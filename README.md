@@ -5,6 +5,8 @@ shared piecemeal. Each subfolder is one self-contained share; content is
 reviewed for local machine identifiers (usernames, absolute paths, emails)
 before being copied here.
 
+Licensed under [MIT](LICENSE).
+
 ## Shares
 
 | Folder | Contents |
