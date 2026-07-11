@@ -1,23 +1,23 @@
 <!--
-  portable-core.md — the single curated source for cross-agent global rules.
+  <URL> — the single curated source for cross-agent global rules.
 
-  This file is the ONLY place to edit portable rules. Generated AGENTS.md
+  This file is the ONLY place to edit portable rules. Generated <URL>
   files at target agents are build artifacts — never edit them directly.
 
-  Block syntax (parsed by interop.py):
+  Block syntax (parsed by <URL>):
     <!-- block:<id> profiles:<p1>,<p2> -->
-    ...markdown content...
+    <URL>rkdown content...
     <!-- /block -->
 
   Profiles: light (lightweight-task agents) ⊂ full (goal-oriented agents).
   Content policy: agent-neutral English only. No references to Claude Code
   skills, hooks, ops/ files, slash commands, or model names — those belong
-  to the mechanism layer (see MIGRATION-MAP.md) and are translated per
+  to the mechanism layer (see <URL>) and are translated per
   target, not copied.
 
-  Provenance: distilled from ~/.claude/CLAUDE.md. When CLAUDE.md changes,
-  `python interop.py status` flags this file for re-curation; after
-  reviewing, run `python interop.py curated`.
+  Provenance: distilled from ~/.claude/<URL>. When <URL> changes,
+  `python <URL> status` flags this file for re-curation; after
+  reviewing, run `python <URL> curated`.
 -->
 
 <!-- block:preamble profiles:light,full -->

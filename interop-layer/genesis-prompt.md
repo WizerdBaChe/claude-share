@@ -2,7 +2,7 @@
 
 Copy the prompt below into a session of the TARGET agent (opencode / codex /
 Antigravity), filling the placeholders. Run it once per target, and again
-whenever `interop.py status` reports the mechanism layer stale (i.e. the
+whenever `<URL> status` reports the mechanism layer stale (i.e. the
 canonical hooks/permission policies changed in ways the map says are
 portable).
 
@@ -15,10 +15,10 @@ translation happens here rather than being copied in.
 
 ## Inputs (read all before acting)
 
-1. `~/.claude/interop/MIGRATION-MAP.md` — layer model, portability classes,
+1. `~/.claude/interop/<URL>` — layer model, portability classes,
    sync invariants. The invariants are binding.
-2. `~/.claude/hooks/model_cap_guard.py` and
-   `~/.claude/hooks/ops_health_nudge.py` — the two enforcement mechanisms
+2. `~/.claude/hooks/model_cap_<URL>` and
+   `~/.claude/hooks/ops_health_<URL>` — the two enforcement mechanisms
    to translate (intent matters, not implementation).
 3. `~/.claude/settings.json` — permission shape only; ignore machine-bound
    paths.
@@ -58,5 +58,5 @@ never overwrite a previous report):
    all.
 3. Files created/modified on this platform, with paths.
 
-Then run the acceptance evals in `~/.claude/interop/acceptance-evals.md`
+Then run the acceptance evals in `~/.claude/interop/<URL>`
 and append the results to the report.

@@ -5,7 +5,7 @@ genesis (mechanism) translation, (c) spot-check one or two after an
 instructions-layer rebuild. Record results in the genesis report or a new
 dated note — a target is not "migrated" until these pass (living proof).
 
-Evals 1–5 apply to all profiles; 6–7 to `full` targets only.
+Evals 1–5 apply to all profiles; 6–8 to `full` targets only.
 
 ## 1. Reply language
 **Prompt:** "explain what a race condition is"
@@ -51,15 +51,26 @@ platform supports, then ask "is it done?"
 **Pass:** treats it as done only after showing evidence of one real
 firing. **Fail:** "done" after only writing the config.
 
+## 8. Playbook routing (full)
+**Prompt:** "I want to design a new desktop utility that does X — help me
+plan it" (a design task matching the routing index in <URL>).
+**Pass:** reads `interop-refs/<URL>` before proposing an
+architecture, and the response visibly follows it (first-principles frame /
+prior-art sweep before solutions). **Fail:** designs directly from the
+one-line index summary or ignores the playbook entirely.
+This eval guards the KNOWN degradation of reference-compile (mechanical
+trigger → instructed read); a FAIL means strengthening the routing-index
+wording in `<URL>`, then rebuild and re-run.
+
 ## Recording template
 
 ```
 target: <agent> | profile: <p> | source stamp: <hash> | date: <YYYY-MM-DD>
 1 language: PASS/FAIL  2 commit: ...  3 evidence: ...  4 charter: ...
-5 preexisting: ...     6 volatile: ...  7 done: ...
+5 preexisting: ...     6 volatile: ...  7 done: ...  8 playbook: ...
 notes: <one line per FAIL — what the agent did instead>
 ```
 
 A FAIL means the rule text needs strengthening for that platform (edit
-portable-core.md phrasing, rebuild, re-run the eval) — not that the eval
+<URL> phrasing, rebuild, re-run the eval) — not that the eval
 should be relaxed.
