@@ -1,0 +1,52 @@
+{
+  "skill_name": "scientific-research-guide",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我在做一個 CNN 影像分割的研究，已經標注了大概兩千張顯微鏡影像、也把模型訓練到收斂了，Dice 分數在測試集上大概 0.82。接下來我想直接開始寫論文投 Nature Communications，你覺得可以嗎？還缺什麼？",
+      "expected_output": "Should triage to Tier 4/5/6, run the six-part diagnosis, flag missing pieces (external validation vs internal test, UQ, exclusion criteria, biological vs technical replicates, data/code availability, limitations), verify reporting standards via web search, and NOT start writing code or the paper unilaterally.",
+      "files": [],
+      "assertions": [
+        {"text": "Locates the current stage against the tier framework (Tier 4/5/6) rather than answering generically", "passed": null, "evidence": ""},
+        {"text": "Produces a gap/next-step diagnosis (what is missing before submission)", "passed": null, "evidence": ""},
+        {"text": "Flags at least one methodological risk (e.g. internal vs external validation, UQ, multiple-comparison, replicate definition)", "passed": null, "evidence": ""},
+        {"text": "Does NOT write analysis code or draft the paper without being asked", "passed": null, "evidence": ""},
+        {"text": "Indicates it will verify current journal/reporting standards rather than asserting them purely from memory", "passed": null, "evidence": ""}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我有三組實驗數據（對照組、低劑量、高劑量），每組 n=6，想比較它們的平均值有沒有顯著差異。該用哪個統計檢定？",
+      "expected_output": "Should ask about / address normality and distribution (EDA first), present the decision criteria (parametric ANOVA vs non-parametric Kruskal-Wallis), warn about small n and multiple comparisons / post-hoc correction, and cite the judgement basis. Should not just name one test.",
+      "files": [],
+      "assertions": [
+        {"text": "Raises the need to check distribution/normality (EDA) before picking a test", "passed": null, "evidence": ""},
+        {"text": "Gives the selection criterion, not just a single test name (ANOVA vs Kruskal-Wallis depending on assumptions)", "passed": null, "evidence": ""},
+        {"text": "Mentions small-sample caution and/or post-hoc multiple-comparison correction", "passed": null, "evidence": ""},
+        {"text": "Explains the reasoning so the user can defend the choice", "passed": null, "evidence": ""}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "幫我把這個資料夾裡的 experiment_log.csv 讀進來，跑一個線性迴歸然後畫個圖給我看擬合得好不好。",
+      "expected_output": "This is an explicit request to act, so acting is appropriate — BUT the skill should still apply methodology: not just fit blindly. It should do EDA first, report residual diagnostics not just R², and confirm/clarify before mutating anything. Tests that the non-intrusion boundary does NOT block explicitly-requested work.",
+      "files": [],
+      "assertions": [
+        {"text": "Recognizes this is an explicit action request and does not refuse to help", "passed": null, "evidence": ""},
+        {"text": "Applies methodology (EDA before fitting, residual analysis not just R²) rather than blindly fitting", "passed": null, "evidence": ""}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "我在量 Bi₂Se₃ 薄膜的低溫磁電導，用單通道 HLN 公式擬合弱反局域化，抽出來 α ≈ −1。這是不是代表我有兩條表面導電通道？",
+      "expected_output": "Domain-routing / sub-profile-activation test (not a physics-fact test). Gate A should identify the Topological Insulator domain AND load the Bi₂Se₃ material sub-profile (domains/topological_insulator/bi2se3_material.md), then fire that sub-profile's material-specific trigger: Bi₂Se₃ films are typically multi-channel (bulk + surface + 2D subbands), so α cannot be read as a surface-channel count until bulk vs surface conduction is confirmed (Hall / resistivity-vs-T). It should give the sub-profile's correct approach (restrict the HLN fit to the low-field WAL window, use a multi-channel model, cross-check against thickness / carrier-density trends) and stay advisory (not accept the interpretation at face value, not run/rewrite the fit unasked). These assertions are mechanism-level so this case doubles as the reusable guard for the sub-profile routing system.",
+      "files": [],
+      "assertions": [
+        {"text": "Loads the Bi₂Se₃ material sub-profile, not just the generic TI profile (surfaces Bi₂Se₃-specific multi-channel / Se-vacancy content that generic TI advice would not)", "passed": null, "evidence": ""},
+        {"text": "Fires the sub-profile material-specific trigger: does NOT accept α≈−1 as a surface-channel count, and asks to confirm bulk vs surface conduction (Hall / resistivity-vs-T) first", "passed": null, "evidence": ""},
+        {"text": "Gives the sub-profile correct-approach guidance (restrict HLN to the low-field WAL regime; use a multi-channel model; cross-check with thickness / carrier-density series)", "passed": null, "evidence": ""},
+        {"text": "Stays advisory — does not unilaterally run or rewrite the fit, consistent with the non-intrusion boundary", "passed": null, "evidence": ""}
+      ]
+    }
+  ]
+}

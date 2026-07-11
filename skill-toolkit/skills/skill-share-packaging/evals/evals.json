@@ -1,0 +1,30 @@
+{
+  "skill_name": "skill-share-packaging",
+  "run_info": "Eval 1 satisfied by the live first export (literature-search-extract, 2026-07-11) rather than a synthetic run; eval 2 pending a real third-party skill to audit.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我把 literature-search-extract 這個 skill 打包成可以分享給別人的版本。",
+      "expected_output": "Mode A export. Builds a copy under ~/.claude/outputs/skill-share/, ships only SKILL.md + references/ + evals.json, drops TODO/PDF-GUIDE/plans/sample-runs, rewrites private ecosystem references (skill-trigger-dict, sibling skill names) and username paths, keeps MCP mentions conditional with verified fallbacks, validates the copy, and leaves the canonical skill untouched.",
+      "files": [],
+      "assertions": [
+        {"text": "Canonical skill directory is byte-identical before and after the export", "passed": true, "evidence": "Live run 2026-07-11: build script writes only under outputs/skill-share/; canonical diff vs same-day backup shows only the separately-authorized P6 edits, none export-induced."},
+        {"text": "Package contains no personal files (TODO, guides, plans, sample runs) and no username/absolute-path/private-skill-name hits on the grep checklist", "passed": true, "evidence": "6 personal items removed (TODO, PDF-GUIDE, 2 plans, sample-run, .claude/); leak/coupling regex (username, email, C:\\Users, trigger-dict, 3 sibling-skill names, key patterns) = 0 hits after 10 rewrites in the copy."},
+        {"text": "Every named MCP in the package carries an if-available clause with a functional fallback", "passed": true, "evidence": "prism generalized to a provider-neutral local-corpus slot ('if available', e.g. Zotero/Obsidian MCP) with 'fully functional with web search alone' + 'empty local result never means literature not found' fallback rules."},
+        {"text": "Official validator passes on the packaged copy", "passed": true, "evidence": "quick_validate.py on the package: 'Skill is valid!'; evals.json valid JSON; all 5 references/ paths resolve inside the package."}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我從網路上抓了一個別人寫的 skill（資料夾在 ~/Downloads/some-skill），幫我檢查能不能安全地裝進來。",
+      "expected_output": "Mode B import audit. Keeps the skill quarantined outside ~/.claude/skills/ during the audit; greps for the author's environment coupling and data-collection surface; reads SKILL.md and scripts adversarially for remote-instruction fetching, out-of-scope writes, or always-trigger phrasing; checks trigger collision against installed skills; runs config-self-audit before recommending enable/reject.",
+      "files": [],
+      "assertions": [
+        {"text": "Does not move the skill into ~/.claude/skills/ before the audit completes", "passed": null, "evidence": ""},
+        {"text": "Reports the author's environment couplings (paths, assumed tools) as concrete findings", "passed": null, "evidence": ""},
+        {"text": "Explicitly checks for instruction-hygiene red flags (remote fetch-and-obey, out-of-scope writes, permission bypass)", "passed": null, "evidence": ""},
+        {"text": "Checks trigger collision against installed skill descriptions", "passed": null, "evidence": ""}
+      ]
+    }
+  ]
+}

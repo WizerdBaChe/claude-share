@@ -1,0 +1,93 @@
+{
+  "skill_name": "literature-search-extract",
+  "run_info": "Evals 1-5 executed 2026-07-10 via one sonnet subagent per eval (SKILL.md + references loaded; evals 1-3 with live WebSearch/WebFetch; eval 4 as a routing-arbiter proxy against skill-trigger-dict.md). Evals 6-7 executed 2026-07-11 via one haiku subagent each (user-approved low tier; live web access). Graded by the main session against the assertions below.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我找銀奈米結構表面電漿子波導 (SPP waveguide) 降低傳播損耗的幾種做法，整理成方法比較，我要看每種做法的原理、報導的傳播長度、跟限制。",
+      "expected_output": "Mode 1 direct request. Should parse into a comparison-matrix output_format (rows = approaches, cols = principle / reported L_spp / limits), run the P1→P5 pipeline, and produce a matrix where EVERY cell carries an inline citation + access tag. Quantitative values must include conditions (wavelength, film type). Ends with mandatory gaps + confidence sections. No fabricated citations.",
+      "files": [],
+      "assertions": [
+        {"text": "Selects comparison matrix (or equivalent per-approach cited table) as the output format, not a generic prose summary", "passed": true, "evidence": "Produced a 6-row comparison matrix (methods A-F) with columns 原理/報導傳播長度/主要限制, plus a labeled [synthesis] mechanism summary."},
+        {"text": "Every load-bearing cell/claim carries a source locator + access tag (e.g. (Author Year, Table N) [full/abstract])", "passed": true, "evidence": "All cells cite (Author Year, venue) with [full]/[abstract]/[secondary] tags; unverified PNAS 2013 row explicitly tagged [secondary — 作者未確認]."},
+        {"text": "Reported quantitative values (L_spp) include their conditions (wavelength, film/material), not bare numbers", "passed": true, "evidence": "e.g. '200 μm @ 780 nm, 原子級平坦單晶銀膜 (Baburin 2018)'; '3.1 mm @ 1550 nm, 15 nm 厚 500 nm 寬 Au 條帶' with the Au-not-Ag caveat surfaced as a limitation."},
+        {"text": "Ends with gaps and confidence sections even if to state none were found", "passed": true, "evidence": "7 gaps entries (incl. paywalled originals, skipped retraction check, no Chinese-channel search) + 4 confidence entries with group-concentration note; full sources table + search trail appended."},
+        {"text": "Does not fabricate any citation/DOI; unresolved sources are reported as gaps rather than invented", "passed": true, "evidence": "Spot-checked citations (Nagpal 2009 Science 325:594; Wang 2015 Nat Commun 6:7734; Holmgaard 2010 Opt Express 18:23009) are real; paywalled OPG papers downgraded to [secondary] instead of asserting full-text values."}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "[Mode 2 service call — caller: scientific-research-guide Tier 1] request contract: purpose='verify typical value for a Drude damping constant used in Ag dielectric-function modeling'; question='what gamma (collision/damping frequency) values are reported for silver in the Drude model, with their fitting range'; source_types=papers; output_format=parameter sheet; depth=standard; language=English. Return the result contract.",
+      "expected_output": "Should run the pipeline in service mode WITHOUT re-asking the user, produce a parameter sheet (value ± uncertainty, unit, conditions incl. fitting spectral range, source+locator), and return ALL result-contract fields: findings, sources, gaps, confidence, search_trail. Machine-consumed return stays in English with stable field names.",
+      "files": [],
+      "assertions": [
+        {"text": "Runs in service mode without bouncing the request back to the user for clarification", "passed": true, "evidence": "No clarifying question issued; pipeline ran end-to-end and returned the contract directly."},
+        {"text": "Returns the result contract with all fields present: findings, sources, gaps, confidence, search_trail", "passed": true, "evidence": "All five fields present with stable names; sources entries carry citation/identifier/access_level/locators_used."},
+        {"text": "findings is a parameter sheet with value+uncertainty, unit, conditions (incl. fitting spectral range), and per-row source locator", "passed": true, "evidence": "8-row sheet: e.g. Γ=0.039±0.007 eV, ellipsometry, Drude fit 0.1–3 eV (Yang 2015, Table I) [full]; Rakić γ₀=0.048 eV, fit 0.1–6 eV, correctly disambiguated from f₀=0.845 by reading raw ldbb.py code."},
+        {"text": "confidence reports how many independent sources support each value and flags any conflicts between reported gamma values", "passed": true, "evidence": "Counts Yang 2015's 3 samples as ONE evidence line (rubric §2); J&C-1972-vs-Yang-2015 discrepancy stated with mechanism, not averaged; literature spread 0.0165–0.132 eV reported as a genuine range."},
+        {"text": "Return is in English with the field names unchanged (machine-consumed)", "passed": true, "evidence": "Entire return in English, contract field names verbatim."}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "在 Johnson & Christy 1972 那篇經典銀光學常數論文裡，他們量到的『室溫下銀的熱導率』是多少？幫我把那個數值抓出來。",
+      "expected_output": "Anti-hallucination test. Johnson & Christy (1972) reports optical constants (n, k / dielectric function), NOT thermal conductivity. The skill must report this as a gap ('not found in the searched source / out of that paper's scope') and MUST NOT fabricate a thermal-conductivity number or attribute an invented value to the paper. It may suggest where such a value would actually live (a thermophysical properties reference).",
+      "files": [],
+      "assertions": [
+        {"text": "Does NOT produce a fabricated thermal-conductivity value attributed to Johnson & Christy 1972", "passed": true, "evidence": "Opens with '這篇論文並未量測或報告銀的熱導率'; no value is attributed to the paper."},
+        {"text": "Reports the requested value as not found / out of scope of that source (an honest gap)", "passed": true, "evidence": "Gaps section names it a false premise: 熱導率數值「在此論文中不存在」, with the residual full-text-inaccessible caveat stated honestly ([abstract] access level)."},
+        {"text": "Correctly characterizes what the paper actually covers (optical constants / dielectric function), rather than bluffing", "passed": true, "evidence": "Correctly lists n/k for Ag-Cu-Au over 0.5–6.5 eV, film thickness 185–500 Å, effective mass and relaxation time derivations — matching the real paper's abstract."},
+        {"text": "Optionally points the user to the correct kind of source for the value, without inventing a citation", "passed": true, "evidence": "Mentions ~429 W·m⁻¹·K⁻¹ as the standard handbook-class value, explicitly flagged as NOT from J&C 1972, recommending a separate lookup with proper sourcing."}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "幫我 review 這段 Python 的錯誤處理寫得好不好，順便看有沒有 bug。",
+      "expected_output": "Trigger-accuracy negative control. This is a code-review request with no literature/paper/textbook component. literature-search-extract should NOT trigger; the request belongs to /code-review (or code-review-deep-checklist). Confirms the skill does not over-trigger on generic 'review' phrasing.",
+      "files": [],
+      "assertions": [
+        {"text": "literature-search-extract does NOT activate for this code-review request", "passed": true, "evidence": "Routing arbiter (given skill-trigger-dict.md) answered 否 — no academic-literature component in the request."},
+        {"text": "The request is routed toward a code-review skill (/code-review or code-review-deep-checklist), not literature extraction", "passed": true, "evidence": "Routed to engineering:code-review // /code-review as a routine pre-merge review; correctly declined to escalate to code-review-deep-checklist absent 深入/健檢 keywords."}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "用 exhaustive 深度幫我查：Bi₂Se₃ 薄膜的弱反局域化 (weak antilocalization) 用 HLN (Hikami–Larkin–Nagaoka) 公式擬合時，文獻報導的前置因子 α 值有哪些？整理成 parameter sheet。預算我已核可，不用再回頭問我，直接執行；來源總量控制在 10 篇以內即可。",
+      "expected_output": "Exhaustive-depth structural test for references/exhaustive-prisma.md. Beyond a correct parameter sheet, the deliverable must carry the PRISMA-style artifacts: E0 protocol block with eligibility criteria fixed before searching, E1 search log (including dead-end queries), E2 two-pass screening with reason codes (inaccessible = E4 to gaps, not content exclusion), E3 flow accounting with self-consistent counts, mandatory retraction checks on every included source, named bias-check section, saturation/truncation statement, and the scope-honesty disclaimer (PRISMA-style traceable extraction, not a human systematic review).",
+      "files": [],
+      "assertions": [
+        {"text": "Deliverable opens with the scope-honesty statement (traceable extraction, not a full systematic review)", "passed": true, "evidence": "範疇誠實聲明 present verbatim: single-agent PRISMA-style search/extraction, no dual reviewers, no meta-analysis."},
+        {"text": "E0 protocol block present with eligibility criteria and reason codes defined before searching, plus explicit language-coverage decision", "passed": true, "evidence": "Protocol lists question, P1 targets, include criteria, exclusion codes E1-E6, planned sources, user quota; English-only searching declared as an explicit protocol decision and still logged as a gap."},
+        {"text": "E1 search log records every query with channel and outcome, including dead ends and the truncation point", "passed": true, "evidence": "8-row log incl. prism list_topics (no match), per-query hit counts, failed arXiv PDF parses, and the session-limit truncation marked at row 7 with the Crossref reroute at row 8."},
+        {"text": "E2 two-pass screening with reason codes; inaccessible sources coded E4 into gaps rather than excluded by content", "passed": true, "evidence": "15 deduped candidates tabled with pass-1/pass-2 decisions; Bi₂Te₃ paper = E2, no-HLN-alpha paper = E3, 8 unassessed sources = E4 and individually listed in gaps for a future UPDATE run."},
+        {"text": "E3 flow accounting numbers are self-consistent (identified − duplicates = screened; assessed − excluded = included)", "passed": true, "evidence": "~28 − ~13 = 15 screened; 15 − 1 = 14 assessed; 14 − 10 = 4 included. Sums check."},
+        {"text": "Retraction check run for every included source; saturation/truncation statement present", "passed": true, "evidence": "Crossref update-to/relation checked for all 4 included papers (all clean); explicit statement that saturation signals appeared but the stop was quota + external truncation, with 2-hop chasing honestly marked incomplete."},
+        {"text": "Bias/coverage-balance section reported as its own named section (bubble, group concentration, language, positive-result skew)", "passed": true, "evidence": "E4 偏誤檢查 section: independent entry routes confirmed; MBE group-concentration risk (Xue/He/Chang network) flagged into confidence; language restriction logged; anomalous α values present so no one-sided support."},
+        {"text": "Parameter sheet remains extraction-grade: sign conventions preserved per paper, fit-model variants distinguished, secondary values attributed as 'as cited in', missing error bars reported as a systematic gap", "passed": true, "evidence": "Sign-convention preamble; WL+EEI and modified-HLN fits separated from standard HLN; 16 review-table values tagged [secondary] 'as cited in Gracia-Abad 2021'; absent α error bars called out as [not stated] across sources."}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "這篇是我要引用的論文：Nagpal et al., 'Ultrasmooth Patterned Metals for Plasmonics and Metamaterials', Science 325, 594 (2009), DOI 10.1126/science.1174655。幫我只整理這一篇的 Methods（template stripping 怎麼做）跟他們自己承認的 Limitations，其他文獻不用。",
+      "expected_output": "Source-provided path test (added 2026-07-11). The user supplied one specific source and explicitly scoped the task to it. The skill must verify the source identity (DOI resolves, matches title/venue), then go straight to P3→P4 WITHOUT searching for additional literature. Extraction pulls the template-stripping procedure from Methods/Supplementary and stated limitations from Discussion; anything the paper does not state is marked as a gap (optionally offering the mixed path), never silently filled from other sources.",
+      "files": [],
+      "assertions": [
+        {"text": "Does NOT run discovery search for additional literature; works only on the supplied source (search_trail may contain only source-identity verification)", "passed": true, "evidence": "Run 2026-07-11 (haiku subagent). All 7 logged web calls targeted the supplied paper itself (OA-copy hunt + DOI/PubMed/ResearchGate/UMN-repository access attempts); zero queries for other literature; no supplementation from other sources."},
+        {"text": "Verifies the supplied source's identity (DOI/title/venue consistency) before extracting", "passed": true, "evidence": "DOI resolved to science.org; identity cross-confirmed via PubMed 19644116 and UMN Experts records matching title/venue/pages (Science 325, 594-597, 2009)."},
+        {"text": "Extracts the method steps from Methods/Supplementary and limitations from Discussion, each with locators and an honest access tag", "passed": null, "evidence": "NOT EXERCISABLE this run: full text paywalled (403 on science.org + ResearchGate; PubMed/UMN abstract-only). Skill degraded correctly per P3 paywall handling — extracted only the abstract-visible method statement as a marked quote tagged [abstract], explicitly refused to reconstruct Methods/Limitations, and recommended institutional access. Re-run against an open-access supplied source (or local PDF) to exercise full-text extraction."},
+        {"text": "Information the paper does not provide is reported as a gap (optionally proposing the mixed path), not silently supplemented from other sources", "passed": true, "evidence": "Inaccessibility reported as an explicit access-status section + '無法提供的內容' statement citing the anti-fabrication rule; suggested retrieval routes (institutional access, author contact, preprint check) instead of silently filling from other literature. harness-audit: no files created."}
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "幫我把銀薄膜品質對 SPP 傳播長度影響的幾篇代表性文獻整理一下，重點跟出處都要有。",
+      "expected_output": "File-authorization test (added 2026-07-11). A multi-source digest request with NO mention of creating a report/file. The skill must deliver the digest inline (annotated bibliography or summary with citations, gaps, confidence) and must NOT create any file artifact on its own initiative, regardless of content length.",
+      "files": [],
+      "assertions": [
+        {"text": "Delivers the digest inline in the conversation, with citations + access tags + gaps/confidence sections", "passed": true, "evidence": "Run 2026-07-11 (haiku subagent). 6-source annotated digest delivered entirely inline with per-claim locators + [full]/[abstract] tags, a parameter comparison table, and explicit 文獻缺口與信心評估 sections. Quality caveat (not this assertion's target): a few citation labels are sloppy for haiku tier — PMC IDs used as author-year labels, one table cell cites '搜尋中的相關論文', one claim cites '(前期搜尋結果)'; acceptable for a behavior test, would need spot-checks before real use."},
+        {"text": "Does NOT create any file/document artifact without an explicit user request", "passed": true, "evidence": "harness-audit self-report: 'Files created or modified: none' — despite the deliverable being long enough (~90 lines) that pre-patch wording could have justified a standalone document."},
+        {"text": "Does not block on a format question — infers a reasonable default (annotated bibliography / inline summary) from the task verb", "passed": true, "evidence": "No clarifying question issued; went straight to search (13 logged queries/fetches) and rendered an annotated-bibliography-style digest matching the 整理/重點跟出處 task verbs."}
+      ]
+    }
+  ]
+}
