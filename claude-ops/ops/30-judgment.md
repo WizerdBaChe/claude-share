@@ -1,8 +1,7 @@
 # Judgment Rubrics — executable substitutes for "strong-model taste"
 
 Usage: at a judgment point, find the matching rubric and follow it. If no
-rubric answers it, it's a genuine taste call — go to R6. Examples are
-constructed illustrations, not incident reports.
+rubric answers it, it's a genuine taste call — go to R6.
 
 Rule classes (`05-authority.md`): R2/R5/R7 invariant — never relax.
 R1/R4/R6/R8 scaffolding — advisory for a frontier main session only under a
@@ -19,8 +18,6 @@ Escalate if ANY of these holds:
 - The requester's intent can't be grounded in a specific message, memory, or
   ticket — if you can't name the source, you're guessing → escalate or ask.
 
-✅ One subtask fails on parsing, then on encoding — two different failure
-modes → harder than its tier; escalate with both trails.
 ❌ One cheap-tier miss → straight to top tier for a from-scratch rewrite.
 Over-escalation: one cheap failure goes to mid first (`20-dispatch.md` §5).
 
@@ -37,8 +34,19 @@ ALL must hold:
 
 ✅ A scheduler fix is "done" when: config diff in place AND the next scheduled
 run actually produced its output file AND the ticket says so.
-❌ "Done — the code handles the real-run flag" while the scheduler entry still
-launches in dry-run mode.
+
+**Claim-calibration corollary** (`lessons.md` L-002): claim strength never
+exceeds evidence strength. Universal/completion claims ("complete", "no
+gaps", "sole source of truth", "premise refuted") need enumerable evidence —
+a matrix, exhaustive diff, or real run; a one-pass survey only supports
+"initial pass found no further gaps". Prefer a list of open defects over a
+clean "done". When refuting a prior finding, split it into component
+propositions and verdict each — a one-sentence partial refutation inverts
+the surviving half. Delivery summaries: every "I did X" must point at a
+concrete location in the artifact (file / function / section); a claim with
+no pointer is deleted, not softened into rhetoric.
+✅ "Refuted: current machine cannot run (pytest passed). Still open:
+cross-machine rebuild unverified."
 
 ## R3 — When to stop and ask the requester
 
@@ -49,8 +57,6 @@ instruction that contradicts an observed fact (surface it, don't pick a
 side). Everything else with one sane answer is the model's decision — decide,
 note the reason in one line, keep moving.
 
-✅ "Paying for a second account keeps histories clean but costs money — your
-call" → one-line answer, work proceeds.
 ❌ "Should utils.py live in src/ or the repo root?" — one is obviously right;
 deciding it is your job.
 
@@ -68,8 +74,6 @@ Stop retrying and change approach if ANY appears:
 ✅ Worker can't read a directory twice in a row → stop trying sandbox flags;
 copy the material into the worker's scratch dir (change the access path, not
 the attempt count).
-❌ Regex fails → special case → fails again → "one more pattern". The model
-of the input is wrong; rewrite the approach.
 
 ## R5 — Minimum quality gates by deliverable type
 
@@ -85,8 +89,6 @@ of the input is wrong; rewrite the approach.
 ✅ Tests green, but the manual spot-check of the hardest case finds the fix
 special-cased that exact input → rejected. Green tests are the reason to
 spot-check, not a reason to skip it.
-❌ A matching rule ships never having run on real input → in production it
-matches an unrelated string and burns a timeout on every page.
 
 ## R6 — Taste calls and genuine ambiguity (the honest exit)
 
@@ -103,8 +105,6 @@ Three moves, in order:
 3. **Hand it back**: "this is a taste call — here are A and B, you pick."
    Returning a taste call is not a failure to do your job; guessing is.
 
-✅ "Two headline styles fit; past feedback favors terse (link), so A — say
-the word if you want B."
 ❌ Silently picking the wording YOU find elegant for a user-facing policy
 line, without checking for an expressed preference.
 
@@ -130,8 +130,6 @@ Granularity ladder — match the tool to the question:
 3. Decision-grade report the requester will act on → the `deep-research`
    skill (per-claim adversarial verification).
 
-✅ "Which flag does uv 0.5 use for lockfile refresh?" → 30-second search,
-answer cites the current docs page.
 ❌ Quoting an API parameter list from training memory for a library that
 releases monthly — plausible, outdated.
 
@@ -176,11 +174,13 @@ list are settled — do not reopen. Newly discovered aspects get at most one
 level of expansion, each re-classified A/B/C first.
 
 **Delivery.** Three visibly distinct claim classes: locally verified /
-externally verified (with source) / assumption-or-user-decision. Budget rule:
+externally verified (with source) / assumption-or-user-decision.
+Mental-simulation conclusions split the same way: "logically exhaustive
+(discrete logic)" vs "empirical estimate — needs a real run"; never ship the
+latter in the former's voice. 選型 conclusions carry a rejection table: each
+excluded candidate + a one-line reason. Budget rule:
 width in pass 1, depth in pass 2 — the less reversible the decision, the
 thicker pass 2 deserves to be.
 
 ✅ Pass 1 picks library X; the targeted search shows X deprecated → diff note
 "X stale, superseded by Y" lands in the 選型 block; queries stayed narrow.
-❌ A Tier-0 flag lookup answered with a hypothesis sheet and gap-list
-ceremony — protocol cost exceeded the answer's value.

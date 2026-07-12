@@ -1,6 +1,6 @@
 # Environment Facts — recorded per `20-dispatch.md` §0
 
-Facts about THIS environment (Claude Code on Windows). Verified on
+Facts about THIS environment (Claude Code on Windows, user gunda). Verified on
 2026-07-07. These are recorded observations, not assumptions — if a dispatch
 behaves as if a fact below is stale (new model names, missing parameters),
 re-verify and update this file; never silently work around it.

@@ -19,6 +19,11 @@ changing what the machine ENFORCES.
 4. **No duplicate mechanisms**: before proposing new machinery, check what
    already exists (audit trail, backups/, drafts/, memory system, skills,
    scheduled tasks). Extending an existing mechanism beats adding a parallel one.
+   If nothing internal covers it, two more layers before building: (L2) quick
+   search for existing community solutions (≤10 min; none found → note it, move
+   on); (L3) state where their assumptions break in OUR context — that diff IS
+   the justification for building new. No articulable diff → adopt or extend
+   instead of building. (Adopted from lifeos-memory skill-author Step 0.)
 
 ✅ "PreToolUse hook X misfires in unrelated repos — proposal: gate it on
 project id; risk: gate too narrow, hook silent where wanted; rollback signal:
