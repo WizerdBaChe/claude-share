@@ -12,7 +12,7 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 
 ## [2026-06-28 22:45] 3D Photo Synthesis Engine (LDI) retrospective — project-specific rules
 
-- Target CLAUDE.md: <project-repository>/CLAUDE.md (created)
+- Target CLAUDE.md: D:\AIWork\3D_Photo_Synthesis_Engine\CLAUDE.md (created)
 - Added/changed: Project-specific conditional rules — don't touch /synthesize, /parallax, parallax.ts/viewer.ts; FB 3D Photo = small-angle parallax; LDI definition; architecture ceiling; C1 inpaint bottleneck; restart backend before retest; LDIBuilder Provider.
 - Outputs: ~/.claude/outputs/retrospectives/retrospective-LDI-2026-06-28.md (Chinese guide), ~/.claude/outputs/retrospectives/claude-instructions-LDI.md (English snippet)
 
@@ -21,7 +21,7 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 - Source: external read-only audit of ~/.claude/ (2026-07-03), fixes applied with user consent. Backup: ~/.claude/backups/audit-fix-2026-07-03/
 - hooks/ai-team-os/* (8 files): `_get_platform_home()` pinned to ~/.claude (was preferring ~/.gemini/antigravity — cross-CLI state contamination); env override AITEAM_PLATFORM_HOME.
 - hooks/ai-team-os/workflow_reminder.py: removed unconditional `permissionDecision: "allow"` (was bypassing the entire permission system on every tool call); gated `_check_agent_team_name` and `_check_leader_doing_too_much` on registered ai-team-os project_id (was hard-blocking Agent calls in ALL projects); docstring corrected ("no HTTP calls" was false).
-- settings.json: hook interpreter switched from <retired-project-venv> python to system Python312 (hooks are stdlib-only; decouples global hooks from an unrelated project). MCP server stays on the venv (needs aiteam package).
+- settings.json: hook interpreter switched from D:/try/AI_COMPANY_TEST/.venv python to system Python312 (hooks are stdlib-only; decouples global hooks from an unrelated project). MCP server stays on the venv (needs aiteam package).
 - skills/workflow-checkpoint/SKILL.md: description phase-log naming unified to `<project>-phase-log.md`; added mutual disambiguation vs project-retrospective; compact-note template now preserves language rules.
 - skills/project-retrospective/SKILL.md: "Always trigger proactively" replaced with ask-once; added disambiguation vs workflow-checkpoint.
 - CLAUDE.md: new conditional rules — 2nd-unfixed-report escalation, manual-acceptance checklist handoff, regression self-check after bugfix, no change-for-change's-sake, post-merge branch/CI report, File hygiene section (archive-not-delete, new-file-not-overwrite).
@@ -37,7 +37,7 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 
 ## [2026-06-28 22:52] Global CLAUDE.md — generalizable lessons from LDI retrospective
 
-- Target CLAUDE.md: <global-agent-home>/CLAUDE.md (global, new "Engineering judgement" section)
+- Target CLAUDE.md: C:\Users\gunda\.claude\CLAUDE.md (global, new "Engineering judgement" section)
 - Added/changed: Cross-project conditional rules — (1) rendering/visual features need in-environment human gate (green tests ≠ correct picture); (2) when an output looks wrong & cause is conceptual, research canonical/industry method & compare point-by-point before editing; (3) ship doubtful components behind a swappable provider; (4) WebGL/GLSL ES: unroll named uniforms, avoid sampler-array variable indexing/dynamic loops, attach shader-error callback.
 - Rationale: these generalize to any future project, so they belong in global, not the repo CLAUDE.md.
 
@@ -87,7 +87,7 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 ## [2026-07-06] AI Team OS decommission (soft) + web-search proactivity rules
 
 - hooks/ai-team-os/{send_event,workflow_reminder,session_bootstrap,inject_subagent_context}.py: presence gate added — no AITEAM_API_URL and no data/ai-team-os/api_port.txt = exit instantly (measured ~0.14s vs 1.5-3s dead-API timeouts per tool call). Revival = start the OS so it writes the port file. Backups: backups/2026-07-06/.
-- settings.json: mcpServers.ai-team-os removed (pointed at <retired-project-venv>; project failed/unused). Backup: settings.json.pre-aiteam-cleanup. Runtime data archived to archive/ai-team-os-data/ with ARCHIVE-NOTE.md; archive/ added to .gitignore.
+- settings.json: mcpServers.ai-team-os removed (pointed at D:\try\AI_COMPANY_TEST venv; project failed/unused). Backup: settings.json.pre-aiteam-cleanup. Runtime data archived to archive/ai-team-os-data/ with ARCHIVE-NOTE.md; archive/ added to .gitignore.
 - NEW ops/30-judgment.md R7: when to search the web — proactive trigger (volatile external facts, never from memory), local-verification-first exclusions, granularity ladder (inline <=3 sources / T4 research dispatch / deep-research skill). 30-judgment.md now 7.8K (<10K cap).
 - CLAUDE.md engineering judgement: volatile-external-fact verification rule added (proactive complement to the existing reactive "conceptually wrong output" rule; routes granularity to R7). Backup: CLAUDE.md.pre-websearch-rule.
 - settings.json permissions.allow += WebSearch (read-only, low risk; WebFetch deliberately left prompting — arbitrary-URL fetch carries prompt-injection surface).
@@ -237,3 +237,36 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 - NEW ~/.claude/skills/skill-share-packaging/ (112 lines, via skill-creator conventions): Mode A export (scope manifest → de-environment pass → data-leak pass → audience decision → verify → package to outputs/skill-share/) + Mode B import audit (quarantine, reverse greps, instruction-hygiene red flags, trigger collision, then config-self-audit). Hard rules: canonical never modified for sharing; share copy = one-way build product outside skills tree. Registered in skill-trigger-dict.md (環境設定 family + 2 quick-table rows + skill-creator mutual disambiguation). evals/evals.json: 2 evals.
 - Living proof (Mode A first run): outputs/skill-share/literature-search-extract-20260711/ (+zip +SHARE-NOTES.md). Removed 6 personal items (TODO, PDF-GUIDE, 2 plans, sample-run, .claude/); 10 rewrites in the copy (trigger-dict ref dropped, sibling-skill names genericized, "Traditional Chinese" → "the requester's language"); leak/coupling grep 0 hits; quick_validate.py valid; all internal refs resolve; canonical untouched by the build. skill-share-packaging eval 1 filled from this run (4/4); eval 2 (import audit) pending a real third-party skill.
 - config-self-audit on the new skill: validator OK, referenced paths exist, conditional trigger + NOT clauses, no exec surface, 112 lines < 150.
+
+## [2026-07-11] skill-share-packaging: prescan.py mechanical pre-pass (adopted from lifeos-memory analysis)
+
+- Context: user-directed adoption round after analyzing D:\Analyze\lifeos-memory-master (external repo, README + full source read; adopt-vs-skip adjudicated in chat). Approved items: (1) pitfall-card convention into memory, (2) mechanical scanner into skill-share-packaging. Explicitly NOT adopted verbatim: their 80-line SKILL.md hard cap (user ruling: line budget must weigh information density and skill weight case-by-case), claw/watchdog/realtime-summary harness (POSIX-only, redundant with harness context continuation, standing haiku cost).
+- NEW scripts/prescan.py (179 lines, stdlib-only, Windows-safe ASCII output): adapted from lifeos-memory skill-vetting scan.py, restructured into mode-tagged pattern sets — import mode (code-exec, subprocess, obfuscation incl. zero-width unicode, network incl. raw-IP URLs and curl|sh, destructive file ops, prompt-injection/reviewer-social-engineering phrasing) + export mode (env-coupling and data-leak patterns mirroring SKILL.md A2/A3, incl. a partial-key-trace pattern). Exit 0 clean / 1 findings / 2 usage; --format json available.
+- SKILL.md (+10 lines): prescan wired into Mode A step A3 (export self-check) and Mode B as mandatory first step, both with the explicit caveat that findings are review pointers and a CLEAN result is not a safety verdict — full manual pass still required.
+- Verification: py_compile OK; live fixture run against lifeos skill-vetting dir — import mode 33 findings (all expected: it's a pattern database documenting the very patterns), export mode caught the real partial-API-key trace in their GOTCHAS.md (`key: rii5...TylN`) that manual reading had also flagged; clean-fixture run returns CLEAN/exit 0; findings exit code 1 confirmed. Merged via feat/skill-share-prescan (--no-ff), branch deleted.
+- Memory side (gitignored, not in this repo's history): pitfall-card-convention.md written — write gate (>few minutes AND recurring AND not repo-derivable), hit_count/last_hit recurrence on existing card, hit_count>=2 → propose promotion to standing rule (user decides), superseded_by for reversals, load-on-demand only (index line always, body only when task touches the area).
+
+## [2026-07-11] lifeos-memory adoption round 2 (C1-C4; C5-C8 adjudicated skip)
+
+- Context: second user-confirmed round from the lifeos-memory analysis. Approved: C1-C4. Skipped by ruling: C5 defensive-daemon reference card (no current daemon-authoring need), C6 80-line cap (ops/40-maintenance S3 is the density-adjusted equivalent), C7 per-skill GOTCHAS.md (superseded by pitfall-card convention), C8 vector search (memory corpus too small).
+- C2 ops/70-evolution.md §1.4 (+5 lines): no-duplicate-mechanisms invariant extended with L2 (community-solution quick search, ≤10 min) and L3 (state where their assumptions break in our context; the diff IS the justification — no diff → adopt/extend, don't build). Source: lifeos-memory skill-author Step 0.
+- C3+C1 workflow-checkpoint SKILL.md (+12/-2): §A gains a self-check step before reporting (four headings present, absolute date, Detail link resolves — guards checkpoints written near context exhaustion); §C gains a crash-recovery fallback (phase-log missing/stale → consent-gated rebuild from persisted transcripts, then offer a catch-up checkpoint). Deliberately replaces lifeos' cron summarizer + watchdog respawn with zero-standing-cost equivalents.
+- C4 skill-share-packaging SKILL.md A6 (+4/-1): share-notes now include three recipient verification steps (install location, one positive trigger probe, one negative probe). Extracted from lifeos doc-to-skill activation verification; their full installer/uninstaller machinery judged overkill for single-skill sharing.
+- Verification: grep-confirmed all four edits landed, §A step numbering deduplicated (one "Then proceed to §B"), line counts 119/72/125. Merged via feat/lifeos-adoption-r2 (--no-ff, 3 semantic commits), branch deleted.
+
+## [2026-07-12] Prism PSM incident fold-in: R2 claim-calibration + product-design-thinking sole-source contract rules
+
+- Context: external Codex review of Prism PSM_REMEDIATION_v1.0.md (8 findings) re-audited and confirmed in-session; user directed system-level rule adjustments instead of project fixes. Root causes distilled into ops/lessons.md L-002 (delta-doc economy, append-only v-bump without consistency pass, claim strength > evidence strength, semantic compression of two-proposition verdicts, plus a skill-trigger miss).
+- ops/30-judgment.md R2 (+18 lines): claim-calibration corollary — universal/completion claims require enumerable evidence (matrix/exhaustive diff/real run), one-pass survey only supports "initial pass found no further gaps"; refutations must give per-proposition verdicts. With ENV-01-derived example pair.
+- skills/product-design-thinking/SKILL.md (+26 lines, description +2): Phase 3.4 gains sole-source contract rules (self-contained or drop the claim; build-ready bar per item; skeleton-plus-incomplete-report over silent thinness; single decision register with status; in-place version bumps require full-doc consistency pass). Description + skill-trigger-dict.md widened: PSM-grade remediation/re-planning of an EXISTING product triggers the skill.
+- Backups in backups/2026-07-12/. Finding 8 (unsourced market claims) judged a violation of existing R5, not a rule gap — no edit.
+
+## [2026-07-12] thinking-notes/11 fold-in round 1: judgment additions + pitfall-ledger consolidation
+
+- Context: user-approved plan `drafts/2026-07-12-implementation-gaps-adjustment-plan.md` (v2). Source thinking-notes/11 was re-audited before execution: citations to notes 01/05/06/09 all verified; four plan-level corrections made (empty card layer, write-gate violation, rule-budget overflow, gap-2 omitted from source's priority table). User rulings: no one-shot skill (principles apply to ALL deliveries → global rules); merge duplicate pitfall stores.
+- ops/30-judgment.md: trimmed 10,959 → 10,227 chars (< 10,240 cap; kept one example per ✅/❌ pair, dropped Usage meta-sentence). Added: R2 delivery-summary claim→artifact-location rule (gap 6); R8 Delivery mental-simulation two-class reporting (shallow 1) + 選型 rejection-table line (one of the three previously-agreed deliverables — the other two already covered by ops/10 Step 4 and R5/R8).
+- Pitfall-ledger consolidation (user-directed): ops/lessons.md declared SOLE pitfall ledger; its tags: field now requires task-type trigger words (absorbs the task-type-index need). memory/pitfall-card-convention.md marked superseded_by: ops/lessons.md (zero cards were ever written; kept for provenance), MEMORY.md index line rewritten, rules-usage-dict.md layer-map row 6 updated. Net mechanism count: -1.
+- thinking-notes/06: one-paragraph addendum — constraints (one-shot/urgent/tech-mandate) are unverified premises; the four-variable model applies to accepting them.
+- config-self-audit on 30-judgment.md + one-line changes: pass (size cap verified via hooks/ops_health_nudge.py SIZE_CAP; reference existence, no contradictions across the three touched rule files, language conventions OK). Backups in backups/2026-07-12/.
+- Pending (next step, 🔴): global CLAUDE.md 5-item diff (B1) awaiting user confirmation.
+- B1 applied 2026-07-12 (user confirmed the 5-item diff verbatim): global CLAUDE.md now 10,572 chars (<12K). Commit c97af8e; backup backups/2026-07-12/CLAUDE.md.

@@ -158,6 +158,11 @@ ladder instead of aborting P2, and record every substitution in `search_trail`:
 2. Free unkeyed APIs (Semantic Scholar shared tier, Crossref polite pool, arXiv export,
    PubMed E-utilities) →
 3. WebSearch site-scoped queries + landing-page WebFetch (always available) →
+3b. **Extraction fallback** — when WebFetch cannot render a needed page (JS-heavy,
+   anti-bot, blocked publisher page), try an extraction-capable provider *if available*
+   before downgrading the access tag: Tavily extract, Exa contents, or a self-hosted
+   Firecrawl instance (same "if available" slot logic as prism). If none is available,
+   keep the item at `[abstract]`/`[partial]` honestly — never reconstruct content. →
 4. prism local corpus alone (coverage limited to ingested docs — flag in `gaps`).
 
 Rules:
@@ -167,6 +172,24 @@ Rules:
 - **Cost transparency:** when a run spends a personal resource — an OpenAlex key's
   credits, a keyed Semantic Scholar tier, or the Crossref polite pool (which sends the
   user's `mailto`) — name it in `search_trail` so the caller knows what was consumed.
+
+### General-web search/extract providers (facts verified 2026-07-12)
+
+Mostly relevant in environments WITHOUT built-in WebSearch/WebFetch (see
+`references/portability.md`); inside Claude Code the built-ins cost no quota and stay
+the default search layer. Quotas are volatile — re-verify before relying on them.
+
+| Provider | Search | Extract | Free tier (2026-07) | Caveats |
+|---|---|---|---|---|
+| Tavily | yes | yes | 1,000 credits/mo, no card | primary extraction fallback |
+| Exa | yes | yes (`contents`, ~$1/1k pages) | $10 one-time; $7/mo credits ONLY with card on file | cheap extraction, card-gated |
+| Brave Search API | yes | no | free 2k/mo tier KILLED 2026-02 → $5/mo metered (~1k queries), card required | legacy free users grandfathered |
+| DDGS (python lib) | yes | no | unkeyed | **best-effort unofficial scraper, NOT an API**: IP blocks well before ~30 req/min, needs proxies at volume, ToS-gray — never plan it as "unlimited" |
+| SearXNG | yes | no | self-hosted, unlimited | infra to run; search only |
+| Firecrawl | yes | yes | AGPL-3.0 self-host (scrape/crawl/extract core) | managed-only surfaces excluded; local-infra slot |
+
+Keyed/personal-resource usage from any of these goes into `search_trail` per the cost
+transparency rule above.
 
 ## Non-English literature
 

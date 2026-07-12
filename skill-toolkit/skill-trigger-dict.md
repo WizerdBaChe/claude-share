@@ -73,6 +73,7 @@
 - 關鍵詞：新產品構想、新工具設計 (new tool design)、可行性評估 (feasibility)、Concept Note、CIM、PIM、PSM、語義契約 (semantic contract / DSL)、語義鴻溝驗證 (semantic gap)、RPD、複雜新功能規劃
 - 精準句型：「我有一個新產品想法，幫我做第一性原理拆解與設計」/「我需要設計一個新工具，進入設計模式」
 - 適用時機：對話中途出現設計需求也應觸發，不限開場；中途沒中時，明講 skill 名稱（「用 product-design-thinking 來做」）100% 命中
+- 也觸發：「給我 **PSM 等級**的修正案/重規劃」「build-ready 的修正規劃文件」— 既有產品的修正**規劃**仍屬本 skill（產出物是 PSM 嚴謹度的文件），只有「按既有 PSM 施工」才不觸發（2026-07-12 新增，源自 ops/lessons.md L-002：未觸發導致差分式偷薄文件被當成唯一施工依據）
 - 避免說法：bug 修復、按圖施工、小型加功能、「寫個小工具/腳本」（都不觸發，這是重量級模式）
 
 ### design-system-suite（多產品共用設計系統）

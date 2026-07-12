@@ -169,3 +169,36 @@
 
 否決不做（記錄防止重提）：exhaustive→extended 更名（會刪除已出貨 PRISMA 能力）、
 evidence_core schema、frontmatter 重寫、capability-aware handoff（屬 interop 層職責）。
+
+## 維運紀錄（2026-07-12）
+
+- 兩份 update-plan（原版 + v2）已全數執行完畢，封存至
+  `~/.claude/archive/2026-07-12-lse-update-plans/`（含 ARCHIVE-NOTE.md）。
+- 未結項僅剩 item 19（分享版打包，待使用者決定）。
+- `.agents\skills\` 副本：查證發現已於 2026-07-11 11:39 被重新同步（與 live 版一致），
+  非 plan v2 §2 所述的 07-08 過期狀態；是否封存改由使用者裁決，本輪未動。
+
+## P7 — 可攜層 + 搜尋供應商補丁 ✅（2026-07-12，使用者授權）
+
+### ~~20. search-sources.md 供應商補丁~~ ✅
+- 降級階梯新增 3b「extraction fallback」（WebFetch 讀不動 → Tavily extract /
+  Exa contents / 自架 Firecrawl，if-available slot 邏輯比照 prism）。
+- 新增 general-web providers 事實表（2026-07-12 web 驗證）：Tavily 1000/月免費屬實；
+  Brave 免費層 2026-02 已取消；DDGS 標註 best-effort 非官方爬蟲（禁標 unlimited）；
+  Exa 月額度需綁卡；Firecrawl AGPL 可自架。
+
+### ~~21. `references/portability.md`（能力自評可攜層）~~ ✅
+- 任何 agent / 網頁 LLM 執行本 skill 前先跑能力盤點：7 個 capability slots
+  （web_search / page_fetch / extract_render / local_corpus / pdf_read / file_write /
+  subagent_dispatch）× 替代綁定 × 降級行為；最低可行 profile 判準（三者取一，
+  全無則拒跑不捏造）；profile 與降級一律記入交付物；零捏造等不變量不隨能力降級。
+- Claude 專屬機制（trigger-dict、跨 skill handoff、MCP 工具名）明文標記為
+  ignore-don't-emulate；副本修改須登記 README-PROVENANCE adaptation log。
+- SKILL.md Reference map 同步（five→six，新增 READ-FIRST-outside-Claude 條目）。
+- 裁決註記：plan v2 曾否決「capability-aware handoff 進 skill 本體」；本輪經使用者
+  明示指示（2026-07-12）以獨立 reference 檔形式實作，不佔 SKILL.md 本體，
+  原否決的精神（本體防膨脹）維持。
+- 同步：本 skill 目錄已重新同步到 `~/.agents/skills/` 與 `~/.codex/skills/`
+  （兩處 README-PROVENANCE 的 sync 紀錄同步更新）。
+- 未實跑驗證：portability 自評流程需在非 Claude 環境（如 codex）實測，
+  列 MANUAL-VERIFY —— 下次 codex 調用本 skill 時驗收。

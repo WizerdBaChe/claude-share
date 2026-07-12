@@ -235,9 +235,12 @@ Assemble extracted items into the `output_format`, in the requested `language`:
 
 ## Reference map
 
-All five reference files below ship with the skill; load each on demand at the point the
+All six reference files below ship with the skill; load each on demand at the point the
 pipeline names it. The P1→P5 pipeline is self-sufficient at `quick`/`standard` depth
 without them, but they are required for `exhaustive` depth and for non-trivial extraction.
+- `references/portability.md` — READ FIRST when running outside Claude Code (any other
+  agent or web LLM): capability-slot map, tool substitutes, minimum viable profile,
+  degradation honesty rules. Inside Claude Code, skip it.
 - `references/search-sources.md` — per-channel query strategies (scholarly indexes,
   preprint servers, textbook discovery), identifier resolution, local-corpus MCP usage
   (prism reference implementation) and fallback rules, citation-chasing procedure with

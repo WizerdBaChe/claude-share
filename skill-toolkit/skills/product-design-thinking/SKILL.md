@@ -7,10 +7,10 @@ description: >-
   CIM / RPD / PIM / PSM / DSL semantic contract) with semantic-gap verification between
   layers. Trigger on new product ideas, NEW TOOL/utility design requests (「新工具設計」),
   feasibility evaluation, design-document chains, or planning a complex feature with an
-  undecided approach — including MID-CONVERSATION, whenever such a need first emerges,
-  not only as an opening request. Deliberately heavyweight —
-  NOT for bug fixes, small additions, or implementing an existing spec. Full
-  disambiguation: ~/.claude/skill-trigger-dict.md.
+  undecided approach — including MID-CONVERSATION. Also fires for PSM-grade /
+  build-ready remediation or re-planning docs for an EXISTING product
+  (「PSM等級修正案」). Deliberately heavyweight — NOT for bug fixes, small additions,
+  or implementing an existing spec. Full disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # Product Design Thinking
@@ -158,7 +158,10 @@ user is at; don't regenerate upstream docs that are already fixed ("拍板的施
 2. **PIM + semantic contract (the lightweight DSL)**: platform-independent model =
    domain concepts, relations, invariants, PLUS a semantic-contract section:
    - **Glossary**: every domain noun gets exactly one definition and one name; that
-     name is used verbatim in every downstream doc and in code identifiers.
+     name is used verbatim in every downstream doc and in code identifiers. Persist
+     crystallized terms to `references/<project>-context.md` (`ops/60-bootstrap.md`
+     §E) so later sessions inherit the vocabulary; challenge conflicts with existing
+     entries instead of silently redefining.
    - **Invariants**: numbered (INV-1, INV-2, …) statements that must hold in any
      implementation.
    - **State machines** for anything with a lifecycle (states, transitions, and
@@ -180,6 +183,29 @@ user is at; don't regenerate upstream docs that are already fixed ("拍板的施
    "implements INV-3"); platform compromises live in the gap register, never as
    silent edits to the PIM. ADR rule: anything the contract doesn't cover gets
    recorded and asked, not invented.
+
+   **Sole-source contract rules** (any doc declared the sole build basis —
+   PSM, remediation plan, 施工合約; from the 2026-07 Prism incident,
+   `ops/lessons.md` L-002):
+   - **Self-contained**: a sole-basis doc may not delegate normative content
+     ("沿用原清單") to superseded or archived files — inline it, or drop the
+     sole-basis claim. Archive is provenance, never spec.
+   - **Build-ready bar per item**: files touched, contracts/schemas, error
+     paths, migration + rollback, test mapping (Unit/SIT/UAT), acceptance
+     evidence. An item missing these is a SKELETON and must be labeled so.
+   - **Skeleton over silent thinness**: when budget or context can't fill
+     every item to the bar, deliver the outline PLUS an explicit "incomplete:
+     items X, Y need a dedicated pass" report so the user can re-dispatch —
+     never present a summary-grade doc as build-ready.
+   - **Decision register completeness**: ALL decision gates in ONE table with
+     status (pending/approved/rejected/superseded), decider, and date. A
+     pending gate's suggested value may not appear inside a milestone plan as
+     if decided.
+   - **In-place version bumps need a full-doc consistency pass**: filename /
+     title / frontmatter version agree; status statements re-tensed against
+     current reality; items added by a new section also land in the milestone
+     lists they cite; the supersede note and phase-log entry ship in the same
+     commit.
 5. **Selection decisions (選型)**: present each significant choice as
    recommendation + plain-language why + rejected alternatives in one short block,
    get confirmation, and record it in the doc so later sessions don't re-litigate.

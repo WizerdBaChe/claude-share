@@ -65,6 +65,12 @@ Grep the copy for coupling and fix every hit **in the copy**:
   Windows-vs-POSIX syntax — state requirements or make them conditional.
 
 ### A3. Data-leak pass
+Start with the mechanical pre-scan, then grep for what regex can't know:
+
+```
+python scripts/prescan.py <copy-dir> --mode export
+```
+
 Grep the copy for: the machine username, email addresses, machine/host names, project
 codenames, API-key-looking strings (`sk-`, `key=`, `token`), and eval `evidence` fields
 quoting private material. Verification dates ("channel facts verified 2026-07-07") are
@@ -86,11 +92,18 @@ half-translate.
 ### A6. Package & record
 Zip the folder for transport. Write a short share-notes file NEXT TO the package (not
 inside it) recording: what was removed/rewritten vs canonical, date, and the canonical
-commit. Log the export in `~/.claude/Global_skill_update.md`.
+commit. Give the recipient three verification steps in the notes: (1) copy the folder
+into their skills directory (`~/.claude/skills/`); (2) one positive probe — a phrase
+that should trigger the skill; (3) one negative probe — a nearby phrase that should
+NOT trigger it. Log the export in `~/.claude/Global_skill_update.md`.
 
 ## Mode B — Import (audit a third-party skill before enabling)
 
 Quarantine first: keep the downloaded skill OUTSIDE `~/.claude/skills/` until audited.
+- **Mechanical pre-scan (run first)**: `python scripts/prescan.py <quarantine-dir> --mode import`
+  flags code-execution vectors, obfuscation, network calls, and prompt-injection phrasing.
+  Findings are review pointers, not verdicts; a CLEAN result is NOT a safety guarantee —
+  regex is bypassable, so every step below still runs in full.
 - **Reverse A2/A3**: grep for THEIR absolute paths, private tool/MCP assumptions, and
   references to files you don't have — each is a future silent failure; fix or accept
   knowingly.

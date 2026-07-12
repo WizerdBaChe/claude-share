@@ -48,8 +48,16 @@ avoiding the need to replay full conversation history and saving usage.
    - **Write the entire phase log section in English** — this file is read by AI in future sessions, and English maximises token efficiency and parsing reliability.
    - Sections should be **concise and scannable, like index entries**: one sentence per point, focused on keywords and highlights for rapid navigation.
    - **Two-layer principle**: keep the log concise; if this phase has longer details worth preserving (full decision rationale, extended design notes, post-mortems), write them to a separate file `references/<project>-phase<N>-<slug>.md` and add a `- Detail: references/...` line in the log section header. The log itself stays summary-only. Detail files must also be written in English.
-4. After writing, **report** which file and which Phase section was written.
-5. Then proceed to §B (ask whether to /compact).
+4. **Self-check the appended section** before reporting: all four headings present
+   (Goals / Decisions / Changes / Open Questions), Date is absolute, `- Detail:` link
+   resolves if present. Fix in place if not — a checkpoint written near context
+   exhaustion is exactly when sections silently go missing.
+5. **Glossary sweep**: ask whether any domain terms crystallized or changed meaning
+   this phase; if yes, update `references/<project>-context.md` (format and rules:
+   `~/.claude/ops/60-bootstrap.md` §E — create lazily, update live, one definition
+   per term). Skip silently if the project has no glossary and no new terms.
+6. After writing, **report** which file and which Phase section was written.
+7. Then proceed to §B (ask whether to /compact).
 
 ### Phase-Log Section Format (follow this order and headings strictly; write all content in English)
 
@@ -97,7 +105,13 @@ avoiding the need to replay full conversation history and saving usage.
 
 ## C. New-Session Reconstruction Flow (user says "continue this project")
 
-1. **Minimum tokens first**: read only `references/<project>-phase-log.md` (do not replay history; do not read the entire repo first).
+1. **Minimum tokens first**: read only `references/<project>-phase-log.md`, plus `references/<project>-context.md` if it exists (domain glossary — small, prevents vocabulary drift across sessions). Do not replay history; do not read the entire repo first.
+   - **Fallback — phase-log missing or clearly stale** (session died before a
+     checkpoint was written): tell the user reconstruction will cost more than a
+     normal recap, and upon consent rebuild from persisted session transcripts
+     (session-management search tools if available; otherwise recently modified
+     files + `git log`). Afterwards, offer to write a catch-up checkpoint section
+     so the next session doesn't pay this cost again.
 2. Reconstruct understanding from the phase-log: project goals, Phase progress and status, most recent key decisions, unresolved TODOs.
 3. Only load a detail file (`- Detail:` link) when deep-diving into a specific phase is necessary.
 4. Summarize the current state in one sentence, then **ask the user** which Phase / TODO to start from.
