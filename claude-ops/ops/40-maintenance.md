@@ -39,6 +39,17 @@ directory — a rule-tier write from a sandbox, unreviewed.
 Never write the same lesson in full into two places — reference it from the
 second place instead. A rule lives in exactly one file.
 
+**Dict-sync corollary**: any 🟡 change that adds/renames/removes a skill, an
+ops rule section, or a durable convention MUST update the affected index files
+(`skill-trigger-dict.md` if the trigger surface changed; `ops/rules-usage-dict.md`
+if a responsibility boundary changed; `OPS.md`'s routing table if a file's scope
+changed) in the SAME commit — enumerate index files by grepping for references
+to the changed file, not from memory (lessons.md L-004). The dicts are
+indexes, and an index that lags its source is a ghost rule (§4.1). The
+config-self-audit red-team of the change checks this sync explicitly, and
+`hooks/ops_health_nudge.py` check 10 mechanically flags any local skill
+missing from `skill-trigger-dict.md` at session start (change the two together).
+
 ✅ Discover a CLI needs a trust flag → one lesson card in `ops/lessons.md`,
 and `20-dispatch.md` §3 already covers the class — bump nothing else.
 ❌ Paste the same pitfall paragraph into lessons.md, dispatch, AND CLAUDE.md —

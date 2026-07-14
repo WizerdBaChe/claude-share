@@ -59,6 +59,48 @@ PSM-grade remediation/re-planning. Finding 8 (market claims without
 source/date) was already covered by R5's "cite or label unverified" — that
 was a violation of an existing rule, not a rule gap.
 
+## L-003 2026-07-12 tags: interop|cross-platform|skills-sync|env hits: 1
+Context: `~/.agents/skills/` and `~/.codex/skills/` hold full raw copies of
+`~/.claude/skills/` (synced 2026-07-11) so codex can use them. On 2026-07-12
+codex, on user instruction, hand-edited its copy of workflow-checkpoint
+(stripped Claude-only /compact flow; SHA-256-verified backups kept). Earlier,
+a stale 07-08 copy in `.agents` caused an external AI review to file 12
+findings against an outdated skill version — 8 of 12 were invalid
+(update-plan v2 §0.1).
+Pitfall: raw skill copies across agent homes violate the interop principle
+("never copy raw skill files; curate/compile instead") and create two failure
+modes: (a) staleness — external reviewers/agents read outdated copies and
+produce wrong findings; (b) silent drift — target-side adaptations (e.g.
+/compact removal) never flow back and are overwritten by the next naive
+re-sync.
+Fix: copies declared one-way build artifacts. `README-PROVENANCE.md` placed
+in both `~/.agents/skills/` and `~/.codex/skills/` (canonical source, sync
+date, adaptation log; hand-edits must be logged there and re-applied on
+re-sync). Durable rule: before reviewing/planning against any skill file,
+confirm the path is the canonical `~/.claude/skills/` tree; before re-syncing,
+read the adaptation log and re-apply platform patches. Long-term option
+(user-owned decision, not yet taken): extend interop.py with a skills-compile
+profile per skill-share-packaging Mode A.
+
+## L-004 2026-07-12 tags: rules-editing|dict-sync|config-change|docs hits: 1
+Context: mattpocock/skills fold-in extended `60-bootstrap.md`'s scope (ticket
+slicing + domain glossary). The SAME changeset introduced the dict-sync rule
+(40-maintenance §2 corollary) and dutifully updated `rules-usage-dict.md` —
+yet still missed `OPS.md` routing table line 56, the PRIMARY router whose
+breakage is the defined ghost-rule failure mode (§4.1). Caught only by the
+config-self-audit red-team grep, not by authoring discipline.
+Pitfall: "update the dicts" was executed as "update the files named dict" —
+but the index surface of a rule file is EVERY place that routes to it (OPS.md
+routing table, rules-usage-dict, skill-trigger-dict, global CLAUDE.md
+pointers). Enumerating index files from memory misses the ones not named
+"dict"; the very session that writes a sync rule can violate it in the same
+commit.
+Fix: when a rule file's scope/responsibilities change, grep the config tree
+for references TO that file (`grep -r "60-bootstrap" ~/.claude` style) and
+update every routing line in the same commit — enumerate by search, not by
+recall. Folded in: 40-maintenance §2 corollary wording now names OPS.md's
+routing table explicitly as an index file.
+
 ---
 ## Archived (folded into another file, or retired)
 (none yet)

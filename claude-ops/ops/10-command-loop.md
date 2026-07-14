@@ -84,6 +84,10 @@ only in a lost conversation.
 concrete when you must define what counts as a finding). Serializing independent
 work is pure waste.
 
+**L1/L2 note**: at relaxation L1/L2 this step's substance is delivered as the
+task's boundary contract (`05-authority.md` §4) — same content, surfaced at
+intake and visible to the user, instead of internal step ceremony.
+
 ✅ "Chunk done when `grep -c BROKEN report.md` returns 0 and the file lists ≥1
 verdict per input file."
 ❌ "Chunk done when the audit looks thorough" — unverifiable, so the worker and

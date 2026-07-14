@@ -46,14 +46,14 @@ Rules 1–6 below are invariants and never relax.
 
 | Situation | Read |
 |---|---|
-| Starting heavyweight/systemic work: rule classes + relaxation gate | `ops/05-authority.md` |
+| Relaxation gate fires (first dispatch / ledger / plan mode / ops-health nudge); boundary contract at L1/L2 | `ops/05-authority.md` |
 | Handling any non-trivial instruction (start here) | `ops/10-command-loop.md` |
 | Dispatching a subagent, choosing model/effort, writing a dispatch prompt | `ops/20-dispatch.md` |
 | Environment facts: tier→model mapping, cost cap, available mechanisms | `ops/environment.md` |
 | Stuck on: escalate? actually done? should I ask? wrong approach? | `ops/30-judgment.md` |
 | About to change any ops/rule file, or a lesson worth recording just happened | `ops/40-maintenance.md` |
 | Meta-heuristics: how to think through a task (for non-frontier models) | `ops/50-coach.md` |
-| First session in a project; where tickets/progress live; ledger templates | `ops/60-bootstrap.md` |
+| First session in a project; where tickets/progress live; ledger templates; slicing plans into tickets; project domain glossary | `ops/60-bootstrap.md` |
 | Proposing/applying guardrail changes; where knowledge belongs (memory vs rules) | `ops/70-evolution.md` |
 | Which layer/skill owns what (boundaries vs CLAUDE.md and skills) | `ops/rules-usage-dict.md` |
 | Before starting work: grep for past pitfalls | `ops/lessons.md` |

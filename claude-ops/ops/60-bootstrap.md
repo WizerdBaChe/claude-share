@@ -8,7 +8,8 @@ environment facts (step B) and a durable task ledger (step C). Without them,
 
 1. **Read what exists**: project `CLAUDE.md`, `references/<project>-phase-log.md`
    (if the `workflow-checkpoint` skill has been used), `references/<project>-tickets.md`,
-   and grep `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
+   `references/<project>-context.md` (domain glossary, §E — if present), and grep
+   `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
 2. **No project CLAUDE.md?** Offer to run `/init`, then add the Environment-facts
    block (template below) with values you actually looked up this session.
 3. **No ticket ledger?** Create `references/<project>-tickets.md` from the template
@@ -16,6 +17,10 @@ environment facts (step B) and a durable task ledger (step C). Without them,
 4. **Verify, don't inherit**: any command, path, or tool name you plan to rely on —
    run it or `Test-Path` it once now. Record what you verified; write
    "couldn't determine" for what you couldn't.
+5. **Relaxation level**: if the main model is frontier-tier and the project
+   CLAUDE.md has no `ops-relaxation:` line, ask the user to pick L0/L1/L2 now
+   (`05-authority.md` §2) and record the answer in the project CLAUDE.md —
+   one ask per project, not per session.
 
 ✅ First session: read phase-log → discover phase 2 finished last week → resume
 from the open ticket instead of re-planning from zero.
@@ -48,6 +53,7 @@ Ticket stub (3 lines minimum — `10-command-loop.md` step 3):
 ```markdown
 ## T-NNN <one-line end state, not the action>
 status: open|active|blocked|done  owner: <dispatcher|worker-id|human>  blocked-by: <T-NNN|->
+type: build|investigation   (optional; default build)
 acceptance: <machine-checkable command + expected output>
 notes: <optional: decisions, reorders with reasons, partial results path>
 ```
@@ -56,6 +62,30 @@ Rules: update `status` BEFORE announcing "I'll do X next"; reorders are edited
 into the ticket before acting and explained when reporting; `done` requires the
 evidence demanded by `30-judgment.md` R2. Completed tickets move to an
 `## Archive` section at the bottom — never deleted.
+
+### Slicing a plan into tickets (tracer-bullet discipline)
+
+When decomposing a plan/design doc into tickets (typically after a
+product-design-thinking PSM is fixed), each `build` ticket is a **tracer
+bullet**: a narrow but COMPLETE vertical slice through every affected layer
+(schema → logic → surface → tests), demoable or verifiable on its own, and
+sized to fit one fresh context window. Write "what to build" from the user's
+perspective, not as a layer breakdown. `blocked-by` edges only where genuine
+gating exists — a ticket with no blockers can start immediately.
+
+- **Exception — wide mechanical refactors**: don't force them into tracer
+  bullets (breaks green-state between tickets). Use expand-contract instead:
+  introduce the new form alongside the old → migrate call sites in batches →
+  retire the old form when unused.
+- **`investigation` tickets** resolve ONE decision, not a deliverable; the
+  answer is recorded in the ticket's `notes`. One investigation per session.
+- **Fog stays coarse**: questions not yet sharp enough to ticket go under an
+  optional `## Not yet specified` section at the top of the ledger — promote
+  to a ticket only when the frontier reaches them; never pre-slice fog.
+
+✅ "T-012 user can export a report as PDF" (schema+API+button+test, demoable).
+❌ "T-012 write the PDF service layer" + "T-013 wire up the UI" — horizontal
+slices, neither verifiable alone.
 
 ✅ Resume after a crash: `grep "status: active" references/*-tickets.md` → pick
 up exactly where the ledger says, partial results path included.
@@ -74,3 +104,34 @@ Verified: <commands run + key output lines>
 Could not do: <honesty clause — what, why, evidence, proposed path forward>
 Artifacts: <paths>
 ```
+
+## E. Project domain glossary (`references/<project>-context.md`)
+
+The project's shared language — where domain terms are defined ONCE so sessions
+don't drift apart on vocabulary. Scope boundary: environment-level vocabulary
+lives in `skill-trigger-dict.md` (skill routing) and `ops/rules-usage-dict.md`
+(layer boundaries); THIS file is project-level domain terms only.
+
+**Create lazily**: only when a domain-heavy multi-session project produces its
+first term worth pinning — not a standard fixture for every project. Format:
+
+```markdown
+# <project> — Domain Glossary
+<!-- One definition per term. Updated live, never batched. English only. -->
+- **<Term>** (<YYYY-MM-DD>): <one-sentence definition>. [superseded: <old>]
+```
+
+Rules:
+- **Update live**: record a term the moment it crystallizes (design session,
+  checkpoint, mid-task) — batching updates is how glossaries die.
+- **Challenge, don't just consume**: when the requester's usage contradicts an
+  entry ("glossary says cancellation = X, you now mean Y"), surface it and
+  update — a stale definition is worse than none.
+- **Glossary only**: no specs, no implementation notes, no scratch content.
+- **ADR gate** (three ALL required, else no ADR): hard to reverse + surprising
+  without context + a genuine trade-off existed. ADRs go in the project's own
+  docs (`docs/adr/` or per project convention), one line of gist here.
+
+Maintenance mounts (who keeps it alive): `workflow-checkpoint` asks at each
+phase checkpoint whether new terms crystallized; `product-design-thinking`
+Phase 3 persists its PIM glossary here; §A step 1 reads it every first session.

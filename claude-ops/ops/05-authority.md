@@ -25,10 +25,19 @@ Every ops rule belongs to exactly one class:
 
 ## §2 The relaxation gate (user-decided, never self-granted)
 
-**Trigger**: at the start of heavyweight / systemic work (project development,
-multi-phase or multi-session tasks — anything that would engage this ops
-layer), the main model states its model identity/tier in one line and asks the
-user to pick this project's relaxation level. One question, three options:
+**Trigger** — fire at the FIRST of these observable events, not at a predicted
+"start of heavyweight work" (a model in execution momentum reliably misjudges
+that prediction, and a rule keyed on it never fires):
+
+- (a) about to dispatch the first subagent of a project task;
+- (b) about to create or first open a ticket ledger;
+- (c) about to enter plan mode / present a plan for a multi-phase task;
+- (d) a `[ops-health]` session-start nudge reports the project's relaxation
+  level is unset.
+
+At that moment the main model states its model identity/tier in one line and
+asks the user to pick this project's relaxation level. One question, three
+options:
 
 - **L0 (default)** — everything binds as written. Applies automatically when
   the question was not asked or not answered, and whenever the main model is
@@ -51,9 +60,12 @@ leave one line — `[deviated] <rule ref> — <reason>` — in the response or t
 project ledger. This replaces ex-ante compliance with ex-post accountability;
 skipping the note voids the relaxation for that task.
 
-**Recording**: the chosen level applies to the current project. To make it
-standing, the user may ask to record `ops-relaxation: L1` (or L2) in the
-project's CLAUDE.md; then re-asking is unnecessary until the user changes it.
+**Recording**: after the user answers, offer IN THE SAME TURN to record
+`ops-relaxation: L1` (or L0/L2) in the project's CLAUDE.md — the level is a
+project property, and one recorded line replaces every future per-session ask
+(the ask-every-session variant proved unreliable; see the trigger note).
+`60-bootstrap.md` §A includes this as a first-session step. Re-ask only when
+the user changes it.
 
 ## §3 Relation to the decision charter
 
@@ -61,3 +73,48 @@ The decision charter (owner: global CLAUDE.md, engineering judgement) governs
 WHICH decisions the main model may take alone — it applies at every relaxation
 level and is not part of this gate. This gate only governs HOW MUCH process
 the main model must run while executing.
+
+## §4 Boundary contract (the L1/L2 exchange: scaffolding out, specification in)
+
+Why: a frontier model's dominant failure mode is not execution but silent
+scope narrowing — unstated interpretation forks resolved by private guesswork,
+over-confident "done", boundaries nobody wrote down. L1/L2 removes procedural
+scaffolding the model doesn't need; in exchange, the boundary work it DOES
+need is made explicit at task intake. The contract is a per-task artifact,
+never a standing rule — it costs context only on the tasks that need it.
+
+**Trigger**: relaxation level is L1 or L2, AND the task is an implementation
+task of Tier-2 weight (depth-tier triage, global CLAUDE.md). Analysis/
+evaluation answers route to `30-judgment.md` R8 instead — same tier words,
+different protocol. Emit the contract BEFORE method or design work starts.
+
+**Format** — 4 sections, HARD CAP 15 lines total; an empty section is the
+single word "none". The cap is load-bearing: a contract too long to read in
+seconds becomes a fake gate the user skims past.
+
+    ## Boundary Contract — <task>
+    1. Interpretation forks: <ambiguity> → chose <reading> because <why>;
+       isolation point: <module/param that flips the call if wrong>
+    2. Boundary inputs: <inputs/states that break it, trimmed to known env>
+    3. Acceptance: <blind-executable checks; mark machine-checkable vs
+       human-eye items>
+    4. Non-goals & degradation: <explicitly out>; drop <X→Y→Z>, core <W>
+
+**Carrier**: inline in the response for single-session tasks; AS the plan
+content when plan mode is active (plan approval = contract sign-off — never
+build a parallel gate beside plan mode); copied into the ticket for
+multi-session projects. Not a new file format.
+
+**Delivery-time duty**: at close-out, re-check the deliverable against the
+contract's section 3 item by item and state the result; deviations are
+reported, never silently absorbed. Self-binding is the point — the contract
+works even on turns the user doesn't read it, because writing it forces the
+forks into the open before momentum builds.
+
+**Supersession**: while a task has a live boundary contract, the four global
+CLAUDE.md rules tagged `[BC]` are satisfied BY the contract (don't run them
+twice): manual-acceptance checklist (→ section 3), boundary/compatibility
+enumeration (→ section 2), degradation-order declaration (→ section 4),
+doubted-interpretation isolation point (→ section 1). At L0, or when no
+contract exists, those rules bind as written — they serve models and tasks
+this mechanism doesn't cover.
