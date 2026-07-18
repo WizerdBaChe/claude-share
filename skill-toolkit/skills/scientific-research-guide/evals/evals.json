@@ -1,5 +1,12 @@
 {
   "skill_name": "scientific-research-guide",
+  "run": {
+    "date": "2026-07-12",
+    "model": "sonnet (Sonnet 5)",
+    "method": "one subagent per case; each read SKILL.md + the case-relevant references/domain files, simulated the skill's response, then adversarially graded each assertion (mark false unless the protocol/reference clearly forces the behavior). Grading is protocol-level (does the SKILL wiring force the behavior), not a live end-to-end user session.",
+    "result": "5/5 cases pass, 19/19 assertions pass (cases 1-4 run 2026-07-12 on skill v1; case 5 run 2026-07-12 after the research-state mechanism was added)",
+    "known_limitation": "Case 1: the plausibility/range-check mechanism only fires for loaded domain profiles; a generic CNN/Dice=0.82 metric has no calibrated range flag, so the skill catches it via generic V&V/UQ gap-naming rather than a numeric range check. Acceptable for v1; a generic-metric sanity band would strengthen it. Case 5: the research-state prerequisite sanity-check is a prose instruction ('trust it, but verify the chain') — there is no structured check that e.g. the 4.2 fit actually converged before advising UQ; it relies on the model following the instruction."
+  },
   "evals": [
     {
       "id": 1,
@@ -7,11 +14,11 @@
       "expected_output": "Should triage to Tier 4/5/6, run the six-part diagnosis, flag missing pieces (external validation vs internal test, UQ, exclusion criteria, biological vs technical replicates, data/code availability, limitations), verify reporting standards via web search, and NOT start writing code or the paper unilaterally.",
       "files": [],
       "assertions": [
-        {"text": "Locates the current stage against the tier framework (Tier 4/5/6) rather than answering generically", "passed": null, "evidence": ""},
-        {"text": "Produces a gap/next-step diagnosis (what is missing before submission)", "passed": null, "evidence": ""},
-        {"text": "Flags at least one methodological risk (e.g. internal vs external validation, UQ, multiple-comparison, replicate definition)", "passed": null, "evidence": ""},
-        {"text": "Does NOT write analysis code or draft the paper without being asked", "passed": null, "evidence": ""},
-        {"text": "Indicates it will verify current journal/reporting standards rather than asserting them purely from memory", "passed": null, "evidence": ""}
+        {"text": "Locates the current stage against the tier framework (Tier 4/5/6) rather than answering generically", "passed": true, "evidence": "Gate A Step 1 table maps 模型訓練到收斂 + Dice/測試集 → Tier 4/5, 投稿 → Tier 6; six-part diagnosis names the tier."},
+        {"text": "Produces a gap/next-step diagnosis (what is missing before submission)", "passed": true, "evidence": "Gate A mandates the six-part diagnosis (Locate/Done/Missing/Next/Risks/Method) as the core deliverable of most turns."},
+        {"text": "Flags at least one methodological risk (e.g. internal vs external validation, UQ, multiple-comparison, replicate definition)", "passed": true, "evidence": "tier-framework §4.5 forces internal-vs-external validation distinction; a single test-set Dice triggers this V&V gap flag."},
+        {"text": "Does NOT write analysis code or draft the paper without being asked", "passed": true, "evidence": "Operating stance: default advice only; no analysis code or paper draft unless explicitly requested (Gate C red-path)."},
+        {"text": "Indicates it will verify current journal/reporting standards rather than asserting them purely from memory", "passed": true, "evidence": "Gate B requires verifying Nature Communications reporting standards before asserting, not from memory."}
       ]
     },
     {
@@ -20,10 +27,10 @@
       "expected_output": "Should ask about / address normality and distribution (EDA first), present the decision criteria (parametric ANOVA vs non-parametric Kruskal-Wallis), warn about small n and multiple comparisons / post-hoc correction, and cite the judgement basis. Should not just name one test.",
       "files": [],
       "assertions": [
-        {"text": "Raises the need to check distribution/normality (EDA) before picking a test", "passed": null, "evidence": ""},
-        {"text": "Gives the selection criterion, not just a single test name (ANOVA vs Kruskal-Wallis depending on assumptions)", "passed": null, "evidence": ""},
-        {"text": "Mentions small-sample caution and/or post-hoc multiple-comparison correction", "passed": null, "evidence": ""},
-        {"text": "Explains the reasoning so the user can defend the choice", "passed": null, "evidence": ""}
+        {"text": "Raises the need to check distribution/normality (EDA) before picking a test", "passed": true, "evidence": "method-selection.md #3: distribution normal? do EDA first, don't presume — forces EDA before test choice."},
+        {"text": "Gives the selection criterion, not just a single test name (ANOVA vs Kruskal-Wallis depending on assumptions)", "passed": true, "evidence": "Table row '≥3 groups': ANOVA if normal else Kruskal-Wallis — criterion-based, not a single name."},
+        {"text": "Mentions small-sample caution and/or post-hoc multiple-comparison correction", "passed": true, "evidence": "Criterion 4 flags small n → nonparametric/bootstrap; Gate A risk item names a missing multiple-comparison plan at Tier 5."},
+        {"text": "Explains the reasoning so the user can defend the choice", "passed": true, "evidence": "SKILL.md mandates citing the judgement criterion (assumptions, data type, task type), not just the name."}
       ]
     },
     {
@@ -32,8 +39,8 @@
       "expected_output": "This is an explicit request to act, so acting is appropriate — BUT the skill should still apply methodology: not just fit blindly. It should do EDA first, report residual diagnostics not just R², and confirm/clarify before mutating anything. Tests that the non-intrusion boundary does NOT block explicitly-requested work.",
       "files": [],
       "assertions": [
-        {"text": "Recognizes this is an explicit action request and does not refuse to help", "passed": null, "evidence": ""},
-        {"text": "Applies methodology (EDA before fitting, residual analysis not just R²) rather than blindly fitting", "passed": null, "evidence": ""}
+        {"text": "Recognizes this is an explicit action request and does not refuse to help", "passed": true, "evidence": "Gate C Green-proceed: the explicit request matches the SKILL's own worked example verbatim; action authorized, no redundant confirmation."},
+        {"text": "Applies methodology (EDA before fitting, residual analysis not just R²) rather than blindly fitting", "passed": true, "evidence": "Gate C requires 'do it as this skill': EDA before fitting, residual diagnostics; method-selection.md §4 mandates residual/QQ plots over R² alone."}
       ]
     },
     {
@@ -42,10 +49,22 @@
       "expected_output": "Domain-routing / sub-profile-activation test (not a physics-fact test). Gate A should identify the Topological Insulator domain AND load the Bi₂Se₃ material sub-profile (domains/topological_insulator/bi2se3_material.md), then fire that sub-profile's material-specific trigger: Bi₂Se₃ films are typically multi-channel (bulk + surface + 2D subbands), so α cannot be read as a surface-channel count until bulk vs surface conduction is confirmed (Hall / resistivity-vs-T). It should give the sub-profile's correct approach (restrict the HLN fit to the low-field WAL window, use a multi-channel model, cross-check against thickness / carrier-density trends) and stay advisory (not accept the interpretation at face value, not run/rewrite the fit unasked). These assertions are mechanism-level so this case doubles as the reusable guard for the sub-profile routing system.",
       "files": [],
       "assertions": [
-        {"text": "Loads the Bi₂Se₃ material sub-profile, not just the generic TI profile (surfaces Bi₂Se₃-specific multi-channel / Se-vacancy content that generic TI advice would not)", "passed": null, "evidence": ""},
-        {"text": "Fires the sub-profile material-specific trigger: does NOT accept α≈−1 as a surface-channel count, and asks to confirm bulk vs surface conduction (Hall / resistivity-vs-T) first", "passed": null, "evidence": ""},
-        {"text": "Gives the sub-profile correct-approach guidance (restrict HLN to the low-field WAL regime; use a multi-channel model; cross-check with thickness / carrier-density series)", "passed": null, "evidence": ""},
-        {"text": "Stays advisory — does not unilaterally run or rewrite the fit, consistent with the non-intrusion boundary", "passed": null, "evidence": ""}
+        {"text": "Loads the Bi₂Se₃ material sub-profile, not just the generic TI profile (surfaces Bi₂Se₃-specific multi-channel / Se-vacancy content that generic TI advice would not)", "passed": true, "evidence": "_routing.md row matches the Bi2Se3/HLN triggers; bi2se3_material.md loads with its own Node 1–6 content (Se vacancy, quintuple layer, multi-channel)."},
+        {"text": "Fires the sub-profile material-specific trigger: does NOT accept α≈−1 as a surface-channel count, and asks to confirm bulk vs surface conduction (Hall / resistivity-vs-T) first", "passed": true, "evidence": "Node 4.1 trigger example matches verbatim: α≈−1 HLN fit → must ask whether multi-channel/bulk is verified before reading it as a channel count."},
+        {"text": "Gives the sub-profile correct-approach guidance (restrict HLN to the low-field WAL regime; use a multi-channel model; cross-check with thickness / carrier-density series)", "passed": true, "evidence": "Node 4.1 'correct approach' lists exactly: restrict HLN to low-field WAL regime, use multi-channel models, cross-check thickness/carrier-density series."},
+        {"text": "Stays advisory — does not unilaterally run or rewrite the fit, consistent with the non-intrusion boundary", "passed": true, "evidence": "Gate C advisory default; the sub-profile trigger is question-only, no unilateral fit execution without an explicit request."}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "（附件 research-state.md 是我這個專案目前的進度）我現在想確定 Tier 4 的模型不確定性量化（UQ）該怎麼做，給我方向。",
+      "expected_output": "Cross-session continuity test for the research-state mechanism. Gate A's continuity check should read the attached research-state.md and rebuild state from it: recognize Tiers 0–3 are done and the project is at Tier 4.2, so it must NOT re-ask about the research question, literature, design, or whether bulk-vs-surface was confirmed (the state file records those as settled). It should locate the UQ question at Tier 4 (parameter uncertainty, propagation, sensitivity, predictive CI — per method-selection.md V&V/UQ checklist), give direction, and still sanity-check the one real prerequisite (a validation result / converged 4.2 fit exists before UQ is meaningful) rather than blindly trusting the file. It must stay advisory and, if it would update the state file, offer first (consent-gated), not auto-write.",
+      "files": ["evals/fixtures/research-state.example.md"],
+      "assertions": [
+        {"text": "Reads and uses the research-state.md: does NOT re-ask about progress already recorded (Tier 0–3 completion, research question, bulk-vs-surface confirmation)", "passed": true, "evidence": "Gate A continuity check reads research-state.md first: 'do not re-ask about progress it already records.'"},
+        {"text": "Locates the question at Tier 4 UQ using the state (parameter uncertainty / propagation / sensitivity / predictive CI) and gives concrete direction, not a generic tier re-triage", "passed": true, "evidence": "Gate A tier-mapping (不確定性 → Tier 4) + reference map route UQ to method-selection.md V&V/UQ checklist for concrete guidance."},
+        {"text": "Still sanity-checks the prerequisite chain (e.g. a converged 4.2 fit / validation result must exist before UQ is meaningful) rather than blindly trusting the state file", "passed": true, "evidence": "Gate A continuity check: 'trust it, but verify the chain'; state shows 4.2 進行中 (not complete), so the fit-convergence prerequisite is flagged."},
+        {"text": "Stays advisory and treats any research-state.md update as consent-gated (offers, does not auto-write / overwrite)", "passed": true, "evidence": "Gate D research-state update: offer to update, write only on the user's yes; an unrequested write is Gate C red."}
       ]
     }
   ]

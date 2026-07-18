@@ -134,3 +134,38 @@ Extended Data / Supplementary Materials
 - 各子模組整合時機與介面：
 - 品質標準：三角驗證 / 效度 / 信度 / 飽和
 ```
+
+## 跨 Session 進度追蹤器 research-state.md（living document）
+> 放在研究專案根目錄。本 skill 每次開場（Gate A continuity check）先讀它重建進度，不重複
+> 詢問已知狀態；§7.4 進度表的活文件實例。**更新採同意制（Gate D）**：完成一個 Tier/section、
+> 定案關鍵決策、或觸發迭代時提議更新，使用者同意才寫；迭代記錄只增不改，勿覆寫未變動段落。
+```
+# research-state — <專案名>
+> 最後更新：<日期>（由 scientific-research-guide 於使用者同意下維護）
+
+## 當前位置
+- 目前 Tier / section：
+- 領域 profile（Layer B）：<如 topological_insulator + bi2se3_material；無則填「無/通用框架」>
+- 本階段一句話目標：
+
+## 各 Tier 完成度
+| Tier | 狀態(未開始/進行中/完成) | 關鍵產出物 | 備註 |
+|------|------|------|------|
+| 0 研究問題 | | | |
+| 1 文獻 | | | |
+| 2 設計 | | | |
+| 3 資料 | | | |
+| 4 建模 | | | |
+| 5 分析 | | | |
+| 6 報告 | | | |
+
+## 已定案關鍵決策（避免重議）
+- <如：檢定選 Welch ANOVA、驗證採外部資料集…>
+
+## 迭代記錄（append-only；對應 §7.1 / Gate E）
+| 日期 | 觸發（下游結果）| 回溯 Tier | 修正 | 結果 |
+|------|------|------|------|------|
+
+## 下一步（skill 開場據此接續，不重問）
+- 
+```

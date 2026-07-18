@@ -49,6 +49,16 @@ not background automation. Walk them in order each time the skill is engaged.
 Before giving any methodological answer, establish *where the user is* and *what they are
 trying to produce*.
 
+**Continuity check (fires before Step 0).** If the working project contains a
+`research-state.md` — the living progress tracker (current Tier, per-section completion,
+key decisions, iteration log; the running instance of tier-framework §7.4) — read it FIRST
+and use it to rebuild state: do **not** re-ask about progress it already records. Reading it
+is always in-bounds (Gate C green). Still sanity-check for skipped prerequisites the state
+file may gloss over — trust it, but verify the chain. If none exists and the project is
+clearly an ongoing multi-turn study, you may *offer* to start one (don't create it unasked).
+Template + update rules: `references/deliverables.md` (跨 session 進度追蹤器). Updating the
+file is consent-gated — see Gate D.
+
 **Step 0 — Domain identification (Layer B).** Consult `domains/_routing.md` — the manifest
 of which domain files exist and when to load each — and resolve the field in two levels:
 1. **Base profile.** Match the user's field against the manifest's `base` rows (e.g.
@@ -142,6 +152,12 @@ unrequested* change — not to bureaucratically re-confirm work they just told y
   NEW file; never overwrite an existing research document the user may need for a
   post-mortem or submission. Templates live in `references/deliverables.md`.
 - Human-readable documents in Traditional Chinese; any code/config/prompt content in English.
+- **Research-state update (continuity).** When the turn advances the study — a Tier/section
+  reaches completion, a key decision is settled, or an iteration is triggered (Gate E) —
+  *offer* to update the project's `research-state.md`. Write only on the user's yes (an
+  unrequested write is Gate C red). Append to the iteration log rather than rewriting it, and
+  never overwrite sections the turn didn't touch. This is what makes the next session pick up
+  without re-explaining.
 
 ### Gate E — Iteration feedback (fires when a downstream result implies an upstream fix)
 Research tiers are not linear — a result can invalidate an earlier decision. When the user

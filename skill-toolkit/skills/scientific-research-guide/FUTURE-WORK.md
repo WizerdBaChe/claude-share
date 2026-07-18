@@ -9,17 +9,17 @@
 
 ## Backlog (priority order)
 
-### ① Research-state file mechanism (already approved, do this first)
+### ① Research-state file mechanism — IMPLEMENTED 2026-07-12
 - Goal: zero re-explaining across sessions. Each research project maintains a
   `research-state.md` (current Tier, per-section completion, iteration log —
   i.e. a living-document version of the tier-framework §7.4 output artifact).
-- Implementation: add a section to SKILL.md — before Gate A Step 0, look for a
-  `research-state.md` in the project and read it; after each turn, update it
-  once the user agrees (non-intrusive: confirm before writing).
-- Effort: small (one SKILL.md section + a state-file template added to
-  deliverables.md).
-- Verification: add one eval — give a state file plus a new question, confirm
-  the skill doesn't re-ask about already-known progress.
+- Done: SKILL.md Gate A gained a "Continuity check (fires before Step 0)" that
+  reads `research-state.md` first and rebuilds state without re-asking; Gate D
+  gained a consent-gated update rule (offer on tier/decision/iteration advance,
+  write only on yes, append-only iteration log). Template added to
+  deliverables.md (跨 Session 進度追蹤器). Eval case 5 + fixture
+  (evals/fixtures/research-state.example.md) added and run.
+- Branch: feat/research-state-mechanism.
 
 ### ② scripts/ deterministic analysis tools (wait for repeated need to emerge; don't build ahead of time)
 - Candidates: statistical-test selector, Bootstrap 95% CI (5000 iterations),
@@ -67,3 +67,13 @@
   should/should-not queries) has never been run; run it if under- or
   over-triggering is observed.
 - config-self-audit has not yet run a formal audit on this skill.
+
+## Status log
+- 2026-07-12 — evals/evals.json executed for the first time (4 cases, sonnet /
+  Sonnet 5, protocol-level grading via 4 subagents): 4/4 pass, 15/15 assertions.
+  One known limitation recorded in the file's `run.known_limitation` (generic
+  metrics have no calibrated range-check; only loaded domain profiles do).
+  Behaviour is now verified, not just designed. See STATUS.md for the full picture.
+- Note on backlog item ②: scripts/ is a DELIBERATE deferral (build only once the
+  same analysis is hand-written ≥2×), NOT an unfinished gap — do not treat as
+  incomplete in a future audit.
