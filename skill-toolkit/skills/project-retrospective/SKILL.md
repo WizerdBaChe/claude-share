@@ -118,7 +118,16 @@ After producing Document 2, do ALL of the following in order (do not skip — th
    Present the generalizable candidates to the user and **ask whether to merge them into global CLAUDE.md** — do NOT write global unilaterally. Putting project-specific rules in global pollutes every future project, so this gate is mandatory.
    - If the user says yes: merge ONLY the generalizable rules into `~/.claude/CLAUDE.md`, matching its existing conditional-section style (append/merge, never overwrite). If no: leave global untouched.
 
-3. **Append an entry to the `Global_skill_update` changelog** at `~/.claude/Global_skill_update.md` (create it if absent, with an `# Global Skill Update Log` heading). Log BOTH the project-CLAUDE.md write and (if it happened) the global merge — separate entries are fine. Each entry:
+3. **Close-out visibility gate.** Two checks before the retrospective counts as done:
+   - Update the project's row in `~/.claude/references/PROJECTS.md` (status →
+     `done`/`archived`/`maintenance`, next → resume pointer or "-"). Register the
+     row if missing.
+   - Check the project root has a current human-readable README (exists AND
+     mentions the final state, not an abandoned earlier design). If not, offer to
+     generate/refresh one from the retrospective content — ask, don't write
+     unprompted.
+
+4. **Append an entry to the `Global_skill_update` changelog** at `~/.claude/Global_skill_update.md` (create it if absent, with an `# Global Skill Update Log` heading). Log BOTH the project-CLAUDE.md write and (if it happened) the global merge — separate entries are fine. Each entry:
    ```
    ## [YYYY-MM-DD HH:MM] <project-name> — <project CLAUDE.md | global CLAUDE.md>
    - Target CLAUDE.md: <absolute path written/merged>

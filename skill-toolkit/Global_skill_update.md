@@ -5,220 +5,18 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 
 ---
 
-## [2026-06-28 22:45] project-retrospective skill update
+> Older entries (2026-06-28 – 2026-07-10) rotated to `archive/Global_skill_update-2026-06-28--2026-07-10.md` on 2026-07-19 (ops/40-maintenance.md S3).
 
-- Skill: `~/.claude/skills/project-retrospective/SKILL.md`
-- Added/changed: New mandatory Step 5 (merge Document 2 directly into CLAUDE.md + append to this changelog). Document 2 now requires conditional-trigger phrasing ("When X, do Y"), precise & concise, no blanket always-on rules. Flow diagram + Notes + Output Principles aligned.
+## [2026-07-25] File-output language rule → 4-class by primary consumer + product-design-thinking restructure
 
-## [2026-06-28 22:45] 3D Photo Synthesis Engine (LDI) retrospective — project-specific rules
-
-- Target CLAUDE.md: D:\AIWork\3D_Photo_Synthesis_Engine\CLAUDE.md (created)
-- Added/changed: Project-specific conditional rules — don't touch /synthesize, /parallax, parallax.ts/viewer.ts; FB 3D Photo = small-angle parallax; LDI definition; architecture ceiling; C1 inpaint bottleneck; restart backend before retest; LDIBuilder Provider.
-- Outputs: ~/.claude/outputs/retrospectives/retrospective-LDI-2026-06-28.md (Chinese guide), ~/.claude/outputs/retrospectives/claude-instructions-LDI.md (English snippet)
-
-## [2026-07-03] Global config audit fixes + new config-self-audit skill
-
-- Source: external read-only audit of ~/.claude/ (2026-07-03), fixes applied with user consent. Backup: ~/.claude/backups/audit-fix-2026-07-03/
-- hooks/ai-team-os/* (8 files): `_get_platform_home()` pinned to ~/.claude (was preferring ~/.gemini/antigravity — cross-CLI state contamination); env override AITEAM_PLATFORM_HOME.
-- hooks/ai-team-os/workflow_reminder.py: removed unconditional `permissionDecision: "allow"` (was bypassing the entire permission system on every tool call); gated `_check_agent_team_name` and `_check_leader_doing_too_much` on registered ai-team-os project_id (was hard-blocking Agent calls in ALL projects); docstring corrected ("no HTTP calls" was false).
-- settings.json: hook interpreter switched from D:/try/AI_COMPANY_TEST/.venv python to system Python312 (hooks are stdlib-only; decouples global hooks from an unrelated project). MCP server stays on the venv (needs aiteam package).
-- skills/workflow-checkpoint/SKILL.md: description phase-log naming unified to `<project>-phase-log.md`; added mutual disambiguation vs project-retrospective; compact-note template now preserves language rules.
-- skills/project-retrospective/SKILL.md: "Always trigger proactively" replaced with ask-once; added disambiguation vs workflow-checkpoint.
-- CLAUDE.md: new conditional rules — 2nd-unfixed-report escalation, manual-acceptance checklist handoff, regression self-check after bugfix, no change-for-change's-sake, post-merge branch/CI report, File hygiene section (archive-not-delete, new-file-not-overwrite).
-- NEW skill: skills/config-self-audit/SKILL.md — lightweight audit checklist for future skills/hooks/CLAUDE.md/settings changes.
-- NOT applied (blocked by permission classifier, needs manual paste by user): read-only git allowlist in settings.json `permissions.allow`.
-
-## [2026-07-03] NEW skill: product-design-thinking
-
-- Skill: `~/.claude/skills/product-design-thinking/SKILL.md` (new)
-- Purpose: high-rigor thinking mode for new-product / complex-feature DESIGN & PLANNING (heavyweight; explicitly not for bugfixes/implementation). Phases: (0) first-principles frame incl. challenging inherited design objects + boundary/"no change for change's sake"; (1) mandatory prior-art & open-source sweep before designing — ask user before adopting OSS, never silently hand-roll; competitor differentiation honesty check; environment constraints up front; (2) systems-engineering rules (low coupling, swappable weak points, self-checkable, UX semantics = user decision, anti-slop styling); (3) converge into Concept→PIM→PSM build-by-blueprint docs with 選型 blocks and acceptance handoff.
-- Sources: user's observed pipeline in 2026-04→07 session logs + 2026-07-03 audit findings.
-- Self-audited with config-self-audit checklist: added disambiguation vs product-management:write-spec / brainstorm / engineering:system-design / design-system-suite / workflow-checkpoint.
-
-## [2026-06-28 22:52] Global CLAUDE.md — generalizable lessons from LDI retrospective
-
-- Target CLAUDE.md: C:\Users\gunda\.claude\CLAUDE.md (global, new "Engineering judgement" section)
-- Added/changed: Cross-project conditional rules — (1) rendering/visual features need in-environment human gate (green tests ≠ correct picture); (2) when an output looks wrong & cause is conceptual, research canonical/industry method & compare point-by-point before editing; (3) ship doubtful components behind a swappable provider; (4) WebGL/GLSL ES: unroll named uniforms, avoid sampler-array variable indexing/dynamic loops, attach shader-error callback.
-- Rationale: these generalize to any future project, so they belong in global, not the repo CLAUDE.md.
-
-## [2026-07-05] New skill: ai-coding-guardrails
-
-- Path: C:\Users\gunda\.claude\skills\ai-coding-guardrails\ (SKILL.md + 5 files under references/)
-- What: 9-section defensive framework for AI-agent coding (context system, architecture lint, eval/test harness, CI/PR automation, safety & policy, observability, feedback loops, recovery, governance). Built from user's draft, deepened with: three-failure-class threat model, scenario router with per-situation deliverables, per-section minimum viable guardrails, Claude Code mappings (settings.json deny lists, PreToolUse hook sketch, plan mode), copy-paste templates (AGENTS.md skeleton, risk-tiers.json, what/why/risk commit format), ordered AI-PR review protocol, incident-in-progress runbook.
-- Structure: SKILL.md ~150 lines (router + principles), detail progressively disclosed via references/.
-- config-self-audit run: all references resolve; description made conditional with disambiguation vs config-self-audit / engineering:code-review / product-design-thinking; no hooks installed, no writes, no secrets.
-
-## 2026-07-05 — code-review-deep-checklist created + ai-coding-guardrails disambiguation
-- NEW skill `code-review-deep-checklist` (SKILL.md + references/single-review.md, project-review.md, dependency-fitness.md): deep-methodology review in 3 modes (A single PR/file, B whole-project, C dependency fitness). Deliberately does NOT own routine pre-merge review (stays with /code-review, engineering:code-review). Handoffs: debt backlog -> engineering:tech-debt; replacement ADR -> engineering:architecture; process-level AI findings -> ai-coding-guardrails.
-- EDIT `ai-coding-guardrails/SKILL.md` description: added mutual disambiguation back-reference to code-review-deep-checklist (per-review deep pass vs process/system design). Backup: backups/2026-07-05/ai-coding-guardrails-SKILL.md.
-- Audited via config-self-audit: pass; residual low-risk collision with plugin skill engineering:tech-debt documented (single-sided disambiguation only, plugin not editable).
-- EDIT global CLAUDE.md (2026-07-05): added conditional "Skill routing" section — on multi-skill ambiguity, consult ~/.claude/skill-trigger-dict.md; dict is index-only, SKILL.md descriptions remain authoritative.
-
-## [2026-07-06] NEW rules layer: ~/.claude/ops/ (critically extracted from claude-project-ops-main.zip)
-
-- Source: user-provided template zip, critically triaged first (3-way classification: executable principles kept / narrative & letter content discarded entirely / unverifiable quantitative claims stripped or rewritten as "experience suggests"). Template's false premise ("Fable 5 sunsets 2026-07-07") not carried over.
-- NEW files: ops/OPS.md (router entry, <60 lines), ops/10-command-loop.md (8-step SOP, constructed pos/neg examples), ops/20-dispatch.md (dispatch contract, tiers, escalation, 5 templates, token discipline), ops/30-judgment.md (R1-R6 rubrics), ops/40-maintenance.md (edit tiering reusing existing mechanisms: this changelog as audit trail, backups/<date>/, config-self-audit as red-team), ops/50-coach.md (meta-heuristics C1-C10 for non-frontier models, newly authored), ops/rules-usage-dict.md (bilingual layer/skill boundary dictionary), ops/lessons.md (empty pitfall log).
-- EDIT ~/.claude/CLAUDE.md: new conditional "Project operations" section (3 lines, routing pointer to ops/OPS.md; precedence: CLAUDE.md > project CLAUDE.md > ops). Backup: backups/2026-07-06/CLAUDE.md.
-- EDIT ~/.claude/skill-trigger-dict.md: new "規則層邊界" section (ops layer is not a skill; boundary pointers). Backup: backups/2026-07-06/skill-trigger-dict.md.
-- Numeric thresholds retained (>3 files/>200 lines delegate, 2-retry cap, ~60-line entry, ~8K trim trigger) are marked as adjustable design defaults, NOT empirical claims.
-- Post-write config-self-audit run (same session): all references/paths verified existing; one defect found & fixed (40-maintenance.md line 29: newline inside a markdown table row, table split — repaired); rules-usage-dict.md bilingual format noted as accepted deviation matching skill-trigger-dict.md precedent.
-
-## [2026-07-06] Harness self-maintenance gap analysis — draft proposals (NOT yet applied)
-
-- ops/40-maintenance.md: trim trigger default calibrated 8K -> 10K (10/20 files ship at 8.3-8.5K by design).
-- NEW drafts (require user to apply — 🔴 tier): drafts/2026-07-06-harness-upgrade/{APPLY.md, settings.proposed.json (permissions.ask on global CLAUDE.md/settings.json/hooks writes + ops_health_nudge SessionStart hook), ops_health_nudge.py (silent-by-default health checks: lesson count / ops file size / audit-trail idle / routing-target existence; dry-run tested incl. missing-file alarm), dot-gitignore (for versioning ~/.claude as a local git repo)}.
-- Plugin-mode conversion evaluated and recommended AGAINST for now (single-user single-machine; git versioning gives most of the benefit at a fraction of the risk). Revisit if cross-machine deployment becomes a need.
-- Follow-up (same day): NEW ops/60-bootstrap.md (first-session-in-project checklist, environment-facts block for project CLAUDE.md, durable ticket-ledger convention references/<project>-tickets.md + ticket stub & worker DELIVERY.md templates). OPS.md routing +1 line (still <60), rules-usage-dict routing +1 line, 10-command-loop step 3 now points to the ledger spec, draft ops_health_nudge.py ROUTED_FILES updated. Closes the "progress/tasks ledger undefined" and "initialization flow missing" gaps.
-
-## [2026-07-06] Final maintenance executed (user granted bypass) + evolution protocol
-
-- Evaluated external "proposal-based OPS" variant: ADOPTED degraded-env fallbacks (20-dispatch S1a), evolution/proposal protocol (NEW ops/70-evolution.md: invariants, proposal format in drafts/<date>-<name>/, instruction-vs-auto-memory routing), explicit-deviation clause (OPS.md); REJECTED blanket rule-softening (default model is haiku — weak models need explicit), plugins/guardrail-proposals path (machine-managed dir; drafts/ convention already exists), new MEMORY.md files (harness memory system already exists).
-- APPLIED proposal 1: settings.json replaced with reviewed settings.proposed.json (permissions.ask on global CLAUDE.md/settings/hooks writes). Backup: backups/2026-07-06/settings.json. Valid JSON confirmed.
-- APPLIED proposal 2: hooks/ops_health_nudge.py installed (SessionStart); dry-run silent/exit 0 with 9-file routing list.
-- APPLIED proposal 3: ~/.claude is now a git repo (branch main); baseline commit 96c9525, 65 durable-config files; staged list human-reviewed (no session data/credentials/pycache).
-- ops/40-maintenance.md: git commit added to the post-change process. skills/project-retrospective/SKILL.md Step 1: ops/lessons.md + git log added as retrospective inputs (backup: backups/2026-07-06/project-retrospective-SKILL.md).
-
-## [2026-07-06] Rules-audit fixes: retry-escalation conflict + worker-verification boundary
-
-- ops/20-dispatch.md S5: reconciled with 30-judgment.md R1 — same subtask fails twice: two DIFFERENT reasons = escalate to top tier; SAME reason twice = environment problem, fix env, don't escalate. Backup: backups/2026-07-06/20-dispatch.md.
-- ops/20-dispatch.md S2.2: clarified worker-vs-dispatcher verification boundary (worker self-checks format only; acceptance verification = dispatcher via 10-command-loop.md Step 6 intake gates).
-- .gitignore: .last-cleanup added (machine-managed timestamp written by Claude Code CLI's periodic transcript cleanup; not referenced by any user hook/script) and untracked from the index — it was accidentally committed in 51658f8 and would show as perpetually modified.
-
-## [2026-07-06] AI Team OS decommission (soft) + web-search proactivity rules
-
-- hooks/ai-team-os/{send_event,workflow_reminder,session_bootstrap,inject_subagent_context}.py: presence gate added — no AITEAM_API_URL and no data/ai-team-os/api_port.txt = exit instantly (measured ~0.14s vs 1.5-3s dead-API timeouts per tool call). Revival = start the OS so it writes the port file. Backups: backups/2026-07-06/.
-- settings.json: mcpServers.ai-team-os removed (pointed at D:\try\AI_COMPANY_TEST venv; project failed/unused). Backup: settings.json.pre-aiteam-cleanup. Runtime data archived to archive/ai-team-os-data/ with ARCHIVE-NOTE.md; archive/ added to .gitignore.
-- NEW ops/30-judgment.md R7: when to search the web — proactive trigger (volatile external facts, never from memory), local-verification-first exclusions, granularity ladder (inline <=3 sources / T4 research dispatch / deep-research skill). 30-judgment.md now 7.8K (<10K cap).
-- CLAUDE.md engineering judgement: volatile-external-fact verification rule added (proactive complement to the existing reactive "conceptually wrong output" rule; routes granularity to R7). Backup: CLAUDE.md.pre-websearch-rule.
-- settings.json permissions.allow += WebSearch (read-only, low risk; WebFetch deliberately left prompting — arbitrary-URL fetch carries prompt-injection surface).
-
-## [2026-07-06] product-design-thinking: MDA ladder upgrade (CIM→PIM+DSL→Verification→PSM+DSL→Implement)
-
-- skills/product-design-thinking/SKILL.md Phase 3 rewritten per user request: Concept Note formalized as CIM (business language only, no tech nouns); PIM gains a lightweight semantic contract (glossary with single canonical names, numbered invariants INV-n, state machines) — formal grammar/parser DSL explicitly rejected as over-engineering; NEW hard Verification gate between PIM and PSM (bidirectional CIM↔PIM traceability matrix, orphans block PSM entry absent user waiver; semantic gap register; verifier ≠ PIM author per ops hard rule 3); PSM constructs must cite the PIM element/invariant they implement.
-- NEW Phase 2 priority rule: semantics over implementation — platform conflicts change the PSM bridge, never the PIM semantic; unbridgeable = value fork → user ruling (routes to ops/30-judgment.md R3).
-- Change-tracking discipline (user directive): git-first, minimal logs — no per-action updated-log sections when docs are git-tracked; log only what diffs can't show (decision why, verification waivers, PIM semantic changes). Task/phase logging stays with ops ticket ledger and workflow-checkpoint (no fourth system).
-- Handoff now routes implementation dispatch to ops/OPS.md (skill defines no dispatch rules of its own — boundary with ops/20-dispatch.md preserved).
-- Frontmatter description + skill-trigger-dict.md keywords updated (CIM/PIM/PSM/DSL/semantic gap). Backups: backups/2026-07-06/product-design-thinking-SKILL.md, skill-trigger-dict.pre-mda.md.
-
-## [2026-07-07] NEW skill env-cleanup: file-level environment self-cleaning (Mode A ~/.claude, Mode B project tree)
-
-- NEW skills/env-cleanup/SKILL.md: shared engine (scan -> classify -> report -> ask per category -> archive + record); hard invariants: archive-never-delete, report-as-new-file (doubles as archive note), no content edits (sole exception: Mode B .gitignore archive/ line with consent), 40-maintenance tier respect (moving 🔴/🟡 files needs per-item confirmation + audit log), main-session-executes (⛔ rule), 14-day age threshold (user-set), per-category consent.
-- NEW references/manifest-claude.md (Mode A): protected list (secrets/🔴-tier/machine-managed/projects incl. harness memory), age-based candidates table (14d, regenerable flag), curated dirs (drafts/plans landed-only; skills/ops/agents via orphan detection only), root whitelist + 4 bidirectional orphan checks (settings hooks ↔ hooks/, trigger-dict ↔ skills/, OPS.md routing ↔ ops/ [cites 40-maintenance §4, file-existence half only], hook interpreter paths).
-- NEW references/project-heuristics.md (Mode B): untracked-stray / editor-litter / duplicate-name / stale-root-one-off signals; mandatory reference check (any grep hit demotes to KEEP) before promoting code-like files; optional per-project .claude/cleanup-keep.md; git etiquette (never rm/commit/branch).
-- Boundary rulings encoded in SKILL.md boundaries table + trigger-dict: vs config-self-audit (content-of-one vs existence-of-many; mutual disambiguation lines added to BOTH descriptions), vs 40-maintenance §3/§4 (content trim + rule-liveness stay there; route-outs), vs update-config (settings/hooks edits routed there), vs workflow-checkpoint/retrospective (knowledge vs files), vs tech-debt/deep-checklist (quality never a cleanup signal), vs CLI built-in transcript cleanup (projects/ protected; .last-cleanup explicitly disowned).
-- skill-trigger-dict.md: env-cleanup entry (keywords/precise phrasing/avoid/boundary) + quick-table row. config-self-audit description: env-cleanup disambiguation line appended.
-- config-self-audit run on the result: 1 finding fixed ("never edits file content" claim contradicted Mode B .gitignore exception -> exception stated in description + invariant 3); existence checks passed (references/, ops/40-maintenance.md, Global_skill_update.md all Test-Path true; update-config verified as builtin skill in session list, not a skills/ folder); SKILL.md 78 lines (<150 cap). Backups: backups/2026-07-07/skill-trigger-dict.pre-env-cleanup.md, config-self-audit-SKILL.pre-env-cleanup.md.
-
-## [2026-07-07] env-cleanup Mode A run #1 — 🔴-tier move: hooks/ai-team-os/ archived
-
-- hooks/ai-team-os/*.py (8 orphan scripts, ~149KB) moved to archive/2026-07-07-env-cleanup/hooks/ai-team-os/ with per-item user confirmation (env-cleanup invariant 4). Orphan basis: all settings.json mounts removed in 013faef (system decommissioned bae12cb); zero registration points remained. __pycache__ deleted (regenerable, user-approved). hooks/ now contains only model_cap_guard.py + ops_health_nudge.py, both registered — bidirectional check clean.
-- file-history/: 129 entries >14d archived to the same batch (user chose archive over delete; file-restore for those old sessions now requires moving them back). telemetry/: 1 expired file deleted (regenerable, user-approved).
-- Full report + restore instructions: archive/2026-07-07-env-cleanup/CLEANUP-REPORT.md. Route-out resolved same run: reports/ (new root dir, commit c065ab7) added to manifest-claude.md §3 as KNOWN-KEEP (🟡 edit; backup backups/2026-07-07/manifest-claude.pre-reports.md; inline consistency check only — one-line whitelist addition, no contradiction surface).
-
-## [2026-07-07] two-pass discipline added to 2 skills (config-self-audit passed)
-
-- skills/product-design-thinking/SKILL.md: inserted Phase 1 step 0 "Hypothesis sheet first" — write beliefs BEFORE the mandatory prior-art search, then diff; explicitly states steps 1-4 remain mandatory (search gate not weakened).
-- skills/ai-coding-guardrails/SKILL.md: inserted "Two-pass discipline" paragraph after the scenario router — 3-line self-diagnosis from the one-screen summary before opening the reference file; incident-in-progress exemption preserved (recovery first).
-- Audit: prose-only additions, no hooks/writes/permissions touched; all 5 referenced files exist; descriptions unchanged (no trigger change); both blocks entirely English. Rationale + design doc: reports/2026-07-07-two-pass-thinking-granularity.md.
-
-## [2026-07-07] depth-tier triage rule (CLAUDE.md) + R8 two-pass protocol (ops/30-judgment.md)
-
-- CLAUDE.md: added one conditional rule under Engineering judgement — 3-tier depth triage (Tier 0 direct / Tier 1 claim tagging / Tier 2 full two-pass via R8), objective Tier-2 criteria (>=2 of 4), user override keywords 快答/深想, no-stacking clause for heavyweight skills, prefer-lower-tier default.
-- ops/30-judgment.md: appended R8 "Two-pass depth protocol" — pass 1 self-reliant with A/B/C gap list (no search), gate routes gaps (local check / one targeted search per gap via R7 / batched user question), pass 2 targeted diff-against-belief only. With one ✅/❌ example pair, matching house format.
-- New numbered rule = tiered change per ops/40-maintenance.md: explicit user approval given this session; backups at backups/2026-07-07/CLAUDE.pre-tier-rule.md and 30-judgment.pre-R8.md. Contradiction grep vs CLAUDE.md volatile-fact rule and existing R1-R7: clean. Design rationale: reports/2026-07-07-two-pass-thinking-granularity.md.
-
-## [2026-07-07] env-cleanup hardening: post-run config-self-audit fixes (F1-F5) + first-principles gaps (G1-G10)
-
-- Audit basis: config-self-audit run on skills/env-cleanup after Mode A run #1, plus a from-scratch structural review (GC/retention lens). Backups: backups/2026-07-07/{env-cleanup-SKILL,manifest-claude,project-heuristics}.pre-audit-fix.md.
-- SKILL.md (90->108 lines, under 150 cap): engine step 5 rewritten — scoped `git add <paths>` replaces `git add -A` (F2; confirmed misfire: unrelated untracked file swept into 59cb5a1), staged-changes precondition before Mode A commit (G3), now-emptied source dirs removed + noted (F4), partial-failure protocol: stop batch, record moved-vs-not (G4), mandatory per-category RESTORE command in report (G5, absorbs F5). Invariant 2: same-day batch dir collision -> suffix -2/-3 (G2). NEW invariant 8: live-environment guard — defer runtime-adjacent items touched within the last hour, concurrent sessions exist (G1). Report step: archive-root total size (retention visibility, G8) + >50MB size outliers report-only (G6). Ask step: UNKNOWN-ORIGIN ruled KEEP = manifest drift -> offer manifest addition same run (G7, formalizes the reports/ case).
-- manifest-claude.md: hooks/ S1 vs S4 contradiction resolved — broken mounts = route-outs, unregistered dead scripts movable only via S4 per-item confirmation (F1); threshold boundary defined: strictly older, boundary = KEEP (F3); mtime mass-touch limitation noted, errs toward KEEP (G10).
-- project-heuristics.md: git submodules excluded from scanning (G9a); runtime-glob caveat — parent-dir referenced (glob/scandir) => contents KEEP wholesale (G9b).
-- STATIC-VERIFY re-run: all markers present, old contradictory wording 0 hits, `git add -A` remains only inside the NEVER warning.
-
-## [2026-07-07] R8 clean-sheet extension: maintenance-time first-principles coverage pass
-
-- Gap verification first (user-mandated verify-before-add): R8 two-pass = claim-verification depth, not coverage re-derivation; product-design-thinking Phase 0 = design-time only; coach C10 / R4 = reactive-when-stuck; config-self-audit = deliberately checklist-bounded. Confirmed uncovered — evidence: env-cleanup G1-G10 gaps required an explicit user prompt to surface. Counter-proposal REJECTED per 70-evolution S4: the "verify-absence-then-rebut" behavior itself is already covered (70-evolution S4 check half + 30-judgment R3 contradiction-surfacing rebut half) — no new rule added for it.
-- ops/30-judgment.md R8 pass 1: NEW "Clean-sheet extension" paragraph — Tier-2 tasks improving an EXISTING artifact run one clean-sheet enumeration (ideal coverage from domain knowledge, diff vs. artifact); structural gaps enter the gap list as PROPOSALS, each requiring a concrete failure scenario (hallucination gate); one round only, no recursive redesign, "core need met -> stop" overrides; boundary vs product-design-thinking Phase 0 stated inline. Backup: backups/2026-07-07/30-judgment.pre-cleansheet.md.
-- CLAUDE.md depth-tier rule: Tier-2 keyword list extended 深入/完整/評估/規劃 -> +全面/加強 (machine-routable trigger for comprehensive-hardening asks). Backup: backups/2026-07-07/CLAUDE.pre-cleansheet.md.
-- skills/config-self-audit/SKILL.md scope section: pointer added — comprehensive requests run checklist then hand off to R8 clean-sheet; skill budget stays narrow. Backup: backups/2026-07-07/config-self-audit-SKILL.pre-cleansheet.md.
-- Risk mitigations encoded in the text itself: proposals-not-edits, failure-scenario gate (weak-model hallucination), Tier-2 gating (token cost), R8 no-stacking clause (heavyweight skills), implemented as extension of existing R8 (70-evolution S4 no-duplicate-mechanisms).
-
-## [2026-07-07] NEW skill security-deep-checklist + security-by-design principles in product-design-thinking
-
-- Research basis (user-mandated search-before-build): blue-team task taxonomy (prevent/detect/respond, SOC roles, MTTD/MTTR, MITRE ATT&CK coverage mapping) via web search; standards anchored to OWASP Top 10:2025 (new A03 Software Supply Chain Failures, new A10 Mishandling of Exceptional Conditions, SSRF folded into A01) and OWASP ASVS 5.0 (May 2025) — both verified current, not from memory.
-- NEW skills/security-deep-checklist/: SKILL.md (mode router A/B/C, blue-team frame, Part 0 meta questions incl. deployment context + trust boundaries, scope rules incl. no-exploit-code + no-memory-CVE-claims + secrets-never-echoed, severity contract with OWASP IDs + attacker position, builder-negligence pitfalls) + references/code-audit.md (Mode A: access control/IDOR/SSRF, authn/session, injection/XSS/CSRF, input-validation architecture, fail-closed error handling, crypto/data, resource stability as DoS surface, AI-generated-code addendum) + references/deployment-audit.md (Mode B: misconfig, supply chain, patching, context-split internet-facing/internal/air-gapped incl. insider threat + removable media, asset & access management) + references/detection-readiness.md (Mode C: security event logging minimum set, log hygiene, alerting & rate limits, monitoring blind spots, IR readiness — scaled-down-SIEM proportionality note).
-- skills/product-design-thinking/SKILL.md: Phase 2 NEW subsection "Security by design" (threat-model lite, least-privilege default, single validation layer, fail-closed error paths, data classification & secrets policy, dependency intake rule, defender-signals designed in); description gained mutual-disambiguation clause vs security-deep-checklist.
-- skills/code-review-deep-checklist/SKILL.md: handoff line added — security-focused asks route to security-deep-checklist; its Mode A section 4 stays a spot-check.
-- skill-trigger-dict.md: /security-review entry rewritten as fast-gate-on-pending-diff with avoid-phrases; new security-deep-checklist entry (Mode A/B/C precise phrasings); disambiguation quick table +4 rows.
-- config-self-audit run on all artifacts: references links Test-Path True x3, SKILL.md 141 non-blank lines (under cap), referenced skills all exist in registry, no writes/hooks/secrets introduced (findings-only skill), mutual disambiguation present on both sides. No fixes required.
-
-## [2026-07-07] literature-search-extract references P1-P3 completed + ecosystem hookup + config-self-audit
-- P1 references (all 4 shipped, English, all example sources fictional-placeholder to avoid modeling fabricated citations): references/extraction-playbook.md (7 information-need types x where-it-lives/procedure/worked-example/wrong-vs-right + pre-P5 checklist); references/output-templates.md (7 catalog formats x field defs+filled example, Mode1 TC / Mode2 EN language rules, full result-contract JSON-like example); references/search-sources.md (8 channels + OpenAlex, identifier resolution DOI/arXiv/PMID/ISBN, prism MCP 6-tool table + fallback rules, backward/forward citation chasing with 4 stopping conditions; channel facts web-verified 2026-07-07: OpenAlex needs API key since 2026-02-13, Crossref rate limits revised 2025-12-01, IEEE Xplore API treated unavailable); references/credibility-rubric.md (venue tiers A-D+X, work-level modifiers, mandatory retraction check via Retraction Watch/Crossref, predatory screening as whitelist-signal+red-flag convergence since Beall's List unmaintained, textbook canonicity+edition rules). SKILL.md Reference map + P2/P3/P4/P5 pointers de-planned.
-- P2 ecosystem integration: skill-trigger-dict.md new literature-search-extract entry in Execution & Verification section + 3 quick-table rows (disambiguation vs deep-research/scientific-research-guide/marketing:competitive-brief). scientific-research-guide bidirectional hookup: SKILL.md Gate B delegation bullet (Tier 1 search+extract -> this skill Mode 2, methodological judgement stays there); references/tier-framework.md §1 header invocation note (1.1/1.3/1.4/1.6 delegable); FUTURE-WORK.md item ③ reconciled + marked HOOKED UP (this skill = primary/targeted-extraction route, deep-research = secondary/broad-recon route). product-design-thinking Phase 1 step 1 new "formal-literature slice only" sub-bullet (scholarly sources delegate to this skill Mode 2; OSS/competitor/environment steps stay).
-- P3: evals/evals.json created (4 evals: Mode1 comparison-matrix cited, Mode2 result-contract 5-field, anti-hallucination Johnson&Christy-1972 out-of-scope-value gap, trigger-accuracy negative control on code-review request; passed/evidence fields await runner). config-self-audit run: all 4 references/ Test-Path true; no security surface (no hooks/exec/permission-bypass, deliverables write NEW files only, no secrets); language conventions clean (English machine-read files; Chinese only in description example-utterances + output-templates Mode-1 demo + human-read TODO). 1 finding fixed: SKILL.md Reference-map preamble said "Remaining planned reference files" while all 4 now exist -> reworded to "All four ship" (STATIC-VERIFY: grep 'planned' SKILL.md -> zero). Note (not fixed, out-of-scope): deep-research is a plugin skill, its description cannot be edited here to add reciprocal disambiguation; trigger-dict + this skill's own "Do NOT trigger" line cover it. Note: SKILL.md 222 lines (>150 soft cap) — output-catalog table partially duplicates output-templates.md; left as inline quick-reference by judgement, flagged for optional future trim.
-
-## [2026-07-09] Anti-bureaucracy batch: relaxation gate + decision charter + token diet (user-approved plan P1-P3)
-
-- NEW ops/05-authority.md: rule classes (invariant vs scaffolding) + per-project relaxation gate L0/L1/L2 — USER decides the level at heavyweight-task start (model states identity, never self-relaxes; no answer = L0; subagent rules and invariants never relax; deviation notes replace ex-ante compliance). OPS.md: routing line + hard-rules preamble note (rules 1-6 = invariants).
-- CLAUDE.md (user-confirmed via plan approval + permission gate): Project operations gained the relaxation-gate ask rule (skip if project CLAUDE.md records ops-relaxation or main model is cheap/mid); Engineering judgement gained the Decision charter (standing authority over reversible, non-value-fork, non-scope-changing implementation decisions; ask only at irreversible/values/scope/UX-semantic forks). 30-judgment R3 slimmed to a charter pointer (single ownership).
-- Trim per 40-maintenance S3 (hook had flagged both >10K): 20-dispatch.md 10295->9982, 30-judgment.md 10999->9988 chars; wording compression only, no live clause deleted; R8 clean-sheet extension retained.
-- Token diet: 11 skill frontmatter descriptions slimmed 14646->6571 chars (~2-3K tokens per session); disambiguation detail now lives in skill-trigger-dict.md (already covered there), each description carries a pointer. Hyphen-break wrap bug caught on read-back and fixed (break_on_hyphens=False).
-- config-self-audit run: frontmatter valid x11, all cross-referenced paths exist, charter/gate anchors present, both trimmed files <10K. 1 finding fixed: 05-authority L1 could be read as relaxing OPS.md hard rule 2 -> clarifying line added ("six OPS.md hard rules still bind").
-- Backups: backups/2026-07-09/ (CLAUDE.md, OPS.md, 20-dispatch, 30-judgment, 11 SKILL.md).
-
-## [2026-07-09] Anti-reaccumulation guard + AGENTS.md gitignore ruling (user-granted top permission)
-
-- .gitignore: AGENTS.md permanently untracked (codex env-copy leftover, user ruling — kept on disk, out of version control).
-- hooks/ops_health_nudge.py extended (RED-tier change, explicit user authorization this session): ghost-rule list gap fixed (+05-authority.md, +environment.md — both routed but previously unchecked); NEW checks 5-9: skill description >800 chars, SKILL.md >250 lines, CLAUDE.md >12K, skill-trigger-dict.md >20K, Global_skill_update.md >60K (rotate-to-archive hint); message cap 3->4. Living proof: normal run silent (all healthy post-cleanup); tightened-cap test run fired all new checks correctly.
-- ops/40-maintenance.md S3: trigger list synced with hook thresholds (change-together note) + NEW "Birth budgets" paragraph — new artifacts must be born within budget (description <=700 chars, SKILL.md <=150 lines soft, CLAUDE.md rules conditional single-bullet merge-not-append, one owning file per ops rule); YELLOW-change reviewer checks budget before content.
-- Backups: backups/2026-07-09/ (ops_health_nudge.py, 40-maintenance.md, gitignore.pre-agentsmd).
-
-## [2026-07-09] NEW PHILOSOPHY.md: non-normative worldview + migration guide (user-requested)
-
-- NEW ~/.claude/PHILOSOPHY.md (Traditional Chinese, human-read, explicitly NON-NORMATIVE — rules win on conflict; AI not routed to it, one provenance pointer added to OPS.md preamble): 8 core beliefs distilled from existing verified mechanisms (rules-as-judgment-substitute, evidence over claims, ex-post accountability, mechanism over prose, index-then-load, birth budgets, archive-never-delete, three-role split); system map with trust ordering; core-asset tiers with the regeneration-cost criterion; 7-step migration procedure (verified facts: settings.json hook paths are machine-bound; projects/<slug>/memory/ is OUTSIDE version control per git check-ignore — documented as the top migration gaps); self-governance section (describe-only, philosophy trails practice).
-
-## [2026-07-10] NEW interop/ cross-agent sync layer (user-requested, idea-1 landing)
-
-- NEW ~/.claude/interop/: one-way layered sync of the portable rule subset to other agent systems. portable-core.md (block-tagged single source, agent-neutral English, light/full profiles), interop.py (build/status/curated; git-hash stamps, staleness detection, archive-never-delete backup of foreign files), MIGRATION-MAP.md (layer model + verified target registry), genesis-prompt.md (mechanism-layer translation template, degradation must be recorded), acceptance-evals.md (7 living-proof evals), README.md (Chinese ops manual with maintenance invariants).
-- Deployed: opencode ~/.config/opencode/AGENTS.md (light — kills its CLAUDE.md fallback ingestion), codex ~/.codex/AGENTS.md (full — displaced the 2026-07 env-copy leftover to AGENTS.md.pre-interop.bak), Antigravity ~/.gemini/AGENTS.md (full — also read by Gemini CLI).
-- Living proof: full build/curated/status run green (exit 0); staleness detection verified firing with a back-dated stamp (correctly named the causing commit, exit 1); light=6 / full=12 sections as designed.
-- Sync definition ruled: one-way compile + staleness detection; memory/state never syncs (cross-CLI isolation ruling upheld); backflow is manual via canonical source only.
-
-## [2026-07-10] literature-search-extract: resilience/bias hardening + evals executed (external-review feedback, session-granted L2)
-
-- Reviewed external critique: ecosystem-integration "incomplete" claim verified FALSE by grep (trigger-dict entry + scientific-research-guide + product-design-thinking hooks all present since 2026-07-07); remaining gaps confirmed real and fixed.
-- SKILL.md (243 lines, under 250 trigger): NEW "Resilience & session economy" section (context/token budget warning + batched note-based extraction; reuse-before-re-search with UPDATE-run versioning; partial-failure returns resumable contract seeded by search_trail; feedback iteration re-runs P1+affected P4-P5 only); P2 bullet routing degradation/non-English/cost cases; failure mode #7 single-cluster evidence; depth contract now honest that exhaustive/PRISMA is not shipped (TODO P4 stays deferred).
-- references/search-sources.md: NEW degradation ladder (keyed API -> free API -> WebSearch -> prism-only, no retry loops) + cost transparency (personal key / polite-pool spend named in search_trail); NEW non-English literature section (bilingual querying, CNKI/J-STAGE-CiNii channel facts web-verified 2026-07-10).
-- references/credibility-rubric.md: NEW section 6 set-level bias & coverage-balance check (citation bubble, group concentration, language skew, positive-result skew); worked example renumbered to section 7.
-- evals/evals.json EXECUTED (TODO item 9 closed): one sonnet subagent per eval, evals 1-3 live web pipelines, eval 4 routing-arbiter proxy -> 4/4 evals, 16/16 assertions passed; evidence recorded per assertion. Notable: eval-2 agent caught a fetch-summarize extraction error (f0 vs gamma0) by reading raw source code — P4 discipline observed in the wild.
-- config-self-audit run: 5 referenced files Test-Path true; section cross-refs resolve (search-sources 2 new headers, rubric 6/7); planned-marker grep = 0; no security surface (no hooks/exec; new-file-only writes). Accepted notes: SKILL.md >150 soft budget (known trim candidate, catalog overlap); one Chinese user-utterance example in the feedback-iteration bullet (same precedent as description example sentences).
-- Backups: backups/2026-07-10/literature-search-extract/ (full pre-edit copy incl. references + evals).
-
-## [2026-07-10] literature-search-extract: P4 optional items shipped (PRISMA exhaustive + local PDF) + user guide + eval 5 (user-requested)
-
-- NEW references/exhaustive-prisma.md (loaded ONLY at depth=exhaustive): E0 protocol-first (criteria fixed before searching), E1 logged search incl. dead ends, E2 two-pass screening with reason codes E1-E6 (inaccessible=E4 -> gaps, never a content exclusion), E3 self-consistent flow accounting, E4 all-source rubric/retraction/2-hop upgrades, E5 deliverable additions + saturation statement; scope-honesty clause (traceable extraction, NOT a human systematic review) + mandatory budget warning.
-- references/search-sources.md: NEW Local PDF library channel (inventory-then-extract, [full] access, online DOI/retraction verification still mandatory, collection-bias complement rule, prism-rank-then-read-PDF combo). NEW human-readable PDF-GUIDE.md (Traditional Chinese) documenting trigger phrasing, runtime behavior, limits, acceptance status; machine rules stay authoritative.
-- SKILL.md: depth contract now points exhaustive to the new reference; reference map four->five; P2 bullet extended with local-PDF routing; resilience section tightened for line budget (243/250 after additions).
-- evals.json: NEW eval 5 (exhaustive structural test, Bi2Se3 WAL HLN alpha) EXECUTED and graded -> 8/8 assertions passed; suite now 5 evals / 24 assertions, all passing. The run hit a REAL usage-limit truncation mid-pipeline and correctly exercised the new resilience rules (degraded retraction checks to Crossref API, truncation recorded in flow table + resumable E4 gap list). Deliverable kept as evals/sample-run-eval5-bi2se3-hln-alpha.md (grading evidence + worked exhaustive example; never context-loaded).
-- [deviated] subagent model cost cap — the eval-5 agent was spawned as sonnet, but the harness resume path (SendMessage after the usage-limit kill) restarted it inheriting the main-session model (fable; transcript shows model_changed cache-miss). Not blocked by model_cap_guard. Disclosed to the user in-session; letting it finish was cheaper than re-running. Known hole: resume/SendMessage bypasses the guard hook — candidate fix for model_cap_guard.py.
-- config-self-audit (round 2): new reference + guide exist, section anchors resolve, evals.json parses (ids 1-5 ordered, 24/24 passed=true), SKILL.md 243 lines < 250. Backups: backups/2026-07-10/literature-search-extract-r2/ (pre-edit state).
-
-## [2026-07-10] interop/ reference-compile layer: portable method playbooks (user-requested fallback for non-portable mechanisms)
-
-- Problem: MIGRATION-MAP's "Do not migrate" bucket dropped skill/ops method CONTENT together with their non-portable TRIGGER mechanisms — target agents got behavior rules but no methodology, a real capability gap.
-- NEW portability class "reference-compile": curated agent-neutral English playbooks in interop/refs/ (never verbatim copies — raw skill/ops files are full of Claude-specific references) compile to target-side `interop-refs/` next to AGENTS.md, plus a prose routing index ("situation → read this file") appended to AGENTS.md. Known degradation recorded: mechanical trigger → instructed read.
-- First batch (full profile only, birth budget): design-protocol (product-design-thinking), judgment-protocol (ops/30-judgment R7/R8), phase-log-protocol (workflow-checkpoint).
-- interop.py: REFS registry, assemble_ref/routing_index, staleness watches interop/refs/, curation loop now watches 4 canonical sources (CLAUDE.md + the 3 ref sources). MIGRATION-MAP.md layer table + classes updated; README.md updated; acceptance-evals.md NEW eval 8 (playbook routing) guards the degradation.
-- Living proof: build deployed 3 refs each to codex + antigravity (opencode light correctly skipped), routing index verified in generated AGENTS.md, status all-green exit 0, curation stamped @ c99c33e. PENDING user action: run eval 8 inside a target agent.
-- Commits: c99c33e, eb9c7bd, merged 7fc4455 (main).
-
-## [2026-07-10] model_cap_guard resume-bypass: investigated, documented, rules-side mitigation (user-instructed)
-
-- Investigated the confirmed SendMessage-resume bypass (session b66f6a9b: resumed background agent inherited main-session model, sonnet->fable). Verified against official hooks docs (code.claude.com/docs/en/hooks, fetched 2026-07-10): NO interception point exists — PreToolUse fires on SendMessage but its payload ({to, summary, message}) has no model/resume info; SubagentStart has no model field and cannot block; no AgentResume event; only SessionStart may receive a model field.
-- hooks/model_cap_guard.py (RED tier; change explicitly named + pre-authorized in the user's task instruction = the requester confirmation; docstring-only, zero behavior change): documented the hole + rules-side mitigation in the header. Verified post-edit: py_compile OK; live tests — Agent fable -> deny, fable+[user-approved-top-tier] -> allow, sonnet -> allow, Workflow inline fable -> deny. (Test note: piping JSON via PowerShell 5.1 adds a UTF-8 BOM that trips fail-open — pre-existing test-harness artifact, not a hook bug; test via bash.)
-- ops/environment.md (YELLOW): added "Known gap 2 — resume bypass" beside the existing scriptPath gap, with the rule: for cost-capped work, when the main session runs above the cap tier, prefer re-spawning a fresh capped Agent over SendMessage-resume; unavoidable resume -> disclose escalation first.
-- ops/lessons.md: NEW L-001 (dispatch|cost-cap|hooks) with evidence + fold-in pointer. Memory subagent-model-cost-cap.md updated with the hole.
-- config-self-audit run: all referenced paths exist; L-001 anchor consistent across 3 files; sizes under trim triggers (environment.md 3.8K/10K, lessons 1/30 entries); hook compiles; machine files all-English. Backups: backups/2026-07-10/model-cap-resume-gap/ (hook + environment.md + lessons.md pre-edit).
+- Trigger: user observed that recent PSM/施工卡 documents (DIT R8 workcards, R7B baseline) came out fully Chinese despite build-spec intent. Root cause diagnosed, not a trigger miss: the old `File output` rule's stated axis was "who reads it" but its examples split by artifact type (all code-like on the English side), so any prose `.md` under `docs/` was pulled to Chinese. No project CLAUDE.md in DIT and no language section in product-design-thinking → both lower layers silent → global default won.
+- `CLAUDE.md` File output rewritten from a 2-way to a 4-way split, axis restated as PRIMARY CONSUMER: human-read (Chinese) / machine-read (English, now explicitly naming phase log + `references/<project>-context.md` + retrospective's CLAUDE.md snippet, which had their own English contracts) / **build spec an agent will execute** (English spec body, Chinese only on the user's ruling surfaces: 盤點結果, ADR rationale, decision register, manual UAT, degradation declaration, open questions) / **concept-level design docs** (bilingual: Chinese semantics + rationale, English glossary/INV-n/schema/state names). Escape hatch for concepts whose Chinese wording carries the meaning.
+- `product-design-thinking` restructured per skill-creator progressive-disclosure guidance: SKILL.md 245 → 111 lines (config-self-audit's ~150 budget, previously flagged as pre-existing debt on 2026-07-16). Detail externalized to NEW `references/prior-art-sweep.md` (58), `references/design-rules.md` (68, incl. security-by-design), `references/document-ladder.md` (95, incl. sole-source contract rules). Language integrated as a **column of the ladder table in the always-loaded body** rather than an appended section — the miss happened because the rule was absent where the ladder is read. Frontmatter description unchanged (coupled to skill-trigger-dict.md).
+- Coupling fixes from the config-self-audit pass: `OPERATOR-GUIDE.md` §1.5 language bullet now points at CLAUDE.md instead of restating a stale 2-way version; `ops/60-bootstrap.md` §F work-card field-ownership list gained a **Language** row (its silence on language was the mechanism that let cards default to Chinese); §-number cross-refs repointed to `references/document-ladder.md` §4 in `ops/60-bootstrap.md` and `ops/lessons.md`.
+- Interop sources updated in a follow-up (same day, user-requested): `portable-core.md` `block:language-output` carries the 4-class split in agent-neutral English (no platform/skill/path references, per that file's content policy); `refs/design-protocol.md` Phase 3 gained a per-rung language table plus the "a PSM's next reader is the implementing session" rationale. The stale generated `AGENTS.md` was archived to `archive/2026-07-25-agents-md-stale-mirror/` rather than hand-synced; user re-runs `interop.py build`.
+- **Curation NOT marked done.** `interop.py status` reports curation sources changed across **13 commits** since the last curation (`c99c33e`) — this batch is 2 of them. The other 11 (visibility mounts, relaxation gate, glossary maintenance, R2/R8 judgment trims, sole-source rules, checkpoint self-check…) have never been reviewed against `portable-core.md`/`refs/`. `interop.py curated` was deliberately not run: marking curation complete would claim a review that did not happen. A dedicated curation pass is owed. Also pre-existing: `refs/design-protocol.md` still lacks the sole-source contract rules that landed in the canonical skill on 2026-07-12, and `~/.codex/AGENTS.md` is `[foreign]` (exists, not interop-managed).
+- Verification: 3 reference files `test -f` OK; all SKILL.md `references/*.md` pointers resolve to existing files; root `AGENTS.md` confirmed absent; no other cross-reference to the moved sections remains (repo-wide grep, excluding backups/archive/memory-archive). Backups: `backups/2026-07-25/`.
+- Not run: skill-creator's eval/benchmark loop (needs subagent dispatch + user review; offered, not executed).
 
 ## [2026-07-11] literature-search-extract P6: semantic-contract patches (update-plan v2, user-approved)
 
@@ -270,3 +68,112 @@ Each entry: what was newly added/changed + when (absolute timestamp).
 - config-self-audit on 30-judgment.md + one-line changes: pass (size cap verified via hooks/ops_health_nudge.py SIZE_CAP; reference existence, no contradictions across the three touched rule files, language conventions OK). Backups in backups/2026-07-12/.
 - Pending (next step, 🔴): global CLAUDE.md 5-item diff (B1) awaiting user confirmation.
 - B1 applied 2026-07-12 (user confirmed the 5-item diff verbatim): global CLAUDE.md now 10,572 chars (<12K). Commit c97af8e; backup backups/2026-07-12/CLAUDE.md.
+
+## [2026-07-12] mattpocock/skills fold-in: tracer-bullet slicing + project domain glossary + dict-sync guard
+
+- Context: user-approved evaluation of github.com/mattpocock/skills (R8 two-pass). Adopted as conventions, NOT new skills: to-tickets tracer-bullet discipline, wayfinder investigation/fog concepts, domain-modeling CONTEXT glossary + ADR triple gate. Rejected: wayfinder concurrency machinery (single-user env), standalone always-on domain-modeling skill (trigger-surface cost), grilling family (user's Q-NN flow already covers alignment).
+- ops/60-bootstrap.md (+59): SC gains slicing discipline (vertical complete slices, context-window sized, expand-contract exception for wide refactors, investigation ticket type, fog section stays coarse); new SE project domain glossary at references/<project>-context.md (lazy creation, live updates, challenge-don't-consume, ADR triple gate: hard-to-reverse + surprising + trade-off); SA step 1 reads it.
+- Vocabulary tiers formalized in rules-usage-dict.md: skill-trigger-dict (env: triggers) / rules-usage-dict (env: layer boundaries) / project context.md (project: domain terms). Maintenance mounts: workflow-checkpoint SKILL.md gains glossary-sweep step 5 + reconstruction reads context file; product-design-thinking Phase 3 glossary persists to context file.
+- ops/40-maintenance.md S2: dict-sync corollary — routing-surface changes update affected dicts in the SAME commit; enforced mechanically by hooks/ops_health_nudge.py new check 10 (skills/ vs skill-trigger-dict diff; verified with real positive [zz-drift-probe detected] and negative [silent, 12/12 in dict] runs; ~0 token cost when clean, user-approved).
+- config-self-audit: one finding fixed (OPS.md routing line 56 lagged the new 60-bootstrap scope — itself a dict-sync case); budgets verified (60-bootstrap 7,010 / 40-maintenance 7,098 / rules-usage-dict 10,008 of 10,240 — NEAR CAP, trim candidate on next touch; wf-checkpoint 98 lines; pdt 208 lines pre-existing debt; trigger-dict 16,113 of 20,480). skill-trigger-dict.md intentionally unchanged (no trigger-surface change). Backups in backups/2026-07-12/.
+
+## [2026-07-12] literature-search-extract: non-Claude portability layer + web-provider fallback facts + TODO retirement
+
+- NEW references/portability.md: capability self-assessment for running this skill outside Claude — 7 tool slots, substitutes per slot, minimum viable profile, degradation-honesty requirement, explicit ignore-don't-emulate list for Claude-only constructs (e.g. prism MCP). search-sources.md: NEW degradation ladder rung 3b (extraction fallback via Tavily/Exa/self-hosted Firecrawl when the primary web-search path is unavailable) + provider quota table refreshed and web-verified 2026-07-12 (Brave free tier killed 2026-02; DDGS marked best-effort, not guaranteed). SKILL.md reference map five->six, new READ-FIRST-outside-Claude entry pointing at portability.md. Skill re-synced to the `~/.agents` and `~/.codex` copies (interop mirror, not the canonical source).
+- TODO.md retired (all 21 P1-P7 items done — the ledger had become history, not a work list): archived to archive/2026-07-12-lse-update-plans/TODO.md; remaining open items (share-packaging decision, 3 MANUAL-VERIFY acceptances, optional SKILL.md slim, interop compile option) moved into a new FUTURE-WORK.md.
+- No config-self-audit / eval re-run recorded for this batch — flagged here as a gap, not asserted as done.
+
+## [2026-07-12] scientific-research-guide: first eval run + cross-session research-state mechanism
+
+- First execution of evals/evals.json (4 cases, sonnet, protocol-level adversarial grading via subagents): 4/4 cases, 15/15 assertions pass; results and per-assertion evidence written back; one known limitation recorded (generic metrics have no calibrated range-check). NEW STATUS.md as a single-file continuation point; run logged in FUTURE-WORK.md; scripts/ backlog item marked a deliberate deferral, not an unfinished gap. No SKILL.md behaviour change in this pass.
+- Cross-session research-state mechanism added: Gate A gains a continuity check (fires before Step 0) that reads the project's research-state.md first and rebuilds progress without re-asking; Gate D gains a consent-gated update rule (offers a write on tier/decision/iteration advance, writes only on yes, append-only iteration log). NEW 跨 Session 進度追蹤器 template added to references/deliverables.md as the living-document instance of tier-framework §7.4.
+- NEW eval case 5 + fixture (evals/fixtures/research-state.example.md) verifying the skill uses recorded state instead of re-asking, still sanity-checks the prerequisite chain, and keeps writes consent-gated; case 5 run 4/4 pass, full suite now 5/5 cases / 19/19 assertions. Closes FUTURE-WORK item ①. Two prose-only residual gaps logged in run.known_limitation.
+
+## [2026-07-14] Boundary-contract mechanism + relaxation-gate reliability fix (frontier-tier completeness shift)
+
+- Context: user-approved design discussion (L2 granted). Diagnosis: the 05-authority relaxation gate almost never fired because (1) its trigger demanded a prediction ("start of heavyweight work") instead of an observation, (2) the rule sat two conditional reads deep, (3) harness autonomy prompts oppose mid-flow meta-questions, (4) no-ask defaults to safe L0 so violations are silent. Fix moves the trigger from model discipline into the harness + durable config.
+- hooks/ops_health_nudge.py NEW check 11: reads hook stdin JSON cwd; if a project CLAUDE.md exists without `ops-relaxation:`, prints a one-line nudge (silent when key recorded, no project CLAUDE.md, or cwd is ~/.claude itself). Verified with real runs: fires on missing key, silent on the three exclusions, exit 0, py_compile OK.
+- ops/05-authority.md: §2 trigger rewritten to four discrete observable events (first subagent dispatch / ticket-ledger creation / plan mode entry / ops-health nudge); recording in project CLAUDE.md promoted to same-turn default (one ask per project). NEW §4 Boundary Contract: L1/L2 + Tier-2 implementation tasks emit a 4-section ≤15-line contract (interpretation forks / boundary inputs / acceptance / non-goals & degradation) before method work; plan mode plan = contract carrier; delivery-time re-check duty; supersedes the four [BC]-tagged global rules while live. File 6,520 chars (<10K cap).
+- Global CLAUDE.md: relaxation-gate bullet rewritten to the discrete-event trigger; NEW boundary-contract trigger bullet in engineering judgement; four rules tagged `[BC]` (manual-acceptance checklist, doubted-interpretation isolation, degradation order, boundary/compat enumeration) — superseded only while a live contract exists, bind as written at L0. File 11,310 chars (<12K cap).
+- ops/60-bootstrap.md §A NEW step 5 (record relaxation level first session); ops/10-command-loop.md step 4 L1/L2 note (step substance delivered as the boundary contract); OPS.md routing row updated.
+- config-self-audit: pass. Findings (low, accepted): nudge repeats in projects that never do heavyweight work (silence by recording `ops-relaxation: L0`); [BC] tags precede their defining bullet in reading order. MANUAL-VERIFY open: next real SessionStart in a keyless project shows the nudge line (stdin path tested synthetically only).
+
+## [2026-07-14] OPERATOR-GUIDE.md: operator manual + whole-environment migration guide
+
+- NEW root OPERATOR-GUIDE.md (Traditional Chinese, human-read): Part 1 operator manual for non-author operators (layer model, permission-mode selection, the three questions the model asks incl. L0/L1/L2, 深想/快答 keywords, ops-health signals, environment conventions); Part 2 asset map (git-tracked canon / non-git memory at path-derived slug / optional-carry archives / never-carry runtime+secrets); Part 3 step-by-step migration checklist with per-step verification + machine-binding table (settings.json hook paths x2 = the ONLY hardcoded absolute paths in tracked files, verified by grep; memory slug rename; credentials re-login; environment.md re-verify; interop targets rebuild); Part 4 division of labor vs interop/ (cross-agent compile, not same-system relocation). interop/README.md gains a two-line cross-reference.
+- Closes the gap the user named: interop covered cross-agent rule sync only; whole-environment Claude Code -> Claude Code relocation had no document.
+
+## [2026-07-14] COMMIT-TEMPLATES.md: repo-specific commit conventions
+
+- NEW root COMMIT-TEMPLATES.md distilled from actual history (docs 32 / feat 28 / chore 9 / merge 7 / test 2 / fix 2 / refactor 1): type-selection table with config-repo semantics (feat = new mechanism, docs = rule-text/trail/notes), boundary-case rulings, scope conventions, fill-in templates + real examples + one anti-example, companion rules (rule-tier change pairs with a trail entry; branch + merge --no-ff convention). OPERATOR-GUIDE.md par.1.5 cross-references it.
+
+## [2026-07-16] Work-card format (施工卡) codified as ops/60-bootstrap.md §F
+
+- Context: user asked whether the work-card granularity used in remediation examples (ARCH-03/SYNC-01 style) was codified; audit found the sole-source build-ready bar covered Objects/Rollback/Acceptance but the card FORMAT (fields, IDs, Severity/Confidence, Blast radius, Commit) existed only as per-conversation improvisation. User approved codifying it.
+- ops/60-bootstrap.md NEW §F: 9-field card template; declared a FORMAT not a ledger (content lives in the PSM item or ticket body — no card registry, §C 3-line stub stays the tracking minimum). Field ownership by reference: severity scale → code-review-deep-checklist output contract; commit format → global CLAUDE.md git rule with an explicit warning that COMMIT-TEMPLATES.md is this config repo's own semantics, never target projects'; Objects/Rollback/Acceptance render the product-design-thinking build-ready bar (normative minimum unchanged — a bar-compliant item missing only card-level fields is NOT a skeleton). Usage scope: recommended for sole-basis build docs + deep-review remediation output; optional for ticket bodies, dispatch orders, expand-contract batches, postmortem items.
+- product-design-thinking SKILL.md: one pointer line under the build-ready bar (recommended rendering → §F); no normative change to the bar itself (field expansion deferred — needs a user-confirmed field list per the original proposal).
+- Index sync: OPS.md routing row + rules-usage-dict.md rows 44/149 (grep-enumerated per L-004); skill-trigger-dict.md intentionally unchanged (no trigger-surface change).
+- config-self-audit: pass. Notes (low): 60-bootstrap now 9,636 chars (94% of ~10K cap — trim candidate on next touch); rules-usage-dict 10,129 of 10,240 (pre-existing near-cap, +121); §F placeholder enumerates the four severity values (usability over pure reference; ownership note mitigates drift). Backups in backups/2026-07-16/.
+
+## 2026-07-19 — ops/50-coach.md C11 + ops/30-judgment.md R2 pointer
+- Added C11 "Close-out sweep" habit (evidence-gated proactive tail: passing observations / failure mode / decision-changing next step; empty allowed, cap 3, generic advice banned).
+- Added advisory pointer in 30-judgment.md R2 (explicitly marked non-invariant after config-self-audit).
+- Audit: config-self-audit passed; contradiction grep clean (10-command-loop report format and 05-authority close-out duty are complementary).
+
+## 2026-07-19 — ops-health maintenance sweep (S3 trim discipline)
+- Global_skill_update.md rotated: entries 2026-06-28..2026-07-10 moved to archive/Global_skill_update-2026-06-28--2026-07-10.md with pointer note (68K -> 24K).
+- product-design-thinking frontmatter description slimmed 870 -> 678 chars; trigger detail already covered by skill-trigger-dict.md (verified before trim).
+- literature-search-extract SKILL.md 261 -> 250 lines: compressed Known-callers and Reference-map routing lines only; P1-P5 pipeline text untouched (eval-passed content preserved).
+- ops/30-judgment.md trimmed under 10K (10482 -> 10185): compressed R8 wording and the C11 pointer, semantics unchanged.
+- Verified: hooks/ops_health_nudge.py re-run -> zero findings. Backups in backups/2026-07-19/ (pre-edit 30-judgment/50-coach recoverable from git HEAD).
+
+## 2026-07-19 — project visibility layer 1+2 (PROJECTS.md index, dashboard generator)
+- Pain point: no global project index, no enforced human-readable close-out docs, config design state only recoverable via git log.
+- NEW references/PROJECTS.md: authoritative project registry (one machine-parseable table row per project; header documents column semantics and maintainers).
+- Mounts: workflow-checkpoint SKILL.md new step 6 "Index row update" (refresh row at every checkpoint, covered by checkpoint consent); project-retrospective Step 5 new item 3 "Close-out visibility gate" (row status -> done/archived + README currency check, generate only on consent); ops/60-bootstrap.md SA step 1 reads PROJECTS.md and registers missing rows.
+- NEW tools/project-dashboard.py: read-only generator -> references/PROJECTS-dashboard.md (gitignored, regenerable): registry rows + phase-log/tickets parsing + git state + staleness flag (commit newer than checkpoint by >7d) + unclassified-file detection + environment section (skills/hooks/recent commits). Verified: exit 0 on current environment, tolerates non-git project path (PaperLens) and no-ledger projects.
+- NEW references/project-visibility-L2L3-eval.md: evaluation of full layer-2 and layer-3 options (build vs graft Obsidian/GitHub/Notion/Backstage vs plugin packaging); external-tool claims explicitly marked unverified.
+- Audit: contradiction grep clean; 60-bootstrap.md 9,746 chars (95% of ~10K cap — trim candidate stands).
+- Follow-up (same day, user-approved): claude-config registered as a PROJECTS.md row with "ops-relaxation: L1" recorded in its status cell (chosen area — avoids polluting global CLAUDE.md; ops_health_nudge.py deliberately skips home cwd so no mechanism conflict). Generator enhanced: git queries scoped to project subtree ("-- ."), unaccounted-commits list since last checkpoint, file-budget warnings mirroring nudge thresholds. Verified exit 0; warnings correctly surface 4 near-cap ops files + CLAUDE.md at 92%.
+
+## 2026-07-19 — visibility extension M1-M4 shipped (design-verified, user-accepted)
+- Design: references/project-visibility-design.md (PIM+PSM, non-author verified, D1-D5 approved). Ledger: references/claude-config-tickets.md (T-002..T-005 done -> Archive; T-001 packaging stays blocked until a 2nd project completes a full cycle).
+- tools/project-dashboard.py rewritten: collect -> ViewModel (schema v1) -> renderer registry (md/html/readme-draft). Fixtures passed: INV-3 partial failure, INV-4 import allowlist, INV-5 html.escape. README drafts write README.draft.md only (promotion is manual).
+- workflow-checkpoint SKILL.md step 6: dashboard regen mounted after index-row update (non-blocking on missing Python).
+- tools/open-dashboard.bat: user-requested quick entry (regen + auto-open HTML), verified end-to-end.
+- .gitignore: PROJECTS-dashboard.html + **/README.draft.md added as derived views.
+
+## 2026-07-25 — config-self-audit made self-sufficient; /doctor demoted to optional input
+- Trigger: measured the official `/doctor` (CLI 2.1.220) against this skill by extracting its
+  full prompt from the binary and running it headless (`claude -p "/doctor"`, write tools
+  disabled). Analysis: `reports/2026-07-25-doctor-vs-config-self-audit.md`.
+- Finding that drove the change: `/doctor`'s headline result was a false positive — a hook
+  reported timing out on 217/220 tool calls whose script had been archived 18 days earlier
+  (events dated 07-03/04, claimed window 07-20..07-25). Root cause: its scan window is keyed
+  on transcript file mtime, not event timestamp. Measured skew here: 20 of 50 files >=3 days,
+  max 26 days (43 files / max 25 days over a 30-day window).
+- SKILL.md rewritten (120 -> 173 lines): removed the "Harness-level pre-step" block that
+  routed disuse questions to `/doctor`; added "Order of operations" (section 2 is a gate that
+  voids any finding referencing a non-existent path); section 2 gains duplicate/variant-collision
+  key detection and CLI startup-warning capture; section 3 gains a permission-posture rule
+  (defaultMode/allow/ask never batch-consented; decline `auto` when ask-rules guard config);
+  section 4 gains cross-surface duplicate detection (plugin namespaces + desktop skills cache);
+  section 5 gains local usage measurement and the on-demand vs routine intent rule; NEW section 7
+  telemetry window integrity; NEW section 8 demotes `/doctor` to lowest-priority optional input.
+- NEW skills/config-self-audit/references/telemetry.md: usage-window tool usage, integrity
+  one-liners, `/doctor` invocation mechanics (PowerShell required — Git Bash rewrites "/doctor"
+  to C:/Program Files/Git/doctor via MSYS path conversion), and 8 measured defects (D-1..D-8).
+- NEW tools/usage-window.py (stdlib only, read-only): per-skill / per-MCP / per-hook / denial
+  activity keyed on event timestamps, plus an mtime-skew list. Verified: compiles, runs in text
+  and --json mode, 139 transcripts scanned.
+- skill-trigger-dict.md: config-self-audit's `/doctor` division-of-labour line rewritten to
+  match the demotion.
+- Self-audit of the change: two defects found and fixed before delivery — (a) the slash-command
+  parser in usage-window.py consumed an entire quoted transcript when the closing tag was
+  missing; (b) the duplicate-key check as first written found 0 hits on `~/.claude.json` because
+  the real problem is case/separator variant collisions (6 groups, 14 entries = 6 projects),
+  which JSON treats as distinct keys. Both corrected and re-verified.
+- Open item: SKILL.md is 173 lines against its own ">~150 lines, move detail to references/"
+  guidance in section 5. Further splitting would fragment the checklist itself; user ruling pending.
+- Backups: backups/2026-07-25/ (config-self-audit-SKILL.md.pre-A1A7, skill-trigger-dict.md.pre-A1A7).
+  Branch: feat/config-self-audit-selfsufficient (uncommitted at time of writing).

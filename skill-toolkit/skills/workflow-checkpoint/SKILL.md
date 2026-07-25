@@ -56,8 +56,15 @@ avoiding the need to replay full conversation history and saving usage.
    this phase; if yes, update `references/<project>-context.md` (format and rules:
    `~/.claude/ops/60-bootstrap.md` §E — create lazily, update live, one definition
    per term). Skip silently if the project has no glossary and no new terms.
-6. After writing, **report** which file and which Phase section was written.
-7. Then proceed to §B (ask whether to /compact).
+6. **Index row update** (no extra consent needed — covered by the checkpoint consent):
+   refresh this project's row in `references/PROJECTS.md` (status / last-checkpoint /
+   next). Create the file from its header template if missing; add the row if the
+   project is not yet registered. Column semantics live in the file's header comment.
+   Then run `python ~/.claude/tools/project-dashboard.py` to regenerate the derived
+   views; if Python is unavailable, say so and continue — the checkpoint never
+   blocks on the dashboard.
+7. After writing, **report** which file and which Phase section was written.
+8. Then proceed to §B (ask whether to /compact).
 
 ### Phase-Log Section Format (follow this order and headings strictly; write all content in English)
 

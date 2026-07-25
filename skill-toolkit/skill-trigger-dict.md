@@ -64,6 +64,7 @@
 ### config-self-audit（Claude Code 設定檔稽核）
 - 關鍵詞：稽核skill (audit skill)、檢查hook、這條global規則安全嗎
 - 精準句型：「幫我 audit 這個 skill/hook/CLAUDE.md 規則」— 只審 Claude Code 設定物件，不審專案代碼
+- 與官方 `/doctor`（`/checkup`）的分工（2026-07-25 實測後修訂）：本 skill **自足**，不需先跑 `/doctor`——存在性/完整性、觸發重疊、安全爆炸半徑、語言規範、以及使用率（`tools/usage-window.py`）都自己做。`/doctor` 降為最低優先的可選輸入，只在使用者指名、或需要安裝層修復/版本落後查詢時才用；其輸出一律當未驗證宣稱，先過 SKILL.md §2 gate 與 §7 視窗完整性。細節見 SKILL.md §8 與 `references/telemetry.md`
 
 ---
 

@@ -48,12 +48,10 @@ offer a format conversion afterward only if an alternative adds real value.
 ### Mode 2 — Service (called by another skill)
 The calling skill supplies a **request contract**. Run the pipeline without re-asking the
 user unless a contract field is missing AND cannot be defaulted. Return the **result
-contract** so the caller can continue its own workflow. Known callers and their typical
-requests:
-- `scientific-research-guide` — Tier 1 literature review support, method-canon
-  verification (its Gate B), parameter/typical-value lookup for domain profiles.
-- `product-design-thinking` — mandatory prior-art & open-source search before designing.
-- Any skill needing "what does the published literature say about X".
+contract** so the caller can continue its own workflow. Known callers:
+`scientific-research-guide` (Tier 1 review support, method-canon verification / Gate B,
+parameter lookup), `product-design-thinking` (mandatory prior-art search before
+designing), and any skill needing "what does the published literature say about X".
 
 **Request contract** (caller fills; defaults in parentheses):
 ```
@@ -235,27 +233,18 @@ Assemble extracted items into the `output_format`, in the requested `language`:
 
 ## Reference map
 
-All six reference files below ship with the skill; load each on demand at the point the
+All six reference files ship with the skill; load each on demand at the point the
 pipeline names it. The P1→P5 pipeline is self-sufficient at `quick`/`standard` depth
-without them, but they are required for `exhaustive` depth and for non-trivial extraction.
-- `references/portability.md` — READ FIRST when running outside Claude Code (any other
-  agent or web LLM): capability-slot map, tool substitutes, minimum viable profile,
-  degradation honesty rules. Inside Claude Code, skip it.
-- `references/search-sources.md` — per-channel query strategies (scholarly indexes,
-  preprint servers, textbook discovery), identifier resolution, local-corpus MCP usage
-  (prism reference implementation) and fallback rules, citation-chasing procedure with
-  stopping conditions, degradation
-  ladder & cost transparency, non-English literature strategy. Channel facts
-  verified 2026-07-07; re-verify on unexpected channel behavior.
-- `references/extraction-playbook.md` — worked examples of P4 per information-need type,
-  wrong-vs-right contrasts, and a pre-P5 extraction checklist.
-- `references/output-templates.md` — templates for each catalog format (field
-  definitions + filled examples), Mode 1/Mode 2 language rules, full result-contract
-  example.
-- `references/exhaustive-prisma.md` — PRISMA-style procedure for `exhaustive` depth
-  only: protocol block, logged search, two-pass screening with reason codes, flow
-  accounting, saturation statement, deliverable additions. Never load at quick/standard.
-- `references/credibility-rubric.md` — source-quality scoring: venue tiers, citation
-  context, preprint→published check, retraction check (Retraction Watch via Crossref),
-  predatory-venue screening, textbook canonicity & edition rules, set-level
-  bias/coverage-balance check.
+without them; they are required for `exhaustive` depth and non-trivial extraction.
+- `references/portability.md` — READ FIRST when running outside Claude Code (other
+  agents / web LLMs): capability slots, substitutes, degradation honesty. Else skip.
+- `references/search-sources.md` — per-channel query strategies, identifier resolution,
+  local-corpus MCP usage + fallbacks, citation chasing, degradation ladder, non-English
+  strategy. Channel facts verified 2026-07-07; re-verify on odd behavior.
+- `references/extraction-playbook.md` — P4 worked examples per information-need type,
+  wrong-vs-right contrasts, pre-P5 checklist.
+- `references/output-templates.md` — templates per catalog format, Mode 1/2 language
+  rules, full result-contract example.
+- `references/exhaustive-prisma.md` — PRISMA procedure, `exhaustive` depth ONLY.
+- `references/credibility-rubric.md` — venue tiers, retraction & predatory-venue
+  checks, textbook canonicity/edition rules, set-level bias/coverage check.
