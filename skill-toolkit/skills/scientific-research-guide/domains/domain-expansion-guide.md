@@ -617,15 +617,22 @@ skills/scientific-research-guide/
 │   ├── _template.md                  ← Blank template for a new BASE profile (7 nodes)
 │   ├── domain-expansion-guide.md     ← This document (expansion conventions)
 │   ├── plasmonic_waveguide.md        ← base profile (established)
-│   ├── topological_insulator.md      ← base profile (established)
-│   └── topological_insulator/        ← that domain's sub-profiles & boundary notes
-│       ├── bi2se3.md                 ← sub-profile (material)      [example, when authored]
-│       ├── wal.md                    ← sub-profile (phenomenon)    [example, when authored]
-│       ├── hoti.md                   ← sub-profile (new-territory) [example, when authored]
-│       └── spt_vs_topological_order.md ← boundary note            [example, when authored]
+│   ├── plasmonic_waveguide/          ← that domain's sub-profiles, reference & boundary notes
+│   │   ├── active_modulation.md          ← sub-profile (method/material platform)
+│   │   ├── terminology_and_geometry.md   ← reference (no standing triggers)
+│   │   └── split_ring_resonators.md      ← boundary note (routes to a future metamaterial domain)
+│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 currently
+│   │                                    missing — see STATUS.md known pre-existing debt)
+│   └── topological_insulator/        ← that domain's sub-profiles
+│       ├── bi2se3_material.md            ← sub-profile (material)
+│       ├── wal_hln_transport.md          ← sub-profile (phenomenon/method)
+│       ├── surface_and_composition_characterization.md ← sub-profile (method)
+│       └── device_fabrication.md         ← sub-profile (method)
 └── evals/
     └── evals.json                    ← Test cases
 ```
 
 > Sub-profile folders (`domains/<domain>/`) are created only when a domain actually needs
-> its first branch — do not pre-create empty folders.
+> its first branch — do not pre-create empty folders. This listing reflects the actual
+> files as of 2026-07-28; treat it as a snapshot, not a guarantee — check the directory
+> and `_routing.md` for the current state.

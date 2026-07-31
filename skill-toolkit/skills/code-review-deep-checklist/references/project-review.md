@@ -43,6 +43,70 @@ design time; here they are audited retrospectively.
 - **ISP**: is any module forced to depend on an oversized interface where it needs
   a fraction of the methods?
 
+## Cross-Module State Ownership (project-scope FSM lens)
+
+Per-unit state machines are Mode A §10; this lens audits state as a COUPLING
+channel across the project — the class of problem invisible in any single diff
+and invisible in the import graph:
+
+- **Distributed state inventory**: where does the same logical state live in
+  more than one place (DB + cache + client store + message queue + search
+  index)? For each, name the authoritative copy and the reconciliation path
+  when copies diverge. No answer = split-brain by design → finding.
+- **Implicit shared state as hidden coupling**: globals, singletons,
+  module-level caches, env vars mutated at runtime, files used as flags. Each
+  is a dependency edge that import-graph coupling metrics miss — enumerate
+  them (grep for module-level mutables) and add them to the coupling picture.
+- **Lifecycle ownership**: does each business lifecycle (order, user, job…)
+  have ONE owning module through which all transitions pass, or do several
+  modules write the status field directly? Many writers = shotgun surgery for
+  state: one rule change forces edits everywhere, and Mode A §10's invariants
+  become unenforceable.
+- **Trend metric**: writers-per-lifecycle-field over time (grep count of
+  mutation sites). Rising = state boundary eroding, even if every PR passed.
+
+## Contract & Twin-Logic Drift (cross-boundary lens)
+
+Same reconstruction discipline as the FSM lens: the design semantics say "one
+rule", the codebase holds N copies of it, and no diff ever shows them drifting
+apart. Per-PR checks are single-review.md §11; this lens does the project-wide
+inventory (ruleId namespace `review.contract.*`):
+
+- **Boundary-contract inventory**: enumerate the seams — HTTP/RPC APIs, event
+  and message schemas, shared enums, error shapes. For each: what is the
+  authoritative artifact, and is code on both sides DERIVED from it (codegen,
+  shared schema package) or hand-mirrored? Build the table before judging;
+  it is also the re-review baseline.
+- **Twin-implementation inventory**: rules deliberately implemented on both
+  sides — validation (client UX copy + server enforcing copy), permission
+  visibility (UI hiding + server authz), lifecycle enums (frontend + backend +
+  DB constraint), derived values computed in two places. Twins are legitimate;
+  UNGATED twins are the finding. For each pair: shared/generated source, or a
+  drift gate (consumer-driven contract test, schema diff in CI, round-trip
+  serialization test)? Neither → finding with the derivation mechanism as the
+  remediation.
+- **Compatibility policy**: is there a stated versioning/evolution rule for
+  each contract (additive-only, deprecation window, unknown-field tolerance),
+  or does every deploy silently assume both sides ship in lockstep?
+- **Architecture fitness functions**: are the intended dependency directions
+  and layer boundaries executable (dependency-cruiser / import-linter /
+  ArchUnit-style rules in CI), or prose in a wiki? Measure with the tool
+  output where present — same rule as coupling metrics above: measure, don't
+  assert. An intended boundary with no executable check is drift waiting to
+  be discovered by an outage.
+- **Documentation drift spot-check**: treat docs (README, API docs, ADRs,
+  onboarding guides) as CLAIMS about the code. Sample the highest-traffic
+  claims (setup steps, listed endpoints, stated invariants, ADR "we chose X
+  because Y") and verify each against the code; every mismatch is a
+  `review.contract.doc-drift` finding. Detection only — rewriting or
+  restructuring the docs is engineering:documentation's deliverable, and a
+  doc-debt backlog is engineering:tech-debt's; hand off with the mismatch
+  list.
+- **Security note**: the attacker-facing projections of these drifts (client-
+  only validation, hidden-but-unprotected functions, enforcement-point desync)
+  are already security-deep-checklist territory — record them as `sec.*`
+  discovery candidates, do not re-audit them here.
+
 ## Risk-Management Lens
 
 - Is there a formalized risk list with extra verification for high-risk components

@@ -140,3 +140,46 @@ code-review-deep-checklist Mode A §9):
   canonical package (feeds Mode B supply chain).
 - Copied boilerplate may carry permissive CORS (`*`), debug flags, or example
   credentials — grep the diff for these defaults.
+
+## 9. State-machine & business-flow attacks (`sec.state.*`)
+
+Business-logic vulnerabilities are the class grep cannot find: every line is
+individually fine, but the FLOW can be driven into states the design never
+intended. Method: reconstruct the intended state machine from design semantics
+(if a code-review-deep-checklist Mode A §10 transition table already exists for
+this unit, reuse it — do not rebuild), then ask for each transition: can an
+attacker **force, skip, replay, or race** it? Run this section only for units
+owning lifecycle/flow state (order, payment, auth/session ceremony, workflow,
+quota); record skips in coverage. The attack-path receipt for a `sec.state.*`
+finding is the forced/skipped/replayed/raced transition narrative.
+
+- **Step-skipping / forced transitions** (A01): can a later-state action be
+  invoked directly — hit the "complete" endpoint without the "paid" state,
+  activate an account without the verification state? Every state-changing
+  endpoint must enforce the current-state precondition SERVER-SIDE; client
+  flow order and hidden buttons count as absent (same rule as §1).
+- **Transition replay**: the same transition fired twice — double-spend, coupon
+  re-redemption, webhook re-delivery re-crediting an order. Look for idempotency
+  keys or a state precondition that the second firing fails.
+- **TOCTOU / transition races**: check-then-write without atomicity — two
+  parallel requests both pass the guard (concurrent withdrawal, double role
+  grant). The finding must name the actual non-atomic read→write path; pairs
+  with error-handling §5 partial-failure states.
+- **Desync between enforcement points**: authorization decided on a COPY of
+  state that has since changed — stale session claims after role downgrade,
+  fulfillment queue proceeding after order cancellation, cache serving a
+  revoked permission. Name both copies and the missing invalidation path.
+- **Cross-context state leakage (環境洩漏)**: state surviving across trust
+  contexts — module-level mutables in request handlers, caches keyed without
+  the tenant/user component, thread-local or pooled-connection residue
+  (uncleared session variables, temp tables), reused request/response objects
+  with residual fields. One user's state observable by (or acting for) another
+  is an access-control finding (A01) even with no classic injection sink. Also
+  check leakage DOWNWARD in trust: internal state serialized into client-visible
+  blobs, sequential IDs disclosing volume/ordering.
+- **Abnormal-transition fail-open** (A10): an error mid-transition leaving the
+  entity in a hybrid state with more privilege than either endpoint state, or
+  a compensation/rollback path that skips the guards the forward path enforces.
+- **Attacker-reachable trap states** (feeds §7): can crafted input drive an
+  entity into a no-exit state (permanently locked resource, stuck queue slot)?
+  A trap state reachable cheaply and at scale is a DoS primitive.

@@ -88,15 +88,32 @@ and keep this skill consistent with the user's global preferences:
 - Fast pre-merge bug hunt → /code-review (or engineering:code-review).
 - Security is the FOCUS (資安健檢, vulnerability sweep, posture/detection audit) →
   security-deep-checklist; Mode A §4 here is only a spot-check for general reviews.
+  A spot-check hit is recorded as a `sec.*` discovery-stage candidate
+  (output-contract.md §5) — no receipts, low confidence, handoff recommended;
+  never run that skill's validation/attack-path pipeline from here.
 - User wants a standalone, prioritized debt backlog as the deliverable →
   engineering:tech-debt (bring this skill's Mode A/B findings as input).
 - Mode C concludes a dependency should be replaced → the decision record is an ADR;
   hand to engineering:architecture.
 - Findings are process-level (AI PR volume outpacing review, missing diff caps,
   no cross-model review, agent permission gaps) → ai-coding-guardrails.
+- Documentation drift surfaced by Mode B's spot-check → findings stay here
+  (detection); rewriting/maintaining the docs → engineering:documentation;
+  a prioritized doc-debt backlog → engineering:tech-debt.
 - The "requirement is wrong / feature needs redesign" → product-design-thinking.
 
 ## Severity & output contract (all modes)
+
+The machine-readable contract lives in
+[references/output-contract.md](references/output-contract.md) — read it before
+writing any finding. Non-negotiables: alongside the human report, emit
+`findings.json` + `coverage.json` (manifests are canonical, report is a
+projection); every finding has a stable identity (`ruleId` in the `review.`
+namespace + anchor + instance → fingerprint) so re-reviews diff as
+new/persisting/resolved/reopened; coverage is inventory-FIRST — enumerate the
+review units before reading code, disposition every one, claim `complete` only
+when nothing is deferred. This is the light contract: identity + coverage only,
+no evidence-receipts pipeline (that belongs to security-deep-checklist).
 
 Report findings ranked, each with:
 
@@ -109,8 +126,8 @@ Report findings ranked, each with:
 - **Plain-language intent test**: for each core unit reviewed, one sentence on what
   it does and why this approach — if you cannot write that sentence, that itself is
   a `should-fix` finding (intent not expressed; common with AI-generated code).
-- End with: what was NOT covered (dimension, directory, or check skipped) — silent
-  truncation reads as full coverage.
+- End with: what was NOT covered — generated from coverage.json's `deferred` +
+  `explicitExclusions` entries, not recalled from memory at the end.
 
 ## Pitfalls this skill exists to prevent
 
@@ -125,14 +142,29 @@ Report findings ranked, each with:
   one-time: coupling/cohesion trends + living debt backlog.
 - Debt fixed where it's most visible instead of where it slows the team → hotspot
   prioritization (change-frequency × poor-quality), not raw quality score.
+- Stateful flow reviewed transition-by-transition while the MACHINE is wrong
+  (undefined transitions, broken per-state invariants, trap states) — invisible
+  in any diff → Mode A §10 reconstructs the intended state machine from design
+  semantics and checks code against it; state as cross-module coupling → Mode B.
+- Each side of a frontend/backend seam passes its own tests while the SEAM
+  drifts (hand-mirrored types/enums/validation with no derivation or drift
+  gate) → Mode A §11 per-PR both-sides check; Mode B contract & twin-logic
+  inventory. Docs asserting things the code no longer does → Mode B doc-drift
+  spot-check (detection only; rewriting → engineering:documentation).
 
 ## Reference files
 
 - [references/single-review.md](references/single-review.md) — Mode A: design &
   correctness, error handling & tests, security, style, requirement–data
-  consistency, full code-smell taxonomy, quantifiable debt metrics, AI-code checks.
+  consistency, full code-smell taxonomy, quantifiable debt metrics, AI-code checks,
+  stateful-logic/FSM consistency (§10 — gated: stateful units only),
+  cross-boundary contract consistency (§11 — gated: boundary contracts only).
 - [references/project-review.md](references/project-review.md) — Mode B:
-  systems-engineering principles, coupling/cohesion, SOLID at project scope, risk
-  and organizational debt management.
+  systems-engineering principles, coupling/cohesion, cross-module state
+  ownership, contract & twin-logic drift (incl. documentation-drift
+  spot-check), SOLID at project scope, risk and organizational debt management.
 - [references/dependency-fitness.md](references/dependency-fitness.md) — Mode C:
   six-layer fitness evaluation, build-vs-buy, lock-in assessment.
+- [references/output-contract.md](references/output-contract.md) — all modes:
+  machine-readable findings/coverage manifests, fingerprint identity for
+  re-review diffing, inventory-first coverage (light contract — no receipts).

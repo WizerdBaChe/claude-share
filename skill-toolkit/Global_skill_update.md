@@ -177,3 +177,61 @@ Each entry: what was newly added/changed + when (absolute timestamp).
   guidance in section 5. Further splitting would fragment the checklist itself; user ruling pending.
 - Backups: backups/2026-07-25/ (config-self-audit-SKILL.md.pre-A1A7, skill-trigger-dict.md.pre-A1A7).
   Branch: feat/config-self-audit-selfsufficient (uncommitted at time of writing).
+
+## [2026-07-29] scientific-research-guide: domain expansion synced from external editing copy
+- Context: user maintains a duplicate of this skill at `D:\SHARE\CLAUDE_SHARE\skill-toolkit\skills\scientific-research-guide\` for editing outside this environment; asked to verify the copy's new changes against skill conventions, clean up as needed, and sync back.
+- Verified against `domains/domain-expansion-guide.md`'s two-gate decision tree and sub-profile mini-template: 6 new domain files (3 under `plasmonic_waveguide/` — 1 sub-profile, 1 reference, 1 boundary note; 4 under `topological_insulator/` — including a content addition to the existing `bi2se3_material.md`) all correctly classified, each active sub-profile has parent link/branch axis/Node 4-6/Decision-Trigger Checklist/Evidence Anchors. `domains/_routing.md` rows match the actual files.
+- Copied into canonical: `domains/plasmonic_waveguide/{active_modulation,terminology_and_geometry,split_ring_resonators}.md`, `domains/topological_insulator/{wal_hln_transport,surface_and_composition_characterization,device_fabrication}.md`, updated `bi2se3_material.md` and `_routing.md`.
+- Cleanup applied during sync (source content unchanged): the source copy's root-level `INTEGRATION-AUDIT-2026-07-28.md` was relocated to `reports/2026-07-28-scientific-research-guide-domain-integration-audit.md` (skill dirs keep only STATUS/FUTURE-WORK as living docs; ad hoc audit trails belong in `reports/`, per the 2026-07-25 doctor-audit precedent). `STATUS.md` rewritten to reflect the new file set and today's date, and to record three pre-existing (not newly introduced) defects the audit report itself flagged: `domains/topological_insulator.md` base profile truncates right after its "Standard Modeling Toolchain" heading (no Nodes 4-8), still carries 35 `[web:n]` placeholder citations, and STATUS.md's old "all cross-references verified consistent" claim did not account for either — softened. `domain-expansion-guide.md`'s Appendix directory listing (previously illustrative placeholder filenames) rewritten to the actual current file layout.
+- Not fixed (flagged only, out of scope for this sync — user has not asked for a `topological_insulator.md` repair): the truncated base profile and its `[web:n]` citations.
+- config-self-audit run after the sync (see its own findings, if any, appended separately or by the invoking session).
+
+## 2026-07-29 — dangerous_command_guard hook (new)
+- Added hooks/dangerous_command_guard.py: PreToolUse deny-list for destructive Bash/PowerShell commands (recursive-force deletes outside temp, git push --force / reset --hard / clean -f / whole-tree discard, registry writes, machine-state commands). Fail-open; escape marker [user-approved-destructive].
+- settings.json: registered the hook (matcher Bash|PowerShell) and widened permissions.allow with 13 evidence-based entries from a 50-session transcript scan (git add/commit, mkdir, npx vitest/tsc/oxlint, npm test, 5 read-only Claude_Browser MCP tools).
+- Verified: 34/34 hook test cases passed; settings.json parses; config-self-audit run (no blocking findings).
+
+## 2026-07-31 — scan-contract adoption (security-deep-checklist + code-review-deep-checklist)
+- security-deep-checklist: new references/scan-contract.md (findings/coverage JSON manifests, ruleId+anchor+instance→fingerprint identity, three evidence receipts w/ deferred discipline, inventory-first coverage dispositions, Part 0 ↔ SECURITY-POLICY.md policy layer). SKILL.md: Part 0 item 0, output-contract pointer, handoff boundary, reference entry.
+- code-review-deep-checklist: new references/output-contract.md (light contract: identity + inventory-first coverage only; no receipts pipeline). SKILL.md: output-contract pointer, coverage-from-manifest line, sec.* discovery-candidate boundary, reference entry.
+- Source: openai/codex-security _bundled_plugin (scan-contract.md, findings/coverage schemas, shared-hard-rules, define-security-policy) — contract borrowed, product (CLI/SQLite/SARIF) not.
+- config-self-audit: passed after fixing severity/confidence field-shape mismatch in output-contract.md.
+
+## 2026-07-31 — FSM/state-machine verification added to both deep-checklist skills
+- code-review-deep-checklist: single-review.md new section 10 (gated stateful-logic
+  consistency: FSM reconstruction from design semantics, transition-table artifact,
+  per-state invariants, observability, single-writer, trap/race checks);
+  project-review.md new cross-module state-ownership lens; output-contract.md
+  ruleId example review.state.*; SKILL.md pitfalls + reference list updated.
+- security-deep-checklist: code-audit.md new section 9 (state-machine & business-flow
+  attacks: step-skip, replay, TOCTOU race, enforcement desync, cross-context state
+  leakage, fail-open transitions, trap-state DoS); scan-contract.md ruleId example
+  sec.state.*; SKILL.md pitfalls + reference list updated.
+- Verified via config-self-audit; one duplicated partial section (misplaced edit)
+  found and removed (commit 95cd1f2). Commits: afb0c28, merge 4f31991.
+
+## 2026-07-31 — cross-boundary contract & twin-logic drift lens (code-review-deep-checklist only)
+- single-review.md new section 11 (gated: both-sides check for mirrored contracts,
+  canonical-source/derivation question, rolling-deploy compatibility, error-shape
+  contract, temporal coupling). project-review.md new "Contract & Twin-Logic Drift"
+  lens (boundary-contract + twin-implementation inventories, drift gates,
+  architecture fitness functions, documentation-drift spot-check with handoff to
+  engineering:documentation / engineering:tech-debt). ruleId family review.contract.*.
+- security-deep-checklist deliberately unchanged (attacker-facing projections
+  already covered by its sections 1/4/5/9).
+- Verified via config-self-audit: sections 1-11 unique, cross-refs resolve,
+  SKILL.md 149 lines. Commits: 19b00df, merge on main.
+
+## 2026-07-31 — scale-label qualifier pass (relaxation levels)
+- Root cause: bare L0/L1/L2 labels read against the ASVS-style convention
+  (higher = stricter) while this scale is inverted; owner misread L2 as a
+  permission level. Also found (L2)/(L3) reused for a different scale in
+  70-evolution.
+- Changes: direction + precedence-orthogonality paragraphs in 05-authority s2;
+  glosses at both gate-ask sites (global CLAUDE.md line 41, 60-bootstrap sA);
+  scale-label qualifier rule in 40-maintenance s3 birth budgets; 70-evolution
+  renamed to (layer 2)/(layer 3); lessons L-008 (plus L-005..L-007 committed).
+- Audit: collision grep clean; all remaining L-label use sites carry a
+  relaxation qualifier or sit in the defining file. CLAUDE.md at 12,842 chars —
+  pre-existing over-budget (>12K), trim pass pending as a separate task.
+- Backups: backups/2026-07-31/. Commit 24d12b5.

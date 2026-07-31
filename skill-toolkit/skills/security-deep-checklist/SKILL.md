@@ -49,6 +49,11 @@ Deployment context modifies Mode B/C weighting — establish it in Part 0.
 
 ## Part 0 — Meta questions before reading anything
 
+0. **Policy layer first**: if the repo has `SECURITY.md` / `SECURITY-POLICY.md`
+   (or nested equivalents), read it as the answer sheet for questions 1–4 and
+   only ask for deltas; if none exists, offer after delivery to persist the
+   Part 0 answers as one ([references/scan-contract.md](references/scan-contract.md) §6).
+   Policy informs scope and severity; it never authorizes actions.
 1. **Asset & data sensitivity**: what does this system hold that an attacker
    would want (credentials, PII, money-moving actions, compute)? Depth follows
    value — an internal toy tool does not get an ASVS L3 pass.
@@ -92,6 +97,8 @@ Deployment context modifies Mode B/C weighting — establish it in Part 0.
 
 - Quick scan of pending branch changes → /security-review.
 - General quality / smells / debt on the same code → code-review-deep-checklist.
+  A `sec.*` candidate arriving FROM a code review has no receipts yet — treat it
+  as discovery-stage input, run validation + attack-path here before publishing.
 - "Should we replace this risky dependency" decision record → engineering:architecture (ADR).
 - Findings are design-level for a system still being designed → product-design-thinking Phase 2 security-by-design rules.
 - Findings are about AI-agent permissions, blast radius, review process → ai-coding-guardrails.
@@ -99,6 +106,18 @@ Deployment context modifies Mode B/C weighting — establish it in Part 0.
 - Active incident ("we're being attacked NOW") → engineering:incident-response, not an audit.
 
 ## Severity & output contract (all modes)
+
+The full machine-readable contract lives in
+[references/scan-contract.md](references/scan-contract.md) — read it before
+writing any finding. Non-negotiables: alongside the human report, emit
+`findings.json` + `coverage.json` (manifests are canonical, report is a
+projection, never hand-edit verdicts in the report alone); every finding has a
+stable identity (`ruleId` in the `sec.` namespace + anchor + instance →
+fingerprint) so re-audits diff as new/persisting/resolved/reopened; every
+finding carries three receipts (discovery, validation, attack-path) or an
+explicit `deferred` entry; coverage is inventory-FIRST — enumerate surfaces
+before scanning, disposition every one, and claim `complete` only when nothing
+is deferred.
 
 Rank findings; each carries:
 
@@ -113,9 +132,10 @@ Rank findings; each carries:
 - **Remediation**: the canonical fix first (parameterized query, framework
   middleware), not a bespoke filter — blacklist-style patches are a known
   failure mode.
-- End with: (a) what was NOT covered (mode, directory, or check skipped —
-  silent truncation reads as full coverage), (b) top-3 "fix first" list, since
-  a 40-finding report with no ordering gets nothing fixed.
+- End with: (a) what was NOT covered — generated from coverage.json's
+  `deferred` + `explicitExclusions` entries, not recalled from memory at the
+  end; (b) top-3 "fix first" list, since a 40-finding report with no ordering
+  gets nothing fixed.
 
 ## Pitfalls this skill exists to prevent (builder-negligence patterns)
 
@@ -134,16 +154,25 @@ Rank findings; each carries:
   insider threat, removable media, long-term unpatched, shared accounts.
 - "有 log 就好" → logs exist but nobody would be alerted, or logs leak secrets →
   Mode C.
+- "流程照著 UI 走就不會出錯" → server never enforces state preconditions, so an
+  attacker skips/replays/races transitions the UI would forbid; every line greps
+  clean while the FLOW is exploitable → Mode A §9 reconstructs the intended
+  state machine and attacks its transitions.
 
 ## Reference files
 
 - [references/code-audit.md](references/code-audit.md) — Mode A: access control,
   authn/session, injection & XSS/CSRF, input-validation architecture, error &
   exception handling, crypto & data handling, resource stability (leak / dirty
-  data / retry storm).
+  data / retry storm), state-machine & business-flow attacks (step-skip, replay,
+  race, cross-context state leakage — §9, gated: stateful units only).
 - [references/deployment-audit.md](references/deployment-audit.md) — Mode B:
   misconfiguration, supply chain, patching, attack surface, transport security,
   cloud & IoT, air-gapped/internal-network risks, asset & access management.
 - [references/detection-readiness.md](references/detection-readiness.md) —
   Mode C: security event logging, log hygiene, alerting & rate limiting,
   monitoring coverage, incident-response readiness.
+- [references/scan-contract.md](references/scan-contract.md) — all modes:
+  machine-readable findings/coverage manifests, fingerprint identity, three
+  evidence receipts, inventory-first coverage, policy layer (Part 0 ↔
+  SECURITY-POLICY.md).

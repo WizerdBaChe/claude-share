@@ -14,6 +14,16 @@
 
 ---
 
+## Contents
+
+- Node 1: theory and terminology
+- Node 2: measurement and preparation
+- Node 3: modeling hooks
+- Node 4: fitting methods
+- Node 5: quality metrics
+- Node 6: pitfalls
+- Decision triggers and evidence anchors
+
 ## Node 1. Localized Theoretical Anchoring (relative to the parent TI profile)
 
 > This node reuses the parent domain’s first principles and only highlights what is *special* or *non-generic* for Bi₂Se₃.
@@ -31,6 +41,24 @@
 2. In ultrathin Bi₂Se₃ films (thickness ≲ 6 QL), top and bottom surface states hybridize and open a gap at the Dirac point; edge/surface transport must account for this thickness-dependent gap and possible Rashba-type splitting.
 3. Bi₂Se₃ surface chemistry is relatively inert but not immune: long exposure and certain dopants/intercalants (e.g. Cu) cause oxidation and composition gradients that can strongly distort ARPES and transport signatures if not controlled.
 4. Ternary derivatives such as Bi₂Se₂S can be topologically trivial; extrapolating Bi₂Se₃’s TI behaviour to all Se-based Bi compounds is invalid.
+
+### Bi₂Se₃ terminology and ARPES label map
+
+- Use **bismuth selenide** for Bi₂Se₃. Do not translate it as bismuth telluride
+  (Bi₂Te₃ is the telluride).
+- `BCB` means bulk conduction band and `BVB` means bulk valence band.
+- Prefer `TSS` (topological surface state) or a source-defined `SS` (surface state).
+  `SSB` is not a sufficiently standardized abbreviation to normalize without the
+  source legend.
+- The Dirac point is the crossing of the surface-state branches in the idealized band
+  picture. Do not equate it with the Fermi level or charge-neutral condition in an
+  as-grown sample without measurement.
+- Distinguish surface from bulk bands by more than visual linearity. Photon-energy
+  dependence, surface localization, spin resolution, and comparison with the projected
+  bulk gap provide stronger evidence.
+- Downward surface band bending can create a conventional two-dimensional electron gas
+  that coexists with the TSS. Do not label every two-dimensional ARPES or transport
+  feature as topological.
 
 ---
 
@@ -180,3 +208,18 @@
       “Surface chemistry and composition may have changed; are you accounting for oxidation, dopant migration, and near-surface gradients in your interpretation?”
 - [ ] **User uses ‘extra Dirac cones’ language in Bi₂Se₃ films** → AI should ask:
       “Could these features be quantum well subbands rather than additional topological surface states, and have you examined their thickness and photon-energy dependence?”
+
+## Evidence Anchors for the Integrated Notes
+
+- Zhang et al., “Topological insulators in Bi₂Se₃, Bi₂Te₃ and Sb₂Te₃ with a single
+  Dirac cone on the surface,” *Nature Physics* 5, 438–442 (2009).
+  DOI: https://doi.org/10.1038/nphys1270
+- Xia et al., “Observation of a large-gap topological-insulator class with a single
+  Dirac cone on the surface,” *Nature Physics* 5, 398–402 (2009).
+  DOI: https://doi.org/10.1038/nphys1274
+- Bianchi et al., “Coexistence of the topological state and a two-dimensional electron
+  gas on the surface of Bi₂Se₃,” *Nature Communications* 1, 128 (2010).
+  DOI: https://doi.org/10.1038/ncomms1131
+- Sakamoto et al., “Spectroscopic evidence of a topological quantum phase transition in
+  ultrathin Bi₂Se₃ films,” *Physical Review B* 81, 165432 (2010).
+  DOI: https://doi.org/10.1103/PhysRevB.81.165432

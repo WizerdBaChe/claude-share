@@ -25,7 +25,13 @@ Type semantics are defined in `domain-expansion-guide.md` §2 (the two-gate deci
 |---|---|---|---|---|---|
 | base | `plasmonic_waveguide.md` | — | SPP, plasmonics, surface plasmon, nanophotonic waveguide, SERS, near-field optics | Plasmonic/SPP waveguide domain profile | yes (Node 6+8) |
 | base | `topological_insulator.md` | — | topological insulator, TI, Z₂, quantum spin Hall, Dirac surface state, QAHE, Majorana | Topological-insulator domain profile | yes (Node 6+8) |
-| sub-profile | `topological_insulator/bi2se3_material.md` | topological_insulator | Bi2Se3, bismuth selenide, Se vacancy, bulk conduction, quintuple layer, ultrathin film, HLN, intercalation | Material-scoped sub-profile: Bi₂Se₃ bulk-conduction / thickness-gap / surface-chemistry traps | yes (Node 6+8) |
+| reference | `plasmonic_waveguide/terminology_and_geometry.md` | plasmonic_waveguide | SP, SPP, SPR, LSP, LSPR, LSPP, IMI, MIM, MIN, HPW, Au film, Au grating, coupling loss, propagation loss | Terminology, geometry, and loss-accounting reference | no |
+| sub-profile | `plasmonic_waveguide/active_modulation.md` | plasmonic_waveguide | plasmonic modulator, graphene modulator, ITO, ENZ, epsilon-near-zero, depletion, accumulation, bias-induced spectral shift, topological modulator | Active-material and bias-to-spectrum validation traps | yes (Node 6+8) |
+| boundary | `plasmonic_waveguide/split_ring_resonators.md` | plasmonic_waveguide | SRR, split-ring resonator, LSRR, negative index, metamaterial, metasurface | Boundary to electromagnetic metamaterials; corrects unsupported SRR equivalences | no |
+| sub-profile | `topological_insulator/bi2se3_material.md` | topological_insulator | Bi2Se3, bismuth selenide, Se vacancy, bulk conduction, quintuple layer, ultrathin film, BCB, BVB, SSB, Dirac point, band bending, intercalation | Material-scoped sub-profile: Bi₂Se₃ band labels, bulk conduction, thickness gap, and surface chemistry | yes (Node 6+8) |
+| sub-profile | `topological_insulator/wal_hln_transport.md` | topological_insulator | WAL, weak antilocalization, HLN, HNL, Hikami-Larkin-Nagaoka, magnetoconductance, Hall measurement, phase coherence | Phenomenon/method sub-profile: WAL/HLN applicability and Hall-channel traps | yes (Node 6+8) |
+| sub-profile | `topological_insulator/surface_and_composition_characterization.md` | topological_insulator | UPS, XPS, SECO, secondary electron cutoff, work function, EDS, EDX, elemental mapping, surface oxidation | Method sub-profile: surface/work-function/chemical-state/composition measurement traps | yes (Node 6+8) |
+| sub-profile | `topological_insulator/device_fabrication.md` | topological_insulator | PMMA 950, electron-beam lithography, EBL, mesa, Hall bar, TFT response, KOH, consort, COMSOL, CST, etching | Method sub-profile: TI device process, geometry, and tool-identification traps | yes (Node 6+8) |
 
 <!--
 Add rows as content is authored. Only list files that ACTUALLY EXIST (Gate A will try to

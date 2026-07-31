@@ -159,3 +159,90 @@ Pass criterion is "the team actually owns it", NOT "it appears to work":
 - Does an exit strategy exist if this logic must be replaced or simplified?
 - If the answer pattern here is systemic (every AI PR fails these), that's a
   process problem → hand off to ai-coding-guardrails.
+
+## 10. Stateful-Logic Consistency (FSM Reconstruction)
+
+**Trigger gate — run this section ONLY when the unit under review owns lifecycle
+state**: a status/enum field that drives behavior, a multi-step flow (order,
+payment, session, job, connection, workflow), or persisted state consumed across
+requests. Stateless code: skip, and record the skip in coverage.json (`deferred`
+with reason "stateless"). This keeps the section from taxing every review.
+
+Why it exists: state bugs are design-semantic bugs — each individual transition
+can look correct in the diff while the MACHINE is wrong (undefined transitions,
+broken invariants, trap states). They cannot be verified from code alone; the
+intended machine must be reconstructed first, then the code checked against it.
+
+**Method — lightweight explicit modeling, not formal verification:**
+
+1. **Reconstruct the intended machine** from design semantics first (spec, PR
+   description, domain docs — §6 traceability sources), then from code. A
+   divergence between the two IS a finding (`review.state.spec-divergence`),
+   before any code-level check.
+2. **Emit a state-transition table** into the report: rows = states, columns =
+   events/triggers, each cell = next state / explicitly rejected / **undefined**.
+   The table is the review artifact all §10 findings anchor to. Depth cap: model
+   the top 1–3 stateful units by risk; list the rest as `deferred` in coverage.
+3. **Run these checks against the table + code** (ruleId namespace `review.state.*`):
+   - **Completeness**: every state×event cell is a defined transition or an
+     explicit rejection. Undefined cells (event silently ignored, partial field
+     update, fall-through) → `should-fix`.
+   - **Per-state invariants (internal self-consistency)**: for each state, write
+     the one-line invariant ("in `SHIPPED`, `tracking_id` is non-null"). Verify
+     every inbound transition establishes it and no code path mutates fields in
+     ways the current state forbids. Fields valid only in some states = Temporary
+     Field smell (§7), escalated here because the invariant makes it checkable.
+   - **Illegal-transition rejection at the write site**: transitions enforced
+     where state is WRITTEN, not by UI flow or caller convention. A setter any
+     module can call with any value = no machine at all.
+   - **Single writer / ownership**: which module(s) mutate the state field?
+     More than one writer outside the owning module = coupling finding; feeds
+     Mode B cross-module state ownership (project-review.md).
+   - **Observability (external verifiability)**: each transition must be
+     externally distinguishable — return value, emitted event, log line, or
+     persisted timestamp — so a test can ASSERT the state, not infer it from
+     side effects. An unobservable transition is untestable → `should-fix`.
+   - **Restart & trap states**: process death mid-transition — is persisted
+     state re-entrant? Does every non-terminal state have an exit (timeout,
+     retry, compensation)? A reachable state with no exit is a trap → finding.
+   - **Concurrent transitions**: two events racing on the same entity — is the
+     transition atomic (transaction, versioned/compare-and-swap update), or is
+     lost-update/double-transition possible?
+4. **Security handoff**: any transition an ATTACKER could force, skip, replay,
+   or race is recorded as a `sec.state.*` discovery-stage candidate
+   (output-contract.md §5) and handed to security-deep-checklist — do not run
+   its attack-path pipeline here.
+
+## 11. Cross-Boundary Contract Consistency
+
+**Trigger gate — run this section ONLY when the diff touches a boundary
+contract**: an API request/response shape, a shared or mirrored enum, a
+validation rule that also exists on the other side of a frontend/backend (or
+service/service) boundary, an event/message schema, or an error shape. Purely
+one-side-internal changes: skip, record in coverage (`deferred`, reason
+"no boundary contract touched").
+
+The failure mode: each side compiles, each side's tests pass, and the SEAM is
+wrong — because the contract lives in two hand-maintained copies. Per-unit
+review cannot see it unless it explicitly looks at both sides. Checks
+(ruleId namespace `review.contract.*`):
+
+- **Both sides in the change set**: if this diff changes one side of a mirrored
+  contract (type, enum value, validation bound, error shape), where is the
+  matching change — same PR, linked PR, or codegen output? "Other side will
+  follow later" with no tracked link → `should-fix`.
+- **Canonical source question**: for each touched contract, which artifact is
+  authoritative (OpenAPI/GraphQL schema, protobuf, shared schema package) —
+  and is the code DERIVED from it (codegen, shared import) or hand-mirrored?
+  Hand-mirrored with no drift gate (contract test, schema diff in CI) →
+  finding; the remediation is the derivation mechanism, not "be careful".
+- **Compatibility window**: during a rolling deploy, old client + new server
+  (and the reverse) coexist. Is the change additive/tolerant (optional field,
+  unknown-value handling), or does it break one direction? Renaming or
+  repurposing a field in place is the classic miss.
+- **Error-shape contract**: does the consumer branch on error codes/shapes this
+  change alters? Error responses are contract too — verify the consumer's
+  error handling against the new shape, not just the happy path.
+- **Sequencing assumptions**: does the consumer rely on call order or
+  freshness the provider doesn't enforce? Note it as temporal coupling; the
+  server-side enforcement question is §10 / security-deep-checklist territory.
