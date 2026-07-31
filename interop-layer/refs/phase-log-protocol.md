@@ -1,9 +1,9 @@
 <!--
-  <URL> — curated, agent-neutral distillation of the
+  phase-log-protocol.md — curated, agent-neutral distillation of the
   workflow-checkpoint methodology (canonical source:
-  ~/.claude/skills/workflow-checkpoint/<URL>).
+  ~/.claude/skills/workflow-checkpoint/SKILL.md).
 
-  Reference-compile class (<URL>): the automatic triggering does
+  Reference-compile class (MIGRATION-MAP.md): the automatic triggering does
   not migrate; this file carries the checkpoint format and flows only. The
   phase-log FILES it produces are plain markdown inside project repos —
   they are readable by every agent platform, which is exactly why this
@@ -33,12 +33,12 @@ work. Never write files without explicit consent.
 
 Prefer the project's existing short code; otherwise a concise slug from the
 working directory name. Always use the SAME name across sessions so
-`references/<project><URL>` stays consistent and appendable.
+`references/<project>-phase-log.md` stays consistent and appendable.
 
 ## Writing a checkpoint
 
 1. Ask first; on consent, draft a concise phase summary.
-2. Write to `references/<project><URL>` inside the project:
+2. Write to `references/<project>-phase-log.md` inside the project:
    - Create `references/` and the file if absent; ALWAYS append a new
      section — never overwrite existing content.
    - Write the section entirely in English (read by AI in future sessions;
@@ -60,7 +60,7 @@ working directory name. Always use the SAME name across sessions so
 - Phase: <phase number and name, e.g. Phase 2 – UI Layout>
 - Status: in-progress / completed
 - Date: <absolute date — never relative dates>
-- Detail: <references/<URL> — omit line if no detail file>
+- Detail: <references/...-detail.md — omit line if no detail file>
 
 ## Goals
 - Bulleted goals for this phase
@@ -90,7 +90,7 @@ trial-and-error history.
 
 ## New-session reconstruction (user says "continue this project")
 
-1. Minimum tokens first: read ONLY `references/<project><URL>` —
+1. Minimum tokens first: read ONLY `references/<project>-phase-log.md` —
    do not replay history; do not read the whole repo first.
 2. Reconstruct: project goals, phase progress and status, most recent key
    decisions, unresolved TODOs.

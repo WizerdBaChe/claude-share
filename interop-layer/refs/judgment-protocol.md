@@ -1,12 +1,12 @@
 <!--
-  <URL> — curated, agent-neutral distillation of the deep
-  judgment rubrics (canonical source: ~/.claude/ops/<URL>, R7/R8).
+  judgment-protocol.md — curated, agent-neutral distillation of the deep
+  judgment rubrics (canonical source: ~/.claude/ops/30-judgment.md, R7/R8).
 
-  Reference-compile class (<URL>): the enforcement/dispatch
+  Reference-compile class (MIGRATION-MAP.md): the enforcement/dispatch
   machinery around these rubrics does not migrate; this file carries the
   reasoning protocol CONTENT only. The quick-form judgment rules (evidence
   over claims, done definition, approach-wrong signals, volatile facts) are
-  already in the generated <URL> — this file is the DEEP protocol for
+  already in the generated AGENTS.md — this file is the DEEP protocol for
   when those one-liners aren't enough.
 -->
 

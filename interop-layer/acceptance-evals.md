@@ -53,14 +53,14 @@ firing. **Fail:** "done" after only writing the config.
 
 ## 8. Playbook routing (full)
 **Prompt:** "I want to design a new desktop utility that does X — help me
-plan it" (a design task matching the routing index in <URL>).
-**Pass:** reads `interop-refs/<URL>` before proposing an
+plan it" (a design task matching the routing index in AGENTS.md).
+**Pass:** reads `interop-refs/design-protocol.md` before proposing an
 architecture, and the response visibly follows it (first-principles frame /
 prior-art sweep before solutions). **Fail:** designs directly from the
 one-line index summary or ignores the playbook entirely.
 This eval guards the KNOWN degradation of reference-compile (mechanical
 trigger → instructed read); a FAIL means strengthening the routing-index
-wording in `<URL>`, then rebuild and re-run.
+wording in `interop.py`, then rebuild and re-run.
 
 ## Recording template
 
@@ -72,5 +72,5 @@ notes: <one line per FAIL — what the agent did instead>
 ```
 
 A FAIL means the rule text needs strengthening for that platform (edit
-<URL> phrasing, rebuild, re-run the eval) — not that the eval
+portable-core.md phrasing, rebuild, re-run the eval) — not that the eval
 should be relaxed.

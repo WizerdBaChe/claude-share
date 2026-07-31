@@ -1,12 +1,12 @@
 <!--
-  <URL> — curated, agent-neutral distillation of the
+  design-protocol.md — curated, agent-neutral distillation of the
   product-design-thinking methodology (canonical source:
-  ~/.claude/skills/product-design-thinking/<URL>).
+  ~/.claude/skills/product-design-thinking/SKILL.md).
 
-  Reference-compile class (<URL>): the ROUTING mechanism
+  Reference-compile class (MIGRATION-MAP.md): the ROUTING mechanism
   (automatic skill triggering) does not migrate; this file carries the
   methodology CONTENT only. Target agents are pointed here by a prose
-  index in their generated <URL> — a deliberate degradation from
+  index in their generated AGENTS.md — a deliberate degradation from
   mechanical triggering to instructed reading.
 
   Content policy: agent-neutral English. No references to platform-specific
@@ -132,6 +132,22 @@ settle these in the design docs:
 Output is documents, not code. Document ladder (MDA-style):
 CIM → PIM + semantic contract → Verification gate → PSM → Implement.
 Match whichever layer the user is at; don't regenerate fixed upstream docs.
+
+**Language per rung** (applies the global file-output rule; that rule stays
+authoritative if the two ever diverge):
+
+| Rung | Language |
+|---|---|
+| CIM | Traditional Chinese — business semantics the user owns |
+| PIM + semantic contract | Bilingual: Chinese for concepts, relations, and rationale the user may intervene in; English for glossary terms, INV-n ids, schema/type names, state names, because downstream docs and code quote them verbatim |
+| Verification gate | Chinese narrative, English for the ids being traced |
+| PSM / work cards / remediation plan | **English spec body** — files touched, contracts, schemas, milestone steps, commands, error paths, rollback, machine-checkable acceptance. **Traditional Chinese only on the user's ruling surfaces**: measured results, decision rationale and register, manual acceptance checklist, degradation declaration, open questions |
+
+A PSM's next reader is the session that implements it, not the user — so
+"it's a prose document, therefore Chinese" is the wrong inference and has
+produced fully-Chinese build specs by mistake. Escape hatch: a concept whose
+original Chinese wording carries the meaning stays Chinese inside an English
+section; gloss it rather than force a lossy translation.
 
 1. **CIM (computation-independent)**: pain, actors, business rules,
    boundaries — business language ONLY; a technology noun here is a solution

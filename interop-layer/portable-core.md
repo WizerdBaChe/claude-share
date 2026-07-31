@@ -1,23 +1,23 @@
 <!--
-  <URL> — the single curated source for cross-agent global rules.
+  portable-core.md — the single curated source for cross-agent global rules.
 
-  This file is the ONLY place to edit portable rules. Generated <URL>
+  This file is the ONLY place to edit portable rules. Generated AGENTS.md
   files at target agents are build artifacts — never edit them directly.
 
-  Block syntax (parsed by <URL>):
+  Block syntax (parsed by interop.py):
     <!-- block:<id> profiles:<p1>,<p2> -->
-    <URL>rkdown content...
+    ...markdown content...
     <!-- /block -->
 
   Profiles: light (lightweight-task agents) ⊂ full (goal-oriented agents).
   Content policy: agent-neutral English only. No references to Claude Code
   skills, hooks, ops/ files, slash commands, or model names — those belong
-  to the mechanism layer (see <URL>) and are translated per
+  to the mechanism layer (see MIGRATION-MAP.md) and are translated per
   target, not copied.
 
-  Provenance: distilled from ~/.claude/<URL>. When <URL> changes,
-  `python <URL> status` flags this file for re-curation; after
-  reviewing, run `python <URL> curated`.
+  Provenance: distilled from ~/.claude/CLAUDE.md. When CLAUDE.md changes,
+  `python interop.py status` flags this file for re-curation; after
+  reviewing, run `python interop.py curated`.
 -->
 
 <!-- block:preamble profiles:light,full -->
@@ -35,9 +35,25 @@ project memory override these when they conflict.
 - **Conversation replies** (answers, questions, explanations): Traditional
   Chinese. For technical or ambiguous terms, append the English name inline:
   `中文名稱 (English name)`.
-- **File output**: human-readable documents (docs, reports, README) default
-  to Traditional Chinese. Machine- or AI-read content (code, comments,
-  commit messages, config files, prompts) must be entirely in English.
+- **File output — classify by PRIMARY CONSUMER, not by file type.** A prose
+  document is not automatically a human document; ask who acts on it next.
+  - *Human-read documents* (README, reports, retrospectives, evidence and
+    baseline records): Traditional Chinese, with the English term inline.
+  - *Machine-read content* (code, comments, commit messages, config files,
+    prompts, agent instruction files, phase logs, project glossary files):
+    entirely English.
+  - *Build specs another agent will execute* (implementation plans, work
+    cards, remediation plans — anything whose next step is handing it to a
+    session that builds from it): **English spec body** — files touched,
+    contracts and schemas, milestone steps, commands, automated acceptance.
+    Traditional Chinese only for the sections the user personally rules on:
+    measured results, decision rationale and registers, manual acceptance
+    checklists, degradation declarations, open questions.
+  - *Concept-level design docs* (concept notes, computation-independent and
+    platform-independent models): bilingual — Chinese for concepts,
+    semantics, and rationale the user may intervene in; English for glossary
+    terms, invariant ids, schema/type names, and state names, because
+    downstream docs and code quote them verbatim.
 <!-- /block -->
 
 <!-- block:git-workflow profiles:light,full -->
