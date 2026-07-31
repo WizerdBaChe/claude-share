@@ -48,6 +48,9 @@ no pointer is deleted, not softened into rhetoric.
 ✅ "Refuted: current machine cannot run (pytest passed). Still open:
 cross-machine rebuild unverified."
 
+Advisory (not part of R2's invariant): run the C11 close-out sweep
+(`50-coach.md`) before the final delivery message.
+
 ## R3 — When to stop and ask the requester
 
 Owner: the **decision charter** in global CLAUDE.md (engineering judgement).
@@ -136,11 +139,10 @@ releases monthly — plausible, outdated.
 ## R8 — Two-pass depth protocol (think first, then targeted verification)
 
 Trigger: Tier 2 of the depth-tier rule (global CLAUDE.md, engineering
-judgement), or the user forces it with 「深想」. Never self-invoke for Tier 0/1
-work. When a heavyweight skill (product-design-thinking,
-code-review-deep-checklist, deep-research) is active, its own protocol wins —
-do not stack this on top. Under user-granted L1/L2 relaxation: own order +
-one post-check instead.
+judgement), or the user forces it with 「深想」. Never self-invoke for Tier
+0/1 work. When a heavyweight skill is active, its own protocol wins — never
+stack this on top (skill list: the depth-tier rule). Under user-granted L1/L2
+relaxation: own order + one post-check instead.
 
 **Pass 1 — self-reliant.** Using only own knowledge plus already-loaded
 instructions: restate the problem, collect constraints, choose a decomposition
@@ -151,15 +153,14 @@ claim: (A) locally verifiable → verify immediately, never leave as assumption;
 external search during pass 1 — write the hypothesis first; searching first
 anchors on early results.
 
-**Clean-sheet extension (when the task improves an EXISTING artifact).**
-When hardening / auditing / extending something that already exists (a rule
-file, skill, config, module), pass 1 adds ONE clean-sheet enumeration: from
-domain knowledge, list what complete coverage of the artifact's problem class
-would include, then diff against the artifact as it stands. Structural gaps
-join the gap list as PROPOSALS — each must name a concrete failure scenario
-or be discarded (hallucination gate). One round only, no recursive redesign;
-"core need already met → recommend stopping" (global CLAUDE.md) still
-overrides. NEW-from-scratch design belongs to product-design-thinking Phase 0.
+**Clean-sheet extension.** When improving an EXISTING artifact (rule file,
+skill, config, module), pass 1 adds ONE clean-sheet enumeration: list from
+domain knowledge what complete coverage of the problem class would include,
+then diff against the artifact. Structural gaps join the gap list as
+PROPOSALS — each must name a concrete failure scenario or be discarded
+(hallucination gate). One round only, no recursive redesign; "core need met →
+recommend stopping" (global CLAUDE.md) overrides. NEW-from-scratch design →
+product-design-thinking Phase 0.
 
 **Gate.** Route each gap: residual A → local check; B → one targeted search
 per gap (granularity per R7), never an open sweep; C → batch into ONE question

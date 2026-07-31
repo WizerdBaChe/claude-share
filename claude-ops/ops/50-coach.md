@@ -134,3 +134,21 @@ the input is the problem → discover the file is UTF-16 and the parser assumed
 UTF-8.
 ❌ Write a fourth, more elaborate regex for input you've never actually
 hex-dumped.
+
+## C11 — Close-out sweep: three questions before the final message
+
+Before delivering any non-trivial result, run three questions: (1) did I
+observe anything in passing the requester should know (risk, debt, anomaly)?
+(2) what is the most likely way this deliverable fails in use? (3) is there
+ONE next step that would actually change the requester's decision? An item may
+be written ONLY with session-specific evidence behind it (file:line, actual
+output, an observation made this session) — no evidence, no item. Empty is a
+fully valid result; cap at 3 items. Generic checklist advice ("add tests",
+"write docs") with no evidence pointer is banned — it is padding, not signal.
+"Core need already met → recommend stopping" (global CLAUDE.md) overrides
+question 3: never propose continuation for its own sake.
+
+✅ "Done. In passing: config.py:88 reads an env var that no longer exists —
+unrelated to this change, flagging only."
+❌ "Next steps: add unit tests, improve error handling, consider refactoring"
+(none tied to anything observed — three lines of padding).

@@ -74,6 +74,15 @@ three copies that will drift apart and contradict each other.
   and MERGE with any near-duplicate instead of appending beside it; a new ops
   rule goes in its ONE owning file (§2). The reviewer of any 🟡 change checks
   the budget before the content.
+- **Scale-label qualifier rule**: an enumerable label whose meaning or
+  direction is not derivable from the word itself (L0–L2, Tier-2, Mode A/B,
+  layer numbers) carries a compact qualifier at every point of USE outside its
+  defining file — e.g. "L2 (fully relaxed, loosest)". Labels travel farther
+  than their definitions, and a bare label invites the reader's default
+  convention, which for L-scales is usually the INVERTED one (ASVS-style
+  higher = stricter). Corollary: never reuse an existing label family for a
+  new scale in the same rule tree (the 70-evolution "(L2)" build-check /
+  relaxation-level collision, fixed 2026-07-31, lessons.md L-008).
 - Before deleting a clause, look for evidence it's alive: referenced in recent
   work, cited in the audit trail, appears in a relevant diff, or tied to an
   open ticket. No evidence → mark "trim candidate", and only demote/remove

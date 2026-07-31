@@ -53,7 +53,8 @@ plan but product-design-thinking did not fire (remediation of an existing
 product read as "implementing an existing spec"), so the doc bypassed the
 skill's build-ready bar entirely.
 Fix (folded in): (3)+(4) → `30-judgment.md` R2 claim-calibration corollary;
-(1)+(2) → product-design-thinking Phase 3.4 sole-source contract rules;
+(1)+(2) → product-design-thinking sole-source contract rules
+(`skills/product-design-thinking/references/document-ladder.md` §4);
 trigger miss → skill description + `skill-trigger-dict.md` widened to
 PSM-grade remediation/re-planning. Finding 8 (market claims without
 source/date) was already covered by R5's "cite or label unverified" — that
@@ -100,6 +101,86 @@ for references TO that file (`grep -r "60-bootstrap" ~/.claude` style) and
 update every routing line in the same commit — enumerate by search, not by
 recall. Folded in: 40-maintenance §2 corollary wording now names OPS.md's
 routing table explicitly as an index file.
+
+## L-005 2026-07-30 tags: handoff|carried-claims|verification|docs hits: 2
+Context: Prism UAT-R3.5. Two separate defects, one shape. (a) 「batch-1 的未通過
+項尚未在真機複驗」 was true when written, became false when the author ran batch
+2, and survived THREE handoff documents afterwards. (b) 「ResearchGate 那一筆會
+繼續算失敗，這是對的」 was copied from the R3 record into the batch-3 UAT sheet
+and shipped to the author as an instruction; their real-machine run refuted it
+in one step.
+Pitfall: a claim copied from the previous round's document READS like an
+established fact, because it is written in the same authoritative voice as the
+facts around it. Nothing distinguishes "I verified this today" from "the last
+document said this". Prose does not decay loudly -- and the receiving session
+has no way to tell which sentences are load-bearing measurements and which are
+inherited assertions.
+Fix: (1) when carrying a claim forward into a new document, either re-derive it
+from source in that session or mark it INHERITED with the round it came from --
+never restate it flat. (2) For claims a build can check, make the build check
+them: Prism's DRIFT-01 rule (`check_architecture.py::carried-design-anchor`)
+asserts both that every file owing a deferred design carries its anchor and
+that the referenced doc section still exists, so deleting or renumbering the
+design goes red. Prose decays because nothing fails when it does; the durable
+fix is to make something fail.
+
+## L-006 2026-07-31 tags: skill-design|review-methodology|checklist|scope-gating hits: 1
+Context: FSM/state-machine verification and cross-boundary contract-drift
+lenses added to the deep-checklist skills (commits afb0c28, 19b00df).
+Pitfall: checklist skills naturally enumerate only code-visible defects.
+Defect classes that live in DESIGN SEMANTICS (state machines, mirrored
+FE/BE contracts, twin-implemented rules, doc claims) have no grep target,
+and both naive ways to add them fail: an always-on checklist section taxes
+every review with irrelevant work, and duplicating the topic into both the
+quality skill and the security skill creates rule drift between them.
+Fix (pattern, folded into code-review-deep-checklist Mode A §10/§11 +
+Mode B lenses, security-deep-checklist Mode A §9):
+(1) reconstruct-and-compare — rebuild the intended model from design
+semantics as a REPORT ARTIFACT (transition table, contract/twin inventory),
+then check code against it; the artifact is what findings anchor to and
+what re-reviews diff against.
+(2) every such section carries an explicit trigger gate (stateful units /
+boundary contracts only) and records skips in coverage — depth is capped
+(top 1–3 units), not open-ended.
+(3) single-owner placement: quality lens in code-review, attacker
+projection in security — and BEFORE adding to the second skill, check
+whether its projection is ALREADY covered (round 2: security intentionally
+unchanged; client-only validation, hidden≠protected, enforcement desync
+were already its §1/§4/§5/§9). Cross-skill traffic stays
+discovery-candidate only. Same test for adjacent skills: doc-drift
+DETECTION stayed in review; doc rewriting/backlog handed to
+engineering:documentation / engineering:tech-debt.
+
+## L-007 2026-07-31 tags: rules-editing|structural-edit|verify hits: 1
+Context: same changeset — inserting section 10 into single-review.md.
+Pitfall: a misplaced Edit insert followed by a PARTIAL revert left a
+duplicated half-section (two "## 10" headers, one truncated). The author
+pass did not catch it; only config-self-audit's section-header listing did.
+Insert-then-revert sequences on numbered checklist files corrupt structure
+silently — each individual edit "succeeded".
+Fix: after any structural edit to a sectioned rules file, scan headers
+(`Select-String '^## '`) and verify uniqueness + order BEFORE commit;
+prefer append-at-end or a single scripted move over incremental
+insert+revert. This is also the standing reason config-self-audit runs
+after every skill edit — the gate worked as designed.
+
+## L-008 2026-07-31 tags: rules-editing|naming|scale-labels|ux hits: 1
+Context: the ops-relaxation scale (05-authority §2). The system's own user
+read "L2" as a PERMISSION/strictness level ("權限L2") and later asked why
+"L0 is strictest but the OPS layer seems optional" — conflating the scale
+direction with the precedence order. Sweep also found "(L2)/(L3)" reused in
+70-evolution.md §4 for a different scale (build-vs-adopt check layers).
+Pitfall: two distinct defects with one root. (a) A bare scale label carries
+no direction; readers fill it with the dominant industry convention
+(ASVS/SIL: higher = stricter), which here is inverted — the designer's own
+misreading is the proof. (b) Label famines: reusing "L2" for a second scale
+in the same rule tree makes grep and recall collide. Definitions live in one
+file, but labels travel through every other file WITHOUT their definitions.
+Fix (folded in): scale-label qualifier rule in 40-maintenance §3 (qualify at
+every point of use outside the defining file; never reuse a label family);
+direction + precedence-orthogonality paragraphs added to 05-authority §2;
+glosses added at the gate ask sites (global CLAUDE.md, 60-bootstrap §A);
+70-evolution renamed to "(layer 2)/(layer 3)".
 
 ---
 ## Archived (folded into another file, or retired)

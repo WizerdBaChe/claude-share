@@ -6,6 +6,19 @@ duplicates its native judgment and taxes tokens. The fix is NOT self-granted
 freedom — it is a user-decided, per-project relaxation level. The model states
 who it is; the USER decides how much the rules loosen.
 
+**Scale direction (read this before using the labels)**: L-numbers measure
+RELAXATION, not rigor — L0 = zero relaxation (strictest, the default), L2 =
+full relaxation (loosest). This is inverted relative to ASVS-style
+"higher = stricter" scales, so every use of a bare label outside this file
+carries a qualifier (e.g. "L2 (fully relaxed)") — see the scale-label rule in
+`40-maintenance.md` §3.
+
+**Orthogonal to precedence**: the `global CLAUDE.md > project CLAUDE.md > ops`
+precedence order resolves CONFLICTS between rule sources; it does not rank how
+binding they are. An ops rule with no conflicting higher rule binds fully at
+L0. Relaxation (this file) is the only mechanism that loosens ops rules, and
+only the user grants it.
+
 ## §1 Rule classes
 
 Every ops rule belongs to exactly one class:

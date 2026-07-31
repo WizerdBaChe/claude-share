@@ -41,7 +41,7 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 | 卡在「該升級嗎/算完成嗎/該問嗎/方法錯了嗎」 | `30-judgment.md` |
 | 要改 ops 檔、或剛踩了值得記的坑 | `40-maintenance.md` |
 | 想校準思考方式（非旗艦模型的後設習慣） | `50-coach.md` |
-| 新專案第一個 session、ticket 帳本位置與格式、切票方法論 (tracer-bullet)、專案詞彙表 (domain glossary) | `60-bootstrap.md` |
+| 新專案第一個 session、ticket 帳本位置與格式、切票方法論 (tracer-bullet)、施工卡格式 (work card)、專案詞彙表 (domain glossary) | `60-bootstrap.md` |
 | 要提案改 guardrail（settings/hooks/權限）、知識該進記憶還是規則 | `70-evolution.md` |
 | 動手前查歷史坑 | `lessons.md`（先 grep） |
 
@@ -146,5 +146,6 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 | 新增/修改使用者跨專案偏好 | 全域 CLAUDE.md（🔴 需確認） |
 | 剛踩了一個坑要記下來 | `ops/lessons.md`（先查重） |
 | 把計畫拆成票（tracer-bullet / investigation） | `ops/60-bootstrap.md` §C |
+| 單項修改要寫成施工卡（欄位、何時必用） | `ops/60-bootstrap.md` §F |
 | 專案領域名詞該定義在哪 | `references/<project>-context.md`（`60-bootstrap.md` §E） |
 | 這條規則到底該放哪一層 | 本檔第一節判別法 |

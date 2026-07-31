@@ -6,10 +6,12 @@ environment facts (step B) and a durable task ledger (step C). Without them,
 
 ## A. First-session-in-a-project checklist (run once, ~10 minutes)
 
-1. **Read what exists**: project `CLAUDE.md`, `references/<project>-phase-log.md`
-   (if the `workflow-checkpoint` skill has been used), `references/<project>-tickets.md`,
-   `references/<project>-context.md` (domain glossary, §E — if present), and grep
-   `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
+1. **Read what exists**: `~/.claude/references/PROJECTS.md` (global project index —
+   register this project's row if missing), project `CLAUDE.md`,
+   `references/<project>-phase-log.md` (if the `workflow-checkpoint` skill has been
+   used), `references/<project>-tickets.md`, `references/<project>-context.md`
+   (domain glossary, §E — if present), and grep `~/.claude/ops/lessons.md` for the
+   project name. Never assume a fresh start.
 2. **No project CLAUDE.md?** Offer to run `/init`, then add the Environment-facts
    block (template below) with values you actually looked up this session.
 3. **No ticket ledger?** Create `references/<project>-tickets.md` from the template
@@ -18,7 +20,8 @@ environment facts (step B) and a durable task ledger (step C). Without them,
    run it or `Test-Path` it once now. Record what you verified; write
    "couldn't determine" for what you couldn't.
 5. **Relaxation level**: if the main model is frontier-tier and the project
-   CLAUDE.md has no `ops-relaxation:` line, ask the user to pick L0/L1/L2 now
+   CLAUDE.md has no `ops-relaxation:` line, ask the user to pick a level now —
+   L0 strictest (no relaxation, default) / L1 core relaxed / L2 loosest
    (`05-authority.md` §2) and record the answer in the project CLAUDE.md —
    one ask per project, not per session.
 
@@ -135,3 +138,49 @@ Rules:
 Maintenance mounts (who keeps it alive): `workflow-checkpoint` asks at each
 phase checkpoint whether new terms crystallized; `product-design-thinking`
 Phase 3 persists its PIM glossary here; §A step 1 reads it every first session.
+
+## F. Work-card format (施工卡 — build-ready rendering of ONE change item)
+
+A work card is a FORMAT, not a ledger: its content lives where the item
+already lives (a PSM/remediation-doc item, or a ticket's body under `notes:`).
+Never create a separate card file or registry beside the ticket ledger.
+
+```markdown
+### <PREFIX>-NN — <one-line end state>
+- Severity/Confidence: <blocker|should-fix|consider|nit> / <level + how verified>
+- Objects: <files touched, incl. new files and doc/ADR amendments>
+- Why: <root cause or violated rule, one line>
+- Change: <the fix, concrete enough for a FRESH context to execute unaided>
+- Blast radius: <behaviors affected + what must NOT change>
+- Rollback: <how to revert; constraints that survive the revert>
+- Acceptance: <machine-checkable check(s) first, then manual-compare items>
+- Commit: <conventional message per global CLAUDE.md git rule>
+```
+
+Field ownership (reference, never redefine — one rule, one file):
+- Language: global CLAUDE.md **File output** rule. A work card is the
+  build-spec class — English card body (Objects/Change/Blast radius/
+  Rollback/machine-checkable Acceptance); Traditional Chinese only for
+  the surfaces the user rules on (manual-compare acceptance items,
+  decision rationale). Do not let "it's a `.md` under `docs/`" default
+  it to Chinese.
+- Severity scale: `code-review-deep-checklist` output contract.
+- Commit format: global CLAUDE.md git rule. (`~/.claude/COMMIT-TEMPLATES.md`
+  is this config repo's own semantics — never apply it to target projects.)
+- Objects/Rollback/Acceptance render the sole-source build-ready bar
+  (`product-design-thinking` → `references/document-ladder.md` §4, the
+  normative minimum for sole-basis
+  docs); Severity/Confidence, Blast radius, and Commit are card additions —
+  a bar-compliant item missing only card-level fields is NOT a skeleton.
+
+When to use: RECOMMENDED for items in sole-basis build docs (PSM, remediation
+plan) and for deep-review remediation output (`code-review-deep-checklist`,
+`security-deep-checklist`) when actionable fixes are requested. OPTIONAL for
+ticket bodies (§C's 3-line stub stays the tracking minimum), dispatch work
+orders, expand-contract batches, and postmortem action items.
+
+✅ "SYNC-01 — SSE relay off the event loop": objects `routers/sync.py`; change
+`await asyncio.to_thread(events.get)` + disconnect handling; acceptance
+"`/api/health` responds during a slow-worker test".
+❌ "Refactor renderer for cleanliness" — no acceptance, no rollback, no blast
+radius: a wish, not a work card.
