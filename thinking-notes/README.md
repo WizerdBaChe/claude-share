@@ -16,6 +16,11 @@
 - [09-ai-reading-ai.md](09-ai-reading-ai.md) — AI-Reading-AI 信任校準：氣味地圖變平、聲明 vs 證據、執行高於閱讀、跨工件對質、共族盲點的結構性無解
 - [10-delegation-economics.md](10-delegation-economics.md) — 委派經濟學：冷啟動稅、上下文防火牆、世界重建包五要件、嵌合體陷阱、同族投票信心虛高
 - [11-implementation-capability-gaps.md](11-implementation-capability-gaps.md) — 三方 one-shot 方法論對讀後的缺口盤點：六個明顯缺乏＋五個深度不足＋落地優先序，供環境調整用
+- [12-legacy-revival-campaign.md](12-legacy-revival-campaign.md) — 從單場除錯到長線復活：除錯的認識論骨架（否證迴圈）、遺留系統啟動（考古／對齊分離、證據分級、補丁三分類）、戰役設計（遠征迴圈、決策塑形、停損機制），供技能開發／系統調整用
+
+## 實作狀態
+
+> **⚠ 標註（2026-07-13）**：文件 01–11 的可操作化項目**均已在本機系統實作與修正完畢**（規則層／坑卡層／模板層落地）。自 [12](12-legacy-revival-campaign.md) 起為尚未落地的新素材。
 
 ## 命名慣例
 
