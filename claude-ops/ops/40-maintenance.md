@@ -60,8 +60,10 @@ three copies that will drift apart and contradict each other.
 - Triggers (defaults, mechanically nudged by `hooks/ops_health_nudge.py` —
   change the two together): any ops file past ~10K chars; the entry file
   (`OPS.md`) past ~60 lines; `ops/lessons.md` past ~30 unfolded entries;
-  global `CLAUDE.md` past ~12K chars (it is ALWAYS loaded — trim/merge, don't
-  append); any skill frontmatter description past ~800 chars; any SKILL.md
+  global `CLAUDE.md` past ~15K chars (it is ALWAYS loaded — trim/merge, don't
+  append; raised from ~12K on 2026-08-01 after a real trim pass capped out at
+  ~13.7K without cutting any distinct rule — see `Global_skill_update.md`);
+  any skill frontmatter description past ~800 chars; any SKILL.md
   past ~250 lines; `skill-trigger-dict.md` past ~20K chars;
   `Global_skill_update.md` past ~60K chars → rotate oldest entries to
   `archive/` with a pointer note (append-only still holds for what remains).
