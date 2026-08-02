@@ -16,6 +16,7 @@ Licensed under [MIT](LICENSE).
 | `claude-ops/` | Anonymized snapshot of operational guidance for a Claude Code environment. See `claude-ops/README.md`. |
 | `thinking-notes/` | Numbered design-thinking notes on one-shot delivery, debugging epistemology, delegation economics, and related topics. See `thinking-notes/README.md`. |
 | `environment-guide/` | Human-facing philosophy, operator manual, and commit-message conventions for the source `~/.claude` environment, including a full migration checklist. See `environment-guide/README.md`. |
+| `global-claude-md/` | The top-level global `CLAUDE.md` entry point itself — conditional working preferences for Git workflow, environment/shell syntax, interaction style, engineering judgement, frontend layering (FSD), skill routing, project-operations tiering, file hygiene, and reply language. See `global-claude-md/README.md`. |
 
 ### `claude-ops/` snapshot details
 
@@ -39,6 +40,13 @@ Licensed under [MIT](LICENSE).
 - Review scope: usernames, local paths, account or machine identifiers.
 - Result: two username occurrences in path examples were replaced with generic `<user>` placeholders.
 - This is a point-in-time snapshot, not a synchronization target. See `environment-guide/README.md`.
+
+### `global-claude-md/` snapshot details (new 2026-08-02)
+
+- Source: `~/.claude/CLAUDE.md`, copied manually on 2026-08-02 (captures the 2026-08-01 update that added the Windows/PowerShell environment rule and the Feature-Sliced Design architecture rule).
+- Review scope: usernames, local paths, account or machine identifiers, machine-bound environment facts.
+- Result: the file carried no personal identifiers; its "Environment" section pinned a specific OS/shell/line-ending combination and was replaced with `<OS_NAME>` / `<SHELL_NAME_AND_VERSION>` / `<LINE_ENDING_CONVENTION>` placeholders (original values kept as an inline comment for reference). Cross-references to the operational rule layer and skill-trigger dictionary were generalized to `<OPS_DIR>` and `<SKILL_TRIGGER_DICT_PATH>`, which map to `claude-ops/` and `skill-toolkit/skill-trigger-dict.md` in this same repo.
+- This is a point-in-time snapshot, not a synchronization target. See `global-claude-md/README.md`.
 
 ## Conventions
 
