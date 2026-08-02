@@ -235,3 +235,24 @@ Each entry: what was newly added/changed + when (absolute timestamp).
   relaxation qualifier or sit in the defining file. CLAUDE.md at 12,842 chars —
   pre-existing over-budget (>12K), trim pass pending as a separate task.
 - Backups: backups/2026-07-31/. Commit 24d12b5.
+
+## 2026-08-02 — motion-design imported into this share (Three.js content excluded)
+
+- Source: `~/.claude/skills/motion-design/`, exported via `skill-share-packaging`
+  Mode A conventions (prescan + grep checklist on the copy, canonical skill
+  left untouched).
+- `vendor/lottiefiles/` copied verbatim — MIT with LICENSE and named copyright
+  holder, no issue.
+- `vendor/threejs/` (upstream `cloudai-x/threejs-skills`) deliberately **not
+  copied**: the canonical environment's own `Global_skill_update.md` entry for
+  this skill (2026-08-01) recorded that upstream's license defect — no
+  `LICENSE` file, no named copyright holder — as "blocks redistribution until
+  upstream fixes it." This share honours that ruling. `SKILL.md`, `NOTICE.md`,
+  and `local/currency.md` were adjusted to point at the upstream URL instead
+  of reproducing the text, and `local/env-bridge.md`'s hardcoded
+  `D:\AIWork\AssetVault\registry.json` path was generalized (machine-specific,
+  and pointed at a skill — `asset-vault` — not included in this share).
+- `skill-trigger-dict.md`: new 動效與 3D section + 3 disambiguation rows,
+  ported from the source dictionary (no personal paths in that section).
+- `asset-vault` itself was NOT imported this round (tied to a separate
+  in-progress project; deferred by request).

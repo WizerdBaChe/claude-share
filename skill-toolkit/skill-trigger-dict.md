@@ -143,6 +143,22 @@
 
 ---
 
+## 動效與 3D (Motion & 3D)
+
+### motion-design（動效與 3D 總控 / motion + animation + 3D hub）
+- 關鍵詞：動畫 (animation)、動效、轉場 (transition)、微互動 (micro-interaction)、緩動 (easing)、時長 (duration)、編舞/交錯 (choreography / stagger)、載入/成功/錯誤狀態、捲動觸發 (scroll-triggered)、品牌動態識別 (brand motion identity)、粒子 (particles)、Three.js、WebGL、GLSL/shader、GLTF、後製特效 (post-processing)、raycasting、OrbitControls
+- 精準句型：
+  - 方法論：「這個按鈕/卡片的**動效**該怎麼做（時長、緩動、人格）」/「幫我定**品牌動態識別**」
+  - 3D：「用 **Three.js** 做一個 X」/「寫個 **shader/GLSL** 效果」/「載入 **GLTF** 模型並播動畫」
+- 性質：**hub（總控）**。SKILL.md 只有路由表與常用表；內容在 `vendor/`（第三方 MIT 原文：LottieFiles 方法論 16 檔 + Three.js 手冊 10 檔）與 `local/`（本機義務與時效說明）。平時不佔 context，用到才讀。
+- 本機義務（交付前必讀 `local/env-bridge.md`）：視覺閘門（測試綠 ≠ 畫面對，需使用者實環境確認）、動效/3D 交付一律附可切換 FPS+物件數讀數、失敗要自曝（黑畫面算缺陷）、GLSL ES 多貼圖取樣必須展開成具名 uniform（否則靜默編譯失敗）、可調參數集中成一個 config 區塊 + 調整對照表。
+- 時效邊界：`vendor/threejs/` 對齊 r160+，現行為 r185（落後約 25 個 release），**完全未涵蓋 WebGPU / TSL**；引用 API 簽名前先讀 `local/currency.md` 並對照專案實裝版本。
+- 授權注意：`vendor/threejs/` 的上游未附 LICENSE 檔、未具名著作權人，MIT 授權只存在於上游 README 的一句話——詳見 `skills/motion-design/NOTICE.md` 的完整記錄與接受理由；`vendor/lottiefiles/` 授權完整（MIT + LICENSE + 具名著作權人），無此疑慮。
+- 擴充：未來新增動效 skill/函式庫（GSAP、Framer Motion、Rive、R3F…）**一律併入本 hub**，不另開頂層 skill — 程序見 `skills/motion-design/local/extending.md`。
+- 避免說法：「多產品統一 design tokens / theme packs」（→ design-system-suite）、「把這個動畫元件存進素材庫」（本分享未收錄對應 skill，此為原環境的內部指涉，可依自己環境的等效技能類推）、「整個產品的設計流程」（→ product-design-thinking）
+
+---
+
 ## 環境設定 (Claude Code Config)
 
 ### update-config（settings.json / 權限 / hooks）
@@ -199,6 +215,9 @@
 | 我這個實驗/研究下一步該做什麼 | scientific-research-guide |
 | 該用哪個統計檢定 / 實驗怎麼設計 | scientific-research-guide |
 | 投稿前方法學要補什麼 | scientific-research-guide |
+| 這個動效/轉場該怎麼做（時長、緩動） | motion-design |
+| Three.js / WebGL / shader / GLTF | motion-design |
+| 品牌動態識別、編舞與交錯 | motion-design |
 | 把這個 skill 打包分享給別人 | skill-share-packaging (A) |
 | 網路抓的 skill 能不能安全裝 | skill-share-packaging (B) |
 | 找論文 / 整理方法比較 / 查文獻參數值 | literature-search-extract |
