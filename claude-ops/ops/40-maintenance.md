@@ -58,7 +58,9 @@ three copies that will drift apart and contradict each other.
 ## §3 Trim discipline (keeping this from becoming an unread constitution)
 
 - Triggers (defaults, mechanically nudged by `hooks/ops_health_nudge.py` —
-  change the two together): any ops file past ~10K chars; the entry file
+  change the two together): any ops file past ~12K chars (raised from ~10K
+  on 2026-08-06 — a lossless trim pass capped out ~11.2K without cutting
+  distinct rules, same pattern as the CLAUDE.md raise); the entry file
   (`OPS.md`) past ~60 lines; `ops/lessons.md` past ~30 unfolded entries;
   global `CLAUDE.md` past ~15K chars (it is ALWAYS loaded — trim/merge, don't
   append; raised from ~12K on 2026-08-01 after a real trim pass capped out at
@@ -76,6 +78,12 @@ three copies that will drift apart and contradict each other.
   and MERGE with any near-duplicate instead of appending beside it; a new ops
   rule goes in its ONE owning file (§2). The reviewer of any 🟡 change checks
   the budget before the content.
+- **Birth schema** (record types): a NEW record-document type must declare at
+  birth its minimum field set — at least an id-or-date anchor, a status/verdict,
+  a why, and an evidence-or-link field — plus its owning file, and register in
+  `ops/rules-usage-dict.md` §7 in the SAME commit. Schema fields are
+  invariant-class: no relaxation level omits them; only narrative style and
+  procedure relax. An unregistered record format is a ghost rule (§4.1).
 - **Scale-label qualifier rule**: an enumerable label whose meaning or
   direction is not derivable from the word itself (L0–L2, Tier-2, Mode A/B,
   layer numbers) carries a compact qualifier at every point of USE outside its

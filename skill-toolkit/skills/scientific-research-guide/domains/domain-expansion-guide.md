@@ -164,6 +164,41 @@ correctly.
 
 ---
 
+## 3.1 Optional profile metadata block (established convention, not yet a required node)
+
+Existing base profiles (`plasmonic_waveguide.md`, `topological_insulator.md`,
+`gan_power_device.md`, `microled.md`) all prepend a `> Profile metadata:` /
+`> Primary source types:` / `> Notes for AI use:` block before Node 1. This is a useful,
+low-cost convention worth continuing for new base profiles, but it is not yet part of §3's
+required seven nodes — a profile missing it is not structurally invalid.
+
+**When a `Notes for AI use:` line points at an optional external tool** (a local literature
+corpus, a terminology/glossary vault, a simulation-tool inventory, etc.), write it as a
+**swappable slot, not a hard dependency** — the same pattern already used for `prism` in
+SKILL.md Gate B and for the local-corpus slot in `literature-search-extract`:
+
+1. Name the *category* of tool and what it is for ("a local terminology/glossary vault",
+   not just a product name).
+2. State the domain's own lookup key if it has one (a DomainPath, a corpus tag) — this is
+   domain-specific and belongs in the domain file even if the tool itself is generic.
+3. Cite the currently-known reference implementation as an example ("the reference
+   implementation as of <date> is X"), not as the only supported option.
+4. State explicitly how the profile degrades when the tool is absent (fall back to this
+   file's own Node 1 tables / a sibling reference file / etc.). A profile must remain
+   fully usable without any optional external tool.
+5. Do **not** hardcode a personal absolute filesystem path into the profile body. It
+   breaks the moment the tool moves, and it becomes a data-leak/environment-coupling
+   finding the moment the skill is shared (see `skill-share-packaging`'s de-environment
+   pass). If a path is genuinely needed for a human reader, put it in `STATUS.md` or a
+   report file, not in content the AI loads as domain reasoning.
+
+This same slot pattern is how the `prism` MCP hook in SKILL.md and the citation-inbox
+delegation to `literature-search-extract` (see `references/user-supplied-citations.md`
+§Delegation rule) are already written — a domain profile's terminology-vault hint should
+read the same way, not invent its own convention.
+
+---
+
 ## 4. Authoring Rules for Each Node
 
 ### Node 1: Theoretical Framework Anchoring
@@ -623,16 +658,22 @@ skills/scientific-research-guide/
 │   │   └── split_ring_resonators.md      ← boundary note (routes to a future metamaterial domain)
 │   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 currently
 │   │                                    missing — see STATUS.md known pre-existing debt)
-│   └── topological_insulator/        ← that domain's sub-profiles
-│       ├── bi2se3_material.md            ← sub-profile (material)
-│       ├── wal_hln_transport.md          ← sub-profile (phenomenon/method)
-│       ├── surface_and_composition_characterization.md ← sub-profile (method)
-│       └── device_fabrication.md         ← sub-profile (method)
+│   ├── topological_insulator/        ← that domain's sub-profiles
+│   │   ├── bi2se3_material.md            ← sub-profile (material)
+│   │   ├── bi2se3_plasmonic_photoresponse.md ← sub-profile (method; Bi2Se3 plasmon/CPGE/LPGE)
+│   │   ├── wal_hln_transport.md          ← sub-profile (phenomenon/method)
+│   │   ├── surface_and_composition_characterization.md ← sub-profile (method)
+│   │   └── device_fabrication.md         ← sub-profile (method)
+│   ├── gan_power_device.md           ← base profile (vertical GaN power devices)
+│   └── microled.md                   ← base profile (inorganic microLED devices)
+├── references/
+│   └── user-supplied-citations.md    ← source-provenance inbox for user-supplied URLs
+│                                        (not a domain file; listed here for completeness)
 └── evals/
     └── evals.json                    ← Test cases
 ```
 
 > Sub-profile folders (`domains/<domain>/`) are created only when a domain actually needs
 > its first branch — do not pre-create empty folders. This listing reflects the actual
-> files as of 2026-07-28; treat it as a snapshot, not a guarantee — check the directory
+> files as of 2026-08-03; treat it as a snapshot, not a guarantee — check the directory
 > and `_routing.md` for the current state.

@@ -10,8 +10,9 @@ environment facts (step B) and a durable task ledger (step C). Without them,
    register this project's row if missing), project `CLAUDE.md`,
    `references/<project>-phase-log.md` (if the `workflow-checkpoint` skill has been
    used), `references/<project>-tickets.md`, `references/<project>-context.md`
-   (domain glossary, §E — if present), and grep `~/.claude/ops/lessons.md` for the
-   project name. Never assume a fresh start.
+   (domain glossary, §E — if present), `references/<project>-decisions.md`
+   (§G — if present, re-confirm its `## Now` premises before acting), and grep
+   `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
 2. **No project CLAUDE.md?** Offer to run `/init`, then add the Environment-facts
    block (template below) with values you actually looked up this session.
 3. **No ticket ledger?** Create `references/<project>-tickets.md` from the template
@@ -25,10 +26,9 @@ environment facts (step B) and a durable task ledger (step C). Without them,
    (`05-authority.md` §2) and record the answer in the project CLAUDE.md —
    one ask per project, not per session.
 
-✅ First session: read phase-log → discover phase 2 finished last week → resume
-from the open ticket instead of re-planning from zero.
-❌ First session: start "helpfully" restructuring, discover in hour two that a
-half-finished migration ticket already covered this — now two conflicting efforts.
+✅ Read phase-log → phase 2 finished last week → resume from the open ticket.
+❌ Start restructuring "helpfully"; hour two reveals a half-finished migration
+ticket already covered it — two conflicting efforts.
 
 ## B. Environment-facts block (append to the PROJECT CLAUDE.md, dated, verified)
 
@@ -46,10 +46,10 @@ a guess (`50-coach.md` C1).
 
 ## C. The durable ticket ledger (progress lives in files, not conversations)
 
-Location: `references/<project>-tickets.md` — sibling of the phase-log so the
-`workflow-checkpoint` skill finds both. In-session task tools (TaskCreate etc.)
-are fine for live tracking, but they are session-scoped: anything that must
-survive a restart gets mirrored here. The file is the authority on resume.
+Location: `references/<project>-tickets.md` — sibling of the phase-log so
+`workflow-checkpoint` finds both. In-session task tools are session-scoped:
+anything that must survive a restart gets mirrored here; the file is the
+authority on resume.
 
 Ticket stub (3 lines minimum — `10-command-loop.md` step 3):
 
@@ -71,10 +71,9 @@ evidence demanded by `30-judgment.md` R2. Completed tickets move to an
 When decomposing a plan/design doc into tickets (typically after a
 product-design-thinking PSM is fixed), each `build` ticket is a **tracer
 bullet**: a narrow but COMPLETE vertical slice through every affected layer
-(schema → logic → surface → tests), demoable or verifiable on its own, and
-sized to fit one fresh context window. Write "what to build" from the user's
-perspective, not as a layer breakdown. `blocked-by` edges only where genuine
-gating exists — a ticket with no blockers can start immediately.
+(schema → logic → surface → tests), demoable on its own, sized to one fresh
+context window, written from the user's perspective — not a layer breakdown.
+`blocked-by` edges only where genuine gating exists.
 
 - **Exception — wide mechanical refactors**: don't force them into tracer
   bullets (breaks green-state between tickets). Use expand-contract instead:
@@ -89,11 +88,9 @@ gating exists — a ticket with no blockers can start immediately.
 ✅ "T-012 user can export a report as PDF" (schema+API+button+test, demoable).
 ❌ "T-012 write the PDF service layer" + "T-013 wire up the UI" — horizontal
 slices, neither verifiable alone.
-
-✅ Resume after a crash: `grep "status: active" references/*-tickets.md` → pick
-up exactly where the ledger says, partial results path included.
-❌ Progress tracked only via the session's task list → restart → the task list
-is gone and "where was I" costs an hour of re-discovery.
+✅ Crash resume: `grep "status: active" references/*-tickets.md` → pick up
+exactly where the ledger says. ❌ Progress only in the session task list →
+restart → gone; "where was I" costs an hour.
 
 ## D. Worker delivery index (the worker-side ledger — not a ticket edit)
 
@@ -125,15 +122,14 @@ first term worth pinning — not a standard fixture for every project. Format:
 ```
 
 Rules:
-- **Update live**: record a term the moment it crystallizes (design session,
-  checkpoint, mid-task) — batching updates is how glossaries die.
-- **Challenge, don't just consume**: when the requester's usage contradicts an
-  entry ("glossary says cancellation = X, you now mean Y"), surface it and
-  update — a stale definition is worse than none.
-- **Glossary only**: no specs, no implementation notes, no scratch content.
+- **Update live**: record a term the moment it crystallizes — batching updates
+  is how glossaries die.
+- **Challenge, don't just consume**: requester usage contradicts an entry →
+  surface it and update; a stale definition is worse than none.
+- **Glossary only**: no specs, implementation notes, or scratch content.
 - **ADR gate** (three ALL required, else no ADR): hard to reverse + surprising
-  without context + a genuine trade-off existed. ADRs go in the project's own
-  docs (`docs/adr/` or per project convention), one line of gist here.
+  without context + a genuine trade-off existed. ADRs live in the project's
+  own docs (`docs/adr/` or per convention), one line of gist here.
 
 Maintenance mounts (who keeps it alive): `workflow-checkpoint` asks at each
 phase checkpoint whether new terms crystallized; `product-design-thinking`
@@ -145,33 +141,12 @@ A work card is a FORMAT, not a ledger: its content lives where the item
 already lives (a PSM/remediation-doc item, or a ticket's body under `notes:`).
 Never create a separate card file or registry beside the ticket ledger.
 
-```markdown
-### <PREFIX>-NN — <one-line end state>
-- Severity/Confidence: <blocker|should-fix|consider|nit> / <level + how verified>
-- Objects: <files touched, incl. new files and doc/ADR amendments>
-- Why: <root cause or violated rule, one line>
-- Change: <the fix, concrete enough for a FRESH context to execute unaided>
-- Blast radius: <behaviors affected + what must NOT change>
-- Rollback: <how to revert; constraints that survive the revert>
-- Acceptance: <machine-checkable check(s) first, then manual-compare items>
-- Commit: <conventional message per global CLAUDE.md git rule>
-```
-
-Field ownership (reference, never redefine — one rule, one file):
-- Language: global CLAUDE.md **File output** rule. A work card is the
-  build-spec class — English card body (Objects/Change/Blast radius/
-  Rollback/machine-checkable Acceptance); Traditional Chinese only for
-  the surfaces the user rules on (manual-compare acceptance items,
-  decision rationale). Do not let "it's a `.md` under `docs/`" default
-  it to Chinese.
-- Severity scale: `code-review-deep-checklist` output contract.
-- Commit format: global CLAUDE.md git rule. (`~/.claude/COMMIT-TEMPLATES.md`
-  is this config repo's own semantics — never apply it to target projects.)
-- Objects/Rollback/Acceptance render the sole-source build-ready bar
-  (`product-design-thinking` → `references/document-ladder.md` §4, the
-  normative minimum for sole-basis
-  docs); Severity/Confidence, Blast radius, and Commit are card additions —
-  a bar-compliant item missing only card-level fields is NOT a skeleton.
+Fields: Severity/Confidence, Objects, Why, Change, Blast radius, Rollback,
+Acceptance (machine-checkable first), Commit. **Full template + the
+field-ownership map (language, severity scale, commit format, build-ready
+bar): `ops/60-record-templates.md` §1 — read it before writing a card.**
+Objects/Rollback/Acceptance render the sole-source build-ready bar; a
+bar-compliant item missing only card-level fields is NOT a skeleton.
 
 When to use: RECOMMENDED for items in sole-basis build docs (PSM, remediation
 plan) and for deep-review remediation output (`code-review-deep-checklist`,
@@ -184,3 +159,43 @@ orders, expand-contract batches, and postmortem action items.
 "`/api/health` responds during a slow-worker test".
 ❌ "Refactor renderer for cleanliness" — no acceptance, no rollback, no blast
 radius: a wish, not a work card.
+
+## G. Decision & Process Journal (`references/<project>-decisions.md`)
+
+The know-why layer between ADR (heavy, three-gate — §E) and a ticket's
+one-line `notes:`: decisions WITH their reasoning and rejected options, plus
+process problems (dead ends, walls) below lessons.md's global-pitfall bar.
+Per-project only — cross-project abstraction/export is `project-retrospective`'s
+job, never this file's.
+
+**Write-triggers** (ANY fires; create the file lazily at the first): a
+serious candidate was rejected; a problem took ≥2 rounds to crack; the user
+made a ruling; the plan deviated from its original course.
+
+Format: append-only, NEWEST ENTRY FIRST, English body (Traditional Chinese
+only in fields the user rules on). Sections: `## Now` (frontier / premises /
+open — the resume anchor) + `## D-NNN` decisions (status / context / options /
+choice+why / revisit-if / links) + `## P-NNN` problems (status / trail /
+resolution / links). **Full template: `ops/60-record-templates.md` §2 — read
+it before writing an entry.** Minimum fields are invariant-class (registry:
+`ops/rules-usage-dict.md` §7); narrative style is free.
+
+Rules:
+- **`## Now` is the resume anchor**: every NEW SESSION on a continuing task
+  re-reads it and re-confirms the premises BEFORE acting — P-env re-verified
+  (facts rot), P-intent/P-validity re-stated to the user in one short block;
+  origin-(user) premises follow the overturn hierarchy (`30-judgment.md` R2:
+  ask with evidence, never auto-overturn). A session-start duty, not a
+  per-turn one; `workflow-checkpoint`'s reconstruction flow mounts it.
+- **Boundaries**: ADR-grade (three gates all pass, §E) → project `docs/adr/`,
+  one gist line here; a pitfall that generalizes beyond the project →
+  promote to `ops/lessons.md`, mark `promoted→L-NNN`; tickets carry D/P ids
+  in `notes:`, never the content (one rule, one file).
+- **Maintenance mounts**: `workflow-checkpoint` sweeps for unrecorded D/P
+  entries at each checkpoint (same pattern as the §E glossary sweep);
+  `10-command-loop.md` Step 8 checks once at close-out.
+
+✅ "D-004 chose SQLite over Postgres: single-user desktop app; revisit-if:
+multi-user sync becomes a goal."
+❌ Ticket note "decided to use SQLite" with the why lost — three sessions
+later the decision gets relitigated from zero.

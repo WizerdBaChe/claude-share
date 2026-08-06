@@ -56,6 +56,12 @@ avoiding the need to replay full conversation history and saving usage.
    this phase; if yes, update `references/<project>-context.md` (format and rules:
    `~/.claude/ops/60-bootstrap.md` §E — create lazily, update live, one definition
    per term). Skip silently if the project has no glossary and no new terms.
+5b. **Journal sweep**: likewise check whether this phase produced unrecorded
+   decisions (rejected options + why) or process problems (≥2-round walls, dead
+   ends); if yes, append D-/P- entries and refresh the `## Now` block (frontier /
+   premises / open) in `references/<project>-decisions.md` (format and
+   write-triggers: `~/.claude/ops/60-bootstrap.md` §G — create lazily). Skip
+   silently if nothing qualifies.
 6. **Index row update** (no extra consent needed — covered by the checkpoint consent):
    refresh this project's row in `references/PROJECTS.md` (status / last-checkpoint /
    next). Create the file from its header template if missing; add the row if the
@@ -112,7 +118,8 @@ avoiding the need to replay full conversation history and saving usage.
 
 ## C. New-Session Reconstruction Flow (user says "continue this project")
 
-1. **Minimum tokens first**: read only `references/<project>-phase-log.md`, plus `references/<project>-context.md` if it exists (domain glossary — small, prevents vocabulary drift across sessions). Do not replay history; do not read the entire repo first.
+1. **Minimum tokens first**: read only `references/<project>-phase-log.md`, plus `references/<project>-context.md` if it exists (domain glossary — small, prevents vocabulary drift across sessions), plus the `## Now` block of `references/<project>-decisions.md` if it exists. Do not replay history; do not read the entire repo first.
+   - **Premise re-confirmation (mandatory for continuing tasks)**: before acting, re-confirm the `## Now` premises — re-verify P-env facts (they rot), and re-state P-intent / P-validity premises to the user in one short block. Origin-(user) premises are never auto-overturned: if evidence now contradicts one, ask with the evidence attached (`~/.claude/ops/30-judgment.md` R2 overturn hierarchy).
    - **Fallback — phase-log missing or clearly stale** (session died before a
      checkpoint was written): tell the user reconstruction will cost more than a
      normal recap, and upon consent rebuild from persisted session transcripts

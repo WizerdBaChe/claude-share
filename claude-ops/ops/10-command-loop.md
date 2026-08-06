@@ -148,7 +148,9 @@ ticket, explain the reorder when reporting.
 1. **Report**: one-sentence conclusion first → key details → next step. Large
    deliverables by path, not pasted.
 2. **Feed the loop**: route the lesson per `40-maintenance.md` §2 (check for an
-   existing entry first).
+   existing entry first). A decision with rejected options, a ≥2-round
+   problem, or a plan deviation also lands in the project's decision journal
+   (`60-bootstrap.md` §G write-triggers).
 3. **Reconcile commitments**: everything you said you'd do — done, or
    rescheduled with notice? Before ending the turn, check for any ticket still
    marked active and owned by you (including one interrupted by an incoming

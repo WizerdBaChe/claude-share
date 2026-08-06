@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 *.stamp
+
+# superseded draft material kept on disk for traceability, not for publishing
+# (may contain local/machine-specific paths — see the archive's own README)
+skill-toolkit/skills/scientific-research-guide/archive/

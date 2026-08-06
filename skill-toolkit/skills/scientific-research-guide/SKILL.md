@@ -121,6 +121,11 @@ Any load-bearing claim about *how to do the research* must be grounded, not reca
   gaps, confidence, search_trail). It owns the search-and-extract sub-task; the
   methodological judgement (what to search for, how the evidence bears on the research
   question) stays here.
+- If the user has supplied raw URLs to store or triage, or an existing entry in
+  `references/user-supplied-citations.md` needs its access tag raised or its identity
+  resolved, run that Tier 1 work through the same `literature-search-extract` Mode 2
+  contract and write the result back per that file's own "Delegation rule" — do not
+  hand-search a citation inline.
 
 State briefly what you verified and when. If a fact is genuinely settled and local
 (this repo, an installed tool), check it locally instead of searching.
@@ -237,6 +242,9 @@ recommend stopping rather than inventing more steps.
   (research-question statement, PRISMA plan, statistical analysis plan, V&V report,
   reproducibility & figure-standards checklist, standard paper structure). Load when writing
   a document (Gate D).
+- `references/user-supplied-citations.md` — source-provenance inbox and triage rules for
+  user-provided URLs. Load when the user asks to store, normalize, deduplicate, or promote
+  a citation list; do not treat [untriaged] entries as evidence.
 - `domains/_routing.md` — the manifest of which Layer-B files exist and when to load each
   (base profiles, sub-profiles, references/boundary notes). Single source of truth for the
   load list; SKILL.md does not hardcode domain paths. Consulted at Gate A Step 0.

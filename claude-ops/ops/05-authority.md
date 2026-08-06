@@ -101,11 +101,16 @@ task of Tier-2 weight (depth-tier triage, global CLAUDE.md). Analysis/
 evaluation answers route to `30-judgment.md` R8 instead — same tier words,
 different protocol. Emit the contract BEFORE method or design work starts.
 
-**Format** — 4 sections, HARD CAP 15 lines total; an empty section is the
+**Format** — 5 sections, HARD CAP 18 lines total; an empty section is the
 single word "none". The cap is load-bearing: a contract too long to read in
 seconds becomes a fake gate the user skims past.
 
     ## Boundary Contract — <task>
+    0. Premises: <irreducible assumptions the task rests on — wrong ⇒ whole
+       deliverable invalid>; each tagged [P-env verified <how>] |
+       [P-intent reported/asked] | [P-validity verified <how> / ASSUMED,
+       blast radius: <impact>]; origin marked (user)/(model) — overturn
+       rules: `30-judgment.md` R2 overturn hierarchy
     1. Interpretation forks: <ambiguity> → chose <reading> because <why>;
        isolation point: <module/param that flips the call if wrong>
     2. Boundary inputs: <inputs/states that break it, trimmed to known env>

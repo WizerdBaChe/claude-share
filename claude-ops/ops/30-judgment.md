@@ -1,11 +1,9 @@
 # Judgment Rubrics — executable substitutes for "strong-model taste"
 
-Usage: at a judgment point, find the matching rubric and follow it. If no
-rubric answers it, it's a genuine taste call — go to R6.
-
-Rule classes (`05-authority.md`): R2/R5/R7 invariant — never relax.
-R1/R4/R6/R8 scaffolding — advisory for a frontier main session only under a
-user-granted relaxation level. R3 points to the decision charter (invariant).
+Usage: at a judgment point, follow the matching rubric; none matches → it's a
+genuine taste call, go to R6. Rule classes (`05-authority.md`): R2/R5/R7
+invariant — never relax; R1/R4/R6/R8 scaffolding — advisory for a frontier
+main session under user-granted relaxation; R3 → decision charter (invariant).
 
 ## R1 — When to escalate the model (or hand back to the dispatcher)
 
@@ -37,16 +35,38 @@ run actually produced its output file AND the ticket says so.
 
 **Claim-calibration corollary** (`lessons.md` L-002): claim strength never
 exceeds evidence strength. Universal/completion claims ("complete", "no
-gaps", "sole source of truth", "premise refuted") need enumerable evidence —
-a matrix, exhaustive diff, or real run; a one-pass survey only supports
-"initial pass found no further gaps". Prefer a list of open defects over a
-clean "done". When refuting a prior finding, split it into component
-propositions and verdict each — a one-sentence partial refutation inverts
-the surviving half. Delivery summaries: every "I did X" must point at a
-concrete location in the artifact (file / function / section); a claim with
-no pointer is deleted, not softened into rhetoric.
+gaps", "premise refuted") need enumerable evidence (matrix, exhaustive diff,
+real run); a one-pass survey supports only "initial pass found no further
+gaps". Prefer listing open defects over a clean "done". Refuting a prior
+finding: split it into component propositions and verdict each — a
+one-sentence partial refutation inverts the surviving half. Every
+delivery-summary "I did X" points at a concrete location (file / function /
+section); a claim with no pointer is deleted, not softened.
 ✅ "Refuted: current machine cannot run (pytest passed). Still open:
 cross-machine rebuild unverified."
+
+**Refutability statement** (R2's delivery-side duty, invariant): a Tier-2
+deliverable (depth-tier triage, global CLAUDE.md) attaches after its
+conclusion:
+
+    Refutability:
+    - Holds when: <validity boundary — conditions under which this stands>
+    - Overturned by: <single most likely falsifier — a concrete check>
+    - Evidence tier: locally verified | externally verified (source) | assumption
+    - Not covered: <explicitly outside this deliverable's claim>
+
+Tier-1 may compress to one line ("Holds when X; overturned by Y; tier Z");
+Tier-0 exempt. Subagents and cheap/mid main models always write the full
+block — they misjudge the tiering.
+
+**Overturn hierarchy** (who may be refuted, by what): any MODEL-derived
+conclusion, premise, or plan is overturned freely by actual data + sound
+reasoning — no permission needed; log the reversal in one line. USER-ORIGIN
+irreducible premises (stated goals, values, explicit rulings) are protected:
+if evidence suggests one is unreasonable, ASK per R3, attaching the
+evidence and a proposed revision — they change only on the user's
+agreement, never auto-overturned (silently optimizing toward a "corrected"
+goal is the violation, however sound the reasoning).
 
 Advisory (not part of R2's invariant): run the C11 close-out sweep
 (`50-coach.md`) before the final delivery message.
@@ -95,36 +115,30 @@ spot-check, not a reason to skip it.
 
 ## R6 — Taste calls and genuine ambiguity (the honest exit)
 
-Rubrics genuinely cannot decide: tone/style choices; unstated requester
-preferences; "both are correct — which is more elegant"; how much latitude a
-policy's wording allows.
-
-Three moves, in order:
+Rubrics genuinely cannot decide: tone/style, unstated requester preferences,
+"both correct — which is more elegant", how much latitude a policy's wording
+allows. Three moves, in order:
 1. **Search for a prior ruling** — past feedback, decisions, preference notes.
-2. **Multi-candidate + fresh-context scoring**: produce 2–3 versions, have a
-   fresh-context reviewer score them against explicit criteria. Stronger:
-   pre-register your own pick BEFORE looking at alternatives — prevents
-   anchoring.
-3. **Hand it back**: "this is a taste call — here are A and B, you pick."
-   Returning a taste call is not a failure to do your job; guessing is.
+2. **Multi-candidate + fresh-context scoring**: 2–3 versions, a fresh-context
+   reviewer scores them against explicit criteria; pre-register your own pick
+   BEFORE looking at alternatives (prevents anchoring).
+3. **Hand it back**: "taste call — here are A and B, you pick." Returning a
+   taste call is not a failure to do your job; guessing is.
 
 ❌ Silently picking the wording YOU find elegant for a user-facing policy
 line, without checking for an expressed preference.
 
 ## R7 — When to reach for the web (and at what granularity)
 
-Search BEFORE asserting (never answer from memory) when the fact is volatile
-or environment-external: library/API versions and signatures, tool/CLI flags,
-pricing, quotas, model ids, security advisories, "current best practice" for
-a fast-moving ecosystem, anything post-cutoff. Test: if wrong recall costs
-the requester more than a ~1-minute lookup → look up.
-
-Do NOT search when the answer is verifiable locally at lower cost: facts about
-THIS repo (grep it), behavior of an installed tool (run `--help`/`--version`),
-stable fundamentals (algorithms, language semantics).
-
-Reactive trigger (owner: global CLAUDE.md): output conceptually wrong →
-compare against the canonical method BEFORE editing again.
+Search BEFORE asserting (never from memory) when the fact is volatile or
+environment-external: library/API versions and signatures, tool/CLI flags,
+pricing, quotas, model ids, security advisories, "current best practice" of a
+fast-moving ecosystem, anything post-cutoff. Test: wrong recall costs more
+than a ~1-minute lookup → look up. Do NOT search what is verifiable locally
+at lower cost: facts about THIS repo (grep), installed-tool behavior
+(`--help`/`--version`), stable fundamentals. Reactive trigger (owner: global
+CLAUDE.md): output conceptually wrong → compare against the canonical method
+BEFORE editing again.
 
 Granularity ladder — match the tool to the question:
 1. Quick lookup, ≤3 sources → do it inline yourself (`20-dispatch.md` §1).
@@ -138,50 +152,50 @@ releases monthly — plausible, outdated.
 
 ## R8 — Two-pass depth protocol (think first, then targeted verification)
 
-Trigger: Tier 2 of the depth-tier rule (global CLAUDE.md, engineering
-judgement), or the user forces it with 「深想」. Never self-invoke for Tier
-0/1 work. When a heavyweight skill is active, its own protocol wins — never
-stack this on top (skill list: the depth-tier rule). Under user-granted L1/L2
+Trigger: Tier 2 of the depth-tier rule (global CLAUDE.md), or the user forces
+it with 「深想」; never self-invoke for Tier 0/1. An active heavyweight
+skill's own protocol wins — never stack this on top. Under user-granted L1/L2
 relaxation: own order + one post-check instead.
 
 **Pass 1 — self-reliant.** Using only own knowledge plus already-loaded
 instructions: restate the problem, collect constraints, choose a decomposition
-axis, produce a first-pass conclusion PLUS a **gap list**. Classify each key
+axis, produce a first-pass conclusion PLUS a **gap list**. Premise gate
+first: before classifying claims, list the task's irreducible premises
+(taxonomy: `05-authority.md` §4 section 0 — P-env / P-intent / P-validity,
+origin-tagged) — a premise whose failure invalidates the whole deliverable
+is never left implicit among ordinary claims. Then classify each key
 claim: (A) locally verifiable → verify immediately, never leave as assumption;
 (B) volatile external fact → mark "needs search", do NOT search yet;
 (C) judgment/value call → mark "user decision" (R3 owns when to ask). No
 external search during pass 1 — write the hypothesis first; searching first
 anchors on early results.
 
-**Clean-sheet extension.** When improving an EXISTING artifact (rule file,
-skill, config, module), pass 1 adds ONE clean-sheet enumeration: list from
-domain knowledge what complete coverage of the problem class would include,
-then diff against the artifact. Structural gaps join the gap list as
-PROPOSALS — each must name a concrete failure scenario or be discarded
-(hallucination gate). One round only, no recursive redesign; "core need met →
-recommend stopping" (global CLAUDE.md) overrides. NEW-from-scratch design →
-product-design-thinking Phase 0.
+**Clean-sheet extension.** Improving an EXISTING artifact (rule file, skill,
+config, module): pass 1 adds ONE clean-sheet enumeration — list what complete
+coverage of the problem class would include, diff against the artifact.
+Structural gaps join the gap list as PROPOSALS; each names a concrete failure
+scenario or is discarded (hallucination gate). One round, no recursive
+redesign; "core need met → stop" (global CLAUDE.md) overrides.
+NEW-from-scratch design → product-design-thinking Phase 0.
 
 **Gate.** Route each gap: residual A → local check; B → one targeted search
-per gap (granularity per R7), never an open sweep; C → batch into ONE question
-to the requester. If the gap list is empty, or the remaining gaps cannot change
-the conclusion's direction, skip pass 2 and deliver with unverified items
-labeled.
+per gap (granularity per R7), never an open sweep; C → batch into ONE question.
+Gap list empty, or remaining gaps cannot change the conclusion's direction →
+skip pass 2, deliver with unverified items labeled.
 
-**Pass 2 — targeted only.** Resolve gaps item by item and DIFF each result
+**Pass 2 — targeted only.** Resolve gaps item by item, DIFF each result
 against the pass-1 belief; a refuted belief gets a one-line "was stale
 because…" note (calibration evidence — keep it). Conclusions not on the gap
 list are settled — do not reopen. Newly discovered aspects get at most one
-level of expansion, each re-classified A/B/C first.
+level of expansion, re-classified A/B/C first.
 
 **Delivery.** Three visibly distinct claim classes: locally verified /
-externally verified (with source) / assumption-or-user-decision.
-Mental-simulation conclusions split the same way: "logically exhaustive
-(discrete logic)" vs "empirical estimate — needs a real run"; never ship the
-latter in the former's voice. 選型 conclusions carry a rejection table: each
-excluded candidate + a one-line reason. Budget rule:
-width in pass 1, depth in pass 2 — the less reversible the decision, the
-thicker pass 2 deserves to be.
+externally verified (with source) / assumption-or-user-decision;
+mental-simulation results likewise split "logically exhaustive (discrete
+logic)" vs "empirical estimate — needs a real run", never shipping the latter
+in the former's voice. 選型 conclusions carry a rejection table (each excluded
+candidate + one-line reason). Width in pass 1, depth in pass 2 — the less
+reversible the decision, the thicker pass 2.
 
-✅ Pass 1 picks library X; the targeted search shows X deprecated → diff note
-"X stale, superseded by Y" lands in the 選型 block; queries stayed narrow.
+✅ Pass 1 picks library X; targeted search shows X deprecated → diff note
+"X stale, superseded by Y" in the 選型 block; queries stayed narrow.

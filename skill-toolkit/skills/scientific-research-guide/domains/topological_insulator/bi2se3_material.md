@@ -223,3 +223,15 @@
 - Sakamoto et al., “Spectroscopic evidence of a topological quantum phase transition in
   ultrathin Bi₂Se₃ films,” *Physical Review B* 81, 165432 (2010).
   DOI: https://doi.org/10.1103/PhysRevB.81.165432
+
+## Cross-reference to the plasmonic and photogalvanic branch
+
+When the question includes Dirac plasmons, Bi₂Se₃ plasmon-polaritons, HPWG or RTRR
+coupling, CPGE, LPGE, polarization-resolved photocurrent, or
+spin-momentum-locked waveguide response, load
+topological_insulator/bi2se3_plasmonic_photoresponse.md in addition to this file.
+
+This file remains authoritative for Bi₂Se₃ thickness, quintuple-layer counting,
+oxidation, composition, defects, band bending, ARPES, transport, and
+multi-channel WAL/HLN reasoning. The plasmonic branch must not duplicate those
+constraints or replace them with a surface-only conductivity assumption.

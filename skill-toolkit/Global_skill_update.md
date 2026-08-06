@@ -256,3 +256,68 @@ Each entry: what was newly added/changed + when (absolute timestamp).
   ported from the source dictionary (no personal paths in that section).
 - `asset-vault` itself was NOT imported this round (tied to a separate
   in-progress project; deferred by request).
+
+## 2026-08-06 — scientific-research-guide: GaN power/microLED domains + Bi2Se3 plasmonic sub-profile + citation inbox (refresh from source)
+
+- Source: `~/.claude/skills/scientific-research-guide/`, refreshed to match the
+  canonical environment's 2026-08-03 domain-expansion sync. Changed/new files:
+  `SKILL.md` (+reference-file index entry, +citation-triage delegation note),
+  `STATUS.md` (changelog + updated Structure section), `domains/_routing.md`
+  (+2 base rows, +1 sub-profile row), `domains/domain-expansion-guide.md`
+  (+§3.1 swappable-slot convention for optional external tools, updated
+  Appendix tree), `domains/gan_power_device.md` (new base profile: vertical
+  GaN trench MOSFET/OG-FET/CAVET, field-shield design, TCAD, electrical
+  extraction), `domains/microled.md` (new base profile: InGaN blue-green +
+  AlGaInP red microLED size/sidewall effect, recombination, optical
+  extraction), `domains/topological_insulator/bi2se3_plasmonic_photoresponse.md`
+  (new method sub-profile: Dirac/bulk/2DEG plasmon channels, CPGE/LPGE,
+  waveguide-coupled photocurrent), `domains/topological_insulator/
+  bi2se3_material.md` (+cross-reference, no content duplication),
+  `domains/plasmonic_waveguide.md` (its `Notes for AI use:` terminology-vault
+  line rewritten as a swappable slot per the new §3.1 convention — the source
+  environment's own fix for a hardcoded personal path, carried over verbatim
+  since it removed the identifier rather than introducing one),
+  `references/user-supplied-citations.md` (new: source-provenance inbox for
+  user-supplied URLs), `workflow-checkpoint/SKILL.md` (+journal sweep step,
+  +premise re-confirmation on resume — see the ops entry below for the
+  matching rule-set).
+- Review scope: usernames, local paths, account/machine identifiers. Result:
+  none found in the synced content itself. This round's source-side drafting
+  had used this very share's `scientific-research-guide/` directory as an
+  isolated editing copy; the leftover raw-notes packet (`material/`) and its
+  verification report (`MATERIAL-INTEGRATION-VERIFICATION-REPORT.md`, which
+  names local machine paths) were moved to `scientific-research-guide/archive/`
+  — fully superseded by the integrated domain files above, and excluded from
+  git via `.gitignore` (contains machine-specific paths; see the archive's own
+  README).
+- This is a point-in-time snapshot, not a synchronization target.
+
+## 2026-08-06 — Premises / refutability / know-why / record-schema rule-set (ops + global CLAUDE.md + PHILOSOPHY.md)
+
+- Source: `~/.claude/ops/{05-authority,10-command-loop,30-judgment,
+  40-maintenance,60-bootstrap,OPS,lessons,rules-usage-dict}.md` +new
+  `ops/60-record-templates.md`, `~/.claude/CLAUDE.md`, `~/.claude/PHILOSOPHY.md`,
+  refreshed to match commits `9a67cbe`..`f8a9c69` (2026-08-06).
+- Content: a new premise-gate + refutability-statement duty (`30-judgment.md`
+  R2/R8, `05-authority.md` §4 boundary contract gains a "Premises" section,
+  4→5 sections / 15→18 line cap), a per-project Decision & Process Journal
+  (`60-bootstrap.md` new §G, know-why layer between ADR and a ticket's
+  one-line note; templates extracted to the new `60-record-templates.md`),
+  a record-type schema registry (`rules-usage-dict.md` new §7), a
+  `workflow-checkpoint` journal-sweep + resume-time premise re-confirmation
+  step, a `lessons.md` L-009 entry (browser-pane screenshot timeout
+  misdiagnosis — DOM-read tools keep working over CDP while the screenshot
+  tool times out when the page reports itself hidden), and an ops-file
+  size-trigger raise (~10K→~12K chars, same "lossless trim capped out short
+  of the old cap" pattern as the 2026-08-01 CLAUDE.md 12K→15K raise).
+  Global CLAUDE.md gained the matching premises&refutability bullet, the BC
+  5-section/18-line sync, and a generalized (tool-name-free) version of the
+  L-009 screenshot-detection rule — kept portable rather than naming this
+  environment's specific tool set, consistent with how this share already
+  treats the Environment/OS-shell rule.
+- Review scope: usernames, local paths, machine identifiers. Result: none
+  found in the synced content; the `lessons.md` L-009 entry references only
+  generic tool behavior (screenshot capability, page-visibility state, DOM
+  read tools), not a specific product name, so it was carried over as-is in
+  `claude-ops/`.
+- This is a point-in-time snapshot, not a synchronization target.

@@ -21,7 +21,13 @@
 >
 > Notes for AI use:
 > - Intended use: Foundational reference for reasoning about plasmonic waveguide physics, modeling, measurement, and interpretation before moving to active-device applications.
-> - Terminology supplement: precise per-term definition cards (with source tiers and dispute flags) live in the local LexiconVault (`D:\AI_Work\LexiconVault`, DomainPath prefix `photonics/`); check there before answering pure what-does-this-term-mean questions.
+> - Terminology supplement: if a local terminology/glossary vault is available, consult it
+>   before answering a pure what-does-this-term-mean question — precise per-term definition
+>   cards with source tiers and dispute flags are more reliable there than a profile's own
+>   prose. This domain's lookup key (DomainPath) is `photonics/`; the reference
+>   implementation as of 2026-08 is LexiconVault. This is a swappable slot, not a hard
+>   dependency (see `domain-expansion-guide.md` §3.1) — without one, fall back to this
+>   file's own Node 1 terminology and to `plasmonic_waveguide/terminology_and_geometry.md`.
 > - Validation status / usage note: Suitable as a baseline domain profile for passive and quasi-passive waveguide analysis; modulator-specific metrics such as extinction ratio and electro-optic bandwidth are intentionally out of scope.
 
 ---

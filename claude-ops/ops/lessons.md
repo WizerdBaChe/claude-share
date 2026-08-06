@@ -182,6 +182,28 @@ direction + precedence-orthogonality paragraphs added to 05-authority §2;
 glosses added at the gate ask sites (global CLAUDE.md, 60-bootstrap §A);
 70-evolution renamed to "(layer 2)/(layer 3)".
 
+## L-009 2026-08-05 tags: env|browser-pane|screenshot|verify|diagnosis hits: 1
+Context: ~1 month of intermittent `computer{action:"screenshot"}` timeouts in
+the in-app Browser pane, repeatedly misdiagnosed as permission/sandbox and
+"fixed" by opening more permissions. Actual state: `document.visibilityState
+=== "hidden"` (window visible but fully occluded by an elevated maximized
+app), while `read_page`/`get_page_text`/`read_console_messages`/
+`javascript_tool` kept working over CDP.
+Pitfall (two, one root). (a) The tell was present from the first occurrence
+and was read past: ONE tool in a group failed while its siblings stayed
+green, and the failure was a TIMEOUT — a denied permission returns a refusal,
+not a timeout. Asymmetry inside a tool group rules out permissions before any
+investigation starts. (b) The first write-up asserted the mechanism
+("Chromium stops compositing") as fact; that is the wording of the TOOL'S OWN
+error string, never independently checked, and an OS-level window-pixel grab
+fits the same evidence. A quoted error string is the tool author's assertion,
+not confirmation — record such claims at correlation level.
+Fix (folded in): global CLAUDE.md carries a DETECTION-first rule (probe
+`visibilityState` before invoking screenshot) rather than a prohibition the
+agent must recall while already misdiagnosing; pictures come from a separate
+browser process. Prism CLAUDE.md holds the project command. Over-firing
+guard: a timeout with `visibilityState: "visible"` is a different fault.
+
 ---
 ## Archived (folded into another file, or retired)
 (none yet)

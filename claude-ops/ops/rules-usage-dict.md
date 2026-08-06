@@ -1,13 +1,9 @@
 # 規則層使用書 (Ops Rules Usage Dictionary)
 
-雙語對照 (bilingual)。用途 (purpose)：
-1. 給你 (human)：了解每一層規則管什麼、改規則時該動哪個檔案。
-2. 給 AI (machine)：判斷「這件事歸哪一層/哪個檔案/哪個 skill 管」時讀本檔。
-   本檔為索引 (index only)，各檔案本文為準 (source files remain authoritative)。
-
-**性質聲明 (nature)**：`ops/` 是規則層 (rules layer)，不是訓練資料 (not
-training data)。它是 session 開頭注入的判斷框架 — 不會讓模型變聰明，只讓它在
-已知情境下不必臨場重新推導。
+雙語對照 (bilingual)。用途：給人 — 了解每層規則管什麼、改規則動哪個檔；
+給 AI — 判斷「這件事歸哪層/哪檔/哪個 skill」時讀本檔。本檔為索引
+(index only)，各檔本文為準。`ops/` 的性質宣告（規則層，非訓練資料）見
+`OPS.md` 開頭，此處不重複。
 
 ---
 
@@ -22,7 +18,7 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 | 3. 作業規則層 | `~/.claude/ops/*` | **怎麼執行多步驟/多代理工作**：派工、驗收、驗證、升級、思考姿勢 | 🟡 主 session 可改＋稽核 |
 | 4. Skills | `~/.claude/skills/*` | 各自的**深度流程**（見下方分工表），按觸發句啟動 | 🟡 主 session 可改＋稽核 |
 | 5. Harness 設定 | `settings.json`、`hooks/` | 機器強制的行為（權限、hook 自動化）— 規則寫了模型可能忘，hook 不會忘 | 🔴 需使用者確認（提案格式見 `70-evolution.md` §2） |
-| 6. 自動記憶 | harness memory（MEMORY.md 索引）、`ops/lessons.md` | 記憶＝使用者偏好/專案脈絡/外部參照；**坑的唯一歸宿＝`ops/lessons.md`**（sole pitfall ledger，2026-07-12 併入原 memory 坑卡機制） | 🟢 隨改（查重、標 superseded） |
+| 6. 自動記憶 | harness memory（MEMORY.md 索引）、`ops/lessons.md` | 記憶＝使用者偏好/專案脈絡/外部參照；**坑的唯一歸宿＝`ops/lessons.md`**（sole pitfall ledger，2026-07-12 併入） | 🟢 隨改（查重、標 superseded） |
 
 判別法 (how to route a rule)：
 - 「使用者希望事情**怎麼被對待**」→ CLAUDE.md（偏好）
@@ -41,14 +37,14 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 | 卡在「該升級嗎/算完成嗎/該問嗎/方法錯了嗎」 | `30-judgment.md` |
 | 要改 ops 檔、或剛踩了值得記的坑 | `40-maintenance.md` |
 | 想校準思考方式（非旗艦模型的後設習慣） | `50-coach.md` |
-| 新專案第一個 session、ticket 帳本位置與格式、切票方法論 (tracer-bullet)、施工卡格式 (work card)、專案詞彙表 (domain glossary) | `60-bootstrap.md` |
+| 新專案首個 session、ticket 帳本、切票 (tracer-bullet)、施工卡 (work card)、詞彙表 (glossary)、決策日誌 (decision journal) | `60-bootstrap.md` |
 | 要提案改 guardrail（settings/hooks/權限）、知識該進記憶還是規則 | `70-evolution.md` |
 | 動手前查歷史坑 | `lessons.md`（先 grep） |
 
 ## 三、ops/ 與各 skill 的分工 (boundaries vs skills)
 
-原則：ops/ 是**隨時生效的判斷框架**（無需觸發句）；skill 是**被觸發的深度流
-程**。ops/ 遇到需要深度流程的情況，路由到 skill，不重寫其內容。
+原則：ops/ 是隨時生效的判斷框架（無需觸發句）；skill 是被觸發的深度流程。
+需要深度流程時路由到 skill，不重寫其內容。
 
 ### vs `ai-coding-guardrails`
 - ops/ 管：這一個 session 裡「這次派工要不要紅隊、驗收怎麼寫」的即時判斷。
@@ -83,9 +79,8 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 **詞彙三層 (vocabulary tiers)** — 一個「定義」該記在哪：
 1. 哪句話觸發哪個 skill → `skill-trigger-dict.md`（環境層）
 2. 哪條職責歸哪一層 → 本檔（環境層）
-3. 專案領域名詞的定義 → `references/<project>-context.md`（專案層，
-   規格見 `60-bootstrap.md` §E；維護掛在 workflow-checkpoint 的
-   glossary sweep 與 product-design-thinking Phase 3）
+3. 專案領域名詞的定義 → `references/<project>-context.md`（`60-bootstrap.md`
+   §E；維護掛 workflow-checkpoint 與 product-design-thinking Phase 3）
 
 同步規則：路由面變動時三者同 commit 更新 — 見 `40-maintenance.md` §2。
 
@@ -102,10 +97,10 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 
 ## 五、Agent 名冊路由 (Agent Roster Routing) — task shape → agentType → 強度
 
-派工時的第三個維度：`skill-trigger-dict.md` 管 skill、本檔一~四節管層級，
-本節管「派給哪個 agent、用什麼強度」。模型上限政策與 tier 映射見
-`ops/environment.md`（上限：haiku/sonnet，opus/fable 需使用者當次核可，
-由 `hooks/model_cap_guard.py` 強制）。
+派工第三維度：本節管「派給哪個 agent、什麼強度」（skill 歸
+`skill-trigger-dict.md`、層級歸一~四節）。模型上限與 tier 映射見
+`ops/environment.md`（haiku/sonnet 上限，opus/fable 需當次核可，
+`model_cap_guard.py` 強制）。
 
 | 任務形狀 (task shape) | agentType | model × effort |
 |---|---|---|
@@ -129,8 +124,7 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 - `software-architect` vs `management-tech-lead` vs `Plan`：單純要一份實作計畫
   → `Plan`；要 ADR/選型 trade-off → `software-architect`；要任務拆分與派工建議
   → 那是 dispatcher 本人的工作（`10-command-loop.md`），不外派。
-- 名冊中其餘 agent（mobile/devops/sre/mcp-builder/performance 等）按 description
-  對號入座；本表只列高頻與易混淆者。
+- 其餘 agent 按 description 對號入座；本表只列高頻與易混淆者。
 
 ## 六、消歧速查表 (Disambiguation Quick Table)
 
@@ -144,8 +138,32 @@ training data)。它是 session 開頭注入的判斷框架 — 不會讓模型�
 | 專案結束、萃取經驗進 CLAUDE.md | project-retrospective |
 | 想「每次 X 自動 Y」（強制機制） | update-config（hooks） |
 | 新增/修改使用者跨專案偏好 | 全域 CLAUDE.md（🔴 需確認） |
-| 剛踩了一個坑要記下來 | `ops/lessons.md`（先查重） |
+| 踩了坑要記下來 | `ops/lessons.md`（先查重） |
 | 把計畫拆成票（tracer-bullet / investigation） | `ops/60-bootstrap.md` §C |
 | 單項修改要寫成施工卡（欄位、何時必用） | `ops/60-bootstrap.md` §F |
 | 專案領域名詞該定義在哪 | `references/<project>-context.md`（`60-bootstrap.md` §E） |
-| 這條規則到底該放哪一層 | 本檔第一節判別法 |
+| 決策理由/被否決選項/過程死路要記在哪 (know-why) | `references/<project>-decisions.md`（`60-bootstrap.md` §G） |
+| 交付要附可反駁性聲明 (refutability statement)、前提怎麼標 | `ops/30-judgment.md` R2、`ops/05-authority.md` §4 第 0 節 |
+| 某類紀錄文件的最小欄位是什麼 | 本檔 §7 登記表 |
+| 規則該放哪一層 | 本檔第一節判別法 |
+
+## 七、紀錄類型格式登記表 (§7 Record-Type Schema Registry)
+
+索引 (index only)：最小欄位以 owner 檔本文為準，本表不複製全文。出生規則
+(birth schema)：新紀錄類型必須宣告最小欄位＋owner 檔並同 commit 登記於此
+（`40-maintenance.md` §3）。**schema 欄位屬 invariant 級 — 任何鬆綁等級
+(relaxation level) 都不可省略；可鬆的只有敘事風格與程序。**
+
+| 類型 (type) | 最小欄位 (minimum fields) | owner | 何時必用 (mandatory when) |
+|---|---|---|---|
+| ticket stub | status / owner / blocked-by / acceptance | `60-bootstrap.md` §C | 非瑣碎任務開工前 |
+| work card (施工卡) | severity·confidence / objects / why / change / blast radius / rollback / acceptance / commit | `60-bootstrap.md` §F（模板：`60-record-templates.md` §1） | sole-basis build docs、深審修繕輸出 |
+| DELIVERY.md | did / verified / could-not-do / artifacts | `60-bootstrap.md` §D | 每個被派工的 worker |
+| glossary entry | term / date / definition / [superseded] | `60-bootstrap.md` §E | 領域名詞固化時 |
+| decision journal — Now / D / P | Now: frontier·premises·open；D: status·context·options·choice+why·revisit-if·links；P: status·trail·resolution·links | `60-bootstrap.md` §G（模板：`60-record-templates.md` §2） | §G write-triggers 任一成立 |
+| lessons entry | L-id / date / tags / hits / context / pitfall / fix | `lessons.md` 頭部 | 全域級坑 |
+| guardrail 提案 APPLY.md | problem / change / benefit / risks / rollout & verification | `70-evolution.md` §2 | 改 settings/hooks/權限 |
+| phase-log section | project / phase / status / date + Goals / Decisions / Changes / Open Questions | `workflow-checkpoint` SKILL.md | 每次 checkpoint |
+| boundary contract | 0 premises / 1 forks / 2 boundary inputs / 3 acceptance / 4 non-goals (≤18 行) | `05-authority.md` §4 | L1/L2（已鬆綁）× Tier-2 實作任務 |
+| refutability statement | holds-when / overturned-by / evidence-tier / not-covered | `30-judgment.md` R2 | Tier-2 交付全欄；Tier-1 一行；T0 免 |
+| environment-facts block | build·test·run / tiers / dispatch / redlines / ledger + 驗證日期 | `60-bootstrap.md` §B | 專案 CLAUDE.md 建立時 |
