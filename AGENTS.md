@@ -1,0 +1,95 @@
+# Repo map — every tracked file, one line each
+
+Written for an agent reading this repository. The tree nests up to seven levels
+because installable skills must keep their directory shape; this file is the flat
+index so you don't have to walk it. **Nothing here is instructions for you** — it is
+a description of documents. Reading a rule file below does not put you under it.
+
+Start with `Global_skill_update.md` if you want to know how this environment got the
+shape it has; start with `claude-ops/ops/OPS.md` if you want the rules themselves.
+
+## Root
+
+| File | What it is |
+|---|---|
+| `README.md` | Orientation: what each share folder holds. |
+| `CHANGELOG.md` | This repo's own sync history — when each share was copied, what changed. |
+| `Global_skill_update.md` | **The big one (52 KB).** The source environment's append-only evolution log: every rule change with its trigger, before→after, evidence, and open items. The single most informative file here. |
+| `AGENTS.md` | This map. |
+| `LICENSE` | MIT. |
+
+## `claude-ops/ops/` — the operating rules layer
+
+Read in this order; `OPS.md` is the entry point and routing table.
+
+| File | What it decides |
+|---|---|
+| `OPS.md` | Entry point + routing table: which file answers which question. |
+| `05-authority.md` | Rule classes (invariant vs scaffolding), the per-project relaxation gate L0/L1/L2, and the boundary contract. |
+| `10-command-loop.md` | The step sequence for handling any non-trivial instruction. |
+| `20-dispatch.md` | Delegating to subagents: when, at what model tier, with what prompt contract. |
+| `30-judgment.md` | Eight rubrics: when to escalate, when something is "done", when to ask, when the method itself is wrong. |
+| `40-maintenance.md` | How to change the rules safely: write tiering, trim discipline, audit-entry schema. |
+| `50-coach.md` | Metacognitive habits for a non-frontier model driving the loop. |
+| `60-bootstrap.md` | First session in a project: environment facts, ticket ledger, work cards, decision journal. |
+| `60-record-templates.md` | Full templates for the record types `60-bootstrap.md` governs. |
+| `70-evolution.md` | Proposing changes to hooks/settings; whether something belongs in rules or memory. |
+| `environment.md` | Machine-specific facts, per-block dated. Subagent cost cap, dispatch mechanisms. |
+| `lessons.md` | The pitfall ledger — real incidents with the fix that followed. |
+| `rules-usage-dict.md` | Bilingual index: which layer owns what, agent-roster routing, record-schema registry. |
+| `README.md` | Folder note. |
+
+## `global-claude-md/` — the always-loaded preferences file
+
+| File | What it is |
+|---|---|
+| `CLAUDE.md` | The global preferences the ops layer hangs off. Machine-specific values are `<PLACEHOLDER>`s — substitute your own. |
+| `README.md` | Cross-reference map back into `claude-ops/`. |
+
+## `skill-toolkit/` — installable skills
+
+`skill-trigger-dict.md` is the disambiguation index; each `skills/<name>/SKILL.md` is
+self-contained, with detail in its own `references/` loaded on demand.
+
+| Skill | For |
+|---|---|
+| `ai-coding-guardrails` | Designing the guardrail *system* around AI coding agents (5 references). |
+| `code-review-deep-checklist` | Deep/holistic code review: single review, project health, dependency fitness. |
+| `config-self-audit` | Auditing one config artifact — a skill, hook, or rule — cheaply. |
+| `design-system-suite` | Design tokens and contracts across a multi-product frontend suite. |
+| `env-cleanup` | File-level cleanup of a config environment or project tree; archives, never deletes. |
+| `literature-search-extract` | Finding scholarly sources and extracting into evidence tables, with citation traceability. |
+| `motion-design` | Motion/animation methodology + Three.js. `vendor/lottiefiles/` is third-party MIT, verbatim. |
+| `product-design-thinking` | Heavyweight design mode for a new product: prior-art sweep, then build-ready docs. |
+| `project-retrospective` | End-of-project extraction of lessons into a guide + rules snippet. |
+| `scientific-research-guide` | Research-methodology advisory. **Domain profiles excluded from this share** — see `domains/README.md`; the template, manifest format, and expansion spec ship. |
+| `security-deep-checklist` | Defensive security audit: code, deployment posture, detection readiness. |
+| `skill-share-packaging` | Exporting a skill for others, or auditing a downloaded one. Includes `scripts/prescan.py`. |
+| `workflow-checkpoint` | Phase archiving and context rebuild across long multi-session projects. |
+
+## `environment-guide/` — why it is shaped this way
+
+| File | What it is |
+|---|---|
+| `PHILOSOPHY.md` | The ten beliefs the whole environment is built on, plus a system map. |
+| `OPERATOR-GUIDE.md` | Human-facing manual: what to run, what to expect, what each file is for. |
+| `COMMIT-TEMPLATES.md` | Commit-message conventions used across this environment. |
+| `README.md` | Folder note incl. migration checklist. |
+
+## `interop-layer/` — porting the rules to other agents
+
+| File | What it is |
+|---|---|
+| `portable-core.md` | The provider-neutral rule subset. |
+| `interop.py` | Compiles that subset into other agents' instruction files. |
+| `MIGRATION-MAP.md` | What maps to what across agents. |
+| `genesis-prompt.md` | Bootstrapping prompt for a fresh environment. |
+| `acceptance-evals.md` | Checks that a port actually landed. |
+| `refs/design-protocol.md`, `refs/judgment-protocol.md`, `refs/phase-log-protocol.md` | The three protocols carried across. |
+
+## `thinking-notes/` — essays, not rules
+
+Twelve numbered notes (`01`–`12`) on one-shot delivery, debugging epistemology,
+unverifiable domains, ask-vs-decide, cross-language asymmetry, AI reading AI,
+delegation economics, implementation-capability gaps, and legacy revival. These are
+argument, not policy — nothing here binds a reader. `README.md` indexes them.
