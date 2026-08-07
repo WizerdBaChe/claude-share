@@ -1,10 +1,12 @@
 # Authority & Relaxation — rule classes and the per-project relaxation gate
 
-Why this file exists: the ops layer was written for a non-frontier main model.
-When the main session runs on a frontier-tier model, process scaffolding
-duplicates its native judgment and taxes tokens. The fix is NOT self-granted
-freedom — it is a user-decided, per-project relaxation level. The model states
-who it is; the USER decides how much the rules loosen.
+Why this file exists: the ops layer was written for a non-frontier **main-loop
+model** — the model the main session actually runs on (the main session itself
+has no tier; subagents carry their own). When that model is frontier-tier,
+process scaffolding duplicates its native judgment and taxes tokens. The fix is
+NOT self-granted freedom — it is a user-decided, per-project relaxation level.
+The model states who it is; the USER decides how much the rules loosen. Read
+the tier live, never from a config pin: `environment.md` "Main-loop model".
 
 **Scale direction (read this before using the labels)**: L-numbers measure
 RELAXATION, not rigor — L0 = zero relaxation (strictest, the default), L2 =
@@ -32,9 +34,9 @@ Every ops rule belongs to exactly one class:
   irreversible-action confirmation.
 - **Scaffolding** — process rules that substitute for judgment where judgment
   is scarce: R8 two-pass protocol, R1/R4/R6 rubrics, `10-command-loop.md` step
-  ordering, routing-table pre-reads. For a frontier main model these may bind
-  as *advisory* (see §2); for cheap/mid main models and ALL subagents they
-  stay hard.
+  ordering, routing-table pre-reads. For a frontier-tier main-loop model these
+  may bind as *advisory* (see §2); for cheap/mid main-loop models and ALL
+  subagents they stay hard.
 
 ## §2 The relaxation gate (user-decided, never self-granted)
 
@@ -48,13 +50,14 @@ that prediction, and a rule keyed on it never fires):
 - (d) a `[ops-health]` session-start nudge reports the project's relaxation
   level is unset.
 
-At that moment the main model states its model identity/tier in one line and
-asks the user to pick this project's relaxation level. One question, three
-options:
+At that moment the main session states its main-loop model identity/tier in one
+line — observed, not read off `settings.json` (`environment.md` "Main-loop
+model", step 1) — and asks the user to pick this project's relaxation level.
+One question, three options:
 
 - **L0 (default)** — everything binds as written. Applies automatically when
-  the question was not asked or not answered, and whenever the main model is
-  cheap/mid tier.
+  the question was not asked or not answered, and whenever the main-loop model
+  is cheap/mid tier.
 - **L1 (core)** — R8 two-pass and `10-command-loop.md` step ceremony become
   advisory for the main session: think first in the model's own order, then
   run ONE post-check against the rule after the work, and note any deviation.
@@ -83,9 +86,9 @@ the user changes it.
 ## §3 Relation to the decision charter
 
 The decision charter (owner: global CLAUDE.md, engineering judgement) governs
-WHICH decisions the main model may take alone — it applies at every relaxation
-level and is not part of this gate. This gate only governs HOW MUCH process
-the main model must run while executing.
+WHICH decisions the main session may take alone — it applies at every
+relaxation level and is not part of this gate. This gate only governs HOW MUCH
+process the main session must run while executing.
 
 ## §4 Boundary contract (the L1/L2 exchange: scaffolding out, specification in)
 

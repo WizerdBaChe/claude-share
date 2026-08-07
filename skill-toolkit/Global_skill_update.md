@@ -321,3 +321,60 @@ Each entry: what was newly added/changed + when (absolute timestamp).
   read tools), not a specific product name, so it was carried over as-is in
   `claude-ops/`.
 - This is a point-in-time snapshot, not a synchronization target.
+
+## 2026-08-07 — Environment recency + main-loop terminology + audit-entry schema
+- **trigger**: external reader review of the 2026-08-06 rule round raised two
+  objections, both re-verified in-session against the files. (1) `environment.md`
+  carried one file-level `Verified on 2026-07-07` while its own body recorded a
+  2026-07-10 fact, and asserted "settings.json pins haiku ⇒ the dispatcher is a
+  non-frontier model" — `settings.json:34` still said `haiku` while the session
+  ran Opus 5, so `05-authority.md` §2's "L0 applies automatically when the main
+  model is cheap/mid" was branching on a stale inference (decision-affecting,
+  not cosmetic). Also four spellings in circulation (main session / main model /
+  main-session model / 主 session) with tier attached to *session*, and
+  30-judgment's rule-class line ordered R2/R5/R7 → R1/R4/R6/R8 → R3. (2) Entries
+  in this log list files and sections but not what the rules now say vs said —
+  root cause found: `rules-usage-dict.md` §7 registers minimum fields for 11
+  record types, and this log's own entries were the only unregistered one.
+- **change (before→after)**:
+  - `environment.md`: single header date → per-block `as-of` lines + an invariant
+    banning file-level dating. Cap table retitled "Subagent cost cap" with an
+    explicit "says nothing about which model the main session runs"; the row note
+    `cheap | haiku | Default main-session model` → `Lowest-cost dispatch tier`.
+    Section "Main-session model" (static inference) → "Main-loop model — READ IT,
+    never infer it": 3-step procedure (take tier from the session's stated
+    identity; `settings.json` is a *fallback* marked "assumed"; never derive it
+    from this file's prose) + the §2 consequence spelled out. Refresh triggers
+    now per-block, plus a ~90-day sweep.
+  - Terminology fixed at the category slip, not by mass rename: **main session** =
+    top-level session (no tier), **main-loop model** = the model it runs on (has
+    the tier). `30-judgment.md`:5 was "advisory for a frontier main session" →
+    "advisory only when the main-loop model is frontier-tier AND the user granted
+    L1/L2"; same line's rule classes reordered to R1..R8 numeric. Parallel fixes:
+    `05-authority.md` (header, §1 scaffolding, §2 gate, §3), `60-bootstrap.md`:23,
+    `30-judgment.md`:59, global `CLAUDE.md` + `AGENTS.md` relaxation-gate bullet
+    ("or the main model is cheap/mid" → main-loop model, observed not read off
+    settings.json). Correct uses of "main session" (write-authority, dispatch,
+    hygiene) deliberately left — they name the session, not a tier.
+  - New `40-maintenance.md` §0 "Audit-trail entry schema" (anchor
+    `audit-entry-schema`): 5 ordered fields — trigger / change (before→after,
+    rule text quoted) / result / rollback / open — opening with the reason a
+    file list is "a routing reference, not a report". Registered as a new row in
+    `rules-usage-dict.md` §7. Effective for entries from 2026-08-07; no backfill.
+- **result**: hook run (`echo '{}' | python hooks/ops_health_nudge.py`) exits 0
+  with only the pre-existing scientific-research-guide >250-line nudge — no size
+  regressions. Sizes after: rules-usage-dict 12,287→12,259 (cap 12,288; the new
+  §7 row was paid for by three lossless trims — header prose, §7 intro clause
+  duplicating it, and the `vs skill-trigger-dict.md` block whose content is
+  restated verbatim by 詞彙三層 items 1-2), 40-maintenance 8,680→10,056,
+  environment 3,842→5,693, CLAUDE.md 15,206 (cap 15,360). Greps: zero residual
+  "main model"; `main-loop` present in all 7 intended files; §7 anchor resolves
+  to the 40-maintenance heading. This entry itself is written to the new schema —
+  living proof of the third change.
+- **rollback**: branch `fix/ops-environment-recency-terminology`; revert the
+  single commit on it, or `git checkout f8a9c69 -- <file>` per file.
+- **open**: (a) `environment.md` blocks still dated 2026-07-07 were NOT
+  re-verified this round — only re-dated in place as unchanged; a real
+  re-verification of the dispatch-mechanism and red-team blocks is outstanding.
+  (b) Pre-existing, out of scope: scientific-research-guide SKILL.md >250 lines.
+  (c) Older log entries keep the old free-form shape by ruling.

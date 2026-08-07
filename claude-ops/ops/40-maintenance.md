@@ -13,6 +13,28 @@ in `~/.claude` (conventional message, e.g. `docs(ops): ...` / `feat(skill): ...`
 narrative index into it. Guardrail changes (settings/hooks) follow the proposal
 protocol in `70-evolution.md` first.
 
+### Audit-trail entry schema (anchor: audit-entry-schema)
+
+An entry that only lists the files and sections touched is a **routing
+reference, not a report**: it tells a reader where to look, not what changed or
+whether it worked — they must reopen every file to find out. Minimum fields,
+in order (invariant — a relaxation level may loosen the prose, never the
+fields):
+
+1. **trigger** — the failure, review finding, or user directive that forced the
+   change. "Because it was better" is not a trigger.
+2. **change** — before → after. For rule text, quote the operative line as it
+   read before and as it reads now; a §-reference alone does not satisfy this.
+3. **result** — the evidence the change holds: command output, size delta,
+   living proof of one real run (`30-judgment.md` R2).
+4. **rollback** — backup path or commit to revert to.
+5. **open** — what is still unresolved, plus known debt deliberately left.
+
+Naturally-numeric changes (size trims, cap raises) satisfy 2–3 with the
+numbers. Rule/feature changes are where the before→after quote is load-bearing;
+that is exactly where entries decay into file lists. Applies to entries written
+from 2026-08-07 on; older entries are not backfilled.
+
 ## §1 Tiering: who can change what
 
 | Tier | Files | Rule |

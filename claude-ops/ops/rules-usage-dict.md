@@ -1,9 +1,8 @@
 # 規則層使用書 (Ops Rules Usage Dictionary)
 
-雙語對照 (bilingual)。用途：給人 — 了解每層規則管什麼、改規則動哪個檔；
-給 AI — 判斷「這件事歸哪層/哪檔/哪個 skill」時讀本檔。本檔為索引
-(index only)，各檔本文為準。`ops/` 的性質宣告（規則層，非訓練資料）見
-`OPS.md` 開頭，此處不重複。
+雙語對照 (bilingual)。索引檔 (index only)，各檔本文為準：查「每層規則管什
+麼、改規則動哪個檔、這件事歸哪層/哪檔/哪個 skill」時讀本檔。`ops/` 性質宣
+告見 `OPS.md` 開頭。
 
 ---
 
@@ -18,7 +17,7 @@
 | 3. 作業規則層 | `~/.claude/ops/*` | **怎麼執行多步驟/多代理工作**：派工、驗收、驗證、升級、思考姿勢 | 🟡 主 session 可改＋稽核 |
 | 4. Skills | `~/.claude/skills/*` | 各自的**深度流程**（見下方分工表），按觸發句啟動 | 🟡 主 session 可改＋稽核 |
 | 5. Harness 設定 | `settings.json`、`hooks/` | 機器強制的行為（權限、hook 自動化）— 規則寫了模型可能忘，hook 不會忘 | 🔴 需使用者確認（提案格式見 `70-evolution.md` §2） |
-| 6. 自動記憶 | harness memory（MEMORY.md 索引）、`ops/lessons.md` | 記憶＝使用者偏好/專案脈絡/外部參照；**坑的唯一歸宿＝`ops/lessons.md`**（sole pitfall ledger，2026-07-12 併入） | 🟢 隨改（查重、標 superseded） |
+| 6. 自動記憶 | harness memory（MEMORY.md 索引）、`ops/lessons.md` | 記憶＝使用者偏好/專案脈絡/外部參照；**坑的唯一歸宿＝`ops/lessons.md`**（sole pitfall ledger） | 🟢 隨改（查重、標 superseded） |
 
 判別法 (how to route a rule)：
 - 「使用者希望事情**怎麼被對待**」→ CLAUDE.md（偏好）
@@ -72,11 +71,8 @@
 - skill 管：**結案時**批次萃取經驗、經確認寫入 CLAUDE.md。
 - 關係：retrospective 掃描時應把 `ops/lessons.md` 當輸入之一。
 
-### vs `skill-trigger-dict.md`
-- 那份管：**skill 之間**的觸發消歧（哪句話觸發哪個 skill）。
-- 本檔管：**層與層之間**的職責邊界（規則該放哪、誰管什麼）。
-
-**詞彙三層 (vocabulary tiers)** — 一個「定義」該記在哪：
+**詞彙三層 (vocabulary tiers)** — 一個「定義」該記在哪（亦即本檔與
+`skill-trigger-dict.md` 的分工）：
 1. 哪句話觸發哪個 skill → `skill-trigger-dict.md`（環境層）
 2. 哪條職責歸哪一層 → 本檔（環境層）
 3. 專案領域名詞的定義 → `references/<project>-context.md`（`60-bootstrap.md`
@@ -100,7 +96,7 @@
 派工第三維度：本節管「派給哪個 agent、什麼強度」（skill 歸
 `skill-trigger-dict.md`、層級歸一~四節）。模型上限與 tier 映射見
 `ops/environment.md`（haiku/sonnet 上限，opus/fable 需當次核可，
-`model_cap_guard.py` 強制）。
+`model_cap_guard.py` 強制）。該表只管 subagent，不是 main-loop model 的預設。
 
 | 任務形狀 (task shape) | agentType | model × effort |
 |---|---|---|
@@ -149,10 +145,10 @@
 
 ## 七、紀錄類型格式登記表 (§7 Record-Type Schema Registry)
 
-索引 (index only)：最小欄位以 owner 檔本文為準，本表不複製全文。出生規則
-(birth schema)：新紀錄類型必須宣告最小欄位＋owner 檔並同 commit 登記於此
-（`40-maintenance.md` §3）。**schema 欄位屬 invariant 級 — 任何鬆綁等級
-(relaxation level) 都不可省略；可鬆的只有敘事風格與程序。**
+最小欄位以 owner 檔本文為準，本表不複製全文。出生規則 (birth schema)：新紀
+錄類型必須宣告最小欄位＋owner 檔並同 commit 登記於此（`40-maintenance.md`
+§3）。**schema 欄位屬 invariant 級 — 任何鬆綁等級都不可省略；可鬆的只有敘
+事風格與程序。**
 
 | 類型 (type) | 最小欄位 (minimum fields) | owner | 何時必用 (mandatory when) |
 |---|---|---|---|
@@ -166,4 +162,5 @@
 | phase-log section | project / phase / status / date + Goals / Decisions / Changes / Open Questions | `workflow-checkpoint` SKILL.md | 每次 checkpoint |
 | boundary contract | 0 premises / 1 forks / 2 boundary inputs / 3 acceptance / 4 non-goals (≤18 行) | `05-authority.md` §4 | L1/L2（已鬆綁）× Tier-2 實作任務 |
 | refutability statement | holds-when / overturned-by / evidence-tier / not-covered | `30-judgment.md` R2 | Tier-2 交付全欄；Tier-1 一行；T0 免 |
+| audit-trail entry | trigger / change (before→after，規則類須引原文) / result (證據) / rollback / open | `40-maintenance.md` 開頭 audit-entry-schema | 每次 🔴/🟡 變更寫入 `Global_skill_update.md` |
 | environment-facts block | build·test·run / tiers / dispatch / redlines / ledger + 驗證日期 | `60-bootstrap.md` §B | 專案 CLAUDE.md 建立時 |

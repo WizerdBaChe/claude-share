@@ -20,7 +20,7 @@ environment facts (step B) and a durable task ledger (step C). Without them,
 4. **Verify, don't inherit**: any command, path, or tool name you plan to rely on —
    run it or `Test-Path` it once now. Record what you verified; write
    "couldn't determine" for what you couldn't.
-5. **Relaxation level**: if the main model is frontier-tier and the project
+5. **Relaxation level**: if the main-loop model is frontier-tier and the project
    CLAUDE.md has no `ops-relaxation:` line, ask the user to pick a level now —
    L0 strictest (no relaxation, default) / L1 core relaxed / L2 loosest
    (`05-authority.md` §2) and record the answer in the project CLAUDE.md —

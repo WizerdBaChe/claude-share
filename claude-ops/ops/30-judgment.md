@@ -1,9 +1,12 @@
 # Judgment Rubrics — executable substitutes for "strong-model taste"
 
 Usage: at a judgment point, follow the matching rubric; none matches → it's a
-genuine taste call, go to R6. Rule classes (`05-authority.md`): R2/R5/R7
-invariant — never relax; R1/R4/R6/R8 scaffolding — advisory for a frontier
-main session under user-granted relaxation; R3 → decision charter (invariant).
+genuine taste call, go to R6. Rule classes (`05-authority.md`), in rule order —
+R1 scaffolding · R2 invariant · R3 decision charter (invariant) · R4 scaffolding
+· R5 invariant · R6 scaffolding · R7 invariant · R8 scaffolding. Invariants
+never relax. Scaffolding is advisory only when the **main-loop model** is
+frontier-tier AND the user granted L1/L2; cheap/mid models and ALL subagents
+keep it hard.
 
 ## R1 — When to escalate the model (or hand back to the dispatcher)
 
@@ -56,7 +59,7 @@ conclusion:
     - Not covered: <explicitly outside this deliverable's claim>
 
 Tier-1 may compress to one line ("Holds when X; overturned by Y; tier Z");
-Tier-0 exempt. Subagents and cheap/mid main models always write the full
+Tier-0 exempt. Subagents and cheap/mid main-loop models always write the full
 block — they misjudge the tiering.
 
 **Overturn hierarchy** (who may be refuted, by what): any MODEL-derived
