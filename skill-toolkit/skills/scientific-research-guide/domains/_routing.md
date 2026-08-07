@@ -21,29 +21,24 @@ Type semantics are defined in `domain-expansion-guide.md` §2 (the two-gate deci
 
 ## Manifest
 
+**This share ships the manifest FORMAT with no rows.** The source environment's
+filled manifest listed its author's own research fields; those domain profiles are
+subject-matter knowledge and were excluded from this share (see `README.md` in this
+folder). Author your own rows — one per file you actually create.
+
 | Type | File | Parent | Load trigger (keywords) | Covers / role | Active triggers? |
 |---|---|---|---|---|---|
-| base | `plasmonic_waveguide.md` | — | SPP, plasmonics, surface plasmon, nanophotonic waveguide, SERS, near-field optics | Plasmonic/SPP waveguide domain profile | yes (Node 6+8) |
-| base | `topological_insulator.md` | — | topological insulator, TI, Z₂, quantum spin Hall, Dirac surface state, QAHE, Majorana | Topological-insulator domain profile | yes (Node 6+8) |
-| base | `gan_power_device.md` | — | vertical GaN, GaN power device, trench MOSFET, OG-FET, OG-MOSFET, CAVET, field plate, field shield, p-shield, dynamic RON | Vertical GaN power-device profile: architecture, processing, electrical extraction, and TCAD | yes (Node 6+8) |
-| base | `microled.md` | — | microLED, micro-LED, micro LED, µLED, sidewall effect, pixel EQE, AlGaInP red microLED, InGaN microLED | Inorganic microLED pixel/optoelectronic device profile | yes (Node 6+8) |
-| reference | `plasmonic_waveguide/terminology_and_geometry.md` | plasmonic_waveguide | SP, SPP, SPR, LSP, LSPR, LSPP, IMI, MIM, MIN, HPW, Au film, Au grating, coupling loss, propagation loss | Terminology, geometry, and loss-accounting reference | no |
-| sub-profile | `plasmonic_waveguide/active_modulation.md` | plasmonic_waveguide | plasmonic modulator, graphene modulator, ITO, ENZ, epsilon-near-zero, depletion, accumulation, bias-induced spectral shift, topological modulator | Active-material and bias-to-spectrum validation traps | yes (Node 6+8) |
-| boundary | `plasmonic_waveguide/split_ring_resonators.md` | plasmonic_waveguide | SRR, split-ring resonator, LSRR, negative index, metamaterial, metasurface | Boundary to electromagnetic metamaterials; corrects unsupported SRR equivalences | no |
-| sub-profile | `topological_insulator/bi2se3_material.md` | topological_insulator | Bi2Se3, bismuth selenide, Se vacancy, bulk conduction, quintuple layer, ultrathin film, BCB, BVB, SSB, Dirac point, band bending, intercalation | Material-scoped sub-profile: Bi₂Se₃ band labels, bulk conduction, thickness gap, and surface chemistry | yes (Node 6+8) |
-| sub-profile | `topological_insulator/bi2se3_plasmonic_photoresponse.md` | topological_insulator | Dirac plasmon, Bi2Se3 plasmon, plasmon polariton, CPGE, LPGE, photogalvanic, polarization-resolved photocurrent, spin-momentum locked photocurrent, Bi2Se3 waveguide | Method sub-profile: Bi₂Se₃ plasmon channels, waveguide coupling, symmetry, and photogalvanic-response traps | yes (Node 6+8) |
-| sub-profile | `topological_insulator/wal_hln_transport.md` | topological_insulator | WAL, weak antilocalization, HLN, HNL, Hikami-Larkin-Nagaoka, magnetoconductance, Hall measurement, phase coherence | Phenomenon/method sub-profile: WAL/HLN applicability and Hall-channel traps | yes (Node 6+8) |
-| sub-profile | `topological_insulator/surface_and_composition_characterization.md` | topological_insulator | UPS, XPS, SECO, secondary electron cutoff, work function, EDS, EDX, elemental mapping, surface oxidation | Method sub-profile: surface/work-function/chemical-state/composition measurement traps | yes (Node 6+8) |
-| sub-profile | `topological_insulator/device_fabrication.md` | topological_insulator | PMMA 950, electron-beam lithography, EBL, mesa, Hall bar, TFT response, KOH, consort, COMSOL, CST, etching | Method sub-profile: TI device process, geometry, and tool-identification traps | yes (Node 6+8) |
+| base | `<domain>.md` | — | 5–10 field-identifying keywords a user would actually type | The domain's 7-node base profile | yes (Node 6+8) |
+| sub-profile | `<domain>/<phenomenon_or_method>.md` | `<domain>` | keywords naming that specific phenomenon, method, or material | Specialized branch whose pitfalls fire as standing rules | yes (Node 6+8) |
+| reference | `<domain>/<terminology>.md` | `<domain>` | terms, symbols, abbreviations the field overloads | Look-up material, pulled only when the topic is explicitly engaged | no |
+| boundary | `<domain>/<adjacent_field>.md` | `<domain>` | keywords belonging to the NEIGHBOURING field | Routes the user OUT to a sibling domain and corrects false equivalences | no |
 
-<!--
-Add rows as content is authored. Only list files that ACTUALLY EXIST (Gate A will try to
-load what it finds here). Row templates for the other two content types:
+Delete the four template rows above once you have real ones. Row-type semantics —
+and when a topic deserves a `sub-profile` versus a line inside the base profile —
+are decided by the two-gate tree in `domain-expansion-guide.md` §2.
 
-| sub-profile | `topological_insulator/wal.md`     | topological_insulator | WAL, weak antilocalization, HLN, Hikami-Larkin-Nagaoka, magnetoconductance | Phenomenon/method sub-profile: HLN-fit pitfalls | yes (Node 6+8) |
-| sub-profile | `topological_insulator/hoti.md`    | topological_insulator | HOTI, higher-order topological, hinge state, corner state, nested Wilson loop | New-territory sub-profile: higher-order bulk-boundary | yes (Node 6+8) |
-| boundary    | `topological_insulator/spt_vs_topological_order.md` | topological_insulator | SPT, symmetry-protected, topological order, long-range entanglement, anyon | Boundary note: routes OUT to a future intrinsic-topological-order domain | no |
--->
+**Only list files that ACTUALLY EXIST.** Gate A will try to load whatever it finds
+here; a row pointing at a missing file is a load failure, not a no-op.
 
 ## Maintenance
 

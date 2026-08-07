@@ -61,8 +61,8 @@ file is consent-gated — see Gate D.
 
 **Step 0 — Domain identification (Layer B).** Consult `domains/_routing.md` — the manifest
 of which domain files exist and when to load each — and resolve the field in two levels:
-1. **Base profile.** Match the user's field against the manifest's `base` rows (e.g.
-   SPP/plasmonics/nanophotonic waveguides → `domains/plasmonic_waveguide.md`). On a match,
+1. **Base profile.** Match the user's field against the manifest's `base` rows (e.g. a
+   nanophotonics query → `domains/<that_field>.md`). On a match,
    load that base profile *alongside* the tier framework — it supplies the domain's physical
    constraints, instrument pitfalls, named fitting methods, typical value ranges, and trap
    triggers that generic advice would miss (see "Domain profiles" section below).
@@ -248,9 +248,11 @@ recommend stopping rather than inventing more steps.
 - `domains/_routing.md` — the manifest of which Layer-B files exist and when to load each
   (base profiles, sub-profiles, references/boundary notes). Single source of truth for the
   load list; SKILL.md does not hardcode domain paths. Consulted at Gate A Step 0.
-- `domains/<domain>.md` — Layer B base profiles (e.g. `plasmonic_waveguide.md`,
-  `topological_insulator.md`); `domains/<domain>/*.md` — that domain's sub-profiles and
-  reference/boundary notes. Loaded per the manifest at Gate A Step 0.
+- `domains/<domain>.md` — Layer B base profiles; `domains/<domain>/*.md` — that domain's
+  sub-profiles and reference/boundary notes. Loaded per the manifest at Gate A Step 0.
+  **This share ships none of them** — Layer B is yours to author (`domains/README.md`).
+  With an empty manifest the skill still runs: Gate A finds no matching `base` row,
+  Layer B stays unloaded, and the generic Layer-A framework carries the turn.
 - `domains/domain-expansion-guide.md` + `domains/_template.md` — authoring spec (incl. the
   domain / sub-profile / reference decision tree) and blank template for adding new domain
   content. Load only when creating/reviewing domain files.

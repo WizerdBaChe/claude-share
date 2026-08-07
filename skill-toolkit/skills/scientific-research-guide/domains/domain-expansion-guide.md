@@ -166,8 +166,7 @@ correctly.
 
 ## 3.1 Optional profile metadata block (established convention, not yet a required node)
 
-Existing base profiles (`plasmonic_waveguide.md`, `topological_insulator.md`,
-`gan_power_device.md`, `microled.md`) all prepend a `> Profile metadata:` /
+Every base profile in the source environment prepended a `> Profile metadata:` /
 `> Primary source types:` / `> Notes for AI use:` block before Node 1. This is a useful,
 low-cost convention worth continuing for new base profiles, but it is not yet part of §3's
 required seven nodes — a profile missing it is not structurally invalid.
@@ -189,7 +188,7 @@ SKILL.md Gate B and for the local-corpus slot in `literature-search-extract`:
 5. Do **not** hardcode a personal absolute filesystem path into the profile body. It
    breaks the moment the tool moves, and it becomes a data-leak/environment-coupling
    finding the moment the skill is shared (see `skill-share-packaging`'s de-environment
-   pass). If a path is genuinely needed for a human reader, put it in `STATUS.md` or a
+   pass). If a path is genuinely needed for a human reader, put it in a status or
    report file, not in content the AI loads as domain reasoning.
 
 This same slot pattern is how the `prism` MCP hook in SKILL.md and the citation-inbox
@@ -638,6 +637,11 @@ Register it in `domains/_routing.md` as a `sub-profile` row before it is conside
 
 ## Appendix: SKILL Directory Structure (this skill's actual layout)
 
+> **Share note**: the tree below is the source environment's layout, kept as a worked
+> example of a populated `domains/`. The concrete profile files it names do NOT ship
+> with this copy — see `README.md` in this folder. Read the names as illustrations of the
+> base / sub-profile / reference / boundary pattern, not as files to look for.
+
 ```
 skills/scientific-research-guide/
 ├── SKILL.md                          ← Operating protocol (Gate A-E; load order:
@@ -656,8 +660,8 @@ skills/scientific-research-guide/
 │   │   ├── active_modulation.md          ← sub-profile (method/material platform)
 │   │   ├── terminology_and_geometry.md   ← reference (no standing triggers)
 │   │   └── split_ring_resonators.md      ← boundary note (routes to a future metamaterial domain)
-│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 currently
-│   │                                    missing — see STATUS.md known pre-existing debt)
+│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 were
+│   │                                    incomplete — carried as known debt)
 │   ├── topological_insulator/        ← that domain's sub-profiles
 │   │   ├── bi2se3_material.md            ← sub-profile (material)
 │   │   ├── bi2se3_plasmonic_photoresponse.md ← sub-profile (method; Bi2Se3 plasmon/CPGE/LPGE)
