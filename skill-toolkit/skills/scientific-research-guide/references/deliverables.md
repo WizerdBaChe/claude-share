@@ -145,7 +145,7 @@ Extended Data / Supplementary Materials
 
 ## 當前位置
 - 目前 Tier / section：
-- 領域 profile（Layer B）：<如 topological_insulator + bi2se3_material；無則填「無/通用框架」>
+- 領域 profile（Layer B）：<base profile + 已載入的 sub-profile；無則填「無/通用框架」>
 - 本階段一句話目標：
 
 ## 各 Tier 完成度
