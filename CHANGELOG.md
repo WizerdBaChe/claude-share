@@ -6,7 +6,91 @@ who opened only the top-level file learned *when* things were copied rather than
 *what is here*. Orientation lives in `README.md`; this file is the record.
 
 For the source environment's own evolution log — the rule-by-rule narrative behind
-these snapshots — see `Global_skill_update.md` at this repo's root.
+these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
+standing rationale moved to `claude-ops/ops/rule-registry.md`).
+
+## 2026-08-11 — structural pass: rule-registry, path-scoped rules, interop redesign
+
+**At a glance** (full detail in the prose below and per-share sections):
+
+| Area | Before this refresh | After this refresh |
+|---|---|---|
+| Rule rationale | `Global_skill_update.md` — one growing chronological log, rotated when it hit its size cap | `Global_skill_update.md` frozen (historical only) + new **`claude-ops/ops/rule-registry.md`**, keyed by rule, no rotation needed |
+| CLAUDE.md architecture rule (FSD) | Inline `## Architecture` section in `global-claude-md/CLAUDE.md`, loaded every session | Moved to new **`global-claude-md/rules/frontend-layering.md`**, loaded only when a matching file is read |
+| CLAUDE.md GLSL rule | Inline parenthetical on the runtime-failure bullet | Moved to new **`global-claude-md/rules/shader-failure-modes.md`** |
+| Browser-pane UI-verification rule | Rules-layer text only (CLAUDE.md + `lessons.md` L-009) | Hook-enforced where the environment supports it; CLAUDE.md bullet reworded to point at the enforcement, `lessons.md` gained L-010 (the pitfall) and L-011 (why a hook, not just a rule) |
+| ops-relaxation for an Opus-tier main-loop model | Always ask, default L0 | **Standing ruling**: Opus-tier → L1 automatically (`CLAUDE.md`, `05-authority.md`) |
+| Agent-roster routing table | Lived in `rules-usage-dict.md` §5 | Moved to `20-dispatch.md`; `rules-usage-dict.md` keeps a one-line pointer |
+| `40-maintenance.md` size-trigger table | Listed cap values inline, mixed with rationale | Split: table stays, rationale moved to `rule-registry.md`; new "extract, not delete" rule added |
+| `lessons.md` schema | 4 fields (Context/Pitfall/Fix) | +required **Evidence** line (session/digest/locator/captured), from 2026-08-11 entries on |
+| `70-evolution.md` Problem field | Free-text "cite evidence" | Structured evidence block, same schema as `lessons.md` |
+| interop-layer method content | `refs/` folder — 3 curated playbooks compiled into every target's `interop-refs/` | **Retired.** Replaced by `delegation_block()` — target agent reads its own current docs instead |
+| interop-layer leak protection | None described | New **leak gate**: every build payload scanned before write; `scan` subcommand added |
+| interop-layer targets | opencode (light), codex (full), Antigravity (full) — all live | opencode (light) only; **codex and Antigravity both sync-off** by user ruling |
+| Root `archive/` | Did not exist | New, gitignored — holds the retired `refs/` playbooks for local traceability, never published |
+| E2 (delivery-gate shadow hook) / E3 (its enforcement phase) | n/a | **Deliberately excluded** — unfinished, user-flagged out of scope; zero mentions anywhere in this repo |
+
+Prompted by a matching structural pass in the source environment over 2026-08-08
+through 2026-08-11: a chronological audit log that needed permanent-maintenance
+rotation was replaced by a rule-keyed registry, two CLAUDE.md rules were sunk into
+path-scoped files, and the interop layer's method-content class was retired for a
+delegation model. This refresh mirrors that redesign, not just the content diff.
+
+**Deliberately excluded from this refresh**: an in-progress "delivery gate" shadow
+hook and its test harness (source-side shorthand: E2), and the enforcement phase
+that depends on it (E3, not yet started in the source environment). Both are
+unfinished, user-flagged as out of scope for this share, and unverified — nothing
+about them appears anywhere in this repo, including in `Global_skill_update.md`'s
+otherwise-comprehensive entries for the same date range. If asked, the honest
+answer is "excluded on request, not merely omitted."
+
+- **Root `Global_skill_update.md`** — gained a frozen-header banner (mirroring the
+  source's own freeze) and six new entries covering 2026-08-08 through 2026-08-11:
+  a new browser-pane UI-verification hook, context-budget instrumentation +
+  evidence-block schema, a CLAUDE.md trim + the Opus→L1 standing ruling + the new
+  `rules/` sink, the audit-trail-to-registry structural change itself, a SKILL.md
+  cap raise + codex sync-off ruling, and the interop method-layer redesign. Each
+  entry is a rewritten, de-identified summary of the source event — not a verbatim
+  copy (the source entries cite internal file paths, personal tool names, and a
+  specific machine's session statistics that don't belong in a public share).
+- **`claude-ops/ops/`** — new `rule-registry.md` (why each size cap, standing
+  ruling, and mechanism holds its current value — the size-and-budget entries and
+  the "delivery gate" mechanism entry from the source were reviewed individually;
+  the delivery-gate one was excluded per the note above). `40-maintenance.md`
+  restructured to point at the registry instead of restating an audit-trail
+  schema, plus a new version-control-boundary section and an "extract, not
+  delete" rule for size triggers. `05-authority.md` gained the Opus→L1 standing
+  ruling. `30-judgment.md` gained a proxy-promotion example (L-012). `70-evolution.md`
+  gained the evidence-block requirement. `20-dispatch.md` gained the agent-roster
+  table (moved from `rules-usage-dict.md`, which now carries only a pointer).
+  `environment.md` gained browser-pane UI-verification and instruction-loading-
+  mechanics sections — de-identified: the source blocks name a personal asset-vault
+  tool and cite this machine's own session statistics, both dropped in favour of
+  the general mechanism description. `lessons.md` gained L-010/L-011/L-012 and the
+  required Evidence-line schema note.
+- **`global-claude-md/`** — new `rules/` subfolder (`frontend-layering.md`,
+  `shader-failure-modes.md`): two rules the source sunk out of CLAUDE.md's
+  always-loaded body into path-scoped files that cost nothing until a matching
+  file is actually read. `CLAUDE.md` gained the path-scoped-rules index line, the
+  Opus→L1 standing ruling (flagged inline as the original author's own grant, not
+  a general recommendation), and a reworded browser-pane bullet (hook-enforced
+  where the environment provides one, with an inline note that the original names
+  a specific hook this share doesn't ship). The `## Architecture` (FSD) section
+  and the GLSL parenthetical were removed from the body — their content now lives
+  in `rules/`, matching the source's own move.
+- **`interop-layer/`** — the `refs/` method-playbook folder and its compile step
+  retired (moved to a local, gitignored `archive/interop-refs-2026-08-11/` for
+  traceability, not published); `interop.py`, `portable-core.md`,
+  `MIGRATION-MAP.md`, and `README.md` updated to the delegation model: preferences
+  still transplant verbatim, method depth is now delegated to the target agent's
+  own official docs via `delegation_block()`, and every build payload is
+  leak-scanned before any write (new `scan` subcommand). Target registry updated:
+  codex and Antigravity both now sync-off by user ruling; opencode is the sole
+  live target, `light` profile, with new notes on its CLI verification and an
+  inbound skill-loading dependency this repo does not control.
+- **New root `archive/`** (gitignored, mirrors the `scientific-research-guide/archive/`
+  convention already in this repo): holds the retired interop `refs/` playbooks,
+  kept on disk for traceability, never published.
 
 ## 2026-08-07 — structural pass (this repo's own layout)
 

@@ -37,7 +37,13 @@ inconvenient — now two histories drift.
 Location: `~/.claude/drafts/<YYYY-MM-DD>-<name>/` containing `APPLY.md` plus
 ready-to-apply artifacts. `APPLY.md` states, per change:
 
-- **Problem**: which observed failure pattern or gap this fixes (cite evidence).
+- **Problem**: which observed failure pattern or gap this fixes, plus an
+  **evidence block** — `session <id> | digest <path> | locator <turn /
+  tool_use_id / quoted command> | captured <YYYY-MM-DD>`. Prose that merely
+  *describes* the failure is not evidence: the reviewer must be able to reopen
+  the moment it happened. Unrecorded? Write "unrecorded" — never invent a
+  pointer. Same schema as `lessons.md`'s Evidence line; required from
+  2026-08-11 on, no backfill.
 - **Change**: exact file/rule/hook/skill added or modified (artifact included).
 - **Benefit**: what improves (reliability, cost, speed, clarity).
 - **Risks**: what might get worse; known residual gaps stated honestly.

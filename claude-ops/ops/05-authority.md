@@ -65,6 +65,12 @@ One question, three options:
 - **L2 (full)** — all scaffolding becomes advisory for the main session
   (think-first + post-check + deviation note). Invariants unchanged.
 
+**Standing ruling (user, 2026-08-11)**: an **Opus-tier** main-loop model runs at
+**L1 (core relaxed)** in every project — the gate does not ask, it states the
+observed identity and the resulting level in one line. This is a user grant
+recorded once, not a self-relaxation; a project CLAUDE.md `ops-relaxation:`
+line still overrides it, and every other tier follows the ask flow above.
+
 **Hard boundaries at every level**:
 - The model NEVER self-relaxes. No user answer → L0.
 - Subagents always receive hard rules regardless of level (they run at

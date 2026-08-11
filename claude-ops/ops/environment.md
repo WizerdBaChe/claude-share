@@ -94,9 +94,80 @@ main-loop model is cheap/mid" is evaluated against step 1, not against the
 taste calls and the intake gates; mitigation: raise the model manually for
 judgment-heavy sessions, or lean on fresh-context sonnet review for intake.
 
+## Browser-pane UI verification (as-of 2026-08-08)
+
+Two recorded properties of an in-app browser pane tool surface, both
+measured, both worth enforcing by hook rather than by recall (why:
+`lessons.md` L-011):
+
+| Property | Consequence | Recorded in |
+|---|---|---|
+| An occluded pane reports `document.visibilityState === "hidden"`; compositing stops while CDP/devtools-protocol reads keep working | every screenshot call TIMES OUT — a display-state fault, never a permission one | L-009 |
+| `getComputedStyle()` during a CSS transition returns the interpolated mid-flight value | hover/focus assertions come back FLAKY, not stably wrong | L-010 |
+
+**Enforcement**: a PreToolUse hook matched to the browser-pane tool names,
+where the harness supports PreToolUse hooks. It denies a `getComputedStyle`
+call carrying no settle token in the same call, and denies a screenshot until
+a `visibilityState` probe has run in this session (a per-session marker with a
+short TTL). Both denials name the corrective call, so the cost is one retry.
+Escape hatch: a literal marker anywhere in the script call stands down the
+settle-check branch, for the rare case where the mid-transition value IS the
+thing being measured. Known gap: only explicit `getComputedStyle`-family calls
+are visible; a style value inferred from an accessibility-tree read is not —
+theoretical, since those tools do not report computed style.
+
+**Out-of-process pictures**: a headless-browser probe script that drives
+hover/focus, finishes animations, and returns computed styles plus an
+optional screenshot as JSON is the recommended path for a real picture when
+the in-app pane cannot be trusted for one — build one appropriate to your own
+tooling if the environment doesn't already have one.
+
+## Instruction-loading mechanics (as-of 2026-08-11)
+
+Measured, not read off the docs — official docs tend to describe path-scoping
+and user-level rules separately and never state that the two compose.
+
+| Carrier | Charged at session start? | Verified how |
+|---|---|---|
+| The always-loaded global instructions file | yes, in full | startup instrumentation, `load_reason: session_start` |
+| `@path` imports inside it | yes ("imported files still load at launch") | official docs only |
+| A user-level rule file **without** a path scope | yes | probe file, 2 runs |
+| The same kind of file **with** a path scope | **no** | same 2 runs — absent from startup |
+| ...that scoped file, when a matching file is read | loaded then | probe file, `load_reason: path_glob_match`, content observed in context |
+| A skill | only when invoked/judged relevant | official docs |
+
+So the only carriers that reduce startup cost are: delete/merge, a
+path-scoped user rule, or a skill. Splitting into imports or unscoped rules
+saves nothing. Sinking an INTENT-triggered rule into an ops-style layer makes
+it a ghost rule (`lessons.md` L-011) if that layer is itself only reached via
+a conditional routing clause.
+
+**Observability**: a logging-only hook on whatever "instructions loaded"
+event the harness exposes (fail-open, never denies) can append a small
+per-file record — file path, memory type, load reason — to a local log. This
+is what the table above was verified against.
+
+**Trim effect sizes can fall below measurement noise.** A trim that removes a
+few hundred bytes from a startup prompt whose observed per-session spread
+spans many thousands of tokens is not a usable acceptance test by itself — a
+sub-1% signal cannot be recovered from a much wider range no matter how many
+sessions are collected. Judge context-budget work by adherence evidence (the
+rule firing when it should) and by the on-disk inventory, not by a token
+delta alone.
+
+**Shell results carry no reliable exit-code signal by themselves.** A
+tool-layer "error" flag is exactly "the shell reported non-zero" — no
+divergence to find between the two. The gap that matters is upstream:
+`cmd || true` and `cmd | head` both exit 0 while the command inside failed,
+and can report success while `FAILED` sits in stdout. Any gate keying on the
+tool-layer error flag must also sniff stdout, or downgrade piped /
+`||`-guarded verifications to "weak" rather than counting them as verified.
+
 ## Refresh triggers
 
 Re-verify a block (and move its `as-of`) when: model names in the harness
 change; the Agent or Workflow tool schema changes; the user revises the cost
-cap; a hook test (`hooks/model_cap_guard.py`) starts failing; `settings.json`
-`model:` is edited. Whole-file sweep: any block older than ~90 days.
+cap; a hook test (`hooks/model_cap_guard.py`, the UI-verification hook if one
+exists) starts failing; `settings.json` `model:` is edited; the browser-pane
+tool names change (a UI guard's matcher is keyed to them). Whole-file sweep:
+any block older than ~90 days.

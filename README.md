@@ -11,7 +11,7 @@ Licensed under [MIT](LICENSE).
 
 | Folder | Contents |
 |---|---|
-| `interop-layer/` | Cross-agent sync layer: compiles a portable rules subset into global instruction files for opencode / codex / Antigravity. See `interop-layer/README.md`. |
+| `interop-layer/` | Cross-agent sync layer: compiles a portable rules subset into global instruction files for opencode (the only live target as of 2026-08-11; codex and Antigravity are sync-off by ruling). Method depth is delegated, not shipped. See `interop-layer/README.md`. |
 | `skill-toolkit/` | Portable AI-agent skills and bilingual trigger dictionary, reviewed for personal identifiers and local paths. See `skill-toolkit/README.md`. |
 | `claude-ops/` | Anonymized snapshot of operational guidance for a Claude Code environment. See `claude-ops/README.md`. |
 | `thinking-notes/` | Numbered design-thinking notes on one-shot delivery, debugging epistemology, delegation economics, and related topics. See `thinking-notes/README.md`. |
@@ -23,7 +23,8 @@ Licensed under [MIT](LICENSE).
 | If you want | Read |
 |---|---|
 | A one-line map of every file here | `AGENTS.md` |
-| How the source environment evolved, rule by rule | `Global_skill_update.md` |
+| How the source environment evolved, rule by rule (frozen 2026-08-11) | `Global_skill_update.md` |
+| Why a rule holds its current value, going forward | `claude-ops/ops/rule-registry.md` |
 | When each share was copied and what changed | `CHANGELOG.md` |
 | The rules layer itself | `claude-ops/ops/` (start at `OPS.md`) |
 | The global preferences file these rules hang off | `global-claude-md/CLAUDE.md` |

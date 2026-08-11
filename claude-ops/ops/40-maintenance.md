@@ -2,38 +2,61 @@
 
 Governs changing the RULES, not doing the work the rules describe. This file
 reuses the environment's existing mechanisms instead of inventing parallel
-ones: audit trail = `~/.claude/Global_skill_update.md` (append-only), backups =
-`~/.claude/backups/<YYYY-MM-DD>/`, config red-team = the `config-self-audit`
-skill, file hygiene = global CLAUDE.md's rules (archive-not-delete,
-new-file-not-overwrite), version history = the `~/.claude` git repo.
+ones: rule rationale = `ops/rule-registry.md`, change events = git commit
+messages, backups = `~/.claude/backups/<YYYY-MM-DD>/`, config red-team = the
+`config-self-audit` skill, file hygiene = global CLAUDE.md's rules
+(archive-not-delete, new-file-not-overwrite), version history = the
+`~/.claude` git repo. (`Global_skill_update.md` is the frozen pre-2026-08-11
+event log — historical reading only.)
 
 **After any 🔴/🟡 change is applied and audited**: `git add -A && git commit`
 in `~/.claude` (conventional message, e.g. `docs(ops): ...` / `feat(skill): ...`)
-— the git history is the diffable evolution record; the audit trail is the
-narrative index into it. Guardrail changes (settings/hooks) follow the proposal
-protocol in `70-evolution.md` first.
+— the commit message IS the change record (fields below), and
+`ops/rule-registry.md` carries the standing reason. Guardrail changes
+(settings/hooks) follow the proposal protocol in `70-evolution.md` first.
 
-### Audit-trail entry schema (anchor: audit-entry-schema)
+### Where a rule change gets recorded (anchor: audit-entry-schema)
 
-An entry that only lists the files and sections touched is a **routing
-reference, not a report**: it tells a reader where to look, not what changed or
-whether it worked — they must reopen every file to find out. Minimum fields,
-in order (invariant — a relaxation level may loosen the prose, never the
-fields):
+Restructured 2026-08-11. A change produces TWO records with different
+lifetimes, and they go to different places:
 
-1. **trigger** — the failure, review finding, or user directive that forced the
-   change. "Because it was better" is not a trigger.
-2. **change** — before → after. For rule text, quote the operative line as it
-   read before and as it reads now; a §-reference alone does not satisfy this.
-3. **result** — the evidence the change holds: command output, size delta,
-   living proof of one real run (`30-judgment.md` R2).
-4. **rollback** — backup path or commit to revert to.
-5. **open** — what is still unresolved, plus known debt deliberately left.
+1. **The event** — which files changed, on what day, and how to revert →
+   **the git commit message**. Fields, in order: trigger (the failure, review
+   finding, or user directive that forced it — "because it was better" is not
+   a trigger) / change (before → after; for rule text quote the operative line
+   both ways, a §-reference does not satisfy this) / result (evidence it
+   holds: command output, size delta, one real run per `30-judgment.md` R2) /
+   rollback (backup path or commit). This is the record that decays: it is
+   worth most on the day it is written, and `git log`/`git log -S` already
+   index it perfectly.
+2. **The standing reason** — why the rule holds its CURRENT value →
+   **`ops/rule-registry.md`**, keyed by the rule, not the date. Changing a rule
+   REPLACES its entry and compresses the old value into `history:`. Fields:
+   key / current / why / evidence / history / rollback.
 
-Naturally-numeric changes (size trims, cap raises) satisfy 2–3 with the
-numbers. Rule/feature changes are where the before→after quote is load-bearing;
-that is exactly where entries decay into file lists. Applies to entries written
-from 2026-08-07 on; older entries are not backfilled.
+Why not one chronological log: it grows as O(changes) while its value is
+O(rules), so it needs rotation forever — and rotation evicts the OLDEST
+rationale, which is the most settled and therefore the most load-bearing.
+`Global_skill_update.md` is frozen as the pre-2026-08-11 historical log for
+exactly this reason; see its header for the ruling it lost.
+
+### Version-control boundary (anchor: vc-boundary)
+
+The test is **"will someone need to FIND this later?"** — not the file type,
+not its age.
+
+- **In git**: rules, the reasons rules hold their values, decision registries,
+  code, and rotated rationale (an archive, tracked). If a future session could
+  ask "why is this like this", it must be greppable in the working tree.
+- **Not in git**: machine-local state (telemetry, caches), raw session
+  transcripts, scratch/draft material, dead material, and **backups** — git
+  IS the backup.
+- **The failure mode this rule exists to stop**: a gitignored directory
+  quietly becoming the only home of a live ruling. It has happened — a
+  gitignored backup directory was briefly the sole surviving copy of a
+  standing user ruling after it was rotated out of the old chronological log.
+  If you are about to move rationale into a gitignored archive or a backups
+  folder, you are about to lose it; move it somewhere tracked instead.
 
 ## §1 Tiering: who can change what
 
@@ -80,17 +103,29 @@ three copies that will drift apart and contradict each other.
 ## §3 Trim discipline (keeping this from becoming an unread constitution)
 
 - Triggers (defaults, mechanically nudged by `hooks/ops_health_nudge.py` —
-  change the two together): any ops file past ~12K chars (raised from ~10K
-  on 2026-08-06 — a lossless trim pass capped out ~11.2K without cutting
-  distinct rules, same pattern as the CLAUDE.md raise); the entry file
-  (`OPS.md`) past ~60 lines; `ops/lessons.md` past ~30 unfolded entries;
-  global `CLAUDE.md` past ~15K chars (it is ALWAYS loaded — trim/merge, don't
-  append; raised from ~12K on 2026-08-01 after a real trim pass capped out at
-  ~13.7K without cutting any distinct rule — see `Global_skill_update.md`);
-  any skill frontmatter description past ~800 chars; any SKILL.md
-  past ~250 lines; `skill-trigger-dict.md` past ~20K chars;
-  `Global_skill_update.md` past ~60K chars → rotate oldest entries to
-  `archive/` with a pointer note (append-only still holds for what remains).
+  change the two together). **WHY each value is what it is, and what it was
+  before, lives in `ops/rule-registry.md` — do not restate it here** (§2: one
+  thing, one place):
+  | trigger | value |
+  |---|---|
+  | any `ops/*.md` | ~12K chars |
+  | entry file `OPS.md` | ~60 lines |
+  | `ops/lessons.md` | ~30 unfolded entries |
+  | global `CLAUDE.md` (ALWAYS loaded — trim/merge, never append) | ~15K chars |
+  | skill frontmatter description (charged every session) | ~800 chars |
+  | any `SKILL.md` body (charged only on invoke) | ~300 lines |
+  | `skill-trigger-dict.md` | ~20K chars |
+  Rotation of a frozen chronological event log is retired — rationale now
+  goes to the registry, which grows with the rule count, not the change count.
+- **A size trigger means EXTRACT, not DELETE.** Over cap, the legitimate moves
+  are: move detail to a references file (or an archive for logs) behind a
+  pointer, merge genuine duplicates, and cut text that says nothing.
+  Compressing a rule until it fits — dropping the example, the why, the
+  boundary case — makes the file shorter and the rule weaker, and it is
+  invisible in a line count. If a pass cannot get under cap without cutting a
+  distinct rule, that IS the signal to raise the cap (with the failed pass
+  recorded as the evidence), the same way CLAUDE.md went 12K→15K and ops files
+  10K→12K. Never trade completeness for the number.
 - **Birth budgets** (prevention beats trimming — a new artifact must be born
   within budget, not grow into a trim candidate): skill description ≤700
   chars stating purpose + trigger phrases + top 1–2 NOT-cases, detailed

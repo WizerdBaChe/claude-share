@@ -56,6 +56,23 @@ project memory override these when they conflict.
     downstream docs and code quote them verbatim.
 <!-- /block -->
 
+<!-- block:environment-shell profiles:light,full -->
+## Environment — when running shell commands or writing runnable command text
+
+- This machine is **Windows 11**; the default shell is cmd/PowerShell, and
+  Git Bash requires a manual second launch on the user's side.
+- When writing command text into scripts, documents, or chat code fences,
+  label the fence with the shell it is for — `powershell` or `git bash`,
+  never a bare `bash` — and pick the one matching what the user is
+  actually using in that moment. Never mix PowerShell and Bash syntax
+  inside one fenced block.
+- Line endings for scripts and config files: CRLF.
+- When enumerating boundary or compatibility cases (resize, DPI,
+  reduced-motion, devices, shells): check the known environment facts
+  first and trim the generic list to what actually applies. Items kept
+  only because the environment is unknown must be labelled as guesses.
+<!-- /block -->
+
 <!-- block:git-workflow profiles:light,full -->
 ## Git workflow — applies only when actually committing, branching, or pushing
 
@@ -124,8 +141,11 @@ For UI, shaders, viewports, canvases, generated images/plots/diagrams:
 green tests or a correct backend response prove the data path, NOT the
 picture. Don't claim it "works" until the user has confirmed it in the
 real environment. When a change cannot be statically verified, end the
-task with a manual-acceptance checklist — numbered steps plus the expected
-result per step — without being asked.
+task with a manual-acceptance checklist — numbered steps, each with a
+concrete action and the expected observation, executable blind by someone
+who did not write it — without being asked. Include no fewer stress-path
+items (rapid toggling, extreme inputs, tab-switching) than happy-path
+ones.
 <!-- /block -->
 
 <!-- block:canonical-method-discipline profiles:full -->
@@ -166,6 +186,18 @@ problem, and a dry-run is not a real run; anything promised to the user
 has been reported back.
 <!-- /block -->
 
+<!-- block:failure-visibility profiles:full -->
+## Failure visibility — when a deliverable can fail at runtime
+
+Rendering, resource loading, async init: design failures to announce
+themselves. A visible error notice or a degraded fallback, plus a
+structured console error — a silent blank screen is a defect, not a
+neutral outcome. State the likely failure modes in the delivery note,
+and what the user would actually see for each. Animation, particle, or
+realtime-render deliverables ship with a toggleable FPS / object-count
+readout.
+<!-- /block -->
+
 <!-- block:approach-wrong-signals profiles:full -->
 ## Signals the approach is wrong (not that you should try harder)
 
@@ -182,6 +214,15 @@ rather than solving the problem.
 
 First state whether the core need is already met; if it is, recommend
 stopping. Never change for change's sake. When you must ship a baseline
-component whose quality you doubt, put it behind a swappable interface so
-the weak part can be replaced without rewriting the pipeline around it.
+component whose quality — or whose reading of the requirement — you
+doubt, put it behind a swappable interface so the weak part can be
+replaced without rewriting the pipeline around it; for a doubted reading,
+say in the delivery which module or parameter flips the whole call if the
+reading turns out wrong.
+
+When a deliverable may not fit the round's budget or scope, declare the
+degradation order up front — drop X, then Y, then Z; guaranteed core W —
+instead of shipping every part at 60%. When it carries aesthetic or
+tunable parameters, centralize them in one commented config block and
+append an adjustment table: desired change → parameter → sane range.
 <!-- /block -->

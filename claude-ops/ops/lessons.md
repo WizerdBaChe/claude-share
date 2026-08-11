@@ -14,9 +14,19 @@ Entry format:
 Context: <what was being done>
 Pitfall: <what went wrong>
 Fix: <the durable fix, and where it now lives if folded in>
+Evidence: session <id> | digest <memory-archive/digests/<card>.md> |
+          locator <turn no. / tool_use_id / quoted command> | captured <YYYY-MM-DD>
 ```
 Recurs? Bump `hits:` instead of adding a duplicate. Replaced? Mark
 `SUPERSEDED by L-XXX`, don't delete.
+
+**Evidence line** (required for entries written from 2026-08-11 on; older
+entries are NOT backfilled — same precedent as the audit-entry-schema).
+`session` alone locates a conversation, not a fact; `locator` is what lets the
+next reader re-derive the judgement instead of re-litigating it. Use `digest`
+when the raw transcript may age out of a readable format, and write
+"unrecorded" rather than inventing an id — a fabricated pointer is worse than
+an absent one. Rationale and the wider trace-linking rule: `70-evolution.md` §2.
 
 ## L-001 2026-07-10 tags: dispatch|cost-cap|hooks hits: 1
 Context: eval-5 subagent (spawned sonnet) was killed by a usage limit and
@@ -201,8 +211,103 @@ not confirmation — record such claims at correlation level.
 Fix (folded in): global CLAUDE.md carries a DETECTION-first rule (probe
 `visibilityState` before invoking screenshot) rather than a prohibition the
 agent must recall while already misdiagnosing; pictures come from a separate
-browser process. Prism CLAUDE.md holds the project command. Over-firing
-guard: a timeout with `visibilityState: "visible"` is a different fault.
+browser process. Over-firing guard: a timeout with `visibilityState: "visible"`
+is a different fault.
+2026-08-08 amendment: the rules-layer version of this was not enough — see
+L-011 on why a CLAUDE.md line cannot carry a mid-measurement rule. Enforcement
+moved to a PreToolUse hook (screenshot branch), which denies the screenshot
+until a `visibilityState` probe has run in this session (short TTL); the
+CLAUDE.md line stays as the explanation the denial points at.
+
+## L-010 2026-08-08 tags: env|browser-pane|verify|ui-testing|flaky|css hits: 1
+Context: browser-pane UI verification — hover/focus a control, then read
+`getComputedStyle` to check the rendered value against a design token.
+Pitfall: `getComputedStyle()` during a CSS transition returns the INTERPOLATED
+mid-flight value (CSSOM resolved value), not the target, and tool round-trip
+latency is non-deterministic. So the failure mode is FLAKY, not stably wrong —
+the same code passes and fails across runs, which sends the reader to debug
+correct code. Compounding: the obvious fallback (look at a screenshot) is
+exactly what L-009 takes away, so a round of verification can end with no
+trustworthy output at all. Measured control (a headless-probe verify script):
+on a 5s transition, hover-then-measure never reaches the target colour;
+finishing animations first reaches it on 3/3 runs.
+Fix (folded in): (1) settle before measuring —
+`el.getAnimations({subtree:true}).forEach(a => a.finish())` is SYNCHRONOUS, so
+it needs no promise and no sleep; infinite keyframes cannot finish() and take
+an injected `transition:none;animation-duration:0s` stylesheet instead.
+(2) prefer asserting STATE (`data-state`, `aria-expanded`, class flips) over
+asserting a rendered pixel value — state assertions are timing-free.
+(3) enforcement is a PreToolUse hook that denies a script-execution call
+containing `getComputedStyle` with no settle token in the same call.
+(4) the out-of-process tool that does all of this: a headless-browser probe
+(utility/node) implementing the same settle-then-measure logic.
+
+## L-011 2026-08-08 tags: rules-design|enforcement|hooks|layering hits: 1
+Context: deciding where to put the L-009/L-010 UI-verification rules so they
+actually fire. Raised by the user as a design question, not discovered by a
+failure: whether the ops layer and lessons.md sit low enough in priority that
+routing through global CLAUDE.md could not reliably reach them.
+Pitfall: the three rule layers have very different firing guarantees, and
+writing a rule into the wrong one produces a rule that reads as durable and
+is in fact dead. `ops/lessons.md` is NOT in context — it fires only when
+something greps it, i.e. essentially never on its own. `ops/*` fires only when
+CLAUDE.md's project-operations clause routes there, which a UI-verification
+task never triggers, because it is not a multi-step project task. Global
+CLAUDE.md IS always in context, but it fires only if the trigger words match
+what the agent is about to do — and that match is unreliable for rules that
+must fire MID-MEASUREMENT, when the agent is already confident and reading
+past reminders (L-009 recurred for ~1 month under exactly such a line).
+Fix: the layer must be chosen by TRIGGER SHAPE, not by importance.
+- Trigger is a named tool call with inspectable input → PreToolUse hook. The
+  harness executes it; the model cannot skip it. Deny beats warn: a warning is
+  text the agent may skim, a denial forces the corrected call, and it costs
+  exactly one retry.
+- Trigger is a task-shaped judgement ("when designing a module layering
+  scheme") → global CLAUDE.md conditional rule.
+- Trigger is "someone is already investigating this topic" → ops/lessons.md,
+  as the detail the shorter layers point AT, never as the enforcement.
+Corollary: when a hook carries the enforcement, the CLAUDE.md line stays but
+changes job — it becomes the explanation the denial message cites, so the two
+must not drift. Both the hook docstring and the CLAUDE.md line name the
+lessons entry, so a reader landing from either arrives at the same place.
+
+## L-012 2026-08-11 tags: verify|evidence|claim-calibration|delivery|self-review hits: 1
+Context: a context-budget/instrumentation task with several sub-deliverables
+tracked across a session. Four over-claims in one task, all caught, none by
+re-reading the text that contained them.
+Pitfall: **proxy promotion** — a proxy is measured, then spoken about in the
+voice of the thing it stands for. Same shape every time: (1) a static byte
+estimate for an always-loaded instructions file was used to rank a trim as
+the root-cause fix; a measured startup floor showed it was a much smaller
+share of the total, an adherence lever, not a token lever. (2) a CLI warning
+about one permission-rule shape was read as "the confirmation gate is
+broken"; only one component had actually been tested, never the live half of
+the mechanism. (3) a probe carrying the SAME path-scope list as a real rule
+file fired → treated as evidence that file works; the probe could not have
+failed on that file's behalf, because it never touched it. (4) a recalled
+count from an earlier read (six items) turned out to be four on recount.
+Why an existing claim-calibration rule did not stop it: it is a
+DELIVERY-TIME duty, executed by the author, on the author's own sentences,
+while the author is still holding only the proxy. Re-reading one's own claim
+re-derives it from the same evidence and it looks true again. A refutability
+block written in that state inherits the error instead of catching it.
+Detection, all four cases: an action taken for an UNRELATED reason produced an
+output that could disagree — running the baseline script, opening the config
+to edit it, checking an empty log. Where no such action existed, the claim
+survived until a reviewer demanded measurement.
+Fix: (1) **name the substitution in the sentence**, not a hedge — "bytes, not
+tokens", "the pattern, not this file", "one rule shape, not the gate". A hedge
+word keeps the proxy invisible; naming it hands the reader the thing to
+attack. (2) Before writing "X works", ask: *could the evidence I have have
+come out differently for the specific artifact I am claiming about?* No → it
+is not evidence about that artifact. (3) When the claim is load-bearing for
+the requester's decision, build the disagreeing artifact ON PURPOSE instead
+of waiting for one to appear incidentally. Companion example under
+`30-judgment.md` R2.
+Evidence: session (this project's) | digest unrecorded | locator: instance (1)
+a startup-baseline script's first run vs the preceding turn's estimate table;
+instance (3) an empty rule-load log after reading a file matched by a
+probe-copy scope | captured 2026-08-11
 
 ---
 ## Archived (folded into another file, or retired)

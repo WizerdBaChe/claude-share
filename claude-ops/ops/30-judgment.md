@@ -47,6 +47,13 @@ delivery-summary "I did X" points at a concrete location (file / function /
 section); a claim with no pointer is deleted, not softened.
 ✅ "Refuted: current machine cannot run (pytest passed). Still open:
 cross-machine rebuild unverified."
+❌ A probe carrying the SAME config as the real artifact passes → "the artifact
+works". The probe could not have failed on the artifact's behalf; it never
+touched it (`lessons.md` L-012, proxy promotion). Test: *could this evidence
+have come out differently for the specific thing I am claiming about?* No ⇒
+name the substitution in the sentence ("the pattern is proven, this file's
+registration is not"), never a hedge word — a hedge hides the proxy, naming it
+hands the reader the thing to attack.
 
 **Refutability statement** (R2's delivery-side duty, invariant): a Tier-2
 deliverable (depth-tier triage, global CLAUDE.md) attaches after its

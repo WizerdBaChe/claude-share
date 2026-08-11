@@ -175,3 +175,37 @@ substitute); on re-dispatch, put the previous failure output in "read first".
 - Large tool output: check size first; read tail/summary before deciding to
   read more. Sanity-check output before treating it as content (does it look
   like an error string? suspiciously short or empty?).
+
+## Agent roster routing — task shape → agentType → strength
+
+Dispatch's third dimension: this section governs "which agent, what
+strength" (skill routing belongs to `skill-trigger-dict.md`; tier routing to
+§1–§4 above). Model ceiling and tier mapping: `ops/environment.md`. This
+table governs subagents only, not the main-loop model's default.
+
+| Task shape | agentType | model × effort |
+|---|---|---|
+| Search/inventory/read-many-files | `Explore` (built-in, read-only) | haiku~sonnet × medium |
+| Mechanical, hard acceptance gate (convert/translate/spec-driven script) | `general-purpose` | haiku × low |
+| Backend/API implementation | `backend-architect` | sonnet × medium |
+| Frontend implementation | `frontend-developer` | sonnet × medium |
+| Writing tests, QA verification | `testing-qa-engineer` / `api-tester` | sonnet × medium |
+| Bug root-cause + fix | `testing-bug-fixer` | sonnet × medium~high |
+| Red-team / review (reviewer ≠ author) | `code-reviewer` (fresh context) | sonnet × high |
+| Security review | `security-engineer` | sonnet × high |
+| Architecture planning (dispatch version) | `Plan` (built-in) or `software-architect` | sonnet × high |
+| Research / multi-source verification | `general-purpose` + T4 contract | sonnet × high |
+| Taste / policy wording / ambiguous judgment | **do not dispatch** — main session does it itself (`30-judgment.md` R6) | — |
+
+Disambiguation (frequently confused pairs):
+- `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`:
+  the skill is the **methodology** (quick bug hunt / deep health check), the
+  agent is the **execution vehicle**. Dispatch `code-reviewer` when the main
+  session is doing red-team intake; when the user actively requests a review,
+  route via skill (`skill-trigger-dict.md` review family).
+- `software-architect` vs `management-tech-lead` vs `Plan`: want a plain
+  implementation plan → `Plan`; want an ADR / tech-selection trade-off →
+  `software-architect`; want task decomposition and dispatch recommendations →
+  that's the dispatcher's own job (`10-command-loop.md`), not outsourced.
+- Every other agent: match by description; this table lists only the
+  high-frequency and easily-confused ones.

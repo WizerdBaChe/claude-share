@@ -4,7 +4,8 @@
 
 ## 內容
 
-- `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、前端分層架構（FSD）、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。
+- `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。開頭有一段「Path-scoped rules」索引，指到下面 `rules/` 資料夾。
+- `rules/`：2026-08-11 新增。兩條原本內嵌在 `CLAUDE.md` 裡的規則被搬出來,改成只在讀到對應副檔名檔案時才載入的 `paths:`-scoped 規則檔——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`（GLSL 靜默失敗模式）。搬出來的理由：這兩條規則的觸發條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後**每個 session 啟動都不用再付它們的位元組成本**,只有真的讀到符合的檔案時才載入。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是 `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這兩條規則的內容併回 `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
 
 ## 去識別化 — 以及為什麼大部分路徑「原樣保留」
 
@@ -33,13 +34,15 @@
 3. 把「Environment」小節的 `<OS_NAME>` / `<SHELL_NAME_AND_VERSION>` / `<LINE_ENDING_CONVENTION>` 三個佔位符換成該機器實際的 OS/shell/換行慣例。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 其餘規則（Git 工作流程、互動風格、工程判斷準則、FSD 架構、檔案整理慣例）與機器/帳號無關，可直接沿用。
+6. 把 `rules/frontend-layering.md`、`rules/shader-failure-modes.md` 複製到目標機器的 `~/.claude/rules/`，才能讓 `CLAUDE.md` 開頭的 path-scoped 索引真的指到活的檔案。若目標環境沒有等效機制，直接把這兩份檔案的規則內容併回 `CLAUDE.md` 也可以。
+7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
 ## 快照細節
 
-- 來源：`~/.claude/CLAUDE.md`，複製於 2026-08-02。
+- 來源：`~/.claude/CLAUDE.md`，複製於 2026-08-02；refreshed 2026-08-06、2026-08-11。
 - 檢查範圍：使用者名稱、電子郵件、帳號、機器綁定的 OS/shell/路徑資訊。
 - 結果：檔案本身無使用者個資；「Environment」小節的機器綁定設定（Windows 11 + PowerShell 5.1 + CRLF）已改為佔位符。`~/.claude/ops/*` 與 `~/.claude/skill-trigger-dict.md` 引用判定為可攜路徑（`~` 不含使用者名稱），故原樣保留，並在本 README 補上與本 repo `claude-ops/`、`skill-toolkit/` 的對應表，取代原先過度抽象化的 `<OPS_DIR>` 寫法。
+- 2026-08-11 refresh：新增 path-scoped rules 索引行與 `rules/` 資料夾（兩條規則從 `CLAUDE.md` 本體搬出）；瀏覽器面板 UI 驗證那條規則改寫為「hook-enforced where the environment provides such a hook」，並附加行內註解說明原文額外指名一支 PreToolUse hook；relaxation gate 那條加了一則「Opus 主迴圈模型 = L1」的 standing ruling（附註解說明這是原作者自己的授權裁定，非泛用建議）；移除的 `## Architecture`（FSD）小節內容原樣搬進新的 `rules/frontend-layering.md`；GLSL 靜默失敗模式的括號子句搬進新的 `rules/shader-failure-modes.md`。無新增個資。
 - 這是時間點快照，不是自動同步目標。
 
 ## 授權

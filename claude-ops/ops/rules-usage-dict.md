@@ -91,36 +91,10 @@
 | 檔案衛生 | archive-not-delete、報告開新檔 | 規則檔分層權限與修剪紀律（`40`） |
 | 查證優先 | 「概念性錯誤先查 canonical 方法再改」 | 一般化為 C2/C6 思考習慣（`50-coach.md`） |
 
-## 五、Agent 名冊路由 (Agent Roster Routing) — task shape → agentType → 強度
+## 五、Agent 名冊路由 → 已移至 `20-dispatch.md`
 
-派工第三維度：本節管「派給哪個 agent、什麼強度」（skill 歸
-`skill-trigger-dict.md`、層級歸一~四節）。模型上限與 tier 映射見
-`ops/environment.md`（haiku/sonnet 上限，opus/fable 需當次核可，
-`model_cap_guard.py` 強制）。該表只管 subagent，不是 main-loop model 的預設。
-
-| 任務形狀 (task shape) | agentType | model × effort |
-|---|---|---|
-| 搜尋/盤點/read-many-files | `Explore`（內建，唯讀） | haiku~sonnet × medium |
-| 機械性、有硬驗收閘（轉檔/翻譯/照規格腳本） | `general-purpose` | haiku × low |
-| 後端/API 實作 | `backend-architect` | sonnet × medium |
-| 前端實作 | `frontend-developer` | sonnet × medium |
-| 寫測試、QA 驗證 | `testing-qa-engineer` / `api-tester` | sonnet × medium |
-| Bug 根因定位與修復 | `testing-bug-fixer` | sonnet × medium~high |
-| 紅隊/審查（reviewer ≠ author） | `code-reviewer`（fresh context） | sonnet × high |
-| 安全審查 | `security-engineer` | sonnet × high |
-| 架構規劃（派工版） | `Plan`（內建）或 `software-architect` | sonnet × high |
-| 研究/多源查證 | `general-purpose` + T4 契約 | sonnet × high |
-| 品味/政策措辭/模糊判斷 | **不派工** — 主 session 自做（`30-judgment.md` R6） | — |
-
-消歧（易混淆組）：
-- `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`：
-  skill 是**方法論**（快速抓蟲/深度健檢），agent 是**執行載體**。主 session 收件
-  紅隊時派 `code-reviewer` agent；使用者主動要求 review 時走 skill 路由
-  （`skill-trigger-dict.md` 審查家族）。
-- `software-architect` vs `management-tech-lead` vs `Plan`：單純要一份實作計畫
-  → `Plan`；要 ADR/選型 trade-off → `software-architect`；要任務拆分與派工建議
-  → 那是 dispatcher 本人的工作（`10-command-loop.md`），不外派。
-- 其餘 agent 按 description 對號入座；本表只列高頻與易混淆者。
+任務形狀 → agentType → model×effort 的名冊是**派工路由**，owner 是
+`20-dispatch.md`（本檔管的是層級與 skill 的職責邊界）。移動於 2026-08-11。
 
 ## 六、消歧速查表 (Disambiguation Quick Table)
 

@@ -1,9 +1,231 @@
 # Global Skill Update Log
 
+> **FROZEN 2026-08-11 — historical event log. Do not add new entries in the
+> source environment.**
+>
+> Standing rationale ("why does this rule hold this value") now lives in
+> **`claude-ops/ops/rule-registry.md`**, keyed by the RULE rather than by the
+> date. The per-change event record — which files changed on which day, and
+> the rollback path — lives in the source environment's git commit messages.
+>
+> Why the split: this file grew as O(changes) while its value is O(rules), so
+> it needed rotation forever, and rotation evicts the OLDEST rationale — which
+> is the most settled and therefore the most load-bearing. That is not
+> theoretical: a rotation pass once evicted a standing user ruling that then
+> survived only in gitignored backup copies, recovered by luck during a later
+> cleanup. Rulings now live in `rule-registry.md`, in version control.
+>
+> This snapshot stays readable and stays in git. The entries below 2026-08-08
+> are this share's own last refresh, added as one batch — not accumulated
+> append-only the way the source log was.
+
 Append-only log of changes made by skills that modify durable config (CLAUDE.md, skills).
 Each entry: what was newly added/changed + when (absolute timestamp).
+Entry fields, from 2026-08-07 on: trigger / change / result / rollback / open.
+
+**Order is NOT uniform, by history**: entries from 2026-08-08 on are
+prepended directly below this header (newest first); everything from
+2026-07-25 to 2026-08-07 sits below them in the original ascending order.
+Read the top block downward for recent work, and the lower block bottom-up.
 
 ---
+
+## [2026-08-11, interop] Preference ports, method does not — refs retired, leak gate added, curation cleared
+
+- **trigger**: user ruling — Antigravity sync dropped (agent no longer used);
+  opencode sync kept, but with a preference shift toward "the target agent
+  reads its own current official docs and adapts, rather than inheriting a
+  copied-over method playbook"; and a question of whether the interop layer
+  should keep only identification/security-risk screening and delegate
+  everything else. Confirmed before implementing: the delegation applies to
+  the METHOD layer only — `portable-core.md` (the user's own standing
+  preferences) stays transplanted, because no official documentation can
+  produce it.
+- **change**: `interop.py`'s reference-compile class (a `REFS` registry that
+  compiled ~20K of curated method playbooks to a target-side `interop-refs/`
+  folder plus a prose routing index) retired entirely, replaced by
+  `delegation_block()` — "the preferences above are the user's own standing
+  rules … for method depth, consult THIS platform's own current official
+  documentation … propose the adaptation to the user before installing
+  anything durable." A new L0 leak gate assembles every enabled target's
+  payload in memory, scans it, and only writes if clean; a hit aborts the
+  whole build with nothing written. `portable-core.md` curated against the
+  accumulated CLAUDE.md changes since the last pass: two new blocks
+  (environment/shell conventions, failure visibility) and two merges. Not
+  ported as method: depth-tier triage, boundary-contract format, relaxation
+  gate, the browser-pane hook rule, path-scoped rules index.
+- **result**: `status` now reports one active target (opencode), `[off]` for
+  both disabled ones, and curation up to date. Leak gate verified
+  adversarially: one planted secret of each of 6 pattern classes inside a
+  REAL block → 6/6 aborted with nothing written, control build still writes.
+  The first two probe versions reported false failures because the plant
+  landed outside the block markers — fixed by asserting the plant reached the
+  assembled payload before judging the gate.
+- **rollback**: `interop-layer/` git history predating this refresh; retired
+  playbooks kept locally (not published) for traceability.
+- **open**: opencode deployment itself is NOT done — writing into another
+  agent's config is outward-facing and wasn't asked for. With only opencode
+  enabled on the `light` profile, several `full`-only blocks — including the
+  new failure-visibility one — currently ship to nobody; whether opencode
+  should take `full` is an open user decision.
+
+## [2026-08-11] Codex push-sync disabled + SKILL.md body cap 250 → 300
+
+- **trigger**: user ruling after a drift sweep — the codex-side environment
+  cannot fully use this design as-is and its own compiled sync quality wasn't
+  good; separately, whether the SKILL.md body-line cap should widen so new
+  skills don't shave completeness just to dodge the trigger.
+- **change**: codex marked disabled in the interop target registry (build
+  skips it, status reports `[off]` without counting it as drift — a disabled
+  target is a decision, not backlog). SKILL.md body cap raised 250 → 300
+  lines; a new maintenance rule states explicitly that a size trigger means
+  EXTRACT, not delete-until-it-fits.
+- **result**: corpus at the time of the raise: 14 skills, median 153.5 lines,
+  62.9 B/line, exactly one skill over 250 (256) and none over 260 — so a
+  smaller raise would have bought one nudge and no headroom. 300 lines is
+  roughly 1.25× the CLAUDE.md cap, paid once per skill invocation (never at
+  session start). A prior compression pass that cut lines from two SKILL.md
+  bodies without extracting to a references file, landing one skill at
+  exactly the old cap, was the concrete case the new rule now names.
+- **rollback**: pre-change backup of the health-check hook; the commits that
+  follow this entry in the source environment's history.
+- **open**: the wider interop curation backlog and antigravity's stale state
+  were untouched by this ruling — it named codex only.
+
+## [2026-08-11] Audit-trail rotation retired → rule-registry.md born; default session model raised
+
+- **trigger**: user directive to address the growing chronological log
+  (rotation had become recurring maintenance) and to check for other drifted
+  or stale leftovers; separately, to raise the default session model tier
+  (kept for simple/mechanical dispatch use only — the cost-cap policy for
+  actual subagent dispatch is unaffected).
+- **change**: the source environment's `Global_skill_update.md` — the file
+  this share mirrors — was frozen as a historical log (see the banner at the
+  top of this file) and its standing-rationale role handed to a new
+  rule-keyed `ops/rule-registry.md`, which replaces the growing log with a
+  file whose size tracks the number of RULES rather than the number of
+  changes. A drift sweep also surfaced that the interop curation backlog and
+  one disabled target were not properly reflected in the status report,
+  addressed in the interop entry above.
+- **result**: no entry was lost — the rotated content is preserved (kept
+  locally in this share for traceability rather than published, since it is
+  older, already-superseded internal history). The default session model
+  change does not affect the subagent cost cap, which is enforced by a
+  dedicated hook reading the dispatch call's own model argument, never the
+  session default.
+- **rollback**: pre-change backups of the rotated log and the settings file,
+  in the source environment.
+- **open**: the interop re-curation itself was deferred as a separate,
+  judgement-heavy pass (covered in the interop entry above) rather than done
+  as part of this cleanup.
+
+## [2026-08-11] CLAUDE.md trim + Opus→L1 standing ruling + dead permission rules removed
+
+- **trigger**: user directive after reviewing a measured startup baseline —
+  clean up a set of dead permission-ask rules that a CLI diagnostic showed
+  never matched anything (a `Write(...)` rule shape that the file-permission
+  checker does not evaluate — only `Edit(...)` rules are), and set the
+  ops-relaxation level for an Opus-tier main-loop model to L1 as a standing
+  grant rather than an ask-every-time gate.
+- **change**:
+  - Removed 4 dead `Write(...)` permission-ask entries (each path already had
+    a live, functioning `Edit(...)` rule covering the same file-editing
+    tools); added an `Edit(...)` rule for the new `rules/` directory, which
+    becomes a rule-tier carrier in this same change.
+  - Global CLAUDE.md relaxation-gate bullet gained the standing ruling:
+    "**Standing ruling (2026-08-11): an Opus-tier main-loop model runs at L1
+    (core relaxed) in every project — don't ask, just state the identity and
+    the level; a project CLAUDE.md may override with its own
+    `ops-relaxation:` line.**" Mirrored into `ops/05-authority.md` §2 as a
+    named user grant (explicitly not a self-relaxation).
+  - Three restated engineering-judgement bullets about browser-pane UI
+    verification collapsed into one shorter bullet — the enforcement detail
+    now lives only in `ops/lessons.md` L-009/L-010, and the CLAUDE.md line
+    points there instead of restating it.
+  - The whole `## Architecture` (FSD layering) section moved out of CLAUDE.md
+    into a new path-scoped rule file (`rules/frontend-layering.md`); the GLSL
+    parenthetical of the runtime-failure bullet moved into
+    `rules/shader-failure-modes.md`. Both carry a path scope so they cost
+    nothing at session start until a matching file is actually read. An index
+    line in the CLAUDE.md preamble lists both, with a scheduled review date.
+- **result**: CLAUDE.md shrank by roughly 8%, clearing the size-nudge
+  threshold, net of new content added in the same commit (the standing ruling
+  and the index line). Path-scope mechanics were established BEFORE any rule
+  moved, by probe: a scoped user rule is absent from session-start loading and
+  loads only when a matching file is read.
+- **rollback**: pre-change backups of CLAUDE.md and the settings file, in the
+  source environment.
+- **open**: acceptance of the path-scope mechanism for these two specific
+  files was not fully closed at the time of this entry — a fresh-session
+  check (read a matching file, confirm it loads on-read and not at start) was
+  still outstanding.
+
+## [2026-08-11] Context-budget instrumentation + evidence-block schema
+
+- **trigger**: evaluating which parts of an external agent-harness design were
+  worth adopting. Two real gaps were found after ruling out duplicated
+  mechanisms: supplemental instruction state has no scope/expiry (context
+  budget), and there was no evidence-block schema tying a claimed pitfall or
+  proposal back to the moment it happened. A review round required that any
+  context-cost claim be MEASURED rather than estimated before a rule moves.
+- **change**: added a logging-only startup-instrumentation hook (never denies,
+  never injects context) and a read-only startup-baseline reporting script,
+  both purely observational. `ops/lessons.md` and `70-evolution.md` gained a
+  required `Evidence:` line on new entries (session / digest / locator /
+  captured), registered as a schema in `rules-usage-dict.md` §7. Both schema
+  changes apply from 2026-08-11 on, no backfill.
+- **result**: the instrumentation hook was exercised against synthetic
+  payloads (normal / empty / malformed / oversized / edge cases) before being
+  trusted — all handled correctly, fail-open on anything odd. The measured
+  finding that reshaped the whole line of work: an always-loaded instructions
+  file turned out to be roughly a tenth of the measured startup floor rather
+  than the dominant cost, so trimming it is an ADHERENCE lever (make it more
+  likely to be followed), not a token-cost lever — the dominant startup cost
+  is the tool/MCP/skill roster, out of scope for a rules trim.
+- **rollback**: pre-change backups of the touched ops files, in the source
+  environment.
+- **open**: whether the instrumentation hook fires at all depends on harness
+  version support for its trigger event — unverified until a fresh session
+  produces a non-empty log. Whether a user-level path-scoped rule file
+  actually honours its path scope (vs. always loading) was also unverified at
+  this point — see the CLAUDE.md-trim entry above, which treats it as
+  unproven until a fresh-session probe confirms it.
+
+## [2026-08-08] NEW hook — browser-pane UI-verification enforcement (L-009/L-010)
+
+- **trigger**: whether the L-009/L-010 browser-pane verification pitfalls,
+  which lived only in rules-layer text (global CLAUDE.md + `ops/lessons.md`),
+  were actually guaranteed to fire — raised as a design question, not
+  discovered by a failure. The answer was no; see `ops/lessons.md` L-011 for
+  why (trigger-shape mismatch: both pitfalls fire mid-measurement, when the
+  agent is already confident and reading past a reminder line — L-009 alone
+  recurred for about a month under a CLAUDE.md-only rule).
+- **change**: a new PreToolUse hook matched to the browser-pane tool names.
+  Denies a script-execution call containing a `getComputedStyle`-family read
+  with no settle token in the same call (escape hatch: a literal marker for
+  the rare case where the mid-transition value IS what's being measured).
+  Denies a screenshot call until a `visibilityState` probe has run this
+  session (a short-TTL per-session marker). CLAUDE.md's existing L-009/L-010
+  lines were kept but now cite the hook as the enforcer, not the mechanism
+  itself; `ops/lessons.md` L-009 got an amendment note, and new entries
+  L-010 (the pitfall) and L-011 (the routing-design rationale) were added.
+  `ops/environment.md` gained a "Browser-pane UI verification" block as the
+  environment-facts anchor the hook's refresh trigger points at.
+- **result**: the hook compiled clean and was exercised against 8 synthetic
+  payloads covering both deny branches, the escape hatch, cross-session
+  marker isolation, non-matching actions, and malformed input (fail-open):
+  8/8 as expected. A companion out-of-process headless-browser probe script
+  (implementing the same settle-then-measure logic) was verified against a
+  control run proving a naive hover-then-measure never reaches a transition
+  target on the same fixture — the mechanism was measured, not just asserted.
+- **rollback**: pre-change backups of CLAUDE.md, the settings file, and
+  `environment.md`, in the source environment.
+- **open**: the hook only sees explicit `getComputedStyle`-family text in
+  script-execution calls — a style value inferred from an accessibility-tree
+  read is invisible to it (theoretical gap; those tools don't report computed
+  style). Not yet exercised against a real occluded-pane screenshot or a real
+  hovered-element measurement in a live session at the time of this entry —
+  only synthetic payloads and the out-of-process fixture had been run.
 
 > Older entries (2026-06-28 – 2026-07-10) rotated to `archive/Global_skill_update-2026-06-28--2026-07-10.md` on 2026-07-19 (ops/40-maintenance.md S3).
 

@@ -14,9 +14,10 @@ shape it has; start with `claude-ops/ops/OPS.md` if you want the rules themselve
 |---|---|
 | `README.md` | Orientation: what each share folder holds. |
 | `CHANGELOG.md` | This repo's own sync history — when each share was copied, what changed. |
-| `Global_skill_update.md` | **The big one (52 KB).** The source environment's append-only evolution log: every rule change with its trigger, before→after, evidence, and open items. The single most informative file here. |
+| `Global_skill_update.md` | The source environment's evolution log. **Frozen 2026-08-11** — historical reading only; going forward, standing rationale lives in `claude-ops/ops/rule-registry.md` and per-change detail lives in commit messages. Still the single most informative narrative file here. |
 | `AGENTS.md` | This map. |
 | `LICENSE` | MIT. |
+| `archive/` | Retired material kept locally for traceability, gitignored — not part of the published repo. |
 
 ## `claude-ops/ops/` — the operating rules layer
 
@@ -34,16 +35,18 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | `60-bootstrap.md` | First session in a project: environment facts, ticket ledger, work cards, decision journal. |
 | `60-record-templates.md` | Full templates for the record types `60-bootstrap.md` governs. |
 | `70-evolution.md` | Proposing changes to hooks/settings; whether something belongs in rules or memory. |
-| `environment.md` | Machine-specific facts, per-block dated. Subagent cost cap, dispatch mechanisms. |
+| `environment.md` | Machine-specific facts, per-block dated. Subagent cost cap, dispatch mechanisms, browser-pane UI verification, instruction-loading mechanics. |
 | `lessons.md` | The pitfall ledger — real incidents with the fix that followed. |
-| `rules-usage-dict.md` | Bilingual index: which layer owns what, agent-roster routing, record-schema registry. |
+| `rule-registry.md` | **New 2026-08-11.** Keyed by RULE, not by date: why each size cap, standing ruling, and mechanism holds its current value, plus its value history. Replaces the old chronological-rotation model. |
+| `rules-usage-dict.md` | Index: which layer owns what, record-schema registry. Agent-roster routing itself moved to `20-dispatch.md` — this file keeps only a pointer. |
 | `README.md` | Folder note. |
 
 ## `global-claude-md/` — the always-loaded preferences file
 
 | File | What it is |
 |---|---|
-| `CLAUDE.md` | The global preferences the ops layer hangs off. Machine-specific values are `<PLACEHOLDER>`s — substitute your own. |
+| `CLAUDE.md` | The global preferences the ops layer hangs off. Machine-specific values are `<PLACEHOLDER>`s — substitute your own. Opens with a "Path-scoped rules" index pointing at `rules/`. |
+| `rules/frontend-layering.md`, `rules/shader-failure-modes.md` | **New 2026-08-11.** Two rules sunk out of CLAUDE.md's body into path-scoped files (only load when a matching file is read) — FSD module layering and GLSL silent-failure modes. |
 | `README.md` | Cross-reference map back into `claude-ops/`. |
 
 ## `skill-toolkit/` — installable skills
@@ -80,12 +83,13 @@ self-contained, with detail in its own `references/` loaded on demand.
 
 | File | What it is |
 |---|---|
-| `portable-core.md` | The provider-neutral rule subset. |
-| `interop.py` | Compiles that subset into other agents' instruction files. |
+| `portable-core.md` | The provider-neutral rule subset — preferences only, as of 2026-08-11. |
+| `interop.py` | Compiles that subset into other agents' instruction files; leak-scans every payload before writing. |
 | `MIGRATION-MAP.md` | What maps to what across agents. |
 | `genesis-prompt.md` | Bootstrapping prompt for a fresh environment. |
 | `acceptance-evals.md` | Checks that a port actually landed. |
-| `refs/design-protocol.md`, `refs/judgment-protocol.md`, `refs/phase-log-protocol.md` | The three protocols carried across. |
+
+**Retired 2026-08-11**: the `refs/` method-playbook folder and its compile step. Method depth is now delegated to each target agent's own official docs (`interop.py`'s `delegation_block()`) rather than shipped as curated prose — the trigger never ported, only the content did, and that degraded to "read either always or never". See `MIGRATION-MAP.md` and `README.md` for the reasoning.
 
 ## `thinking-notes/` — essays, not rules
 
