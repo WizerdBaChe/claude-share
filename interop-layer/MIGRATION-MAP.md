@@ -15,12 +15,10 @@ mechanism-layer translation. Human operating manual: README.md (中文).
 
 ## Portability classes (per asset)
 
-- **Verbatim-compile** (→ portable-core.md blocks): language rules,
-  environment/shell conventions, git workflow, evidence-over-claims,
-  decision charter, pre-existing-issue attribution, file hygiene,
-  visual acceptance, canonical-method discipline, volatile-fact
-  verification, done definition, failure visibility, approach-wrong
-  signals, scope restraint.
+- **Verbatim-compile** (→ portable-core.md blocks): language rules, git
+  workflow, evidence-over-claims, decision charter, pre-existing-issue
+  attribution, file hygiene, canonical-method discipline, volatile-fact
+  verification, done definition, approach-wrong signals, scope restraint.
 - **Translate per target** (genesis prompt): permission boundaries,
   cost/model-cap enforcement, health/anti-bloat checks. If the target has
   no equivalent extension point, DEGRADE to a prose rule in its AGENTS.md
@@ -31,32 +29,33 @@ mechanism-layer translation. Human operating manual: README.md (中文).
   folder plus a prose routing index. The degradation recorded right here
   turned out to be fatal rather than acceptable: mechanical trigger →
   instructed read means no target platform can fire the text at the right
-  moment, so it is read either always or never. Playbooks archived locally
-  (their SOURCES are untouched and still canonical in the source
-  environment). Replaced by delegation — see the class below. The
-  governing principle is now: **preference ports, method does not.**
+  moment, so it is read either always or never. Playbooks archived to
+  `archive/interop-refs-2026-08-11/` (their SOURCES are untouched and still
+  canonical). Replaced by delegation — see the class below. The governing
+  principle is now: **preference ports, method does not.**
 - **Delegate to the target** (→ `delegation_block()` in the generated
-  AGENTS.md): everything method-shaped. The block states that the rules
-  above it are the user's own standing preferences, not derivable from any
-  docs and binding verbatim; and that for method depth the agent must read
-  THIS platform's current official documentation for its own extension
-  points, then propose the adaptation to the user before installing
-  anything durable. This is the same principle `genesis-prompt.md` already
-  applied to the mechanism layer — "you know your own platform best" —
-  extended to the method layer.
+  AGENTS.md): everything method-shaped. The block states that the rules above
+  it are the user's own standing preferences, not derivable from any docs and
+  binding verbatim; and that for method depth the agent must read THIS
+  platform's current official documentation for its own extension points, then
+  propose the adaptation to the user before installing anything durable. This
+  is the same principle `genesis-prompt.md` already applied to the mechanism
+  layer — "you know your own platform best" — extended to the method layer.
 - **Do not migrate**: skill ROUTING (skill-trigger-dict.md, automatic
   triggering), ops/ dispatch framework (assumes platform subagent
   machinery), settings.json machine-bound paths, ops/environment.md
   (environment facts must be re-established per platform, never assumed),
-  memory, credentials.
+  memory, credentials. Skill/ops BODIES are eligible for reference-compile
+  above when their value justifies the context rent — the raw files
+  themselves never ship.
 
 ## Profiles
 
-- **light** — lightweight-task agents. Minimal rent: language, environment,
-  git, evidence, decision charter, pre-existing issues, file hygiene.
+- **light** — lightweight-task agents. Minimal rent: language, git,
+  evidence, decision charter, pre-existing issues, file hygiene.
 - **full** — goal-oriented agents. light + judgment core: visual
   acceptance, canonical-method discipline, volatile facts, done
-  definition, failure visibility, approach-wrong signals, scope restraint.
+  definition, approach-wrong signals, scope restraint.
 
 Superset rule: light ⊂ full. A block tagged `light` must also carry `full`.
 
@@ -73,22 +72,25 @@ before adding targets — these locations are volatile facts)
 Notes:
 - **codex sync is OFF (user ruling 2026-08-11)**, marked `"disabled"` in
   `interop.py` TARGETS. Reason: that environment cannot use this one's design
-  wholesale — its ops tree lives at a separate path and its own
-  `05-authority.md` still specifies a 4-section boundary contract against
-  this side's 5 — and the compiled output was judged not worth overwriting a
+  wholesale — its ops tree lives at `~/.codex/ops/codex-ops/` and its own
+  `05-authority.md` still specifies a 4-section boundary contract against this
+  side's 5 — and the compiled output was judged not worth overwriting a
   hand-tuned file with. Codex-side changes are made FROM codex, by hand.
-  `build` will not write there and `status` reports it as `[off]` without
+  `build` will not write there (verified: real `cmd_build()` run against a
+  codex-only target registry left the file's sha256, size and mtime identical
+  and created no `interop-refs/`), and `status` reports it as `[off]` without
   counting it as drift. Re-enabling is not a one-liner in practice: the file
   there is now foreign, so `build` would back it up and replace it.
-- **Antigravity sync is OFF (user ruling 2026-08-11)**: the agent is no
-  longer used. Leftovers from the 2026-07-10 build at the target are
-  deliberately not touched from here — removing them is the user's call on
-  that machine, not this repo's.
-- **opencode CLI verified working 2026-08-11**: a standalone CLI binary is
-  on `PATH` via a global package-manager install, separate from any
-  Electron desktop app (which is not a CLI). Useful local, zero-exposure
-  introspection commands: `opencode debug config` (resolved config),
-  `opencode debug skill` (every skill it can see), `opencode models`.
+- **Antigravity sync is OFF (user ruling 2026-08-11)**, marked `"disabled"` in
+  `interop.py` TARGETS: the agent is no longer used. Leftovers from the
+  2026-07-10 build at the target are deliberately not touched from here —
+  removing them is the user's call on that machine, not this repo's.
+- **opencode CLI verified working 2026-08-11**: `opencode` v1.18.16 on PATH at
+  `~/AppData/Roaming/npm/opencode` (npm global). The Electron desktop app
+  (v1.18.11, `AppData/Local/Programs/@opencode-aidesktop/`) is a SEPARATE
+  install and is not a CLI — `OpenCode.exe --version` opens the GUI. Useful
+  local, zero-exposure introspection: `opencode debug config` (resolved
+  config), `opencode debug skill` (every skill it can see), `opencode models`.
 - **Rules precedence, quoted from the official docs 2026-08-11**: (1) local
   files walking UP from the cwd — `AGENTS.md`, then `CLAUDE.md`; (2) global
   `~/.config/opencode/AGENTS.md`; (3) `~/.claude/CLAUDE.md` "unless disabled".
@@ -96,17 +98,49 @@ Notes:
   supersede (3) — but it does NOT stop opencode from reading a PROJECT's
   `CLAUDE.md` at (1), which outranks it. Any expectation that deployment gives
   full control of what opencode reads is wrong.
-- **INBOUND dependency the layer model did not account for**: opencode
-  auto-loads external skills from `~/.claude/skills/<name>/SKILL.md` (stated
-  in its own built-in `customize-opencode` skill). This is the reverse of
-  interop's one-way flow — the target reads this repo directly, bypassing
-  curation, profiles, the leak gate, and the "preference ports, method does
-  not" ruling entirely. All skills here would be exposed to it unadapted if
-  both environments coexist on the same machine. Kill switches, per the same
-  source: `OPENCODE_DISABLE_EXTERNAL_SKILLS=1` or
-  `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`. Whether to set one is an open user
-  decision — it is not obviously wrong to share the skills, but it IS
-  currently unmanaged and invisible.
+- **INBOUND dependency the layer model did not account for** — *the 2026-08-11
+  entry was RIGHT; a same-day "correction" was wrong and is retracted below.*
+
+  **Resolved 2026-08-12: `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` is set** (user
+  decision), and `~/.agents/skills/` is retired to
+  `archive/2026-08-12-agents-skills-retired/`. opencode now supplies itself from
+  the share repo instead.
+
+  The measurement trail, because it inverted twice and the shape is instructive:
+  `opencode debug skill` first returned only 3 entries — 1 built-in + 2 from
+  `~/.agents/skills/`, zero from `~/.claude/`. That was read as "the 2026-08-11
+  claim named the wrong path". **It did not.** `~/.agents/skills/` was
+  SHADOWING the `~/.claude/` scan. Retiring it flipped the count from 3 to 15,
+  with all 14 live skills now listed from `~/.claude/skills/` — exactly what the
+  original entry said, and momentarily MORE exposure than before, in the middle
+  of a change meant to reduce it. Verified fix: unset → 15 entries;
+  `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` → 1; `OPENCODE_DISABLE_EXTERNAL_SKILLS=1`
+  → 1. Per opencode's own built-in skill, both flags "skip the external skill
+  scans under `~/.claude/` and `~/.agents/`".
+
+  Lesson: an observation taken while a SHADOWING artifact is in place measures
+  the shadow, not the system. Removing the shadow is part of the measurement,
+  not a separate step.
+
+  What exists instead is worse and was invisible: **`~/.agents/skills/` holds a
+  second physical copy of the entire 14-skill corpus** — real directories, not
+  symlinks — frozen at **2026-08-03**. All 14 differ from live. Ten differ by
+  1–7 bytes (line-ending artefacts of the copy); **four are substantively
+  stale**, worst `config-self-audit` at **−7,235 bytes**, missing the whole
+  adoption mode added 2026-08-12. So opencode reads a rotting snapshot, and
+  only 2 of the 14 surface at all.
+
+  This is a second source of truth for the corpus, which `40-maintenance.md` §2
+  ("a rule lives in exactly one file") forbids at rule scale and nothing was
+  watching at corpus scale: `ops_health_nudge` check 10 walks `~/.claude/skills/`
+  only, and `config-self-audit` §4 names the plugin roots, not this one.
+
+  Kill switches (`OPENCODE_DISABLE_EXTERNAL_SKILLS=1`,
+  `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`) are now the wrong lever: the second
+  would change nothing observable, the first would only hide the 2 stale
+  entries. **The live decision is what to do with `~/.agents/skills/`** — refresh
+  it deliberately, retire it, or keep it frozen on purpose. Open, user's call;
+  routing context in `ops/references/inbound-routing.md`.
 - `~/.gemini/AGENTS.md` is also read by Gemini CLI; keep its content
   agent-neutral (which portable-core already guarantees).
 
@@ -120,10 +154,10 @@ also covers `portable-core.md` itself. Patterns: email, JWT, prefixed API keys
 (`sk-`/`gh?_`/`AKIA`/`xox?-`), secret-shaped assignments, hex runs >=32 chars
 (shorter would flag the git short hash the source stamp needs), and the
 account name inside a filesystem path. The account name is read from the
-environment at runtime — hardcoding it would make `interop.py` itself the
+environment at runtime -- hardcoding it would make `interop.py` itself the
 leak. Verified 2026-08-11 by planting one secret of each class inside a real
 block: 6/6 aborted with nothing written, control build unaffected. The probe
-asserts the plant actually reached the payload first — two earlier versions
+asserts the plant actually reached the payload first -- two earlier versions
 silently tested nothing because the plant landed outside the block markers.
 
 ## Sync invariants
@@ -137,14 +171,10 @@ silently tested nothing because the plant landed outside the block markers.
 3. **Curation gate.** portable-core.md is a manual distillation of
    CLAUDE.md. When CLAUDE.md changes, `status` flags re-curation; a human
    (or main-session Claude) reviews the diff, updates portable-core.md if
-   the change is portable, then runs `curated`. Narrowed to CLAUDE.md alone
-   on 2026-08-11 — the retired refs/ playbooks no longer need tracking.
+   the change is portable, then runs `curated`.
 4. **Living proof.** After any mechanism-layer translation (genesis run)
    and after first deploy to a new target, run the acceptance evals
    (`acceptance-evals.md`) inside the target agent. Compile-only refreshes
    of the instructions layer need only a spot-check.
 5. **Archive, never delete.** Foreign files at target paths are renamed to
    `*.pre-interop*.bak`, not removed.
-6. **Nothing identifying leaves this machine.** Every payload is
-   leak-scanned before any write (see Leak gate above); a hit aborts the
-   whole build.

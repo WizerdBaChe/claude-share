@@ -40,6 +40,11 @@
 | 要提案改 guardrail（settings/hooks/權限）、知識該進記憶還是規則 | `70-evolution.md` |
 | 動手前查歷史坑 | `lessons.md`（先 grep） |
 
+**`ops/references/`（2026-08-12 起）**：ops 檔超標時「具體內容」的落點——範例、
+指令區塊、佐證案例搬進去，**規則本文只留規則、條件、路由**。由 owner 檔的該節
+以指標帶入，**不進上面這張路由表**（跟 `skills/*/references/` 同語意：隨用隨載，
+不在 session start 計費）。上限單位與兩類計費模型見 `40-maintenance.md` §3。
+
 ## 三、ops/ 與各 skill 的分工 (boundaries vs skills)
 
 原則：ops/ 是隨時生效的判斷框架（無需觸發句）；skill 是被觸發的深度流程。
@@ -53,8 +58,19 @@
 
 ### vs `config-self-audit`
 - ops/ 管：改規則檔的**時機與權限分層**（`40-maintenance.md` §1）。
-- skill 管：對**單一設定物件**（skill/hook/CLAUDE.md 條目/ops 檔）跑稽核清單。
+- skill 管：兩個 mode。預設 mode 對**單一設定物件**（skill/hook/CLAUDE.md
+  條目/ops 檔）跑稽核清單；**adoption mode** 對「從別的環境搬進來的一整層規則」
+  審**彼此的關係**（觸發碰撞、順序、機制沒跟著到）——這是唯一會超出單一物件
+  範圍的 mode，且僅限被採用的集合與其直接鄰居。
 - 關係：ops/ 的 🟡 級改動**以此 skill 作為紅隊步驟** — 互相引用，不重疊。
+
+### 外部進來的東西該走哪條（inbound routing，2026-08-12）
+
+依**粒度**分流（粒度決定失效模式）：單一 skill → `skill-share-packaging`
+Mode B；一整層規則／ops 樹 → `config-self-audit` adoption mode；
+plugin／市集包／MCP → **只能偵測**，那些檔案受管、每 session 重生、在
+`~/.claude` 之外，蓋不了戳也不該改。實測數字、outbound 分歧標記規則、
+opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 
 ### vs `code-review-deep-checklist` / `/code-review`
 - ops/ 管：收件三關卡（抽查/紅隊/簽核）— 對**任何**交付的通用收件紀律。
@@ -119,10 +135,8 @@
 
 ## 七、紀錄類型格式登記表 (§7 Record-Type Schema Registry)
 
-最小欄位以 owner 檔本文為準，本表不複製全文。出生規則 (birth schema)：新紀
-錄類型必須宣告最小欄位＋owner 檔並同 commit 登記於此（`40-maintenance.md`
-§3）。**schema 欄位屬 invariant 級 — 任何鬆綁等級都不可省略；可鬆的只有敘
-事風格與程序。**
+最小欄位以 owner 檔本文為準，本表不複製全文。出生規則與 invariant 級宣告見
+`40-maintenance.md` §3（新紀錄類型同 commit 登記於此）。
 
 | 類型 (type) | 最小欄位 (minimum fields) | owner | 何時必用 (mandatory when) |
 |---|---|---|---|
@@ -131,10 +145,16 @@
 | DELIVERY.md | did / verified / could-not-do / artifacts | `60-bootstrap.md` §D | 每個被派工的 worker |
 | glossary entry | term / date / definition / [superseded] | `60-bootstrap.md` §E | 領域名詞固化時 |
 | decision journal — Now / D / P | Now: frontier·premises·open；D: status·context·options·choice+why·revisit-if·links；P: status·trail·resolution·links | `60-bootstrap.md` §G（模板：`60-record-templates.md` §2） | §G write-triggers 任一成立 |
-| lessons entry | L-id / date / tags / hits / context / pitfall / fix | `lessons.md` 頭部 | 全域級坑 |
-| guardrail 提案 APPLY.md | problem / change / benefit / risks / rollout & verification | `70-evolution.md` §2 | 改 settings/hooks/權限 |
+| lessons entry | L-id / date / tags / hits / context / pitfall / fix / **evidence** | `lessons.md` 頭部 | 全域級坑 |
+| guardrail 提案 APPLY.md | problem (含 **evidence block**) / change / benefit / risks / rollout & verification | `70-evolution.md` §2 | 改 settings/hooks/權限 |
+| evidence block | session_id / digest / locator / captured_at | `70-evolution.md` §2 | 2026-08-11 起：新 lessons 條目與 guardrail 提案的 problem 欄（舊資料不回填） |
 | phase-log section | project / phase / status / date + Goals / Decisions / Changes / Open Questions | `workflow-checkpoint` SKILL.md | 每次 checkpoint |
 | boundary contract | 0 premises / 1 forks / 2 boundary inputs / 3 acceptance / 4 non-goals (≤18 行) | `05-authority.md` §4 | L1/L2（已鬆綁）× Tier-2 實作任務 |
 | refutability statement | holds-when / overturned-by / evidence-tier / not-covered | `30-judgment.md` R2 | Tier-2 交付全欄；Tier-1 一行；T0 免 |
-| audit-trail entry | trigger / change (before→after，規則類須引原文) / result (證據) / rollback / open | `40-maintenance.md` 開頭 audit-entry-schema | 每次 🔴/🟡 變更寫入 `Global_skill_update.md` |
+| rule-registry entry | key / current / why / evidence / history / rollback | `ops/rule-registry.md` 頭部 | 規則值、上限、常設裁定設定或變更時（就地取代該鍵） |
+| change event | trigger / change (before→after) / result / rollback | git commit message | 每次 🔴/🟡 變更 |
 | environment-facts block | build·test·run / tiers / dispatch / redlines / ledger + 驗證日期 | `60-bootstrap.md` §B | 專案 CLAUDE.md 建立時 |
+| adoption stamp | adopted-from / source / adopted / reconciled | 被採用檔案的檔頭（格式見 `config-self-audit/references/imported-config.md`） | 從別的環境搬入任何持久設定時 |
+| reconciliation ledger | artifact / source / collisions / class / resolution / mechanism status / stamp | `config-self-audit` SKILL.md `Output format` | adoption mode 每次執行 |
+| label family entry | 家族 / 量的軸 / 方向·值域 / owner（唯一定義處） | `~/.claude/LABEL-REGISTRY.md` §2 | 造出會裸引用的可列舉標籤時（同 commit） |
+| list-generation entry | 前綴 / 涵蓋範圍 / `[superseded: <old>]` | `60-bootstrap.md` §E（規則見 `LABEL-REGISTRY.md` §3） | 專案清單／回合被新版取代時 |

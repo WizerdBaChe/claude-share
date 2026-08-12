@@ -8,8 +8,9 @@ description: >-
   enabling it — their environment coupling, data-collection surface, and instruction
   hygiene. Trigger on 「把這個 skill 分享/打包/匯出給別人」"package/export/share this
   skill", or 「幫我檢查/安裝網路上抓的 skill」"audit this downloaded skill before I
-  install it". NOT for authoring skills (→ skill-creator), auditing your own config
-  content (→ config-self-audit), or cleaning stray files (→ env-cleanup).
+  install it". Mode B is ONE skill; a whole rules LAYER → config-self-audit
+  adoption mode. NOT for authoring skills (→ skill-creator), your own config
+  content (→ config-self-audit), or stray files (→ env-cleanup).
 ---
 
 # Skill Share Packaging

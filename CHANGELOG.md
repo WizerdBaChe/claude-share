@@ -9,6 +9,40 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-12 — inbound-dependency correction, config-self-audit adoption mode
+
+Two independent threads from the source's same-day work, both landing here:
+
+- **`interop-layer/MIGRATION-MAP.md`** — the 2026-08-11 entry recording an
+  "opencode reads `~/.claude/skills/` unadapted" dependency was itself wrong:
+  measured, opencode read a stale **second physical copy** of the skill corpus
+  at `~/.agents/skills/` (frozen weeks earlier, one skill 7KB behind live) and
+  never touched `~/.claude/` at all. The source retired that second copy and set
+  a kill-switch env var so opencode now supplies itself from the share repo
+  instead; the file's inbound-dependency section carries the full measurement
+  trail (why the first read inverted, why removing the shadow was part of the
+  fix rather than a separate step) because the source flagged the shape as
+  reusable. Nothing here changes what this repo publishes — `~/.agents/` is
+  entirely local machine state — only the prose explaining the target registry.
+- **`skill-toolkit/skills/config-self-audit/`** — gained a second mode (adoption:
+  for config copied in wholesale from another environment, auditing relations
+  between rules rather than one artifact) plus a §8 subagent-definition
+  checklist and a §9 renumber; two new files, `references/imported-config.md`
+  and `evals/evals.json`. `skill-share-packaging/SKILL.md` gained one
+  disambiguation clause pointing single-skill imports at Mode B and whole-layer
+  imports at the new adoption mode. `claude-ops/ops/` gained `references/` (new
+  subfolder — landing zone for size-cap-driven extraction of examples/command
+  blocks out of the rule files themselves) and `rules-usage-dict.md` picked up
+  the routing pointer and three new schema-registry rows.
+- **Deliberately not synced**: `skills/motion-design/NOTICE.md`. The source
+  file now assumes its `vendor/threejs/` package is present (a local-only
+  decision made after the 2026-08-02 exclusion recorded below), which this
+  share still doesn't carry — syncing the text would describe content that
+  isn't here. Per-file rationale in the `skill-toolkit/` section below.
+
+See the `claude-ops/` and `skill-toolkit/` snapshot-detail sections below for
+the file-by-file breakdown.
+
 ## 2026-08-11 — structural pass: rule-registry, path-scoped rules, interop redesign
 
 **At a glance** (full detail in the prose below and per-share sections):
@@ -125,14 +159,14 @@ so the most informative material was the least likely to be read.
 
 ### `claude-ops/` snapshot details
 
-- Source: `~/.claude/ops/` (13 Markdown files, +1 since the last refresh), copied manually on 2026-07-11; refreshed 2026-07-31, 2026-08-02, 2026-08-06, 2026-08-07.
+- Source: `~/.claude/ops/` (13 Markdown files, +1 since the last refresh), copied manually on 2026-07-11; refreshed 2026-07-31, 2026-08-02, 2026-08-06, 2026-08-07, 2026-08-12.
 - Review scope: usernames, local paths, account or machine identifiers, and email-like strings.
-- Result: one source username was removed (`ops/environment.md`); references between the operational documents were intentionally retained. 2026-08-02 refresh: `ops/40-maintenance.md` §3 trim-trigger line updated to match the source's raised global-`CLAUDE.md` cap (~12K → ~15K, with rationale) — the only file that had drifted since the prior refresh. 2026-08-06 refresh: premise-gate + refutability-statement rule-set synced across `05-authority.md`, `10-command-loop.md`, `30-judgment.md`, `60-bootstrap.md` (new §G Decision & Process Journal), `OPS.md`, `rules-usage-dict.md` (new §7 schema registry); new file `ops/60-record-templates.md` added (templates extracted from `60-bootstrap.md` in a same-day trim pass); `40-maintenance.md`'s ops-file size trigger raised ~10K→~12K; `lessons.md` gained L-009 (browser-pane screenshot timeout misdiagnosis). No personal identifiers found in the synced content. Full detail: `skill-toolkit/Global_skill_update.md`'s 2026-08-06 entry. 2026-08-07 refresh: `environment.md` restructured — per-block `as-of` dating replaces a single file-level verification date (which had already gone stale against a later fact recorded in the same file), the tier table is scoped explicitly to *subagent* dispatch, and the main-loop-model section became a read-it-don't-infer procedure (a config file's `model:` pin is a fallback marked "assumed", never proof of the running model — the prior wording made `05-authority.md` §2's automatic-L0 branch fire on a stale inference). Tier vocabulary corrected across `05-authority.md`, `30-judgment.md`, `60-bootstrap.md`: a *session* has no tier, the *main-loop model* it runs on does. `40-maintenance.md` gained an audit-trail entry schema (trigger / change before→after / result / rollback / open), registered in `rules-usage-dict.md` §7 and paid for by lossless trims to stay under the size cap. Same username removal as before in `environment.md`; no new identifiers.
+- Result: one source username was removed (`ops/environment.md`); references between the operational documents were intentionally retained. 2026-08-02 refresh: `ops/40-maintenance.md` §3 trim-trigger line updated to match the source's raised global-`CLAUDE.md` cap (~12K → ~15K, with rationale) — the only file that had drifted since the prior refresh. 2026-08-06 refresh: premise-gate + refutability-statement rule-set synced across `05-authority.md`, `10-command-loop.md`, `30-judgment.md`, `60-bootstrap.md` (new §G Decision & Process Journal), `OPS.md`, `rules-usage-dict.md` (new §7 schema registry); new file `ops/60-record-templates.md` added (templates extracted from `60-bootstrap.md` in a same-day trim pass); `40-maintenance.md`'s ops-file size trigger raised ~10K→~12K; `lessons.md` gained L-009 (browser-pane screenshot timeout misdiagnosis). No personal identifiers found in the synced content. Full detail: `skill-toolkit/Global_skill_update.md`'s 2026-08-06 entry. 2026-08-07 refresh: `environment.md` restructured — per-block `as-of` dating replaces a single file-level verification date (which had already gone stale against a later fact recorded in the same file), the tier table is scoped explicitly to *subagent* dispatch, and the main-loop-model section became a read-it-don't-infer procedure (a config file's `model:` pin is a fallback marked "assumed", never proof of the running model — the prior wording made `05-authority.md` §2's automatic-L0 branch fire on a stale inference). Tier vocabulary corrected across `05-authority.md`, `30-judgment.md`, `60-bootstrap.md`: a *session* has no tier, the *main-loop model* it runs on does. `40-maintenance.md` gained an audit-trail entry schema (trigger / change before→after / result / rollback / open), registered in `rules-usage-dict.md` §7 and paid for by lossless trims to stay under the size cap. Same username removal as before in `environment.md`; no new identifiers. 2026-08-12 refresh: new subfolder `ops/references/` added (`inbound-routing.md`, `integrity-sweep.md`) — the size-cap landing zone for concrete examples/command blocks that `40-maintenance.md` §3 now points at instead of inlining them in the rule files; `rules-usage-dict.md` gained the pointer convention plus an inbound-routing row (grain-of-import routing: one skill → `skill-share-packaging` Mode B, a whole rules layer → `config-self-audit` adoption mode, plugin/marketplace content → detection-only) and its §7 schema table gained `rule-registry entry` / `change event` / `adoption stamp` / `reconciliation ledger` / `label family entry` / `list-generation entry` rows (the old single `audit-trail entry` row split into two — a rule-value change now updates `rule-registry.md` in place, a one-off event goes to the git commit message, neither is a `Global_skill_update.md` append). No personal identifiers in any of the new or changed content.
 - This is a point-in-time snapshot, not a synchronization target. Folder-level documentation is maintained separately.
 
 ### `skill-toolkit/` snapshot details
 
-- Source: `~/.claude/skill-trigger-dict.md`, `~/.claude/skills/`, and `~/.claude/Global_skill_update.md`, copied manually on 2026-07-11; refreshed 2026-07-31, 2026-08-02.
+- Source: `~/.claude/skill-trigger-dict.md`, `~/.claude/skills/`, and `~/.claude/Global_skill_update.md`, copied manually on 2026-07-11; refreshed 2026-07-31, 2026-08-02, 2026-08-12.
 - Contents: a bilingual trigger dictionary, 13 skill directories with their referenced material and evaluations, plus the append-only global skill update log.
 - Review scope: usernames, email-like strings, absolute local paths, internal project or package names, runtime lock metadata, and (2026-08-02) third-party license completeness for vendored content.
 - Result: non-skill paths and identifiers were replaced with portable placeholders; the runtime lock metadata was redacted.
@@ -140,6 +174,7 @@ so the most informative material was the least likely to be read.
 - 2026-08-02 refresh: added `skills/motion-design/` (animation/3D design methodology hub) plus its `skill-trigger-dict.md` section and disambiguation rows. Its vendored `vendor/threejs/` reference package was **excluded** — the source environment's own update log had recorded that upstream's license defect (no `LICENSE` file, no named copyright holder) as blocking redistribution, and this share honours that ruling; only the properly-licensed `vendor/lottiefiles/` package was carried over, with the excluded package's SKILL.md/NOTICE.md pointing to its upstream URL instead. One hardcoded local path (`local/env-bridge.md`, pointing at a sibling `asset-vault` skill not included in this share) was also generalized. `skills/asset-vault/` was deliberately **not** imported this round (tied to a separate in-progress project).
 - 2026-08-06 refresh: `skills/scientific-research-guide/` synced to the source's 2026-08-03 domain-expansion pass — two new base domain profiles (`gan_power_device.md`, `microled.md`), one new TI method sub-profile (`bi2se3_plasmonic_photoresponse.md`), a new source-provenance citation inbox (`references/user-supplied-citations.md`), and a swappable-slot convention for optional external tools (`domain-expansion-guide.md` §3.1) that also fixed a hardcoded personal path in `domains/plasmonic_waveguide.md`. Leftover draft material from a prior editing-copy round (`material/`, `MATERIAL-INTEGRATION-VERIFICATION-REPORT.md` — the latter naming local machine paths) was moved to `scientific-research-guide/archive/` and excluded from git via `.gitignore`, fully superseded by the integrated domain files. `skills/workflow-checkpoint/SKILL.md` also synced (journal-sweep step, resume-time premise re-confirmation). See `skill-toolkit/Global_skill_update.md` for the full entries.
 - 2026-08-07 refresh: `Global_skill_update.md` only — one appended entry covering the same-day `claude-ops/` round, and the first entry written to the newly-registered audit-entry schema. No skill directories changed.
+- 2026-08-12 refresh: `skills/config-self-audit/` gained its ADOPTION mode (AD1–AD5, a reconciliation-ledger output format, a §8 subagent-definition (`agents/*.md`) checklist, and a §9 renumber) plus two new files, `references/imported-config.md` (the mode's procedure and the `adopted-from:`/`reconciled:` stamp format) and `evals/evals.json` (routing evals against `skill-share-packaging` Mode B and `env-cleanup`). `skills/skill-share-packaging/SKILL.md` gained one disambiguation clause (Mode B is one skill; a whole rules layer routes to the new adoption mode instead). **`skills/motion-design/NOTICE.md` was deliberately NOT synced this round** — the source now documents `vendor/threejs/` as present with an accepted (not blocking) license-defect ruling, because the source machine kept a local-only copy of that vendor package after the 2026-08-02 exclusion above. This share still does not carry `vendor/threejs/`, so syncing the source's current NOTICE.md verbatim would describe content this repo doesn't have; the exclusion ruling and the pre-2026-08-12 NOTICE.md text stand until (if ever) `vendor/threejs/` itself is deliberately imported here under its own audit pass. See `skill-toolkit/Global_skill_update.md` for full entries where they exist.
 - This is a point-in-time snapshot, not a synchronization target. Installation guidance and the complete skill inventory live in `skill-toolkit/README.md`.
 
 ### `environment-guide/` snapshot details (new 2026-07-31)
