@@ -62,6 +62,15 @@ avoiding the need to replay full conversation history and saving usage.
    premises / open) in `references/<project>-decisions.md` (format and
    write-triggers: `~/.claude/ops/60-bootstrap.md` §G — create lazily). Skip
    silently if nothing qualifies.
+5c. **Map sweep** (write-time half only — freshness is checked at session start,
+   §C step 1, never here): if `references/<project>-map.md` exists, ask whether
+   any `[infer]` in its `## Open [infer]` section got confirmed this phase — each
+   confirmed one is PROMOTED into `-decisions.md`/`-context.md` and PRUNED from
+   the map (a map that never shrinks means promotion is not happening). Also flag
+   any regenerable fact (file lists, module structure, what connects to what) you
+   just wrote into a write-time record — that belongs to the map, not there.
+   Rules: `~/.claude/ops/60-bootstrap.md` §H; write classes:
+   `ops/references/project-map.md` §9. Skip silently if no map exists.
 6. **Index row update** (no extra consent needed — covered by the checkpoint consent):
    refresh this project's row in `references/PROJECTS.md` (status / last-checkpoint /
    next). Create the file from its header template if missing; add the row if the
@@ -120,6 +129,7 @@ avoiding the need to replay full conversation history and saving usage.
 
 1. **Minimum tokens first**: read only `references/<project>-phase-log.md`, plus `references/<project>-context.md` if it exists (domain glossary — small, prevents vocabulary drift across sessions), plus the `## Now` block of `references/<project>-decisions.md` if it exists. Do not replay history; do not read the entire repo first.
    - **Premise re-confirmation (mandatory for continuing tasks)**: before acting, re-confirm the `## Now` premises — re-verify P-env facts (they rot), and re-state P-intent / P-validity premises to the user in one short block. Origin-(user) premises are never auto-overturned: if evidence now contradicts one, ask with the evidence attached (`~/.claude/ops/30-judgment.md` R2 overturn hierarchy).
+   - **Map fingerprint check (read-time, do it HERE not at checkpoint)**: if `references/<project>-map.md` exists, verify it BEFORE reading it — `git merge-base --is-ancestor <generated-from> HEAD`, then `git diff --name-only <generated-from>..HEAD` scoped to its `covers` globs. FRESH replaces a repo scan entirely; DRIFT means patch from the diff; STALE means regenerate. Reading first and verifying after spends exactly the tokens the check exists to save. The verdict is a P-env premise — report it in the block above. Algorithm and write classes: `~/.claude/ops/references/project-map.md` §6/§9.
    - **Fallback — phase-log missing or clearly stale** (session died before a
      checkpoint was written): tell the user reconstruction will cost more than a
      normal recap, and upon consent rebuild from persisted session transcripts

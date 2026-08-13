@@ -53,7 +53,7 @@ Rules 1–6 below are invariants and never relax.
 | Stuck on: escalate? actually done? should I ask? wrong approach? | `ops/30-judgment.md` |
 | About to change any ops/rule file, or a lesson worth recording just happened | `ops/40-maintenance.md` |
 | Meta-heuristics: how to think through a task (for non-frontier models) | `ops/50-coach.md` |
-| First session in a project; where tickets/progress live; ledger templates; slicing plans into tickets; work-card format (施工卡); project domain glossary; decision & process journal (know-why, session-resume premise re-confirm) | `ops/60-bootstrap.md` |
+| First session in a project; where tickets/progress live; ledger templates; slicing plans into tickets; work-card format (施工卡); project domain glossary; decision & process journal (know-why, session-resume premise re-confirm); **cold start on a project with NO records — the read-time map + its fingerprint** | `ops/60-bootstrap.md` |
 | Proposing/applying guardrail changes; where knowledge belongs (memory vs rules) | `ops/70-evolution.md` |
 | Which layer/skill owns what (boundaries vs CLAUDE.md and skills) | `ops/rules-usage-dict.md` |
 | Before starting work: grep for past pitfalls | `ops/lessons.md` |

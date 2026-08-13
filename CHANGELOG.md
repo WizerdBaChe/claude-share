@@ -9,6 +9,66 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-13 — the read-time map layer, ops cap raise, provisional values
+
+One thread from the source, plus two corrections it forced.
+
+- **`claude-ops/ops/references/project-map.md`** (new) + **`60-bootstrap.md` §H**
+  — a second record layer, split from the existing one by REGENERABILITY rather
+  than by content. Everything the ops layer had was write-time: know-why,
+  produced while doing the work, unreproducible, never expiring. A repo with no
+  such records — unfamiliar, third-party, or predating the system — hit an empty
+  §A step 1 and no derive procedure, so every session re-derived the project from
+  scratch. The map is the read-time half: machine-generated know-what/where,
+  carrying a `generated-from` git SHA as its fingerprint, expiring on any commit
+  inside its declared `covers` globs. The detail file holds the header schema,
+  the `[git]`/`[read]`/`[infer]` provenance tags, a closed six-diagram catalogue
+  (**derived** mermaid, not hand-drawn — a hand-drawn diagram is a write-time
+  artifact and drifts with nothing to detect it), the FRESH/DRIFT/STALE
+  algorithm, and a three-write interface (`generate`/`patch`/`prune`) with
+  defined fingerprint effects. Concept borrowed from a knowledge-graph tool's
+  fingerprint-and-cache mechanism, minus its graph engine — that tool's own
+  benchmark puts token reduction near 1× on small codebases, so the engine does
+  not earn its dependency weight at this scale.
+  **`skill-toolkit/skills/workflow-checkpoint/`** gained the two mounts, and
+  they are deliberately NOT the same mount: freshness is read-time and fires at
+  session start (§C step 1), promote/demote are write-time and fire at the
+  checkpoint sweep (step 5c). Hanging a read-time check on a phase-end ritual
+  would be the exact category error the layer exists to name.
+- **`40-maintenance.md` §3 + `rule-registry.md` — ops file cap 12K → 15K**, with
+  `lessons.md` and `rule-registry.md` newly exempt. The trigger was that six
+  files sat over the old cap at once and the nudge fired every session with no
+  pass able to clear it; a permanently-on alarm has stopped measuring anything.
+  The two exempt files' size tracks the CORPUS, not bloat, so an over-cap
+  reading on them has no extract remedy at all. **This entry also catches up a
+  correction this repo missed on 2026-08-12**: the §3 table still read "~12K
+  **chars**" while the source had already resolved the unit to BYTES — and
+  `references/integrity-sweep.md` shipped here carrying the *rationale* for that
+  correction without the correction itself. All four file-cap rows now say
+  bytes.
+- **`rule-registry.md` header — PROVISIONAL values.** A threshold shipped as a
+  guess must now be registered with `evidence:` opening on the literal token
+  `PROVISIONAL`, plus what would settle it and the instruction that observations
+  are appended to that entry. Without a registered home the correcting data has
+  nowhere to land, is never collected, and the guess silently becomes permanent
+  — indistinguishable from a measured value to every later reader. The new
+  `map STALE thresholds` entry is the first user of the convention, and
+  `integrity-sweep.md` gained check 11 (`grep -n PROVISIONAL`) so unsettled
+  values are enumerable rather than remembered. Check 10 was added the same day
+  for cap VALUE drift across mechanisms — check 7 compares the unit only, and
+  the value class had by then recurred three times.
+- **Deliberately not synced**: the source's hook and tooling changes behind
+  these rules — the nudge hook's size constant and exemption set, and a
+  dashboard renderer that now derives its caps from that hook instead of holding
+  a third copy. This repo has never shipped `hooks/` or `tools/`, so those stay
+  described-but-absent, as `40-maintenance.md` §3 already does when it names the
+  nudge hook. Check 10's rationale names the renderer for the same reason. Also
+  not synced: the source's label-family registry (never part of this share), so
+  the `SHAPE-1..6` diagram ids in `project-map.md` §5 arrive without the family
+  table that reserves them; and the source's own project ledgers, which schedule
+  the `map STALE thresholds` measurement — the registry entry carries the
+  authority and the write target, which is the portable half.
+
 ## 2026-08-12 — inbound-dependency correction, config-self-audit adoption mode
 
 Two independent threads from the source's same-day work, both landing here:

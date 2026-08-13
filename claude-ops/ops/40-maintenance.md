@@ -108,13 +108,18 @@ three copies that will drift apart and contradict each other.
   thing, one place):
   | trigger | value |
   |---|---|
-  | any `ops/*.md` | ~12K chars |
+  | any `ops/*.md` — except `lessons.md` and `rule-registry.md` | ~15K **bytes** |
   | entry file `OPS.md` | ~60 lines |
   | `ops/lessons.md` | ~30 unfolded entries |
-  | global `CLAUDE.md` (ALWAYS loaded — trim/merge, never append) | ~15K chars |
+  | global `CLAUDE.md` (ALWAYS loaded — trim/merge, never append) | ~15K **bytes** |
   | skill frontmatter description (charged every session) | ~800 chars |
   | any `SKILL.md` body (charged only on invoke) | ~300 lines |
-  | `skill-trigger-dict.md` | ~20K chars |
+  | `skill-trigger-dict.md` | ~20K **bytes** |
+  File caps count BYTES (`getsize`, so CRLF counts 2), not chars: bytes track
+  TOKEN cost across mixed CJK/Latin, chars under-count the densest files.
+  Two files are exempt from the ops cap — their size tracks the CORPUS, not
+  bloat, so an over-cap reading has no extract remedy and can only nag forever;
+  their real checks are the lessons entry-count and §4.1 ghost rules.
   Rotation of a frozen chronological event log is retired — rationale now
   goes to the registry, which grows with the rule count, not the change count.
 - **A size trigger means EXTRACT, not DELETE.** Over cap, the legitimate moves

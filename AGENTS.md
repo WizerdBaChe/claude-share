@@ -39,6 +39,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | `lessons.md` | The pitfall ledger — real incidents with the fix that followed. |
 | `rule-registry.md` | **New 2026-08-11.** Keyed by RULE, not by date: why each size cap, standing ruling, and mechanism holds its current value, plus its value history. Replaces the old chronological-rotation model. |
 | `rules-usage-dict.md` | Index: which layer owns what, record-schema registry. Agent-roster routing itself moved to `20-dispatch.md` — this file keeps only a pointer. |
+| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), and **new 2026-08-13** `project-map.md` (the read-time layer behind `60-bootstrap.md` §H: fingerprint schema, provenance tags, derived-mermaid catalogue, STALE algorithm, write interface). |
 | `README.md` | Folder note. |
 
 ## `global-claude-md/` — the always-loaded preferences file

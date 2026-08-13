@@ -53,6 +53,18 @@ ls references/ skills/*/references/ 2>/dev/null \
 #    plugin/local trigger collisions are invisible to it
 #    (inbound-routing.md; count was 50 files / 15,664 desc chars on 2026-08-12)
 find "$APPDATA/Claude/local-agent-mode-sessions" -name SKILL.md 2>/dev/null | wc -l
+# 10. cap VALUE drift across mechanisms — check 7 catches the unit, not the
+#     number, and a second mechanism holding its own copy is how a phantom
+#     breach survived 12 days (see below). Every cap literal outside the
+#     owning hook must be a declared fallback, never a live value.
+grep -rnE '_CAP[A-Z_]* *= *[0-9]+ *\* *1024' tools/ hooks/ --include=*.py \
+  | grep -v 'ops_health_nudge\|CAP_FALLBACKS'
+# 11. unsettled values: every threshold still running on a guess. Non-empty is
+#     NORMAL (a declared guess beats a silent one); the finding is an entry
+#     whose evidence has not gained a line in months, or a guess in the tree
+#     with NO registry entry at all (nowhere for the data to land).
+grep -n "PROVISIONAL" ops/rule-registry.md
+grep -rn "provisional\|not measured" ops/ --include=*.md | grep -v rule-registry
 ```
 
 ## Check 7's rationale (added 2026-08-12)
@@ -64,3 +76,22 @@ chars. The rule text says "change the two together"; nothing enforced it. Bytes
 won on evidence (see `rule-registry.md`, key `cap measurement unit`) and the
 table was corrected — but the drift was silent for as long as it existed, which
 is what makes it a sweep item rather than a one-off fix.
+
+## Check 10's rationale (added 2026-08-13)
+
+Check 7 compares how the hook MEASURES against how §3 says to measure. It is
+blind to a second mechanism holding its own copy of the VALUE, which is the
+larger class: `tools/project-dashboard.py` carried three stale caps at once —
+`ops/*.md` at 10K (two raises behind), `CLAUDE.md` at 12K (one raise behind,
+so the dashboard printed "CLAUDE.md 15,084B (123% of 12K cap)", a breach that
+did not exist, for 12 days), and a cap on `Global_skill_update.md` which was
+retired from capping on 2026-08-11. Only `DICT_CAP` happened to still match.
+
+The fix was not to correct the three numbers — that repeats in six weeks. The
+dashboard now DERIVES the caps from the hook by parsing it (importing would
+break its stdlib-single-file INV-4), keeps them only as declared fallbacks, and
+announces a parse failure instead of silently reverting to them. This check
+exists for the remaining hole in that arrangement: a fourth mechanism appearing
+later with its own literal, or a constant rename that makes the parse fall back
+forever. Third recurrence of the constant-binding class, and the first found in
+a RENDERER rather than a rule file.

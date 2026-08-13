@@ -144,6 +144,7 @@ opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 | work card (施工卡) | severity·confidence / objects / why / change / blast radius / rollback / acceptance / commit | `60-bootstrap.md` §F（模板：`60-record-templates.md` §1） | sole-basis build docs、深審修繕輸出 |
 | DELIVERY.md | did / verified / could-not-do / artifacts | `60-bootstrap.md` §D | 每個被派工的 worker |
 | glossary entry | term / date / definition / [superseded] | `60-bootstrap.md` §E | 領域名詞固化時 |
+| project map (read-time) | 檔頭 map-schema / repo / generated-at / **generated-from (SHA)** / covers / excludes / budget；本文 Entry&routing / Shape / Facts / Open [infer]；每條斷言帶 `[git]`\|`[read]`\|`[infer]` | `60-bootstrap.md` §H（格式：`ops/references/project-map.md`） | §A 找不到任何 write-time 紀錄、且任務不只一處具名修改時 |
 | decision journal — Now / D / P | Now: frontier·premises·open；D: status·context·options·choice+why·revisit-if·links；P: status·trail·resolution·links | `60-bootstrap.md` §G（模板：`60-record-templates.md` §2） | §G write-triggers 任一成立 |
 | lessons entry | L-id / date / tags / hits / context / pitfall / fix / **evidence** | `lessons.md` 頭部 | 全域級坑 |
 | guardrail 提案 APPLY.md | problem (含 **evidence block**) / change / benefit / risks / rollout & verification | `70-evolution.md` §2 | 改 settings/hooks/權限 |

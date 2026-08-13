@@ -20,7 +20,23 @@
      Entry fields: key / current / why / evidence / history / rollback.
      `history` is the point of the file: it is the retrieval path that does
      NOT require git archaeology. Keep each entry ~6 lines; if the reasoning
-     needs more, it belongs in a lessons entry and this cites it. -->
+     needs more, it belongs in a lessons entry and this cites it.
+
+     PROVISIONAL VALUES (added 2026-08-13). A threshold shipped as a GUESS
+     must still be registered, with `evidence:` starting with the literal
+     token `PROVISIONAL` followed by (a) what observation would settle it and
+     (b) the instruction that observations are appended to THIS entry. An
+     unregistered guess has no home for the data that would correct it, so the
+     data is never collected and the guess silently becomes permanent — which
+     is indistinguishable from a measured value to every later reader.
+     Registering it here buys three things a ticket cannot: `grep -n
+     PROVISIONAL ops/rule-registry.md` enumerates every unsettled value
+     (integrity-sweep check 11), this file has a liveness check of its own
+     (idle > 45 days), and it is project-independent — a ticket in ONE
+     project's ledger is invisible to the sessions in OTHER projects, which
+     are the ones actually generating the observations. The point-of-use text
+     must name this key as the write target; "revise later" with no
+     destination is how a guess ossifies. -->
 
 ## Size and budget rules
 
@@ -59,12 +75,52 @@
 - rollback: `hooks/ops_health_nudge.py` `DESC_CAP`
 
 ### ops file cap
-- current: ~12K chars per `ops/*.md` (2026-08-06)
-- why: same trim-vs-delete logic as CLAUDE.md, one tier down.
-- evidence: a lossless trim pass capped out at ~11.2K without cutting distinct
-  rules — the same pattern that justified the CLAUDE.md raise.
-- history: 10K (birth) → 12K (2026-08-06, after the failed trim pass)
-- rollback: `hooks/ops_health_nudge.py`; `40-maintenance.md` §3
+- current: ~15K **bytes** per `ops/*.md` (2026-08-13). **Scope: `lessons.md`
+  and `rule-registry.md` are exempt** — their size tracks the CORPUS, not
+  bloat, so an over-cap reading has no extract remedy and can only nag
+  forever. Their real degradation checks are elsewhere: the lessons
+  entry-count cap, and §4.1 ghost rules (a registry entry for a rule nobody
+  uses).
+- why: same trim-vs-delete logic as CLAUDE.md, one tier down — but a DIFFERENT
+  rule class: ops files are charged only when something routes to them, so the
+  cap is a proxy for "reading this got expensive", not a hard budget
+  (`40-maintenance.md` §3). The 12K value had reached the state a proxy must
+  not reach: six files over it at once, nudging every session, with no pass
+  able to clear them — a permanently-on alarm is one nobody reads.
+- evidence: 12K→15K (2026-08-13) — `60-bootstrap.md` sat at 12,011 B BEFORE
+  the §H read-time-map rules were added, i.e. already at cap with its whole
+  extractable surface already extracted into `60-record-templates.md`. Adding
+  7 distinct rules put it at 14,163 B; the only concrete left to move was two
+  templates totalling ~1,180 B, landing at ~12,983 B — still over. The pass
+  provably could not reach cap without cutting a distinct rule, which §3
+  forbids. The prior raise (10K→12K) used the same test.
+- history: 10K (birth) → 12K (2026-08-06, after a failed trim pass) → 15K
+  (2026-08-13, after the failed pass above)
+- rollback: the nudge hook's size constant; `40-maintenance.md` §3
+
+### map STALE thresholds — when a project map stops being trusted
+- current: DRIFT at 1–5 relevant changed files, STALE above 5 OR on any
+  structural path (package manifest, directory added/removed). Relevance is
+  scoped to the map's `covers` globs minus `excludes` (2026-08-13). Point of
+  use: `ops/references/project-map.md` §6.
+- why: scoping to `covers` is the cheap accuracy win — a docs-only commit must
+  not invalidate a code map. The 5 and the structural list are NOT reasoned
+  values; they are the smallest thing that could work, shipped as declared
+  guesses rather than picked silently, because the source environment had
+  already hit that trap twice with other thresholds.
+- evidence: **PROVISIONAL — no measurement exists.** What settles it: two or
+  three real cold-start projects each completing a FRESH → DRIFT → STALE
+  cycle, recording the relevant-file count at which patching from the diff
+  stopped being cheaper than regenerating. **Append each observation as one
+  line to THIS entry** (`<date> <project>: <N> relevant files → patch|regen
+  was cheaper`); replace `current` once three lines agree. Also open: how many
+  of the six SHAPE diagrams a real map actually uses — SHAPE-4/5 are expected
+  to be skipped often, which decides whether the catalogue is the right size.
+- history: born provisional 2026-08-13 (no prior value)
+- rollback: `ops/references/project-map.md` §6. Track the measurement as a
+  ticket in whichever project ledger schedules it — but THIS entry is the
+  authority and the write target, because a ledger in one project is invisible
+  to the sessions in others that generate the data.
 
 ### Audit-trail rotation model — retired
 - current: the chronological event-log-with-rotation model is retired. A

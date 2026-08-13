@@ -13,6 +13,10 @@ environment facts (step B) and a durable task ledger (step C). Without them,
    (domain glossary, §E — if present), `references/<project>-decisions.md`
    (§G — if present, re-confirm its `## Now` premises before acting), and grep
    `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
+   **`references/<project>-map.md` (§H) is read LAST and only after its
+   fingerprint verifies** — verifying after reading has already spent the tokens
+   the check exists to save. Its verdict is a P-env premise: report it in the
+   same `## Now` re-confirm block. Nothing found at all → §H.
 2. **No project CLAUDE.md?** Offer to run `/init`, then add the Environment-facts
    block (template below) with values you actually looked up this session.
 3. **No ticket ledger?** Create `references/<project>-tickets.md` from the template
@@ -199,3 +203,46 @@ Rules:
 multi-user sync becomes a goal."
 ❌ Ticket note "decided to use SQLite" with the why lost — three sessions
 later the decision gets relitigated from zero.
+
+## H. Cold start — the read-time map, when §A finds nothing
+
+§A assumes the write-time records exist. When they do not — an unfamiliar repo,
+a third-party project, work predating this system — do NOT re-derive the project
+from scratch every session. Derive it ONCE into `references/<project>-map.md`,
+and let a fingerprint tell later sessions whether it still holds.
+
+**Trigger**: §A step 1 finds no phase-log / decisions / context file, AND the
+task is more than one named edit.
+
+- **The two layers are separate files and never merge.** Their expiry semantics
+  are opposite: write-time (§C/§E/§G) is know-why — unreproducible, hand-written,
+  never expires; the map is know-what/where — regenerable, machine-generated,
+  expires on any relevant commit. A mixed file makes the fingerprint useless,
+  because one commit would mark settled rulings stale alongside the structure.
+- **Check before scanning**: an existing map is verified by one
+  `git diff --name-only <recorded-SHA>..HEAD`. FRESH replaces the scan entirely;
+  only STALE earns a rescan. That check IS the point of this layer.
+- **Never write regenerable facts into §C/§E/§G** (which files changed, what
+  modules exist, how they connect) — it spends the discipline budget on content
+  that will drift with no detector. The map covers it.
+- **Promote, never hand-edit**: a confirmed `[infer]` moves into §G/§E and leaves
+  the map. A map that never shrinks means promotion is not happening.
+- **Conflict**: structural facts → the map wins (code is the truth); intent and
+  rationale → §G wins (code carries no intent); "should be" differing from "is"
+  is a FINDING to report, not a discrepancy to resolve silently.
+
+✅ Session 2 on a cold repo: one `git diff --name-only` → FRESH → work starts
+from the map's routing table. ❌ Re-grepping the whole tree because the map's
+date "looks old" — dates are read by humans, fingerprints by machines.
+
+**Maintenance mounts** (what keeps a map from rotting — the acts split by time
+semantics, so they do NOT share one mount): verify + regenerate are read-time and
+fire at **session start** (§A step 1; `workflow-checkpoint` §C step 1); promote +
+demote are write-time and fire at the **checkpoint sweep** (`workflow-checkpoint`
+step 5c, beside the §E and §G sweeps). Hanging the freshness check on a phase-end
+ritual would be the exact category error this section exists to name.
+
+Schema, fingerprint fields, provenance tags (`[git]`/`[read]`/`[infer]`), the
+derived-mermaid diagram catalogue, the STALE algorithm, and the three legal
+writes (`generate`/`patch`/`prune`) with their fingerprint effects:
+`ops/references/project-map.md`.
