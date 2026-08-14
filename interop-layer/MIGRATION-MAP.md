@@ -61,9 +61,18 @@ fails any citation that neither resolves nor carries one of these.**
 | Class | Means | Example |
 |---|---|---|
 | `upstream-absent` | the source environment has no such artifact either | MCP servers, connectors — never existed here |
-| `referenced-only` | it exists at the source, but only its INTENT ships; no portable artifact was ever produced | `hooks/model_cap_guard.py` — cited as the mechanism behind the model cap, machine-bound, not shipped |
-| `excluded-by-decision` | a concrete file exists and was deliberately withheld | `settings.json` — publishing another operator's permission set invites copy-paste of decisions the adopter never made |
-| `partial` | only part of it ships | `ops/environment.md` — ships as one machine's dated record, not as fact |
+| `referenced-only` | it exists at the source, but only its INTENT ships; no portable artifact was ever produced | `LABEL-REGISTRY.md` — the citing rules degrade from "use the registered label" to "use a consistent label" |
+| `excluded-by-decision` | a concrete file exists and was deliberately withheld | `skills/asset-vault` — operates a private library at a hardcoded path and delegates authority to a non-public file |
+| `partial` | only part of it ships | `settings.json` — structure and permission example ship as a template; the two absolute paths cannot |
+
+**`referenced-only` is the class that rots.** It is a claim about the source
+made at one moment, and nothing re-tests it. Three hook entries sat in that
+class for a month on the reasoning "machine-bound"; a 2026-08-14 source audit
+found every one of them resolves paths through `Path.home()` /
+`CLAUDE_CONFIG_DIR` with no machine-bound value at all — they had simply never
+been collected, and they now ship under `hooks/`. Re-verify a
+`referenced-only` entry against the source before relying on it;
+`tools/COLLECTION-RULES.md` makes that step mandatory rather than optional.
 
 Every entry states the FALLBACK: what the adopter actually gets instead —
 mechanism, or prose. That is the *Translate per target* rule above — "the loss

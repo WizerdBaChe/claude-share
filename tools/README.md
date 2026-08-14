@@ -36,10 +36,22 @@ python tools/test_share_gate.py       # 驗收閘門本身：4 個案例
 | **P** | placeholder | 佔位符出現在**路徑位置**（緊鄰 `/`）或**指令位置**（行首是 `python`/`git`/`cd`…），以及同一 token 在單一檔案被當獨立值用 ≥4 次 | 還原真實值，或在 `[placeholders]` 宣告該 token |
 | **R** | reference | 引用了來源環境的資產（`hooks/…`、`~/.claude/…`、`ops/…`）但 repo 沒附、manifest 也沒宣告 | 在 `[source_map]` 建立對應，或加一筆 `[[not_shipped]]` |
 | **S** | structure | 巢狀 `SKILL.md`、缺 `SKILL.md`、clone 後會消失的空目錄、被追蹤的 `.claude/`／`__pycache__/`／`archive/`、技能清單表與實際樹不一致 | 修樹 |
+| **C** | collection | 從來源環境搬進來的檔案（`collected_roots` 底下）沒登記出處、沒登記狀態，或狀態不是 `verbatim` 卻沒列出每一處改動 | 補 `[[collected]]` 條目 |
 
 P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類，全 repo 約 160 個）。
 管全部只會製造噪音而沒有保護；真正危險的只有兩個位置——那才是佔位符可能正藏著
 讀者需要的真實值的地方。`<URL>` 事件同時違反 P 的三條規則。
+
+## 要從 `~/.claude` 搬東西進來？
+
+**先讀 [`COLLECTION-RULES.md`](COLLECTION-RULES.md)，不要自己臨場決定去識別化policy。**
+那份是給 agent 讀的判定程序：七問決策表、五種判定詞、絕不收錄清單，以及
+「先記來源 SHA → 逐字讀完 → 複製 → 對來源 diff → 登記每一處改動 → 跑閘門 →
+確認來源沒被動到」的強制步驟。
+
+第三種失敗就是這樣來的：2026-08-14 的來源稽核發現，三支 hook 被寫成
+`referenced-only`「綁機器」整整一個月，實際上它們**完全可攜、只是從來沒被撈進來**。
+判定一旦寫成散文、沒有東西會重測，它就會爛掉。C 檢查與那份規則就是為此存在。
 
 ## manifest 怎麼寫
 

@@ -52,7 +52,7 @@ relying on anything you remember:
 | File | What silently inverts in it |
 |---|---|
 | [`interop-layer/MIGRATION-MAP.md`](interop-layer/MIGRATION-MAP.md) | Target registry rows (on/off), portability classes (one is RETIRED), the inbound-dependency entry |
-| [`tools/share-manifest.toml`](tools/share-manifest.toml) | Which dependencies are declared not-shipped, and what fallback you actually get |
+| [`tools/share-manifest.toml`](tools/share-manifest.toml) | Which dependencies are declared not-shipped, and what fallback you actually get. **2026-08-14: three hook entries here were wrong for a month** — classified "machine-bound" without re-checking. They ship now. |
 | [`claude-ops/ops/rule-registry.md`](claude-ops/ops/rule-registry.md) | The current value of every cap and standing ruling, plus its value history |
 | [`claude-ops/ops/environment.md`](claude-ops/ops/environment.md) | Machine facts, per-block dated. Every one of them expires. |
 
@@ -79,8 +79,10 @@ the model: any mechanism name is an example, verify before relying on it.
 | `skill-toolkit/` | Portable AI-agent skills and a bilingual trigger dictionary, reviewed for personal identifiers and local paths. |
 | `interop-layer/` | Cross-agent sync layer: compiles a portable rules subset into global instruction files for other agents. Method depth is delegated, not shipped. |
 | `environment-guide/` | Human-facing philosophy, operator manual, and commit-message conventions, including a full migration checklist. |
+| `hooks/` | **New 2026-08-14.** The mechanical enforcement layer the rules had been citing without shipping: seven fail-open hooks (destructive-command deny-list, subagent model cap, browser-pane measurement and scope guards, session health nudge, shadow delivery gate, rule-load logger) plus the mounting template. |
+| `agents/` | **New 2026-08-14.** The eight subagent definitions `claude-ops/ops/20-dispatch.md` routes to, each with a `tools:` capability allowlist and a defined output contract. |
 | `thinking-notes/` | Twelve numbered design-thinking notes. Argument, not policy — nothing there binds a reader. |
-| `tools/` | The publishing gate: leak, placeholder, reference-disposition and structure checks, plus the manifest that is the only way past a finding. |
+| `tools/` | The publishing gate — leak, placeholder, reference-disposition, structure and collection-provenance checks — plus `COLLECTION-RULES.md`, the procedure for deciding what may be collected in the first place. |
 
 ## Where things are
 
@@ -95,6 +97,8 @@ the model: any mechanism name is an example, verify before relying on it.
 | Installable skills | `skill-toolkit/skills/` (inventory in `skill-toolkit/README.md`) |
 | Why any of this is shaped this way | `environment-guide/PHILOSOPHY.md` |
 | What this repo names but does not ship | `tools/share-manifest.toml` |
+| Where a collected file came from, and every edit made on the way | `tools/share-manifest.toml` `[[collected]]` |
+| The rules for collecting anything else out of the source environment | `tools/COLLECTION-RULES.md` |
 
 ## Conventions
 

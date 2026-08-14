@@ -1,0 +1,19 @@
+{
+  "_comment": [
+    "Hosts that must not be opened in the IN-APP Browser pane (mcp__Claude_Browser__*).",
+    "Read by hooks/browser_pane_scope_guard.py; a listed host also covers its subdomains.",
+    "Nothing writes this file automatically - adding an entry is a deliberate act, so the",
+    "list stays small and its false-positive rate stays at zero. Add a host only after a",
+    "pane-adjacent crash whose last navigation is attributable (telemetry/browser-nav.jsonl",
+    "plus the 'GPU process gone' line in %APPDATA%\\Claude\\logs\\main.log).",
+    "Out-of-process routes (WebFetch, claude-in-chrome, headless Playwright) are unaffected."
+  ],
+  "hosts": [
+    {
+      "host": "saveclip.app",
+      "recorded": "2026-08-12",
+      "reason": "Two GPU-process crashes (exitCode 101457950) 3-4s after preview_start, 2026-08-11 23:59 and 2026-08-12 00:08; Cloudflare challenge script calls navigator.gpu.requestAdapter() on first load",
+      "evidence": "ops/lessons.md L-013"
+    }
+  ]
+}

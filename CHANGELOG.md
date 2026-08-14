@@ -9,6 +9,70 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-14 (later) — the source audit: most of it was never collected
+
+The gate above made the repo honest about what it did not ship. The obvious next
+question was whether those absences were decisions. A read-only audit of the
+source environment at commit `182d9793` says mostly not.
+
+**The hooks were never machine-bound.** Three of them sat in the manifest as
+`referenced-only` with the reasoning "machine-bound: settings.json wires them
+with absolute interpreter paths". Checking instead of reasoning: the source has
+**seven** hooks, not the two the environment-guide snapshot names, and every one
+resolves its paths through `Path.home()` / `os.path.expanduser` /
+`CLAUDE_CONFIG_DIR` / `os.environ["TEMP"]`. Zero hardcoded accounts, zero
+absolute paths. They were not withheld; they were never collected. All seven now
+ship under **`hooks/`** — destructive-command deny-list, subagent model cap, the
+two browser-pane guards with their blocklist, the session health nudge, the
+shadow delivery gate, and the rule-load logger — each fail-open, each carrying
+the incident record that produced it.
+
+That flips the outside adopter's headline finding. "Command policy and Lifecycle
+are upstream-referenced-only" was true of the repo and false of the source.
+
+**`settings.json` was half right.** Its permission block is generic and its
+`ask` entries are the interesting half; only the hook-mount paths are
+machine-bound, because Claude Code expands neither `~` nor environment variables
+in a hook command. It ships as `hooks/settings.example.json` with `<PYTHON_EXE>`
+and `<CLAUDE_HOME>` to substitute, the memory-pipeline mount removed rather than
+left pointing at a script this share does not carry, and a `_README` saying
+plainly that a permission list is one operator's threat model, not a
+recommendation.
+
+**`agents/` had never been mentioned at all**, while `claude-ops/ops/20-dispatch.md`
+routes to all eight by name. They ship byte-verbatim. Their bodies were rewritten
+from CLAUDE.md and `ops/` on 2026-08-12 — the third-party lineage in the
+`adopted-from` comment is provenance, not remaining content, which is why the
+threejs-skills standard (no verifiable licence → do not ship) reaches the
+opposite conclusion here.
+
+**`references/PROJECTS.md` was `partial`, not private.** Header and column
+semantics are a generic format spec; the rows are real projects. The format
+ships as `claude-ops/references/PROJECTS.md`, so the two skills and the ops rule
+that cite it finally resolve.
+
+Confirmed genuinely out: `skills/asset-vault` (hardcoded private library —
+`skill-toolkit/` ships 13 of 14, now stated rather than left to be noticed),
+`reports/`, `LABEL-REGISTRY.md`, `telemetry/`, the source environment's own
+`tools/`.
+
+**`tools/COLLECTION-RULES.md`** (new) is the rule this audit earned: a seven-question
+decision table, the closed verdict vocabulary, a never-collect list, and the
+mandatory procedure — record the source SHA, read every byte, diff against the
+source with line endings normalised, declare every edit, run the gate, confirm
+the source is untouched. **Check C** enforces the declarable half: every file
+under a collected root carries its source, a valid status, and one recorded
+reason per edit; an entry pointing at a file that is not there fails too.
+
+Nine files were collected verbatim and four edited — two local session ids and
+three pointers into a private asset library, each listed individually in
+`[[collected]] edits`. Source SHA `182d9793` unchanged, working tree clean; the
+audit was read-only throughout.
+
+The lesson worth keeping is not about hooks. **A disposition is a claim about
+the source, and a claim nobody re-tests decays into a fact.** That one sat
+unexamined for a month and was the largest gap in the repo.
+
 ## 2026-08-14 — the publishing gate, and the two failures that forced it
 
 Not a sync from the source environment. This entry is about the repo's own

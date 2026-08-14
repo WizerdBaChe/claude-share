@@ -21,16 +21,20 @@
 | `~/.claude/CLAUDE.md` | [`../global-claude-md/CLAUDE.md`](../global-claude-md/CLAUDE.md) | 目標機器的 `~/.claude/CLAUDE.md` |
 | `~/.claude/skill-trigger-dict.md` | [`../skill-toolkit/skill-trigger-dict.md`](../skill-toolkit/skill-trigger-dict.md) | 目標機器的 `~/.claude/skill-trigger-dict.md` |
 | `~/.claude/PHILOSOPHY.md` | [`../environment-guide/PHILOSOPHY.md`](../environment-guide/PHILOSOPHY.md) | 目標機器的 `~/.claude/PHILOSOPHY.md` |
-| `hooks/*.py`、`settings.json` | **未隨附** | 見下 |
+| `hooks/*.py` | [`../hooks/`](../hooks/)（2026-08-14 補齊，7 支） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
+| `agents/*.md` | [`../agents/`](../agents/)（2026-08-14 補齊，8 支） | 目標機器的 `~/.claude/agents/` |
+| `~/.claude/references/PROJECTS.md` | [`references/PROJECTS.md`](references/PROJECTS.md)（只有格式，沒有資料列） | 目標機器的 `~/.claude/references/PROJECTS.md` |
+| `settings.json` | [`../hooks/settings.example.json`](../hooks/settings.example.json)（範本） | 併進你自己的 `settings.json` |
 
-**這層引用了但沒附的東西**：`hooks/model_cap_guard.py`、`hooks/ops_health_nudge.py`、
-`~/.claude/references/PROJECTS.md`、`~/.claude/LABEL-REGISTRY.md`、`reports/`、
-`settings.json`。每一項的原因與「你實際拿到的是什麼」記在
+**2026-08-14 更正**：這段原本寫「規則檔說『由 hook 機械強制』的地方，你拿到的是散文」。
+那是因為 hook 從來沒被撈進來，而 manifest 把原因誤判成「綁機器」。查證結果是七支
+hook 完全可攜，現已隨附——所以**強制力不再是降級的**，只要你照
+[`../hooks/README.md`](../hooks/README.md) 掛上去。
+
+仍然引用了但沒附的是：`~/.claude/LABEL-REGISTRY.md`、`reports/`、以及 `settings.json`
+裡兩個絕對路徑。每一項的原因與「你實際拿到的是什麼」記在
 [`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的 `[[not_shipped]]`；
 `../tools/share_gate.py` 的 R 檢查會擋下任何新的未宣告引用。
-
-重點只有一句：**規則檔寫「由 hook 機械強制」的地方，你拿到的是散文。**
-不是規則失效，是強制力降級——引用處寫的效果與你實際得到的效果不同，要自己補。
 
 ## 去識別化
 

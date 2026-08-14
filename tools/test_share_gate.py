@@ -72,13 +72,13 @@ def main():
 
     # 2 — removing a disposition must resurface the dependency.
     man_saved = MANIFEST.read_text(encoding="utf-8")
-    man_cut = man_saved.replace('path = "hooks/model_cap_guard.py"',
-                                'path = "hooks/__removed_for_test__.py"')
+    man_cut = man_saved.replace('path = "settings.json"',
+                                'path = "__removed_for_test__.json"')
     assert man_cut != man_saved, "manifest fixture no longer matches"
     results.append(case(
-        "under-declare: hooks/model_cap_guard.py with its disposition removed",
+        "under-declare: settings.json with its disposition removed",
         expect_fail=True,
-        expect_in_output=["model_cap_guard.py", "does not ship"],
+        expect_in_output=["settings.json", "does not ship"],
         mutate=lambda: MANIFEST.write_text(man_cut, encoding="utf-8", newline=""),
         restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
     ))
@@ -96,7 +96,20 @@ def main():
         restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
     ))
 
-    # 4 — control: the tree as it stands must pass.
+    # 4 — a collected file whose edits were never written down.
+    man_unrecorded = man_saved.replace(
+        'edits = [\n  "docstring: replaced a local session id',
+        'edits_MISSING = [\n  "docstring: replaced a local session id')
+    assert man_unrecorded != man_saved, "collection fixture no longer matches"
+    results.append(case(
+        "unrecorded edit: a collected file with status 'edited' and no edit list",
+        expect_fail=True,
+        expect_in_output=["model_cap_guard.py", "no recorded edits"],
+        mutate=lambda: MANIFEST.write_text(man_unrecorded, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
+    ))
+
+    # 5 — control: the tree as it stands must pass.
     results.append(case(
         "control: current tree",
         expect_fail=False,

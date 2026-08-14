@@ -47,16 +47,26 @@ instead:
 | `excluded-by-decision` | a concrete file exists and was deliberately withheld |
 | `partial` | only part of it ships |
 
-The largest case: **the enforcement hooks are not here.** `hooks/model_cap_guard.py`,
-`hooks/ops_health_nudge.py` and `hooks/ui_verify_guard.py` are cited across the ops
-layer as the mechanism behind a rule. You get the rule as prose. Where a rule says
-"mechanically enforced", read "mechanically enforced *in the source environment*" —
-and treat the prose version as known-weak, because in at least one case the prose
-form recurred unfixed for about a month before enforcement moved to a hook.
+**Corrected 2026-08-14 — the enforcement hooks ARE here now.** They used to be
+listed as `referenced-only` with the reasoning "machine-bound". A source audit
+disproved that: all seven resolve their paths through `Path.home()` /
+`expanduser` / `CLAUDE_CONFIG_DIR` and contain no machine-bound value. They had
+never been collected. `hooks/` now ships them, with `hooks/settings.example.json`
+for the mounting, and `agents/` ships the eight subagent definitions
+`claude-ops/ops/20-dispatch.md` routes to. If you read an earlier version of this
+file and concluded the mechanism layer was unavailable, that conclusion is stale.
 
-`tools/share_gate.py` check R makes this structural: a citation that neither
-resolves inside the repo nor carries a disposition fails the build. Undisclosed
-dependencies cannot ship again.
+`tools/share_gate.py` check R makes disclosure structural: a citation that
+neither resolves inside the repo nor carries a disposition fails the build.
+Check C does the same for provenance: every collected file declares where it came
+from and every edit made on the way in. Undisclosed dependencies and silent edits
+cannot ship again.
+
+What genuinely stays out: your own `settings.json` values, the operator's project
+index rows, dated internal reports, runtime telemetry, and one skill
+(`asset-vault`) that operates a private library — so `skill-toolkit/` ships 13 of
+the source environment's 14 skills, which is stated rather than left to be
+noticed.
 
 ## Symptoms that are your environment, not this repo
 

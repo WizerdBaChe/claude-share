@@ -22,9 +22,16 @@
 # under-declaration class in the repo stays invisible.
 # ---------------------------------------------------------------------------
 source_env_roots = [
-    "hooks/", "ops/", "skills/", "rules/", "interop/",
+    "hooks/", "ops/", "skills/", "rules/", "interop/", "agents/",
     "projects/", "outputs/", "reports/",
 ]
+
+# ---------------------------------------------------------------------------
+# collected_roots — directories holding files copied in from the source
+# environment. Check C requires a [[collected]] entry for every tracked file
+# under these, and rejects an entry with no matching file.
+# ---------------------------------------------------------------------------
+collected_roots = ["hooks/", "agents/"]
 
 # ---------------------------------------------------------------------------
 # foreign_roots — paths belonging to OTHER platforms. Prose about a target
@@ -45,6 +52,9 @@ foreign_roots = [
 # ---------------------------------------------------------------------------
 [source_map]
 "ops/" = "claude-ops/ops/"
+"hooks/" = "hooks/"
+"agents/" = "agents/"
+"references/" = "claude-ops/references/"
 "skills/" = "skill-toolkit/skills/"
 "rules/" = "global-claude-md/rules/"
 "interop/" = "interop-layer/"
@@ -68,51 +78,57 @@ foreign_roots = [
 # knows what they actually get: mechanism, or prose.
 # ---------------------------------------------------------------------------
 
-[[not_shipped]]
-path = "hooks/model_cap_guard.py"
-disposition = "referenced-only"
-reason = """PreToolUse hook capping the model tier a dispatched subagent may
-use. Machine-bound: it reads the Agent tool's own `model` argument via a
-Claude-Code-specific hook payload, and settings.json wires it with absolute
-interpreter paths. Shipping the file without that wiring would look installable
-and silently do nothing."""
-fallback = """The rule survives as prose (`claude-ops/ops/20-dispatch.md`,
-`environment.md`). You get the cost cap as an expectation, not as enforcement.
-If your platform has a pre-tool hook, wiring one is strictly stronger."""
-
-[[not_shipped]]
-path = "hooks/ops_health_nudge.py"
-disposition = "referenced-only"
-reason = """SessionStart hook: size caps, ghost-rule detection, skill-corpus
-sweep, relaxation-level nudge. Same machine-binding as above, plus it walks
-absolute local skill roots that do not exist on an adopter's machine."""
-fallback = """`claude-ops/ops/40-maintenance.md` states the caps as numbers a
-human or model must check by hand. The checks in
-`claude-ops/ops/references/integrity-sweep.md` are the grep-level equivalent
-and DO ship — run them manually."""
-
-[[not_shipped]]
-path = "hooks/ui_verify_guard.py"
-disposition = "referenced-only"
-reason = """PreToolUse hook denying a browser screenshot before a visibility
-probe has run. Named in the source CLAUDE.md; the share copy already carries an
-inline placeholder note at that bullet."""
-fallback = """`global-claude-md/CLAUDE.md` keeps the rule as prose with an
-explicit note that the original enforces it mechanically. Rules-layer text alone
-recurred unfixed for about a month before enforcement moved to a hook — treat
-the prose version as known-weak."""
+# NOTE 2026-08-14: three hook entries used to live here, classified
+# `referenced-only` and reasoned as "machine-bound". A source audit disproved
+# that — the hooks resolve every path through Path.home() / expanduser /
+# CLAUDE_CONFIG_DIR and contain no machine-bound value at all. They had simply
+# never been collected. All seven now ship under hooks/. The wrong entry is
+# recorded here rather than deleted quietly: a disposition is a claim about the
+# source, and a claim nobody re-checked for a month is exactly what check C and
+# tools/COLLECTION-RULES.md now exist to prevent.
 
 [[not_shipped]]
 path = "settings.json"
+disposition = "partial"
+reason = """The live file wires each hook with an absolute interpreter path and
+an absolute .claude path — Claude Code expands neither ~ nor environment
+variables inside a hook command, so those two values genuinely cannot port. The
+rest (permission allow/ask lists, model, effort) is generic and does ship."""
+fallback = """`hooks/settings.example.json` carries the whole structure with
+<PYTHON_EXE> and <CLAUDE_HOME> to substitute, plus the permission block as a
+worked example that must be read before it is adopted — an allowlist you did not
+decide on is worse than no allowlist. The source file's SessionEnd
+memory-pipeline hook is omitted because that script is not part of this share."""
+
+[[not_shipped]]
+path = "skills/asset-vault"
 disposition = "excluded-by-decision"
-reason = """Permissions, hook mounts, model default. Contains machine-bound
-absolute paths (interpreter + hook locations) and a permission allowlist shaped
-by one operator's threat model. Publishing another environment's permission set
-is worse than publishing nothing: it invites copy-paste of decisions the adopter
-never made."""
-fallback = """`environment-guide/OPERATOR-GUIDE.md` §3.4 and
-`claude-ops/ops/70-evolution.md` describe the SHAPE (what belongs there, how a
-change gets proposed). Write your own file; do not port someone else's."""
+reason = """The 14th skill in the source environment. It operates a personal
+asset library at a hardcoded local drive path and delegates its authority to
+that library's own AGENTS.md, which is not public. De-coupling it would leave a
+skill that describes a vault the reader does not have."""
+fallback = """None. `skill-toolkit/` ships 13 of 14 skills; this is the missing
+one, named here so the count is not silently short."""
+
+[[not_shipped]]
+path = "tools/"
+disposition = "excluded-by-decision"
+reason = """The source environment's own tooling (project dashboard, usage
+window, memory pipeline). Portable in principle — no machine-bound values — but
+they serve records this share does not carry, so shipping them would add a
+maintenance surface with nothing on the other end. Note: this repo's own
+`tools/` is a different thing, built here, not collected."""
+fallback = """None needed. The rules they support are described in
+`claude-ops/ops/60-bootstrap.md`; build your own if you want the automation."""
+
+[[not_shipped]]
+path = "telemetry/"
+disposition = "excluded-by-decision"
+reason = """Runtime logs written by the shipped hooks (rule loads, delivery-gate
+shadow rows, browser navigation). Session ids, working directories and command
+strings from real work."""
+fallback = """The hooks recreate it on first run. Each hook's docstring
+documents its own schema."""
 
 [[not_shipped]]
 path = "ops/environment.md"
@@ -132,14 +148,14 @@ fallback = "`claude-ops/ops/60-record-templates.md` ships the empty templates."
 
 [[not_shipped]]
 path = "references/PROJECTS.md"
-disposition = "excluded-by-decision"
-reason = """The operator's own index of active projects — names, paths and
-status of real work. Cited by `claude-ops/ops/60-bootstrap.md` and
-`skill-toolkit/skills/project-retrospective/SKILL.md` as the place a project is
-registered. Pure personal inventory; nothing about it generalises."""
-fallback = """Both citations still describe WHAT the index is for (one row per
-project, so a cold session can find prior work). Create your own; the format is
-one line per project and nothing depends on its schema."""
+disposition = "partial"
+reason = """The live file's HEADER is a generic, machine-parseable format spec
+(column semantics, which skill maintains which column) and does ship. Its ROWS
+are real project names, paths and status — personal inventory that does not
+generalise, and they do not."""
+fallback = """`claude-ops/references/PROJECTS.md` is the header plus one
+worked example row. Cited by `claude-ops/ops/60-bootstrap.md` and
+`skill-toolkit/skills/project-retrospective/SKILL.md`; both now resolve."""
 
 [[not_shipped]]
 path = "LABEL-REGISTRY.md"
@@ -173,6 +189,125 @@ reason = "Working output directory (share builds, reports). Contents are persona
 fallback = "None needed — it is a scratch location, not a rule surface."
 
 # ---------------------------------------------------------------------------
+# collected — provenance for every file copied in from the source environment.
+#
+# status:
+#   verbatim  byte-identical to the source (line endings aside)
+#   edited    changed on the way in; EVERY change is listed in `edits`
+#   template  rewritten so an adopter can use it; `edits` says what was made
+#             substitutable
+#
+# `edits` is the load-bearing field. An unrecorded edit is indistinguishable
+# from the accidental over-scrub this gate exists to catch, and the source lives
+# on a machine this repo cannot see — the list is what makes the difference
+# reproducible by whoever has both. Procedure: tools/COLLECTION-RULES.md.
+# Collected 2026-08-14 from the source environment at commit 182d9793.
+# ---------------------------------------------------------------------------
+
+[[collected]]
+path = "hooks/dangerous_command_guard.py"
+source = "~/.claude/hooks/dangerous_command_guard.py"
+status = "verbatim"
+
+[[collected]]
+path = "hooks/ops_health_nudge.py"
+source = "~/.claude/hooks/ops_health_nudge.py"
+status = "verbatim"
+
+[[collected]]
+path = "hooks/instructions_loaded_logger.py"
+source = "~/.claude/hooks/instructions_loaded_logger.py"
+status = "verbatim"
+
+[[collected]]
+path = "hooks/browser-pane-blocklist.json"
+source = "~/.claude/hooks/browser-pane-blocklist.json"
+status = "verbatim"
+
+[[collected]]
+path = "hooks/model_cap_guard.py"
+source = "~/.claude/hooks/model_cap_guard.py"
+status = "edited"
+edits = [
+  "docstring: replaced a local session id with 'a local transcript' — the id points at a transcript no reader can open, so it carried no evidence value outward",
+]
+
+[[collected]]
+path = "hooks/delivery_gate_shadow.py"
+source = "~/.claude/hooks/delivery_gate_shadow.py"
+status = "edited"
+edits = [
+  "docstring: 'session 8ee03a1f emitted 19 events' -> 'one session emitted 19 events' — same reason as model_cap_guard",
+]
+
+[[collected]]
+path = "hooks/ui_verify_guard.py"
+source = "~/.claude/hooks/ui_verify_guard.py"
+status = "edited"
+edits = [
+  "docstring + denial text: dropped two pointers to a private asset-library entry ('AssetVault asset ui-state-probe'), keeping the portable instruction (npx playwright screenshot) that stood beside it",
+]
+
+[[collected]]
+path = "hooks/browser_pane_scope_guard.py"
+source = "~/.claude/hooks/browser_pane_scope_guard.py"
+status = "edited"
+edits = [
+  "denial text: dropped one pointer to the same private asset-library entry; the headless-Playwright fallback it named is kept",
+]
+
+[[collected]]
+path = "hooks/settings.example.json"
+source = "~/.claude/settings.json"
+status = "template"
+edits = [
+  "every interpreter path -> <PYTHON_EXE>; every config-directory path -> <CLAUDE_HOME>",
+  "removed the SessionEnd memory-pipeline hook: that script is not part of this share, and a mount pointing at a missing file is worse than an absent mount",
+  "removed machine-preference keys (autoUpdatesChannel, theme, agentPushNotifEnabled) — no reader should inherit them",
+  "added a _README block: this is a template to merge from, and the permission list is one operator's threat model, not a recommendation",
+]
+
+[[collected]]
+path = "agents/engineering-backend-architect.md"
+source = "~/.claude/agents/engineering-backend-architect.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/engineering-code-reviewer.md"
+source = "~/.claude/agents/engineering-code-reviewer.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/engineering-frontend-developer.md"
+source = "~/.claude/agents/engineering-frontend-developer.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/engineering-security-engineer.md"
+source = "~/.claude/agents/engineering-security-engineer.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/engineering-software-architect.md"
+source = "~/.claude/agents/engineering-software-architect.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/testing-api-tester.md"
+source = "~/.claude/agents/testing-api-tester.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/testing-bug-fixer.md"
+source = "~/.claude/agents/testing-bug-fixer.md"
+status = "verbatim"
+
+[[collected]]
+path = "agents/testing-qa-engineer.md"
+source = "~/.claude/agents/testing-qa-engineer.md"
+status = "verbatim"
+
+# ---------------------------------------------------------------------------
 # placeholders — POSITION, not vocabulary.
 #
 # Free prose templates are not the gate's business; there are ~160 of them and
@@ -202,6 +337,9 @@ substitution = [
     "<LINE_ENDING_CONVENTION>", "<OPS_DIR>", "<PLACEHOLDER>",
     "<local-workspace>", "<suite-repository>", "<project-repository>",
     "<global-agent-home>", "<user>", "<hooks path>",
+    # hooks/settings.example.json — the only two genuinely machine-bound values
+    # in the whole hook layer; Claude Code expands neither ~ nor $VARS there.
+    "<PYTHON_EXE>", "<CLAUDE_HOME>",
 ]
 
 # Genuine template parameters that legitimately sit in a path.
@@ -221,6 +359,8 @@ path_position_ok = [
     "<doi>", "<isbn>",
     # env-cleanup scan output columns
     "<file-count>", "<newest-mtime>",
+    # COLLECTION-RULES.md diff recipe: the reader supplies both sides
+    "<path>", "<repo-path>",
     # personal data the reader replaces, in de-identification examples
     "<username>", "<email>",
 ]

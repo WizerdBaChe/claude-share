@@ -34,6 +34,8 @@ Checks
   R  reference    every source-environment asset cited either resolves inside
                   this repo, or carries a disposition in share-manifest.toml
   S  structure    the packaging shapes that silently break on the adopter side
+  C  collection   every file copied in from the source environment declares
+                  where it came from and every edit made on the way
 
 Exit codes: 0 clean · 1 findings · 2 the gate itself could not run.
 """
@@ -236,8 +238,12 @@ def _resolves(key, source_map, tracked, citing_file):
     here = citing_file.rsplit("/", 1)[0] if "/" in citing_file else ""
     if here and f"{here}/{key}" in tracked:
         return True
-    # a bare filename that exists anywhere in the tree (e.g. `README.md`)
-    if "/" not in key and any(p.endswith("/" + key) or p == key for p in tracked):
+    # Suffix match anywhere in the tree. Rule files cite a skill's own
+    # `references/x.md` relative to a directory the citing file is not in, so
+    # an exact-prefix rule reports those as missing when they are right there.
+    # Deliberately loose: the failure worth catching is "nothing by this name
+    # exists anywhere", not "it resolved via a different parent".
+    if any(p.endswith("/" + key) or p == key for p in tracked):
         return True
     return False
 
@@ -307,6 +313,57 @@ def check_structure(manifest, files, f):
               "keep the table and skills/ in step")
 
 
+# --- C: collection -----------------------------------------------------------
+
+VALID_STATUS = {"verbatim", "edited", "template"}
+
+
+def check_collection(manifest, files, f):
+    """Every file copied in from the source environment must declare itself.
+
+    The failure this prevents is the one that produced the `<URL>` damage from
+    the other side: content arriving with edits nobody wrote down, so no later
+    reader can tell an intentional de-identification from a mistake. A collected
+    file is declared once, with its source path and every edit made on the way;
+    the roots it applies to are listed in `collected_roots`.
+
+    What it cannot check: whether the copy still matches the source. The source
+    lives on one machine and this repo does not. That is what the recorded edit
+    list is for — it makes the diff reproducible by whoever does have both.
+    """
+    roots = tuple(manifest.get("collected_roots", []))
+    if not roots:
+        return
+    declared = {e.get("path"): e for e in manifest.get("collected", [])}
+
+    in_scope = {p for p in files if p.startswith(roots)
+                and not p.endswith(("README.md", "NOTICE.md"))}
+
+    for rel in sorted(in_scope):
+        e = declared.get(rel)
+        if not e:
+            f.add("C", rel, 0, "collected file with no provenance entry",
+                  "add a [[collected]] entry: source, status, and every edit")
+            continue
+        if not e.get("source"):
+            f.add("C", rel, 0, "provenance entry has no source path",
+                  "record where in the source environment it came from")
+        status = e.get("status")
+        if status not in VALID_STATUS:
+            f.add("C", rel, 0, f"status {status!r} is not one of {sorted(VALID_STATUS)}",
+                  "verbatim = byte-identical; edited = enumerate every change; "
+                  "template = rewritten for adopters")
+        elif status != "verbatim" and not e.get("edits"):
+            f.add("C", rel, 0, f"status '{status}' with no recorded edits",
+                  "list each change; an unrecorded edit is indistinguishable "
+                  "from the over-scrub this gate exists to catch")
+
+    for rel in sorted(declared):
+        if rel not in in_scope:
+            f.add("C", rel, 0, "provenance entry for a file that is not tracked here",
+                  "remove the stale entry, or restore the file")
+
+
 def _ignored(rel):
     out = subprocess.run(["git", "-C", str(REPO_ROOT), "check-ignore", "-q", rel],
                          capture_output=True)
@@ -336,16 +393,17 @@ def seed(manifest, files):
 
 # --- main --------------------------------------------------------------------
 
-CHECKS = {"L": check_leak, "P": check_placeholder,
-          "R": check_reference, "S": check_structure}
-NAMES = {"L": "leak", "P": "placeholder", "R": "reference", "S": "structure"}
+CHECKS = {"L": check_leak, "P": check_placeholder, "R": check_reference,
+          "S": check_structure, "C": check_collection}
+NAMES = {"L": "leak", "P": "placeholder", "R": "reference",
+         "S": "structure", "C": "collection"}
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--check", default="LPRS",
-                    help="subset of LPRS (default: all)")
+    ap.add_argument("--check", default="LPRSC",
+                    help="subset of LPRSC (default: all)")
     ap.add_argument("--seed", action="store_true",
                     help="print undeclared placeholders and exit; writes nothing")
     args = ap.parse_args()

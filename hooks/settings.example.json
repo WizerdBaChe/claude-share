@@ -1,0 +1,136 @@
+{
+  "_README": [
+    "TEMPLATE, not a drop-in. Merge the parts you want into your own",
+    "~/.claude/settings.json; do not copy this file over yours.",
+    "",
+    "Replace <PYTHON_EXE> with an absolute path to a Python 3.10+ interpreter and",
+    "<CLAUDE_HOME> with the absolute path to your .claude directory. Claude Code",
+    "does not expand ~ or environment variables inside a hook command, which is",
+    "why these are absolute and why they are the only machine-bound values here.",
+    "",
+    "The permissions block is ONE operator's threat model, published as a worked",
+    "example. Read every line before adopting it; an allowlist you did not decide",
+    "on is worse than no allowlist. The `ask` entries are the important half —",
+    "they make the config edit itself a confirmed action.",
+    "",
+    "The source environment also wires a SessionEnd memory-pipeline hook. That",
+    "script is not part of this share, so the block is omitted rather than left",
+    "pointing at a file you do not have.",
+    "",
+    "Verify after wiring: run each hook by hand with empty stdin and check it",
+    "exits 0 — e.g. `<PYTHON_EXE> <CLAUDE_HOME>/hooks/ops_health_nudge.py < /dev/null`.",
+    "Every hook here is fail-open, so a silent exit 0 is the healthy state."
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(mkdir *)",
+      "Bash(npx vitest *)",
+      "Bash(npx tsc *)",
+      "Bash(npx oxlint *)",
+      "Bash(npm test)",
+      "mcp__Claude_Browser__read_page",
+      "mcp__Claude_Browser__read_console_messages",
+      "mcp__Claude_Browser__get_page_text",
+      "mcp__Claude_Browser__find",
+      "mcp__Claude_Browser__preview_logs",
+      "WebSearch"
+    ],
+    "ask": [
+      "Edit(~/.claude/CLAUDE.md)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(~/.claude/settings.local.json)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/.claude/rules/**)"
+    ]
+  },
+  "model": "sonnet",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dangerous_command_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/model_cap_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__(computer|javascript_tool)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ui_verify_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__(navigate|preview_start)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/browser_pane_scope_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ops_health_nudge.py\"",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/delivery_gate_shadow.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/instructions_loaded_logger.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "enableWorkflows": true,
+  "effortLevel": "medium"
+}
