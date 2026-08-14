@@ -12,7 +12,8 @@ shape it has; start with `claude-ops/ops/OPS.md` if you want the rules themselve
 
 | File | What it is |
 |---|---|
-| `README.md` | Orientation: what each share folder holds. |
+| `README.md` | Orientation and three reading lanes: first read, returning read, installing. |
+| `ADOPTERS.md` | What this repo names but does not ship, where not to clone it, and which symptoms belong to the adopter's platform rather than to this repo. |
 | `CHANGELOG.md` | This repo's own sync history — when each share was copied, what changed. |
 | `Global_skill_update.md` | The source environment's evolution log. **Frozen 2026-08-11** — historical reading only; going forward, standing rationale lives in `claude-ops/ops/rule-registry.md` and per-change detail lives in commit messages. Still the single most informative narrative file here. |
 | `AGENTS.md` | This map. |
@@ -39,6 +40,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | `lessons.md` | The pitfall ledger — real incidents with the fix that followed. |
 | `rule-registry.md` | **New 2026-08-11.** Keyed by RULE, not by date: why each size cap, standing ruling, and mechanism holds its current value, plus its value history. Replaces the old chronological-rotation model. |
 | `rules-usage-dict.md` | Index: which layer owns what, record-schema registry. Agent-roster routing itself moved to `20-dispatch.md` — this file keeps only a pointer. |
+| `../references/PROJECTS.md` | **New 2026-08-14.** The project-index format the ops layer and two skills cite — header and column semantics only; the source environment's rows are its own inventory and do not ship. |
 | `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), and **new 2026-08-13** `project-map.md` (the read-time layer behind `60-bootstrap.md` §H: fingerprint schema, provenance tags, derived-mermaid catalogue, STALE algorithm, write interface). |
 | `README.md` | Folder note. |
 
@@ -71,6 +73,33 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `skill-share-packaging` | Exporting a skill for others, or auditing a downloaded one. Includes `scripts/prescan.py`. |
 | `workflow-checkpoint` | Phase archiving and context rebuild across long multi-session projects. |
 
+## `hooks/` — the mechanical enforcement layer
+
+Collected 2026-08-14. Seven PreToolUse/SessionStart/SubagentStop/InstructionsLoaded
+hooks that the ops layer had been citing as its enforcement mechanism without ever
+shipping them; all fail-open, none machine-bound. Install steps and the per-hook
+table are in `hooks/README.md`; `settings.example.json` is the mounting template
+with `<PYTHON_EXE>` / `<CLAUDE_HOME>` to substitute.
+
+| File | Enforces |
+|---|---|
+| `dangerous_command_guard.py` | Deny-list for irreversible shell commands (the compensating control for a widened allowlist). |
+| `model_cap_guard.py` | Subagent model cost cap, with the SendMessage-resume bypass documented rather than hidden. |
+| `ui_verify_guard.py` | Browser-pane measurement discipline (lessons L-009/L-010) — denies, does not warn. |
+| `browser_pane_scope_guard.py` + `browser-pane-blocklist.json` | Records every pane navigation; denies hosts known to crash the Electron GPU child (L-013). |
+| `ops_health_nudge.py` | Eleven maintenance thresholds at session start; silent when healthy. |
+| `delivery_gate_shadow.py` | Shadow mode only — measures what a delivery gate WOULD block before anything is blocked. |
+| `instructions_loaded_logger.py` | Observation only: which instruction files load, when. |
+
+## `agents/` — subagent definitions
+
+Collected 2026-08-14, byte-verbatim. The eight agent types `claude-ops/ops/20-dispatch.md`
+routes to: `backend-architect`, `frontend-developer`, `software-architect`,
+`code-reviewer`, `security-engineer`, `testing-qa-engineer`, `api-tester`,
+`testing-bug-fixer`. Each carries a `tools:` capability allowlist (so "read-only"
+is a fact, not a request), always includes `Skill`, and defines its output format
+with evidence and attribution grading. Lineage and licence reasoning: `agents/README.md`.
+
 ## `environment-guide/` — why it is shaped this way
 
 | File | What it is |
@@ -91,6 +120,20 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `acceptance-evals.md` | Checks that a port actually landed. |
 
 **Retired 2026-08-11**: the `refs/` method-playbook folder and its compile step. Method depth is now delegated to each target agent's own official docs (`interop.py`'s `delegation_block()`) rather than shipped as curated prose — the trigger never ported, only the content did, and that degraded to "read either always or never". See `MIGRATION-MAP.md` and `README.md` for the reasoning.
+
+## `tools/` — the publishing gate
+
+Run `python tools/share_gate.py` before any push that touches shipped content;
+exit 0 is the release condition.
+
+| File | What it is |
+|---|---|
+| `share_gate.py` | Five fail-closed checks over every tracked file: **L** leak, **P** placeholder position, **R** reference disposition, **S** packaging structure, **C** collection provenance. Never edits anything — automatic scrubbing is the failure it exists to catch. |
+| `COLLECTION-RULES.md` | The decision procedure the gate enforces: what may be collected from the source environment, in which of five verdicts, and the mandatory copy → diff → declare → verify steps. Read it before adding or refreshing anything collected. |
+| `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart. |
+| `share-manifest.toml` | The only way past a finding: `[[allow]]` leak exceptions, `[[not_shipped]]` dependency dispositions + fallbacks, the `[placeholders]` position vocabulary, and the source-environment → repo path map. |
+| `test_share_gate.py` | Replays both historical incidents (the `<URL>` over-scrub, an undeclared hook) plus planted personal data against the live gate. |
+| `README.md` | Operator manual (中文): why the layer exists, how to write a manifest entry, how to add a check. |
 
 ## `thinking-notes/` — essays, not rules
 

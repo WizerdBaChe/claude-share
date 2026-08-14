@@ -8,6 +8,34 @@
 - `ops/environment.md`：擷取時的工具環境與模型成本上限紀錄。
 - `ops/OPS.md`：各規範文件的入口與使用索引。
 
+## 路徑對照（採用前先看這張表）
+
+`ops/` 底下的檔案彼此以 `~/.claude/ops/...` 互相引用，而且**刻意保留原樣**——
+`~` 在任何機器上都會展開成當前使用者的家目錄，不含帳號名，本身就是可攜寫法。
+但這也代表：這批規則預設自己被放在 `~/.claude/ops/`。放到別的位置（例如
+`~/.codex/ops/`）時，交叉引用不會自動跟著改。
+
+| 規則檔內寫的路徑 | 在本 repo 的位置 | 要生效需放到 |
+|---|---|---|
+| `~/.claude/ops/*.md` | [`claude-ops/ops/`](ops/) | 目標機器的 `~/.claude/ops/` |
+| `~/.claude/CLAUDE.md` | [`../global-claude-md/CLAUDE.md`](../global-claude-md/CLAUDE.md) | 目標機器的 `~/.claude/CLAUDE.md` |
+| `~/.claude/skill-trigger-dict.md` | [`../skill-toolkit/skill-trigger-dict.md`](../skill-toolkit/skill-trigger-dict.md) | 目標機器的 `~/.claude/skill-trigger-dict.md` |
+| `~/.claude/PHILOSOPHY.md` | [`../environment-guide/PHILOSOPHY.md`](../environment-guide/PHILOSOPHY.md) | 目標機器的 `~/.claude/PHILOSOPHY.md` |
+| `hooks/*.py` | [`../hooks/`](../hooks/)（2026-08-14 補齊，7 支） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
+| `agents/*.md` | [`../agents/`](../agents/)（2026-08-14 補齊，8 支） | 目標機器的 `~/.claude/agents/` |
+| `~/.claude/references/PROJECTS.md` | [`references/PROJECTS.md`](references/PROJECTS.md)（只有格式，沒有資料列） | 目標機器的 `~/.claude/references/PROJECTS.md` |
+| `settings.json` | [`../hooks/settings.example.json`](../hooks/settings.example.json)（範本） | 併進你自己的 `settings.json` |
+
+**2026-08-14 更正**：這段原本寫「規則檔說『由 hook 機械強制』的地方，你拿到的是散文」。
+那是因為 hook 從來沒被撈進來，而 manifest 把原因誤判成「綁機器」。查證結果是七支
+hook 完全可攜，現已隨附——所以**強制力不再是降級的**，只要你照
+[`../hooks/README.md`](../hooks/README.md) 掛上去。
+
+仍然引用了但沒附的是：`~/.claude/LABEL-REGISTRY.md`、`reports/`、以及 `settings.json`
+裡兩個絕對路徑。每一項的原因與「你實際拿到的是什麼」記在
+[`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的 `[[not_shipped]]`；
+`../tools/share_gate.py` 的 R 檢查會擋下任何新的未宣告引用。
+
 ## 去識別化
 
 此快照已移除來源中出現的使用者名稱；未修改規範文件之間的交叉引用，以保留其原始結構與可讀性。分享前仍應依自己的環境檢查路徑、帳號、主機名稱、電子郵件與存取權杖等本機資訊。

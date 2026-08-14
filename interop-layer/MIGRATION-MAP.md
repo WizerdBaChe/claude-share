@@ -49,6 +49,38 @@ mechanism-layer translation. Human operating manual: README.md (中文).
   above when their value justifies the context rent — the raw files
   themselves never ship.
 
+## Disposition classes — why something is absent (added 2026-08-14)
+
+"Do not migrate" above conflated four different causes, and an outside adopter
+had to re-derive the distinction before they could tell which absences were
+decisions and which were just gaps. Naming them costs nothing here and saves the
+next adopter the same cycle. **Machine-readable form:
+`tools/share-manifest.toml` `[[not_shipped]]`; check R of `tools/share_gate.py`
+fails any citation that neither resolves nor carries one of these.**
+
+| Class | Means | Example |
+|---|---|---|
+| `upstream-absent` | the source environment has no such artifact either | MCP servers, connectors — never existed here |
+| `referenced-only` | it exists at the source, but only its INTENT ships; no portable artifact was ever produced | `LABEL-REGISTRY.md` — the citing rules degrade from "use the registered label" to "use a consistent label" |
+| `excluded-by-decision` | a concrete file exists and was deliberately withheld | `skills/asset-vault` — operates a private library at a hardcoded path and delegates authority to a non-public file |
+| `partial` | only part of it ships | `settings.json` — structure and permission example ship as a template; the two absolute paths cannot |
+
+**`referenced-only` is the class that rots.** It is a claim about the source
+made at one moment, and nothing re-tests it. Three hook entries sat in that
+class for a month on the reasoning "machine-bound"; a 2026-08-14 source audit
+found every one of them resolves paths through `Path.home()` /
+`CLAUDE_CONFIG_DIR` with no machine-bound value at all — they had simply never
+been collected, and they now ship under `hooks/`. Re-verify a
+`referenced-only` entry against the source before relying on it;
+`tools/COLLECTION-RULES.md` makes that step mandatory rather than optional.
+
+Every entry states the FALLBACK: what the adopter actually gets instead —
+mechanism, or prose. That is the *Translate per target* rule above — "the loss
+must be visible, not silent" — made checkable rather than remembered. The
+failure it prevents: a rule saying "mechanically enforced"
+while the enforcing file is absent, which is indistinguishable from a working
+mechanism until something goes wrong.
+
 ## Profiles
 
 - **light** — lightweight-task agents. Minimal rent: language, git,

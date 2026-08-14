@@ -9,6 +9,134 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-14 (later) — the source audit: most of it was never collected
+
+The gate above made the repo honest about what it did not ship. The obvious next
+question was whether those absences were decisions. A read-only audit of the
+source environment at commit `182d9793` says mostly not.
+
+**The hooks were never machine-bound.** Three of them sat in the manifest as
+`referenced-only` with the reasoning "machine-bound: settings.json wires them
+with absolute interpreter paths". Checking instead of reasoning: the source has
+**seven** hooks, not the two the environment-guide snapshot names, and every one
+resolves its paths through `Path.home()` / `os.path.expanduser` /
+`CLAUDE_CONFIG_DIR` / `os.environ["TEMP"]`. Zero hardcoded accounts, zero
+absolute paths. They were not withheld; they were never collected. All seven now
+ship under **`hooks/`** — destructive-command deny-list, subagent model cap, the
+two browser-pane guards with their blocklist, the session health nudge, the
+shadow delivery gate, and the rule-load logger — each fail-open, each carrying
+the incident record that produced it.
+
+That flips the outside adopter's headline finding. "Command policy and Lifecycle
+are upstream-referenced-only" was true of the repo and false of the source.
+
+**`settings.json` was half right.** Its permission block is generic and its
+`ask` entries are the interesting half; only the hook-mount paths are
+machine-bound, because Claude Code expands neither `~` nor environment variables
+in a hook command. It ships as `hooks/settings.example.json` with `<PYTHON_EXE>`
+and `<CLAUDE_HOME>` to substitute, the memory-pipeline mount removed rather than
+left pointing at a script this share does not carry, and a `_README` saying
+plainly that a permission list is one operator's threat model, not a
+recommendation.
+
+**`agents/` had never been mentioned at all**, while `claude-ops/ops/20-dispatch.md`
+routes to all eight by name. They ship byte-verbatim. Their bodies were rewritten
+from CLAUDE.md and `ops/` on 2026-08-12 — the third-party lineage in the
+`adopted-from` comment is provenance, not remaining content, which is why the
+threejs-skills standard (no verifiable licence → do not ship) reaches the
+opposite conclusion here.
+
+**`references/PROJECTS.md` was `partial`, not private.** Header and column
+semantics are a generic format spec; the rows are real projects. The format
+ships as `claude-ops/references/PROJECTS.md`, so the two skills and the ops rule
+that cite it finally resolve.
+
+Confirmed genuinely out: `skills/asset-vault` (hardcoded private library —
+`skill-toolkit/` ships 13 of 14, now stated rather than left to be noticed),
+`reports/`, `LABEL-REGISTRY.md`, `telemetry/`, the source environment's own
+`tools/`.
+
+**`tools/COLLECTION-RULES.md`** (new) is the rule this audit earned: a seven-question
+decision table, the closed verdict vocabulary, a never-collect list, and the
+mandatory procedure — record the source SHA, read every byte, diff against the
+source with line endings normalised, declare every edit, run the gate, confirm
+the source is untouched. **Check C** enforces the declarable half: every file
+under a collected root carries its source, a valid status, and one recorded
+reason per edit; an entry pointing at a file that is not there fails too.
+
+Nine files were collected verbatim and four edited — two local session ids and
+three pointers into a private asset library, each listed individually in
+`[[collected]] edits`. Source SHA `182d9793` unchanged, working tree clean; the
+audit was read-only throughout.
+
+The lesson worth keeping is not about hooks. **A disposition is a claim about
+the source, and a claim nobody re-tests decays into a fact.** That one sat
+unexamined for a month and was the largest gap in the repo.
+
+## 2026-08-14 — the publishing gate, and the two failures that forced it
+
+Not a sync from the source environment. This entry is about the repo's own
+share machinery, prompted by an outside adopter's review of commit `23af48b`.
+
+De-identification here had always been decided verbally, per push. That produced
+two opposite failures at once, neither of which we found ourselves:
+
+- **Over-scrub.** `interop-layer/README.md` had 23 real, harmless,
+  repo-relative paths — six distinct filenames — collapsed onto a single
+  `<URL>` token, four of them inside the runnable-command fence. The operator
+  manual could not be followed. Restored from `a8e1b29`, which predates the
+  damage.
+- **Under-declare.** 20+ rule files cite `hooks/model_cap_guard.py`,
+  `hooks/ops_health_nudge.py` and `settings.json` as the MECHANISM enforcing a
+  rule, while the repo ships none of them. An adopter reads "mechanically
+  enforced" and receives prose, with nothing marking the difference. The
+  *Translate per target* rule in `MIGRATION-MAP.md` — "the loss must be visible,
+  not silent" — already forbade this; nothing was checking.
+
+**`tools/`** (new) makes both mechanical. `share_gate.py` runs four fail-closed
+checks over every tracked file and exits 1 on any finding: **L** leak, **P**
+placeholder position, **R** reference disposition, **S** packaging structure.
+It never edits anything, because automatic scrubbing is the failure it exists to
+catch. `sharelib.py` holds the leak patterns as one definition shared with
+`interop-layer/interop.py`, so the two gates cannot drift; the email pattern now
+requires an alphabetic TLD (`three@0.185.1` is an npm specifier) and two
+repo-scope patterns are added — any account's home path, and private network
+hosts. `share-manifest.toml` is the only way past a finding, every entry
+carrying a reason. `test_share_gate.py` replays both incidents plus planted
+personal data against the live gate: 4/4.
+
+Check P is positional rather than a vocabulary: free prose templates
+(`<project name>`, `<title>` — about 160 of them) are none of the gate's
+business, but a token adjacent to a `/`, a token on a runnable line, and a token
+used as a standalone value four or more times in one file each fail. The `<URL>`
+incident trips all three.
+
+**What the gate then found on its own**: `~/.claude/references/PROJECTS.md` and
+`~/.claude/LABEL-REGISTRY.md`, cited by the ops layer and two skills, ship
+nowhere and had never been disclosed. Both now carry a disposition.
+
+**Four disposition classes** replace the single "do not migrate" bucket —
+`upstream-absent`, `referenced-only`, `excluded-by-decision`, `partial` — each
+with the fallback the adopter actually gets. Written into `MIGRATION-MAP.md`
+(prose) and `share-manifest.toml` (machine-readable). The distinction came from
+the adopter's review; naming it here saves the next adopter from re-deriving it.
+
+**Routing.** `README.md` now opens with three lanes instead of a folder table:
+first read, returning read, installing. The returning lane exists because "I
+read this already, it probably hasn't changed" is a documented failure in this
+repo's own history — a target flipped to SYNC OFF inside an unchanged-looking
+registry, the whole method layer was retired, and one same-day "correction" was
+itself wrong and is retracted. It names the four files whose meaning inverts on
+small diffs. **`ADOPTERS.md`** (new) covers where not to clone this repo, what it
+names but does not ship, and the symptom table separating platform permission
+and cache problems from defects here — deliberately without trying to solve
+them. `claude-ops/README.md` gains the source-path → repo-path map that
+`global-claude-md/README.md` already had.
+
+No release tags or digests were added, on purpose: adopters pin a SHA on their
+side, and a version number from here would imply a compatibility promise that
+does not exist. Recorded in `ADOPTERS.md` rather than left unstated.
+
 ## 2026-08-13 — the read-time map layer, ops cap raise, provisional values
 
 One thread from the source, plus two corrections it forced.
