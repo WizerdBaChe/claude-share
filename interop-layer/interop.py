@@ -115,43 +115,18 @@ def parse_blocks():
 
 
 # --- L0: leak gate -----------------------------------------------------------
-# Nothing here hardcodes personal data — that would make THIS file the leak.
-# The account name is read from the running environment instead.
-_USER = Path.home().name
-
-LEAK_PATTERNS = [
-    ("email address", re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")),
-    ("JWT", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}")),
-    ("API key (prefixed)", re.compile(
-        r"\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{16,}"
-        r"|AKIA[0-9A-Z]{12,}|xox[baprs]-[A-Za-z0-9-]{10,})")),
-    ("secret-shaped assignment", re.compile(
-        r"(?i)\b(?:api[_-]?key|secret|password|passwd|token|bearer)\b"
-        r"\s*[:=]\s*['\"]?[A-Za-z0-9_\-/+]{16,}")),
-    # >=32 hex avoids matching git short hashes, which the source stamp needs.
-    ("hash / long hex", re.compile(r"\b[0-9a-fA-F]{32,}\b")),
-    ("account name in a path", re.compile(
-        r"(?i)(?:[A-Z]:[\\/]+Users[\\/]+|/home/|/c/Users/)" + re.escape(_USER)
-        + r"\b")),
-]
-
-
-def scan_text(text, label):
-    """Return [(label, kind, sample)] for anything that must not leave here."""
-    hits = []
-    for kind, rx in LEAK_PATTERNS:
-        for m in rx.finditer(text):
-            s = m.group(0)
-            hits.append((label, kind, s[:12] + "…" if len(s) > 13 else s))
-    return hits
-
-
-def report_leaks(hits):
-    print(f"LEAK CHECK FAILED — {len(hits)} finding(s); nothing was written.\n")
-    for label, kind, sample in hits:
-        print(f"  [{kind}] in {label}: {sample}")
-    print("\nFix the source (interop/portable-core.md) or, for a false "
-          "positive, narrow LEAK_PATTERNS — never bypass the gate.")
+# The patterns themselves live in tools/sharelib.py — ONE definition, two
+# callers (this compiler and the repo-wide tools/share_gate.py). A second copy
+# would drift, and a drifted leak gate is worse than an obvious absent one.
+# Nothing there hardcodes personal data either; the account name is read from
+# the running environment.
+_SHARELIB = Path(__file__).resolve().parent.parent / "tools"
+if not (_SHARELIB / "sharelib.py").exists():
+    sys.exit(f"FATAL: {_SHARELIB / 'sharelib.py'} not found. The leak gate is "
+             f"defined there; refusing to run without it. Copy the tools/ "
+             f"directory next to this script's parent.")
+sys.path.insert(0, str(_SHARELIB))
+from sharelib import scan_text, report_leaks  # noqa: E402
 
 
 def delegation_block(profile):

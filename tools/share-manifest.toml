@@ -1,0 +1,251 @@
+# share-manifest.toml — everything the gate is allowed to let through.
+#
+# Read by tools/share_gate.py and tools/sharelib.py. The gate fails closed:
+# anything not declared here is a finding. That is the point — de-identification
+# and dependency disclosure used to be decided verbally at push time, which
+# produced both over-scrubbing (a real path replaced by an opaque token) and
+# under-declaration (a rule citing a mechanism the repo does not ship).
+#
+# Editing rules:
+#   - Every entry carries a reason. An entry without one does not match.
+#   - Narrow beats broad. `file` is exact; wildcards are not accepted.
+#   - Adding a token to [placeholders] is a claim that a reader can resolve it.
+#     If they cannot, the fix is to restore the real value, not to declare it.
+
+# NOTE: top-level arrays must precede the first [table] — TOML would otherwise
+# read them as keys of that table.
+
+# ---------------------------------------------------------------------------
+# source_env_roots — bare prefixes that mean "an asset of the SOURCE
+# environment", even without the ~/.claude/ prefix. Rule files write
+# `hooks/ops_health_nudge.py`, not the full path; without this list the biggest
+# under-declaration class in the repo stays invisible.
+# ---------------------------------------------------------------------------
+source_env_roots = [
+    "hooks/", "ops/", "skills/", "rules/", "interop/",
+    "projects/", "outputs/", "reports/",
+]
+
+# ---------------------------------------------------------------------------
+# foreign_roots — paths belonging to OTHER platforms. Prose about a target
+# agent's own tree is not a claim about this repo, so check R skips them.
+# ---------------------------------------------------------------------------
+foreign_roots = [
+    "~/.config/opencode/",
+    "~/.codex/",
+    "~/.gemini/",
+    "~/.agents/",
+    "~/AppData/",
+    "node_modules/",
+]
+
+# ---------------------------------------------------------------------------
+# source_map — where an asset of the SOURCE environment (~/.claude/...) lives
+# inside this repo. Used by check R to decide whether a citation resolves.
+# ---------------------------------------------------------------------------
+[source_map]
+"ops/" = "claude-ops/ops/"
+"skills/" = "skill-toolkit/skills/"
+"rules/" = "global-claude-md/rules/"
+"interop/" = "interop-layer/"
+"CLAUDE.md" = "global-claude-md/CLAUDE.md"
+"skill-trigger-dict.md" = "skill-toolkit/skill-trigger-dict.md"
+"PHILOSOPHY.md" = "environment-guide/PHILOSOPHY.md"
+"OPERATOR-GUIDE.md" = "environment-guide/OPERATOR-GUIDE.md"
+"COMMIT-TEMPLATES.md" = "environment-guide/COMMIT-TEMPLATES.md"
+
+# ---------------------------------------------------------------------------
+# not_shipped — assets this repo NAMES but does not contain.
+#
+# disposition (the four classes; do not invent a fifth):
+#   upstream-absent       the source environment has no such artifact
+#   referenced-only       it exists at the source, but only its INTENT ships —
+#                         no portable artifact was ever produced
+#   excluded-by-decision  a concrete file exists and was deliberately withheld
+#   partial               only part of it ships
+#
+# Every entry states the fallback, so an adopter reading a rule that cites it
+# knows what they actually get: mechanism, or prose.
+# ---------------------------------------------------------------------------
+
+[[not_shipped]]
+path = "hooks/model_cap_guard.py"
+disposition = "referenced-only"
+reason = """PreToolUse hook capping the model tier a dispatched subagent may
+use. Machine-bound: it reads the Agent tool's own `model` argument via a
+Claude-Code-specific hook payload, and settings.json wires it with absolute
+interpreter paths. Shipping the file without that wiring would look installable
+and silently do nothing."""
+fallback = """The rule survives as prose (`claude-ops/ops/20-dispatch.md`,
+`environment.md`). You get the cost cap as an expectation, not as enforcement.
+If your platform has a pre-tool hook, wiring one is strictly stronger."""
+
+[[not_shipped]]
+path = "hooks/ops_health_nudge.py"
+disposition = "referenced-only"
+reason = """SessionStart hook: size caps, ghost-rule detection, skill-corpus
+sweep, relaxation-level nudge. Same machine-binding as above, plus it walks
+absolute local skill roots that do not exist on an adopter's machine."""
+fallback = """`claude-ops/ops/40-maintenance.md` states the caps as numbers a
+human or model must check by hand. The checks in
+`claude-ops/ops/references/integrity-sweep.md` are the grep-level equivalent
+and DO ship — run them manually."""
+
+[[not_shipped]]
+path = "hooks/ui_verify_guard.py"
+disposition = "referenced-only"
+reason = """PreToolUse hook denying a browser screenshot before a visibility
+probe has run. Named in the source CLAUDE.md; the share copy already carries an
+inline placeholder note at that bullet."""
+fallback = """`global-claude-md/CLAUDE.md` keeps the rule as prose with an
+explicit note that the original enforces it mechanically. Rules-layer text alone
+recurred unfixed for about a month before enforcement moved to a hook — treat
+the prose version as known-weak."""
+
+[[not_shipped]]
+path = "settings.json"
+disposition = "excluded-by-decision"
+reason = """Permissions, hook mounts, model default. Contains machine-bound
+absolute paths (interpreter + hook locations) and a permission allowlist shaped
+by one operator's threat model. Publishing another environment's permission set
+is worse than publishing nothing: it invites copy-paste of decisions the adopter
+never made."""
+fallback = """`environment-guide/OPERATOR-GUIDE.md` §3.4 and
+`claude-ops/ops/70-evolution.md` describe the SHAPE (what belongs there, how a
+change gets proposed). Write your own file; do not port someone else's."""
+
+[[not_shipped]]
+path = "ops/environment.md"
+disposition = "partial"
+reason = """Ships, but as a point-in-time record of ONE machine — model tiers,
+cost caps, browser-pane facts. `claude-ops/ops/OPS.md` already states that any
+mechanism name inside it is an example to be re-verified, never assumed."""
+fallback = """Read it as a worked example of the format. Re-establish every
+fact in your own environment before relying on it; OPS.md's standing rule is
+'write "couldn't determine" rather than guess'."""
+
+[[not_shipped]]
+path = "projects/"
+disposition = "excluded-by-decision"
+reason = "Per-project memory, session records and ticket ledgers. Personal by definition."
+fallback = "`claude-ops/ops/60-record-templates.md` ships the empty templates."
+
+[[not_shipped]]
+path = "references/PROJECTS.md"
+disposition = "excluded-by-decision"
+reason = """The operator's own index of active projects — names, paths and
+status of real work. Cited by `claude-ops/ops/60-bootstrap.md` and
+`skill-toolkit/skills/project-retrospective/SKILL.md` as the place a project is
+registered. Pure personal inventory; nothing about it generalises."""
+fallback = """Both citations still describe WHAT the index is for (one row per
+project, so a cold session can find prior work). Create your own; the format is
+one line per project and nothing depends on its schema."""
+
+[[not_shipped]]
+path = "LABEL-REGISTRY.md"
+disposition = "referenced-only"
+reason = """Registry of the label vocabulary used across records and audits.
+Cited by `claude-ops/ops/rules-usage-dict.md` and
+`skill-toolkit/skills/config-self-audit/SKILL.md`. Its content is this
+environment's accumulated label set — porting it would impose vocabulary an
+adopter has no reason to share."""
+fallback = """The citing rules work without it; they degrade from 'use the
+registered label' to 'use a consistent label'. If you keep records at scale,
+build your own registry — the rule's value is the single vocabulary, not this
+particular one."""
+
+[[not_shipped]]
+path = "reports/"
+disposition = "excluded-by-decision"
+reason = """Dated audit and investigation reports from the source environment.
+Two are cited by name as evidence (`config-self-audit/references/telemetry.md`,
+`Global_skill_update.md`). They quote real local paths, real tool output and
+real project material, so they cannot be published as-is, and a scrubbed
+version would no longer be evidence."""
+fallback = """The CONCLUSION each report supports is stated inline at every
+citation site — you get the finding without the receipt. Treat those as claims
+made by the source environment, not as verifiable evidence on your side."""
+
+[[not_shipped]]
+path = "outputs/"
+disposition = "excluded-by-decision"
+reason = "Working output directory (share builds, reports). Contents are personal."
+fallback = "None needed — it is a scratch location, not a rule surface."
+
+# ---------------------------------------------------------------------------
+# placeholders — POSITION, not vocabulary.
+#
+# Free prose templates are not the gate's business; there are ~160 of them and
+# policing all of them would be churn without protection. Only two positions
+# are dangerous, because only there can a placeholder be hiding a real value
+# the reader needed:
+#
+#   path_position_ok      the token is adjacent to a `/`  → it stands where a
+#                         resolvable path belongs
+#   command_position_ok   the token is on a line starting with python/git/cd/…
+#                         → the reader is expected to paste it verbatim
+#
+# A token in either position must appear below. That is not a formality: adding
+# one is a statement that a human looked and confirmed the token is a genuine
+# parameter the reader supplies, NOT a real path that a scrubber ate. The
+# `<URL>` incident fails every rule here — 23 positions, one meaningless token,
+# six distinct real filenames underneath.
+#
+# `substitution` is the subset the ADOPTER must replace before use; it inherits
+# path-position permission.
+# ---------------------------------------------------------------------------
+[placeholders]
+
+# The adopter substitutes these with their own environment's values.
+substitution = [
+    "<OS_NAME>", "<SHELL_NAME_AND_VERSION>", "<SECONDARY_SHELL_NAME>",
+    "<LINE_ENDING_CONVENTION>", "<OPS_DIR>", "<PLACEHOLDER>",
+    "<local-workspace>", "<suite-repository>", "<project-repository>",
+    "<global-agent-home>", "<user>", "<hooks path>",
+]
+
+# Genuine template parameters that legitimately sit in a path.
+# Reviewed 2026-08-14; each names what it stands for, which `<URL>` did not.
+path_position_ok = [
+    # record/report naming
+    "<YYYY-MM-DD>", "<YYYYMMDD>", "<date>", "<id>", "<card>", "<type>",
+    "<name>", "<short-name>", "<slug>", "<N>", "<x>",
+    # project / workspace scoping
+    "<project>", "<project-root>", "<dir>", "<copy-dir>",
+    "<archive-batch-dir>", "<local-papers>", "<skill-name>", "<skill>",
+    "<publisher-or-lib>",  # vendor/<publisher-or-lib>/ — the upstream's name
+    # research-domain profiles
+    "<domain>", "<domain_name>", "<that_field>", "<adjacent_field>",
+    "<phenomenon_or_method>", "<terminology>", "<topic>",
+    # citation identifiers
+    "<doi>", "<isbn>",
+    # env-cleanup scan output columns
+    "<file-count>", "<newest-mtime>",
+    # personal data the reader replaces, in de-identification examples
+    "<username>", "<email>",
+]
+
+# Tokens allowed on a runnable line — the reader is expected to fill them in.
+command_position_ok = ["<dir>", "<copy-dir>", "<username>", "<email>", "<hooks path>"]
+
+# ---------------------------------------------------------------------------
+# allow — narrow, reasoned exceptions to the leak patterns. file AND kind must
+# match exactly; `match` further narrows by substring. No wildcards.
+# ---------------------------------------------------------------------------
+
+[[allow]]
+file = "tools/test_share_gate.py"
+kind = "email address"
+# `match` is deliberately the domain alone, not the full address: writing the
+# address here would make this manifest a finding in its own right.
+match = "example.com"
+reason = """The gate's own leak fixture. RFC 2606 reserves example.com precisely
+so it can be written down; if this line ever stops being a finding elsewhere,
+case 3 of the test is what tells us."""
+
+[[allow]]
+file = "tools/test_share_gate.py"
+kind = "absolute home path (any account)"
+match = "somebodyelse"
+reason = """The gate's own leak fixture — an invented account name planted to
+prove the pattern fires on a home path that is not this machine's."""
