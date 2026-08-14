@@ -226,7 +226,11 @@ path_position_ok = [
 ]
 
 # Tokens allowed on a runnable line — the reader is expected to fill them in.
-command_position_ok = ["<dir>", "<copy-dir>", "<username>", "<email>", "<hooks path>"]
+command_position_ok = [
+    "<dir>", "<copy-dir>", "<username>", "<email>", "<hooks path>",
+    # README.md Lane B: only the reader knows which SHA they last read.
+    "<the-sha-you-last-read>",
+]
 
 # ---------------------------------------------------------------------------
 # allow — narrow, reasoned exceptions to the leak patterns. file AND kind must

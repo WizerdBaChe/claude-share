@@ -49,6 +49,29 @@ mechanism-layer translation. Human operating manual: README.md (中文).
   above when their value justifies the context rent — the raw files
   themselves never ship.
 
+## Disposition classes — why something is absent (added 2026-08-14)
+
+"Do not migrate" above conflated four different causes, and an outside adopter
+had to re-derive the distinction before they could tell which absences were
+decisions and which were just gaps. Naming them costs nothing here and saves the
+next adopter the same cycle. **Machine-readable form:
+`tools/share-manifest.toml` `[[not_shipped]]`; check R of `tools/share_gate.py`
+fails any citation that neither resolves nor carries one of these.**
+
+| Class | Means | Example |
+|---|---|---|
+| `upstream-absent` | the source environment has no such artifact either | MCP servers, connectors — never existed here |
+| `referenced-only` | it exists at the source, but only its INTENT ships; no portable artifact was ever produced | `hooks/model_cap_guard.py` — cited as the mechanism behind the model cap, machine-bound, not shipped |
+| `excluded-by-decision` | a concrete file exists and was deliberately withheld | `settings.json` — publishing another operator's permission set invites copy-paste of decisions the adopter never made |
+| `partial` | only part of it ships | `ops/environment.md` — ships as one machine's dated record, not as fact |
+
+Every entry states the FALLBACK: what the adopter actually gets instead —
+mechanism, or prose. That is the *Translate per target* rule above — "the loss
+must be visible, not silent" — made checkable rather than remembered. The
+failure it prevents: a rule saying "mechanically enforced"
+while the enforcing file is absent, which is indistinguishable from a working
+mechanism until something goes wrong.
+
 ## Profiles
 
 - **light** — lightweight-task agents. Minimal rent: language, git,

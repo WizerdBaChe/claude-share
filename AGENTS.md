@@ -12,7 +12,8 @@ shape it has; start with `claude-ops/ops/OPS.md` if you want the rules themselve
 
 | File | What it is |
 |---|---|
-| `README.md` | Orientation: what each share folder holds. |
+| `README.md` | Orientation and three reading lanes: first read, returning read, installing. |
+| `ADOPTERS.md` | What this repo names but does not ship, where not to clone it, and which symptoms belong to the adopter's platform rather than to this repo. |
 | `CHANGELOG.md` | This repo's own sync history — when each share was copied, what changed. |
 | `Global_skill_update.md` | The source environment's evolution log. **Frozen 2026-08-11** — historical reading only; going forward, standing rationale lives in `claude-ops/ops/rule-registry.md` and per-change detail lives in commit messages. Still the single most informative narrative file here. |
 | `AGENTS.md` | This map. |
@@ -91,6 +92,19 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `acceptance-evals.md` | Checks that a port actually landed. |
 
 **Retired 2026-08-11**: the `refs/` method-playbook folder and its compile step. Method depth is now delegated to each target agent's own official docs (`interop.py`'s `delegation_block()`) rather than shipped as curated prose — the trigger never ported, only the content did, and that degraded to "read either always or never". See `MIGRATION-MAP.md` and `README.md` for the reasoning.
+
+## `tools/` — the publishing gate
+
+Run `python tools/share_gate.py` before any push that touches shipped content;
+exit 0 is the release condition.
+
+| File | What it is |
+|---|---|
+| `share_gate.py` | Four fail-closed checks over every tracked file: **L** leak, **P** placeholder position, **R** reference disposition, **S** packaging structure. Never edits anything — automatic scrubbing is the failure it exists to catch. |
+| `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart. |
+| `share-manifest.toml` | The only way past a finding: `[[allow]]` leak exceptions, `[[not_shipped]]` dependency dispositions + fallbacks, the `[placeholders]` position vocabulary, and the source-environment → repo path map. |
+| `test_share_gate.py` | Replays both historical incidents (the `<URL>` over-scrub, an undeclared hook) plus planted personal data against the live gate. |
+| `README.md` | Operator manual (中文): why the layer exists, how to write a manifest entry, how to add a check. |
 
 ## `thinking-notes/` — essays, not rules
 
