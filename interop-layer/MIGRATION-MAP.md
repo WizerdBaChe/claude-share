@@ -51,6 +51,13 @@ mechanism-layer translation. Human operating manual: README.md (中文).
 
 ## Disposition classes — why something is absent (added 2026-08-14)
 
+> **Share-repo-only section.** It is not in the source environment's copy of
+> this file and must not be back-flowed into it: everything it describes —
+> `tools/share-manifest.toml`, `tools/share_gate.py`, `tools/COLLECTION-RULES.md`
+> — is machinery built HERE, for publication. The source has no such layer and
+> would gain nothing but a dangling citation. Declared as an edit on this
+> file's `[[collected]]` entry.
+
 "Do not migrate" above conflated four different causes, and an outside adopter
 had to re-derive the distinction before they could tell which absences were
 decisions and which were just gaps. Naming them costs nothing here and saves the
@@ -83,40 +90,58 @@ mechanism until something goes wrong.
 
 ## Profiles
 
-- **light** — lightweight-task agents. Minimal rent: language, git,
-  evidence, decision charter, pre-existing issues, file hygiene.
-- **full** — goal-oriented agents. light + judgment core: visual
-  acceptance, canonical-method discipline, volatile facts, done
-  definition, approach-wrong signals, scope restraint.
+- **light** — lightweight-task agents. Minimal rent, 8 blocks: preamble,
+  language output, environment/shell, git workflow, evidence over claims,
+  decision charter, pre-existing issues, file hygiene.
+- **full** — goal-oriented agents. light + judgment core, 7 more: visual
+  acceptance, canonical-method discipline, volatile facts, done definition,
+  failure visibility, approach-wrong signals, scope restraint.
 
 Superset rule: light ⊂ full. A block tagged `light` must also carry `full`.
+15 blocks total. These counts are derivable — `parse_blocks()` in `interop.py`
+is the source of truth, and both this file and README.md have carried a wrong
+count before (README said 6-of-13 while the share copy said 8-of-15; neither
+matched the 7-of-15 the parser reports). Re-derive, do not copy the sentence.
 
 ## Target registry (opencode row re-verified 2026-08-11 against the CLI and
-the official docs; the other two are frozen at 2026-07-10 and OFF. Re-verify
-before adding targets — these locations are volatile facts)
+the official docs. Re-verify before adding targets — these locations are
+volatile facts)
 
 | Target | Global rules file | Profile | Mechanism extension points |
 |---|---|---|---|
-| opencode | `~/.config/opencode/AGENTS.md` | light | `~/.config/opencode/opencode.json` — `permission` (allow/ask/deny, per-tool patterns, LAST match wins), `agent(s)/`, `command(s)/`, `skill(s)/`, `plugin` (TS/JS hooks incl. `tool.execute.before`, `permission.ask`), `mcp` |
-| codex | `~/.codex/AGENTS.md` | **SYNC OFF** (was: full) | `~/.codex/config.toml` (sandbox/approval), command hooks (`/hooks` in TUI) |
-| Antigravity | `~/.gemini/AGENTS.md` (cross-tool, >=1.20.3) | **SYNC OFF** (was: full) | `~/.gemini/GEMINI.md` (Antigravity-specific overlay, higher priority); `.agent/rules/` per workspace |
+| opencode | `~/.config/opencode/AGENTS.md` | **full** (was light; user ruling 2026-08-15) | `~/.config/opencode/opencode.json` — `permission` (allow/ask/deny, per-tool patterns, LAST match wins), `agent(s)/`, `command(s)/`, `skill(s)/`, `plugin` (TS/JS hooks incl. `tool.execute.before`, `permission.ask`), `mcp` |
 
 Notes:
-- **codex sync is OFF (user ruling 2026-08-11)**, marked `"disabled"` in
-  `interop.py` TARGETS. Reason: that environment cannot use this one's design
-  wholesale — its ops tree lives at `~/.codex/ops/codex-ops/` and its own
-  `05-authority.md` still specifies a 4-section boundary contract against this
-  side's 5 — and the compiled output was judged not worth overwriting a
-  hand-tuned file with. Codex-side changes are made FROM codex, by hand.
-  `build` will not write there (verified: real `cmd_build()` run against a
-  codex-only target registry left the file's sha256, size and mtime identical
-  and created no `interop-refs/`), and `status` reports it as `[off]` without
-  counting it as drift. Re-enabling is not a one-liner in practice: the file
-  there is now foreign, so `build` would back it up and replace it.
-- **Antigravity sync is OFF (user ruling 2026-08-11)**, marked `"disabled"` in
-  `interop.py` TARGETS: the agent is no longer used. Leftovers from the
-  2026-07-10 build at the target are deliberately not touched from here —
-  removing them is the user's call on that machine, not this repo's.
+- **codex and Antigravity were REMOVED from this registry (user ruling
+  2026-08-15)**, having been sync-off since 2026-08-11. Not "disabled" any
+  more — gone. Both rows had been frozen at their 2026-07-10 verification
+  while the heading directly above them says those locations are volatile
+  facts requiring re-verification, and nobody re-verified them for five weeks;
+  Antigravity's application was confirmed uninstalled 2026-08-13, so its row
+  could not be re-verified at all. The reason originally given for keeping
+  them ("the path + profile + cross-tool caveat are verified facts worth
+  keeping") had inverted: they were no longer verified facts, just a stale
+  snapshot presented as a registry. Re-adding either target goes through the
+  README.md checklist step 1 — look the current paths and extension points up
+  in that platform's own docs — which is both faster and safer than trusting
+  the old values. Removed text preserved at
+  `archive/2026-08-15-interop-targets-removed/`; the last commit containing it
+  is `596cfc0`. The `disabled` mechanism itself stays in `interop.py` (the
+  `[off]` branches of `build`/`status`, and check 12's skip) with no target
+  using it, so a future sync-off ruling does not have to re-add it.
+- **opencode profile is `full` (user ruling 2026-08-15, was `light`)**, set in
+  `interop.py` TARGETS. Two reasons, and the first one is a measurement that
+  INVERTED the birth-budget argument that had picked `light`: no AGENTS.md had
+  ever been deployed, so opencode was falling back to `~/.claude/CLAUDE.md`
+  (~16.5 KB, all of it Claude-Code-specific mechanism a non-Claude worker
+  cannot act on). `full` is 11,129 B / 15 blocks — it costs the worker LESS
+  context than the status quo it replaced, not more, so "light profile 尤其要
+  守小" never applied to this target in the first place. Second: the role
+  changed — opencode is now a dispatch target (free-tier workers execute work
+  cards and run cross-family red-team review), so it needs the preference set
+  the dispatcher assumes it has. Effect on the block set: all 15 blocks now
+  reach a live target; before the ruling the 7 `full`-only ones reached nobody.
+  Standing reason: `ops/rule-registry.md`, key `interop`.
 - **opencode CLI verified working 2026-08-11**: `opencode` v1.18.16 on PATH at
   `~/AppData/Roaming/npm/opencode` (npm global). The Electron desktop app
   (v1.18.11, `AppData/Local/Programs/@opencode-aidesktop/`) is a SEPARATE
@@ -154,27 +179,32 @@ Notes:
   the shadow, not the system. Removing the shadow is part of the measurement,
   not a separate step.
 
-  What exists instead is worse and was invisible: **`~/.agents/skills/` holds a
-  second physical copy of the entire 14-skill corpus** — real directories, not
-  symlinks — frozen at **2026-08-03**. All 14 differ from live. Ten differ by
-  1–7 bytes (line-ending artefacts of the copy); **four are substantively
-  stale**, worst `config-self-audit` at **−7,235 bytes**, missing the whole
-  adoption mode added 2026-08-12. So opencode reads a rotting snapshot, and
-  only 2 of the 14 surface at all.
+  What the shadow was hiding, and why retiring it was the right call rather
+  than refreshing it: **`~/.agents/skills/` held a second physical copy of the
+  entire 14-skill corpus** — real directories, not symlinks — frozen at
+  **2026-08-03**. All 14 differed from live. Ten by 1–7 bytes (line-ending
+  artefacts of the copy); **four substantively**, worst `config-self-audit` at
+  **−7,235 bytes**, missing the whole adoption mode added 2026-08-12. That is a
+  second source of truth for the corpus, which `40-maintenance.md` §2 ("a rule
+  lives in exactly one file") forbids at rule scale and nothing was watching at
+  corpus scale: `ops_health_nudge` check 10 walks `~/.claude/skills/` only, and
+  `config-self-audit` §4 names the plugin roots, not this one.
 
-  This is a second source of truth for the corpus, which `40-maintenance.md` §2
-  ("a rule lives in exactly one file") forbids at rule scale and nothing was
-  watching at corpus scale: `ops_health_nudge` check 10 walks `~/.claude/skills/`
-  only, and `config-self-audit` §4 names the plugin roots, not this one.
-
-  Kill switches (`OPENCODE_DISABLE_EXTERNAL_SKILLS=1`,
-  `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1`) are now the wrong lever: the second
-  would change nothing observable, the first would only hide the 2 stale
-  entries. **The live decision is what to do with `~/.agents/skills/`** — refresh
-  it deliberately, retire it, or keep it frozen on purpose. Open, user's call;
-  routing context in `ops/references/inbound-routing.md`.
-- `~/.gemini/AGENTS.md` is also read by Gemini CLI; keep its content
-  agent-neutral (which portable-core already guarantees).
+  **Current state, re-verified 2026-08-15** (this entry described an open
+  decision for three days after that decision was made — the resolution above
+  was prepended and the superseded tail was left standing, so it is stated once,
+  here, with its proof): `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` is set at the
+  Windows User level, so it survives a reboot rather than living in one shell;
+  `~/.agents/` is empty; the snapshot is at
+  `archive/2026-08-12-agents-skills-retired/`. Proof of life —
+  `opencode debug skill` returns exactly **1** entry, the built-in
+  `customize-opencode`, with zero from `~/.claude/skills/` or `~/.agents/skills/`.
+  Re-run that command before trusting this paragraph; it is the only statement
+  here that a change on either side can silently falsify. Routing context:
+  `ops/references/inbound-routing.md`.
+- Keep every target's content agent-neutral (which portable-core already
+  guarantees): a global rules file at a shared path — `~/.gemini/AGENTS.md`
+  was the known case — can be read by more than the agent it was written for.
 
 ## Leak gate (added 2026-08-11)
 

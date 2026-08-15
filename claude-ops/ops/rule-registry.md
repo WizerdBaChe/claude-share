@@ -146,7 +146,16 @@
   line. Others: ask, default L0. (2026-08-11)
 - why: user ruling. L-numbers measure RELAXATION, not rigor — L0 is strictest.
 - evidence: user directive, recorded this session.
-- history: always-ask (birth) → Opus⇒L1 standing (2026-08-11)
+  Surfaced by `hooks/ops_health_nudge.py` check 11, which fires when a project
+  CLAUDE.md declares no level. It requires the VALUE (`ops-relaxation: L1`),
+  not the key: until 2026-08-15 it tested `"ops-relaxation:" not in text` and
+  the global CLAUDE.md carries that token in prose, so every derived project
+  file passed vacuously and the check had never once fired correctly
+  (`lessons.md` L-016). This repo's copy additionally runs it only when
+  `ops/05-authority.md` is present — taking the hooks lane without the ops
+  lane is supported here, and the key would otherwise be unsatisfiable.
+- history: always-ask (birth) → Opus⇒L1 standing (2026-08-11); check 11
+  made precise 2026-08-15
 - rollback: `ops/05-authority.md` §2; global `CLAUDE.md` relaxation-gate bullet
 
 ### subagent model cost cap
@@ -179,16 +188,30 @@
 ### interop — what crosses to other agents
 - current: **preference ports, method does not.** `portable-core.md` (the
   user's own standing rules) is transplanted; method depth is delegated to the
-  target agent, which reads ITS OWN current official docs. Every payload is
-  leak-scanned before any write. codex sync OFF (maintained by hand from that
-  side); antigravity OFF (unused); opencode is the only live target.
-- why: no documentation can produce the user's own preferences, so those must
-  be carried. Method is the opposite: it needs platform machinery to fire, and
-  copied prose has no trigger.
-- evidence: the retired reference-compile playbooks shipped ~20K whose own
-  recorded degradation was "mechanical trigger → instructed read" — read
-  either always or never. Leak gate verified adversarially: 6/6 planted secret
-  classes aborted the build with nothing written.
+  target agent, which reads ITS OWN current docs. Every payload is leak-scanned
+  before any write. **One target in the registry**, at profile **`full`**
+  (rulings 2026-08-15; it was `light`, alongside two sync-off targets).
+- why: no documentation can produce the user's own preferences; method is the
+  opposite — it needs platform machinery to fire, and copied prose has no
+  trigger. `full` because the target's role changed to dispatch target, and
+  because the birth-budget argument for `light` inverted once measured.
+- evidence: leak gate — 6/6 planted secret classes aborted the build, nothing
+  written. Profile — with nothing deployed the target fell back to reading the
+  source environment's `CLAUDE.md` (~16.5 KB of Claude-only mechanism); `full`
+  is ~11 KB / 15 blocks, so the heavier profile cost the worker less. Port the
+  SHAPE, not the number: whether `full` is cheaper depends on what YOUR target
+  falls back to when nothing is deployed. Measure that before deciding.
+  Surfaced by `hooks/ops_health_nudge.py` check 12, a stat()-only session
+  screen whose only remedy is "run `status`" — why it routes instead of
+  judging, and why the layer needed a caller at all: `lessons.md` L-016.
 - history: reference-compile retired, leak gate added, curation narrowed to
-  CLAUDE.md (all 2026-08-11)
+  CLAUDE.md, two targets sync-OFF (2026-08-11); profile `light` → `full`,
+  check 12 added, eval 8 replaced, and the two sync-off targets REMOVED from
+  the registry outright (2026-08-15 — their rows had been frozen at a
+  2026-07-10 verification under a heading calling those locations volatile, and
+  one of the two applications had since been uninstalled; `lessons.md` L-005
+  hit 3). Removing beats annotating: a registry row reads as a fact sheet.
+- review-when: a second target goes live ("`full` costs less than the fallback"
+  is measured against one target's own fallback and does not transfer), or that
+  target changes the rules-precedence order that makes it the right baseline
 - rollback: `interop-layer/` git history predating the 2026-08-11 retirement

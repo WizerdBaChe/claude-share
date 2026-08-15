@@ -9,6 +9,169 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-15 (later) — the caveat is cleared, and two frozen rows come out
+
+The morning's collection ran against an uncommitted source tree and said so. The
+commits have now landed — eight of them, split by theme — and every collected
+file was re-collected against `df21070`. `tools/share-manifest.toml` names the
+commits; `git show <sha>:<path>` reproduces the bytes.
+
+**Four agent definitions were declaring `verbatim` falsely.** Not drift here —
+drift at the SOURCE: `engineering-backend-architect`, `engineering-frontend-
+developer`, `testing-api-tester` and `testing-qa-engineer` had uncommitted local
+edits when they were last collected. Check C cannot see this (it says outright
+that it cannot compare against a source it does not have), which is exactly the
+"a judgement made once, in prose, decays silently" failure `COLLECTION-RULES.md`
+opens with. The edits turned out to be publishable — `effort: medium` completing
+the roster's cost declarations, and a `file:line` + "label unverified claims"
+output contract for the two testing definitions — so they were committed at the
+source and re-collected. All four are `verbatim` again, and now truthfully.
+
+**Two targets left the registry.** codex and Antigravity had been sync-off since
+2026-08-11 and their rows were still frozen at a 2026-07-10 verification — sitting
+directly under a heading that says those locations are volatile facts requiring
+re-verification. One of the two applications had since been uninstalled, so its
+row could not be re-verified at all. The reason for keeping them ("the path +
+profile + cross-tool caveat are verified facts worth keeping") had quietly
+inverted into its opposite. Both rows are gone; the `disabled` mechanism stays in
+`interop.py` with no target using it, so a future sync-off ruling does not have to
+re-invent it. **The portable half:** a registry row reads as a fact sheet even
+when its cells are quotations, and annotating one does not fix that — removing it
+does. Re-adding a target now has to walk the checklist that re-derives the paths
+from the platform's current docs.
+
+**The rule-registry entry was 60 lines and carrying three narratives that were
+not standing reasons.** A `config-self-audit` pass (owed for a rule-layer change
+and skipped that morning) cut it to 30, dropped a field that was not in the
+schema, and moved the check-11 material to the relaxation-gate entry where
+someone looking for it would actually grep. What came out became
+`claude-ops/ops/lessons.md` **L-016** — *a check that cannot fail is
+indistinguishable from a check that passes*, with the day's three instances
+(predicate satisfied by prose; report nobody invokes; eval whose subject was
+retired) and a three-part fix. **L-005** goes to `hits: 3`: the frozen registry
+rows are its "carried claim reads as an established fact" mechanism again, in its
+highest-risk carrier.
+
+**One declared exception.** Three statements in this repo's frozen records still
+say `light`, or describe the profile as an open question: the `At a glance` table
+in the 2026-08-11 entry below, that entry's `interop-layer/` bullet, and
+`Global_skill_update.md`'s `open:` field. They were correct on the day they were
+written, and rewriting a dated record to match today is tampering — which is why
+the earlier pass deliberately left them alone and added a new entry instead. On
+the requester's instruction they now carry a **forward pointer**, marked inline as
+a later annotation, with the original sentence untouched in every case. The rule
+is unchanged: a frozen record is appended to, never edited. This is the narrow
+exception — a reader landing on a stale row from a search result had no way to
+know a newer entry existed.
+
+## 2026-08-15 — interop-layer joins the provenance regime, and the drift it hid
+
+`interop-layer/` had been collected since 2026-07-10 and declared nowhere. It
+was in no `collected_roots`, so check C never looked at it — and in that gap the
+copy drifted **in both directions at once**: failure 1 (over-scrub) and failure
+2 (under-declare) of `tools/COLLECTION-RULES.md` happening simultaneously, in
+the one directory whose own over-scrub incident (2026-08-07, recorded below) is
+the reason that file exists. Six files re-collected; all six now declared.
+
+**What this repo had that the source did not.** Two things, both kept, both now
+declared as edits so the next diff does not have to re-derive them: `interop.py`
+imports the leak patterns from `tools/sharelib.py` instead of defining them
+inline (one definition, two callers — the source has one caller and no second
+gate to keep in step, so importing there would buy nothing), and
+`MIGRATION-MAP.md` carries a share-repo-only section on disposition classes (it
+documents this repo's manifest and gate; the source has no publication layer and
+would receive four dangling citations). That section now states its own backflow
+exemption inline.
+
+**What this repo had that was simply wrong.** `README.md` carried four
+undeclared edits, all reverted to source. The instructive one is a deleted
+pointer to `OPERATOR-GUIDE.md` — a citation that *resolves in this repo*
+(`source_map` sends it to `environment-guide/OPERATOR-GUIDE.md`), removed for no
+stated reason. That is the same failure in miniature, committed after the rule
+against it was written. Also reverted: `Claude 專屬` generalised to `平台專屬`
+when the specificity was the point; the `archive/interop-refs-2026-08-11/` path
+replaced by a vague phrase while this very file names it openly two entries
+down; and a reordered list carrying no information either way.
+
+**What the source had that never flowed back** — fixed at the source first, then
+re-collected: the `scan` subcommand was missing from the manual's command list
+though it has existed since 2026-08-11; `status` was described as covering
+"three targets" when two are `[off]`; the leak gate was absent from the
+operating invariants; and "known boundaries" still offered reference-compile as
+a live migration path for method content, a claim the same file retires four
+paragraphs earlier.
+
+**Neither side had the block count right.** The manual said 6-of-13 `full`-only
+blocks, this copy said 8-of-15; `parse_blocks()` reports **15 blocks, 8 `light`,
+7 `full`-only**. Both figures were hand-maintained restatements of something
+derivable, so both rotted. Corrected, with a note to re-derive rather than copy
+the sentence.
+
+**opencode moved `light` → `full`** (ruling 2026-08-15). The reasoning is worth
+more than the setting: the birth-budget argument that picked `light` inverted
+once someone measured it. No instruction file had ever been deployed, so the
+target fell back to reading the source's `CLAUDE.md` — ~16.5 KB of
+Claude-Code-specific mechanism a non-Claude worker cannot act on. `full` is
+~11 KB, so the "heavier" profile costs the worker *less* context than the status
+quo it replaced. Port the shape of that argument, not the number: it turns on
+what YOUR target falls back to when nothing is deployed.
+
+**And nothing was watching.** `interop.py status` had been printing `[missing]`
+and exiting 1 since 2026-08-11 — the target was never deployed at all — and
+no one saw it, because nothing ran it. `hooks/ops_health_nudge.py` gains
+**check 12**: a stat()-only session-start screen (artifact absent, not ours, or
+older than its source; curation stamp absent or behind `CLAUDE.md`) whose only
+remedy is "run `status`". It routes to the authority instead of impersonating
+it — mtime is not the commit comparison `status` makes — so a false positive
+costs one cheap command. It reads the target registry out of `interop.py`
+rather than re-declaring it. One synthetic-tree case caught a real bug in the
+check's first draft: a machine with no interop layer at all got a permanent,
+unfixable nudge.
+
+**Check 11 had never once fired correctly.** Found while testing the above. It
+asked `"ops-relaxation:" not in text` — and the global `CLAUDE.md` contains that
+token in prose ("offer to record `ops-relaxation:` in project CLAUDE.md"), so
+every project `CLAUDE.md` derived from it passed vacuously. A source-wide grep
+that day found *no* occurrence of the token anywhere that was a real
+declaration; the check had been silently green since birth. The lesson is
+portable and cheap: **a mention is not a declaration — require the value, not
+the key.** It now demands a level (`ops-relaxation: L1`), accepting a bullet or
+bold wrapper but not the backtick-quoted form that `05-authority.md`'s own
+example uses.
+
+This repo's copy of the hook now carries **one declared specialization**, its
+first: check 11 runs only when `ops/05-authority.md` is present. Taking the
+hooks lane without the ops lane is a supported outcome here — the lanes are
+independent — and such an adopter would otherwise be nagged every session about
+a key defined nowhere they can read and satisfiable by no file they own. A
+permanently-on alarm is the kind nobody reads, and it would train them past the
+other eleven checks. It is not back-flowed: on the source machine the ops layer
+is always present, so the same gate could only mask a real ghost-rule failure,
+which is check 4's job. `hooks/ops_health_nudge.py` moves from `verbatim` to
+`edited` accordingly.
+
+The test suite runs against **either** copy and asserts the opposite outcome per
+edition — 21/21 on both.
+
+`acceptance-evals.md` eval 8 was replaced. It required reading
+`interop-refs/design-protocol.md` — a directory retired 2026-08-11 that exists
+at no target — so it could neither pass nor fail: coverage on paper, measuring
+nothing. It now tests what `delegation_block()` actually promises.
+
+**One gate change.** Check C skipped any file named `README.md` under a
+collected root — a name heuristic for the lane guides written here, which
+misfires on `interop-layer/README.md`, a genuinely collected file that happens
+to share the name. A declared `[[collected]]` entry now overrides the heuristic;
+undeclared READMEs behave exactly as before. Gate clean; 5/5
+`test_share_gate.py` cases unchanged.
+
+**Recorded caveat — CLEARED the same day, see the entry above.** The source
+working tree was dirty at collection time: the edits above were applied but not
+committed, on the requester's instruction, so the bytes here matched a working
+tree rather than commit `86c6b39`. Left standing rather than deleted, because a
+retracted caveat is evidence the record works. The commits landed and everything
+was re-collected against `df21070`.
+
 ## 2026-08-14 (later) — the source audit: most of it was never collected
 
 The gate above made the repo honest about what it did not ship. The obvious next
@@ -252,6 +415,13 @@ the file-by-file breakdown.
 | Root `archive/` | Did not exist | New, gitignored — holds the retired `refs/` playbooks for local traceability, never published |
 | E2 (delivery-gate shadow hook) / E3 (its enforcement phase) | n/a | **Deliberately excluded** — unfinished, user-flagged out of scope; zero mentions anywhere in this repo |
 
+> *Annotation added 2026-08-15, by exception — the row above is left exactly as
+> written.* The `interop-layer targets` row froze a state that has since changed
+> twice: the profile moved `light` → `full`, and codex and Antigravity were
+> removed from the registry outright. The row remains correct **as a record of
+> 2026-08-11**; it is not correct as a description of today. See the 2026-08-15
+> entries at the top of this file.
+
 Prompted by a matching structural pass in the source environment over 2026-08-08
 through 2026-08-11: a chronological audit log that needed permanent-maintenance
 rotation was replaced by a rule-keyed registry, two CLAUDE.md rules were sunk into
@@ -310,6 +480,9 @@ answer is "excluded on request, not merely omitted."
   codex and Antigravity both now sync-off by user ruling; opencode is the sole
   live target, `light` profile, with new notes on its CLI verification and an
   inbound skill-loading dependency this repo does not control.
+  *(Annotation added 2026-08-15, by exception; the sentence above is unchanged.
+  `light` became `full`, and the two sync-off targets were later removed from
+  the registry entirely — see the 2026-08-15 entries.)*
 - **New root `archive/`** (gitignored, mirrors the `scientific-research-guide/archive/`
   convention already in this repo): holds the retired interop `refs/` playbooks,
   kept on disk for traceability, never published.

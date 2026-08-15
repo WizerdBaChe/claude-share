@@ -58,37 +58,32 @@ CURATION_SOURCES = [
 TARGETS = {
     "opencode": {
         "path": Path.home() / ".config" / "opencode" / "AGENTS.md",
-        "profile": "light",
+        # USER RULING 2026-08-15: light -> full. opencode is being promoted from
+        # an occasional side tool to a dispatch target (free-tier workers execute
+        # work cards and run cross-family red-team review), so it now needs the
+        # same preference set the dispatcher assumes. The birth-budget argument
+        # for `light` also inverted once measured: with no AGENTS.md deployed at
+        # all, opencode was falling back to ~/.claude/CLAUDE.md (~16.5 KB of
+        # Claude-Code-specific mechanism the worker cannot use), so `full` costs
+        # the worker LESS context than the status quo it replaces, not more.
+        "profile": "full",
         "note": "global rules; overrides opencode's fallback to ~/.claude/CLAUDE.md",
     },
-    "codex": {
-        "path": Path.home() / ".codex" / "AGENTS.md",
-        "profile": "full",
-        "note": "codex global instructions (CODEX_HOME)",
-        # USER RULING 2026-08-11: push sync to codex is OFF. That environment
-        # cannot use this one's design wholesale (its ops tree lives at
-        # ~/.codex/ops/codex-ops/ and its own 05-authority still specifies a
-        # 4-section boundary contract against this side's 5), and the compiled
-        # output was judged not good enough to overwrite a hand-tuned file.
-        # Codex-side changes are made FROM codex, by hand. `build` will not
-        # write here and `status` will not count it as drift.
-        # To re-enable: delete this line and run `status` first -- the file
-        # there is now foreign, so `build` would back it up and replace it.
-        "disabled": "user ruling 2026-08-11 — maintained from the codex side",
-    },
-    "antigravity": {
-        "path": Path.home() / ".gemini" / "AGENTS.md",
-        "profile": "full",
-        "note": "cross-tool global rules (Antigravity >=1.20.3; also read by Gemini CLI)",
-        # USER RULING 2026-08-11: no longer used, sync removed. The entry stays
-        # (not deleted) because the path + profile + cross-tool caveat are
-        # verified facts worth keeping if this ever comes back.
-        # LEFTOVERS at the target from the 2026-07-10 build, deliberately NOT
-        # touched from here: ~/.gemini/AGENTS.md and ~/.gemini/interop-refs/
-        # {design,judgment,phase-log}-protocol.md. They are another
-        # environment's files; removing them is the user's call.
-        "disabled": "user ruling 2026-08-11 — agent no longer used",
-    },
+    # USER RULING 2026-08-15: `codex` and `antigravity` REMOVED from the
+    # registry (they had been sync-off since 2026-08-11). Both rows were frozen
+    # at their 2026-07-10 verification while this registry's own header says
+    # those locations are volatile facts that must be re-verified -- so what
+    # was being "kept for later" was an unverifiable snapshot, not a fact.
+    # Re-adding either one goes through README.md's "新增一個目標 agent 的
+    # checklist" step 1 (look the paths and extension points up in the
+    # platform's current docs), which is faster than trusting a stale value.
+    # Full text of both entries: archive/2026-08-15-interop-targets-removed/,
+    # or `git show 596cfc0:interop/interop.py`.
+    #
+    # The `disabled` key below is still honoured by cmd_build/cmd_status (the
+    # `[off]` branches) and by ops_health_nudge.py check 12. No target uses it
+    # today; it is kept as the mechanism for recording a future sync-off ruling
+    # without deleting the target outright.
 }
 
 

@@ -112,7 +112,7 @@ update every routing line in the same commit — enumerate by search, not by
 recall. Folded in: 40-maintenance §2 corollary wording now names OPS.md's
 routing table explicitly as an index file.
 
-## L-005 2026-07-30 tags: handoff|carried-claims|verification|docs hits: 2
+## L-005 2026-07-30 tags: handoff|carried-claims|verification|docs|registry|volatile-facts hits: 3
 Context: Prism UAT-R3.5. Two separate defects, one shape. (a) 「batch-1 的未通過
 項尚未在真機複驗」 was true when written, became false when the author ran batch
 2, and survived THREE handoff documents afterwards. (b) 「ResearchGate 那一筆會
@@ -133,6 +133,19 @@ asserts both that every file owing a deferred design carries its anchor and
 that the referenced doc section still exists, so deleting or renumbering the
 design goes red. Prose decays because nothing fails when it does; the durable
 fix is to make something fail.
+Recurrence (hit 3, 2026-08-15, the interop layer's target registry): two target
+rows were verified once and never re-checked. Five weeks later a note was added
+justifying keeping them — "the path + profile + cross-tool caveat are verified
+facts worth keeping if this ever comes back" — which restated the original
+verification flat, in the present tense, one screen below a heading saying these
+locations are volatile facts requiring re-verification. By then one of the two
+applications had been uninstalled, so its row was unverifiable in principle, and
+the note still read as fact. Same shape as (b) above: an inherited assertion in
+the same authoritative voice as the measured ones. Fixed by the durable route
+rather than by re-wording — both rows were REMOVED, so adding a target now has
+to go through the checklist step that re-derives the paths from the platform's
+current docs. Registry rows are the high-risk carrier: a table reads as a fact
+sheet even when its cells are quotations.
 
 ## L-006 2026-07-31 tags: skill-design|review-methodology|checklist|scope-gating hits: 1
 Context: FSM/state-machine verification and cross-boundary contract-drift
@@ -308,6 +321,51 @@ Evidence: session (this project's) | digest unrecorded | locator: instance (1)
 a startup-baseline script's first run vs the preceding turn's estimate table;
 instance (3) an empty rule-load log after reading a file matched by a
 probe-copy scope | captured 2026-08-11
+
+## L-016 2026-08-15 tags: verify|hooks|checks|acceptance-eval|config|silent-failure|self-audit hits: 1
+Context: interop-layer maintenance pass. Three independent checks were examined
+in one day and all three turned out to be incapable of failing. None of them
+was broken in a way anything reports.
+Pitfall: **a check that cannot fail is indistinguishable from a check that
+passes**, and the three ways it happens do not look alike.
+(1) *The predicate is satisfied by the wrong thing.* `ops_health_nudge.py`
+check 11 tested `"ops-relaxation:" not in text`. The global CLAUDE.md contains
+that token in PROSE ("offer to record `ops-relaxation:` in project CLAUDE.md"),
+so every project CLAUDE.md derived from it passed vacuously. An environment-wide
+grep that day found zero real declarations anywhere — the check had never once
+fired correctly since birth, and its silence had been read as health.
+(2) *Nothing invokes it.* `interop.py status` was correct: it printed the target
+as `[missing]` and exited 1 for four days. No hook, no CI, no habit ran it, so
+the target sat undeployed. A report nobody runs is not a check; exit codes only
+matter to a caller.
+(3) *Its subject was retired.* An acceptance eval required the target agent to
+read a playbook directory that had been retired two weeks earlier and exists
+nowhere. It could neither PASS nor FAIL — coverage on paper.
+Why each survived: all three FAILED SILENT, and silence is the healthy signal
+for a nudge, a status report and an unrun eval alike. Nothing in the artifacts
+distinguishes "nothing wrong" from "asked nothing".
+Fix, three parts, each cheap:
+(a) **Test the check against a positive case, not just the corpus.** Every one
+of these dies to one synthetic input that SHOULD trip it. A synthetic-tree suite
+does it: the case named "PROSE MENTION ONLY -> must fire" is the whole lesson in
+one line. Another case in the same suite caught a first-draft bug the same way
+— a machine without the interop layer got a permanent, unfixable nudge.
+(b) **A mention is not a declaration — require the VALUE, not the key.** Any
+check keyed on a token appearing in a document is one prose sentence away from
+vacuous. Match the shape that carries meaning (`ops-relaxation: L1`), anchored
+to line start.
+(c) **A report needs a caller, and the caller must be cheap and automatic.**
+Check 12 is that caller for `status` — a stat()-only session-start screen whose
+only remedy is "run `status`". Note the restraint: it routes to the authority
+rather than re-implementing it, because mtime is not the commit comparison
+`status` makes, so a false positive costs one command instead of a wrong build.
+Detection when you cannot write a test: ask of any check, "what input would make
+this print something?" If the answer takes real thought, or names a file that no
+longer exists, it is already broken.
+Evidence: source-environment session 2026-08-15, interop maintenance | locator
+three commits that day (check 11 precision, check 12 + suite, eval 8 replaced);
+the grep is `grep -rn "ops-relaxation:"` over the whole config tree |
+captured 2026-08-15
 
 ---
 ## Archived (folded into another file, or retired)

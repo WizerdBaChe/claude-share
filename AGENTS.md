@@ -118,6 +118,15 @@ with evidence and attribution grading. Lineage and licence reasoning: `agents/RE
 | `MIGRATION-MAP.md` | What maps to what across agents. |
 | `genesis-prompt.md` | Bootstrapping prompt for a fresh environment. |
 | `acceptance-evals.md` | Checks that a port actually landed. |
+| `README.md` | The source environment's own operating manual for the layer (中文). Collected, not written here — unlike every other `README.md` in this repo. |
+
+**Collected, and declared as such since 2026-08-15**: every file above has a
+`[[collected]]` entry in `tools/share-manifest.toml`, and `interop-layer/` is a
+`collected_root`, so check C now enforces provenance here. Before that it did
+not, and the copy silently drifted in both directions for weeks. Two files carry
+declared, deliberate edits — `interop.py` imports the leak patterns from
+`tools/sharelib.py` instead of defining them inline, and `MIGRATION-MAP.md`
+carries a share-repo-only section on disposition classes. Neither back-flows.
 
 **Retired 2026-08-11**: the `refs/` method-playbook folder and its compile step. Method depth is now delegated to each target agent's own official docs (`interop.py`'s `delegation_block()`) rather than shipped as curated prose — the trigger never ported, only the content did, and that degraded to "read either always or never". See `MIGRATION-MAP.md` and `README.md` for the reasoning.
 

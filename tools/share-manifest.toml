@@ -31,7 +31,14 @@ source_env_roots = [
 # environment. Check C requires a [[collected]] entry for every tracked file
 # under these, and rejects an entry with no matching file.
 # ---------------------------------------------------------------------------
-collected_roots = ["hooks/", "agents/"]
+# 2026-08-15: `interop-layer/` added. It had been collected since 2026-07-10 and
+# declared nowhere, so check C never looked at it — and the copy drifted in BOTH
+# directions without anything noticing: the source gained rulings this repo never
+# received, while this repo grew content (a whole MIGRATION-MAP section, an
+# interop.py refactor) recorded in no edits list at all. That is failure 1 and
+# failure 2 of tools/COLLECTION-RULES.md simultaneously, in the one directory
+# whose over-scrub incident is the reason that file exists.
+collected_roots = ["hooks/", "agents/", "interop-layer/"]
 
 # ---------------------------------------------------------------------------
 # foreign_roots — paths belonging to OTHER platforms. Prose about a target
@@ -113,13 +120,27 @@ one, named here so the count is not silently short."""
 [[not_shipped]]
 path = "tools/"
 disposition = "excluded-by-decision"
-reason = """The source environment's own tooling (project dashboard, usage
-window, memory pipeline). Portable in principle — no machine-bound values — but
-they serve records this share does not carry, so shipping them would add a
-maintenance surface with nothing on the other end. Note: this repo's own
-`tools/` is a different thing, built here, not collected."""
-fallback = """None needed. The rules they support are described in
-`claude-ops/ops/60-bootstrap.md`; build your own if you want the automation."""
+reason = """The source environment's own tooling. Portable in principle — no
+machine-bound values — but most of it serves records this share does not carry,
+so shipping it would add a maintenance surface with nothing on the other end:
+project dashboard, usage window, memory pipeline, skill-routing audit.
+CORRECTED 2026-08-15: that reasoning no longer covers the whole directory. The
+source added `tools/ops-health-test/`, a synthetic-tree test for
+`hooks/ops_health_nudge.py` — a hook this repo DOES ship — so the "nothing on
+the other end" argument does not apply to it. It is still withheld this round,
+for a different and weaker reason: it builds its fixture by pointing
+USERPROFILE at a temp tree, which is a technique worth reading but not a rule,
+and no shipped file cites it. Treat this as the `referenced-only` failure mode
+one level up — a disposition written for a directory keeps applying itself to
+files added later that it never examined. Re-check per file, not per root.
+Note: this repo's own `tools/` is a different thing, built here, not
+collected."""
+fallback = """None needed for the record-serving tools; the rules they support
+are described in `claude-ops/ops/60-bootstrap.md`, so build your own if you want
+the automation. For the hook test specifically the adopter gets nothing, and the
+honest consequence is that `hooks/ops_health_nudge.py` ships with its behaviour
+asserted only in this repo's prose — `tools/test_share_gate.py` is the pattern
+to copy if you want to re-establish it on your side."""
 
 [[not_shipped]]
 path = "telemetry/"
@@ -212,7 +233,10 @@ status = "verbatim"
 [[collected]]
 path = "hooks/ops_health_nudge.py"
 source = "~/.claude/hooks/ops_health_nudge.py"
-status = "verbatim"
+status = "edited"
+edits = [
+  "check 11 (project ops-relaxation level) gated on `ops/05-authority.md` being present. `ops-relaxation` is defined by claude-ops/ops/05-authority.md, and taking the hooks lane without the ops lane is a supported outcome here — the lanes are independent. Ungated, such an adopter is nagged every session about a key defined nowhere they can read and satisfiable by no file they own; a permanently-on alarm is the kind nobody reads, and it would train them past the other eleven checks. NOT back-flowed: the source machine always has the ops layer, so the same gate there could only mask a real ghost-rule failure, which is check 4's job.",
+]
 
 [[collected]]
 path = "hooks/instructions_loaded_logger.py"
@@ -266,6 +290,73 @@ edits = [
   "removed machine-preference keys (autoUpdatesChannel, theme, agentPushNotifEnabled) — no reader should inherit them",
   "added a _README block: this is a template to merge from, and the permission list is one operator's threat model, not a recommendation",
 ]
+
+# --- interop-layer/ -------------------------------------------------------
+# Re-collected 2026-08-15 from the source environment at commit df21070
+# (branch chore/interop-full-profile-2026-08-15). Every byte here is reproducible
+# with `git -C <source> show df21070:interop/<file>` plus the declared edits.
+#
+# This supersedes the caveat recorded earlier the same day, and the caveat is
+# worth keeping visible rather than deleting: the first collection ran against a
+# DIRTY source tree, because the round had been instructed not to commit. That
+# violates COLLECTION-RULES.md step 1, and the record said so instead of glossing
+# it. The commits then landed as
+#   9521c20 eval 8 -> delegation test
+#   f12cf5c opencode light -> full
+#   9480f39 check 11 requires a level
+#   8fab5cb check 12 + its test suite
+#   907796a README / MIGRATION-MAP backflow
+#   62f7ed9 / 596cfc0 agent output contract, effort declarations
+#   79e3517 codex + antigravity removed from the target registry
+#   df21070 registry entry compressed into lessons L-016 / L-005
+# and everything was re-collected against df21070.
+#
+# Source-tree state at this collection, stated precisely because "clean" would be
+# false: `git status --porcelain` is EMPTY for every collected path (interop/,
+# hooks/, agents/, ops/, tools/). It is non-empty for references/ and reports/ —
+# both on COLLECTION-RULES.md's never-collect list, neither reachable from any
+# entry below. That is the honest form of step 1's requirement here.
+
+[[collected]]
+path = "interop-layer/portable-core.md"
+source = "~/.claude/interop/portable-core.md"
+status = "verbatim"
+
+[[collected]]
+path = "interop-layer/acceptance-evals.md"
+source = "~/.claude/interop/acceptance-evals.md"
+status = "verbatim"
+
+[[collected]]
+path = "interop-layer/genesis-prompt.md"
+source = "~/.claude/interop/genesis-prompt.md"
+status = "verbatim"
+
+[[collected]]
+path = "interop-layer/README.md"
+source = "~/.claude/interop/README.md"
+status = "verbatim"
+edits = [
+  "none. Recorded because the previous copy carried four undeclared ones, all now reverted to source: a deleted OPERATOR-GUIDE.md pointer (the citation resolves here via source_map -> environment-guide/OPERATOR-GUIDE.md, so removing it was the over-scrub class this gate exists to catch); 'Claude 專屬' generalised to '平台專屬' (the specificity was the point — portable-core.md excludes Claude-Code-specific mechanism, and this repo ships global-claude-md/ anyway); the archive/interop-refs-2026-08-11/ path replaced by a vague phrase (CHANGELOG.md already names that path openly, so the scrub protected nothing and cost the reader a locator); and a reordered preference list carrying no information either way",
+]
+
+[[collected]]
+path = "interop-layer/MIGRATION-MAP.md"
+source = "~/.claude/interop/MIGRATION-MAP.md"
+status = "edited"
+edits = [
+  "ADDED a share-repo-only section, 'Disposition classes — why something is absent' (~35 lines before ## Profiles). It documents tools/share-manifest.toml, tools/share_gate.py check R and tools/COLLECTION-RULES.md — machinery that exists only here. Exempt from backflow BY CONSTRUCTION: the source environment has no publication layer, so the section would land there as four dangling citations. The section now carries that exemption in its own text, so the next person to diff the two copies does not have to re-derive it.",
+]
+
+[[collected]]
+path = "interop-layer/interop.py"
+source = "~/.claude/interop/interop.py"
+status = "edited"
+edits = [
+  "leak gate: the inline LEAK_PATTERNS list plus scan_text() and report_leaks() (37 lines) replaced by an import from tools/sharelib.py, with a hard exit if that file is absent. Exempt from backflow: sharelib.py exists only in this repo, where the same patterns must serve both this compiler and the repo-wide tools/share_gate.py; the source has exactly one caller and no second gate to keep in step, so importing there would add a dependency to buy nothing. Behaviour is identical — same patterns, same labels, same abort semantics.",
+]
+
+# --- agents/ --------------------------------------------------------------
 
 [[collected]]
 path = "agents/engineering-backend-architect.md"

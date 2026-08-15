@@ -336,8 +336,16 @@ def check_collection(manifest, files, f):
         return
     declared = {e.get("path"): e for e in manifest.get("collected", [])}
 
+    # The README/NOTICE skip is a NAME heuristic for the lane guides written
+    # here (agents/README.md, hooks/README.md) — repo-authored, so they have no
+    # source to declare. It misfires on a file that is genuinely collected and
+    # merely named README.md: interop-layer/README.md is the source's own
+    # operating manual. A declared entry overrides the heuristic, because
+    # declaring a file IS the assertion that it was collected. Undeclared
+    # READMEs behave exactly as before.
     in_scope = {p for p in files if p.startswith(roots)
-                and not p.endswith(("README.md", "NOTICE.md"))}
+                and (p in declared
+                     or not p.endswith(("README.md", "NOTICE.md")))}
 
     for rel in sorted(in_scope):
         e = declared.get(rel)

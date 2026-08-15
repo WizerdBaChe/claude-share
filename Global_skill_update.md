@@ -68,6 +68,11 @@ Read the top block downward for recent work, and the lower block bottom-up.
   enabled on the `light` profile, several `full`-only blocks — including the
   new failure-visibility one — currently ship to nobody; whether opencode
   should take `full` is an open user decision.
+  *(Annotation added 2026-08-15, by exception — this file is frozen and the
+  bullet above is unchanged. That open decision was closed on 2026-08-15: the
+  profile is `full`, the target is deployed, and all 15 blocks now reach it.
+  Standing reason: `claude-ops/ops/rule-registry.md`, key `interop`; the event:
+  `CHANGELOG.md`, the two 2026-08-15 entries.)*
 
 ## [2026-08-11] Codex push-sync disabled + SKILL.md body cap 250 → 300
 

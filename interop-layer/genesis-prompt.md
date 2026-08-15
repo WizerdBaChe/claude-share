@@ -1,10 +1,17 @@
 # Genesis prompt — mechanism-layer translation (run INSIDE the target agent)
 
-Copy the prompt below into a session of the TARGET agent (opencode / codex /
-Antigravity), filling the placeholders. Run it once per target, and again
-whenever `interop.py status` reports the mechanism layer stale (i.e. the
-canonical hooks/permission policies changed in ways the map says are
-portable).
+Copy the prompt below into a session of the TARGET agent, filling the
+placeholders. Run it once per target, and again whenever `interop.py status`
+reports the mechanism layer stale (i.e. the canonical hooks/permission
+policies changed in ways the map says are portable).
+
+As of 2026-08-15 **opencode is the only target in the registry at all**.
+codex (maintained by hand from that side) and Antigravity (retired, the
+application uninstalled) were sync-off from 2026-08-11 and removed outright
+on 2026-08-15 — see `MIGRATION-MAP.md`'s target registry note. Do not run
+this prompt for a target that is not in `interop.py` TARGETS; add it through
+the README.md checklist first, which starts by re-verifying its paths and
+extension points against that platform's current docs.
 
 ---
 
