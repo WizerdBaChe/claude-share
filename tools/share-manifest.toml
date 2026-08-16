@@ -147,10 +147,58 @@ its files still resolve the library by absolute path, so the reasoning holds.
 The same pass removed two further pointers to that library from
 `skill-toolkit/skill-trigger-dict.md`, which had been naming the drive path in
 this skill's own dictionary entry."""
-fallback = """None. `skill-toolkit/` ships 14 of the source's 15 skills; this is
-the missing one, named here so the count is not silently short. (Counts updated
-2026-08-16: the source gained `skill-co-upgrade`, which DOES ship, and every
-'13 of 14' in this repo was stale by one on both sides.)"""
+fallback = """None. `skill-toolkit/` ships 15 of the source's 18 skills; this is
+one of the three missing, named here so the count is not silently short. (Counts
+updated 2026-08-16: the source gained `skill-co-upgrade`, which DOES ship, and
+every '13 of 14' in this repo was stale by one on both sides. Updated again
+2026-08-17: the source had by then gained three more — `mechanism-share-packaging`,
+which now ships, and the two knowledge packs below, which do not — so '14 of 15'
+had been stale for weeks in the same way. The lesson repeating here is that a
+COUNT is a claim about the source, and this file has no check that re-reads the
+source's skill list; only a human or model going and looking does.)"""
+
+[[not_shipped]]
+path = "skills/render-perf"
+disposition = "excluded-by-decision"
+reason = """A knowledge pack: `SKILL.md` carries only triggers and judgement,
+while the knowledge itself lives in `references/` with per-file date / source /
+review-when stamps. Withheld 2026-08-17 on the source owner's ruling, and the
+reason is about STATE rather than about content — the pack is unfinished work.
+Its own posture rule is that a covered branch must cite pack files and an
+uncovered branch must SAY it is uncovered, so shipping a half-stocked pack would
+export a skill whose honest answer to most questions is "no stock here", plus a
+trigger that fires anyway. The references are also user-authored curation, not
+this environment's rules; sharing them is a separate decision from sharing the
+rules layer, and it has not been made.
+The `## 知識包` section of `skill-toolkit/skill-trigger-dict.md` was removed the
+same day rather than left routing to an absent skill — see that file's edits.
+REVIEW-WHEN: the pack reaches the state its owner calls complete, or its
+references start being cited by something this repo does ship."""
+fallback = """None, and nothing here depends on it: no shipped file cites this
+skill except the trigger dictionary, which no longer does. If you want the
+pattern rather than the contents, the shape is worth copying on its own — a
+skill whose body is triggers and routing only, whose knowledge sits in dated
+reference files, and whose standing instruction is to name the gap out loud when
+a question lands on an unstocked branch."""
+
+[[not_shipped]]
+path = "skills/system-design"
+disposition = "excluded-by-decision"
+reason = """The second knowledge pack, withheld 2026-08-17 on the same ruling
+and for the same reason, one degree stronger: it is explicitly early-stage at
+the source — two reference files, a declared low answering priority, and a
+standing instruction to ASK rather than guess when routing is ambiguous. A pack
+that is candid about having almost no stock is useful to its owner, who knows
+what the two files contain; shipped, it would be a trigger surface with nearly
+nothing behind it.
+Same trigger-dictionary amendment as `render-perf` above.
+REVIEW-WHEN: the pack leaves collect-first posture — i.e. when its own SKILL.md
+stops describing itself as early-stage."""
+fallback = """None. For the backend/system-design questions this pack would
+answer, `skill-toolkit/skills/` ships nothing equivalent and this repo does not
+pretend otherwise; `claude-ops/ops/30-judgment.md` R7 covers only when to go
+looking something up rather than answer from memory, which is the meta-rule, not
+the knowledge."""
 
 [[not_shipped]]
 path = "tools/"
@@ -1024,7 +1072,17 @@ source = "~/.claude/skill-trigger-dict.md"
 status = "edited"
 edits = [
   "asset-vault section: two absolute paths to a private asset library and its sibling GUI repo removed. The skill itself is excluded-by-decision (see [[not_shipped]] skills/asset-vault), and its dict entry now says so instead of naming locations the reader cannot reach.",
+  "2026-08-17: the whole `## 知識包 (Knowledge Packs)` section removed — its two entries route to `render-perf` and `system-design`, which do not ship (see their [[not_shipped]] entries). Leaving a router pointing at absent skills is COLLECTION-RULES.md's row-2 inverse, and it is the failure a 2026-08-16 refresh committed at scale with twelve domain-profile rows.",
+  "2026-08-17, the same edit finished properly: the quick-routing table near the end of the file carried its OWN two rows for the same pair (長列表卡頓 -> render-perf, 要不要上 MQ -> system-design), and removing the section left them pointing at nothing. A router is not one place in a file whose whole job is routing — grep the skill NAME, not the section heading. `engineering:system-design` on the plugin list is a different skill and stays.",
 ]
+# REFRESHED 2026-08-17, procedure B, and worth recording why it was even
+# opened: the shipped copy was stale by three skill sections and check V could
+# not say so. V can only assert that an `edited` file DIFFERS from its source —
+# it cannot tell "differs by the declared edits" from "differs because the
+# source moved on", which is the KNOWN LIMIT stated in its own docstring. The
+# staleness surfaced only because this round shipped one of the three skills
+# and went looking for its dictionary entry. Anything `edited` here can be
+# carrying the same debt; the detector is a reader, not the gate.
 
 [[collected]]
 path = "skill-toolkit/skills/ai-coding-guardrails/SKILL.md"
@@ -1168,6 +1226,28 @@ status = "verbatim"
 path = "skill-toolkit/skills/literature-search-extract/references/search-sources.md"
 source = "~/.claude/skills/literature-search-extract/references/search-sources.md"
 status = "verbatim"
+
+# mechanism-share-packaging — collected 2026-08-17 (user ruling, red-team
+# round). Written the day after the skill's own second live run, which is why
+# the count claims elsewhere in this file moved: the source had gained three
+# skills since the last skill sweep and none of them was declared here.
+[[collected]]
+path = "skill-toolkit/skills/mechanism-share-packaging/SKILL.md"
+source = "~/.claude/skills/mechanism-share-packaging/SKILL.md"
+status = "verbatim"
+
+[[collected]]
+path = "skill-toolkit/skills/mechanism-share-packaging/references/governance-starter.md"
+source = "~/.claude/skills/mechanism-share-packaging/references/governance-starter.md"
+status = "verbatim"
+
+[[collected]]
+path = "skill-toolkit/skills/mechanism-share-packaging/evals/evals.json"
+source = "~/.claude/skills/mechanism-share-packaging/evals/evals.json"
+status = "edited"
+edits = [
+  "run_info and eval 1's prompt, 2 places: the share repo's absolute path on a non-system drive -> `<share-repo>`. It is this repo's own location, which the reader supplies for themselves; every other detail of the run — dates, counts, finding totals, the source SHA — is kept, because those are what make the eval checkable",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/motion-design/NOTICE.md"
@@ -1583,6 +1663,12 @@ path_position_ok = [
     "<sid>", "<session-id>",
     # project / workspace scoping
     "<project>", "<project-root>", "<dir>", "<copy-dir>",
+    # mechanism-share-packaging/references/governance-starter.md (2026-08-17):
+    # the seed manifest's own example rows. `~/<source path>` is where the
+    # adopter writes the path INSIDE their source environment — a genuine
+    # parameter, and the file would be unusable with a real one substituted in,
+    # since the whole point is that the reader has a different source.
+    "<source path>",
     "<archive-batch-dir>", "<local-papers>", "<skill-name>", "<skill>",
     "<publisher-or-lib>",  # vendor/<publisher-or-lib>/ — the upstream's name
     # research-domain profiles
