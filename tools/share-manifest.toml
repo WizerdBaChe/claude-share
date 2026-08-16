@@ -49,6 +49,10 @@ collected_roots = [
     # never looked" list above. Holds one collected file (preserve.py) beside
     # two repo-authored docs (README.md, ACCEPTANCE.md — both name-exempt).
     "compact-recovery/",
+    # 2026-08-17 (red-team round): same discipline, declared on creation day.
+    # Seven collected files (five .py, two prompt templates) beside the same
+    # two name-exempt authored docs.
+    "red-team/",
 ]
 
 # ---------------------------------------------------------------------------
@@ -206,7 +210,7 @@ patterns on 2026-08-16."""
 
 [[not_shipped]]
 path = "tools/extdispatch/"
-disposition = "excluded-by-decision"
+disposition = "partial"
 reason = """NEW 2026-08-16, and written per-file rather than inherited from the
 `tools/` entry below — which is exactly what that entry's own 2026-08-15
 correction demands. The source's external-dispatch layer: a dispatcher that
@@ -221,14 +225,48 @@ disqualifying and none of them is incidental:
     run against real work — the CONTENT of dispatched work, which the source's
     own .gitignore singles out as the one class that must never accumulate.
 A scrubbed copy would not be the evidence the reports cite, and a copy without
-the allowlist would be a gate with its policy removed."""
+the allowlist would be a gate with its policy removed.
+NARROWED 2026-08-17 (red-team round, user ruling), disposition
+`excluded-by-decision` -> `partial`. The three disqualifying classes above are
+still true and still not shipped; what was wrong was applying them to the whole
+directory. Re-checked per file, as this manifest keeps telling itself to:
+  · SHIPS as `red-team/` — `score_redteam.py`, `jsonspan.py`,
+    `redteam_verify.py`, `test_score_anchor.py`, `test_parser_rulers.py`,
+    `prompts/redteam-v2.txt`, `prompts/redteam-v2.1.txt`. None of them touches
+    the allowlist, the telemetry or the raw peer output; four are stdlib-only
+    and machine-independent by inspection, and the fifth was made so by a
+    single declared edit. Each has a [[collected]] entry below.
+  · STAYS OUT, unchanged — `extdispatch.py` (the dispatcher itself: provider
+    registry, key handling, the allowlist gate), `allowlist.txt`, `grants.json`,
+    `breaker-state.json`, `daily-count.json`, every `*.jsonl` telemetry and
+    ratecheck log, `audit/`, `spool/`, `interop-out/`, `peer-experiments-raw/`,
+    `probe-workspace/`, and the experiment/regrade scripts that only read those
+    records (`peer_experiments.py`, `export_peer_rows.py`, `rate_audit.py`,
+    `ratecheck.py`, `catprobe.py`, `regrade_*.py`, `test_peer_strip.py`,
+    `test_ratecheck_stall.py`, `test_route_shadow.py`, and the three non-review
+    prompts).
+  · `prompts/redteam-v2.1-kys.txt` — excluded, and worth naming because it is
+    the only file withheld for redundancy rather than for content. It is
+    byte-identical to `redteam-v2.1.txt` apart from a second private project's
+    four file paths in its SCOPE block; once templated the two files are the
+    same file. Shipping both would publish a second private project's tree
+    shape to say nothing new.
+The 2026-08-16 reasoning was not wrong about what it examined — it was written
+for the dispatcher and its evidence, and then applied to a directory that also
+holds the acceptance layer. That is the `tools/` entry's own 2026-08-15 lesson
+recurring one level down: a disposition written for a root keeps applying
+itself to files it never examined."""
 fallback = """The DESIGN ships and is the transferable part:
 `claude-ops/ops/references/external-dispatch.md` carries the prompt shape
 (format-first, evidence anchors, licensing the empty answer), the acceptance
 layers, and the failure signatures — all of it stated as measurements with their
-sample sizes. You get the method and the numbers, not the harness. Build your
-own dispatcher against your own tier; nothing in that reference depends on this
-one existing."""
+sample sizes.
+SINCE 2026-08-17 the adopter also gets the acceptance layers as RUNNING CODE in
+`red-team/`, not only as prose: layers 2-4 execute with no dispatcher at all,
+and layer 5 takes one by name through a two-symbol contract. What is still
+missing is only the transport — you supply ~20 lines against your own tier.
+`red-team/README.md` carries the skeleton and `red-team/ACCEPTANCE.md` marks
+which checks that leaves open in your environment."""
 
 [[not_shipped]]
 path = "hooks/extdispatch_entrypoint_guard.py"
@@ -239,7 +277,11 @@ local session API, and its denial text routes the caller to
 `~/.claude/tools/extdispatch/extdispatch.py` — the entry point excluded above.
 An adopter installing it gets their `opencode` blocked and pointed at a script
 they do not have. `hooks/settings.example.json` already dropped a mount for the
-same reason: a mount pointing at a missing file is worse than an absent one."""
+same reason: a mount pointing at a missing file is worse than an absent one.
+RE-CHECKED 2026-08-17 (red-team round), because the entry it depends on was
+narrowed to `partial` that day: the dependency is on `extdispatch.py`
+specifically, which is one of the files that STAYED out, so this disposition is
+unaffected. Recorded rather than assumed — the entry above changed under it."""
 fallback = """None, and the honest consequence is that the single-gated-entry-
 point pattern ships as prose only. The pattern is worth copying if you dispatch
 outward: one shell entry that runs the gates, everything else denied, because a
@@ -256,7 +298,10 @@ the external tier. Same dependency, one level softer: it reads
 fails open and every row reads `would_route: subagent`, so it does not break
 anything — it just measures nothing, forever, while looking like a live
 control. That is the `referenced-only` failure this manifest keeps warning
-about, and shipping it would be committing it."""
+about, and shipping it would be committing it.
+RE-CHECKED 2026-08-17 (red-team round): `allowlist.txt` is named explicitly in
+the narrowed entry above as one of the files that stayed out — it IS the policy
+artifact — so this disposition holds unchanged."""
 fallback = """None. The rule it measures (`20-dispatch.md` §4a) ships; the
 measurement does not. If you build the layer, `hooks/delivery_gate_shadow.py`
 and `hooks/context_runway_shadow.py` both ship and are the house pattern for
@@ -584,6 +629,68 @@ source = "~/.claude/tools/memory-pipeline/preserve.py"
 status = "edited"
 edits = [
   "docstring, 3 places: dropped pointers to design docs that do not ship — a PIM section reference in the title line, 'see docs/PIM.md' on the invariants list, and 'see repo .gitignore' on INV-7 -> 'keep them gitignored'; every invariant id and its meaning is kept",
+]
+
+# --- red-team/ ------------------------------------------------------------
+# Collected 2026-08-17 from the source at commit d500be3, first collection
+# (procedure A) for all seven. The second mechanism export after
+# compact-recovery, and the second time a [[not_shipped]] directory entry had
+# to be narrowed rather than kept: `tools/extdispatch/` below is now `partial`.
+#
+# What ships is the ACCEPTANCE side of external red-team review — the prompt
+# shape, the mechanical anchor/scope gate, and the adversarial layer. What does
+# not ship is the dispatcher that sends the prompt, for the reasons recorded in
+# that entry. The split is deliberate: the gate is a property of the method and
+# runs anywhere; the dispatcher is a property of one machine's provider tier.
+
+[[collected]]
+path = "red-team/jsonspan.py"
+source = "~/.claude/tools/extdispatch/jsonspan.py"
+status = "verbatim"
+
+[[collected]]
+path = "red-team/score_redteam.py"
+source = "~/.claude/tools/extdispatch/score_redteam.py"
+status = "edited"
+edits = [
+  "docstring Usage line: the `--repo` example was an absolute path on a non-system drive (a private work root) -> `--repo <project-root>`. Non-system-drive absolutes are a scrub target since 2026-08-16; the token is already declared under [placeholders] path_position_ok",
+  "extract_findings() comment: the open-norm question pointed at `reports/<dated-report>.md` in the source's private report tree -> re-pointed at this share's own README.md section. The question itself is kept verbatim; only the pointer changed, per the rule that a shipped copy may not cite what does not ship",
+]
+
+[[collected]]
+path = "red-team/redteam_verify.py"
+source = "~/.claude/tools/extdispatch/redteam_verify.py"
+status = "edited"
+edits = [
+  "docstring Usage line: absolute second-drive `--repo` path -> `<project-root>`, and the two live model keys -> `<model-a>`/`<model-b>`; added the new `--dispatcher` flag to the same line",
+  "THE ONE BEHAVIOURAL EDIT of this round, and it is here because the alternative was shipping a file that ImportErrors on line 41: `import extdispatch as ed` (module-scope, hard dependency on the dispatcher this repo does not ship) -> a `load_dispatcher(name)` function that imports by NAME, defaulting to `extdispatch` so the source's own invocation is unchanged, and refuses with a named contract (MODELS + dispatch()) when the module is absent or incomplete. The refusal happens before any grant is spent",
+  "consequence of the above, argparse: `--author`/`--verifier` lost `choices=sorted(ed.MODELS)` (it needs the dispatcher at parser-build time) and gained an explicit membership check against the loaded dispatcher's MODELS, printing the same list. Same rejection, same exit code 2, moved four lines later",
+]
+
+[[collected]]
+path = "red-team/test_score_anchor.py"
+source = "~/.claude/tools/extdispatch/test_score_anchor.py"
+status = "verbatim"
+
+[[collected]]
+path = "red-team/test_parser_rulers.py"
+source = "~/.claude/tools/extdispatch/test_parser_rulers.py"
+status = "verbatim"
+
+[[collected]]
+path = "red-team/prompts/redteam-v2.txt"
+source = "~/.claude/tools/extdispatch/prompts/redteam-v2.txt"
+status = "template"
+edits = [
+  "TASK line: the reviewed commit's real sha -> `<COMMIT_SHA>`. The sha is a pointer into a private repository, and it is the one value every adopter must supply; structure, wording and the four rules above it are untouched",
+]
+
+[[collected]]
+path = "red-team/prompts/redteam-v2.1.txt"
+source = "~/.claude/tools/extdispatch/prompts/redteam-v2.1.txt"
+status = "template"
+edits = [
+  "SCOPE block: the four repo-relative paths of a private project -> `<FILE_UNDER_REVIEW_1..4>`. The block's SHAPE is the finding — naming the files is what stopped scope drift in the 2026-08-16 measurement — so the four lines are kept as four lines rather than collapsed onto one token, which would be the over-scrub failure this manifest is named after",
 ]
 
 # --- interop-layer/ -------------------------------------------------------

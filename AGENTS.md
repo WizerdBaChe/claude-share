@@ -41,7 +41,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | `rule-registry.md` | **New 2026-08-11.** Keyed by RULE, not by date: why each size cap, standing ruling, and mechanism holds its current value, plus its value history. Replaces the old chronological-rotation model. |
 | `rules-usage-dict.md` | Index: which layer owns what, record-schema registry. Agent-roster routing itself moved to `20-dispatch.md` — this file keeps only a pointer. |
 | `../references/PROJECTS.md` | **New 2026-08-14.** The project-index format the ops layer and two skills cite — header and column semantics only; the source environment's rows are its own inventory and do not ship. |
-| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), `project-map.md` (the read-time layer behind `60-bootstrap.md` §H), and **new 2026-08-16** `external-dispatch.md` (the detail behind `20-dispatch.md` §4a — measured prompt shape, acceptance layers, failure signatures; the dispatcher itself is not shipped) and `skill-trigger-classes.md` (why a skill's zero fire count is or is not a defect). |
+| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), `project-map.md` (the read-time layer behind `60-bootstrap.md` §H), and **new 2026-08-16** `external-dispatch.md` (the detail behind `20-dispatch.md` §4a — measured prompt shape, acceptance layers, failure signatures; the dispatcher itself is not shipped, but since 2026-08-17 its acceptance layers ship as running code in `red-team/`) and `skill-trigger-classes.md` (why a skill's zero fire count is or is not a defect). |
 | `README.md` | Folder note. |
 
 ## `global-claude-md/` — the always-loaded preferences file
@@ -117,6 +117,32 @@ would re-inflate context — a wholesale re-read — is structurally denied.
 | `ACCEPTANCE.md` | Seven-item real-fire checklist (中文), plus what the source environment already verified on 2026-08-16 — including a full-chain live compaction. |
 | `preserve.py` | Transcript archiver + mechanical digest-card generator (stdlib-only, HOME-relative). The one file of the source's 279-file memory-pipeline product that ships; the rest stays not-shipped — see the manifest. |
 
+## `red-team/` — machine-checkable adversarial review
+
+New 2026-08-17. The second mechanism export, and the answer to a question
+`agents/engineering-code-reviewer.md` alone does not close: when a model says "there is a
+bug here", what makes that claim expensive to fabricate? A prompt shape, a
+six-layer acceptance ladder, and the four layers of it that are code. Layers
+2–4 run with no model and no dispatcher at all; layer 5 takes one by name.
+
+| File | What it is |
+|---|---|
+| `README.md` | The operating mode (中文): the ladder as a data-flow diagram, the measurement behind each design choice, three ways to wire it (local subagent / external tier / hybrid), the dispatcher contract, a tunables table, per-part failure modes, de-identification notes. |
+| `ACCEPTANCE.md` | Two-part checklist (中文): section A is mechanical and blind-runnable with no model — five items, all re-verified on this copy 2026-08-17; section B needs a real model and stays open in the adopter's environment, with the source's own numbers beside each item. |
+| `score_redteam.py` | Layers 2–4: structure, anchor, scope, spot-check. Separates a CITATION error (verbatim quote, wrong line — repaired) from a FABRICATION (quote appears nowhere — voids the report). Stdlib-only. |
+| `jsonspan.py` | The one JSON-span extractor for the whole layer. Exists because the same scanner had been written three times and the copy in the *structure* gate was the one never fixed. |
+| `redteam_verify.py` | Layer 5: one refuter per finding, verifier ≠ author enforced. Three outcomes, and `inconclusive` is load-bearing — tool failure is not evidence about a claim. The only file here with a behavioural share edit: it loads a dispatcher by name instead of importing the source's. |
+| `test_score_anchor.py` | Ten cases. Two of them are the regression guard for the day this layer was *loosened* — an invented quote must still void the report. |
+| `test_parser_rulers.py` | Eight cases mapping where a greedy `{.*}` regex fails and a balanced scan does not. |
+| `prompts/redteam-v2.txt`, `prompts/redteam-v2.1.txt` | The prompt as an instrument: format instruction first, evidence anchor per claim, explicit file scope, and a written licence to return `[]`. Templates — `<COMMIT_SHA>` and four `<FILE_UNDER_REVIEW_n>` are yours to fill. |
+
+The dispatcher that sends these prompts is still **not** here, and the
+`tools/extdispatch/` manifest entry — narrowed from `excluded-by-decision` to
+`partial` on the day this folder was born — says per file what stayed behind
+and why. The method-level write-up remains
+`claude-ops/ops/references/external-dispatch.md`; this folder is that document's
+executable half.
+
 ## `agents/` — subagent definitions
 
 Collected 2026-08-14, byte-verbatim. The eight agent types `claude-ops/ops/20-dispatch.md`
@@ -157,12 +183,13 @@ truncation case is restated against that gate's return shape, and
 `MIGRATION-MAP.md` carries a share-repo-only section on disposition classes.
 None of the three back-flows.
 
-**As of 2026-08-16 that regime covers all eight collected roots**, not three.
+**As of 2026-08-16 that regime covers every collected root**, not three.
 `claude-ops/`, `global-claude-md/`, `environment-guide/`, `skill-toolkit/` and
 `thinking-notes/` joined it — 118 further files, each declaring its source path
-and every edit. If you are looking for what this repo changed on the way in from
-the source environment, `[[collected]] edits` is now the complete answer rather
-than a partial one.
+and every edit. `red-team/` was declared a root on its creation day, 2026-08-17,
+bringing the list to nine. If you are looking for what this repo changed on the
+way in from the source environment, `[[collected]] edits` is now the complete
+answer rather than a partial one.
 
 **Retired 2026-08-11**: the `refs/` method-playbook folder and its compile step. Method depth is now delegated to each target agent's own official docs (`interop.py`'s `delegation_block()`) rather than shipped as curated prose — the trigger never ported, only the content did, and that degraded to "read either always or never". See `MIGRATION-MAP.md` and `README.md` for the reasoning.
 
