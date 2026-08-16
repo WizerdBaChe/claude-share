@@ -13,10 +13,14 @@
     "on is worse than no allowlist. The `ask` entries are the important half —",
     "they make the config edit itself a confirmed action.",
     "",
-    "Three of the source environment's mounts are omitted rather than left",
-    "pointing at files you do not have: a SessionEnd memory-pipeline hook, and",
-    "two external-dispatch hooks that gate a dispatcher this share does not",
-    "ship. All three are declared in tools/share-manifest.toml with the reason.",
+    "Two of the source environment's mounts are omitted rather than left",
+    "pointing at files you do not have: the external-dispatch hooks that gate a",
+    "dispatcher this share does not ship. Both are declared in",
+    "tools/share-manifest.toml with the reason. A third omission ended",
+    "2026-08-16: the SessionEnd memory-pipeline script now ships as",
+    "compact-recovery/preserve.py, but its mount stays out of this file — it",
+    "points outside hooks/, and this template mounts hooks/ and nothing else;",
+    "the optional SessionEnd block lives in compact-recovery/README.md.",
     "Every hook in hooks/ IS mounted here — if you find one that is not, that is",
     "a defect in this template, not a recommendation.",
     "",
@@ -111,6 +115,21 @@
             "timeout": 5
           }
         ]
+      },
+      {
+        "_comment": [
+          "compact-recovery trio, part 1 of 3 (overview: compact-recovery/README.md).",
+          "Denies an unbounded Read of large session-transcript files; the deny",
+          "message itself states the compliant grep-then-windowed-read path."
+        ],
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/transcript_read_guard.py\"",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -143,6 +162,26 @@
         ]
       }
     ],
+    "PreCompact": [
+      {
+        "_comment": [
+          "compact-recovery trio, part 2 of 3. Before the summary lands, writes a",
+          "bookmark (transcript path, line count, trigger) that the SessionStart",
+          "pointer card reads, then best-effort refreshes digest cards via",
+          "<CLAUDE_HOME>/tools/memory-pipeline/preserve.py (ships in",
+          "compact-recovery/; skip installing it and the hook silently skips the",
+          "refresh — the bookmark still works)."
+        ],
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/compact_bookmark.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -151,6 +190,21 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ops_health_nudge.py\"",
             "timeout": 3
+          }
+        ]
+      },
+      {
+        "_comment": [
+          "compact-recovery trio, part 3 of 3. Matcher 'compact' fires after both",
+          "manual and auto compaction; SessionStart stdout is injected into the",
+          "fresh context, which is what lets the pointer card reach the model."
+        ],
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/compact_pointer.py\"",
+            "timeout": 10
           }
         ]
       }

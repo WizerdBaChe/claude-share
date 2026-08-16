@@ -633,6 +633,50 @@
   graduation decision, and it judges the WORDING at that moment, not the band).
 - rollback: unregister `UserPromptSubmit` from `settings.json`.
 
+### compact recovery (`hooks/compact_bookmark.py` + `compact_pointer.py` + `transcript_read_guard.py`)
+- current: PreCompact("") writes `cache/compact-recovery/<sid>.json` (transcript
+  path, newline count, trigger, ts — no jsonl parsing per the standing
+  format-unstable ruling) then runs memory-pipeline `preserve.py` (<=45s) so the
+  LIVE session's digest exists at recall time; SessionStart("compact") injects a
+  ~130-token pointer card (digest-first ladder + the two recall triggers);
+  PreToolUse(Read) denies reads under `projects/` + `memory-archive/` + any
+  configured mirror root when size > 128KB AND (no `limit` or
+  limit > 120 lines). Grep untouched. (2026-08-16)
+- why: post-compact recall must stay ON-DEMAND — compaction saves resident
+  tokens, recall spends one-off tokens, and the only move that re-inflates
+  context is a wholesale re-read, removed structurally at its pressure moment
+  (same argument as ui_verify_guard: enforced, not recalled). User rulings
+  2026-08-16: D1 build, D2 hard guard, D3 digest refresh at compact.
+- evidence: PROVISIONAL — the 128KB gate and 120-line window are guesses; a
+  denial that blocked a LEGITIMATE whole-file need is the settling observation,
+  append such cases HERE. Measured: digest = 1.1% of raw (50,849B/4,448,760B,
+  one real session); 19/19 real-data acceptance runs 2026-08-16 including
+  live-session digest refresh proof (mtime_age 0s). Guard REAL-fired the same
+  day: live PreToolUse deny on a 4.2MB corpus read in the authoring session —
+  hooks apply mid-session, no restart. FULL-CHAIN REAL FIRE 2026-08-16 21:59
+  (manual /compact in the authoring session): bookmark written (manual,
+  160 lines/0.87MB) -> card injected post-compact naming the exact region
+  (lines 1-160, values matching the bookmark) -> digest fresh at card time ->
+  recall ladder walked for real (digest hit for one fact; a truncation-cut
+  fact escalated per policy to a transcript-region Grep, line 158) -> guard
+  deny re-confirmed POST-compact (guard survives compaction). One observation:
+  digest mtime 22:02 postdates the 45s-capped chained preserve run, so a
+  second preserve invocation also fired during the compact turnover; the D3
+  guarantee held either way (chained-run sufficiency was separately proven
+  pre-compact, mtime_age 0s). Still unobserved: the auto-compact trigger case
+  (card should read trigger=auto).
+- history: born 2026-08-16. Compact on-disk geometry evidence (boundary
+  appended in-place, session id retained) recorded the same day in
+  a local memory note, correcting its first draft.
+- review-when: a CC update changes compact geometry (recheck: compact_boundary
+  line numbers in `projects/*/*.jsonl` — mid-file = unchanged) or
+  PreCompact/SessionStart stdin fields; the mirror root moves with
+  the scheduled copy job that feeds it; a recurring Bash `cat`/`Get-Content`
+  bypass on corpus files is the event that extends guard coverage to the shell
+  path.
+- rollback: unregister the three hooks from `settings.json` (single merge
+  commit on `feat/compact-recovery`).
+
 ### in-app Browser pane — what may be loaded into it
 - current: **ALLOWLIST** (2026-08-14, user ruling). Loopback hosts (`localhost`,
   `127.0.0.1`, `::1`, `*.localhost`, `0.0.0.0`) are allowed by the hook itself;

@@ -9,6 +9,60 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-16 (fourth) — the compaction learns the way back, and the share learns to carry it
+
+New share: `compact-recovery/` — the post-compact recall operating mode, shared
+the same day it passed a full-chain LIVE acceptance at the source (a real
+`/compact`: bookmark written, pointer card injected naming the exact pre-compact
+region, recall ladder walked for a fact the summary dropped, and the read guard
+still firing POST-compact).
+
+**What came in.** Three hooks into `hooks/` (`compact_bookmark.py`,
+`compact_pointer.py`, `transcript_read_guard.py`) and the digest generator
+`preserve.py` into `compact-recovery/`, collected at source commit `519342c`;
+`README.md` (operating mode: event-pair bridge, recall ladder, token economics,
+install incl. the optional SessionEnd mount, tunables, platform-contract
+re-check recipes) and `ACCEPTANCE.md` (seven-item real-fire checklist) authored
+here. Every edit is the usual de-identification class, declared per file: one
+project name + session id, one scheduled-task name, one second-drive mirror
+root, and pointers into trees that do not ship (memory/, the source's rule
+registry, PIM design docs). Measurements, dates and ruling ids all kept.
+
+**Dispositions corrected, not deleted.** `tools/memory-pipeline/` ("a separate
+product… that decision has not been made") is now PARTIALLY superseded: the
+user made the decision for exactly one of its 279 files — `preserve.py` ships,
+the vendored search stack stays out. The settings.example.json entry's
+"SessionEnd script is not part of this share" reason is amended the same way:
+the script now ships, and the mount still stays out of the template because it
+would point outside hooks/ — the optional block lives in
+`compact-recovery/README.md`, keeping the template's "mounts hooks/ and nothing
+else" invariant intact.
+
+**Counts.** `hooks/` went nine -> twelve; the mounting template gained a
+PreCompact event and its omission list went three -> two.
+
+**What the gate forced, and what it got.** The round's first gate run caught
+the shipped `claude-ops/ops/rule-registry.md` lagging the source it mirrors —
+check V doing its job, the source having gained two entries the same day
+('compact recovery' and 'browser-pane pixel route'). Refreshed via procedure
+B, verbatim -> edited with four declared de-identification edits, all inside
+the compact-recovery entry. The same run caught `ACCEPTANCE.md` as an
+undeclared file under the brand-new collected root: repo-authored acceptance
+checklists are now the third authored-name exemption beside README/NOTICE in
+`share_gate.py`, with test case 11 as the negative control keeping the
+exemption narrow — and case 9 (current tree) doubling as the
+fails-without-the-change half, since the live tree now holds one.
+`<sid>`/`<session-id>` joined `[placeholders]` path_position_ok. Gate: exit 0
+with `--source`; suite 11/11.
+
+**Zip.** This share doubles as a hand-off bundle: a `compact-recovery-*.zip`
+is built at the repo root for physically handing the mechanism to someone, and
+`*.zip` is now gitignored — the repo publishes files and commits, not archives.
+
+Source tree re-checked unchanged at `519342c` after collection; the dirty
+paths there (four references/ files, two outputs/ files) are the source's own
+pending pool and none is a file this round collected.
+
 ## 2026-08-16 (third) — the twin gets fixed upstream, and the sweep breaks again
 
 Two things closed the day: the sibling gap the co-upgrade sweep found was fixed

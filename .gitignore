@@ -2,6 +2,9 @@ __pycache__/
 *.pyc
 *.stamp
 
+# hand-off bundles built from shares; the repo publishes files, not archives
+*.zip
+
 # superseded draft material kept on disk for traceability, not for publishing
 # (may contain local/machine-specific paths — see the archive's own README)
 skill-toolkit/skills/scientific-research-guide/archive/

@@ -31,6 +31,9 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | `context_runway_shadow.py` | UserPromptSubmit | **影子模式**。context 已經很長**且**這個 session 還沒寫過 checkpoint——兩個條件的**合取**才是觸發點：只看長度會在 65% 的 session 誤報，加上第二個條件降到 26% |
 | `fieldwork_threshold_notice.py` | PreToolUse `Read\|Grep\|Glob` | **影子模式**。主 session 自己讀檔的量對照 `20-dispatch.md` §1 的字面門檻。**高頻 matcher**：每次呼叫多付一次 Python 啟動（約 100ms），掛載前先讀它 docstring 裡的成本說明與退場條件 |
 | `instructions_loaded_logger.py` | InstructionsLoaded | 只做觀測：哪些指令檔在什麼時候被載入。是決定「哪條規則可以搬去 path-scoped」的證據來源 |
+| `compact_bookmark.py` | PreCompact | **2026-08-16，compact-recovery 三支之一**（總覽與召回紀律：[`../compact-recovery/README.md`](../compact-recovery/README.md)）。壓縮前把 transcript 路徑／行數／大小／trigger 寫成書籤，再 best-effort 跑 preserve.py，讓活 session 的摘要卡在壓縮當下就存在 |
+| `compact_pointer.py` | SessionStart `compact` | 壓縮後注入 ~130 token 指標卡：digest 優先、原檔壓縮前區段（lines 1..N）、兩個召回觸發條件、視窗紀律。書籤缺失時出降級卡而非沉默 |
+| `transcript_read_guard.py` | PreToolUse `Read` | 語料根目錄下 >128KB 的檔案，無 `limit` 或 >120 行一律 deny，訊息內附合規路徑（先 Grep 定位再視窗讀）。Grep／Glob 不受影響，小檔自由讀 |
 | `settings.example.json` | — | 掛載範本，見下 |
 
 ## 安裝
@@ -62,7 +65,9 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
   什麼都不檢查——這是 fail-open 的代價，不是 bug。
 - **`delivery_gate_shadow.py` 是實驗儀器的第一階段**，不是成品閘門。它 docstring 裡
   自己列出三個 proxy 的不可靠之處；照抄它的 verify allowlist 當標準會被 Goodhart。
-- **來源環境還有一支 SessionEnd 的 memory-pipeline hook**，那支腳本不在本次分享範圍，
-  所以範本裡整個區塊移除，而不是留一個指向不存在檔案的掛載。
+- **SessionEnd 的 memory-pipeline 腳本（preserve.py）自 2026-08-16 起隨
+  [`../compact-recovery/`](../compact-recovery/README.md) 出貨**，但它裝在
+  `tools/memory-pipeline/` 而非 hooks/，所以掛載範例放在那份 README 的安裝章——
+  本目錄的範本維持「只掛 hooks/ 內檔案」的不變量。
 - **`environment-guide/` 裡寫「hooks/（2 檔）」的地方是 2026-07-31 的快照**，
   當時確實只有兩支。那些檔案作為快照保持原樣，正確數字以本目錄為準。

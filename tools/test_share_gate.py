@@ -23,8 +23,14 @@ Every case is a real incident, not a hypothetical:
   9  CONTROL         the current tree passes
  10  source-verify   a declared edit reverted by a verbatim refresh — the
                      2026-08-16 failure, and the only case needing --source
+ 11  CONTROL         an undeclared non-README file under a collected root
+                     still fires — the negative half of the ACCEPTANCE.md
+                     name-exemption added 2026-08-16 (compact-recovery round).
+                     The exemption's fails-without-it half is case 9: the live
+                     tree now holds compact-recovery/ACCEPTANCE.md, so the
+                     old gate fails the current-tree control.
 
-Two of the ten assert that the gate stays QUIET. That ratio is deliberate: a
+Two of the eleven assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -233,6 +239,31 @@ def main():
         results.append(case_v(src))
     else:
         print(f"[SKIP] source-verify: no source tree at {src} — check V not exercised")
+
+    # 11 — the negative control for the ACCEPTANCE.md name-exemption
+    #      (2026-08-16): an undeclared, non-exempt file under a collected root
+    #      must still fire check C. Mutates the INDEX, not just a file, because
+    #      the gate reads tracked files; restore un-stages and deletes.
+    stray = ROOT / "compact-recovery" / "__undeclared_for_test__.md"
+
+    def plant_stray():
+        stray.write_text("planted by test_share_gate.py\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(ROOT), "add", "--", str(stray)],
+                       capture_output=True)
+
+    def remove_stray():
+        subprocess.run(["git", "-C", str(ROOT), "rm", "--cached", "-q", "--",
+                        str(stray)], capture_output=True)
+        stray.unlink(missing_ok=True)
+
+    results.append(case(
+        "control: undeclared file under a collected root still fires",
+        expect_fail=True,
+        expect_in_output=["__undeclared_for_test__.md",
+                          "no provenance entry"],
+        mutate=plant_stray,
+        restore=remove_stray,
+    ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")
     return 0 if all(results) else 1
