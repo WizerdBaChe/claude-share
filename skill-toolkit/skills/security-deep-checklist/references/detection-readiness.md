@@ -93,3 +93,31 @@ must exist BEFORE the incident:
   hope, not a control).
 - **Post-incident loop**: lessons feed back into Mode A/B checks and new §3
   alert conditions — detection engineering is iterative by nature.
+
+## 6. AI agent actions — visibility and recovery
+
+An agent's damage differs from an attacker's in one way that matters here: it
+is fast, well-intentioned, and looks like normal work. §1-§5 are tuned for a
+hostile actor; these are tuned for a trusted one that is wrong. Audit items —
+designing the missing mechanism is a handoff to `ai-coding-guardrails`.
+
+- **Intent is recoverable, not just the diff**: agent run transcripts
+  (reasoning, tool calls, results) are retained. A diff shows what changed; only
+  the transcript shows what it was TRYING to do, which is what tells you whether
+  the rest of its work is also wrong.
+- **Recovery verified ENABLED, in advance**: `git reflog` retention window,
+  editor/IDE local history, and database PITR — check each is on TODAY. All
+  three are worthless if switched on after the incident, and this is the single
+  item most often assumed rather than verified. Distinct from §5's backup item:
+  that one asks whether backups restore, this one asks whether the
+  seconds-to-minutes undo paths exist at all.
+- **Time-to-detect a wrong-but-plausible change**: what would surface a subtly
+  incorrect agent commit that compiles and passes review, and how long after
+  merge? If the honest answer is "when a user reports it", say so — that is the
+  finding.
+- **Loop circuit breaker**: is there a max-retry limit on an
+  agent-fix → review → agent-fix cycle, or can it churn until someone notices?
+  An unbounded loop burns budget and buries the original defect under edits.
+- **Undo path for bulk operations**: agent-run mass edits (codemods, renames,
+  migrations) are reversible as a unit — a single reverting commit, not
+  file-by-file archaeology.

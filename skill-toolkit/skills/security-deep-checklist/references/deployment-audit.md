@@ -116,3 +116,30 @@ Isolation removes remote attackers but concentrates these:
   accounts and forgotten API keys are standing backdoors.
 - **Privilege review**: periodic re-check that access matches current role —
   privilege only ever accumulates unless something removes it.
+
+## 8. AI coding agents as a deployment actor (all contexts)
+
+An agent with write access is an actor with §7's problems and none of its
+habits. Audit it as one. These are AUDIT items — if the finding is "no such
+mechanism exists and one must be designed", that is a handoff to
+`ai-coding-guardrails`, not work to do here.
+
+- **Agent identity**: agents act under their own credentials, never a human's.
+  A shared credential makes every agent action untraceable and unrevocable —
+  you cannot answer "did a person or an agent do this" after the fact.
+- **Least privilege by default**: read-only database role, no infra/secret
+  scope, write access scoped to declared paths. Grant the exception per task,
+  not per agent.
+- **Blast radius declared**: an explicit list of what an agent may never touch
+  (migrations, secrets, force-push, deploy, `rm -rf`, mass delete). If the list
+  lives only in prose that the agent reads, see the next item.
+- **Instruction is not a control**: check whether a PROHIBITED action would
+  actually be stopped by something — hook, sandbox, permission mode, deny list.
+  A rule the agent is told to follow is a preference; a layer that refuses the
+  call is a control. Most "we told it not to" setups fail this item.
+- **Secrets outside the agent's reach**: agent context, tool output, and
+  retained transcripts are a new exfiltration surface. `.env`, tokens and keys
+  must not be readable in the working set, and a transcript store inherits the
+  classification of whatever was pasted into it.
+- **Agent-authored config changes take the same path as human ones**: same
+  review, same approval, same audit trail. Volume is not a reason to shorten it.

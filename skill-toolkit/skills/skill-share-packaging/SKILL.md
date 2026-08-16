@@ -1,16 +1,15 @@
 ---
 name: skill-share-packaging
 description: >-
-  Packaging and audit rules for moving skills BETWEEN environments. Mode A (export):
-  build a share-ready copy of one of this machine's skills — strip personal data,
-  decouple environment-specific references, verify tool fallbacks — without ever
-  modifying the canonical skill. Mode B (import): audit a third-party skill BEFORE
-  enabling it — their environment coupling, data-collection surface, and instruction
-  hygiene. Trigger on 「把這個 skill 分享/打包/匯出給別人」"package/export/share this
-  skill", or 「幫我檢查/安裝網路上抓的 skill」"audit this downloaded skill before I
-  install it". Mode B is ONE skill; a whole rules LAYER → config-self-audit
-  adoption mode. NOT for authoring skills (→ skill-creator), your own config
-  content (→ config-self-audit), or stray files (→ env-cleanup).
+  Moving skills BETWEEN environments — the canonical skill is never modified.
+  Mode A (export): build a share-ready copy of one of this machine's skills.
+  Trigger on 「把這個 skill 分享/打包/匯出給別人」「這個能給別人用嗎」"export this
+  skill". Mode B (import): audit a third-party skill BEFORE enabling it. Trigger
+  on 「幫我檢查網路上抓的 skill」「這個 skill 安全嗎」"audit this downloaded skill",
+  or one arriving from a repo, a gist, or a colleague. Mode B is ONE skill; a
+  whole rules LAYER → config-self-audit adoption mode. Do NOT fire on skills
+  merely DISCUSSED or edited in place here — only on one crossing the machine
+  boundary. NOT for authoring (→ skill-creator) or stray files (→ env-cleanup).
 ---
 
 # Skill Share Packaging
@@ -43,6 +42,35 @@ the leak is in files they stopped reading long ago.
 ## Mode A — Export (package one of this machine's skills)
 
 Run the steps in order; each has a concrete check.
+
+### A0. Look for a previous export FIRST
+
+```
+ls ~/.claude/outputs/skill-share/<name>-*/SHARE-NOTES.md
+```
+
+A hit means this is a RE-export, and A1–A6 must not be run from scratch. Read
+the newest notes and carry every decision in it forward, or overrule it
+deliberately and say so in the new notes. Then diff the previous package against
+the canonical skill: whatever differs is either a decision to re-apply or a
+canonical change to let through, and you have to say which for each.
+
+**Why this step is not optional, and why it is A0 rather than a line in A5.**
+Hard rule 1 says fixes flow canonical → copy and never back. That is correct,
+and it means the canonical skill *by construction* never learns what an export
+decided. The share-notes file is therefore the ONLY record of it — and before
+this step, nothing read that file. A re-export re-derived every judgement from
+the canonical skill and silently dropped the ones the canonical skill cannot
+carry: a scrubbed research topic, a name generalised for an audience, an eval
+kept-or-cut call. The package still passes A5, because A5 checks the copy
+against the canonical, not against the last decision.
+
+Found 2026-08-16 by the same failure landing in a sibling artifact: a bulk
+refresh of a share repo reverted six de-identification decisions that lived in
+commits and nowhere a check could read. Same shape, one directory over —
+a build product whose decisions have no home in the source they are built from.
+
+No previous export → this is a first export, continue at A1.
 
 ### A1. Scope the manifest
 Copy the skill directory to the output location, then DELETE from the copy:
@@ -91,12 +119,25 @@ half-translate.
 - Confirm the canonical skill is untouched (`git status` / diff against canonical).
 
 ### A6. Package & record
-Zip the folder for transport. Write a short share-notes file NEXT TO the package (not
-inside it) recording: what was removed/rewritten vs canonical, date, and the canonical
-commit. Give the recipient three verification steps in the notes: (1) copy the folder
+Zip the folder for transport. Write a share-notes file NEXT TO the package (not
+inside it) — **named `SHARE-NOTES.md`, because A0 globs for that name and a
+differently-named file is invisible to the next export**. Record: what was
+removed/rewritten vs canonical, date, and the canonical commit.
+
+Write it for A0, not just for the recipient. Each entry states what was changed
+and **whether it must survive the next export** — a scrub of a research topic
+must; a fix for a canonical bug that has since been fixed upstream must not, and
+saying so is what stops the next export re-applying a patch to code that no
+longer needs it. An entry with no such verdict is a note the next export has to
+re-derive, which is the state A0 exists to end.
+
+Give the recipient three verification steps in the notes: (1) copy the folder
 into their skills directory (`~/.claude/skills/`); (2) one positive probe — a phrase
 that should trigger the skill; (3) one negative probe — a nearby phrase that should
-NOT trigger it. Log the export in `~/.claude/Global_skill_update.md`.
+NOT trigger it. Log the export in the git commit message — the old
+`Global_skill_update.md` destination was frozen 2026-08-11 and retired to
+`audit-archive/` 2026-08-15, and this line survived both because a write aimed
+at a frozen file fails silently: the instruction reads as correct forever.
 
 ## Mode B — Import (audit a third-party skill before enabling)
 

@@ -3,7 +3,7 @@
 > 這批檔案是 2026-08-14 才補進本 repo 的。在那之前，`claude-ops/` 與
 > `environment-guide/` 有 20 多處引用它們當作「機械強制」的依據，但檔案一個都沒附，
 > 而 manifest 把原因寫成「machine-bound（綁機器）」——**那個判斷是錯的**。
-> 逐檔查證後：七支 hook 全部用 `Path.home()`／`os.path.expanduser`／
+> 逐檔查證後：所有 hook 全部用 `Path.home()`／`os.path.expanduser`／
 > `CLAUDE_CONFIG_DIR`／`os.environ["TEMP"]` 解析路徑，**零個寫死的帳號或絕對路徑**。
 > 它們不是不能分享，是從來沒被撈進來。收錄程序見
 > [`../tools/COLLECTION-RULES.md`](../tools/COLLECTION-RULES.md)。
@@ -23,16 +23,19 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | `dangerous_command_guard.py` | PreToolUse `Bash\|PowerShell` | 不可逆指令的確定性拒絕清單：遞迴強制刪除、`git push --force`／`reset --hard`／`clean -f`、registry 寫入、關機／格式化。放寬 allowlist 後的補償控制 |
 | `model_cap_guard.py` | PreToolUse `Agent\|Workflow` | subagent 模型成本上限（只准 haiku/sonnet）。已知繞過：SendMessage-resume 路徑無攔截點，docstring 有完整查證紀錄 |
 | `ui_verify_guard.py` | PreToolUse 瀏覽器 `computer\|javascript_tool` | 擋下「沒先探 `visibilityState` 就要截圖」與「動畫未落停就讀 `getComputedStyle`」。有 per-session marker 與 `intentional-midflight` 逃生口 |
-| `browser_pane_scope_guard.py` | PreToolUse 瀏覽器 `navigate\|preview_start` | 記錄每次導覽（app 端 log 不記 URL），並擋下已知會殺掉 Electron GPU 子行程的 host。只擋 in-app pane，Chrome 那條路永遠不擋 |
-| `browser-pane-blocklist.json` | — | 上面那支讀的清單。手改、進版控，加一筆是刻意行為 |
-| `ops_health_nudge.py` | SessionStart | 11 項維護門檻（檔案大小、ghost rule、skill 預載預算、字典同步、relaxation 等級未設定）。健康時完全安靜 |
+| `browser_pane_scope_guard.py` | PreToolUse 瀏覽器 `navigate\|preview_start` | 記錄每次導覽（app 端 log 不記 URL）。**2026-08-14 起改為白名單 (allowlist)**：loopback 由 hook 自己放行，其餘一律拒絕並改走 out-of-process 路徑。只管 in-app pane，Chrome 那條路永遠不擋 |
+| `browser-pane-allowlist.json` | — | 上面那支讀的白名單，出貨時 `hosts` 是空的。手改、進版控，加一筆是刻意行為 |
+| `browser-pane-blocklist.json` | — | 保留：它記著每個 host 當初為什麼炸掉，讓拒絕訊息講得出具體理由 |
+| `ops_health_nudge.py` | SessionStart | 13 項維護門檻（檔案大小、ghost rule、skill 預載預算、字典同步、relaxation 等級未設定、advisory output 未處理…）。健康時完全安靜 |
 | `delivery_gate_shadow.py` | SubagentStop | **影子模式，永不阻擋**。只記錄「如果會擋，會擋什麼」，讓誤判率先被量出來再談強制 |
+| `context_runway_shadow.py` | UserPromptSubmit | **影子模式**。context 已經很長**且**這個 session 還沒寫過 checkpoint——兩個條件的**合取**才是觸發點：只看長度會在 65% 的 session 誤報，加上第二個條件降到 26% |
+| `fieldwork_threshold_notice.py` | PreToolUse `Read\|Grep\|Glob` | **影子模式**。主 session 自己讀檔的量對照 `20-dispatch.md` §1 的字面門檻。**高頻 matcher**：每次呼叫多付一次 Python 啟動（約 100ms），掛載前先讀它 docstring 裡的成本說明與退場條件 |
 | `instructions_loaded_logger.py` | InstructionsLoaded | 只做觀測：哪些指令檔在什麼時候被載入。是決定「哪條規則可以搬去 path-scoped」的證據來源 |
 | `settings.example.json` | — | 掛載範本，見下 |
 
 ## 安裝
 
-1. 把 `*.py` 與 `browser-pane-blocklist.json` 複製到你的 `~/.claude/hooks/`。
+1. 把 `*.py` 與兩份 `browser-pane-*.json` 複製到你的 `~/.claude/hooks/`。
 2. 打開 `settings.example.json`，把需要的區塊**併進**你自己的 `settings.json`
    （不要整個覆蓋），並替換兩個佔位符：
    - `<PYTHON_EXE>`：Python 3.10+ 直譯器的**絕對路徑**

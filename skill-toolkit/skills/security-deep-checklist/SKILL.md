@@ -168,10 +168,14 @@ Rank findings; each carries:
   race, cross-context state leakage — §9, gated: stateful units only).
 - [references/deployment-audit.md](references/deployment-audit.md) — Mode B:
   misconfiguration, supply chain, patching, attack surface, transport security,
-  cloud & IoT, air-gapped/internal-network risks, asset & access management.
+  cloud & IoT, air-gapped/internal-network risks, asset & access management,
+  AI coding agents as a deployment actor (identity, least privilege, declared
+  blast radius, whether a prohibition is a control or only an instruction).
 - [references/detection-readiness.md](references/detection-readiness.md) —
   Mode C: security event logging, log hygiene, alerting & rate limiting,
-  monitoring coverage, incident-response readiness.
+  monitoring coverage, incident-response readiness, AI agent action visibility
+  and recovery (transcript retention, reflog/local-history/PITR verified ON in
+  advance, time-to-detect a wrong-but-plausible change, loop circuit breaker).
 - [references/scan-contract.md](references/scan-contract.md) — all modes:
   machine-readable findings/coverage manifests, fingerprint identity, three
   evidence receipts, inventory-first coverage, policy layer (Part 0 ↔

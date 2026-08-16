@@ -85,6 +85,18 @@ MAX_COMMANDS = 40
 CMD_TRUNC = 160
 
 WRITE_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
+
+# Prose has nothing to execute, so "wrote but did not verify" is not a finding
+# about it. Both organic would-block rows of the 2026-08-15 soak were subagents
+# writing spec documents (verification_PSM_v0.3.md, verification_PIM_v0.5.md) --
+# false positives produced by treating "wrote a file" as "wrote something a test
+# run should have covered". Config formats (.json/.yaml/.toml) deliberately
+# still count: a broken config IS verifiable by running something.
+PROSE_EXT = (".md", ".txt", ".rst", ".adoc", ".markdown")
+
+
+def is_prose(path: str) -> bool:
+    return path.lower().rstrip().endswith(PROSE_EXT)
 SHELL_TOOLS = {"Bash", "PowerShell"}
 
 # Bash that changes state. Heuristic -- deliberately broad; a false "wrote"
@@ -203,8 +215,10 @@ def scan_transcript(path):
                     name = block.get("name")
                     payload = block.get("input") or {}
                     if name in WRITE_TOOLS:
-                        facts["wrote"] = True
                         target = str(payload.get("file_path", ""))[:CMD_TRUNC]
+                        if is_prose(target):
+                            continue
+                        facts["wrote"] = True
                         if target and len(facts["write_evidence"]) < 10:
                             facts["write_evidence"].append(f"{name}:{target}")
                     elif name in SHELL_TOOLS:

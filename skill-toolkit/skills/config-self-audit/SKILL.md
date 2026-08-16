@@ -111,10 +111,22 @@ Every path, interpreter, command, event name, and file referenced: `Test-Path` /
 - **Retired destinations.** A path can exist and still be the wrong target: check
   that any file the artifact instructs a WRITE to still accepts writes. A frozen,
   superseded, or archived file passes `Test-Path` and fails silently forever —
-  the instruction reads as correct and nothing ever lands. Known frozen here:
-  `Global_skill_update.md` (2026-08-11). Sweep:
-  `grep -rn "Global_skill_update" --include=*.md . | grep -v -E "^\./(backups|archive|audit-archive)"`
-  — four live instruction files still pointed at it three weeks after the freeze.
+  the instruction reads as correct and nothing ever lands. Retired here: the
+  config change log, frozen 2026-08-11 and moved to `audit-archive/` 2026-08-15.
+  Do not re-derive the sweep — it is integrity-sweep check 3, and it now greps
+  the general shape ("Log … in <some>.md") rather than one dead filename, since
+  the next retirement will have a different name. Track record: four live
+  instruction files still pointed at the frozen log three weeks after the
+  freeze, and a fifth (`skill-share-packaging`) survived four days past the
+  rename. Assume there is one more.
+- **Conditionally-referenced mechanisms.** A body line of the form "if X
+  hook/task is installed, do Y" names a MECHANISM, not a path — `Test-Path`
+  cannot void it. Verify the install state NOW (settings.json for hooks,
+  `Get-ScheduledTask` for tasks) AND check the decision journal for a ruling
+  that superseded it: a rejected-then-still-referenced mechanism reads as
+  correct forever while its conditional silently never fires. Measured
+  2026-08-16: `workflow-checkpoint` §B referenced a "transcript-archive hook"
+  that the same day's D-033 had rejected in favour of a scheduled mirror.
 
 For settings/config files, two checks a successful parse does NOT cover — run both,
 commands in `references/telemetry.md` §2:
@@ -163,7 +175,10 @@ commands in `references/telemetry.md` §2:
   `skills-plugin/` (15 as of 2026-08-12) and `*/*/rpm/plugin_*/skills/` (35).
   Checking only the first misses the larger one.
   Same name or description = routing ambiguity plus wasted listing budget, and a
-  copy rots the moment the canonical file changes.
+  copy rots the moment the canonical file changes. If a documented cache root
+  or pattern matches NOTHING, say so — an empty match on a path this checklist
+  hardcodes is a finding about the checklist (the cache layout moved), never a
+  clean result.
 - CLAUDE.md additions: must not duplicate or contradict an existing rule; if it
   refines one, merge instead of appending a near-duplicate. This bullet covers a
   rule being ADDED; for near-duplicates already installed across two files — the
@@ -247,7 +262,11 @@ Group findings by artifact. One line each:
 Discard any finding for which neither verification method can be written. List
 voided items separately as `stale finding` with the check that voided them — they
 are evidence the gate worked, not noise. Order by severity. If everything passes,
-say so explicitly with the checks performed.
+say so explicitly with the checks performed. Every run ALSO declares the
+checklist items NOT run and why (budget, out of scope, tooling failed) — a
+silent skip reads as a pass. Measured 2026-08-16: a same-day audit skipped §4
+cross-surface and §5 usage with no trace in its output, and the skip was only
+discovered because the same session later re-ran the skill on another target.
 
 Adoption mode adds a **reconciliation ledger** — one row per imported artifact:
 `artifact | source | collisions | class | resolution | mechanism status | stamp`.
@@ -259,7 +278,7 @@ grep that would have found it now returns nothing.
 ## After applying fixes (only with user consent)
 
 - Re-run the STATIC-VERIFY commands and paste results.
-- Record it where that kind of fact lives — NOT in `Global_skill_update.md`, which
+- Record it where that kind of fact lives — NOT in `audit-archive/`, which
   was frozen 2026-08-11 and rejects new entries. The event (which files changed
   when, and how to undo it) belongs in the git commit message; a changed standing
   rule replaces its entry in `ops/rule-registry.md`; a pitfall you actually hit

@@ -23,16 +23,13 @@ GLSL ES blank-screen trap, centralized tunables). Those outrank anything in
 
 `vendor/` is third-party MIT content, unmodified. See `NOTICE.md`.
 
-> **This share does not include a Three.js reference package.** The canonical
-> environment vendored one, but its upstream (`CloudAI-X/threejs-skills`)
-> ships no `LICENSE` file and names no copyright holder — the MIT grant exists
-> only as a README sentence — and the canonical environment's own import log
-> explicitly recorded that defect as **blocking redistribution** until
-> upstream fixes it. Rather than ship it under that cloud, this share omits
-> it entirely. If you want the Three.js material, fetch and audit it yourself
-> from <https://github.com/cloudai-x/threejs-skills> (see `NOTICE.md` for the
-> full license-defect writeup and `local/currency.md` for a version-gap
-> analysis you can re-run against whatever you fetch).
+> **This share does not include a Three.js reference package.** The source
+> environment vendored one, but its upstream ships no `LICENSE` file and names
+> no copyright holder — the MIT grant exists only as a README sentence — so it
+> was excluded rather than redistributed. Every routing row below that points
+> at `vendor/threejs/` is therefore a pointer to something you must supply:
+> use the official Three.js documentation, and read `local/currency.md` first
+> for how to check whatever you fetch.
 
 ---
 
@@ -41,7 +38,7 @@ GLSL ES blank-screen trap, centralized tunables). Those outrank anything in
 | If the task is about… | Read |
 |---|---|
 | **Local obligations, every delivery** | `local/env-bridge.md` |
-| Currency caveats for a self-fetched Three.js package | `local/currency.md` |
+| Whether the vendored Three.js text is still accurate | `local/currency.md` |
 | Adding a new motion skill/library to this hub | `local/extending.md` |
 | Why an animation should exist at all; three pillars, motion layers | `vendor/lottiefiles/director/core-philosophy.md` |
 | Full decision pipeline from brief → keyframes | `vendor/lottiefiles/director/decision-framework.md` |
@@ -59,7 +56,16 @@ GLSL ES blank-screen trap, centralized tunables). Those outrank anything in
 | Hover, press, loading, success, error states | `vendor/lottiefiles/patterns/state-feedback.md` |
 | Looping, breathing, parallax, background life | `vendor/lottiefiles/patterns/ambient-continuous.md` |
 | Stagger and multi-element recipes | `vendor/lottiefiles/patterns/multi-element.md` |
-| **Three.js** — scene, geometry, materials, lighting, textures, GLTF, shaders/GLSL, post-processing, raycasting, controls | not included — see the box above |
+| **Three.js** — scene, camera, renderer, Object3D, transforms | `vendor/threejs/fundamentals.md` |
+| Shapes, BufferGeometry, custom meshes, instancing | `vendor/threejs/geometry.md` |
+| PBR/basic/phong materials, material properties | `vendor/threejs/materials.md` |
+| Lights, shadows, IBL/environment lighting | `vendor/threejs/lighting.md` |
+| Textures, UV, cubemaps, HDR, render targets | `vendor/threejs/textures.md` |
+| AnimationMixer, clips, skeletal, morph targets, blending | `vendor/threejs/animation.md` |
+| GLTF/GLB, Draco, async loading, progress, caching | `vendor/threejs/loaders.md` |
+| GLSL, ShaderMaterial, uniforms, custom effects | `vendor/threejs/shaders.md` |
+| EffectComposer, bloom, DOF, custom passes | `vendor/threejs/postprocessing.md` |
+| Raycasting, OrbitControls, mouse/touch, object picking | `vendor/threejs/interaction.md` |
 
 Three.js tasks still go through the design tables below — an API-correct scene
 with linear easing and no secondary motion is still bad motion.

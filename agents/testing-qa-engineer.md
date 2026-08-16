@@ -45,6 +45,8 @@ the roster; do not try to work around that.
 
 ## Output
 
-Tests added or changed, the run output, defects found (each with a reproduction),
-and an explicit list of what remains unverified and why. Do not report a coverage
-number as if it were a quality measure.
+Tests added or changed, the run output, defects found (each with a `file:line`
+and a reproduction), and an explicit list of what remains unverified and why.
+Any numeric or factual claim you did not directly execute or observe is labeled
+"unverified" rather than stated as fact. Do not report a coverage number as if
+it were a quality measure.

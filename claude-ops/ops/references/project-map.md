@@ -25,9 +25,9 @@ worse than no map**, because a reader will trust it instead of checking.
 `~/.claude/references/<project>-map.md` — central, not inside the analysed repo.
 Reasons: third-party and read-only repos must not be written into; the map
 outlives the checkout; it sits beside the write-time ledgers §A already reads.
-`map` is a governed filename kind, like the four write-time ledgers. Gitignore
-it with the rest of `references/`: it is a DERIVED VIEW, and a derived view is
-disposable, regenerable, and never the only copy of anything.
+`map` is a registered `<kind>` (`LABEL-REGISTRY.md` §4). Gitignored with the
+rest of `references/`; it is a derived view (`references/project-visibility-design.md`
+INV-1: disposable, regenerable, gitignored).
 
 ## 2. Header — the fingerprint (mandatory, every field)
 
@@ -159,9 +159,8 @@ line to `ops/rule-registry.md`, key `map STALE thresholds`, in its `evidence:`
 field: `<date> <project>: <N> relevant files → patch|regen was cheaper`. Three
 agreeing lines replace `current` there and here. Do this from whatever project
 you are in — the registry is project-independent precisely so the observation
-has somewhere to land. A ticket in one project's ledger would be the schedule,
-not the destination, and is invisible from every other project — which is where
-the observations actually get generated.
+has somewhere to land; the T-010 ticket in `claude-config` is the schedule, not
+the destination, and is invisible from here.
 
 Scoping to `covers` rather than "any commit" is the cheap accuracy win: a commit
 touching only docs must not invalidate a code map.

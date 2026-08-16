@@ -642,6 +642,11 @@ Register it in `domains/_routing.md` as a `sub-profile` row before it is conside
 > with this copy — see `README.md` in this folder. Read the names as illustrations of the
 > base / sub-profile / reference / boundary pattern, not as files to look for.
 
+> **Share note**: the tree below is the source environment's layout, kept as a worked
+> example of a populated `domains/`. The concrete profile files it names do NOT ship
+> with this copy — see `README.md` in this folder. Read the names as illustrations of the
+> base / sub-profile / reference / boundary pattern, not as files to look for.
+
 ```
 skills/scientific-research-guide/
 ├── SKILL.md                          ← Operating protocol (Gate A-E; load order:
@@ -660,8 +665,8 @@ skills/scientific-research-guide/
 │   │   ├── active_modulation.md          ← sub-profile (method/material platform)
 │   │   ├── terminology_and_geometry.md   ← reference (no standing triggers)
 │   │   └── split_ring_resonators.md      ← boundary note (routes to a future metamaterial domain)
-│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 were
-│   │                                    incomplete — carried as known debt)
+│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 currently
+│   │                                    missing — see STATUS.md known pre-existing debt)
 │   ├── topological_insulator/        ← that domain's sub-profiles
 │   │   ├── bi2se3_material.md            ← sub-profile (material)
 │   │   ├── bi2se3_plasmonic_photoresponse.md ← sub-profile (method; Bi2Se3 plasmon/CPGE/LPGE)

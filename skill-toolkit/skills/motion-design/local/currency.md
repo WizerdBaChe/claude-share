@@ -1,12 +1,11 @@
 # Currency & accuracy caveats — read before trusting a Three.js reference package
 
 > **Note:** this share does not include `vendor/threejs/` (see `../NOTICE.md`
-> for why — an upstream license defect). Everything below documents the
-> canonical environment's now-excluded copy of
-> <https://github.com/cloudai-x/threejs-skills>. It's kept here as a
-> ready-made currency check to re-run if you fetch that package yourself —
-> the version gap, spot-checks, and known gaps below describe that specific
-> upstream, not anything shipped in this package.
+> for why — an upstream licence defect). Everything below documents the source
+> environment's now-excluded copy of that package. It is kept here as a
+> ready-made currency check to re-run if you fetch it yourself — the version
+> gap, spot-checks and known gaps describe that specific upstream, not
+> anything shipped in this package.
 
 Import date: **2026-08-01**. This file records what was actually verified and
 what was not. Treat it as the trust boundary on vendored API text.

@@ -26,7 +26,11 @@ Over-escalation: one cheap failure goes to mid first (`20-dispatch.md` §5).
 
 ALL must hold:
 1. Every acceptance criterion has evidence (command output, hash, artifact) —
-   not "should be fine".
+   not "should be fine". Evidence about MUTABLE content names the version it
+   attaches to (commit / content hash): an unpinned verification result is a
+   claim about an unnamed moment — re-scoring after the artifact changed
+   legitimately differs, so pin it or re-run it, and never read that drift as
+   a broken checker (`score_redteam.py` `file_sha()`; scoping report §7.6 Q4).
 2. **Living proof** for mechanisms (cron / hook / service / scheduled job): an
    artifact from one successful REAL run has been seen. Editing the code is
    not the same as fixing the problem; a dry-run is not a real run.
@@ -54,6 +58,18 @@ have come out differently for the specific thing I am claiming about?* No ⇒
 name the substitution in the sentence ("the pattern is proven, this file's
 registration is not"), never a hedge word — a hedge hides the proxy, naming it
 hands the reader the thing to attack.
+
+**Scope** (`lessons.md` L-015, the recurrence that proved this needed saying):
+the corollary covers DESIGN-RATIONALE prose, not only evidence prose. Once the
+findings sections have been disciplined, the untested claim hides in a
+justification sentence, and nobody ever decided that section was exempt. Any
+sentence asserting two things are the SAME, or that X FOLLOWS FROM Y, takes the
+same test — and takes it via a transform OF THE SENTENCE, never by re-reading
+it (re-reading re-derives the claim from the same evidence and it looks true
+again):
+- "X and Y are the same problem" → *would one fix repair both?* Different
+  evidence required ⇒ two problems sharing a symptom, not one problem.
+- "X follows from Y" → *what would still be true if Y were false?*
 
 **Refutability statement** (R2's delivery-side duty, invariant): a Tier-2
 deliverable (depth-tier triage, global CLAUDE.md) attaches after its

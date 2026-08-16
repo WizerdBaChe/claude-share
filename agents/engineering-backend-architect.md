@@ -6,6 +6,7 @@ description: >
   it does not choose between architectures (that is software-architect).
 tools: Read, Glob, Grep, Edit, Write, Bash, PowerShell, Skill
 model: sonnet
+effort: medium
 color: green
 ---
 <!-- adopted-from: ai-team-os (third-party subagent kit) | source: 22 definitions imported 2026-07-06 | adopted: 2026-07-06 | reconciled: 2026-08-12 rewritten for this environment — see OPERATOR-GUIDE.md agents/ row, ops/lessons.md L-014 -->

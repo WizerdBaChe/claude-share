@@ -37,7 +37,7 @@ Global rule: a silent blank screen is a design defect. This bites hardest in 3D.
 ### GLSL ES — the known trap (global `CLAUDE.md`, verbatim obligation)
 
 When writing shaders (see a Three.js reference for API specifics — this
-package doesn't ship one, see `NOTICE.md`):
+package does not ship one, see `NOTICE.md`):
 
 - **Unroll multi-texture sampling into named uniforms.** Variable-indexed sampler
   arrays and dynamic loop bounds **fail to compile as a silent blank** on GLSL ES.
@@ -72,10 +72,10 @@ are yours to make; just say what you picked.
 `asset-vault` Mode B self-triggers on generic capabilities, and animation assets
 are its most likely stock: loaders/spinners, transitions, easing helpers, scene
 boilerplate. If an `asset-vault`-equivalent skill is installed, check its
-registry **before** writing a generic animated component from scratch
-(this reference is machine-specific — see that skill's own docs for its
-registry location). If it's absent, hand-roll and consider
-Mode A extraction afterward.
+registry **before** writing a generic animated component from scratch (the
+source environment's registry path is machine-specific and is not shipped —
+see that skill's own docs for where yours lives). If it is absent, hand-roll
+and consider Mode A extraction afterward.
 
 ## 6. Accessibility is already covered upstream — use it, don't re-derive
 
@@ -86,7 +86,7 @@ of any motion deliverable here, not a nice-to-have.
 
 ## 7. Trust boundary
 
-This package ships no vendored Three.js text (see `NOTICE.md`). If you fetch
-a Three.js reference yourself, read `currency.md` first — it documents the
-~25-release drift the canonical environment found in its own (now-excluded)
-copy, as a template for checking whatever you fetch.
+This package ships no vendored Three.js text (see `NOTICE.md`). If you fetch a
+Three.js reference yourself, read `currency.md` first — it documents the ~25-
+release drift the source environment found in its own (now-excluded) copy, as
+a template for checking whatever you fetch.

@@ -1,11 +1,13 @@
 ---
 name: env-cleanup
 description: >-
-  File-level environment cleanup ("環境自清潔"). Mode A: the ~/.claude environment (whitelist
-  manifest); Mode B: a project working tree (heuristics + reference checks). Trigger on
-  "清理環境", "掃描無關檔案", "clean up my .claude", "find files that no longer belong". Writes a
-  candidate report, ALWAYS asks per category, then ARCHIVES — never deletes, never edits
-  file content. NOT for auditing one artifact's content (→ config-self-audit). Full
+  File-level environment cleanup ("環境自清潔") — finds files that no longer belong
+  and ARCHIVES them; never deletes, never edits file content. Mode A: the ~/.claude
+  environment; Mode B: a project working tree. Trigger on 「清理環境」「掃描無關檔案」
+  「這裡有沒有多餘/沒用到的檔案」「根目錄太亂」"clean up my .claude", "find files that no
+  longer belong", or a reorganisation that leaves strays behind. Do NOT fire to audit
+  ONE artifact's CONTENT (→ config-self-audit), to package a skill for someone else
+  (→ skill-share-packaging), or on a tidy working tree with no cleanup ask. Full
   disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
@@ -39,7 +41,8 @@ Mode selection: explicit user request wins; otherwise cwd inside `~/.claude`
 4. **Tier respect (ops/40-maintenance.md §1).** A candidate that is itself a
    🔴/🟡-tier file (CLAUDE.md, settings, hooks/, ops/, skills/, trigger dict)
    is never moved without an explicit per-item user confirmation, and the move
-   is logged in `~/.claude/Global_skill_update.md`.
+   is recorded in the git commit message (NOT `audit-archive/`, frozen
+   2026-08-11) plus the batch `CLEANUP-REPORT.md`.
 5. **Main session executes.** Subagents may scan and draft the candidate list;
    only the main session performs moves (⛔ rule, 40-maintenance §1).
 6. **Age threshold: 14 days** (last-modified) for all age-based candidacy,

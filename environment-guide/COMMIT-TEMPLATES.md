@@ -5,6 +5,11 @@
 > 模板即可，語意與歷史保持一致。
 > 基本格式（Conventional Commits）：`type(scope): subject` —
 > subject 用祈使句、小寫開頭、結尾不加句點、全英文。
+>
+> **每個 commit 結尾加 `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`**
+> —— 使用者裁定 2026-08-15。此前本檔對它保持沉默、而 harness 一直在要求，
+> 等於每次 commit 都有一邊被忽略；現在往「保留」這側收斂。裁定之前的 commit
+> 混雜有無，**不要回頭改寫歷史**——那會抹掉這個慣例何時開始的唯一紀錄。
 
 ---
 
@@ -69,9 +74,11 @@ merge: docs/tickets-context-foldin - tracer-bullet + domain glossary fold-in
 
 ## 4. 搭配規則（commit 之外的配套動作）
 
-1. **規則層變更必附 audit trail**：改到 CLAUDE.md / ops/ / skills/ /
-   hooks/ / settings.json 時，同批補一條 `Global_skill_update.md` 條目
-   （可併入同一 commit，或緊接一顆 `docs: audit trail entry for ...`）。
+1. **規則層變更必附理由紀錄**：改到 CLAUDE.md / ops/ / skills/ / agents/ /
+   hooks/ / settings.json 時，理由要有歸宿 —— 但**不是** `audit-archive/`
+   （2026-08-11 凍結，不再接受新條目）。分流：事件本身（哪些檔案何時改、怎麼回滾）
+   寫進 commit message；規則的**現行理由**改寫 `ops/rule-registry.md` 的對應條目
+   （就地取代，舊值壓進 `history:`）；真的踩到的坑寫 `ops/lessons.md` L-nnn。
 2. **Body 何時寫**：subject 永遠必填；body 只在「為什麼」不明顯時加
    （例如 user ruling、取捨理由、驗證證據摘要）。
 3. **分支慣例**：一批相關的規則層變更走

@@ -11,7 +11,7 @@
 
 原始檔案本身未包含使用者名稱、電子郵件或帳號等個資。逐項檢查後只有一處真正屬於機器綁定資訊，其餘引用其實是可攜路徑，不需要泛化成佔位符：
 
-- **真正機器綁定、已改為佔位符**：「Environment」小節原文寫死「本機是 Windows 11、只用 PowerShell 5.1、換行為 CRLF」——這是單一機器的環境事實，不具可攜性。已替換為 `<OS_NAME>` / `<SHELL_NAME_AND_VERSION>` / `<LINE_ENDING_CONVENTION>` 三個佔位符，並保留原始設定作為行內註解，供對照。
+- **真正機器綁定、已改為佔位符**：「Environment」小節原文寫死「本機是 Windows 11、只用 PowerShell 5.1、換行為 CRLF」——這是單一機器的環境事實，不具可攜性。已替換為 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` / `<LINE_ENDING_CONVENTION>` 四個佔位符，並保留原始設定作為行內註解，供對照。（2026-08-16 更正：本節先前寫的是 `<SHELL_NAME_AND_VERSION>`，那個代號在 2026-08-06 該條規則改寫成「預設 shell / 次要 shell」兩欄時就不再使用，本文一直沒跟上。）
 - **`~/.claude/ops/*.md`、`~/.claude/skill-trigger-dict.md` 等路徑——刻意保留原樣，不改成佔位符**：`~` 在任何機器上都會展開成當前使用者的家目錄，本身就是可攜寫法，不會洩漏使用者名稱；把它硬改成 `<OPS_DIR>` 之類的抽象佔位符反而模糊了「這條路徑其實有明確、可直接使用的預設值」這件事。這些路徑對應到**本 repo 已經附贈的內容**：
 
   | CLAUDE.md 內的路徑 | 對應到本 repo 的哪裡 | 要能生效，需先放到 |
@@ -31,7 +31,7 @@
 
 1. 複製 `CLAUDE.md` 到目標環境的 `~/.claude/CLAUDE.md`。
 2. 依「去識別化」表格，把 [`claude-ops/ops/`](../claude-ops/ops/) 複製到 `~/.claude/ops/`，把 [`skill-toolkit/skill-trigger-dict.md`](../skill-toolkit/skill-trigger-dict.md) 複製到 `~/.claude/skill-trigger-dict.md`。
-3. 把「Environment」小節的 `<OS_NAME>` / `<SHELL_NAME_AND_VERSION>` / `<LINE_ENDING_CONVENTION>` 三個佔位符換成該機器實際的 OS/shell/換行慣例。
+3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` / `<LINE_ENDING_CONVENTION>` 四個佔位符換成該機器實際的 OS/shell/換行慣例；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
 6. 把 `rules/frontend-layering.md`、`rules/shader-failure-modes.md` 複製到目標機器的 `~/.claude/rules/`，才能讓 `CLAUDE.md` 開頭的 path-scoped 索引真的指到活的檔案。若目標環境沒有等效機制，直接把這兩份檔案的規則內容併回 `CLAUDE.md` 也可以。

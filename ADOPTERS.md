@@ -49,7 +49,7 @@ instead:
 
 **Corrected 2026-08-14 — the enforcement hooks ARE here now.** They used to be
 listed as `referenced-only` with the reasoning "machine-bound". A source audit
-disproved that: all seven resolve their paths through `Path.home()` /
+disproved that: every one of them resolves its paths through `Path.home()` /
 `expanduser` / `CLAUDE_CONFIG_DIR` and contain no machine-bound value. They had
 never been collected. `hooks/` now ships them, with `hooks/settings.example.json`
 for the mounting, and `agents/` ships the eight subagent definitions
@@ -60,12 +60,16 @@ file and concluded the mechanism layer was unavailable, that conclusion is stale
 neither resolves inside the repo nor carries a disposition fails the build.
 Check C does the same for provenance: every collected file declares where it came
 from and every edit made on the way in. Undisclosed dependencies and silent edits
-cannot ship again.
+cannot ship again. Two more were added 2026-08-16 after a refresh proved the
+paperwork could be complete and still untrue: **D** removes declarations that no
+longer match anything, and **V** — which only runs for someone holding both trees
+— compares every collected file against its source, including the case that has
+no other detector, a declared edit silently reverted.
 
 What genuinely stays out: your own `settings.json` values, the operator's project
 index rows, dated internal reports, runtime telemetry, and one skill
-(`asset-vault`) that operates a private library — so `skill-toolkit/` ships 13 of
-the source environment's 14 skills, which is stated rather than left to be
+(`asset-vault`) that operates a private library — so `skill-toolkit/` ships 14 of
+the source environment's 15 skills, which is stated rather than left to be
 noticed.
 
 ## Symptoms that are your environment, not this repo

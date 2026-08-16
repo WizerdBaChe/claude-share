@@ -135,9 +135,9 @@ UTF-8.
 ❌ Write a fourth, more elaborate regex for input you've never actually
 hex-dumped.
 
-## C11 — Close-out sweep: three questions before the final message
+## C11 — Close-out sweep: four questions before the final message
 
-Before delivering any non-trivial result, run three questions: (1) did I
+Before delivering any non-trivial result, run four questions: (1) did I
 observe anything in passing the requester should know (risk, debt, anomaly)?
 (2) what is the most likely way this deliverable fails in use? (3) is there
 ONE next step that would actually change the requester's decision? An item may
@@ -148,7 +148,22 @@ fully valid result; cap at 3 items. Generic checklist advice ("add tests",
 "Core need already met → recommend stopping" (global CLAUDE.md) overrides
 question 3: never propose continuation for its own sake.
 
+**(4) One unrelated measurement** (`lessons.md` L-012 / L-015). Questions
+(1)-(3) are all answerable from memory, which is why they catch overstatement
+but never omission — a check never run leaves nothing to re-read. Before
+closing a Tier-2 deliverable, run ONE computation over the artifact that no
+finding asked for (a composition breakdown, a count, a cross-tab) and PASTE the
+raw output; summarizing it routes the result back through the belief being
+checked. Not one of the three items and not subject to their cap. Nothing
+disagreed → one line saying so, and that is a pass. Rationale: every recorded
+catch of proxy promotion (L-012, 4/4) and of the two omission classes (L-015,
+3/3) came from an output produced for an UNRELATED reason that happened to
+disagree; no phrasing-discipline rule in this system has a recorded catch.
+
 ✅ "Done. In passing: config.py:88 reads an env var that no longer exists —
 unrelated to this change, flagging only."
+✅ Q4 on a design doc: a query-type breakdown nobody asked for shows two queries
+are entirely figure-derived — so the "defer bbox acquisition" line silently
+killed them (L-015 (2) was found in exactly this way).
 ❌ "Next steps: add unit tests, improve error handling, consider refactoring"
 (none tied to anything observed — three lines of padding).

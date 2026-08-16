@@ -40,8 +40,17 @@ LEAK_PATTERNS = [
     # address, and it appears legitimately in version tables.
     ("email address", re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[A-Za-z]{2,}")),
     ("JWT", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}")),
+    # 2026-08-16: `sk_live_`/`sk_test_` and `AIza` added. They were in the
+    # SOURCE environment's own copy of this list (interop.py, before that file
+    # was refactored to import from here) and were dropped on the way in — so
+    # for the whole life of this gate a Stripe-shaped or Google API key would
+    # have published cleanly. Found by running interop-layer/test_interop.py,
+    # whose known-TRUE calibration set names both, against this module. That is
+    # the argument for two-sided calibration stated in the repo's own rules,
+    # working: a one-sided gate cannot report what it never looks for.
     ("API key (prefixed)", re.compile(
-        r"\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{16,}"
+        r"\b(?:sk-[A-Za-z0-9_-]{16,}|sk_(?:live|test)_[A-Za-z0-9]{10,}"
+        r"|gh[pousr]_[A-Za-z0-9]{16,}|AIza[0-9A-Za-z_-]{30,}"
         r"|AKIA[0-9A-Z]{12,}|xox[baprs]-[A-Za-z0-9-]{10,})")),
     ("secret-shaped assignment", re.compile(
         r"(?i)\b(?:api[_-]?key|secret|password|passwd|token|bearer)\b"
@@ -58,6 +67,24 @@ LEAK_PATTERNS = [
         r"(?!<)[A-Za-z][A-Za-z0-9._-]{1,}")),
     ("private network host", re.compile(
         r"\b(?:10\.\d{1,3}|192\.168|172\.(?:1[6-9]|2\d|3[01]))\.\d{1,3}\.\d{1,3}\b")),
+    # 2026-08-16. The blind spot that let nine private paths through a refresh,
+    # plus three that had been published since long before it. The two patterns
+    # above only know about HOME directories, so a second-drive tree — a private
+    # asset library, real project roots, the operator's own publication root —
+    # scanned clean while being exactly what hard rule 2 of
+    # tools/COLLECTION-RULES.md calls a scrub target: "a pointer to a private asset
+    # the reader cannot open". Found by grepping the refreshed tree by hand, which
+    # is the argument for encoding it: the next refresh will not have that reader.
+    # (No example is spelled out in this comment on purpose — writing one would
+    # make this module a finding under its own pattern.)
+    # System roots are excluded because they resolve identically on every Windows
+    # machine and carry no information about this one; `Users` is excluded because
+    # the two home-path patterns above already own it and would double-report.
+    ("absolute local path (non-system drive)", re.compile(
+        r"\b[A-Za-z]:[\\/]{1,2}"
+        r"(?!(?:Users|Windows|Program Files|Program Files \(x86\)|ProgramData|"
+        r"Temp|tmp|Python[0-9]*)\b)"
+        r"(?!<)[A-Za-z0-9_][A-Za-z0-9 _.+-]*")),
 ]
 
 

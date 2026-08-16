@@ -46,4 +46,8 @@ the roster; do not try to work around that.
 ## Output
 
 Per endpoint: what you tested, the observed responses, and any deviation from
-the contract. List explicitly which endpoints you could not reach and why.
+the contract — each deviation with a `file:line` (where traceable to server
+code) and a reproduction (the exact request that produced it). Any numeric or
+factual claim you did not directly execute or observe is labeled "unverified"
+rather than stated as fact. List explicitly which endpoints you could not reach
+and why.

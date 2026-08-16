@@ -13,9 +13,12 @@
     "on is worse than no allowlist. The `ask` entries are the important half —",
     "they make the config edit itself a confirmed action.",
     "",
-    "The source environment also wires a SessionEnd memory-pipeline hook. That",
-    "script is not part of this share, so the block is omitted rather than left",
-    "pointing at a file you do not have.",
+    "Three of the source environment's mounts are omitted rather than left",
+    "pointing at files you do not have: a SessionEnd memory-pipeline hook, and",
+    "two external-dispatch hooks that gate a dispatcher this share does not",
+    "ship. All three are declared in tools/share-manifest.toml with the reason.",
+    "Every hook in hooks/ IS mounted here — if you find one that is not, that is",
+    "a defect in this template, not a recommendation.",
     "",
     "Verify after wiring: run each hook by hand with empty stdin and check it",
     "exits 0 — e.g. `<PYTHON_EXE> <CLAUDE_HOME>/hooks/ops_health_nudge.py < /dev/null`.",
@@ -89,6 +92,52 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/browser_pane_scope_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "_comment": [
+          "HIGH-VOLUME matcher: one Python start (~100ms) on every Read/Grep/Glob.",
+          "Acceptable for a bounded measurement window, not as a permanent tax —",
+          "the hook's own docstring states the exit criterion. Mount it while you",
+          "want the measurement; unmount it when you have one."
+        ],
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/fieldwork_threshold_notice.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "_comment": [
+          "The SECOND half of ui_verify_guard.py. It is one file mounted on two",
+          "events: PreToolUse denies an unprobed screenshot, PostToolUse reads the",
+          "probe RESULT and routes on it. Mount both or the hook only denies and",
+          "never routes."
+        ],
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__javascript_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ui_verify_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/context_runway_shadow.py\"",
             "timeout": 5
           }
         ]

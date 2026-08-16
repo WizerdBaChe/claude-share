@@ -3,9 +3,14 @@
 
 Run before every push that touches shipped content:
 
-    python tools/share_gate.py            # all checks, exit 1 on any finding
-    python tools/share_gate.py --check P  # one check
-    python tools/share_gate.py --seed     # print undeclared tokens/refs, write nothing
+    python tools/share_gate.py                 # all repo-local checks, exit 1 on any finding
+    python tools/share_gate.py --check P       # one check
+    python tools/share_gate.py --source ~/.claude   # + check V, needs the source tree
+    python tools/share_gate.py --seed          # print undeclared tokens/refs, write nothing
+
+Anyone COLLECTING (rather than reading) must pass --source. That is the only
+mode in which the gate can see whether a copy still matches what it claims;
+tools/COLLECTION-RULES.md makes it step 6 of the procedure.
 
 Why this exists
 ---------------
@@ -36,11 +41,16 @@ Checks
   S  structure    the packaging shapes that silently break on the adopter side
   C  collection   every file copied in from the source environment declares
                   where it came from and every edit made on the way
+  D  dead         declarations that no longer match anything: a permission for
+                  a finding that is gone, an absence for a file that now ships
+  V  source-verify  (opt-in, --source) every collected file still matches what
+                  its entry claims — the one thing C says it cannot do
 
 Exit codes: 0 clean · 1 findings · 2 the gate itself could not run.
 """
 
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -145,8 +155,15 @@ def check_placeholder(manifest, files, f):
     """
     ph = manifest.get("placeholders", {})
     substitution = set(ph.get("substitution", []))
-    path_ok = set(ph.get("path_position_ok", [])) | substitution
-    command_ok = set(ph.get("command_position_ok", []))
+    # `literal` is not a permission, it is a type correction: these tokens are
+    # not placeholders standing for a value the reader supplies, they are names
+    # that happen to be spelled inside angle brackets — a harness tag, an HTML
+    # element quoted in prose. Declaring one under path_position_ok instead would
+    # be recording a false claim ("a human confirmed the reader can fill it in")
+    # to silence a finding, which is the shape of decay this gate exists to stop.
+    literal = set(ph.get("literal", []))
+    path_ok = set(ph.get("path_position_ok", [])) | substitution | literal
+    command_ok = set(ph.get("command_position_ok", [])) | literal
 
     for rel in files:
         if Path(rel).suffix.lower() != ".md":
@@ -312,6 +329,63 @@ def check_structure(manifest, files, f):
               f"inventory table {sorted(listed ^ set(skills))} differs from the tree",
               "keep the table and skills/ in step")
 
+    # S5 — the mounting template must mount exactly the hooks that ship.
+    #
+    # Added 2026-08-16 after the template was found mounting 7 hooks while 9
+    # shipped. Nothing was broken and nothing was leaked: the two newest hooks
+    # simply arrived with no way to turn them on, which reads to an adopter as
+    # "these are optional" rather than "this file is out of date". The failure
+    # is symmetrical and both halves matter — a hook with no mount is dead
+    # weight, and a mount with no hook is `hooks/settings.example.json`'s own
+    # stated worst case ("a mount pointing at a missing file is worse than an
+    # absent mount"). Deliberate omissions are not silent: they go in the
+    # template's `_README` and in a [[not_shipped]] entry, which is also why
+    # this check reads the tree rather than a list it could drift from.
+    tmpl = read("hooks/settings.example.json")
+    if tmpl is not None:
+        # Parse, do not grep. The first version of this check grepped the whole
+        # file and reported ops_health_nudge.py as mounted twice — the second
+        # "mount" was the _README line telling the reader how to smoke-test it
+        # by hand. A check that cannot tell a mount from a sentence about a
+        # mount is measuring the wrong thing, and its first output was a false
+        # positive about the file it was written to protect.
+        try:
+            sites = [(event, b.get("matcher", ""),
+                      h.get("command", "").replace("\\", "/")
+                       .rsplit("/", 1)[-1].strip('"'))
+                     for event, blocks in json.loads(tmpl).get("hooks", {}).items()
+                     for b in blocks for h in b.get("hooks", [])]
+            mounted = [name for _, _, name in sites]
+        except (json.JSONDecodeError, AttributeError) as exc:
+            f.add("S", "hooks/settings.example.json", 0,
+                  f"does not parse as the settings shape: {exc}",
+                  "an adopter merges this file into their own settings.json; "
+                  "it has to be valid first")
+            mounted = []
+        mounted = [m for m in mounted if m.endswith(".py")]
+        shipped = {p.split("/")[-1] for p in files
+                   if p.startswith("hooks/") and p.endswith(".py")}
+        for name in sorted(shipped - set(mounted)):
+            f.add("S", "hooks/settings.example.json", 0,
+                  f"{name} ships but is not mounted",
+                  "add its block, or say in _README why it is deliberately unmounted")
+        for name in sorted(set(mounted) - shipped):
+            f.add("S", "hooks/settings.example.json", 0,
+                  f"mounts {name}, which this repo does not ship",
+                  "remove the block; a mount pointing at a missing file is worse "
+                  "than an absent mount")
+        # A duplicate is the same hook on the same (event, matcher) — NOT the
+        # same hook twice. Corrected 2026-08-16, hours after this check shipped:
+        # the source turned ui_verify_guard.py into a PreToolUse/PostToolUse
+        # router, which is two mounts of one file and entirely correct, and the
+        # first version of this rule would have reported the correct wiring as a
+        # defect. A check that fires on the fix is worse than no check.
+        for site in sorted({s for s in sites if sites.count(s) > 1}):
+            f.add("S", "hooks/settings.example.json", 0,
+                  f"{site[2]} is mounted twice on {site[0]} matcher {site[1]!r}",
+                  "one mount per hook per event+matcher; a true duplicate runs "
+                  "the hook twice for the same call")
+
 
 # --- C: collection -----------------------------------------------------------
 
@@ -336,8 +410,16 @@ def check_collection(manifest, files, f):
         return
     declared = {e.get("path"): e for e in manifest.get("collected", [])}
 
+    # The README/NOTICE skip is a NAME heuristic for the lane guides written
+    # here (agents/README.md, hooks/README.md) — repo-authored, so they have no
+    # source to declare. It misfires on a file that is genuinely collected and
+    # merely named README.md: interop-layer/README.md is the source's own
+    # operating manual. A declared entry overrides the heuristic, because
+    # declaring a file IS the assertion that it was collected. Undeclared
+    # READMEs behave exactly as before.
     in_scope = {p for p in files if p.startswith(roots)
-                and not p.endswith(("README.md", "NOTICE.md"))}
+                and (p in declared
+                     or not p.endswith(("README.md", "NOTICE.md")))}
 
     for rel in sorted(in_scope):
         e = declared.get(rel)
@@ -370,6 +452,196 @@ def _ignored(rel):
     return out.returncode == 0
 
 
+# --- D: dead declarations ----------------------------------------------------
+
+def check_dead(manifest, files, f):
+    """Declarations that no longer match anything.
+
+    Every entry in share-manifest.toml widens the gate or explains an absence.
+    A stale one is not inert: an [[allow]] whose finding is long gone is a
+    standing permission nobody re-reads, a [[not_shipped]] for a file that now
+    ships is a published lie about what an adopter gets, and a placeholder token
+    declared with nothing using it is the residue of a rule that was rewritten
+    without anyone checking what pointed at it.
+
+    All three were found by hand on 2026-08-16 — the last one, a token retired
+    from CLAUDE.md on 2026-08-06 and still declared here ten days later, only
+    because the file it belonged to was being read for an unrelated reason.
+    The manifest is the one file in this repo whose whole value is that its
+    claims are true; nothing was checking the claims it had stopped making.
+    """
+    text = {}
+    for rel in files:
+        if Path(rel).suffix.lower() in TEXT_SUFFIXES:
+            t = read(rel)
+            if t is not None:
+                text[rel] = t
+    manifest_rel = "tools/share-manifest.toml"
+
+    # D1 — a [[not_shipped]] path that now resolves inside the repo.
+    #
+    # `partial` is exempt, and the exemption is the point rather than a
+    # loophole: partial MEANS part of it ships, so "it resolves" is what the
+    # entry already says. The first version of this check did not know that and
+    # reported both partial entries as findings — a gate ruling on something it
+    # could not determine, which is the one thing this repo's own rules say a
+    # gate may never do. The three dispositions below all assert total absence,
+    # and for those a resolving path is a contradiction.
+    source_map = manifest.get("source_map", {})
+    tracked = set(files)
+    ABSENT = {"upstream-absent", "referenced-only", "excluded-by-decision"}
+    for e in manifest.get("not_shipped", []):
+        key = e.get("path", "")
+        if not key or key.endswith("/") or e.get("disposition") not in ABSENT:
+            continue
+        if _resolves(key, source_map, tracked, manifest_rel):
+            f.add("D", manifest_rel, 0,
+                  f"[[not_shipped]] {key!r} — but it resolves in this repo now",
+                  "it ships: delete the entry and add a [[collected]] one, or "
+                  "narrow the path if only part of it is absent")
+
+    # D2 — an [[allow]] entry that excuses no current finding.
+    for e in manifest.get("allow", []):
+        rel, kind = e.get("file"), e.get("kind")
+        if not rel or not kind:
+            continue
+        if rel not in text:
+            f.add("D", manifest_rel, 0,
+                  f"[[allow]] names {rel!r}, which is not a tracked text file",
+                  "remove it; an exception for a file nobody publishes is noise "
+                  "that reads as coverage")
+            continue
+        needle = e.get("match")
+        if not any(k == kind and (not needle or needle in sample)
+                   for _, k, _, sample in scan_text(text[rel], rel)):
+            f.add("D", manifest_rel, 0,
+                  f"[[allow]] for {rel} / {kind} matches nothing there any more",
+                  "the finding it excused is gone: remove the entry rather than "
+                  "leave a standing permission for a case nobody can see")
+
+    # D3 — a declared placeholder token that appears nowhere.
+    ph = manifest.get("placeholders", {})
+    blob = "\n".join(t for rel, t in text.items() if rel != manifest_rel)
+    for group in ("substitution", "path_position_ok", "command_position_ok",
+                  "literal"):
+        for tok in ph.get(group, []):
+            if tok not in blob:
+                f.add("D", manifest_rel, 0,
+                      f"[placeholders] {group}: {tok} appears in no tracked file",
+                      "the text that used it was rewritten; drop the token so "
+                      "the vocabulary stays a description of this repo")
+
+
+# --- V: verify against a real source tree ------------------------------------
+
+def check_verify(manifest, files, f, source_root):
+    """The one thing check C says it cannot do — done when the source is here.
+
+    check C's docstring is explicit: it cannot verify that a copy still matches
+    its source, because the source lives on one machine and this repo does not.
+    That is true of the published repo and false of the machine doing the
+    collecting, where both trees are mounted at once. On 2026-08-16 that gap
+    cost six de-identification decisions: a verbatim refresh overwrote files
+    whose repo copies were deliberately different, and every mechanical check
+    passed, because none of them was comparing anything.
+
+    Opt-in on purpose (`--source PATH`) and never silently skipped — an adopter
+    has no source to point at, and a check that quietly does nothing is worse
+    than an absent one. Three findings, and the second is the one that matters:
+
+      verbatim but differs   the copy drifted, or the source moved on
+      edited/template but IDENTICAL to source
+                             the declared edit is gone. Either it was never
+                             applied, or a refresh reverted it. This is the
+                             failure that has no other detector.
+      declared source missing
+                             the entry points at a path the source no longer
+                             has; the disposition rests on a claim that expired
+      source is content-dirty
+                             the source file has uncommitted changes, so the
+                             copy is a snapshot of a state committed nowhere.
+                             COLLECTION-RULES.md step 0 says stop; this is that
+                             step, applied to the paths that actually matter
+                             instead of to the whole tree. Line-ending-only
+                             dirt is not reported — a signal that is routinely
+                             false teaches its reader to ignore it.
+
+    KNOWN LIMIT, found on this check's first real use (2026-08-16) and stated
+    here rather than in a note somewhere else: for an `edited` or `template`
+    entry, V can only assert that the file DIFFERS from the source. It cannot
+    tell "differs by exactly the declared edits" from "differs because the
+    source moved on and this copy is stale". There is no machine-readable form
+    of an edit list, and inventing one would trade a prose record a human can
+    audit for a schema that would rot. The dirty-source finding above closes the
+    common case; the rest is what the `edits` list and a human are for.
+    """
+    root = Path(source_root).expanduser()
+    if not root.is_dir():
+        print(f"FATAL: --source {source_root} is not a directory")
+        sys.exit(2)
+
+    # Content-dirty paths at the source, by line count. --numstat, not
+    # --porcelain: a file shows M for line endings alone, and G-4 of this
+    # check's own review round is that treating that as "stop" trains the
+    # reader to stop obeying.
+    dirty = set()
+    out = subprocess.run(["git", "-C", str(root), "diff", "--numstat"],
+                         capture_output=True, text=True)
+    for line in out.stdout.splitlines():
+        parts = line.split("\t")
+        if len(parts) == 3 and (parts[0] != "0" or parts[1] != "0"):
+            dirty.add(parts[2].strip())
+
+    prefix = "~/.claude/"
+    checked = 0
+    for e in manifest.get("collected", []):
+        rel, src, status = e.get("path"), e.get("source", ""), e.get("status")
+        if not rel or not src.startswith(prefix):
+            f.add("V", "tools/share-manifest.toml", 0,
+                  f"[[collected]] {rel}: source {src!r} is not under {prefix}",
+                  f"record the source path as {prefix}<path>")
+            continue
+        s, r = root / src[len(prefix):], REPO_ROOT / rel
+        if not s.exists():
+            f.add("V", rel, 0, f"declared source {src} does not exist",
+                  "the source moved or was deleted: re-locate it and correct "
+                  "the entry, or remove the file and say why in [[not_shipped]]")
+            continue
+        if not r.exists():
+            continue          # check C already reports this
+        checked += 1
+        if src[len(prefix):] in dirty:
+            # The escape is a declared, dated reason on the entry — the same
+            # shape as every other exception in this manifest, because the
+            # alternative (a red gate for a legitimate transient state) is the
+            # permanently-on alarm nobody reads. An empty ack does not count.
+            ack = (e.get("source_dirty_ack") or "").strip()
+            if ack:
+                print(f"  [V] ack: {rel} — source dirty, declared: {ack[:88]}")
+            else:
+                f.add("V", rel, 0,
+                      f"source {src} has uncommitted content changes",
+                      "your copy is a snapshot of a state committed nowhere: "
+                      "commit at the source and re-collect, or add a dated "
+                      "source_dirty_ack to this entry saying why it does not "
+                      "matter for this file")
+        same = (s.read_bytes().replace(b"\r\n", b"\n")
+                == r.read_bytes().replace(b"\r\n", b"\n"))
+        if status == "verbatim" and not same:
+            f.add("V", rel, 0, "declared verbatim, but differs from the source",
+                  "re-collect it, or change the status and enumerate every edit")
+        elif status in ("edited", "template") and same:
+            f.add("V", rel, 0,
+                  f"declared '{status}', but is byte-identical to the source",
+                  "the declared edits are not in the file — a refresh most "
+                  "likely reverted them; re-apply them or delete the claim")
+    print(f"  [V] compared {checked} collected file(s) against {root}")
+
+
+def _resolves_public(key, manifest, files):
+    return _resolves(key, manifest.get("source_map", {}), set(files), "")
+
+
 # --- seed --------------------------------------------------------------------
 
 def seed(manifest, files):
@@ -394,16 +666,20 @@ def seed(manifest, files):
 # --- main --------------------------------------------------------------------
 
 CHECKS = {"L": check_leak, "P": check_placeholder, "R": check_reference,
-          "S": check_structure, "C": check_collection}
+          "S": check_structure, "C": check_collection, "D": check_dead}
 NAMES = {"L": "leak", "P": "placeholder", "R": "reference",
-         "S": "structure", "C": "collection"}
+         "S": "structure", "C": "collection", "D": "dead-declaration",
+         "V": "source-verify"}
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--check", default="LPRSC",
-                    help="subset of LPRSC (default: all)")
+    ap.add_argument("--check", default="LPRSCD",
+                    help="subset of LPRSCD (default: all). V requires --source.")
+    ap.add_argument("--source", metavar="PATH",
+                    help="path to the source environment; enables check V, "
+                         "which compares every collected file against it")
     ap.add_argument("--seed", action="store_true",
                     help="print undeclared placeholders and exit; writes nothing")
     args = ap.parse_args()
@@ -422,6 +698,9 @@ def main():
         return 2
     for c in selected:
         CHECKS[c](manifest, files, f)
+    if args.source:
+        check_verify(manifest, files, f, args.source)
+        selected.append("V")
 
     if not f:
         print(f"share gate CLEAN — {len(files)} tracked file(s), "

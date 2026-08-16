@@ -1,14 +1,16 @@
 ---
 name: workflow-checkpoint
 description: >-
-  Phase-archiving and context-reconstruction for long-running multi-phase /
-  multi-session projects. Trigger when (a) a phase/milestone completes and the user will
-  CONTINUE — ask whether to checkpoint, append a scannable section to
-  references/<project>-phase-log.md (never overwrite), then offer /compact; or (b) a new
-  session opens with "continue / recap project X" — read only the phase-log to rebuild
-  state at minimum token cost. Always seek consent before writing or compacting. Project
-  ENDING with lessons extraction → project-retrospective. Full disambiguation:
-  ~/.claude/skill-trigger-dict.md.
+  Phase archiving + context reconstruction. Fires inside ONE long session, not
+  only across sessions. (a) A phase boundary passes and work goes on later —
+  proactively ASK whether to checkpoint. Boundaries are usually SPOKEN, not
+  committed: 「先到這邊」「本輪的終止」「收尾」「我會再新開 session/對話」,
+  UAT/驗收 passing, a key document delivered (spec/design/施工卡), or work
+  shifting from discussion into implementation. (b) A session opens with
+  「繼續這個專案 / recap / 接續上次」 — rebuild from the phase-log alone. Do NOT
+  fire on minor edits, single-file changes, pure Q&A, or mid-phase work. Work
+  continues → here; project ENDS with lessons extraction →
+  project-retrospective. Disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # Workflow Checkpoint
@@ -41,10 +43,22 @@ avoiding the need to replay full conversation history and saving usage.
 
 ## A. Phase Checkpoint Flow
 
-1. **Ask first**: "要不要為此階段做一次 checkpoint？" — explain that the result will be written to `references/<project>-phase-log.md`.
+1. **Ask ONCE, carrying all three decisions** (one interruption, not three):
+   "要不要為此階段做一次 checkpoint？順帶回答：本階段有沒有新術語該進詞彙表？
+   寫完之後要不要 /compact？" — explain that the result will be written to the
+   project's phase-log. Steps 5 and §B then act on this answer instead of
+   asking again.
 2. Upon consent, **draft** a high-quality but concise phase summary (do not compact yet).
-3. Write to `references/<project>-phase-log.md`:
-   - Create `references/` and the file if they do not exist; **always append a new section — never overwrite existing content**.
+3. **Resolve the record home FIRST**, then write to `<home>/<project>-phase-log.md`:
+   - If the project already keeps records somewhere (an existing
+     `<project>-phase-log.md` in `~/.claude/references/` OR
+     `<project-root>/references/`), that existing home WINS — never start a
+     second home.
+   - Otherwise default to `~/.claude/references/` (user-level: it survives repo
+     moves and is where sibling skills look first).
+   - State the chosen home in the PROJECTS.md row's entry chain so readers
+     never have to guess.
+   - Create the directory and the file if they do not exist; **always append a new section — never overwrite existing content**.
    - **Write the entire phase log section in English** — this file is read by AI in future sessions, and English maximises token efficiency and parsing reliability.
    - Sections should be **concise and scannable, like index entries**: one sentence per point, focused on keywords and highlights for rapid navigation.
    - **Two-layer principle**: keep the log concise; if this phase has longer details worth preserving (full decision rationale, extended design notes, post-mortems), write them to a separate file `references/<project>-phase<N>-<slug>.md` and add a `- Detail: references/...` line in the log section header. The log itself stays summary-only. Detail files must also be written in English.
@@ -52,10 +66,11 @@ avoiding the need to replay full conversation history and saving usage.
    (Goals / Decisions / Changes / Open Questions), Date is absolute, `- Detail:` link
    resolves if present. Fix in place if not — a checkpoint written near context
    exhaustion is exactly when sections silently go missing.
-5. **Glossary sweep**: ask whether any domain terms crystallized or changed meaning
-   this phase; if yes, update `references/<project>-context.md` (format and rules:
-   `~/.claude/ops/60-bootstrap.md` §E — create lazily, update live, one definition
-   per term). Skip silently if the project has no glossary and no new terms.
+5. **Glossary sweep**: per the step-1 answer (ask again only if step 1 did not
+   cover it), update `references/<project>-context.md` with any crystallized or
+   changed terms (format and rules: `~/.claude/ops/60-bootstrap.md` §E — create
+   lazily, update live, one definition per term). Skip silently if the project
+   has no glossary and no new terms.
 5b. **Journal sweep**: likewise check whether this phase produced unrecorded
    decisions (rejected options + why) or process problems (≥2-round walls, dead
    ends); if yes, append D-/P- entries and refresh the `## Now` block (frontier /
@@ -73,8 +88,11 @@ avoiding the need to replay full conversation history and saving usage.
    `ops/references/project-map.md` §9. Skip silently if no map exists.
 6. **Index row update** (no extra consent needed — covered by the checkpoint consent):
    refresh this project's row in `references/PROJECTS.md` (status / last-checkpoint /
-   next). Create the file from its header template if missing; add the row if the
-   project is not yet registered. Column semantics live in the file's header comment.
+   next). **Re-read the file immediately before editing** — in a multi-session
+   environment the row may have changed since you last saw it; edit against the
+   fresh copy, never a cached one. Create the file from its header template if
+   missing; add the row if the project is not yet registered. Column semantics
+   live in the file's header comment.
    Then run `python ~/.claude/tools/project-dashboard.py` to regenerate the derived
    views; if Python is unavailable, say so and continue — the checkpoint never
    blocks on the dashboard.
@@ -90,6 +108,10 @@ avoiding the need to replay full conversation history and saving usage.
 - Status: in-progress / completed
 - Date: <timestamp>
 - Detail: <references/...-detail.md — omit this line if no detail file>
+- Transcript: <session-id>.jsonl — archived: yes/no  (the raw-history pointer;
+  compaction chains continuations into NEW files, and cleanupPeriodDays
+  — default 30 days — deletes them, so this line is what lets anyone find the
+  history before it ages out)
 
 ## Goals
 - Bulleted list of goals for this phase
@@ -122,6 +144,16 @@ avoiding the need to replay full conversation history and saving usage.
      - Critical rules that will definitely be needed to continue the project (design principles, important constraints)
      - A reminder line that global language rules stay in force after compaction (replies in Traditional Chinese; machine-read output in English)
    - Safe to drop: debug details, outdated option exploration, step-by-step trial-and-error history.
+3. **Transcript fate (state it, don't assume it)**: compaction deletes nothing —
+   the continuation opens a NEW `.jsonl` chained to the old one — but
+   `cleanupPeriodDays` (default 30) WILL delete both halves eventually. On
+   the source machine a daily mirror task copies transcripts to an archive
+   directory outside the retention window (ruling D-033); with one, check
+   `_mirror-logs\last-run-status.txt` shows a recent OK, then set
+   `archived: yes` and move on. If the mirror is absent or stale, offer to
+   copy the session's `.jsonl` (and its `<id>/subagents/` folder, if present)
+   to the archive folder manually. NEVER parse the jsonl internals — the
+   format is documented as unstable; copy whole files only.
 
 ---
 
@@ -133,9 +165,12 @@ avoiding the need to replay full conversation history and saving usage.
    - **Fallback — phase-log missing or clearly stale** (session died before a
      checkpoint was written): tell the user reconstruction will cost more than a
      normal recap, and upon consent rebuild from persisted session transcripts
-     (session-management search tools if available; otherwise recently modified
-     files + `git log`). Afterwards, offer to write a catch-up checkpoint section
-     so the next session doesn't pay this cost again.
+     (session-management search tools if available; the transcript-archive
+     folder and the DIT viewer are also reconstruction sources — a compacted
+     session's older files chain via `logicalParentUuid`, but hand whole files
+     to tools, never parse the jsonl internals yourself; otherwise recently
+     modified files + `git log`). Afterwards, offer to write a catch-up
+     checkpoint section so the next session doesn't pay this cost again.
 2. Reconstruct understanding from the phase-log: project goals, Phase progress and status, most recent key decisions, unresolved TODOs.
 3. Only load a detail file (`- Detail:` link) when deep-diving into a specific phase is necessary.
 4. Summarize the current state in one sentence, then **ask the user** which Phase / TODO to start from.

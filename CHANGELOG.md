@@ -9,6 +9,383 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-16 (third) — the twin gets fixed upstream, and the sweep breaks again
+
+Two things closed the day: the sibling gap the co-upgrade sweep found was fixed
+at the source, and a second re-collection round tested the morning's rules
+against real drift. The rules held. The TOOLING did not, which is the finding.
+
+**The twin, fixed at the source.** `skill-share-packaging` had the same shape as
+the morning's failure and sharper: hard rule 1 says fixes flow canonical → copy
+and never back, so the canonical skill by construction never learns what an
+export decided; A6 wrote those decisions to a share-notes file, and nothing read
+it. A re-export re-derived everything from the canonical and dropped every
+judgement the canonical cannot carry. New A0 globs for a previous
+`SHARE-NOTES.md` and refuses to start from scratch on a hit; A6 now fixes the
+file's NAME (A0 depends on it) and requires each entry to say whether it must
+survive the next export. Fixed in the source environment at `88490bc`, then
+collected here — which is the correct direction, and the reason the share repo's
+copy was not edited in place.
+
+**The sweep broke the same six decisions a second time, hours after the rule
+against it was written.** The rewritten `COLLECTION-RULES.md` says sort the
+candidate list into A and B before copying. The script did not know that, so it
+ran A over B's files again — same four excluded files re-introduced, same share
+edits reverted. The round's own disposition had predicted exactly this
+("if V fires on a real reverted edit, procedure B did not work — the answer is
+mechanical, not editorial"), and it did. The refresh script now reads the
+manifest and REFUSES by default: it touches a file only when the declared status
+is `verbatim`, names every `edited`/`template` file it skipped, and names every
+file with no entry at all. Procedure B's sorting step, mechanised.
+
+**Two declared edits ended because upstream fixed them.** The source removed the
+private asset-library pointers from `hooks/ui_verify_guard.py` and
+`ops/environment.md` itself, so both are `verbatim` again. Check V is what
+surfaced it — "declared 'edited', but is byte-identical to the source" is the
+same finding whether an edit was dropped by accident or retired by upstream, and
+V cannot tell them apart. Both entries keep their superseded edit text under a
+comment saying which of the two happened, because that distinction is exactly
+what a later reader cannot reconstruct.
+
+**Check S5 was wrong about duplicates.** It required every hook to appear in the
+mounting template exactly once. The source turned `ui_verify_guard.py` into a
+PreToolUse/PostToolUse router — one file, two events, entirely correct — and S5
+would have reported the correct wiring as a defect. Duplicates are now judged per
+(event, matcher, hook), and the template gained the PostToolUse mount it had been
+missing, which is a half-wired hook the check existed to catch and nearly
+prevented itself from catching.
+
+**One new source reference excluded.** `ops/references/browser-pane-pixel-route.md`
+is normally exactly the class this repo ships. Its payload is runnable recipes
+carrying an absolute home path, a private asset's source path, an npx-cache
+directory keyed by a content hash, and three private project names. Step 4 of the
+decision procedure does not apply — the machine-specific part is not incidental
+to the recipes, it IS the recipes — and a template with the measurements removed
+would be a shape with no measurement in it. The portable half already ships in
+`environment.md` and `global-claude-md/CLAUDE.md`, both refreshed the same day.
+
+**Two dirty-source acks cleared by their own review-when.** Both said "that work
+lands at the source"; it landed mid-round, the files were re-collected, and the
+acks are gone. The third (`references/PROJECTS.md`) has no review-when on
+purpose — a live project index is dirty as its normal state — and remains.
+
+## 2026-08-16 (later) — the round's own findings become checks
+
+Same day, second pass. Everything below exists because the morning's collection
+found it by hand, and a finding that stays a story is a finding that recurs.
+
+**Two new checks, one of them opt-in.**
+`D` (dead declaration) removes entries that no longer match anything: an
+`[[allow]]` outliving its finding, a `[[not_shipped]]` for a file that now
+ships, a placeholder token nothing uses. All three classes were live when it was
+written — including two `[[allow]]` entries added that same morning and made
+dead by a restore four hours later, which is now recorded in the manifest as the
+clearest small example of the pattern.
+`V` (source-verify) needs `--source <path>` and does the one thing check C's own
+docstring says it cannot: compares every collected file against the real source.
+The finding that has no other detector is **"declared 'edited', but is
+byte-identical to the source"** — a declared edit that a refresh reverted, which
+is exactly what happened to six files this morning while every repo-local check
+passed. It is opt-in because an adopter has no source to point at, and it is
+never silently skipped.
+
+**Check S gained mount parity.** Every `.py` under `hooks/` appears in
+`settings.example.json` exactly once, and nothing else does. The template had
+been mounting 7 of 9.
+
+**Both new checks were wrong on their first run, and that is recorded because it
+is the lesson.** D reported the two `partial` dispositions as findings — a
+`partial` entry MEANS part of it ships, so "it resolves" is what the entry
+already says. S reported `ops_health_nudge.py` as mounted twice; the second
+"mount" was the `_README` line telling the reader how to smoke-test it by hand.
+Both were instruments ruling on something they could not determine, on the first
+output of checks written to enforce exactly that rule. D now exempts `partial`;
+S parses the JSON instead of grepping the file.
+
+**The test suite went from 5 cases to 10, two of them negative controls.** A
+system path on a drive letter must NOT fire; the current tree must pass. A gate
+calibrated only on what it should catch scores 100% by rejecting everything.
+
+**`COLLECTION-RULES.md` was rewritten where it was imprecise enough to cause the
+damage.** The morning's failure was procedural, not careless: the file said
+"verbatim is the default" and said nothing about a file that is already here.
+- Rule 1 now splits: verbatim is the default for a FIRST collection and **never**
+  for a refresh, and the procedure splits with it — **A** for a file not here
+  yet, **B** for one that is, with sorting the candidate list by which procedure
+  it needs made an explicit step, because a bulk sweep runs A over B's files.
+- B carries the scan the gate cannot do, named as four concrete classes, all
+  four of which were live findings this morning: a private-tree pointer with no
+  path in it, subject matter arriving inside a file whose structure is what
+  ships, a pointer into an excluded directory, and a count claim in prose that
+  the refresh has just falsified.
+- Rule 2's scrub-target list is now enumerated rather than inferred, including
+  the non-system-drive class, and states what is NOT a target — project names,
+  ruling ids, evidence lines.
+- New rule 7: reach a verdict this round. A deferral that survives two rounds is
+  a decision made by nobody. New rule 8: the source's own words about sharing
+  are first-hand evidence and outrank your reading of the file.
+- Step 0 now defines "dirty" as a CONTENT difference: a file showing `M` for
+  line endings alone is not a reason to stop, and treating it as one teaches you
+  to skip the check.
+- The decision procedure gained the inverse of its row 2: excluding something a
+  shipped file ROUTES to is a two-part act — the disposition, and the edit to
+  whatever pointed at it. Nothing detects the half you forget.
+
+**One disposition closed rather than rolled forward.** The three source-side
+tests for hooks this repo ships were recorded this morning as an explicit
+deferral. User ruling: not collected. The entry now decides instead of deferring
+— per the new rule 7, and because the entry itself was the first thing that rule
+would have caught.
+
+## 2026-08-16 — the other five roots, and what a verbatim sweep costs
+
+Full re-collection against source commit `f8605e4`. Two things happened: the
+repo caught up with three days of source drift, and the mechanism that was
+supposed to make that safe turned out to cover three of its eight roots.
+
+**Check C was watching 3/8 of what it should have been.** `collected_roots` was
+`hooks/`, `agents/`, `interop-layer/`. Everything under `claude-ops/`,
+`global-claude-md/`, `environment-guide/`, `skill-toolkit/` and `thinking-notes/`
+— 118 files — had been collected since the day each folder was created and
+declared nowhere. That is the same finding as 2026-08-15's, one level wider: the
+2026-08-15 entry fixed the one directory whose incident wrote `COLLECTION-RULES.md`
+and did not ask which others were in the same position. All eight roots are
+declared now, 99 `verbatim` / 14 `edited` / 5 `template`, with `verbatim` computed
+by byte comparison rather than asserted. Positive control run before believing
+it: deleting one entry and flipping one `verbatim` to `edited` both produce the
+expected finding, so the check is looking at the new roots rather than passing
+them by.
+
+**What the undeclared roots were hiding, found the hard way.** The refresh was
+run as a verbatim sweep first. It silently reverted six de-identification
+decisions across two skills — `scientific-research-guide`'s domain manifest, its
+research-state fixture and its citation inbox came back carrying the author's
+actual research topics, and `motion-design`'s notes came back pointing at a
+vendored Three.js package this repo deliberately does not redistribute. Nothing
+flagged it. The decisions had been made in commits (`fde9ae3`, `81dfe82`) and
+nowhere a check could read, which is exactly the failure `COLLECTION-RULES.md`
+opens with, reproduced from the other direction: not an unrecorded edit, but an
+unrecorded DECISION NOT to take the source's text. All six are restored and all
+six are now `[[collected]]` entries with their reasoning.
+
+**A leak class the gate could not see.** The same sweep brought in nine absolute
+paths on a second drive — a private asset library, real project roots, the
+operator's own publication tree. Every one scanned clean: the leak patterns knew
+about home directories and nothing else. Three more had been sitting in
+`Global_skill_update.md` since long before this round, published. `sharelib.py`
+gained an `absolute local path (non-system drive)` pattern; system roots and
+`Users` are excluded, and four narrow `[[allow]]` entries cover the two files
+where such a path is the worked example rather than a location.
+
+**The gate's own leak patterns were weaker than the source's.** Running
+`interop-layer/test_interop.py` — collected this round — against this repo's
+`sharelib.py` failed two of its known-TRUE samples: `sk_live_`/`sk_test_` and
+`AIza` key shapes were in the source's inline list and were dropped when
+`interop.py` was refactored to import from here on 2026-08-11. The manifest
+entry claimed "behaviour is identical — same patterns"; it was not, and for the
+gate's whole life a Stripe-shaped or Google API key would have published cleanly.
+Both patterns are added, the false claim is corrected in place rather than
+deleted, and the calibration set that caught it now ships and runs here. This is
+the argument for two-sided calibration, from the repo's own rules, landing on
+the repo itself.
+
+**New content.** Four hooks and one test join the mechanism layer:
+`context_runway_shadow.py` (context runway vs an unwritten checkpoint),
+`fieldwork_threshold_notice.py` (main-session fieldwork vs the delegation
+threshold), `browser-pane-allowlist.json` (the pane guard was rewritten from
+blocklist to allowlist at the source, so the second file is now load-bearing),
+and `interop-layer/test_interop.py`. Two ops references —
+`external-dispatch.md` and `skill-trigger-classes.md` — and one skill,
+`skill-co-upgrade`, bringing the toolkit to 14 of the source's 15.
+
+**`hooks/settings.example.json` had been quietly short.** It mounted 7 hooks
+while 9 shipped. Re-derived against the source's committed `settings.json`; the
+invariant to check after any hook change is now stated in its manifest entry —
+every `.py` under `hooks/` appears exactly once, and nothing else does.
+
+**Dispositions re-checked, two of them wrong.** `outputs/` was described as a
+scratch directory whose contents are personal, with a fallback saying it is "not
+a rule surface". The source began tracking it on 2026-08-16 precisely because it
+is one — the retrospective layer, and two shipped files cite into it by name. It
+stays excluded, for the reason that survived (every artifact is a finding about a
+specific real project) rather than the reason that did not. `tools/` was
+re-checked per file as its own 2026-08-15 correction demanded: nine entries,
+three of which are tests for hooks this repo ships and are deferred rather than
+judged — recorded as a deferral so the next round does not read it as settled.
+New entries for `references/` (the source's project-memory layer, 15 files),
+`tools/extdispatch/`, and the two external-dispatch hooks, which are portable and
+would still be harmful to mount without the dispatcher they gate.
+
+**One gate change worth naming.** `[placeholders] literal` was added to
+`share-manifest.toml`, for tokens that are not placeholders at all — a harness
+tag quoted in prose. The alternative was declaring `<browser_surfaces>` under
+`path_position_ok`, which asserts that a human confirmed a reader can fill it in.
+Recording a false claim to silence a finding is the decay this file exists to
+prevent, so the vocabulary grew instead.
+
+## 2026-08-15 (later) — the caveat is cleared, and two frozen rows come out
+
+The morning's collection ran against an uncommitted source tree and said so. The
+commits have now landed — eight of them, split by theme — and every collected
+file was re-collected against `df21070`. `tools/share-manifest.toml` names the
+commits; `git show <sha>:<path>` reproduces the bytes.
+
+**Four agent definitions were declaring `verbatim` falsely.** Not drift here —
+drift at the SOURCE: `engineering-backend-architect`, `engineering-frontend-
+developer`, `testing-api-tester` and `testing-qa-engineer` had uncommitted local
+edits when they were last collected. Check C cannot see this (it says outright
+that it cannot compare against a source it does not have), which is exactly the
+"a judgement made once, in prose, decays silently" failure `COLLECTION-RULES.md`
+opens with. The edits turned out to be publishable — `effort: medium` completing
+the roster's cost declarations, and a `file:line` + "label unverified claims"
+output contract for the two testing definitions — so they were committed at the
+source and re-collected. All four are `verbatim` again, and now truthfully.
+
+**Two targets left the registry.** codex and Antigravity had been sync-off since
+2026-08-11 and their rows were still frozen at a 2026-07-10 verification — sitting
+directly under a heading that says those locations are volatile facts requiring
+re-verification. One of the two applications had since been uninstalled, so its
+row could not be re-verified at all. The reason for keeping them ("the path +
+profile + cross-tool caveat are verified facts worth keeping") had quietly
+inverted into its opposite. Both rows are gone; the `disabled` mechanism stays in
+`interop.py` with no target using it, so a future sync-off ruling does not have to
+re-invent it. **The portable half:** a registry row reads as a fact sheet even
+when its cells are quotations, and annotating one does not fix that — removing it
+does. Re-adding a target now has to walk the checklist that re-derives the paths
+from the platform's current docs.
+
+**The rule-registry entry was 60 lines and carrying three narratives that were
+not standing reasons.** A `config-self-audit` pass (owed for a rule-layer change
+and skipped that morning) cut it to 30, dropped a field that was not in the
+schema, and moved the check-11 material to the relaxation-gate entry where
+someone looking for it would actually grep. What came out became
+`claude-ops/ops/lessons.md` **L-016** — *a check that cannot fail is
+indistinguishable from a check that passes*, with the day's three instances
+(predicate satisfied by prose; report nobody invokes; eval whose subject was
+retired) and a three-part fix. **L-005** goes to `hits: 3`: the frozen registry
+rows are its "carried claim reads as an established fact" mechanism again, in its
+highest-risk carrier.
+
+**One declared exception.** Three statements in this repo's frozen records still
+say `light`, or describe the profile as an open question: the `At a glance` table
+in the 2026-08-11 entry below, that entry's `interop-layer/` bullet, and
+`Global_skill_update.md`'s `open:` field. They were correct on the day they were
+written, and rewriting a dated record to match today is tampering — which is why
+the earlier pass deliberately left them alone and added a new entry instead. On
+the requester's instruction they now carry a **forward pointer**, marked inline as
+a later annotation, with the original sentence untouched in every case. The rule
+is unchanged: a frozen record is appended to, never edited. This is the narrow
+exception — a reader landing on a stale row from a search result had no way to
+know a newer entry existed.
+
+## 2026-08-15 — interop-layer joins the provenance regime, and the drift it hid
+
+`interop-layer/` had been collected since 2026-07-10 and declared nowhere. It
+was in no `collected_roots`, so check C never looked at it — and in that gap the
+copy drifted **in both directions at once**: failure 1 (over-scrub) and failure
+2 (under-declare) of `tools/COLLECTION-RULES.md` happening simultaneously, in
+the one directory whose own over-scrub incident (2026-08-07, recorded below) is
+the reason that file exists. Six files re-collected; all six now declared.
+
+**What this repo had that the source did not.** Two things, both kept, both now
+declared as edits so the next diff does not have to re-derive them: `interop.py`
+imports the leak patterns from `tools/sharelib.py` instead of defining them
+inline (one definition, two callers — the source has one caller and no second
+gate to keep in step, so importing there would buy nothing), and
+`MIGRATION-MAP.md` carries a share-repo-only section on disposition classes (it
+documents this repo's manifest and gate; the source has no publication layer and
+would receive four dangling citations). That section now states its own backflow
+exemption inline.
+
+**What this repo had that was simply wrong.** `README.md` carried four
+undeclared edits, all reverted to source. The instructive one is a deleted
+pointer to `OPERATOR-GUIDE.md` — a citation that *resolves in this repo*
+(`source_map` sends it to `environment-guide/OPERATOR-GUIDE.md`), removed for no
+stated reason. That is the same failure in miniature, committed after the rule
+against it was written. Also reverted: `Claude 專屬` generalised to `平台專屬`
+when the specificity was the point; the `archive/interop-refs-2026-08-11/` path
+replaced by a vague phrase while this very file names it openly two entries
+down; and a reordered list carrying no information either way.
+
+**What the source had that never flowed back** — fixed at the source first, then
+re-collected: the `scan` subcommand was missing from the manual's command list
+though it has existed since 2026-08-11; `status` was described as covering
+"three targets" when two are `[off]`; the leak gate was absent from the
+operating invariants; and "known boundaries" still offered reference-compile as
+a live migration path for method content, a claim the same file retires four
+paragraphs earlier.
+
+**Neither side had the block count right.** The manual said 6-of-13 `full`-only
+blocks, this copy said 8-of-15; `parse_blocks()` reports **15 blocks, 8 `light`,
+7 `full`-only**. Both figures were hand-maintained restatements of something
+derivable, so both rotted. Corrected, with a note to re-derive rather than copy
+the sentence.
+
+**opencode moved `light` → `full`** (ruling 2026-08-15). The reasoning is worth
+more than the setting: the birth-budget argument that picked `light` inverted
+once someone measured it. No instruction file had ever been deployed, so the
+target fell back to reading the source's `CLAUDE.md` — ~16.5 KB of
+Claude-Code-specific mechanism a non-Claude worker cannot act on. `full` is
+~11 KB, so the "heavier" profile costs the worker *less* context than the status
+quo it replaced. Port the shape of that argument, not the number: it turns on
+what YOUR target falls back to when nothing is deployed.
+
+**And nothing was watching.** `interop.py status` had been printing `[missing]`
+and exiting 1 since 2026-08-11 — the target was never deployed at all — and
+no one saw it, because nothing ran it. `hooks/ops_health_nudge.py` gains
+**check 12**: a stat()-only session-start screen (artifact absent, not ours, or
+older than its source; curation stamp absent or behind `CLAUDE.md`) whose only
+remedy is "run `status`". It routes to the authority instead of impersonating
+it — mtime is not the commit comparison `status` makes — so a false positive
+costs one cheap command. It reads the target registry out of `interop.py`
+rather than re-declaring it. One synthetic-tree case caught a real bug in the
+check's first draft: a machine with no interop layer at all got a permanent,
+unfixable nudge.
+
+**Check 11 had never once fired correctly.** Found while testing the above. It
+asked `"ops-relaxation:" not in text` — and the global `CLAUDE.md` contains that
+token in prose ("offer to record `ops-relaxation:` in project CLAUDE.md"), so
+every project `CLAUDE.md` derived from it passed vacuously. A source-wide grep
+that day found *no* occurrence of the token anywhere that was a real
+declaration; the check had been silently green since birth. The lesson is
+portable and cheap: **a mention is not a declaration — require the value, not
+the key.** It now demands a level (`ops-relaxation: L1`), accepting a bullet or
+bold wrapper but not the backtick-quoted form that `05-authority.md`'s own
+example uses.
+
+This repo's copy of the hook now carries **one declared specialization**, its
+first: check 11 runs only when `ops/05-authority.md` is present. Taking the
+hooks lane without the ops lane is a supported outcome here — the lanes are
+independent — and such an adopter would otherwise be nagged every session about
+a key defined nowhere they can read and satisfiable by no file they own. A
+permanently-on alarm is the kind nobody reads, and it would train them past the
+other eleven checks. It is not back-flowed: on the source machine the ops layer
+is always present, so the same gate could only mask a real ghost-rule failure,
+which is check 4's job. `hooks/ops_health_nudge.py` moves from `verbatim` to
+`edited` accordingly.
+
+The test suite runs against **either** copy and asserts the opposite outcome per
+edition — 21/21 on both.
+
+`acceptance-evals.md` eval 8 was replaced. It required reading
+`interop-refs/design-protocol.md` — a directory retired 2026-08-11 that exists
+at no target — so it could neither pass nor fail: coverage on paper, measuring
+nothing. It now tests what `delegation_block()` actually promises.
+
+**One gate change.** Check C skipped any file named `README.md` under a
+collected root — a name heuristic for the lane guides written here, which
+misfires on `interop-layer/README.md`, a genuinely collected file that happens
+to share the name. A declared `[[collected]]` entry now overrides the heuristic;
+undeclared READMEs behave exactly as before. Gate clean; 5/5
+`test_share_gate.py` cases unchanged.
+
+**Recorded caveat — CLEARED the same day, see the entry above.** The source
+working tree was dirty at collection time: the edits above were applied but not
+committed, on the requester's instruction, so the bytes here matched a working
+tree rather than commit `86c6b39`. Left standing rather than deleted, because a
+retracted caveat is evidence the record works. The commits landed and everything
+was re-collected against `df21070`.
+
 ## 2026-08-14 (later) — the source audit: most of it was never collected
 
 The gate above made the repo honest about what it did not ship. The obvious next
@@ -252,6 +629,13 @@ the file-by-file breakdown.
 | Root `archive/` | Did not exist | New, gitignored — holds the retired `refs/` playbooks for local traceability, never published |
 | E2 (delivery-gate shadow hook) / E3 (its enforcement phase) | n/a | **Deliberately excluded** — unfinished, user-flagged out of scope; zero mentions anywhere in this repo |
 
+> *Annotation added 2026-08-15, by exception — the row above is left exactly as
+> written.* The `interop-layer targets` row froze a state that has since changed
+> twice: the profile moved `light` → `full`, and codex and Antigravity were
+> removed from the registry outright. The row remains correct **as a record of
+> 2026-08-11**; it is not correct as a description of today. See the 2026-08-15
+> entries at the top of this file.
+
 Prompted by a matching structural pass in the source environment over 2026-08-08
 through 2026-08-11: a chronological audit log that needed permanent-maintenance
 rotation was replaced by a rule-keyed registry, two CLAUDE.md rules were sunk into
@@ -310,6 +694,9 @@ answer is "excluded on request, not merely omitted."
   codex and Antigravity both now sync-off by user ruling; opencode is the sole
   live target, `light` profile, with new notes on its CLI verification and an
   inbound skill-loading dependency this repo does not control.
+  *(Annotation added 2026-08-15, by exception; the sentence above is unchanged.
+  `light` became `full`, and the two sync-off targets were later removed from
+  the registry entirely — see the 2026-08-15 entries.)*
 - **New root `archive/`** (gitignored, mirrors the `scientific-research-guide/archive/`
   convention already in this repo): holds the retired interop `refs/` playbooks,
   kept on disk for traceability, never published.

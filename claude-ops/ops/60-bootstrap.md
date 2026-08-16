@@ -131,6 +131,18 @@ Rules:
 - **Challenge, don't just consume**: requester usage contradicts an entry →
   surface it and update; a stale definition is worse than none.
 - **Glossary only**: no specs, implementation notes, or scratch content.
+- **List and round IDs are terms too** (added 2026-08-12, `lessons.md` L-008
+  recurrence 3): any checklist, test round, or numbered plan cited outside the
+  document that defines it gets an entry — prefix, what it covers, and
+  `[superseded: <old prefix>]` when it replaces one. Superseded prefixes STAY
+  listed: the reason to look one up is precisely that you just met an old
+  citation. Numbering rules (generation prefix, no bare ordinals, filename
+  carries the generation): `~/.claude/LABEL-REGISTRY.md` §3. Skipping this is
+  how "the 5th item" comes to mean two different tests in one project.
+  Ad-hoc project documents (specs, evals, UAT lists, remediation plans) are
+  named `<project>-<kind>[-<generation>].md` and **must not abbreviate a phrase
+  into a label** — LABEL-REGISTRY §4, sweep check 8. The four ledger filenames
+  above are governed and hold at 8/8; every ungoverned name drifted.
 - **ADR gate** (three ALL required, else no ADR): hard to reverse + surprising
   without context + a genuine trade-off existed. ADRs live in the project's
   own docs (`docs/adr/` or per convention), one line of gist here.

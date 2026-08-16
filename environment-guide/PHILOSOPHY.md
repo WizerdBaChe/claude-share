@@ -88,7 +88,8 @@ per-project journal，新 session 從最新條目恢復進度並**重新確認�
 ├── PHILOSOPHY.md              本文件：非規範性世界觀（人讀）
 ├── settings.json              權限、hooks 掛載、預設模型 ⚠️ 內含機器綁定路徑
 ├── skill-trigger-dict.md      skill 路由字典：哪句話觸發哪個 skill（按需載入）
-├── Global_skill_update.md     審計軌跡：append-only 的演化敘事索引
+├── audit-archive/     審計軌跡：已凍結（2026-08-11），僅存歷史敘事
+│                   （本分享版把它以 `Global_skill_update.md` 之名放在 repo 根目錄）
 ├── ops/                       規則層：專案作業的判斷框架（路由表按需載入）
 │   ├── OPS.md                 入口 + 六條硬規則 + 路由表
 │   ├── 05-authority.md        規則分類 + 放寬閘門（人決定放寬程度）
@@ -112,9 +113,11 @@ ops/ > skill 內文。字典與索引永遠只是索引，本體以各自的檔�
 **Tier 1 —— 不可再生，遺失即重寫**（全部已在 git repo 內）：
 - `CLAUDE.md`（全域偏好——多次專案回顧萃取的裁決紀錄）
 - `ops/` 全部（除 `environment.md` 外都可跨環境攜帶）
-- `skills/` 自製 11 個（含 references/、evals/）
-- `hooks/` 兩支 Python 腳本
-- `skill-trigger-dict.md`、`Global_skill_update.md`、`.gitignore`、本文件
+- `skills/` 自製 14 個（含 references/、evals/）
+- `hooks/` 7 支 Python 腳本 + `browser-pane-blocklist.json`
+- `agents/` 自訂 subagent 定義 8 個（能力白名單 + 路由表 `ops/20-dispatch.md`）
+- `skill-trigger-dict.md`、`audit-archive/`（凍結，歷史；本分享版即根目錄的
+  `Global_skill_update.md`）、`.gitignore`、本文件
 - `interop/`(跨 agent 同步層:可攜規則唯一源 + 編譯器 + 遷移地圖;
   手冊見 `interop/README.md`)
 - `settings.json`（權限與 hook 掛載的形狀有價值；路徑要改，見下）
@@ -162,5 +165,7 @@ sessions/telemetry/cache 等執行期狀態、任何 credentials。
   對應的實際事件或機制），不寫願景。某條信念若被實踐推翻，改寫它並在
   審計軌跡留一行——信念被推翻是系統在學習，不是失敗。
 - 溯源：本文件初版寫於 2026-07-09，同日完成反官僚重整（放寬閘門、決策憲章、
-  token 瘦身、防再膨脹護欄）。演化敘事的完整索引見 `Global_skill_update.md`，
+  token 瘦身、防再膨脹護欄）。2026-08-11 前的演化敘事見已凍結的
+  `audit-archive/`（本分享版：`Global_skill_update.md`），其後的規則理由見
+  `ops/rule-registry.md`，
   逐 diff 歷史見 git log。
