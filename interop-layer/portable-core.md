@@ -8,6 +8,8 @@
     <!-- block:<id> profiles:<p1>,<p2> -->
     ...markdown content...
     <!-- /block -->
+  (The angle-bracket placeholders are what keep this example from being
+  parsed as a real block — never replace them with word characters.)
 
   Profiles: light (lightweight-task agents) ⊂ full (goal-oriented agents).
   Content policy: agent-neutral English only. No references to Claude Code
@@ -67,6 +69,18 @@ project memory override these when they conflict.
   actually using in that moment. Never mix PowerShell and Bash syntax
   inside one fenced block.
 - Line endings for scripts and config files: CRLF.
+- When calling a native executable from PowerShell with an argument that
+  may contain `"` or `[` (commit messages above all): pass it via
+  `-F <file>` or stdin, never inline — the native-arg encoder does not
+  escape them, so the argument ends mid-string, and the failure is SILENT:
+  the command chain keeps running, a later `merge` can report "Already up
+  to date", and a branch gets deleted un-merged. Here-strings solve
+  MULTILINE, not embedded quotes. Verify afterwards with
+  `git merge-base --is-ancestor <sha> HEAD`.
+- When embedding a Windows path in Python: use a raw string
+  (`r"C:\Users\..."`) or forward slashes — in a normal string `\t`, `\n`,
+  `\U` are silently reinterpreted rather than erroring. A raw string
+  cannot END in a backslash; use `pathlib` when it would.
 - When enumerating boundary or compatibility cases (resize, DPI,
   reduced-motion, devices, shells): check the known environment facts
   first and trim the generic list to what actually applies. Items kept
@@ -145,7 +159,8 @@ task with a manual-acceptance checklist — numbered steps, each with a
 concrete action and the expected observation, executable blind by someone
 who did not write it — without being asked. Include no fewer stress-path
 items (rapid toggling, extreme inputs, tab-switching) than happy-path
-ones.
+ones. Leave a non-destructive way to inspect what is being judged — a
+check nobody can run without mutating the artifact is not a check.
 <!-- /block -->
 
 <!-- block:canonical-method-discipline profiles:full -->
@@ -159,10 +174,16 @@ ones.
   stop patching. Produce a current-vs-canonical comparison plus ONE minimal
   diagnostic experiment (or a specific info request to the user) before
   any further edit. Guessing a 3rd time is not allowed.
+- When the diagnostic's own verdict is "inherent to the current
+  representation": compare representations next (candidates × cost /
+  quality / dependencies), not another patch — the tell is a fix that
+  patches the hole the last fix left.
 - When fixing a bug in code that already passed user acceptance: before
   editing, list the already-accepted behaviours; after the fix, re-check
   each and state that none regressed. Overwriting previously-accepted
-  design counts as a new bug.
+  design counts as a new bug. The same applies to LOOSENING a gate — its
+  accepted behaviour is what it used to catch, so ship the change with a
+  regression case reproducing the original failure.
 <!-- /block -->
 
 <!-- block:volatile-facts profiles:full -->
@@ -198,6 +219,27 @@ realtime-render deliverables ship with a toggleable FPS / object-count
 readout.
 <!-- /block -->
 
+<!-- block:gates-and-controls profiles:full -->
+## Gates and controls — when you design, modify, or read an automated gate
+
+- A gate (acceptance layer, CI check, parser, evaluator, lint rule) may
+  only rule on what it can DETERMINE; for anything else the correct output
+  is downgrade-and-forward, never veto. A negative-but-plausible verdict
+  ("that source is unreliable", "0/8 passed") is a false negative until
+  the instrument is checked: report the ruler beside the rate, use a
+  positive control, and calibrate with a known-TRUE input as well as a
+  known-false one — a gate that rejects everything scores 100% on a
+  one-sided calibration. Persist whatever the gate may reject BEFORE it
+  runs, and never publish a rate the metric cannot print the evidence for.
+- When authoring an invariant, checklist item, gate, or standing rule:
+  write it as a property of the ASSET ("this file must never contain X"),
+  not as an instruction about a path ("when editing foo, remember X") — an
+  instruction is only as good as the reader's memory of it. Any rule
+  resting on a fact outside the repo gets a review trigger naming the
+  EVENT that invalidates it: a control that rots silently is worse than
+  none, because it is still being trusted.
+<!-- /block -->
+
 <!-- block:approach-wrong-signals profiles:full -->
 ## Signals the approach is wrong (not that you should try harder)
 
@@ -216,7 +258,10 @@ First state whether the core need is already met; if it is, recommend
 stopping. Never change for change's sake. When you must ship a baseline
 component whose quality — or whose reading of the requirement — you
 doubt, put it behind a swappable interface so the weak part can be
-replaced without rewriting the pipeline around it; for a doubted reading,
+replaced without rewriting the pipeline around it — but only when the
+replacement is already NAMED; a nameless future is not doubt, and one
+interface with one implementation is the right shape until a second is
+real. For a doubted reading,
 say in the delivery which module or parameter flips the whole call if the
 reading turns out wrong.
 

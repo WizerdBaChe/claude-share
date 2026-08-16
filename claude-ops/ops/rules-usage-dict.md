@@ -152,10 +152,11 @@ opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 | phase-log section | project / phase / status / date + Goals / Decisions / Changes / Open Questions | `workflow-checkpoint` SKILL.md | 每次 checkpoint |
 | boundary contract | 0 premises / 1 forks / 2 boundary inputs / 3 acceptance / 4 non-goals (≤18 行) | `05-authority.md` §4 | L1/L2（已鬆綁）× Tier-2 實作任務 |
 | refutability statement | holds-when / overturned-by / evidence-tier / not-covered | `30-judgment.md` R2 | Tier-2 交付全欄；Tier-1 一行；T0 免 |
-| rule-registry entry | key / current / why / evidence / history / rollback | `ops/rule-registry.md` 頭部 | 規則值、上限、常設裁定設定或變更時（就地取代該鍵） |
+| rule-registry entry | key / current / why / evidence / history / review-when / rollback；**值是猜測時 `evidence` 以 `PROVISIONAL` 開頭 + 何者可定案 + 觀測寫回本條目**（2026-08-13）；**值依賴本庫以外的事實時（harness 預設、平台能力、廠商文件、未量測的比率）必填 `review-when:`，寫「哪個可觀察事件會使它失效」而非日期**（2026-08-14） | `ops/rule-registry.md` 頭部 | 規則值、上限、常設裁定設定或變更時（就地取代該鍵）；**含「先出貨的猜測值」——未登記的猜測沒有資料落點，會靜默變成永久值**；**含「注入層預設 × 本機收窄」一節——harness 注入文字會隨產品改版靜默變動** |
 | change event | trigger / change (before→after) / result / rollback | git commit message | 每次 🔴/🟡 變更 |
 | environment-facts block | build·test·run / tiers / dispatch / redlines / ledger + 驗證日期 | `60-bootstrap.md` §B | 專案 CLAUDE.md 建立時 |
 | adoption stamp | adopted-from / source / adopted / reconciled | 被採用檔案的檔頭（格式見 `config-self-audit/references/imported-config.md`） | 從別的環境搬入任何持久設定時 |
 | reconciliation ledger | artifact / source / collisions / class / resolution / mechanism status / stamp | `config-self-audit` SKILL.md `Output format` | adoption mode 每次執行 |
 | label family entry | 家族 / 量的軸 / 方向·值域 / owner（唯一定義處） | `~/.claude/LABEL-REGISTRY.md` §2 | 造出會裸引用的可列舉標籤時（同 commit） |
+| advisory-output status line（建議型產出狀態列） | 檔案**前 10 行**內一行可 grep 的狀態宣告：`> status: SPENT\|OPEN\|PARTIAL — 消費者（D-條目/commit/規則§）; residual: <殘餘價值或 re-open 條件>`（中文檔用 `**狀態**：` 開頭亦合規，兩種拼法都算）。**便宜入口（免翻檔）**：`powershell` `Get-ChildItem -Recurse ~\.claude\outputs -Filter *.md \| Select-String -Pattern '^(> status:\|\*\*狀態)' -List \| ForEach-Object { "$($_.Filename): $($_.Line)" }`。清理語意：OPEN 永不成為 cleanup 候選；SPENT 仍 KEEP（是已發表比率的可印證據），唯一淘汰路徑是新檔標 `Supersedes` | 本列即 owner（2026-08-16，源自使用者指出散落建議資料無入口、無事前宣告、無白名單） | `outputs/` 下任何**帶著建議/候選/待裁事項**、未來 session 可能要接手處理的產出（candidates 檔、實驗證據目錄的 metrics、disposition）誕生時；主動浮出＝ops-health check 13（2026-08-16 落地，registry key `advisory-output surfacing`） |
 | list-generation entry | 前綴 / 涵蓋範圍 / `[superseded: <old>]` | `60-bootstrap.md` §E（規則見 `LABEL-REGISTRY.md` §3） | 專案清單／回合被新版取代時 |

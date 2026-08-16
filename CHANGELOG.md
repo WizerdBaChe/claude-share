@@ -9,6 +9,92 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-16 — the other five roots, and what a verbatim sweep costs
+
+Full re-collection against source commit `f8605e4`. Two things happened: the
+repo caught up with three days of source drift, and the mechanism that was
+supposed to make that safe turned out to cover three of its eight roots.
+
+**Check C was watching 3/8 of what it should have been.** `collected_roots` was
+`hooks/`, `agents/`, `interop-layer/`. Everything under `claude-ops/`,
+`global-claude-md/`, `environment-guide/`, `skill-toolkit/` and `thinking-notes/`
+— 118 files — had been collected since the day each folder was created and
+declared nowhere. That is the same finding as 2026-08-15's, one level wider: the
+2026-08-15 entry fixed the one directory whose incident wrote `COLLECTION-RULES.md`
+and did not ask which others were in the same position. All eight roots are
+declared now, 99 `verbatim` / 14 `edited` / 5 `template`, with `verbatim` computed
+by byte comparison rather than asserted. Positive control run before believing
+it: deleting one entry and flipping one `verbatim` to `edited` both produce the
+expected finding, so the check is looking at the new roots rather than passing
+them by.
+
+**What the undeclared roots were hiding, found the hard way.** The refresh was
+run as a verbatim sweep first. It silently reverted six de-identification
+decisions across two skills — `scientific-research-guide`'s domain manifest, its
+research-state fixture and its citation inbox came back carrying the author's
+actual research topics, and `motion-design`'s notes came back pointing at a
+vendored Three.js package this repo deliberately does not redistribute. Nothing
+flagged it. The decisions had been made in commits (`fde9ae3`, `81dfe82`) and
+nowhere a check could read, which is exactly the failure `COLLECTION-RULES.md`
+opens with, reproduced from the other direction: not an unrecorded edit, but an
+unrecorded DECISION NOT to take the source's text. All six are restored and all
+six are now `[[collected]]` entries with their reasoning.
+
+**A leak class the gate could not see.** The same sweep brought in nine absolute
+paths on a second drive — a private asset library, real project roots, the
+operator's own publication tree. Every one scanned clean: the leak patterns knew
+about home directories and nothing else. Three more had been sitting in
+`Global_skill_update.md` since long before this round, published. `sharelib.py`
+gained an `absolute local path (non-system drive)` pattern; system roots and
+`Users` are excluded, and four narrow `[[allow]]` entries cover the two files
+where such a path is the worked example rather than a location.
+
+**The gate's own leak patterns were weaker than the source's.** Running
+`interop-layer/test_interop.py` — collected this round — against this repo's
+`sharelib.py` failed two of its known-TRUE samples: `sk_live_`/`sk_test_` and
+`AIza` key shapes were in the source's inline list and were dropped when
+`interop.py` was refactored to import from here on 2026-08-11. The manifest
+entry claimed "behaviour is identical — same patterns"; it was not, and for the
+gate's whole life a Stripe-shaped or Google API key would have published cleanly.
+Both patterns are added, the false claim is corrected in place rather than
+deleted, and the calibration set that caught it now ships and runs here. This is
+the argument for two-sided calibration, from the repo's own rules, landing on
+the repo itself.
+
+**New content.** Four hooks and one test join the mechanism layer:
+`context_runway_shadow.py` (context runway vs an unwritten checkpoint),
+`fieldwork_threshold_notice.py` (main-session fieldwork vs the delegation
+threshold), `browser-pane-allowlist.json` (the pane guard was rewritten from
+blocklist to allowlist at the source, so the second file is now load-bearing),
+and `interop-layer/test_interop.py`. Two ops references —
+`external-dispatch.md` and `skill-trigger-classes.md` — and one skill,
+`skill-co-upgrade`, bringing the toolkit to 14 of the source's 15.
+
+**`hooks/settings.example.json` had been quietly short.** It mounted 7 hooks
+while 9 shipped. Re-derived against the source's committed `settings.json`; the
+invariant to check after any hook change is now stated in its manifest entry —
+every `.py` under `hooks/` appears exactly once, and nothing else does.
+
+**Dispositions re-checked, two of them wrong.** `outputs/` was described as a
+scratch directory whose contents are personal, with a fallback saying it is "not
+a rule surface". The source began tracking it on 2026-08-16 precisely because it
+is one — the retrospective layer, and two shipped files cite into it by name. It
+stays excluded, for the reason that survived (every artifact is a finding about a
+specific real project) rather than the reason that did not. `tools/` was
+re-checked per file as its own 2026-08-15 correction demanded: nine entries,
+three of which are tests for hooks this repo ships and are deferred rather than
+judged — recorded as a deferral so the next round does not read it as settled.
+New entries for `references/` (the source's project-memory layer, 15 files),
+`tools/extdispatch/`, and the two external-dispatch hooks, which are portable and
+would still be harmful to mount without the dispatcher they gate.
+
+**One gate change worth naming.** `[placeholders] literal` was added to
+`share-manifest.toml`, for tokens that are not placeholders at all — a harness
+tag quoted in prose. The alternative was declaring `<browser_surfaces>` under
+`path_position_ok`, which asserts that a human confirmed a reader can fill it in.
+Recording a false claim to silence a finding is the decay this file exists to
+prevent, so the vocabulary grew instead.
+
 ## 2026-08-15 (later) — the caveat is cleared, and two frozen rows come out
 
 The morning's collection ran against an uncommitted source tree and said so. The

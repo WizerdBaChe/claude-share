@@ -41,7 +41,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | `rule-registry.md` | **New 2026-08-11.** Keyed by RULE, not by date: why each size cap, standing ruling, and mechanism holds its current value, plus its value history. Replaces the old chronological-rotation model. |
 | `rules-usage-dict.md` | Index: which layer owns what, record-schema registry. Agent-roster routing itself moved to `20-dispatch.md` — this file keeps only a pointer. |
 | `../references/PROJECTS.md` | **New 2026-08-14.** The project-index format the ops layer and two skills cite — header and column semantics only; the source environment's rows are its own inventory and do not ship. |
-| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), and **new 2026-08-13** `project-map.md` (the read-time layer behind `60-bootstrap.md` §H: fingerprint schema, provenance tags, derived-mermaid catalogue, STALE algorithm, write interface). |
+| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), `project-map.md` (the read-time layer behind `60-bootstrap.md` §H), and **new 2026-08-16** `external-dispatch.md` (the detail behind `20-dispatch.md` §4a — measured prompt shape, acceptance layers, failure signatures; the dispatcher itself is not shipped) and `skill-trigger-classes.md` (why a skill's zero fire count is or is not a defect). |
 | `README.md` | Folder note. |
 
 ## `global-claude-md/` — the always-loaded preferences file
@@ -70,26 +70,36 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `project-retrospective` | End-of-project extraction of lessons into a guide + rules snippet. |
 | `scientific-research-guide` | Research-methodology advisory. **Domain profiles excluded from this share** — see `domains/README.md`; the template, manifest format, and expansion spec ship. |
 | `security-deep-checklist` | Defensive security audit: code, deployment posture, detection readiness. |
+| `skill-co-upgrade` | **New 2026-08-16.** Field-test loop: run a real task through a skill, collect gaps under "a gap exists iff the executor had to BYPASS the skill to do it right", verify every citation, hand off via disposition files. |
 | `skill-share-packaging` | Exporting a skill for others, or auditing a downloaded one. Includes `scripts/prescan.py`. |
 | `workflow-checkpoint` | Phase archiving and context rebuild across long multi-session projects. |
 
 ## `hooks/` — the mechanical enforcement layer
 
-Collected 2026-08-14. Seven PreToolUse/SessionStart/SubagentStop/InstructionsLoaded
-hooks that the ops layer had been citing as its enforcement mechanism without ever
-shipping them; all fail-open, none machine-bound. Install steps and the per-hook
-table are in `hooks/README.md`; `settings.example.json` is the mounting template
-with `<PYTHON_EXE>` / `<CLAUDE_HOME>` to substitute.
+Collected 2026-08-14, extended 2026-08-16. Nine PreToolUse / UserPromptSubmit /
+SessionStart / SubagentStop / InstructionsLoaded hooks that the ops layer had been
+citing as its enforcement mechanism without ever shipping them; all fail-open,
+none machine-bound. Install steps and the per-hook table are in `hooks/README.md`;
+`settings.example.json` is the mounting template with `<PYTHON_EXE>` /
+`<CLAUDE_HOME>` to substitute.
 
 | File | Enforces |
 |---|---|
 | `dangerous_command_guard.py` | Deny-list for irreversible shell commands (the compensating control for a widened allowlist). |
 | `model_cap_guard.py` | Subagent model cost cap, with the SendMessage-resume bypass documented rather than hidden. |
 | `ui_verify_guard.py` | Browser-pane measurement discipline (lessons L-009/L-010) — denies, does not warn. |
-| `browser_pane_scope_guard.py` + `browser-pane-blocklist.json` | Records every pane navigation; denies hosts known to crash the Electron GPU child (L-013). |
-| `ops_health_nudge.py` | Eleven maintenance thresholds at session start; silent when healthy. |
+| `browser_pane_scope_guard.py` + `browser-pane-allowlist.json` + `browser-pane-blocklist.json` | Records every pane navigation; **allowlist** since 2026-08-14 — loopback is allowed by the hook, everything else is denied and handed to an out-of-process route. The blocklist stays for its recorded crash reasons, which make a denial specific (L-013). |
+| `ops_health_nudge.py` | Thirteen maintenance thresholds at session start; silent when healthy. |
 | `delivery_gate_shadow.py` | Shadow mode only — measures what a delivery gate WOULD block before anything is blocked. |
+| `context_runway_shadow.py` | **New 2026-08-16.** Shadow: long context *and* no checkpoint written yet. The conjunction is the trigger — context alone fires in 65% of sessions at 150k, the pair in 26%. |
+| `fieldwork_threshold_notice.py` | **New 2026-08-16.** Shadow: main-session Read/Grep/Glob measured against `20-dispatch.md` §1's literal thresholds. High-volume matcher — read its cost note before mounting it. |
 | `instructions_loaded_logger.py` | Observation only: which instruction files load, when. |
+
+Two more hooks exist at the source and are deliberately **not** here — both
+gate an external-dispatch entry point this repo does not ship, and a deny-hook
+pointing at a missing script is worse than no hook. `tools/share-manifest.toml`
+carries both dispositions. `settings.example.json` mounts every hook that ships
+and nothing else; that is the invariant to re-check whenever this table changes.
 
 ## `agents/` — subagent definitions
 
@@ -118,15 +128,25 @@ with evidence and attribution grading. Lineage and licence reasoning: `agents/RE
 | `MIGRATION-MAP.md` | What maps to what across agents. |
 | `genesis-prompt.md` | Bootstrapping prompt for a fresh environment. |
 | `acceptance-evals.md` | Checks that a port actually landed. |
+| `test_interop.py` | **New 2026-08-16.** The compiler's self-test: parser positive *and* negative controls, plus a two-sided leak-gate calibration (15 known-TRUE samples, 5 known-FALSE). Running it here is what proved this repo's own leak patterns were missing two key shapes. |
 | `README.md` | The source environment's own operating manual for the layer (中文). Collected, not written here — unlike every other `README.md` in this repo. |
 
 **Collected, and declared as such since 2026-08-15**: every file above has a
 `[[collected]]` entry in `tools/share-manifest.toml`, and `interop-layer/` is a
 `collected_root`, so check C now enforces provenance here. Before that it did
-not, and the copy silently drifted in both directions for weeks. Two files carry
-declared, deliberate edits — `interop.py` imports the leak patterns from
-`tools/sharelib.py` instead of defining them inline, and `MIGRATION-MAP.md`
-carries a share-repo-only section on disposition classes. Neither back-flows.
+not, and the copy silently drifted in both directions for weeks. Three files
+carry declared, deliberate edits — `interop.py` imports the leak patterns from
+`tools/sharelib.py` instead of defining them inline, `test_interop.py`'s
+truncation case is restated against that gate's return shape, and
+`MIGRATION-MAP.md` carries a share-repo-only section on disposition classes.
+None of the three back-flows.
+
+**As of 2026-08-16 that regime covers all eight collected roots**, not three.
+`claude-ops/`, `global-claude-md/`, `environment-guide/`, `skill-toolkit/` and
+`thinking-notes/` joined it — 118 further files, each declaring its source path
+and every edit. If you are looking for what this repo changed on the way in from
+the source environment, `[[collected]] edits` is now the complete answer rather
+than a partial one.
 
 **Retired 2026-08-11**: the `refs/` method-playbook folder and its compile step. Method depth is now delegated to each target agent's own official docs (`interop.py`'s `delegation_block()`) rather than shipped as curated prose — the trigger never ported, only the content did, and that degraded to "read either always or never". See `MIGRATION-MAP.md` and `README.md` for the reasoning.
 
@@ -139,7 +159,7 @@ exit 0 is the release condition.
 |---|---|
 | `share_gate.py` | Five fail-closed checks over every tracked file: **L** leak, **P** placeholder position, **R** reference disposition, **S** packaging structure, **C** collection provenance. Never edits anything — automatic scrubbing is the failure it exists to catch. |
 | `COLLECTION-RULES.md` | The decision procedure the gate enforces: what may be collected from the source environment, in which of five verdicts, and the mandatory copy → diff → declare → verify steps. Read it before adding or refreshing anything collected. |
-| `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart. |
+| `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart — a claim that was false from 2026-08-11 to 2026-08-16 and is recorded as such in the manifest. Now also catches absolute paths on a non-system drive, the class that let nine private pointers through a single refresh. |
 | `share-manifest.toml` | The only way past a finding: `[[allow]]` leak exceptions, `[[not_shipped]]` dependency dispositions + fallbacks, the `[placeholders]` position vocabulary, and the source-environment → repo path map. |
 | `test_share_gate.py` | Replays both historical incidents (the `<URL>` over-scrub, an undeclared hook) plus planted personal data against the live gate. |
 | `README.md` | Operator manual (中文): why the layer exists, how to write a manifest entry, how to add a check. |

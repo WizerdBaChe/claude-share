@@ -14,8 +14,11 @@ Design invariants (see README.md / MIGRATION-MAP.md):
   - One-way flow: ~/.claude is the canonical source; targets never write back.
   - Never delete: a foreign file at a target path is backed up, not clobbered.
   - Every artifact carries a source stamp (git short hash) for staleness checks.
-  - Nothing identifying leaves this machine: every artifact is leak-scanned
-    before it is written, and a hit ABORTS the build (2026-08-11).
+  - Leak gate (best-effort backstop, 2026-08-11): every artifact is scanned
+    against a curated denylist (known secret shapes, account-name paths) and a
+    hit ABORTS the build. The PRIMARY control is human curation of
+    portable-core.md — the gate does not claim general secret/PII coverage,
+    and `test_interop.py` calibrates it in both directions (2026-08-16).
   - Preferences port; method does not. Only the user's own standing rules —
     the ones no documentation can supply — are transplanted. Method depth is
     delegated to the target agent, which reads its OWN current official docs.
@@ -31,10 +34,20 @@ CORE = Path(__file__).resolve().parent / "portable-core.md"
 CURATION_STAMP = Path(__file__).resolve().parent / "curation.stamp"
 
 STAMP_RE = re.compile(r"managed-by: claude-interop \| profile: (\S+) \| source: (\S+)")
+# 2026-08-16 hardening (verified findings, outputs/experiments/2026-08-16-q2-
+# schema-order/): `profiles:` now tolerates whitespace after the colon and the
+# commas — the old pattern silently DROPPED a block on `profiles: light,full`,
+# and parse_blocks() only errored at zero blocks total. The structural guard in
+# parse_blocks() is the real fix: every real-looking open marker must parse.
+# `\r?\n` keeps the match independent of universal-newline translation.
 BLOCK_RE = re.compile(
-    r"<!--\s*block:(\S+)\s+profiles:([\w,]+)\s*-->\n(.*?)<!--\s*/block\s*-->",
+    r"<!--\s*block:(\S+)\s+profiles:\s*([\w,\s]+?)\s*-->\r?\n(.*?)<!--\s*/block\s*-->",
     re.DOTALL,
 )
+# Guard scanner: word-char ids only, ON PURPOSE — the syntax example in
+# portable-core.md's header uses angle-bracket placeholders (<id>), which keeps
+# it inert to BLOCK_RE and to this guard alike. Do not "clean up" that example.
+OPEN_MARKER_RE = re.compile(r"<!--\s*block:([\w-]+)")
 
 # RETIRED 2026-08-11 — the reference-compile class is gone. It shipped ~20K of
 # curated method playbooks to an `interop-refs/` folder plus a prose routing
@@ -88,24 +101,45 @@ TARGETS = {
 
 
 def git(*args):
+    # encoding pinned 2026-08-16: this repo's history verifiably contains
+    # non-ASCII commit text, and the default decode follows the console code
+    # page — correct only while chcp happens to be 65001.
     r = subprocess.run(["git", "-C", str(REPO)] + list(args),
-                       capture_output=True, text=True)
+                       capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
     if r.returncode != 0:
         sys.exit(f"git {' '.join(args)} failed: {r.stderr.strip()}")
     return r.stdout.strip()
 
 
-def parse_blocks():
-    text = CORE.read_text(encoding="utf-8")
+def parse_blocks(text=None):
+    if text is None:
+        text = CORE.read_text(encoding="utf-8")
     blocks = []
     for m in BLOCK_RE.finditer(text):
-        bid, profiles, body = m.group(1), m.group(2).split(","), m.group(3)
+        bid = m.group(1)
+        profiles = [p.strip() for p in m.group(2).split(",")]
         for p in profiles:
             if p not in ("light", "full"):
                 sys.exit(f"block '{bid}': unknown profile '{p}'")
-        blocks.append({"id": bid, "profiles": profiles, "body": body.strip()})
+        # light ⊆ full — documented in README/MIGRATION-MAP, enforced 2026-08-16
+        if "light" in profiles and "full" not in profiles:
+            sys.exit(f"block '{bid}': profile 'light' without 'full' — "
+                     "light must be a subset of full")
+        blocks.append({"id": bid, "profiles": profiles, "body": m.group(3).strip()})
     if not blocks:
         sys.exit("no blocks parsed from portable-core.md — check block syntax")
+    # Structural guard (2026-08-16): a block that LOOKS like a block must have
+    # parsed — a malformed marker used to vanish from every output silently.
+    parsed = [b["id"] for b in blocks]
+    opens = OPEN_MARKER_RE.findall(text)
+    unparsed = [o for o in opens if opens.count(o) > parsed.count(o)]
+    if unparsed:
+        sys.exit(f"block marker(s) present but NOT parsed: {sorted(set(unparsed))} "
+                 "— check the 'profiles:' list and the closing '<!-- /block -->'")
+    dups = sorted({i for i in parsed if parsed.count(i) > 1})
+    if dups:
+        sys.exit(f"duplicate block id(s): {dups} — ids must be unique")
     return blocks
 
 
@@ -114,15 +148,15 @@ def parse_blocks():
 # callers (this compiler and the repo-wide tools/share_gate.py). A second copy
 # would drift, and a drifted leak gate is worse than an obvious absent one.
 # Nothing there hardcodes personal data either; the account name is read from
-# the running environment.
+# the running environment, and `_USER` is re-exported so test_interop.py can
+# build its known-TRUE home-path samples the same way the source's does.
 _SHARELIB = Path(__file__).resolve().parent.parent / "tools"
 if not (_SHARELIB / "sharelib.py").exists():
     sys.exit(f"FATAL: {_SHARELIB / 'sharelib.py'} not found. The leak gate is "
              f"defined there; refusing to run without it. Copy the tools/ "
              f"directory next to this script's parent.")
 sys.path.insert(0, str(_SHARELIB))
-from sharelib import scan_text, report_leaks  # noqa: E402
-
+from sharelib import scan_text, report_leaks, _USER  # noqa: E402,F401
 
 def delegation_block(profile):
     """Replaces the old `interop-refs/` compile (retired 2026-08-11).
@@ -188,7 +222,7 @@ def build_payloads():
     """Assemble every enabled target's file in memory. Writes nothing."""
     src_hash = git("rev-parse", "--short", "HEAD")
     blocks = parse_blocks()
-    return src_hash, {
+    return src_hash, blocks, {
         name: assemble(t["profile"], blocks, src_hash)
         for name, t in TARGETS.items() if not t.get("disabled")
     }
@@ -196,7 +230,7 @@ def build_payloads():
 
 def cmd_scan():
     """Leak check only — the same gate `build` runs, without the writing."""
-    _, payloads = build_payloads()
+    _, _, payloads = build_payloads()
     hits = []
     for name, text in payloads.items():
         hits += scan_text(text, f"{name} AGENTS.md")
@@ -209,11 +243,14 @@ def cmd_scan():
 
 
 def cmd_build():
-    if git("status", "--porcelain", "--", "interop/portable-core.md"):
-        print("WARNING: portable-core.md has uncommitted changes; the stamp "
-              "will point at the last commit, not your working copy. "
+    # Both stamp-relevant sources — cmd_status diffs against both, so the
+    # build-time warning must too (was portable-core.md only until 2026-08-16).
+    if git("status", "--porcelain", "--",
+           "interop/portable-core.md", "interop/interop.py"):
+        print("WARNING: portable-core.md / interop.py have uncommitted changes; "
+              "the stamp will point at the last commit, not your working copy. "
               "Commit first for an accurate stamp.")
-    src_hash, payloads = build_payloads()
+    src_hash, blocks, payloads = build_payloads()
 
     # L0 gate: assemble everything FIRST, scan it, and only then write. A
     # per-target scan inside the write loop would leave earlier targets
@@ -233,11 +270,23 @@ def cmd_build():
         if not path.parent.is_dir():
             print(f"[skip] {name}: {path.parent} does not exist (agent not installed)")
             continue
-        if path.exists() and not STAMP_RE.search(path.read_text(encoding="utf-8")[:300]):
-            bak = backup_foreign(path)
-            print(f"[backup] {name}: foreign file moved to {bak.name}")
-        path.write_text(payloads[name], encoding="utf-8")
-        print(f"[write] {name}: {path} (profile={profile}, source={src_hash})")
+        if path.exists():
+            try:
+                foreign = not STAMP_RE.search(
+                    path.read_text(encoding="utf-8")[:300])
+            except UnicodeDecodeError:
+                foreign = True   # undecodable is definitely not ours — back up
+            if foreign:
+                bak = backup_foreign(path)
+                print(f"[backup] {name}: foreign file moved to {bak.name}")
+        # write-to-temp + replace: a mid-write kill can no longer truncate the
+        # file the target agent actually reads (2026-08-16)
+        tmp = path.with_name(path.name + ".interop-tmp")
+        tmp.write_text(payloads[name], encoding="utf-8")
+        tmp.replace(path)
+        n_blocks = sum(1 for b in blocks if profile in b["profiles"])
+        print(f"[write] {name}: {path} (profile={profile}, source={src_hash}, "
+              f"blocks={n_blocks}, bytes={len(payloads[name].encode('utf-8'))})")
 
 
 def cmd_status():
@@ -256,12 +305,22 @@ def cmd_status():
             print(f"[missing] {name}: {path} not deployed (run: build)")
             ok = False
             continue
-        m = STAMP_RE.search(path.read_text(encoding="utf-8")[:300])
+        try:
+            m = STAMP_RE.search(path.read_text(encoding="utf-8")[:300])
+        except UnicodeDecodeError:
+            m = None   # undecodable = foreign, report instead of crashing
         if not m:
             print(f"[foreign] {name}: {path} exists but is not interop-managed")
             ok = False
             continue
         stamp = m.group(2)
+        if not re.fullmatch(r"[0-9a-f]{7,40}", stamp):
+            # never hand a non-hash to a git revision range (option injection /
+            # guaranteed hard-exit inside the loop)
+            print(f"[error] {name}: unparseable source stamp {stamp[:20]!r} — "
+                  "rebuild this target")
+            ok = False
+            continue
         log = git("log", "--oneline", f"{stamp}..HEAD", "--",
                   "interop/portable-core.md", "interop/interop.py")
         if log:
@@ -291,6 +350,13 @@ def cmd_status():
 
 
 def cmd_curated():
+    # Mirror of cmd_build's dirty warning (2026-08-16): stamping HEAD while a
+    # curation source is dirty re-flags the just-reviewed edit as unreviewed
+    # the moment it is committed — which trains the user to distrust the nag.
+    if git("status", "--porcelain", "--", *CURATION_SOURCES):
+        print("WARNING: curation source(s) have uncommitted changes; the stamp "
+              "points at HEAD, so those edits will re-flag as unreviewed once "
+              "committed. Commit first, then rerun curated.")
     head = git("rev-parse", "--short", "HEAD")
     CURATION_STAMP.write_text(head + "\n", encoding="utf-8")
     print(f"curation stamp set to {head}")

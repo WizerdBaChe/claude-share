@@ -50,9 +50,10 @@ ready-to-apply artifacts. `APPLY.md` states, per change:
 - **Rollout & verification**: how to apply, how to test, what regression looks
   like, how to roll back (backup path).
 
-Lifecycle: applied → log in the audit trail (`Global_skill_update.md`) + git
-commit; rejected/superseded → one-line note in the audit trail, artifacts stay
-in drafts/ as record.
+Lifecycle: applied → git commit carries the event, and `rule-registry.md` carries
+the standing reason (replace the rule's entry in place); rejected/superseded →
+one-line note in that entry's `history:`, artifacts stay in drafts/ as record.
+`audit-archive/` is frozen (2026-08-11) and takes no new entries.
 
 ## §3 Instruction memory vs auto-memory (route knowledge to the right store)
 

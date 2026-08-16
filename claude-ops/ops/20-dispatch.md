@@ -44,7 +44,10 @@ duties is the invariant; the mechanism is negotiable. Run scanning as a
 separate phase whose raw output is reduced to conclusions + refs BEFORE the
 decision phase reads it; simulate reviewer separation with a fresh pass under
 a different role framing ("review as tomorrow's inheritor, no memory of
-writing it"). State the deviation explicitly.
+writing it"). State the deviation explicitly, and wherever it lands in a FILE
+(delivery note, ticket, phase log) tag it `DEVIATION:` — an unmarked deviation
+is invisible to every sweep, which is how "no mechanism available" quietly
+becomes "no mechanism used" (`lessons.md` L-011 P2; sweep check 12).
 
 ## §2 The dispatch contract (all five parts, or it doesn't go out)
 
@@ -52,7 +55,23 @@ writing it"). State the deviation explicitly.
    details you didn't spell out.
 2. **Machine-checkable acceptance + output-format contract** (exact structure,
    schema, verbatim-preserve fields). Format drift is a more common failure
-   than wrong content. State the goal, not the proof ritual — "prove your
+   than wrong content. **How strict the schema may be routes by answer-shape
+   class** (adopted 2026-08-16; evidence:
+   `reports/2026-08-16-machine-first-verification-scoping.md` §五/§7.5/§八):
+   **(A) enumerable outputs** (listings, extractions, to-spec files — shape
+   known) → full schema up front, machine checks before AND after; **(B) a
+   verdict plus open-ended reasons** (refute/confirm, pass/fail) → pin ONLY
+   the verdict field, reasons stay free-form, and a format failure must never
+   decide the verdict; **(C) open-ended judgment** (what's wrong / what's
+   missing — the shape IS the answer's value) → NO schema up front: acquire
+   free-form first, then convert each claim into a verifiable unit and
+   machine-check after. Measured 2026-08-16 (2×2 arms, same task, same
+   model): a schema-first contract suppressed the INVESTIGATION itself — 1
+   tool call vs 8/18, no companion files read, zero empirical probes — not
+   merely the output's shape; free-first cost ~1.6× tokens / ~2× wall-clock,
+   which is the price of the investigation, not overhead. Orthogonal to the
+   class: each acceptance layer stacked on one output still rules only on
+   what IT can determine (global gate rule; `lessons.md` L-019). State the goal, not the proof ritual — "prove your
    own work passes" invites an expensive self-verification loop. The worker
    self-checks FORMAT compliance only; ACCEPTANCE verification belongs to
    the dispatcher with fresh context (`10-command-loop.md` Step 6).
@@ -100,6 +119,48 @@ environment supports it — see `environment.md`).
 Where the dispatch mechanism supports a machine-enforced output schema (see
 `environment.md`), use it instead of prompt-side format instructions — format
 drift is the most common cheap-tier failure, and a schema eliminates it.
+(Applies to class-A/B outputs per §2's answer-shape routing; a class-C task
+takes no up-front schema on either mechanism.)
+
+## §4a Which PATH: subagent or external tier (ask before §4's table)
+
+Two dispatch paths exist. §4 above sizes work WITHIN the subagent path; this
+picks the path. Facts, entry point and gates: `environment.md` "External
+dispatch tier".
+
+**Send it externally when ALL of these hold** — one NO sends it to a subagent:
+
+- the target project is in `tools/extdispatch/allowlist.txt`;
+- the work is not ABOUT `.claude`-class internals (see §4b);
+- the deliverable is machine-checkable — a schema, an anchored finding list, a
+  file that either compiles or does not. External output is accepted by
+  verification, never by reading it and finding it plausible;
+- latency is not the binding constraint (an external run is minutes, and free);
+- **red-team / review: prefer external by default.** It is a genuinely
+  different model family, which the subagent path cannot offer at all.
+
+**Keep it in a subagent when** the work needs main-repo context, touches
+anything unlisted or private, needs a tool the external worker lacks, or is
+judgment/taste (which is not delegable at all — `30-judgment.md` R6).
+
+Profile → task shape, prompt shape (format first line, evidence anchor, explicit
+file scope, licensed empty answer), acceptance and failure signatures:
+`ops/references/external-dispatch.md`. Chains and live health:
+`extdispatch.py status` — that output beats any table.
+
+## §4b Redlines and disclosure for external dispatch
+
+- **Never externally**: `~/.claude` and its subtree, plus the operator's own
+  share and publication trees — refused mechanically (exit 3).
+- **Never as a TASK**: a project's own `.claude`-class internals. Not
+  mechanical — a worker's `grep` cannot be gated by path, so the dispatcher
+  owns this one. Authored in-house, verified by skills/subagents.
+- **Disclose at dispatch time** (user ruling): which project is going out, to a
+  free external tier, and why it is safe to send. Free-tier use needs
+  disclosure, not approval.
+- **Shard the card** by real sub-need and stage, so one dispatch never carries
+  a whole picture of a codebase.
+- **Unlisted or private project → STOP and ask**, every time.
 
 ## §5 Escalation and de-escalation
 
@@ -168,44 +229,64 @@ substitute); on re-dispatch, put the previous failure output in "read first".
 
 ## §8 Token discipline (main-session hygiene)
 
-- Batch micro-tasks: each dispatch has fixed overhead — don't send sub-minute
+- Batch micro-tasks: each dispatch has fixed overhead — **measured 2026-08-14 at
+  ~49K tokens of preamble for one `general-purpose` worker with zero tool uses**
+  (`rule-registry.md` → subagent instruction surface). Don't send sub-minute
   tasks one at a time; one worker, several items, each verified individually.
+  The currency §1 actually buys is MAIN-CONTEXT preservation, not total tokens:
+  below roughly that size, reading it yourself is cheaper both ways.
 - Small reference material: pass a path anyway (keeps the prompt short and the
   material updatable).
 - Large tool output: check size first; read tail/summary before deciding to
   read more. Sanity-check output before treating it as content (does it look
   like an error string? suspiciously short or empty?).
 
-## Agent roster routing — task shape → agentType → strength
+## Agent 名冊路由 (Agent Roster Routing) — task shape → agentType → 強度
 
-Dispatch's third dimension: this section governs "which agent, what
-strength" (skill routing belongs to `skill-trigger-dict.md`; tier routing to
-§1–§4 above). Model ceiling and tier mapping: `ops/environment.md`. This
-table governs subagents only, not the main-loop model's default.
+派工第三維度：本節管「派給哪個 agent、什麼強度」（skill 歸
+`skill-trigger-dict.md`、層級歸一~四節）。模型上限與 tier 映射見
+`ops/environment.md`。該表只管 subagent，不是 main-loop model 的預設。
 
-| Task shape | agentType | model × effort |
-|---|---|---|
-| Search/inventory/read-many-files | `Explore` (built-in, read-only) | haiku~sonnet × medium |
-| Mechanical, hard acceptance gate (convert/translate/spec-driven script) | `general-purpose` | haiku × low |
-| Backend/API implementation | `backend-architect` | sonnet × medium |
-| Frontend implementation | `frontend-developer` | sonnet × medium |
-| Writing tests, QA verification | `testing-qa-engineer` / `api-tester` | sonnet × medium |
-| Bug root-cause + fix | `testing-bug-fixer` | sonnet × medium~high |
-| Red-team / review (reviewer ≠ author) | `code-reviewer` (fresh context) | sonnet × high |
-| Security review | `security-engineer` | sonnet × high |
-| Architecture planning (dispatch version) | `Plan` (built-in) or `software-architect` | sonnet × high |
-| Research / multi-source verification | `general-purpose` + T4 contract | sonnet × high |
-| Taste / policy wording / ambiguous judgment | **do not dispatch** — main session does it itself (`30-judgment.md` R6) | — |
+**effort 不是 per-call**（查證 2026-08-12，見 `environment.md`）：自訂 agent 的
+強度寫死在該檔 frontmatter 的 `effort:`，派工當下改不了。下表「強度」欄記錄的是
+各定義**已經釘住**的值，不是給 dispatcher 填的參數；要改就改定義檔。
+`model` 仍可 per-call 覆寫。
 
-Disambiguation (frequently confused pairs):
-- `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`:
-  the skill is the **methodology** (quick bug hunt / deep health check), the
-  agent is the **execution vehicle**. Dispatch `code-reviewer` when the main
-  session is doing red-team intake; when the user actively requests a review,
-  route via skill (`skill-trigger-dict.md` review family).
-- `software-architect` vs `management-tech-lead` vs `Plan`: want a plain
-  implementation plan → `Plan`; want an ADR / tech-selection trade-off →
-  `software-architect`; want task decomposition and dispatch recommendations →
-  that's the dispatcher's own job (`10-command-loop.md`), not outsourced.
-- Every other agent: match by description; this table lists only the
-  high-frequency and easily-confused ones.
+| 任務形狀 (task shape) | agentType | model × effort（定義檔已釘） | 能力邊界 |
+|---|---|---|---|
+| 搜尋/盤點/read-many-files | `Explore`（內建，唯讀） | 繼承 × 繼承 | 唯讀；**不載入 CLAUDE.md** |
+| 機械性、有硬驗收閘（轉檔/翻譯/照規格腳本） | `general-purpose` | haiku × 繼承 | 全繼承 |
+| 後端/API 實作 | `backend-architect` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
+| 前端實作 | `frontend-developer` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
+| 寫測試、QA 驗證 | `testing-qa-engineer` / `api-tester` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
+| Bug 根因定位與修復 | `testing-bug-fixer` | sonnet × **high** | 可寫 + Bash/PowerShell |
+| 紅隊/審查（reviewer ≠ author） | `code-reviewer`（fresh context） | sonnet × **high** | **唯讀**（Read/Glob/Grep/Skill + dontAsk） |
+| 安全審查 | `security-engineer` | sonnet × **high** | **唯讀** + WebSearch/WebFetch |
+| 架構規劃（派工版） | `Plan`（內建）或 `software-architect` | sonnet × **high** | architect 可寫文件，不可執行 shell |
+| 研究/多源查證 | `general-purpose` + T4 契約 | sonnet × 繼承 | 全繼承 |
+| 品味/政策措辭/模糊判斷 | **不派工** — 主 session 自做（`30-judgment.md` R6） | — | — |
+
+能力邊界是**強制的**，不是提示：唯讀角色的 `tools` 白名單不含 `Edit`/`Write`，
+且 `permissionMode: dontAsk` 會自動拒絕 allowlist 以外的動作。派工時不要要求
+唯讀 agent 順手修好——它做不到，只會浪費一輪。反之，實作型角色**刻意不設**
+`permissionMode`，因為 `dontAsk` 會連 `Edit` 一起拒絕（allowlist 沒有它）。
+
+skill 觸發：每個定義都保留 `Skill` 工具，body 只指示「查執行期 roster」而不寫死
+skill 名稱，所以新增 skill 自動生效、不需回頭改定義。**移除 `Skill` 會靜默關閉
+整個 skill 機制**（`lessons.md` L-014）。
+
+消歧（易混淆組）：
+- `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`：
+  skill 是**方法論**（快速抓蟲/深度健檢），agent 是**執行載體**。主 session 收件
+  紅隊時派 `code-reviewer` agent；使用者主動要求 review 時走 skill 路由
+  （`skill-trigger-dict.md` 審查家族）。內建 `/code-review` 與 `/verify`
+  **不能用 `skills:` 預載**（官方明載，理由是預載只取自模型可調用的集合）。
+  但實測 2026-08-12：subagent 的 roster **仍然列出**它們，所以「subagent 能不能
+  實際叫起來」未經驗證 —— 派工時不要依賴它，改派 `code-review-deep-checklist`
+  或在交辦訊息裡直接給方法。
+- `software-architect` vs `Plan`：單純要一份實作計畫 → `Plan`；要 ADR/選型
+  trade-off → `software-architect`；要任務拆分與派工建議 → 那是 dispatcher
+  本人的工作（`10-command-loop.md`），不外派。
+  （`management-tech-lead` 已於 2026-08-12 封存：三個分支全部路由離開它，
+  留著只是名冊噪音。）
+- 其餘 agent 按 description 對號入座；本表只列高頻與易混淆者。

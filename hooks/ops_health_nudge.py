@@ -22,6 +22,8 @@ Checks (all cheap, no network, no subprocess):
  11. project CLAUDE.md declares no ops-relaxation level -> gate never fired
      (a DECLARATION -- `ops-relaxation: L1` -- not a prose mention; see below)
  12. interop target undeployed/foreign/behind   -> run interop.py status
+ 13. advisory output OPEN / born unstamped      -> read the named file
+     (rules-usage-dict.md S7 "advisory-output status line")
 Thresholds mirror ops/40-maintenance.md S3 defaults; change them together --
 INCLUDING the unit. File caps are BYTES (os.path.getsize, so CRLF counts 2);
 DESC_CAP is chars; BODY_CAP is lines. Bytes because they track token cost:
@@ -66,7 +68,7 @@ BODY_CAP = 300          # lines, whole SKILL.md. Charged only on invoke, not at
                         # session start. Over cap means EXTRACT to references/,
                         # never compress in place. why/history:
                         # ops/rule-registry.md
-CLAUDE_MD_CAP = 15 * 1024  # BYTES. why/history: ops/rule-registry.md
+CLAUDE_MD_CAP = 17 * 1024  # BYTES. why/history: ops/rule-registry.md
 DICT_CAP = 24 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # reasoning as SIZE_CAP: the dict is charged only on a
                        # routing miss. Raised 20K->24K on 2026-08-15 after
@@ -363,6 +365,57 @@ def main():
                 + " — run `python interop/interop.py status` for the "
                 "authoritative report (it compares commits; this screen only "
                 "compared mtimes), then build / curated as it directs"
+            )
+    except OSError:
+        pass
+
+    # 13. advisory-output status lines (rules-usage-dict.md S7, 2026-08-16).
+    #     Advisory artifacts under outputs/ declare handling status in a
+    #     greppable line within their first 10 lines; this screen surfaces the
+    #     ones still awaiting action and flags NEW ones born without the line.
+    #     Scope is deliberately narrow -- candidates files and experiment
+    #     metrics only; outputs/skill-reviews/ keeps its own disposition
+    #     convention (D-032) and is not double-governed. A file with no date
+    #     in its name, or dated on/before the convention's birth, is exempt
+    #     from the missing-line flag (no backfill -- evidence-block precedent;
+    #     a permanently-on alarm about old files is the alarm nobody reads).
+    #     The status parse rules only on what it can determine: clearly-spent
+    #     keywords silence, anything else present surfaces and routes to
+    #     reading ONE named file.
+    try:
+        import glob as _glob
+        spent_rx = re.compile(r"SPENT|已執行|否決|已裁")
+        status_rx = re.compile(r"^(?:> status:|\*\*狀態)")
+        date_rx = re.compile(r"(\d{4}-\d{2}-\d{2})")
+        open_arts, unstamped = [], []
+        for pat in ("outputs/retrospectives/global-rule-candidates-*.md",
+                    "outputs/experiments/*/metrics.md"):
+            for p in _glob.glob(os.path.join(HOME, pat)):
+                with open(p, encoding="utf-8", errors="replace") as f:
+                    head = [next(f, "") for _ in range(10)]
+                line = next((l for l in head if status_rx.match(l)), None)
+                base = (os.path.basename(os.path.dirname(p))
+                        if os.path.basename(p) == "metrics.md"
+                        else os.path.basename(p))
+                if line is None:
+                    m = date_rx.search(base)
+                    if m and m.group(1) > "2026-08-16":
+                        unstamped.append(base)
+                elif not spent_rx.search(line):
+                    open_arts.append(base)
+        if open_arts:
+            msgs.append(
+                "advisory output(s) still OPEN: "
+                + ", ".join(sorted(open_arts))
+                + " — carries offers a session may need to act on; read its "
+                "status line (rules-usage-dict.md S7)"
+            )
+        if unstamped:
+            msgs.append(
+                "advisory output(s) born without a status line: "
+                + ", ".join(sorted(unstamped))
+                + " — add `> status: ...` in the first 10 lines "
+                "(rules-usage-dict.md S7)"
             )
     except OSError:
         pass

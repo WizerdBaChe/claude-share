@@ -145,8 +145,15 @@ def check_placeholder(manifest, files, f):
     """
     ph = manifest.get("placeholders", {})
     substitution = set(ph.get("substitution", []))
-    path_ok = set(ph.get("path_position_ok", [])) | substitution
-    command_ok = set(ph.get("command_position_ok", []))
+    # `literal` is not a permission, it is a type correction: these tokens are
+    # not placeholders standing for a value the reader supplies, they are names
+    # that happen to be spelled inside angle brackets — a harness tag, an HTML
+    # element quoted in prose. Declaring one under path_position_ok instead would
+    # be recording a false claim ("a human confirmed the reader can fill it in")
+    # to silence a finding, which is the shape of decay this gate exists to stop.
+    literal = set(ph.get("literal", []))
+    path_ok = set(ph.get("path_position_ok", [])) | substitution | literal
+    command_ok = set(ph.get("command_position_ok", [])) | literal
 
     for rel in files:
         if Path(rel).suffix.lower() != ".md":

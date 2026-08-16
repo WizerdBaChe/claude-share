@@ -93,15 +93,20 @@ mechanism until something goes wrong.
 - **light** — lightweight-task agents. Minimal rent, 8 blocks: preamble,
   language output, environment/shell, git workflow, evidence over claims,
   decision charter, pre-existing issues, file hygiene.
-- **full** — goal-oriented agents. light + judgment core, 7 more: visual
+- **full** — goal-oriented agents. light + judgment core, 8 more: visual
   acceptance, canonical-method discipline, volatile facts, done definition,
-  failure visibility, approach-wrong signals, scope restraint.
+  failure visibility, approach-wrong signals, scope restraint, gates and
+  controls (added 2026-08-16).
 
-Superset rule: light ⊂ full. A block tagged `light` must also carry `full`.
-15 blocks total. These counts are derivable — `parse_blocks()` in `interop.py`
-is the source of truth, and both this file and README.md have carried a wrong
-count before (README said 6-of-13 while the share copy said 8-of-15; neither
-matched the 7-of-15 the parser reports). Re-derive, do not copy the sentence.
+Superset rule: light ⊂ full. A block tagged `light` must also carry `full` —
+ENFORCED by `parse_blocks()` since 2026-08-16, no longer prose-only.
+16 blocks total as of 2026-08-16. These counts are derivable — `parse_blocks()`
+in `interop.py` is the source of truth, and both this file and README.md have
+carried a wrong count before (README said 6-of-13 while the share copy said
+8-of-15; neither matched the 7-of-15 the parser reports) — and this very
+paragraph carried "15 total" for a day after the 16th block landed, caught by
+an external review 2026-08-16. Re-derive, do not copy the sentence: `build`
+now prints blocks/bytes per target.
 
 ## Target registry (opencode row re-verified 2026-08-11 against the CLI and
 the official docs. Re-verify before adding targets — these locations are
@@ -134,13 +139,15 @@ Notes:
   INVERTED the birth-budget argument that had picked `light`: no AGENTS.md had
   ever been deployed, so opencode was falling back to `~/.claude/CLAUDE.md`
   (~16.5 KB, all of it Claude-Code-specific mechanism a non-Claude worker
-  cannot act on). `full` is 11,129 B / 15 blocks — it costs the worker LESS
-  context than the status quo it replaced, not more, so "light profile 尤其要
-  守小" never applied to this target in the first place. Second: the role
-  changed — opencode is now a dispatch target (free-tier workers execute work
-  cards and run cross-family red-team review), so it needs the preference set
-  the dispatcher assumes it has. Effect on the block set: all 15 blocks now
-  reach a live target; before the ruling the 7 `full`-only ones reached nobody.
+  cannot act on). `full` was 11,129 B / 15 blocks at the ruling (by
+  2026-08-16: 13,639 B / 16 blocks — re-derive via `build`, which prints
+  both) — it costs the worker LESS context than the status quo it replaced,
+  not more, so "light profile 尤其要守小" never applied to this target in the
+  first place. Second: the role changed — opencode is now a dispatch target
+  (free-tier workers execute work cards and run cross-family red-team
+  review), so it needs the preference set the dispatcher assumes it has.
+  Effect on the block set: every block now reaches a live target (15 at the
+  ruling, 16 since 2026-08-16); before it, the `full`-only ones reached nobody.
   Standing reason: `ops/rule-registry.md`, key `interop`.
 - **opencode CLI verified working 2026-08-11**: `opencode` v1.18.16 on PATH at
   `~/AppData/Roaming/npm/opencode` (npm global). The Electron desktop app

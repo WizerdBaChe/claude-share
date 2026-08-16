@@ -660,8 +660,8 @@ skills/scientific-research-guide/
 │   │   ├── active_modulation.md          ← sub-profile (method/material platform)
 │   │   ├── terminology_and_geometry.md   ← reference (no standing triggers)
 │   │   └── split_ring_resonators.md      ← boundary note (routes to a future metamaterial domain)
-│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 were
-│   │                                    incomplete — carried as known debt)
+│   ├── topological_insulator.md      ← base profile (established; Nodes 4-8 currently
+│   │                                    missing — see STATUS.md known pre-existing debt)
 │   ├── topological_insulator/        ← that domain's sub-profiles
 │   │   ├── bi2se3_material.md            ← sub-profile (material)
 │   │   ├── bi2se3_plasmonic_photoresponse.md ← sub-profile (method; Bi2Se3 plasmon/CPGE/LPGE)

@@ -20,10 +20,12 @@ Born from unifying the ArchLens suite (4 independent browser apps) into one syst
 
 ## Reference implementation (real, maintained)
 
-A complete worked example + copy-paste templates live in the ArchLens hub repo:
+A complete worked example + copy-paste templates live in the source
+environment's own suite hub repo, which is not public. What it holds, so you
+can build the equivalent:
 
-- Playbook (full rationale + Day-1 checklist): `D:\AIWork\ArchLens_Series\docs\design-first-playbook.md`
-- Starter template (index.html / theme.css / theme-switch.ts): `D:\AIWork\ArchLens_Series\docs\new-product-starter\`
+- Playbook: full rationale + the Day-1 checklist below, as one document
+- Starter template: `index.html` / `theme.css` / `theme-switch.ts`
 - Live shared packages: `packages/tokens/` (theme packs), `packages/ui/suite-nav.js`, `packages/schema/`
 
 If working in or near that repo, **read those files and copy from them** rather than

@@ -49,7 +49,7 @@ instead:
 
 **Corrected 2026-08-14 — the enforcement hooks ARE here now.** They used to be
 listed as `referenced-only` with the reasoning "machine-bound". A source audit
-disproved that: all seven resolve their paths through `Path.home()` /
+disproved that: every one of them resolves its paths through `Path.home()` /
 `expanduser` / `CLAUDE_CONFIG_DIR` and contain no machine-bound value. They had
 never been collected. `hooks/` now ships them, with `hooks/settings.example.json`
 for the mounting, and `agents/` ships the eight subagent definitions
@@ -64,8 +64,8 @@ cannot ship again.
 
 What genuinely stays out: your own `settings.json` values, the operator's project
 index rows, dated internal reports, runtime telemetry, and one skill
-(`asset-vault`) that operates a private library — so `skill-toolkit/` ships 13 of
-the source environment's 14 skills, which is stated rather than left to be
+(`asset-vault`) that operates a private library — so `skill-toolkit/` ships 14 of
+the source environment's 15 skills, which is stated rather than left to be
 noticed.
 
 ## Symptoms that are your environment, not this repo

@@ -48,7 +48,7 @@ Rules 1–6 below are invariants and never relax.
 |---|---|
 | Relaxation gate fires (first dispatch / ledger / plan mode / ops-health nudge); boundary contract at L1/L2 | `ops/05-authority.md` |
 | Handling any non-trivial instruction (start here) | `ops/10-command-loop.md` |
-| Dispatching a subagent, choosing model/effort, writing a dispatch prompt | `ops/20-dispatch.md` |
+| Dispatching work — **which path first** (subagent vs free external tier), then model/effort and the dispatch prompt | `ops/20-dispatch.md` (§4a picks the path; §4b redlines) |
 | Environment facts: tier→model mapping, cost cap, available mechanisms | `ops/environment.md` |
 | Stuck on: escalate? actually done? should I ask? wrong approach? | `ops/30-judgment.md` |
 | About to change any ops/rule file, or a lesson worth recording just happened | `ops/40-maintenance.md` |

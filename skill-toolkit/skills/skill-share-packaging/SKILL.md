@@ -1,16 +1,15 @@
 ---
 name: skill-share-packaging
 description: >-
-  Packaging and audit rules for moving skills BETWEEN environments. Mode A (export):
-  build a share-ready copy of one of this machine's skills — strip personal data,
-  decouple environment-specific references, verify tool fallbacks — without ever
-  modifying the canonical skill. Mode B (import): audit a third-party skill BEFORE
-  enabling it — their environment coupling, data-collection surface, and instruction
-  hygiene. Trigger on 「把這個 skill 分享/打包/匯出給別人」"package/export/share this
-  skill", or 「幫我檢查/安裝網路上抓的 skill」"audit this downloaded skill before I
-  install it". Mode B is ONE skill; a whole rules LAYER → config-self-audit
-  adoption mode. NOT for authoring skills (→ skill-creator), your own config
-  content (→ config-self-audit), or stray files (→ env-cleanup).
+  Moving skills BETWEEN environments — the canonical skill is never modified.
+  Mode A (export): build a share-ready copy of one of this machine's skills.
+  Trigger on 「把這個 skill 分享/打包/匯出給別人」「這個能給別人用嗎」"export this
+  skill". Mode B (import): audit a third-party skill BEFORE enabling it. Trigger
+  on 「幫我檢查網路上抓的 skill」「這個 skill 安全嗎」"audit this downloaded skill",
+  or one arriving from a repo, a gist, or a colleague. Mode B is ONE skill; a
+  whole rules LAYER → config-self-audit adoption mode. Do NOT fire on skills
+  merely DISCUSSED or edited in place here — only on one crossing the machine
+  boundary. NOT for authoring (→ skill-creator) or stray files (→ env-cleanup).
 ---
 
 # Skill Share Packaging
@@ -96,7 +95,10 @@ inside it) recording: what was removed/rewritten vs canonical, date, and the can
 commit. Give the recipient three verification steps in the notes: (1) copy the folder
 into their skills directory (`~/.claude/skills/`); (2) one positive probe — a phrase
 that should trigger the skill; (3) one negative probe — a nearby phrase that should
-NOT trigger it. Log the export in `~/.claude/Global_skill_update.md`.
+NOT trigger it. Log the export in the git commit message — the old
+`Global_skill_update.md` destination was frozen 2026-08-11 and retired to
+`audit-archive/` 2026-08-15, and this line survived both because a write aimed
+at a frozen file fails silently: the instruction reads as correct forever.
 
 ## Mode B — Import (audit a third-party skill before enabling)
 

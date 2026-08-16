@@ -4,6 +4,26 @@ Use this table to classify items flagged during conversation scan. Each category
 
 ---
 
+## Conversation scan signals (used by SKILL.md Step 1 item 7)
+
+**High-value signals (always extract)**
+- User says "no", "redo", "that's not what I meant" → log the root cause of the misunderstanding
+- User says "use this", "this is better", "let's go with X" → log the decision outcome
+- Claude went in the wrong direction and was corrected → log the correct path
+- A term or concept appears repeatedly → log the definition
+- A direction was explicitly abandoned with a reason → log the rejected option
+
+**Medium-value signals (extract when present)**
+- User adds "oh, and one more thing..." → often signals a key constraint
+- A tool or API error appeared and was resolved → log the pitfall and workaround
+- User expressed a preference about format, tone, or pacing
+
+**Low-value signals (skip or summarize briefly)**
+- Pure small talk or off-topic exchanges
+- Standard procedures already documented elsewhere
+
+---
+
 ## Category 1: Technical Decisions
 
 **What to include**
@@ -47,7 +67,15 @@ Use this table to classify items flagged during conversation scan. Each category
 - **Root cause**: [why it happens]
 - **Fix/workaround**: [how to resolve]
 - **Prevention**: [how to avoid next time]
+- **Cost**: [rounds/time actually lost — be honest: "30 seconds but hit twice"
+  and "two rounds chasing the wrong cause" are different animals]
+- **Times hit**: [how many times in this project — feeds `ops/lessons.md`'s `hits:` field]
+- **Status**: [fixed / worked around / accepted — an accepted one is not a
+  failure to report, but it must not be written as if it were solved]
 ```
+
+Cost and times-hit are what let a reader (and Step 6.2's gate d) rank pitfalls —
+without them, a two-round trap and a thirty-second annoyance look identical.
 
 ---
 
@@ -146,6 +174,39 @@ Use this table to classify items flagged during conversation scan. Each category
 
 ---
 
+## Category 7: The Clean Path (forward-looking)
+
+**What to include**
+- The build order you would follow if you started this project again, with a
+  GATE per step ("do not proceed until X passes")
+- The selection table: component → what was chosen → why → under what condition
+  to re-choose
+- Which decisions are load-bearing (change them and everything downstream
+  changes) vs cheap
+
+**Test**: Categories 1–6 answer "what happened". This one answers "what would I
+do next time". If the project is one of a recurring KIND (a CLI, a scraper, a
+desktop agent), this section is usually the most valuable output of the whole
+retrospective — and it is the one a purely backward-looking taxonomy loses.
+
+**Output format**
+```markdown
+### Clean path: [project kind]
+0. [step] → gate: [what must be true before step 1]
+1. [step] → gate: [...]
+...
+
+### Selection table
+| Component | Chosen | Why | Re-choose when |
+|-----------|--------|-----|----------------|
+```
+
+**Caveat**: only write this when the project is an instance of a repeatable
+kind. A one-off has no clean path worth generalizing — say so rather than
+inventing one.
+
+---
+
 ## Classification Decision Tree
 
 ```
@@ -168,4 +229,7 @@ The user's format, tone, or pacing preferences?
 
 A principle that generalizes across projects?
   └→ Category 6 (Reusable Principles)
+
+What order to build in / what to pick, next time this KIND of project starts?
+  └→ Category 7 (The Clean Path)
 ```

@@ -59,8 +59,8 @@
 - **永不刪除**：淘汰的檔案移 `archive/` 附註記，不刪。
 - **報告開新檔**：不覆蓋既有文件。
 - **Commit**：Conventional Commits（`type(scope): subject`），模板與
-  type 判斷表見 `COMMIT-TEMPLATES.md`；規則層檔案的變更記入
-  `Global_skill_update.md`。
+  type 判斷表見 `COMMIT-TEMPLATES.md`；規則層變更的理由記入
+  `ops/rule-registry.md`（事件本身由 commit message 承載）。
 - **語言**：對話回覆用繁體中文。**檔案輸出不看副檔名、看主要消費者**
   （人讀文件／機器讀內容／agent 執行的施工卡／概念層 PIM 共四類），
   完整判定規則見全域 `CLAUDE.md` 的 **File output** 條——此處不複述，
@@ -74,23 +74,24 @@
 
 | 資產 | 內容 |
 |---|---|
-| `CLAUDE.md` | 全域工作規則（常駐預算 12K） |
+| `CLAUDE.md` | 全域工作規則（常駐預算 15K bytes，2026-08-01 由 12K 調升） |
+| `LABEL-REGISTRY.md` | 可列舉標籤（`Mode X`/`L2`/`Tier-3`/清單序號）的唯一定義表；造新標籤前必讀 |
 | `settings.json` | 權限、hooks 掛載、模型預設 ⚠️ 內含機器綁定路徑，見 3.4 |
 | `skill-trigger-dict.md` | skill 路由消歧義表 |
-| `Global_skill_update.md` | 規則層變更的 audit trail |
+| `audit-archive/` | **已凍結 2026-08-11** 的歷史事件日誌，唯讀。現行分流：事件→commit message、規則現行理由→`ops/rule-registry.md`、踩到的坑→`ops/lessons.md` |
 | `PHILOSOPHY.md` | 整套環境背後的世界觀（人讀） |
 | `ops/`（12 檔） | 專案作業規則層 |
 | `skills/`（52 檔） | 自製 skills 本體 |
-| `hooks/`（2 檔） | `model_cap_guard.py`（subagent 模型上限）、`ops_health_nudge.py`（健康提醒 + 放寬等級提醒）— 皆以 `~/.claude` 解析路徑，可攜 |
-| `agents/` | 自訂 subagent 定義 |
+| `hooks/`（7 個 .py + 1 資料檔） | `model_cap_guard.py`（subagent 模型上限）、`ops_health_nudge.py`（健康提醒 + 放寬等級提醒）、`dangerous_command_guard.py`（危險 shell 指令）、`ui_verify_guard.py`（瀏覽器窗格量測紀律 L-009/L-010）、`browser_pane_scope_guard.py`（窗格導航記錄 + 已知崩潰站點封鎖 L-013，配 `browser-pane-blocklist.json`）、`instructions_loaded_logger.py`（規則載入遙測）、`delivery_gate_shadow.py`（交付閘門，shadow）— 皆以 `~/.claude` 解析路徑，可攜 |
+| `agents/`（8 檔） | 自訂 subagent 定義。全部於 2026-08-12 依本環境重寫（前身是第三方 ai-team-os 套件的 22 個定義，其餘已封存）。每個都帶 `tools:` 能力白名單且必含 `Skill`；路由表 `ops/20-dispatch.md`，政策 `ops/rule-registry.md` |
 | `interop/` | 跨 agent 同步層（編譯器 + 地圖 + 驗收） |
 | `thinking-notes/` | 設計思考筆記（編號系列） |
 | `reports/`（部分） | 少數被追蹤的報告 |
 
 ### 2.2 記憶（❗不在 git，最容易漏搬的資產）
 
-- 位置：`projects/<slug>/memory/`（`MEMORY.md` 索引 + 一事實一檔）；
-  slug 範例：家目錄下的 `~/.claude` 對應 `C--Users-<user>--claude`。
+- 位置：`projects/C--Users-gunda--claude/memory/`（`MEMORY.md` 索引 +
+  一事實一檔）。
 - slug 是**專案路徑衍生**的：路徑中非字母數字的字元轉 `-`。換了機器
   或使用者名稱，slug 會不同 → 必須搬到**新路徑對應的新 slug 目錄**，
   否則 Claude Code 找不到（見 3.5）。

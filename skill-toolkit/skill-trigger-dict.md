@@ -64,7 +64,8 @@
 ### config-self-audit（Claude Code 設定檔稽核）
 - 關鍵詞：稽核skill (audit skill)、檢查hook、這條global規則安全嗎
 - 精準句型：「幫我 audit 這個 skill/hook/CLAUDE.md 規則」— 只審 Claude Code 設定物件，不審專案代碼
-- 與官方 `/doctor`（`/checkup`）的分工（2026-07-25 實測後修訂）：本 skill **自足**，不需先跑 `/doctor`——存在性/完整性、觸發重疊、安全爆炸半徑、語言規範、以及使用率（`tools/usage-window.py`）都自己做。`/doctor` 降為最低優先的可選輸入，只在使用者指名、或需要安裝層修復/版本落後查詢時才用；其輸出一律當未驗證宣稱，先過 SKILL.md §2 gate 與 §7 視窗完整性。細節見 SKILL.md §8 與 `references/telemetry.md`
+- **兩個 mode**：預設 mode 審**單一物件**；**adoption mode** 審「從別的環境搬進來的設定」之間的**關係**（觸發碰撞、順序、機制沒跟著到）。觸發詞：「移植過來的規則跟原本的打架」「我把別人的設定 repo 併進來了」、或磁碟上有 `reconciled: no` 戳記。搬進來的**單一** skill 走 `skill-share-packaging` Mode B，不走這裡
+- 與官方 `/doctor`（`/checkup`）的分工：本 skill **自足**，`/doctor` 是最低優先的可選輸入，其輸出一律當未驗證宣稱。判定理由與 2026-07-25 實測細節見 SKILL.md §9 與 `skills/config-self-audit/references/telemetry.md`
 
 ---
 
@@ -75,6 +76,7 @@
 - 精準句型：「我有一個新產品想法，幫我做第一性原理拆解與設計」/「我需要設計一個新工具，進入設計模式」
 - 適用時機：對話中途出現設計需求也應觸發，不限開場；中途沒中時，明講 skill 名稱（「用 product-design-thinking 來做」）100% 命中
 - 也觸發：「給我 **PSM 等級**的修正案/重規劃」「build-ready 的修正規劃文件」— 既有產品的修正**規劃**仍屬本 skill（產出物是 PSM 嚴謹度的文件），只有「按既有 PSM 施工」才不觸發（2026-07-12 新增，源自 ops/lessons.md L-002：未觸發導致差分式偷薄文件被當成唯一施工依據）
+- 也觸發：把既有功能**換成完全不同的技術路線**（re-architecture、搬平台、換渲染路徑）——即使它以「實作任務」的措辭出現。判別子：要做的東西有業界專有名詞（"3D photo"、"parallax"、"LDI"…）＝有公認做法，選架構前的 prior-art 查證屬設計工作（2026-08-16 新增，源自 3D-photo-engine H-3 否決：Web 重架構被當實作任務，兩個 Phase 後才發現業界標準做法便宜一個數量級）
 - 避免說法：bug 修復、按圖施工、小型加功能、「寫個小工具/腳本」（都不觸發，這是重量級模式）
 
 ### design-system-suite（多產品共用設計系統）
@@ -93,9 +95,11 @@
 ## 流程與階段管理 (Workflow & Phases)
 
 ### workflow-checkpoint（階段封存 + 續作回溯）
-- 關鍵詞：階段完成 (phase done)、存檔 (checkpoint)、回顧專案繼續做 (recap and continue)
-- 精準句型：「這個階段完成了，做一次 checkpoint」/「我要接續之前的 X 專案」
+- 關鍵詞：階段完成 (phase done)、存檔 (checkpoint)、寫 phase log、回顧專案繼續做 (recap and continue)、收尾、本輪的終止、先到這邊、驗收/UAT 全數通過、我會再新開 session
+- 精準句型：邊界多半「講出來」而非 commit 出來（實測 2026-06~08）：「先到這邊，我會再新開 session」/「本輪的終止要是…」/「合併吧，結束後寫 phase log」/「驗收已全數通過」/「先設計(留文件)再動手」；續作：「接續之前的 X 專案」/「recap」
 - 避免說法：「專案結束了幫我總結」（→ project-retrospective）
+- **收尾 vs 結案**：判準是「後面還有沒有事」，不是聽起來多終局。收尾+會繼續 → 本 skill；結案+萃取經驗 → project-retrospective
+- 不該觸發：小修、單檔改動、純問答、階段進行中
 
 ### project-retrospective（結案回顧 / lessons learned）
 - 關鍵詞：回顧 (retrospective)、踩了什麼坑、總結這個專案、幫我寫CLAUDE.md規則
@@ -143,6 +147,19 @@
 
 ---
 
+## 素材庫 (Asset Library)
+
+### asset-vault（個人跨棧素材庫操作 / personal cross-stack asset library；此 skill 未隨本 repo 出貨，見 tools/share-manifest.toml）
+- 關鍵詞：素材庫、元件庫、抽進素材庫 (extract to vault)、查素材庫 (check the vault)、有沒有現成的X、可重用素材 (reusable asset)、素材庫健檢
+- 精準句型：
+  - Mode A：「把 X **抽進素材庫**」/ "extract this into the asset library"
+  - Mode B：「**查素材庫**有沒有現成的 loader/dialog/parser」；建置任務中遇到通用能力需求時 AI 應**自觸發**先查庫再手刻
+  - Mode C：「**素材庫健檢**」→ validate.py 完整性檢查
+- 避免說法：「設計素材庫新功能/改架構」（設計層 → product-design-thinking）、「清理素材庫無關檔案」（→ env-cleanup）、「多產品**套件**統一 design tokens/theme packs」（跨 app 設計系統方法論 → design-system-suite；asset-vault 只管「單件素材入庫/取用」）
+- 邊界：GUI 接口 (gui/gui-contract.json) 鎖版，已由一個姊妹 repo 實作為可瀏覽目錄（新增 kind 要同步該 repo 的 FAMILIES 家族表）；素材永不刪除只 deprecated
+
+---
+
 ## 動效與 3D (Motion & 3D)
 
 ### motion-design（動效與 3D 總控 / motion + animation + 3D hub）
@@ -153,9 +170,8 @@
 - 性質：**hub（總控）**。SKILL.md 只有路由表與常用表；內容在 `vendor/`（第三方 MIT 原文：LottieFiles 方法論 16 檔 + Three.js 手冊 10 檔）與 `local/`（本機義務與時效說明）。平時不佔 context，用到才讀。
 - 本機義務（交付前必讀 `local/env-bridge.md`）：視覺閘門（測試綠 ≠ 畫面對，需使用者實環境確認）、動效/3D 交付一律附可切換 FPS+物件數讀數、失敗要自曝（黑畫面算缺陷）、GLSL ES 多貼圖取樣必須展開成具名 uniform（否則靜默編譯失敗）、可調參數集中成一個 config 區塊 + 調整對照表。
 - 時效邊界：`vendor/threejs/` 對齊 r160+，現行為 r185（落後約 25 個 release），**完全未涵蓋 WebGPU / TSL**；引用 API 簽名前先讀 `local/currency.md` 並對照專案實裝版本。
-- 授權注意：`vendor/threejs/` 的上游未附 LICENSE 檔、未具名著作權人，MIT 授權只存在於上游 README 的一句話——詳見 `skills/motion-design/NOTICE.md` 的完整記錄與接受理由；`vendor/lottiefiles/` 授權完整（MIT + LICENSE + 具名著作權人），無此疑慮。
 - 擴充：未來新增動效 skill/函式庫（GSAP、Framer Motion、Rive、R3F…）**一律併入本 hub**，不另開頂層 skill — 程序見 `skills/motion-design/local/extending.md`。
-- 避免說法：「多產品統一 design tokens / theme packs」（→ design-system-suite）、「把這個動畫元件存進素材庫」（本分享未收錄對應 skill，此為原環境的內部指涉，可依自己環境的等效技能類推）、「整個產品的設計流程」（→ product-design-thinking）
+- 避免說法：「多產品統一 design tokens / theme packs」（→ design-system-suite）、「把這個動畫元件**存進素材庫**」（→ asset-vault）、「整個產品的設計流程」（→ product-design-thinking）
 
 ---
 
@@ -184,6 +200,12 @@
   - Mode B：「我從網路抓了一個 skill，**檢查能不能安全裝**」/ "audit this downloaded skill before installing"
 - 避免說法：「建/改 skill」（→ skill-creator）、「稽核我自己的 skill 內容」（→ config-self-audit）、「清理環境檔案」（→ env-cleanup）
 - 邊界：正典 skill 永不為分享而修改；分享副本是單向建置產物，放 `~/.claude/outputs/skill-share/`；匯入一律先隔離稽核再入 `skills/`
+
+### skill-co-upgrade（skill 實測共升級迴圈 / field-test co-upgrade loop）
+- 關鍵詞：跑一輪迴圈 (run a co-upgrade round)、交互升級 (co-upgrade)、硬化這個 skill (harden this skill)、實測缺口、繞過了才做對 (had to bypass the skill to do it right)
+- 精準句型：「跑一輪 co-upgrade 迴圈」/「這個 skill 實測有缺口，硬化它」
+- 主動提議（僅一次，never run unprompted）：實戰中 skill 明顯誤觸發或被繞過時、或大改寫後的 skill 即將上第一次實戰前
+- 避免說法：「稽核這個 skill 的內容」（靜態稽核 → config-self-audit，它是本迴圈內升級者的驗證步驟）、「建/改 skill」（→ skill-creator）、「清理檔案」（→ env-cleanup）
 
 ### /loop、/schedule（排程與循環）
 - 精準句型：「每 5 分鐘跑一次 /X」（loop）/「每天早上 9 點自動執行 X」（schedule）
@@ -228,8 +250,11 @@
 | 該選 A 還是 B（新決策） | engineering:architecture |
 | AI PR 審不完（流程） | ai-coding-guardrails |
 | 深審這段 AI 產的 code | code-review-deep-checklist (A §9) |
-| 稽核這個 skill/hook | config-self-audit |
+| 稽核這個 skill/hook | config-self-audit（預設 mode） |
+| 搬進來的規則跟原本的打架 | config-self-audit（adoption mode） |
 | 清理 .claude / 專案的無關檔案 | env-cleanup |
+| 跑一輪 skill 升級迴圈 / 硬化這個 skill | skill-co-upgrade |
 | 新產品構想設計 | product-design-thinking |
+| 既有功能換完全不同技術路線（re-architecture） | product-design-thinking |
 | 階段完成存檔、之後續作 | workflow-checkpoint |
 | 專案結束萃取經驗 | project-retrospective |

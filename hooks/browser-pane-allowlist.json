@@ -1,0 +1,16 @@
+{
+  "_comment": [
+    "In-app Browser pane (mcp__Claude_Browser__*) host ALLOWLIST. See ops/lessons.md L-013.",
+    "The pane shares the desktop app's GPU child process: a page that kills it takes the",
+    "in-flight turn of EVERY session in the app with it. Local dev servers and own-build",
+    "previews are the traffic this surface exists for; arbitrary third-party pages are not.",
+    "",
+    "Loopback hosts (localhost, 127.0.0.1, ::1, *.localhost, 0.0.0.0) are allowed by the",
+    "hook itself and need no entry here. Add a host below ONLY after deciding that loading",
+    "it in the shared-GPU pane is worth the blast radius; claude-in-chrome runs in a",
+    "separate Chrome process and is never denied, so it is almost always the better answer.",
+    "",
+    "Each entry: host (exact or parent domain - subdomains match), why, added (date)."
+  ],
+  "hosts": []
+}
