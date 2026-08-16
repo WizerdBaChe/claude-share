@@ -417,9 +417,15 @@ def check_collection(manifest, files, f):
     # operating manual. A declared entry overrides the heuristic, because
     # declaring a file IS the assertion that it was collected. Undeclared
     # READMEs behave exactly as before.
+    # ACCEPTANCE.md joined the authored-name list on 2026-08-16
+    # (compact-recovery round): a repo-authored acceptance checklist shipping
+    # beside a collected file, caught by this check on the round's first gate
+    # run. Same authored-file class, same declared-entry override; test case 11
+    # is the negative control that keeps the exemption narrow.
     in_scope = {p for p in files if p.startswith(roots)
                 and (p in declared
-                     or not p.endswith(("README.md", "NOTICE.md")))}
+                     or not p.endswith(("README.md", "NOTICE.md",
+                                        "ACCEPTANCE.md")))}
 
     for rel in sorted(in_scope):
         e = declared.get(rel)

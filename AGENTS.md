@@ -76,10 +76,10 @@ self-contained, with detail in its own `references/` loaded on demand.
 
 ## `hooks/` — the mechanical enforcement layer
 
-Collected 2026-08-14, extended 2026-08-16. Nine PreToolUse / UserPromptSubmit /
-SessionStart / SubagentStop / InstructionsLoaded hooks that the ops layer had been
-citing as its enforcement mechanism without ever shipping them; all fail-open,
-none machine-bound. Install steps and the per-hook table are in `hooks/README.md`;
+Collected 2026-08-14, extended twice on 2026-08-16. Twelve hooks across
+PreToolUse / UserPromptSubmit / SessionStart / PreCompact / SubagentStop /
+InstructionsLoaded — the enforcement layer the ops rules had been citing without
+ever shipping it; all fail-open, none machine-bound. Install steps and the per-hook table are in `hooks/README.md`;
 `settings.example.json` is the mounting template with `<PYTHON_EXE>` /
 `<CLAUDE_HOME>` to substitute.
 
@@ -94,12 +94,28 @@ none machine-bound. Install steps and the per-hook table are in `hooks/README.md
 | `context_runway_shadow.py` | **New 2026-08-16.** Shadow: long context *and* no checkpoint written yet. The conjunction is the trigger — context alone fires in 65% of sessions at 150k, the pair in 26%. |
 | `fieldwork_threshold_notice.py` | **New 2026-08-16.** Shadow: main-session Read/Grep/Glob measured against `20-dispatch.md` §1's literal thresholds. High-volume matcher — read its cost note before mounting it. |
 | `instructions_loaded_logger.py` | Observation only: which instruction files load, when. |
+| `compact_bookmark.py` | **New 2026-08-16.** PreCompact half of the compact-recovery bridge: bookmarks the pre-compact transcript (path, line count, trigger), then best-effort refreshes digest cards. |
+| `compact_pointer.py` | SessionStart("compact") half: injects a ~130-token pointer card — digest-first recall ladder, exact pre-compact region, the two recall triggers. |
+| `transcript_read_guard.py` | Deny on unbounded Reads of large session-transcript files; the grep-then-windowed-read path stays friction-free. The trio's overview lives in `compact-recovery/README.md`. |
 
 Two more hooks exist at the source and are deliberately **not** here — both
 gate an external-dispatch entry point this repo does not ship, and a deny-hook
 pointing at a missing script is worse than no hook. `tools/share-manifest.toml`
 carries both dispositions. `settings.example.json` mounts every hook that ships
 and nothing else; that is the invariant to re-check whenever this table changes.
+
+## `compact-recovery/` — post-compact recall as an operating mode
+
+New 2026-08-16. Not a single tool but one mechanism spanning four files: the
+three compact hooks above plus the digest generator here. What a `/compact`
+summary drops stays recoverable at on-demand token cost; the one move that
+would re-inflate context — a wholesale re-read — is structurally denied.
+
+| File | What it is |
+|---|---|
+| `README.md` | The operating mode (中文): event-pair bridge, recall ladder, token economics, install steps incl. the optional SessionEnd mount, tunables table, platform-contract re-check recipes, de-identification notes. |
+| `ACCEPTANCE.md` | Seven-item real-fire checklist (中文), plus what the source environment already verified on 2026-08-16 — including a full-chain live compaction. |
+| `preserve.py` | Transcript archiver + mechanical digest-card generator (stdlib-only, HOME-relative). The one file of the source's 279-file memory-pipeline product that ships; the rest stays not-shipped — see the manifest. |
 
 ## `agents/` — subagent definitions
 
