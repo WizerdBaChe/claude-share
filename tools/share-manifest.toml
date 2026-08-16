@@ -168,12 +168,16 @@ ways:
     `hooks/ops_health_nudge.py`), `tools/e2-gate-test/` (for
     `hooks/delivery_gate_shadow.py`), `tools/context-budget/` (the startup
     measurement behind `claude-ops/ops/environment.md`'s instruction-loading
-    table). These are the ones the 2026-08-15 correction was about, and the
-    honest answer is that they are still withheld for a weaker reason than the
-    others: each builds its fixture by re-pointing USERPROFILE or
-    CLAUDE_CONFIG_DIR at a temp tree, no shipped file cites them, and none has
-    been read end-to-end for this share. That is a deferral, not a judgement —
-    recorded as such so the next round does not read it as settled.
+    table). These are the ones the 2026-08-15 correction was about. Carried for
+    one round as an explicit deferral; DECIDED 2026-08-16 (user ruling): not
+    collected, and the deferral is closed rather than rolled forward. Each
+    builds its fixture by re-pointing USERPROFILE or CLAUDE_CONFIG_DIR at a
+    synthetic tree, which makes it a test of the source machine's layout as much
+    as of the hook; none is cited by any shipped file; and this repo already
+    ships two working test patterns, so what they would add is a third
+    maintenance surface rather than a capability. A deferral that survives its
+    round becomes an entry nobody re-reads — the same decay this manifest exists
+    to stop — so it is settled here instead of restated.
 Note: this repo's own `tools/` is a different thing, built here, not
 collected."""
 fallback = """None needed for the record-serving tools; the rules they support
@@ -1395,6 +1399,15 @@ case 3 of the test is what tells us."""
 
 [[allow]]
 file = "tools/test_share_gate.py"
+kind = "absolute local path (non-system drive)"
+match = "SomePrivateTree"
+reason = """The gate's own leak fixture for the non-system-drive pattern — an
+invented tree name planted to prove it fires. Its negative control sits in the
+next case down (system paths on the same drive letter must NOT fire) and needs
+no entry, which is how you can tell the two-sided calibration is real."""
+
+[[allow]]
+file = "tools/test_share_gate.py"
 kind = "absolute home path (any account)"
 match = "somebodyelse"
 reason = """The gate's own leak fixture — an invented account name planted to
@@ -1489,21 +1502,14 @@ precisely about whether to keep it — this file is silent about it and the harn
 kept requiring it, so one side was being ignored on every commit. Scrubbing the
 address would delete the subject of the rule."""
 
-[[allow]]
-file = "skill-toolkit/skills/scientific-research-guide/references/user-supplied-citations.md"
-kind = "hash / long hex"
-match = "2944335ea0059073531b43ea"
-reason = """A Semantic Scholar paper id inside a public URL, not a secret. The
-32-hex pattern exists to catch credentials and cannot tell the two apart; this
-entry is where a human did. Kept because the file's purpose is preserving the
-EXACT user-supplied URL — rewriting it would break the identity check the
-document is for."""
-
-[[allow]]
-file = "skill-toolkit/skills/scientific-research-guide/references/user-supplied-citations.md"
-kind = "hash / long hex"
-match = "d7a2004e215a1c964b97bb8a"
-reason = "Second Semantic Scholar paper id in the same file, same reasoning."
+# REMOVED 2026-08-16, same day they were added, by the D check added the same
+# round. Two [[allow]] entries excused Semantic Scholar paper ids in
+# `scientific-research-guide/references/user-supplied-citations.md` — correct
+# while a verbatim refresh had that file carrying the source's real citation
+# inbox, and dead the moment the share-edition template was restored over it.
+# They are recorded here rather than silently dropped because they are the
+# clearest small example of what check D is for: an exception outlives the
+# finding it was written for, keeps reading as coverage, and nothing looks.
 
 [[allow]]
 file = "interop-layer/test_interop.py"

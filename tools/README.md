@@ -1,6 +1,6 @@
 # tools/ — 發佈閘門（給維護者讀的操作手冊）
 
-> 機器讀的本體：`share_gate.py`（四道檢查）、`sharelib.py`（外洩樣式唯一源）、
+> 機器讀的本體：`share_gate.py`（六道 repo 內檢查 ＋ 一道要掛來源樹的 V）、`sharelib.py`（外洩樣式唯一源）、
 > `share-manifest.toml`（唯一的例外宣告處）、`test_share_gate.py`（閘門自身的驗收）。
 > 建立於 2026-08-14。
 
@@ -20,15 +20,21 @@
 ## 日常操作（三個指令）
 
 ```powershell
-python tools/share_gate.py            # 四道檢查全跑，有發現就 exit 1
-python tools/share_gate.py --check P  # 只跑一道（L / P / R / S 任選）
-python tools/test_share_gate.py       # 驗收閘門本身：4 個案例
+python tools/share_gate.py                        # repo 內六道全跑，有發現就 exit 1
+python tools/share_gate.py --check P              # 只跑一道（L / P / R / S / C / D 任選）
+python tools/share_gate.py --source ~/.claude     # 再加上 V：逐檔比對來源樹
+python tools/test_share_gate.py                   # 驗收閘門本身：10 個案例
 ```
 
 **推送前一定要跑一次 `share_gate.py`，exit 0 才推。** 它不會自動修任何東西——
 自動塗改正是它要防的那件事。
 
-## 四道檢查
+**在「搬東西進來」的時候，一定要加 `--source`。** 沒加就不會跑 V，而 V 是唯一
+看得見「宣告過的改動被一次 verbatim 覆蓋洗掉」的東西。2026-08-16 就是這樣一次
+掃描讓六個去識別化決定無聲消失，repo 內的六道檢查全部通過——因為它們沒有一道在
+比對任何東西。
+
+## 六道 repo 內檢查，加一道要來源樹的
 
 | 代號 | 名稱 | 擋什麼 | 過關的唯一方式 |
 |---|---|---|---|
@@ -37,6 +43,8 @@ python tools/test_share_gate.py       # 驗收閘門本身：4 個案例
 | **R** | reference | 引用了來源環境的資產（`hooks/…`、`~/.claude/…`、`ops/…`）但 repo 沒附、manifest 也沒宣告 | 在 `[source_map]` 建立對應，或加一筆 `[[not_shipped]]` |
 | **S** | structure | 巢狀 `SKILL.md`、缺 `SKILL.md`、clone 後會消失的空目錄、被追蹤的 `.claude/`／`__pycache__/`／`archive/`、技能清單表與實際樹不一致 | 修樹 |
 | **C** | collection | 從來源環境搬進來的檔案（`collected_roots` 底下）沒登記出處、沒登記狀態，或狀態不是 `verbatim` 卻沒列出每一處改動 | 補 `[[collected]]` 條目 |
+| **D** | dead-declaration | 已經對不上任何東西的宣告：`[[allow]]` 要豁免的那個發現已經不在、`[[not_shipped]]` 說沒出貨的檔案現在出貨了、`[placeholders]` 宣告的 token 全 repo 沒人用 | 刪掉那筆。過期的例外會一直被讀成「有在管」 |
+| **V** | source-verify | *（要 `--source`）* 宣告 `verbatim` 卻和來源不一樣、宣告 `edited`/`template` 卻和來源**完全一樣**（＝宣告過的改動不見了）、宣告的來源路徑已不存在 | 重收、補回改動，或改掉那個宣告 |
 
 P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類，全 repo 約 160 個）。
 管全部只會製造噪音而沒有保護；真正危險的只有兩個位置——那才是佔位符可能正藏著
@@ -97,4 +105,9 @@ python tools/share_gate.py || exit 1
 - **它證明不了語意。** 它能判定「這個 token 站在路徑位置」，判定不了
   「這段描述是否誠實」。`disposition` 與 `fallback` 的內容仍然要人寫、人審。
 - **`[[allow]]` 一旦寫寬就等於關掉那一項。** 這是設計上留給人的權力，也是
-  唯一一個可以無聲失效的地方；審 PR 時優先看 manifest 的 diff。
+  唯一一個可以無聲失效的地方；審 PR 時優先看 manifest 的 diff。D 檢查現在會抓
+  「豁免的對象已經不存在」，但抓不到「一開始就寫太寬」。
+- **V 是選配，而且只對「手上同時有兩棵樹」的人有效。** 採用者沒有來源樹可指，
+  所以它預設不跑；它不會靜默跳過——沒下 `--source` 就是沒跑，輸出裡看得出來。
+- **V 也證明不了「這次該不該重收」。** 它只回答「檔案和宣告是否一致」。來源自己
+  改壞了、而你照抄，V 一樣是綠的。

@@ -82,7 +82,7 @@ the model: any mechanism name is an example, verify before relying on it.
 | `hooks/` | **New 2026-08-14, nine hooks since 2026-08-16.** The mechanical enforcement layer the rules had been citing without shipping: destructive-command deny-list, subagent model cap, browser-pane measurement and scope guards, session health nudge, and four shadow probes (delivery gate, context runway, fieldwork threshold, rule-load logger) plus the mounting template. All fail-open. |
 | `agents/` | **New 2026-08-14.** The eight subagent definitions `claude-ops/ops/20-dispatch.md` routes to, each with a `tools:` capability allowlist and a defined output contract. |
 | `thinking-notes/` | Twelve numbered design-thinking notes. Argument, not policy — nothing there binds a reader. |
-| `tools/` | The publishing gate — leak, placeholder, reference-disposition, structure and collection-provenance checks — plus `COLLECTION-RULES.md`, the procedure for deciding what may be collected in the first place. |
+| `tools/` | The publishing gate — leak, placeholder, reference-disposition, structure, collection-provenance and dead-declaration checks, plus an opt-in source comparison — and `COLLECTION-RULES.md`, the procedure for deciding what may be collected in the first place. Its two procedures are worth reading even if you never collect: **A** for a file that is not here yet, **B** for one that is, because running A over B's files is what a 2026-08-16 refresh did to six deliberate decisions. |
 
 ## Where things are
 
@@ -109,4 +109,6 @@ the model: any mechanism name is an example, verify before relying on it.
 - No release tags, version numbers or content digests, on purpose. Pin a commit
   SHA on your side; see ADOPTERS.md for the reasoning.
 - Before any push that touches shipped content: `python tools/share_gate.py`
-  must exit 0.
+  must exit 0. If you are COLLECTING rather than reading, add
+  `--source <your ~/.claude>` — that enables the one check which can see a
+  declared edit that a refresh quietly reverted.

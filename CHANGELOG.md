@@ -9,6 +9,74 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-16 (later) — the round's own findings become checks
+
+Same day, second pass. Everything below exists because the morning's collection
+found it by hand, and a finding that stays a story is a finding that recurs.
+
+**Two new checks, one of them opt-in.**
+`D` (dead declaration) removes entries that no longer match anything: an
+`[[allow]]` outliving its finding, a `[[not_shipped]]` for a file that now
+ships, a placeholder token nothing uses. All three classes were live when it was
+written — including two `[[allow]]` entries added that same morning and made
+dead by a restore four hours later, which is now recorded in the manifest as the
+clearest small example of the pattern.
+`V` (source-verify) needs `--source <path>` and does the one thing check C's own
+docstring says it cannot: compares every collected file against the real source.
+The finding that has no other detector is **"declared 'edited', but is
+byte-identical to the source"** — a declared edit that a refresh reverted, which
+is exactly what happened to six files this morning while every repo-local check
+passed. It is opt-in because an adopter has no source to point at, and it is
+never silently skipped.
+
+**Check S gained mount parity.** Every `.py` under `hooks/` appears in
+`settings.example.json` exactly once, and nothing else does. The template had
+been mounting 7 of 9.
+
+**Both new checks were wrong on their first run, and that is recorded because it
+is the lesson.** D reported the two `partial` dispositions as findings — a
+`partial` entry MEANS part of it ships, so "it resolves" is what the entry
+already says. S reported `ops_health_nudge.py` as mounted twice; the second
+"mount" was the `_README` line telling the reader how to smoke-test it by hand.
+Both were instruments ruling on something they could not determine, on the first
+output of checks written to enforce exactly that rule. D now exempts `partial`;
+S parses the JSON instead of grepping the file.
+
+**The test suite went from 5 cases to 10, two of them negative controls.** A
+system path on a drive letter must NOT fire; the current tree must pass. A gate
+calibrated only on what it should catch scores 100% by rejecting everything.
+
+**`COLLECTION-RULES.md` was rewritten where it was imprecise enough to cause the
+damage.** The morning's failure was procedural, not careless: the file said
+"verbatim is the default" and said nothing about a file that is already here.
+- Rule 1 now splits: verbatim is the default for a FIRST collection and **never**
+  for a refresh, and the procedure splits with it — **A** for a file not here
+  yet, **B** for one that is, with sorting the candidate list by which procedure
+  it needs made an explicit step, because a bulk sweep runs A over B's files.
+- B carries the scan the gate cannot do, named as four concrete classes, all
+  four of which were live findings this morning: a private-tree pointer with no
+  path in it, subject matter arriving inside a file whose structure is what
+  ships, a pointer into an excluded directory, and a count claim in prose that
+  the refresh has just falsified.
+- Rule 2's scrub-target list is now enumerated rather than inferred, including
+  the non-system-drive class, and states what is NOT a target — project names,
+  ruling ids, evidence lines.
+- New rule 7: reach a verdict this round. A deferral that survives two rounds is
+  a decision made by nobody. New rule 8: the source's own words about sharing
+  are first-hand evidence and outrank your reading of the file.
+- Step 0 now defines "dirty" as a CONTENT difference: a file showing `M` for
+  line endings alone is not a reason to stop, and treating it as one teaches you
+  to skip the check.
+- The decision procedure gained the inverse of its row 2: excluding something a
+  shipped file ROUTES to is a two-part act — the disposition, and the edit to
+  whatever pointed at it. Nothing detects the half you forget.
+
+**One disposition closed rather than rolled forward.** The three source-side
+tests for hooks this repo ships were recorded this morning as an explicit
+deferral. User ruling: not collected. The entry now decides instead of deferring
+— per the new rule 7, and because the entry itself was the first thing that rule
+would have caught.
+
 ## 2026-08-16 — the other five roots, and what a verbatim sweep costs
 
 Full re-collection against source commit `f8605e4`. Two things happened: the

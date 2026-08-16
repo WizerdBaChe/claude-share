@@ -157,11 +157,11 @@ exit 0 is the release condition.
 
 | File | What it is |
 |---|---|
-| `share_gate.py` | Five fail-closed checks over every tracked file: **L** leak, **P** placeholder position, **R** reference disposition, **S** packaging structure, **C** collection provenance. Never edits anything — automatic scrubbing is the failure it exists to catch. |
+| `share_gate.py` | Six fail-closed checks over every tracked file — **L** leak, **P** placeholder position, **R** reference disposition, **S** packaging structure, **C** collection provenance, **D** dead declarations — plus **V**, which needs `--source <path>` and is the only one that can see a declared edit reverted by a refresh. Never edits anything; automatic scrubbing is the failure it exists to catch. |
 | `COLLECTION-RULES.md` | The decision procedure the gate enforces: what may be collected from the source environment, in which of five verdicts, and the mandatory copy → diff → declare → verify steps. Read it before adding or refreshing anything collected. |
 | `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart — a claim that was false from 2026-08-11 to 2026-08-16 and is recorded as such in the manifest. Now also catches absolute paths on a non-system drive, the class that let nine private pointers through a single refresh. |
 | `share-manifest.toml` | The only way past a finding: `[[allow]]` leak exceptions, `[[not_shipped]]` dependency dispositions + fallbacks, the `[placeholders]` position vocabulary, and the source-environment → repo path map. |
-| `test_share_gate.py` | Replays both historical incidents (the `<URL>` over-scrub, an undeclared hook) plus planted personal data against the live gate. |
+| `test_share_gate.py` | Ten cases, every one a real incident: the `<URL>` over-scrub, an undeclared hook, planted personal data, an unrecorded edit, a second-drive private path, an unmounted hook, a dead permission, and a declared edit reverted by a refresh. **Two of the ten assert the gate stays quiet** — a gate calibrated only on what it should catch scores 100% by rejecting everything. |
 | `README.md` | Operator manual (中文): why the layer exists, how to write a manifest entry, how to add a check. |
 
 ## `thinking-notes/` — essays, not rules

@@ -60,7 +60,11 @@ file and concluded the mechanism layer was unavailable, that conclusion is stale
 neither resolves inside the repo nor carries a disposition fails the build.
 Check C does the same for provenance: every collected file declares where it came
 from and every edit made on the way in. Undisclosed dependencies and silent edits
-cannot ship again.
+cannot ship again. Two more were added 2026-08-16 after a refresh proved the
+paperwork could be complete and still untrue: **D** removes declarations that no
+longer match anything, and **V** — which only runs for someone holding both trees
+— compares every collected file against its source, including the case that has
+no other detector, a declared edit silently reverted.
 
 What genuinely stays out: your own `settings.json` values, the operator's project
 index rows, dated internal reports, runtime telemetry, and one skill
