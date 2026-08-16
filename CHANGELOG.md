@@ -9,6 +9,84 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-17 — the red team ships its ruler, not just its verdict
+
+New share: `red-team/` — adversarial review made machine-checkable. The second
+mechanism export, and the second time a `[[not_shipped]]` root turned out to be
+hiding something transferable inside it.
+
+**What came in.** Seven files from `~/.claude/tools/extdispatch/` at source
+commit `d500be3`, first collection: `score_redteam.py` (acceptance layers 2–4 —
+structure, anchor, scope, spot-check), `jsonspan.py` (the one JSON-span
+extractor, extracted after the same scanner was found written three times with
+the *structure* gate holding the copy nobody had fixed), `redteam_verify.py`
+(layer 5 — one refuter per finding, verifier ≠ author enforced),
+`test_score_anchor.py` (ten cases), `test_parser_rulers.py` (eight cases), and
+two prompt templates. `README.md` (the mode: ladder diagram, the measurement
+behind each design choice, three wirings, dispatcher contract, tunables,
+per-part failure modes) and `ACCEPTANCE.md` (section A blind-runnable with no
+model, section B needing one) authored here.
+
+**One behavioural edit, declared as such.** `redteam_verify.py` opened with
+`import extdispatch as ed` at module scope — a hard dependency on the
+dispatcher this repo does not ship, which would have made the shipped file
+ImportError on line 41. It now loads a dispatcher by NAME (`--dispatcher`,
+defaulting to `extdispatch`, so the source's own invocation is unchanged) and
+refuses against a two-symbol contract before a single grant is spent.
+`--author`/`--verifier` lost their argparse `choices=` for the same reason and
+gained an explicit membership check: same rejection, same exit code, four lines
+later. Everything else is the usual de-identification class — two second-drive
+`--repo` examples, one pointer into a private report tree, one commit sha and
+one private project's four file paths (both templated, with the SCOPE block
+kept as four lines, because collapsing it onto one token is the over-scrub
+failure this repo is named after).
+
+**The disposition that was wrong about its own scope.** `tools/extdispatch/`
+was `excluded-by-decision` as of 2026-08-16, and its three disqualifying
+classes — a policy allowlist of local project paths, telemetry carrying home
+paths in every row, 53 files of raw model output from real work — are all still
+true and all still not shipped. What was wrong was applying them to the whole
+directory: the same root also held the acceptance layer, which touches none of
+the three. Narrowed to `partial`, with the per-file split written out and the
+2026-08-16 reasoning kept in place rather than replaced. This is the `tools/`
+entry's own 2026-08-15 lesson recurring one level down — *a disposition written
+for a root keeps applying itself to files it never examined* — and it is now
+the second time this repo has made that exact mistake, which is worth more than
+the correction itself.
+
+`prompts/redteam-v2.1-kys.txt` is the one file withheld for redundancy rather
+than content: templated, it is byte-identical to the version that ships, and
+publishing it would only disclose a second private project's tree shape.
+
+**Dispositions re-checked, not assumed.** Both external-dispatch hook entries
+were re-read the same day because the entry beneath them moved: each depends on
+a file that stayed out (`extdispatch.py`, `allowlist.txt`), so both hold
+unchanged — recorded in the entries rather than left to be re-derived. The
+`settings.example.json` omission list is untouched: still three omissions, two
+of them these hooks.
+
+**Counts.** Collected roots eight -> nine, and `red-team/` was declared a root
+on its creation day rather than joining the "had never looked" list. Tracked
+files: 181, as the gate reports them.
+
+**What ran.** Gate exit 0 with `--source` (156 collected files compared);
+`tools/test_share_gate.py` 11/11; `interop-layer/test_interop.py` 14/14. The
+shipped copies themselves: `test_score_anchor.py` 10/10 and
+`test_parser_rulers.py` 8 cases / 4 disagreements / no stale-boundary warning,
+both run from `red-team/` rather than from the source. Layer 5's four refusal
+paths and one full chain were exercised against a stub dispatcher — which
+proves the wiring and explicitly does not prove that a real model refutes
+anything; `ACCEPTANCE.md` records that split rather than blurring it. The
+round's only gate finding was the new `AGENTS.md` section citing the reviewer
+subagent under an `agents/` filename this repo does not carry — the shipped one
+is `agents/engineering-code-reviewer.md` — check R catching a broken pointer in
+prose written minutes earlier. Writing the wrong path out again here would
+re-trip it, which is check R declining to tell a post-mortem from a pointer;
+the entry says what happened instead.
+
+**Zip.** `red-team-2026-08-17.zip` at the repo root, gitignored like the last
+one: the repo publishes files and commits, not archives.
+
 ## 2026-08-16 (fourth) — the compaction learns the way back, and the share learns to carry it
 
 New share: `compact-recovery/` — the post-compact recall operating mode, shared

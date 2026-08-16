@@ -66,11 +66,26 @@ longer match anything, and **V** — which only runs for someone holding both tr
 — compares every collected file against its source, including the case that has
 no other detector, a declared edit silently reverted.
 
+**Corrected 2026-08-17 — the external-review acceptance layers ARE here now.**
+`tools/extdispatch/` was written off as `excluded-by-decision` on 2026-08-16 and
+the reasoning was sound about what it examined: a dispatcher carrying a policy
+allowlist of local project paths, telemetry with absolute home paths in every
+row, and 53 files of raw model output from real work. It was applied to the
+whole directory, and the directory also held the part that is pure method. That
+entry is now `partial`: `red-team/` ships the prompt templates, the mechanical
+anchor/scope gate, the adversarial layer and both test suites. The dispatcher
+itself still stays out, and so do the two hooks that gate it. If you need layer
+5, you supply ~20 lines against your own model tier — `red-team/README.md`
+carries the contract, and `red-team/ACCEPTANCE.md` marks exactly which checks
+that leaves open in your environment. This is the same failure class as the
+2026-08-14 correction above, one level down: **a disposition written for a root
+keeps applying itself to files it never examined.**
+
 What genuinely stays out: your own `settings.json` values, the operator's project
-index rows, dated internal reports, runtime telemetry, and one skill
-(`asset-vault`) that operates a private library — so `skill-toolkit/` ships 14 of
-the source environment's 15 skills, which is stated rather than left to be
-noticed.
+index rows, dated internal reports, runtime telemetry, the external dispatcher
+and its allowlist, and one skill (`asset-vault`) that operates a private library
+— so `skill-toolkit/` ships 14 of the source environment's 15 skills, which is
+stated rather than left to be noticed.
 
 ## Symptoms that are your environment, not this repo
 

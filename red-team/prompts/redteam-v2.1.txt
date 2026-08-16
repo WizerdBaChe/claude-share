@@ -1,0 +1,22 @@
+OUTPUT FORMAT — follow exactly, or the report is discarded unread: reply with ONE fenced ```json block containing a JSON array of finding objects, and nothing else. No prose before it, no summary after it. An empty array [] is a valid and accepted answer.
+
+Each object in the array has exactly these six keys:
+  "file"     : repository-relative path of the file the defect is in
+  "line"     : integer, the 1-based line number the defect is on
+  "quote"    : the ENTIRE TEXT OF THAT LINE, copied character for character out of the file, including its leading indentation. If you cannot find a line in the source that exhibits the defect, put the literal string "SOURCE-NOT-FOUND" here.
+  "defect"   : one sentence stating what is wrong
+  "failure"  : a concrete failure scenario -- specific inputs or state, leading to a specific wrong output or crash
+  "severity" : one of "high", "medium", "low"
+
+EVIDENCE RULE, read it twice: "quote" is checked mechanically against the file. A quote that does not match the named file and line invalidates THE ENTIRE REPORT, not merely the finding it belongs to. Copy the line; do not reconstruct it from memory and do not paraphrase it. If your claim is about something that is ABSENT from the code, the quote must still be a real line -- the line where the missing thing should have been -- or "SOURCE-NOT-FOUND".
+
+NO-FINDING RULE: returning [] is a correct answer and costs you nothing. A report with two anchored findings is worth more than a report with six, four of which are guesses. Never write a finding you are not prepared to have checked against the source line by line.
+
+TASK: you are an adversarial reviewer, working read-only.
+SCOPE — these are the only files under review. A finding about any other file is discarded and invalidates the report:
+  <FILE_UNDER_REVIEW_1>
+  <FILE_UNDER_REVIEW_2>
+  <FILE_UNDER_REVIEW_3>
+  <FILE_UNDER_REVIEW_4>
+Read those files directly. Do not review anything else in the repository, however interesting it looks.
+ Report defects in logic, error handling, resource handling, concurrency, and API misuse. Do not report formatting or style preferences, and do not propose refactors.
