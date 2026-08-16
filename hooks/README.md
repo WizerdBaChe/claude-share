@@ -69,5 +69,5 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
   [`../compact-recovery/`](../compact-recovery/README.md) 出貨**，但它裝在
   `tools/memory-pipeline/` 而非 hooks/，所以掛載範例放在那份 README 的安裝章——
   本目錄的範本維持「只掛 hooks/ 內檔案」的不變量。
-- **`environment-guide/` 裡寫「hooks/（2 檔）」的地方是 2026-07-31 的快照**，
-  當時確實只有兩支。那些檔案作為快照保持原樣，正確數字以本目錄為準。
+- **`environment-guide/` 裡寫「hooks/（7 個 .py + 1 資料檔）」的地方是 2026-08-14 的快照**，
+  當時確實只有七支。那些檔案作為快照保持原樣，正確數字（現為 12 支）以本目錄為準。

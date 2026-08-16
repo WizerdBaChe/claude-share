@@ -87,9 +87,6 @@
 ### engineering:system-design（單一系統/服務架構設計）
 - 精準句型：「幫我設計一個處理 X 的系統/API/資料模型」— 範圍窄於 product-design-thinking
 
-### product-management:write-spec（寫 PRD/spec）
-- 精準句型：「把這個功能想法寫成一份 PRD」
-
 ---
 
 ## 流程與階段管理 (Workflow & Phases)

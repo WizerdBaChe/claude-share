@@ -9,6 +9,64 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-17 (third) — a sync/doc-accuracy pass, not a refresh
+
+Not a share from the source environment — the user asked for a plain audit:
+is local in sync with remote, and does every layer's documentation still
+match what's actually in the repo. It was (clean, `origin/main` even), but
+the doc side had four stale spots, three of them left behind by the very
+refresh logged above.
+
+**`skill-toolkit/README.md`'s own inventory sentence never got the count fix.**
+The prior entry corrected `ADOPTERS.md`, `CHANGELOG.md`, and
+`tools/share-manifest.toml` to "15 of 18," but the prose in
+`skill-toolkit/README.md` — the file a reader actually opens first — still
+read "14 個…來源環境共有 15 顆；未收錄的是 `asset-vault`." Fixed to name all
+three withheld skills (`asset-vault`, `render-perf`, `system-design`) and the
+18/15 split. The inventory table beneath it already had the
+`mechanism-share-packaging` row; only the summary paragraph above it was
+behind.
+
+**`claude-ops/README.md`'s path-mapping table still said "7 支" hooks.**
+`hooks/` has grown to 12 since the 2026-08-14 note was written (3 from
+`compact-recovery`, more from later rounds) and neither `hooks/README.md`
+nor the top-level `README.md` was wrong — only this one cross-reference
+table. Reworded to name both the historical count and the current one, and
+pointed at `hooks/README.md` as the number's source of truth so this doesn't
+drift again the same way.
+
+**`hooks/README.md` misquoted the file it was citing.** Its own note about
+`environment-guide/`'s hook count being a stale snapshot claimed the snapshot
+said "hooks/（2 檔）" — that phrase does not exist anywhere in
+`environment-guide/`; the actual text there is "7 個 .py + 1 資料檔" /
+"7 支," dated 2026-08-14, not 2026-07-31. Corrected the quote and the date.
+
+**`skill-toolkit/skill-trigger-dict.md` carried one router entry for a skill
+that has never existed in this environment.** The `[ops-health]` hook that
+fires on this file every session start (25.1K, over its 24K review-trigger
+size) names the fix procedure explicitly: run the routing-coverage script
+and correct what it flags as fiction before considering a cap raise. Ran it
+against the live `~/.claude` transcript history (the script is a live-ops
+tool, not part of this repo — it reads real session turns, so it cannot run
+against a packaged snapshot in isolation). Cross-checked its verdicts
+against this session's actual available-skill list rather than trusting the
+tool's own "not a local skill" tag at face value (that tag only scans
+`~/.claude/skills/*/SKILL.md` and misses built-ins and marketplace plugins —
+several of its flags, e.g. `run`, `security-review`, `loop`, were false
+positives once checked that way). One flag held up under both checks:
+`product-management:write-spec` — no such plugin exists in the installed
+marketplace catalog, in this session's skill list, or anywhere in `~/.claude`
+outside old archived backups; `git log -S` shows it was present since the
+initial anonymized snapshot commit and never corresponded to anything real.
+Removed the entry and its one cross-reference (was routing "寫 PRD" to it from
+the `scientific-research-guide` avoid-list). No replacement skill covers that
+gap; the honest state is that this toolkit has no dedicated PRD-writing
+router, not a silent respell to something adjacent. The byte-budget trigger
+was a symptom here, not the target — deleting the one fictitious entry does
+not clear the file's 24K review threshold on its own, and per the hook's own
+instruction that is fine: raising the cap after a real review is the
+intended outcome, extraction for its own sake is not.
+
 ## 2026-08-17 (second) — the packer packs itself, and a count nobody was checking comes due
 
 Follow-on to the red-team round, on the user's ruling: ship the skill that did

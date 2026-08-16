@@ -21,7 +21,7 @@
 | `~/.claude/CLAUDE.md` | [`../global-claude-md/CLAUDE.md`](../global-claude-md/CLAUDE.md) | 目標機器的 `~/.claude/CLAUDE.md` |
 | `~/.claude/skill-trigger-dict.md` | [`../skill-toolkit/skill-trigger-dict.md`](../skill-toolkit/skill-trigger-dict.md) | 目標機器的 `~/.claude/skill-trigger-dict.md` |
 | `~/.claude/PHILOSOPHY.md` | [`../environment-guide/PHILOSOPHY.md`](../environment-guide/PHILOSOPHY.md) | 目標機器的 `~/.claude/PHILOSOPHY.md` |
-| `hooks/*.py` | [`../hooks/`](../hooks/)（2026-08-14 補齊，7 支） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
+| `hooks/*.py` | [`../hooks/`](../hooks/)（2026-08-14 首次補齊 7 支，現有 12 支——正確數字以 [`../hooks/README.md`](../hooks/README.md) 為準） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
 | `agents/*.md` | [`../agents/`](../agents/)（2026-08-14 補齊，8 支） | 目標機器的 `~/.claude/agents/` |
 | `~/.claude/references/PROJECTS.md` | [`references/PROJECTS.md`](references/PROJECTS.md)（只有格式，沒有資料列） | 目標機器的 `~/.claude/references/PROJECTS.md` |
 | `settings.json` | [`../hooks/settings.example.json`](../hooks/settings.example.json)（範本） | 併進你自己的 `settings.json` |
