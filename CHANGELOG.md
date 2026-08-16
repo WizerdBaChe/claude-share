@@ -9,6 +9,58 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-17 (second) — the packer packs itself, and a count nobody was checking comes due
+
+Follow-on to the red-team round, on the user's ruling: ship the skill that did
+the packing, withhold the two knowledge packs, and write the withholding down.
+
+**What came in.** `skill-toolkit/skills/mechanism-share-packaging/` — `SKILL.md`
+and `references/governance-starter.md` verbatim, `evals/evals.json` with the
+share repo's own absolute path replaced by `<share-repo>` in two places. The
+skill is the procedure behind both `compact-recovery/` and `red-team/`, and its
+first hard rule is delegation: the target repo's collection rules are
+authoritative and are never restated inside it, because a second copy of a rule
+is a fork that drifts. This repo IS that target, which makes shipping it a
+mildly recursive act and changes nothing about the procedure.
+
+**What stayed out, with the reason written down.** `render-perf` and
+`system-design`, the two knowledge packs, `excluded-by-decision`. The reason is
+about STATE, not content: both are unfinished at the source. A knowledge pack's
+own posture rule is that a covered branch must cite pack files and an uncovered
+branch must say so out loud — ship one half-stocked and you export a trigger
+surface whose honest answer to most questions is "no stock here". Both entries
+carry a REVIEW-WHEN naming the event that would reopen them, because a
+disposition resting on a fact outside this repo is exactly the kind that rots
+quietly.
+
+**The count that had been wrong for weeks.** This repo said `skill-toolkit/`
+ships "14 of the source's 15 skills". The source had 18. Three additions —
+`mechanism-share-packaging`, `render-perf`, `system-design` — had arrived with
+no `[[collected]]` and no `[[not_shipped]]` entry between them, so the sentence
+naming `asset-vault` as *the* withheld skill was false in a way no check could
+see: a count is a claim about a tree the gate cannot read. Now 15 of 18, with
+all three declared, and `ADOPTERS.md` says plainly that counts here need a human
+to re-derive them.
+
+**The stale router, and the second half of the same edit.**
+`skill-toolkit/skill-trigger-dict.md` was three skill sections behind its
+source. Check V had been reporting it healthy every round and was right to: for
+an `edited` file it can only assert the copy DIFFERS, never that it differs by
+exactly the declared edits — its own docstring calls that the known limit.
+Refreshed via procedure B, with a second declared edit removing the whole
+`## 知識包` section so the dictionary stops routing to skills this repo does not
+have. That edit then had to be finished twice: the file's quick-routing table
+near the end carried its own two rows for the same pair. **A router is not one
+place** — grep the skill name, not the section heading.
+
+**What the gate forced.** Two findings, both mechanical: `<source path>` in a
+path position inside the seeded governance template (declared under
+`[placeholders]` path_position_ok — it is a genuine parameter, and substituting
+a real value would defeat a file whose premise is that the reader's source is
+elsewhere), and check S catching `skill-toolkit/README.md`'s inventory table one
+row short of the tree. Gate: exit 0 with `--source`, 184 tracked, 159 collected
+compared; suite 11/11; `interop-layer/test_interop.py` 14/14.
+
 ## 2026-08-17 — the red team ships its ruler, not just its verdict
 
 New share: `red-team/` — adversarial review made machine-checkable. The second

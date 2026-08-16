@@ -65,6 +65,7 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `design-system-suite` | Design tokens and contracts across a multi-product frontend suite. |
 | `env-cleanup` | File-level cleanup of a config environment or project tree; archives, never deletes. |
 | `literature-search-extract` | Finding scholarly sources and extracting into evidence tables, with citation traceability. |
+| `mechanism-share-packaging` | **New 2026-08-17.** Exporting a behavioural MECHANISM — an operating mode spanning hooks, tools, wiring and docs — into a governed share repo: scope it as a runtime, land each file where the target's structure says, sweep the ripples arrival causes, loop the target's gate. Delegation is its first hard rule — the target repo's collection rules stay authoritative and are never restated inside it. `compact-recovery/` and `red-team/` are its two live runs. |
 | `motion-design` | Motion/animation methodology + Three.js. `vendor/lottiefiles/` is third-party MIT, verbatim. |
 | `product-design-thinking` | Heavyweight design mode for a new product: prior-art sweep, then build-ready docs. |
 | `project-retrospective` | End-of-project extraction of lessons into a guide + rules snippet. |

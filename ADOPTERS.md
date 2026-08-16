@@ -83,9 +83,17 @@ keeps applying itself to files it never examined.**
 
 What genuinely stays out: your own `settings.json` values, the operator's project
 index rows, dated internal reports, runtime telemetry, the external dispatcher
-and its allowlist, and one skill (`asset-vault`) that operates a private library
-— so `skill-toolkit/` ships 14 of the source environment's 15 skills, which is
-stated rather than left to be noticed.
+and its allowlist, and three skills — `asset-vault`, which operates a private
+library, and the two knowledge packs `render-perf` and `system-design`, withheld
+2026-08-17 because they are unfinished at the source and a half-stocked pack
+ships a trigger with nothing behind it. So `skill-toolkit/` ships **15 of the
+source environment's 18 skills**, stated rather than left to be noticed.
+
+That number was wrong for weeks before anyone looked: it read "14 of 15" while
+the source had quietly grown to 18. Nothing checks it — a count is a claim about
+a tree this repo cannot see, and the gate has no access to the source. Treat
+every count here as needing a human to re-derive it, not as something the build
+protects.
 
 ## Symptoms that are your environment, not this repo
 

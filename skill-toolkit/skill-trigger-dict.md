@@ -198,8 +198,14 @@
 - 精準句型：
   - Mode A：「把 X skill **打包成分享版**給別人用」/ "package this skill to share"
   - Mode B：「我從網路抓了一個 skill，**檢查能不能安全裝**」/ "audit this downloaded skill before installing"
-- 避免說法：「建/改 skill」（→ skill-creator）、「稽核我自己的 skill 內容」（→ config-self-audit）、「清理環境檔案」（→ env-cleanup）
+- 避免說法：「建/改 skill」（→ skill-creator）、「稽核我自己的 skill 內容」（→ config-self-audit）、「清理環境檔案」（→ env-cleanup）、「打包一個**機制/運作模式**」（跨層多檔 → mechanism-share-packaging）
 - 邊界：正典 skill 永不為分享而修改；分享副本是單向建置產物，放 `~/.claude/outputs/skill-share/`；匯入一律先隔離稽核再入 `skills/`
+
+### mechanism-share-packaging（行為機制輸出 / behavioral-mechanism export to a governed share repo）
+- 關鍵詞：打包機制 (package a mechanism)、運作模式輸出 (export an operating mode)、這套 hook 組合分享出去、機制進 share repo、跨層打包
+- 精準句型：「把這個**機制/運作模式**（hooks+工具+文件）打包到 share repo，照那邊的規則進版控」/ "export this mechanism to the share repo"
+- 避免說法：「打包**一個 skill**」（單一 skill 過機器邊界 → skill-share-packaging）、「把別人的規則層搬進來」（→ config-self-audit adoption mode）、「備份/搬遷整個環境」（那是 migration，不是治理型輸出）
+- 邊界：本 skill 只做程序骨架與漣漪清單；目的 repo 的 COLLECTION-RULES/gate 永遠是權威，**絕不**把對方規則內容複寫進來（雙源漂移）；來源環境唯讀（SHA 前後驗證）；zip 是攜帶工件不進版控；push 一律等使用者。首跑實證 2026-08-16（compact-recovery，9 findings → 0）
 
 ### skill-co-upgrade（skill 實測共升級迴圈 / field-test co-upgrade loop）
 - 關鍵詞：跑一輪迴圈 (run a co-upgrade round)、交互升級 (co-upgrade)、硬化這個 skill (harden this skill)、實測缺口、繞過了才做對 (had to bypass the skill to do it right)
@@ -255,6 +261,7 @@
 | 清理 .claude / 專案的無關檔案 | env-cleanup |
 | 跑一輪 skill 升級迴圈 / 硬化這個 skill | skill-co-upgrade |
 | 新產品構想設計 | product-design-thinking |
+| 把這套機制/運作模式打包進 share repo | mechanism-share-packaging |
 | 既有功能換完全不同技術路線（re-architecture） | product-design-thinking |
 | 階段完成存檔、之後續作 | workflow-checkpoint |
 | 專案結束萃取經驗 | project-retrospective |
