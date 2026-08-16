@@ -642,6 +642,11 @@ Register it in `domains/_routing.md` as a `sub-profile` row before it is conside
 > with this copy — see `README.md` in this folder. Read the names as illustrations of the
 > base / sub-profile / reference / boundary pattern, not as files to look for.
 
+> **Share note**: the tree below is the source environment's layout, kept as a worked
+> example of a populated `domains/`. The concrete profile files it names do NOT ship
+> with this copy — see `README.md` in this folder. Read the names as illustrations of the
+> base / sub-profile / reference / boundary pattern, not as files to look for.
+
 ```
 skills/scientific-research-guide/
 ├── SKILL.md                          ← Operating protocol (Gate A-E; load order:

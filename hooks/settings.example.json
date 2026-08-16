@@ -113,6 +113,24 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "_comment": [
+          "The SECOND half of ui_verify_guard.py. It is one file mounted on two",
+          "events: PreToolUse denies an unprobed screenshot, PostToolUse reads the",
+          "probe RESULT and routes on it. Mount both or the hook only denies and",
+          "never routes."
+        ],
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__javascript_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ui_verify_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "matcher": "",

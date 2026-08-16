@@ -9,6 +9,66 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-16 (third) — the twin gets fixed upstream, and the sweep breaks again
+
+Two things closed the day: the sibling gap the co-upgrade sweep found was fixed
+at the source, and a second re-collection round tested the morning's rules
+against real drift. The rules held. The TOOLING did not, which is the finding.
+
+**The twin, fixed at the source.** `skill-share-packaging` had the same shape as
+the morning's failure and sharper: hard rule 1 says fixes flow canonical → copy
+and never back, so the canonical skill by construction never learns what an
+export decided; A6 wrote those decisions to a share-notes file, and nothing read
+it. A re-export re-derived everything from the canonical and dropped every
+judgement the canonical cannot carry. New A0 globs for a previous
+`SHARE-NOTES.md` and refuses to start from scratch on a hit; A6 now fixes the
+file's NAME (A0 depends on it) and requires each entry to say whether it must
+survive the next export. Fixed in the source environment at `88490bc`, then
+collected here — which is the correct direction, and the reason the share repo's
+copy was not edited in place.
+
+**The sweep broke the same six decisions a second time, hours after the rule
+against it was written.** The rewritten `COLLECTION-RULES.md` says sort the
+candidate list into A and B before copying. The script did not know that, so it
+ran A over B's files again — same four excluded files re-introduced, same share
+edits reverted. The round's own disposition had predicted exactly this
+("if V fires on a real reverted edit, procedure B did not work — the answer is
+mechanical, not editorial"), and it did. The refresh script now reads the
+manifest and REFUSES by default: it touches a file only when the declared status
+is `verbatim`, names every `edited`/`template` file it skipped, and names every
+file with no entry at all. Procedure B's sorting step, mechanised.
+
+**Two declared edits ended because upstream fixed them.** The source removed the
+private asset-library pointers from `hooks/ui_verify_guard.py` and
+`ops/environment.md` itself, so both are `verbatim` again. Check V is what
+surfaced it — "declared 'edited', but is byte-identical to the source" is the
+same finding whether an edit was dropped by accident or retired by upstream, and
+V cannot tell them apart. Both entries keep their superseded edit text under a
+comment saying which of the two happened, because that distinction is exactly
+what a later reader cannot reconstruct.
+
+**Check S5 was wrong about duplicates.** It required every hook to appear in the
+mounting template exactly once. The source turned `ui_verify_guard.py` into a
+PreToolUse/PostToolUse router — one file, two events, entirely correct — and S5
+would have reported the correct wiring as a defect. Duplicates are now judged per
+(event, matcher, hook), and the template gained the PostToolUse mount it had been
+missing, which is a half-wired hook the check existed to catch and nearly
+prevented itself from catching.
+
+**One new source reference excluded.** `ops/references/browser-pane-pixel-route.md`
+is normally exactly the class this repo ships. Its payload is runnable recipes
+carrying an absolute home path, a private asset's source path, an npx-cache
+directory keyed by a content hash, and three private project names. Step 4 of the
+decision procedure does not apply — the machine-specific part is not incidental
+to the recipes, it IS the recipes — and a template with the measurements removed
+would be a shape with no measurement in it. The portable half already ships in
+`environment.md` and `global-claude-md/CLAUDE.md`, both refreshed the same day.
+
+**Two dirty-source acks cleared by their own review-when.** Both said "that work
+lands at the source"; it landed mid-round, the files were re-collected, and the
+acks are gone. The third (`references/PROJECTS.md`) has no review-when on
+purpose — a live project index is dirty as its normal state — and remains.
+
 ## 2026-08-16 (later) — the round's own findings become checks
 
 Same day, second pass. Everything below exists because the morning's collection

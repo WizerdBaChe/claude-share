@@ -804,3 +804,29 @@
   added, which is when the `tools:`-must-include-`Skill` invariant is at risk.
 - rollback: commits fe8d69b / 79936c2 / 0548220 and this one;
   `archive/agents-2026-08-12/`
+
+### browser-pane pixel route — out-of-process by default
+- current: pixels for UI verification come from headless Playwright
+  out-of-process BY DEFAULT (durable runner: `tools/ui-shot/`, doctor-checked);
+  the pane serves DOM/state reads; the screenshot guard ROUTES on a `hidden`
+  probe result (deny + handed command) and permits on `visible`, so
+  visible+timeout stays a distinct diagnosable fault; pictures reach the user
+  via `SendUserFile`/links, never a fronted window; pixels are for APPEARANCE
+  claims only. (2026-08-16)
+- why: user premise — the foreground is not commandeerable, so `hidden` is the
+  steady state and probe-then-retry was a ritual with a foregone answer.
+  Brief + dispositions: `outputs/browser-pane-visibility-brief-2026-08-16.md`,
+  `outputs/browser-pane-visibility-outcome-2026-08-16.md`.
+- evidence: headless 1.4–1.5s WITH pixels vs pane 5s timeout with none; fresh
+  pane born hidden/0×0/rAF-stalled; archive-wide 80 pane-screenshot calls vs
+  853 DOM/state reads; hook suite 19/19 (`tools/ui-verify-test/`); live
+  router check in-session (marker annotated `hidden`, route denial fired).
+- history: detect-first CLAUDE.md line (2026-08-05) → PreToolUse gate
+  (2026-08-08) → result-aware router + default inversion + durable runner
+  (2026-08-16)
+- review-when: `<browser_surfaces>` or the screenshot tool's error wording
+  changes on an upgrade; the suite or `tools/ui-shot/doctor.mjs` fails; a
+  probe marker stays `unknown` in live use (`tool_response` unpopulated). A
+  user "I'm watching" is a temporary premise flip, not an edit trigger.
+- rollback: `backups/2026-08-16/ui_verify_guard.py.pre-router`;
+  `drafts/2026-08-16-pane-pixel-route/`

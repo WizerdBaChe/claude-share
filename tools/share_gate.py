@@ -350,10 +350,12 @@ def check_structure(manifest, files, f):
         # mount is measuring the wrong thing, and its first output was a false
         # positive about the file it was written to protect.
         try:
-            mounted = [h.get("command", "").replace("\\", "/").rsplit("/", 1)[-1]
-                       .strip('"')
-                       for blocks in json.loads(tmpl).get("hooks", {}).values()
-                       for b in blocks for h in b.get("hooks", [])]
+            sites = [(event, b.get("matcher", ""),
+                      h.get("command", "").replace("\\", "/")
+                       .rsplit("/", 1)[-1].strip('"'))
+                     for event, blocks in json.loads(tmpl).get("hooks", {}).items()
+                     for b in blocks for h in b.get("hooks", [])]
+            mounted = [name for _, _, name in sites]
         except (json.JSONDecodeError, AttributeError) as exc:
             f.add("S", "hooks/settings.example.json", 0,
                   f"does not parse as the settings shape: {exc}",
@@ -372,10 +374,17 @@ def check_structure(manifest, files, f):
                   f"mounts {name}, which this repo does not ship",
                   "remove the block; a mount pointing at a missing file is worse "
                   "than an absent mount")
-        for name in sorted({m for m in mounted if mounted.count(m) > 1}):
+        # A duplicate is the same hook on the same (event, matcher) — NOT the
+        # same hook twice. Corrected 2026-08-16, hours after this check shipped:
+        # the source turned ui_verify_guard.py into a PreToolUse/PostToolUse
+        # router, which is two mounts of one file and entirely correct, and the
+        # first version of this rule would have reported the correct wiring as a
+        # defect. A check that fires on the fix is worse than no check.
+        for site in sorted({s for s in sites if sites.count(s) > 1}):
             f.add("S", "hooks/settings.example.json", 0,
-                  f"{name} is mounted {mounted.count(name)} times",
-                  "one mount per hook; a duplicate runs the hook twice per event")
+                  f"{site[2]} is mounted twice on {site[0]} matcher {site[1]!r}",
+                  "one mount per hook per event+matcher; a true duplicate runs "
+                  "the hook twice for the same call")
 
 
 # --- C: collection -----------------------------------------------------------

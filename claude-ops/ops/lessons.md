@@ -271,6 +271,16 @@ L-011 on why a CLAUDE.md line cannot carry a mid-measurement rule. Enforcement
 moved to `hooks/ui_verify_guard.py` (screenshot branch), which denies the
 screenshot until a `visibilityState` probe has run in this session (5 min TTL);
 the CLAUDE.md line stays as the explanation the denial points at.
+2026-08-16 amendment: the premise under the remedy was wrong. `hidden` is this
+machine's STEADY STATE (user's foreground is not commandeerable; a fresh
+`preview_start` pane is born hidden — 0×0, rAF stalled, measured — and steals
+no focus), so "restore visibility and retry" was never an available remedy;
+the pane screenshot timeout measures 5s today, zero pixels, while headless
+delivers a PNG in 1.4–1.5s. Pixels therefore route OUT-OF-PROCESS BY DEFAULT;
+the probe's remaining job is the discriminator (`visible` + timeout = a
+different fault). Premise: `environment.md` "Browser pane"; recipes:
+`ops/references/browser-pane-pixel-route.md`. Not a recurrence — no new
+failure event; `hits:` unchanged.
 
 ## L-010 2026-08-08 tags: env|browser-pane|verify|ui-testing|flaky|css hits: 1
 Context: browser-pane UI verification — hover/focus a control, then read

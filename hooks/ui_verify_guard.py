@@ -1,4 +1,5 @@
-r"""PreToolUse guard: browser-pane UI verification discipline (ops/lessons.md L-009, L-010).
+r"""PreToolUse/PostToolUse guard: browser-pane UI verification discipline
+(ops/lessons.md L-009 + 2026-08-16 amendment, L-010).
 
 Two failures kept recurring in browser-pane UI verification, and neither is
 reliably prevented by a rules-layer reminder, because both fire at the moment
@@ -13,43 +14,51 @@ the agent is already mid-measurement and confident:
          a transition:none stylesheet, then measure.
 
   L-009  An occluded browser pane reports document.visibilityState === "hidden";
-         compositing stops and every screenshot call TIMES OUT while DOM reads
-         over CDP keep working. Historically misdiagnosed as a permission fault
-         and "fixed" by opening more permissions. Fix: probe visibilityState
-         before asking for pixels; take real pictures out-of-process.
+         compositing stops and every screenshot call TIMES OUT (5s, measured
+         2026-08-16) while DOM reads over CDP keep working. Historically
+         misdiagnosed as a permission fault. 2026-08-16 premise correction:
+         "hidden" is this machine's STEADY STATE - the user's foreground is not
+         commandeerable, so "make the pane visible and retry" was never an
+         available remedy. Pixels route OUT-OF-PROCESS BY DEFAULT
+         (ops/references/browser-pane-pixel-route.md, 1.4-1.5s measured).
 
-Enforcement shape. Both branches DENY rather than warn: a warning arrives as
-text the agent may skim, a denial forces the corrected call. Each denial costs
-exactly one retry, and the corrected form is the one that should have been used
-anyway.
+Enforcement shape - the screenshot branch is a ROUTER, not just a gate. The
+probe is still required first (its result is what routes), and the marker now
+records the probe's RESULT, written by the PostToolUse event:
 
-The screenshot branch is stateful: a javascript_tool call mentioning
-visibilityState writes a per-session marker, and a screenshot within
-MARKER_TTL_S of that marker is allowed through. So the first screenshot of a
-session is denied once, the probe satisfies it, and the rest of the session
-runs unimpeded. The marker is per session_id, so it cannot leak between
-sessions, and it expires so it cannot vouch for a stale observation.
+  no fresh marker            -> deny: run the visibilityState probe first
+  marker state = "visible"   -> allow: pane screenshot is meaningful; a timeout
+                                after a visible probe is a DIFFERENT fault and
+                                must stay diagnosable (L-009 over-firing guard)
+  marker state = "hidden"    -> deny WITH THE ROUTE: ready-to-run headless
+                                command + SendUserFile delivery. Re-probing
+                                (e.g. after the user says they are watching)
+                                refreshes the state.
+  marker state = "unknown"   -> allow (probe ran, result unparseable/legacy -
+                                fail-open to the pre-router behaviour)
 
-Escape hatch. Measuring an IN-FLIGHT value is occasionally the actual goal -
-verifying an easing curve, sampling a transition midpoint. The literal marker
-`intentional-midflight` anywhere in the call (a comment is enough) says the
-mid-transition read is the point, and the L-010 branch stands down. Same shape
-as model_cap_guard.py's `[user-approved-top-tier]`.
+PostToolUse cannot block (docs) and is used here only to annotate the marker
+with the observed state; every parse failure leaves state "unknown", so a
+harness payload change degrades this hook to its 2026-08-08 behaviour, never
+to a lockout.
 
-Write scope: one marker file per session under
-%TEMP%\claude-ui-verify-guard\. Deliberately outside ~/.claude - it is
-ephemeral session state, and the config directory is a git repo that must not
-accumulate untracked runtime droppings. Nothing else is written.
+Escape hatch (L-010 branch, unchanged): the literal marker
+`intentional-midflight` anywhere in the call stands down the settled-read
+denial, for the rare case where the mid-transition value IS the measurement.
+
+Write scope: one marker file per session under %TEMP%\claude-ui-verify-guard\
+(JSON: {"ts": <epoch>, "state": "unknown|visible|hidden"}; legacy plain-float
+markers read as "unknown"). Deliberately outside ~/.claude. Nothing else is
+written.
 
 Scope: the in-app Browser pane (mcp__Claude_Browser__*) and Claude-in-Chrome
-(mcp__claude-in-chrome__*). Known gap: a measurement performed inside
-`read_page`/`get_page_text` output rather than an explicit getComputedStyle
-call is not visible here - those tools do not report computed style, so the
-gap is theoretical. Cost: one Python start (~100ms) per browser computer /
-javascript_tool call; the matcher excludes read_page, find, get_page_text and
-the network/console readers, which are the high-volume ones.
+(mcp__claude-in-chrome__*). Cost: one Python start (~100ms) per browser
+computer / javascript_tool call, now also on javascript_tool PostToolUse; the
+matchers exclude read_page, find, get_page_text and the network/console
+readers, which are the high-volume ones.
 
 Fail-open by design: any parse error exits 0 so a guard bug never blocks work.
+Tests: tools/ui-verify-test/test_ui_verify_guard.py.
 """
 import json
 import os
@@ -73,8 +82,18 @@ SETTLED_RE = re.compile(
 
 VISIBILITY_RE = re.compile(r"visibilityState", re.IGNORECASE)
 
+# Probe RESULT, parsed from the PostToolUse tool_response (stringified, so
+# escaped-JSON tolerant). Both patterns demand the QUOTED-JSON value shape and
+# the parser takes the LAST match: a response that echoes the probe's own code
+# (`visibilityState: document.visibilityState,` / `hidden: document.hidden`)
+# must not be read as a result — the real result follows any echo.
+STATE_RE = re.compile(r'visibilityState\\*"?\s*:\s*\\*"(hidden|visible)\\*"', re.IGNORECASE)
+HIDDEN_BOOL_RE = re.compile(r'"hidden\\*"\s*:\s*(true|false)', re.IGNORECASE)
+
 # Opt-out for the case where the mid-flight value IS the measurement.
 MIDFLIGHT_MARKER = "intentional-midflight"
+
+ROUTE_POINTER = "ops/references/browser-pane-pixel-route.md"
 
 
 def deny(reason: str) -> None:
@@ -93,12 +112,85 @@ def marker_path(session_id: str) -> Path:
     return MARKER_DIR / f"{safe}.probe"
 
 
-def main() -> None:
+def write_marker(session_id: str, state: str) -> None:
     try:
-        payload = json.load(sys.stdin)
+        MARKER_DIR.mkdir(parents=True, exist_ok=True)
+        marker_path(session_id).write_text(
+            json.dumps({"ts": time.time(), "state": state}), encoding="utf-8")
     except Exception:
-        sys.exit(0)
+        pass
 
+
+def read_marker(session_id: str):
+    """Returns (fresh: bool, state: str). Legacy float markers -> "unknown"."""
+    try:
+        p = marker_path(session_id)
+        if not p.exists():
+            return False, ""
+        raw = p.read_text(encoding="utf-8").strip()
+        try:
+            data = json.loads(raw)
+            ts = float(data.get("ts", 0))
+            state = str(data.get("state", "unknown"))
+        except Exception:
+            ts = float(raw)  # legacy format: bare epoch float
+            state = "unknown"
+        if (time.time() - ts) >= MARKER_TTL_S:
+            return False, state
+        return True, state
+    except Exception:
+        return False, ""
+
+
+def parse_probe_state(tool_response) -> str:
+    try:
+        text = json.dumps(tool_response, ensure_ascii=False)
+    except Exception:
+        text = str(tool_response)
+    hits = STATE_RE.findall(text)
+    if hits:
+        return hits[-1].lower()
+    hits = HIDDEN_BOOL_RE.findall(text)
+    if hits:
+        return "hidden" if hits[-1].lower() == "true" else "visible"
+    return "unknown"
+
+
+def deny_probe_first() -> None:
+    deny(
+        "L-009: probe visibility before asking the pane for pixels. Run "
+        "javascript_tool with `document.visibilityState` first. If it returns "
+        '"visible", the pane screenshot unlocks for '
+        f"{MARKER_TTL_S // 60} minutes and a timeout then means a DIFFERENT "
+        'fault. If it returns "hidden" - the steady state on this machine - do '
+        "NOT retry the pane: compositing is stopped and a screenshot can only "
+        "time out (5s, measured); it is a display-state fault, never a "
+        "permission one. Take the picture out-of-process instead:\n"
+        "  npx playwright screenshot <url> <out>.png   (~1.5s)\n"
+        f"  settled-state probe + PNG: {ROUTE_POINTER}\n"
+        "then deliver it with SendUserFile - never ask the user to front a "
+        "window. Detail: ~/.claude/ops/lessons.md L-009."
+    )
+
+
+def deny_route_hidden() -> None:
+    deny(
+        'L-009 route: this session\'s last visibility probe returned "hidden" '
+        "- the pane is not compositing, so this screenshot can only time out "
+        "(5s, measured, zero pixels). Denied so you do not pay for nothing. "
+        "Take the picture out-of-process:\n"
+        "  npx playwright screenshot <url> <out>.png   (~1.5s, works from anywhere)\n"
+        f"  settled-state probe + PNG (~1.4s): {ROUTE_POINTER}\n"
+        "Deliver it with SendUserFile - never ask the user to bring a window "
+        'forward (standing premise, ops/environment.md "Browser pane"). DOM/'
+        "state reads (read_page / get_page_text / javascript_tool) still work "
+        "over CDP for content/structure/state/order claims. If the user has "
+        "said they are watching and the pane should now be visible, re-run the "
+        'visibilityState probe - a "visible" result refreshes this guard.'
+    )
+
+
+def handle_pre(payload) -> None:
     tool = str(payload.get("tool_name", ""))
     tool_input = payload.get("tool_input") or {}
     session_id = payload.get("session_id", "")
@@ -107,11 +199,7 @@ def main() -> None:
         text = str(tool_input.get("text", ""))
 
         if VISIBILITY_RE.search(text):
-            try:
-                MARKER_DIR.mkdir(parents=True, exist_ok=True)
-                marker_path(session_id).write_text(str(time.time()), encoding="utf-8")
-            except Exception:
-                pass
+            write_marker(session_id, "unknown")
             sys.exit(0)
 
         if (
@@ -134,27 +222,40 @@ def main() -> None:
         sys.exit(0)
 
     if tool.endswith("computer") and str(tool_input.get("action", "")) == "screenshot":
-        try:
-            p = marker_path(session_id)
-            if p.exists() and (time.time() - p.stat().st_mtime) < MARKER_TTL_S:
-                sys.exit(0)
-        except Exception:
-            sys.exit(0)
-        deny(
-            "L-009: probe visibility before asking the pane for pixels. Run "
-            "javascript_tool with `document.visibilityState` first. If it returns "
-            '"hidden" the pane is occluded, compositing has stopped, and this '
-            "screenshot will TIME OUT - that is a display-state fault, never a "
-            "permission one, so do not open permissions to chase it; read_page / "
-            "get_page_text / read_console_messages still work over CDP, and real "
-            "pictures come from a separate browser process "
-            "(`npx playwright screenshot <url> <out>.png`). "
-            'If it returns "visible" the probe clears this guard for '
-            f"{MARKER_TTL_S // 60} minutes and a timeout then means a different "
-            "fault. Detail: ~/.claude/ops/lessons.md L-009."
-        )
+        fresh, state = read_marker(session_id)
+        if not fresh:
+            deny_probe_first()
+        if state == "hidden":
+            deny_route_hidden()
+        sys.exit(0)
 
     sys.exit(0)
+
+
+def handle_post(payload) -> None:
+    tool = str(payload.get("tool_name", ""))
+    tool_input = payload.get("tool_input") or {}
+    session_id = payload.get("session_id", "")
+
+    if tool.endswith("javascript_tool"):
+        text = str(tool_input.get("text", ""))
+        if VISIBILITY_RE.search(text):
+            state = parse_probe_state(payload.get("tool_response"))
+            write_marker(session_id, state)
+    sys.exit(0)
+
+
+def main() -> None:
+    try:
+        payload = json.load(sys.stdin)
+    except Exception:
+        sys.exit(0)
+
+    event = str(payload.get("hook_event_name", "PreToolUse"))
+    if event == "PostToolUse":
+        handle_post(payload)
+    else:
+        handle_pre(payload)
 
 
 if __name__ == "__main__":

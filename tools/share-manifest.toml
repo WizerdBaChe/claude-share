@@ -299,6 +299,28 @@ evidence, treat the citation as a claim made by the source environment, not as a
 receipt you can pull."""
 
 [[not_shipped]]
+path = "ops/references/browser-pane-pixel-route.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-16, second collection round. A detail file under
+`ops/references/` — normally exactly the class this repo ships — and excluded
+because what it records is one machine's install layout, not a rule. Its payload
+is runnable recipes: a `node` command carrying an absolute path under the
+author's home directory, the source path of a private asset library entry, an
+npx-cache directory keyed by a content hash, and an inventory line naming three
+private projects. Decision-procedure step 4 does not apply: the machine-specific
+part is not incidental to the recipes, it IS the recipes. A template rewrite was
+considered and rejected — every measured number in it (1.4s probe, browser
+build, package version) is a fact about that install, and a template with the
+facts removed would be a shape with no measurement in it."""
+fallback = """The portable half already ships, in two places refreshed the same
+day: `claude-ops/ops/environment.md`'s browser-pane section carries the premise
+(`hidden` is the steady state, so pixels come from out-of-process by default),
+and `global-claude-md/CLAUDE.md`'s browser-pane bullet carries the routing rule
+(content/structure/state claims take DOM reads; appearance claims take pixels,
+out-of-process). `hooks/ui_verify_guard.py` ships and enforces it. What you do
+not get is this machine's timings and paths, which would not transfer anyway."""
+
+[[not_shipped]]
 path = "rules/x.md"
 disposition = "upstream-absent"
 reason = """Not a file at either end. `claude-ops/ops/environment.md` uses
@@ -473,9 +495,14 @@ edits = [
 [[collected]]
 path = "hooks/ui_verify_guard.py"
 source = "~/.claude/hooks/ui_verify_guard.py"
-status = "edited"
-edits = [
-  "docstring + denial text: dropped two pointers to a private asset-library entry ('AssetVault asset ui-state-probe'), keeping the portable instruction (npx playwright screenshot) that stood beside it",
+status = "verbatim"
+# WAS 'edited' until 2026-08-16 (second round): two pointers to a private
+# asset-library entry were dropped from the docstring and denial text. The
+# source rewrote this hook into a result-aware router the same day and removed
+# both pointers itself, so the copy is byte-identical again. Same class as the
+# environment.md note above — an edit that ends because upstream fixed it.
+_superseded_edits = [
+  "docstring + denial text: dropped two pointers to a private asset-library entry, keeping the portable instruction (npx playwright screenshot) that stood beside it",
 ]
 
 [[collected]]
@@ -496,6 +523,7 @@ edits = [
   "removed machine-preference keys (autoUpdatesChannel, theme, agentPushNotifEnabled) — no reader should inherit them",
   "added a _README block: this is a template to merge from, and the permission list is one operator's threat model, not a recommendation",
   "2026-08-16 re-derivation against the source's committed settings.json: added the two mounts for the hooks collected this round (fieldwork_threshold_notice.py on Read|Grep|Glob, context_runway_shadow.py on UserPromptSubmit), matchers and timeouts as the source wires them, plus a _comment on the first about its per-call cost. Removed the two external-dispatch mounts along with the SessionEnd one — three omissions now, all named in _README. Before this the template mounted 7 hooks while 9 shipped, which is the same class of silent drift as an undeclared edit: the file claims to be the mounting template and was quietly short.",
+  "2026-08-16 (second round): added the PostToolUse mount for ui_verify_guard.py. The source turned that hook into a PreToolUse/PostToolUse router — PreToolUse denies an unprobed screenshot, PostToolUse reads the probe RESULT and routes on it — and the template carried only the first half, which would have shipped a hook that denies and never routes. Found because check S5 existed; S5 itself had to be corrected in the same pass, since its first version treated one hook on two events as a duplicate and would have reported the correct wiring as a defect.",
 ]
 
 # --- interop-layer/ -------------------------------------------------------
@@ -697,15 +725,17 @@ status = "verbatim"
 [[collected]]
 path = "claude-ops/ops/environment.md"
 source = "~/.claude/ops/environment.md"
-status = "edited"
-source_dirty_ack = """2026-08-16: the source gained ~44 uncommitted lines in its
-browser-pane section AFTER this copy was taken, from a concurrent session on that
-subject. The collection itself was against clean, committed content at f8605e4 —
-verified before it ran. Kept rather than re-collected because COLLECTION-RULES.md
-step 0 forbids collecting uncommitted work, and this repo promises a reviewed
-snapshot as of its commit, not a mirror. review-when: that work lands at the
-source — then re-collect and delete this line."""
-edits = [
+status = "verbatim"
+# WAS 'edited' until 2026-08-16 (second round). The single declared edit dropped
+# the name and absolute path of a private asset-library entry from the
+# "Out-of-process pictures" block. The source has since rewritten that block and
+# removed the pointer itself, so the edit is obsolete and re-applying it would
+# be a patch against text that no longer exists. Recorded rather than quietly
+# deleted: an edit ending because upstream fixed it is a different event from an
+# edit being dropped, and check V cannot tell them apart — this comment is what
+# makes the difference readable. The dirty-source ack that sat here is gone too;
+# its review-when ("that work lands at the source") fired.
+_superseded_edits = [
   "'Out-of-process pictures': dropped the name and absolute path of a private asset-library entry, keeping the capability description (headless Playwright, drives hover/focus, finishes animations, returns computed styles + optional PNG). Same treatment the same pointer already got in hooks/ui_verify_guard.py and hooks/browser_pane_scope_guard.py — the reader cannot open it, so the pointer is cost with no value.",
 ]
 
@@ -713,9 +743,6 @@ edits = [
 path = "claude-ops/ops/lessons.md"
 source = "~/.claude/ops/lessons.md"
 status = "edited"
-source_dirty_ack = """2026-08-16: +10 uncommitted lines at the source, same
-concurrent browser-pane work as environment.md above, same reasoning. review-when:
-that work lands at the source."""
 edits = [
   "7 session UUIDs in Evidence: lines -> 'session (a local transcript)'. The schema (session | digest | locator | captured) is the instructive part and is kept whole; the id points at a transcript no reader can open. Same wording already declared for hooks/model_cap_guard.py.",
   "3 evidence locators: the absolute drive prefix stripped, leaving the project-relative path (e.g. '<drive>:/<work-root>/Foo/SECURITY-POLICY.md' -> 'Foo/SECURITY-POLICY.md'). COLLECTION-RULES.md rule 2 forbids scrubbing a path that resolves, and the tail still identifies the file for anyone who has the repo; only the machine-specific prefix goes.",

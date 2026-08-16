@@ -146,7 +146,7 @@ main-loop model is cheap/mid" is evaluated against step 1, not against the
 taste calls and the intake gates; mitigation: raise the model manually for
 judgment-heavy sessions, or lean on fresh-context sonnet review for intake.
 
-## Browser pane — recorded properties (as-of 2026-08-12)
+## Browser pane — recorded properties (as-of 2026-08-16)
 
 Three recorded properties of the in-app Browser pane, all measured, all
 enforced by hook rather than by recall (why: `lessons.md` L-011). The first two
@@ -158,42 +158,54 @@ are about reading OUT of the pane; the third is about what you let IN.
 | `getComputedStyle()` during a CSS transition returns the interpolated mid-flight value | hover/focus assertions come back FLAKY, not stably wrong | L-010 |
 | A third-party page loaded in the pane can crash the Electron GPU child (`exitCode 101457950`); Electron does not relaunch it | window stops compositing, main process wedges (8m26s of log silence, observed), in-flight turn of EVERY session in the app is lost | L-013 |
 
-**Enforcement**: `hooks/ui_verify_guard.py` (PreToolUse, matcher
-`mcp__(Claude_Browser\|claude-in-chrome)__(computer\|javascript_tool)`). It
-denies a `getComputedStyle` call carrying no settle token in the same call, and
-denies a screenshot until a `visibilityState` probe has run in this session
-(marker under `%TEMP%\claude-ui-verify-guard\<session>.probe`, 300s TTL). Both
-denials name the corrective call, so the cost is one retry. Escape hatch: the
-literal marker `intentional-midflight` anywhere in the `javascript_tool` call
-stands down the L-010 branch, for the rare case where the mid-transition value
-IS the thing being measured (same shape as `model_cap_guard.py`'s
-`[user-approved-top-tier]`). Hook tested 2026-08-08 against 8 synthetic
-payloads (deny/allow both branches, escape-hatch marker, cross-session marker
-isolation, non-screenshot actions, malformed stdin → fail-open): 8/8, re-run
-clean after fixing a docstring escape-sequence SyntaxWarning (`r"""` prefix).
-Known gap: only explicit `getComputedStyle`-family calls are visible; a style
-value inferred from `read_page` output is not — theoretical, since those tools
-do not report computed style.
+**Standing premise (user, 2026-08-16): the foreground is not commandeerable.**
+「絕大部分時間我一定都在做別的事情，不可能讓你跳視窗到我眼前」 — `hidden` is
+the pane's STEADY STATE, not an exception: a fresh `preview_start` pane is
+born `hidden` (0×0, rAF stalled, no focus stolen) and its screenshot times
+out (5s, zero pixels) while script/CDP stay alive. Consequences: no rule,
+remedy, or delivery note may ask the user to bring a window forward; pixels
+default to the out-of-process route; pictures reach the user via
+`SendUserFile`/links. FLIP: only while the user explicitly says they are
+watching, for that stated scope (their words are the flip; this file does not
+change). Detail: `ops/references/browser-pane-pixel-route.md`. review-when:
+the pane gains an always-visible surface, or `<browser_surfaces>` wording
+changes.
 
-**Pane-scope enforcement**: `hooks/browser_pane_scope_guard.py` (PreToolUse,
-matcher `mcp__(Claude_Browser\|claude-in-chrome)__(navigate\|preview_start)`).
-Logs every pane navigation to `telemetry/browser-nav.jsonl` — the desktop app's
-own `main.log` records a preview's `serverId`/`tabId` and never the URL, so
-without this log a pane-adjacent crash has no attributable trigger. Denies a
-host listed in `hooks/browser-pane-blocklist.json` (tracked in git, hand-edited,
-one seed entry) when the call targets the IN-APP pane; `claude-in-chrome` runs
-in a separate Chrome process and is never denied, which is the escape hatch.
-Tested 2026-08-12 against 10 synthetic payloads: 10/10. Standing rule of thumb
-(deliberately NOT in CLAUDE.md yet, user ruling 2026-08-12 — promote on a second
-independent incident): the pane is for localhost, your own build, and pages the
-user wants to see; third-party pages go WebFetch → claude-in-chrome → headless
-Playwright first; a URL loaded immediately before a pane/app death is never
-retried in the pane.
+**Enforcement**: `hooks/ui_verify_guard.py` (PreToolUse matcher
+`mcp__(Claude_Browser\|claude-in-chrome)__(computer\|javascript_tool)`, plus a
+PostToolUse javascript_tool matcher). Denies a `getComputedStyle` call with no
+settle token; denies a screenshot until a `visibilityState` probe has run
+(marker `%TEMP%\claude-ui-verify-guard\<session>.probe`, 300s TTL); and ROUTES
+— deny + ready-to-run headless command — when the probe's RESULT was `hidden`
+(PostToolUse writes the result into the marker; parse failure degrades to the
+plain gate). `visible` unlocks the pane screenshot, so visible+timeout stays a
+distinct fault. Escape hatch: literal `intentional-midflight` stands down the
+L-010 branch. Tested 2026-08-16: 19/19 (`tools/ui-verify-test/`) + live
+(marker annotated `hidden`, route denial fired). Known gap: hook header
+(`read_page`-inferred styles invisible — theoretical).
 
-**Out-of-process pictures**: a local headless-Playwright helper (a private
-asset of the source environment; not shipped) — drives hover/focus, finishes
-animations, returns computed styles + optional PNG as JSON. Playwright 1.62.1 and Chromium are already on this
-machine (`~\AppData\Local\ms-playwright`), resolvable via `npx`.
+**Pane-scope enforcement (as-of 2026-08-14, re-verified 2026-08-16)**:
+`hooks/browser_pane_scope_guard.py` (PreToolUse, matcher
+`mcp__(Claude_Browser\|claude-in-chrome)__(navigate\|preview_start)`) logs
+every pane navigation to `telemetry/browser-nav.jsonl` (live — the app's own
+log never records preview URLs) and enforces an **ALLOWLIST**: loopback hosts
+allowed by the hook itself; anything else needs
+`hooks/browser-pane-allowlist.json`, edited only by the user; denials are loud
+and route to claude-in-chrome (separate process, never denied) / WebFetch /
+headless Playwright. The blocklist file survives only to annotate deny
+messages with recorded crash reasons.
+Standing reason, evidence (7/7), history, and the third-party rule of thumb
+(unchanged; promote on a second independent incident): `rule-registry.md`
+"in-app Browser pane" + `lessons.md` L-013.
+
+**Out-of-process pictures — the DEFAULT pixel route (as-of 2026-08-16,
+measured)**: headless Playwright in its own process. Full probe
+(hover+settle+`--shot`) 1.4s, `npx playwright screenshot` 1.5s, PNGs
+delivered; the hidden pane: 5s timeout, none. The `playwright` package
+resolves ONLY from the npx cache, so `node ui-probe.mjs` needs a dir tree
+with playwright installed. Recipes, resolution facts, representativeness
+limits, E-6 flag research, asset + browser paths:
+`ops/references/browser-pane-pixel-route.md`.
 
 ## Instruction-loading mechanics (as-of 2026-08-11, Claude Code 2.1.220)
 
