@@ -548,11 +548,41 @@ def check_verify(manifest, files, f, source_root):
       declared source missing
                              the entry points at a path the source no longer
                              has; the disposition rests on a claim that expired
+      source is content-dirty
+                             the source file has uncommitted changes, so the
+                             copy is a snapshot of a state committed nowhere.
+                             COLLECTION-RULES.md step 0 says stop; this is that
+                             step, applied to the paths that actually matter
+                             instead of to the whole tree. Line-ending-only
+                             dirt is not reported — a signal that is routinely
+                             false teaches its reader to ignore it.
+
+    KNOWN LIMIT, found on this check's first real use (2026-08-16) and stated
+    here rather than in a note somewhere else: for an `edited` or `template`
+    entry, V can only assert that the file DIFFERS from the source. It cannot
+    tell "differs by exactly the declared edits" from "differs because the
+    source moved on and this copy is stale". There is no machine-readable form
+    of an edit list, and inventing one would trade a prose record a human can
+    audit for a schema that would rot. The dirty-source finding above closes the
+    common case; the rest is what the `edits` list and a human are for.
     """
     root = Path(source_root).expanduser()
     if not root.is_dir():
         print(f"FATAL: --source {source_root} is not a directory")
         sys.exit(2)
+
+    # Content-dirty paths at the source, by line count. --numstat, not
+    # --porcelain: a file shows M for line endings alone, and G-4 of this
+    # check's own review round is that treating that as "stop" trains the
+    # reader to stop obeying.
+    dirty = set()
+    out = subprocess.run(["git", "-C", str(root), "diff", "--numstat"],
+                         capture_output=True, text=True)
+    for line in out.stdout.splitlines():
+        parts = line.split("\t")
+        if len(parts) == 3 and (parts[0] != "0" or parts[1] != "0"):
+            dirty.add(parts[2].strip())
+
     prefix = "~/.claude/"
     checked = 0
     for e in manifest.get("collected", []):
@@ -571,6 +601,21 @@ def check_verify(manifest, files, f, source_root):
         if not r.exists():
             continue          # check C already reports this
         checked += 1
+        if src[len(prefix):] in dirty:
+            # The escape is a declared, dated reason on the entry — the same
+            # shape as every other exception in this manifest, because the
+            # alternative (a red gate for a legitimate transient state) is the
+            # permanently-on alarm nobody reads. An empty ack does not count.
+            ack = (e.get("source_dirty_ack") or "").strip()
+            if ack:
+                print(f"  [V] ack: {rel} — source dirty, declared: {ack[:88]}")
+            else:
+                f.add("V", rel, 0,
+                      f"source {src} has uncommitted content changes",
+                      "your copy is a snapshot of a state committed nowhere: "
+                      "commit at the source and re-collect, or add a dated "
+                      "source_dirty_ack to this entry saying why it does not "
+                      "matter for this file")
         same = (s.read_bytes().replace(b"\r\n", b"\n")
                 == r.read_bytes().replace(b"\r\n", b"\n"))
         if status == "verbatim" and not same:

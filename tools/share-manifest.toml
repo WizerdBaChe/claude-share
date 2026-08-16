@@ -698,6 +698,13 @@ status = "verbatim"
 path = "claude-ops/ops/environment.md"
 source = "~/.claude/ops/environment.md"
 status = "edited"
+source_dirty_ack = """2026-08-16: the source gained ~44 uncommitted lines in its
+browser-pane section AFTER this copy was taken, from a concurrent session on that
+subject. The collection itself was against clean, committed content at f8605e4 —
+verified before it ran. Kept rather than re-collected because COLLECTION-RULES.md
+step 0 forbids collecting uncommitted work, and this repo promises a reviewed
+snapshot as of its commit, not a mirror. review-when: that work lands at the
+source — then re-collect and delete this line."""
 edits = [
   "'Out-of-process pictures': dropped the name and absolute path of a private asset-library entry, keeping the capability description (headless Playwright, drives hover/focus, finishes animations, returns computed styles + optional PNG). Same treatment the same pointer already got in hooks/ui_verify_guard.py and hooks/browser_pane_scope_guard.py — the reader cannot open it, so the pointer is cost with no value.",
 ]
@@ -706,6 +713,9 @@ edits = [
 path = "claude-ops/ops/lessons.md"
 source = "~/.claude/ops/lessons.md"
 status = "edited"
+source_dirty_ack = """2026-08-16: +10 uncommitted lines at the source, same
+concurrent browser-pane work as environment.md above, same reasoning. review-when:
+that work lands at the source."""
 edits = [
   "7 session UUIDs in Evidence: lines -> 'session (a local transcript)'. The schema (session | digest | locator | captured) is the instructive part and is kept whole; the id points at a transcript no reader can open. Same wording already declared for hooks/model_cap_guard.py.",
   "3 evidence locators: the absolute drive prefix stripped, leaving the project-relative path (e.g. '<drive>:/<work-root>/Foo/SECURITY-POLICY.md' -> 'Foo/SECURITY-POLICY.md'). COLLECTION-RULES.md rule 2 forbids scrubbing a path that resolves, and the tail still identifies the file for anyone who has the repo; only the machine-specific prefix goes.",
@@ -751,6 +761,12 @@ status = "verbatim"
 path = "claude-ops/references/PROJECTS.md"
 source = "~/.claude/references/PROJECTS.md"
 status = "template"
+source_dirty_ack = """2026-08-16: the source's rows change continuously — it is a
+live project index, and its dirty state is its normal state. Nothing here tracks
+those rows: this copy is the HEADER plus one worked example, and the source's row
+content is excluded by the [[not_shipped]] entry above. The finding is correct and
+structurally permanent for this file, which is why the ack has no review-when: it
+would fire on every run forever."""
 edits = [
   "the live file's rows are real project names, paths and status. Header, column semantics and one worked example row ship; the inventory does not. Declared in the [[not_shipped]] 'references/PROJECTS.md' entry as `partial`.",
 ]
