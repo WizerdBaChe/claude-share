@@ -31,9 +31,23 @@ ALL must hold:
    claim about an unnamed moment — re-scoring after the artifact changed
    legitimately differs, so pin it or re-run it, and never read that drift as
    a broken checker (`score_redteam.py` `file_sha()`; scoping report §7.6 Q4).
-2. **Living proof** for mechanisms (cron / hook / service / scheduled job): an
-   artifact from one successful REAL run has been seen. Editing the code is
-   not the same as fixing the problem; a dry-run is not a real run.
+2. **Living proof** for anything whose output will be BELIEVED rather than read
+   line by line — a standing mechanism (cron / hook / service / scheduled job),
+   and equally a one-off script that prints a verdict, an aggregate, or a
+   discard decision: an artifact from one successful REAL run has been seen,
+   on an input whose answer was already known. Editing the code is not the same
+   as fixing the problem; a dry-run is not a real run; and a run nothing could
+   have contradicted is not evidence either.
+   *The parenthesis used to BE the trigger, and that is why this rule fired for
+   none of the six instruments a 2026-08-21 measurement study built and
+   immediately believed (`lessons.md` L-025): not one of them was a cron, a
+   hook, a service or a job — they were scripts that printed "11 missing",
+   "$254.22", "4 invalid". Widened 2026-08-21 from a closed list to a property.*
+   Global CLAUDE.md's gate-design rule carries the same duty at the moment of
+   danger (a new mechanism's first real output does not feed a downstream step
+   in the same motion; a fresh checker's unanimous verdict over n>=3 is an
+   instrument fault until a positive control says otherwise). One rule, stated
+   at two altitudes — they must not drift (`lessons.md` L-011 corollary).
 3. The ticket is backfilled with status and result.
 4. Anything promised to the requester has been reported back.
 
@@ -48,7 +62,13 @@ gaps". Prefer listing open defects over a clean "done". Refuting a prior
 finding: split it into component propositions and verdict each — a
 one-sentence partial refutation inverts the surviving half. Every
 delivery-summary "I did X" points at a concrete location (file / function /
-section); a claim with no pointer is deleted, not softened.
+section); a claim with no pointer is deleted, not softened. **Numbers are the
+worst carrier** (`lessons.md` L-005 hit 4): any figure a design or conclusion
+RESTS ON carries `measured-here` / `measured-elsewhere(what, when)` /
+`estimated` / `inherited-default`, and anything not `measured-here` is
+re-measured before a conclusion is published on it — a PRODUCT, RANGE or TOTAL
+fuses several provenances into one token with no visible seam, so ask which
+inputs went in and whether they were all current at the same moment.
 ✅ "Refuted: current machine cannot run (pytest passed). Still open:
 cross-machine rebuild unverified."
 ❌ A probe carrying the SAME config as the real artifact passes → "the artifact
@@ -58,6 +78,20 @@ have come out differently for the specific thing I am claiming about?* No ⇒
 name the substitution in the sentence ("the pattern is proven, this file's
 registration is not"), never a hedge word — a hedge hides the proxy, naming it
 hands the reader the thing to attack.
+
+**Absence claims** (2026-08-27 CPO incident): "no X here /
+無資料在手" is a universal claim over the environment and takes enumerable
+evidence — run EVERY noun the request itself names through the prior-art
+chain layer by layer (registry → xi query → skill-trigger-dict / domain
+manifests → vaults → session-find) and report which layers were checked; an
+index built for user-question routing doubles as an existence index.
+❌ Asserted "no CPO data at hand" after prior-art queries for "diagram" only —
+the request's own named noun (CPO) was never queried anywhere, and the gap
+was exported to the user as a data request.
+✅ The trigger-dict row alone (CPO → `domains/_routing.md` → owner profile
+`siph_packaging_reliability.md`) refutes the absence; a true absence ships as
+"not found — checked: xi query (terms used), trigger-dict, vaults,
+session-find". (Evidence: `references/cross-index-misses.md` 2026-08-27 row.)
 
 **Scope** (`lessons.md` L-015, the recurrence that proved this needed saying):
 the corollary covers DESIGN-RATIONALE prose, not only evidence prose. Once the

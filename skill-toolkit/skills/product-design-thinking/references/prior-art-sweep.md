@@ -15,6 +15,12 @@ The sheet earns its keep by sharpening queries and exposing knowledge drift — 
 never a substitute for searching. Steps 1–4 stay mandatory no matter how confident
 the sheet feels; confidence is exactly the signal that has been wrong before.
 
+Tier scoping (SKILL.md mode table): at 標準 Standard and 全梯 Full-ladder all four
+steps stay mandatory as written. At 速寫 Sketch the sweep narrows to step 2 (OSS
+inventory) + step 4 (environment) with a 3-line sheet — but ask-before-hand-rolling
+(step 2) never relaxes, and confidence still doesn't waive what remains; the tier,
+not the sheet's confidence, is what narrows the sweep, and it is recorded in the doc.
+
 ## 1. Search recent info (WebSearch / WebFetch)
 
 For each hard sub-problem: the current canonical approach, recent (≤2y)

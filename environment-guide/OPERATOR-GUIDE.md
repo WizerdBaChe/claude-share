@@ -1,3 +1,11 @@
+---
+xi: 1
+what: 操作者手冊與環境搬移指南 (operator guide for non-author operators + migrating the whole ~/.claude environment to another machine)
+tags: [guide, environment, migration]
+aliases: [操作手冊, 搬機器, 環境搬移, 遷移, migration guide, operator guide, 新機器安裝]
+status: live
+---
+
 # OPERATOR-GUIDE — 操作者手冊與環境搬移指南
 
 > 給「不是原作者的操作者」與「要把整個環境搬到別台機器」的人。

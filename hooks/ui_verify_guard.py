@@ -168,6 +168,8 @@ def deny_probe_first() -> None:
         "permission one. Take the picture out-of-process instead:\n"
         "  npx playwright screenshot <url> <out>.png   (~1.5s)\n"
         f"  settled-state probe + PNG: {ROUTE_POINTER}\n"
+        "  multi-step (click/hover/then shoot): mcp__playwright-headless__* "
+        "(installed Chrome, no window; Playwright-launched, so not occludable)\n"
         "then deliver it with SendUserFile - never ask the user to front a "
         "window. Detail: ~/.claude/ops/lessons.md L-009."
     )
@@ -181,6 +183,8 @@ def deny_route_hidden() -> None:
         "Take the picture out-of-process:\n"
         "  npx playwright screenshot <url> <out>.png   (~1.5s, works from anywhere)\n"
         f"  settled-state probe + PNG (~1.4s): {ROUTE_POINTER}\n"
+        "  multi-step (click/hover/then shoot): mcp__playwright-headless__* "
+        "(installed Chrome, no window; Playwright-launched, so not occludable)\n"
         "Deliver it with SendUserFile - never ask the user to bring a window "
         'forward (standing premise, ops/environment.md "Browser pane"). DOM/'
         "state reads (read_page / get_page_text / javascript_tool) still work "

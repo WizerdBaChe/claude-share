@@ -30,7 +30,7 @@ Field ownership (reference, never redefine — one rule, one file):
 - Commit format: global CLAUDE.md git rule. (`~/.claude/COMMIT-TEMPLATES.md`
   is this config repo's own semantics — never apply it to target projects.)
 - Objects/Rollback/Acceptance render the sole-source build-ready bar
-  (`product-design-thinking` → `references/document-ladder.md` §4, the
+  (`product-design-thinking` → `skills/product-design-thinking/references/document-ladder.md` §4, the
   normative minimum for sole-basis docs); Severity/Confidence, Blast radius,
   and Commit are card additions — a bar-compliant item missing only
   card-level fields is NOT a skeleton.

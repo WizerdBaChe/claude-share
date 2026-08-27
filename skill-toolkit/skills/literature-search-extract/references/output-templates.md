@@ -220,8 +220,8 @@ seven formats above; the other four fields are always present.
       conflicts: "Park 2022 §4.3 vs Chen 2023 §3.4" }
   ],
   search_trail: [
-    "prism: rank_by_topic('silver SPP propagation length') — unavailable this
-     session, fell back to WebSearch",
+    "connectors: no live local_corpus registered — went straight to WebSearch
+     (an absent channel is logged once, not as a per-run gap)",
     "WebSearch: 'template-stripped silver SPP propagation length' (3 relevant hits)",
     "backward citation chase from Chen 2023 review bibliography (2 sources added)"
   ]

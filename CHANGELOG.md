@@ -9,6 +9,64 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-27 — architecture-diagramming: the diagram capability set ships as one loop
+
+Third mechanism export (after `compact-recovery/`, `red-team/`), and the first
+whose parts ship inside `skill-toolkit/` rather than beside the map. What came
+in: `skills/diagram-authoring/` (three files, first collection — one declared
+edit, a field-test ledger pointer into the source's private review records
+replaced with prose; the FT-ids stay), the two theory references
+`product-design-thinking/references/representation-models.md` and
+`view-integrity-checks.md` (verbatim, with two considered keeps recorded in
+their entries: a same-day global-rule promotion note, and a CPO example that is
+industry vocabulary rather than withheld profile knowledge), and the authored
+pair `architecture-diagramming/README.md` + `ACCEPTANCE.md` — the integration
+map and a fourteen-item blind-runnable external checklist whose open evidence
+cells (PPTX carrier, BPMN branch, two never-live-fired probes) are stated
+rather than implied. `code-review-deep-checklist` was refreshed current, which
+is what brings its Mode B view-audit layer (體檢視圖層) — the audit third of
+the set — into this repo at all.
+
+The trigger dictionary went through procedure B: the three 2026-08-17 edits
+re-applied cleanly, and three new ones joined them — the `graph-query` and
+`media-fetch-pipeline` sections removed (machine-bound wrappers, new
+`[[not_shipped]]` entries; the row-2-inverse two-part act each time) and the
+scientific-research-guide domain block condensed to a share note, since its
+expanded source text had begun enumerating the withheld profiles in detail.
+Counts moved 15-of-18 to 16-of-21 in the four places that state them.
+
+Running the gate `--source` surfaced 23 verbatim files lagging a source that
+had moved for ten days; all refreshed per procedure B. The B4 read of the
+incoming content caught what the gate cannot: a session id arriving inside
+30-judgment's new incident example; the second-drive work root in two
+integrity-sweep probe payloads and in shader-failure-modes' corpus sentence;
+`environment.md` citing a measurement ledger that does not ship (new
+`[[not_shipped]]` with the re-measure fallback); three new placeholder tokens;
+and one deliberately fictional probe path allowed with its match written
+name-only, per the email-allow's own comment about not making the manifest a
+finding. The same sweep found an EIGHTH session UUID surviving in
+`lessons.md` L-013's evidence locator — the seven-UUID edit had scrubbed the
+line's first field and missed its locator; the declared class, applied.
+
+One reversal: `scientific-research-guide/evals/evals.json` is UN-shipped. The
+v1 suite tested the generic framework; the current suite is the withheld
+domain profiles' routing harness — quoting trigger strings, pitfall rows and
+standards traps at row level — so a verbatim refresh would have exported the
+withheld knowledge through the eval side door, and keeping the stale copy
+would misdescribe it as verbatim. The `[[not_shipped]]` entry carries the
+reversal; the v1 copy stays in git history.
+
+Deferred, named: `global-claude-md/CLAUDE.md` gained a representation-selection
+rule at the source the same day this round ran; re-applying that file's
+template edits is its own procedure-B round, so the snapshot ships one rule
+behind, the manifest comment on `representation-models.md` says so, and
+`architecture-diagramming/README.md` carries the interim note. Reported, not
+fixed: the `tools/` disposition's per-file recheck (2026-08-16, nine entries)
+predates several tools the source has since grown; nothing this round ships
+from there, so that re-examination belongs to its own round.
+
+Gate: exit 0 with `--source` (163 collected files verified), suite 11/11.
+
 ## 2026-08-17 (third) — a sync/doc-accuracy pass, not a refresh
 
 Not a share from the source environment — the user asked for a plain audit:

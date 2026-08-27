@@ -83,11 +83,13 @@ keeps applying itself to files it never examined.**
 
 What genuinely stays out: your own `settings.json` values, the operator's project
 index rows, dated internal reports, runtime telemetry, the external dispatcher
-and its allowlist, and three skills — `asset-vault`, which operates a private
-library, and the two knowledge packs `render-perf` and `system-design`, withheld
+and its allowlist, and five skills — `asset-vault`, which operates a private
+library; the two knowledge packs `render-perf` and `system-design`, withheld
 2026-08-17 because they are unfinished at the source and a half-stocked pack
-ships a trigger with nothing behind it. So `skill-toolkit/` ships **15 of the
-source environment's 18 skills**, stated rather than left to be noticed.
+ships a trigger with nothing behind it; and the two machine-bound wrappers
+`graph-query` and `media-fetch-pipeline`, adjudicated 2026-08-27 — each fronts
+a tool that exists only on the source machine. So `skill-toolkit/` ships **16 of
+the source environment's 21 skills**, stated rather than left to be noticed.
 
 That number was wrong for weeks before anyone looked: it read "14 of 15" while
 the source had quietly grown to 18. Nothing checks it — a count is a claim about

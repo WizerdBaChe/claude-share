@@ -38,7 +38,7 @@
 | 想校準思考方式（非旗艦模型的後設習慣） | `50-coach.md` |
 | 新專案首個 session、ticket 帳本、切票 (tracer-bullet)、施工卡 (work card)、詞彙表 (glossary)、決策日誌 (decision journal) | `60-bootstrap.md` |
 | 要提案改 guardrail（settings/hooks/權限）、知識該進記憶還是規則 | `70-evolution.md` |
-| 動手前查歷史坑 | `lessons.md`（先 grep） |
+| 動手前查歷史坑 | `lessons.md`（先 grep；每條是 card，完整敘事在 `references/lessons-detail.md` 同編號章節） |
 
 **`ops/references/`（2026-08-12 起）**：ops 檔超標時「具體內容」的落點——範例、
 指令區塊、佐證案例搬進去，**規則本文只留規則、條件、路由**。由 owner 檔的該節
@@ -146,7 +146,7 @@ opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 | glossary entry | term / date / definition / [superseded] | `60-bootstrap.md` §E | 領域名詞固化時 |
 | project map (read-time) | 檔頭 map-schema / repo / generated-at / **generated-from (SHA)** / covers / excludes / budget；本文 Entry&routing / Shape / Facts / Open [infer]；每條斷言帶 `[git]`\|`[read]`\|`[infer]` | `60-bootstrap.md` §H（格式：`ops/references/project-map.md`） | §A 找不到任何 write-time 紀錄、且任務不只一處具名修改時 |
 | decision journal — Now / D / P | Now: frontier·premises·open；D: status·context·options·choice+why·revisit-if·links；P: status·trail·resolution·links | `60-bootstrap.md` §G（模板：`60-record-templates.md` §2） | §G write-triggers 任一成立 |
-| lessons entry | L-id / date / tags / hits / context / pitfall / fix / **evidence** | `lessons.md` 頭部 | 全域級坑 |
+| lessons entry | L-id / date / tags / hits / context / pitfall / fix / **evidence**；2026-08-21 起分兩層：`lessons.md` 放 card（`hits:` 唯一維護處），`references/lessons-detail.md` 同編號放完整敘事（逐字、只追加） | `lessons.md` 頭部 | 全域級坑 |
 | guardrail 提案 APPLY.md | problem (含 **evidence block**) / change / benefit / risks / rollout & verification | `70-evolution.md` §2 | 改 settings/hooks/權限 |
 | evidence block | session_id / digest / locator / captured_at | `70-evolution.md` §2 | 2026-08-11 起：新 lessons 條目與 guardrail 提案的 problem 欄（舊資料不回填） |
 | phase-log section | project / phase / status / date + Goals / Decisions / Changes / Open Questions | `workflow-checkpoint` SKILL.md | 每次 checkpoint |
@@ -155,8 +155,9 @@ opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 | rule-registry entry | key / current / why / evidence / history / review-when / rollback；**值是猜測時 `evidence` 以 `PROVISIONAL` 開頭 + 何者可定案 + 觀測寫回本條目**（2026-08-13）；**值依賴本庫以外的事實時（harness 預設、平台能力、廠商文件、未量測的比率）必填 `review-when:`，寫「哪個可觀察事件會使它失效」而非日期**（2026-08-14） | `ops/rule-registry.md` 頭部 | 規則值、上限、常設裁定設定或變更時（就地取代該鍵）；**含「先出貨的猜測值」——未登記的猜測沒有資料落點，會靜默變成永久值**；**含「注入層預設 × 本機收窄」一節——harness 注入文字會隨產品改版靜默變動** |
 | change event | trigger / change (before→after) / result / rollback | git commit message | 每次 🔴/🟡 變更 |
 | environment-facts block | build·test·run / tiers / dispatch / redlines / ledger + 驗證日期 | `60-bootstrap.md` §B | 專案 CLAUDE.md 建立時 |
-| adoption stamp | adopted-from / source / adopted / reconciled | 被採用檔案的檔頭（格式見 `config-self-audit/references/imported-config.md`） | 從別的環境搬入任何持久設定時 |
+| adoption stamp | adopted-from / source / adopted / reconciled | 被採用檔案的檔頭（格式見 `skills/config-self-audit/references/imported-config.md`） | 從別的環境搬入任何持久設定時 |
 | reconciliation ledger | artifact / source / collisions / class / resolution / mechanism status / stamp | `config-self-audit` SKILL.md `Output format` | adoption mode 每次執行 |
 | label family entry | 家族 / 量的軸 / 方向·值域 / owner（唯一定義處） | `~/.claude/LABEL-REGISTRY.md` §2 | 造出會裸引用的可列舉標籤時（同 commit） |
 | advisory-output status line（建議型產出狀態列） | 檔案**前 10 行**內一行可 grep 的狀態宣告：`> status: SPENT\|OPEN\|PARTIAL — 消費者（D-條目/commit/規則§）; residual: <殘餘價值或 re-open 條件>`（中文檔用 `**狀態**：` 開頭亦合規，兩種拼法都算）。**便宜入口（免翻檔）**：`powershell` `Get-ChildItem -Recurse ~\.claude\outputs -Filter *.md \| Select-String -Pattern '^(> status:\|\*\*狀態)' -List \| ForEach-Object { "$($_.Filename): $($_.Line)" }`。清理語意：OPEN 永不成為 cleanup 候選；SPENT 仍 KEEP（是已發表比率的可印證據），唯一淘汰路徑是新檔標 `Supersedes` | 本列即 owner（2026-08-16，源自使用者指出散落建議資料無入口、無事前宣告、無白名單） | `outputs/` 下任何**帶著建議/候選/待裁事項**、未來 session 可能要接手處理的產出（candidates 檔、實驗證據目錄的 metrics、disposition）誕生時；主動浮出＝ops-health check 13（2026-08-16 落地，registry key `advisory-output surfacing`） |
 | list-generation entry | 前綴 / 涵蓋範圍 / `[superseded: <old>]` | `60-bootstrap.md` §E（規則見 `LABEL-REGISTRY.md` §3） | 專案清單／回合被新版取代時 |
+| gap report（視圖缺口表） | view / element / defect(integrity·correspondence·view-missing·data-gap) / severity / basis(user-data·code·assumed) | `skills/product-design-thinking/references/view-integrity-checks.md` §3 | 對既有系統做視圖稽核或重建繪圖時（PDT Verification 視圖過門、code-review-deep-checklist Mode B 視圖稽核、diagram-authoring audit drawing） |

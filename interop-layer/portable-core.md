@@ -68,7 +68,15 @@ project memory override these when they conflict.
   never a bare `bash` — and pick the one matching what the user is
   actually using in that moment. Never mix PowerShell and Bash syntax
   inside one fenced block.
-- Line endings for scripts and config files: CRLF.
+- Route by task shape BEFORE writing shell syntax: file CONTENT goes through
+  the agent's native file-write / edit tool, never a heredoc, `>`/`>>` or
+  `sed -i`; search goes through the native search tool. The shell keeps git,
+  running programs and pipelines. (Measured in the source environment: native
+  write 0.1% failure vs shell-written files 5.2%; native search 0.9% vs
+  shell search 17.4%.)
+- Line endings: append or modify with the editor tool, never with shell `>>`
+  (a mixed-ending file results); pin each repo's endings with a committed
+  `.gitattributes`, not with a machine-wide `core.autocrlf`.
 - When calling a native executable from PowerShell with an argument that
   may contain `"` or `[` (commit messages above all): pass it via
   `-F <file>` or stdin, never inline — the native-arg encoder does not
@@ -201,10 +209,13 @@ grep; installed tool → run `--help`) are checked locally instead.
 
 ALL must hold before declaring done: every acceptance criterion has
 evidence (command output, hash, artifact) — not "should be fine"; for
-mechanisms (cron/hook/service/scheduled job), an artifact from one
-successful REAL run has been seen — editing the code is not fixing the
-problem, and a dry-run is not a real run; anything promised to the user
-has been reported back.
+anything whose output will be BELIEVED rather than read line by line — a
+standing mechanism (cron/hook/service/scheduled job) and equally a one-off
+script that prints a verdict, an aggregate or a discard decision — an
+artifact from one successful REAL run has been seen, on an input whose
+answer was already known; editing the code is not fixing the problem, a
+dry-run is not a real run, and a run nothing could have contradicted is not
+evidence either; anything promised to the user has been reported back.
 <!-- /block -->
 
 <!-- block:failure-visibility profiles:full -->
@@ -231,6 +242,11 @@ readout.
   known-false one — a gate that rejects everything scores 100% on a
   one-sided calibration. Persist whatever the gate may reject BEFORE it
   runs, and never publish a rate the metric cannot print the evidence for.
+  Two moments of danger, whatever care went into the design: a freshly
+  written checker that returns a UNANIMOUS verdict over n ≥ 3 is an
+  instrument fault until a positive control says otherwise — calibrate,
+  then believe; and a new mechanism's first real output never feeds a
+  downstream step in the same motion — put a known-answer input between them.
 - When authoring an invariant, checklist item, gate, or standing rule:
   write it as a property of the ASSET ("this file must never contain X"),
   not as an instruction about a path ("when editing foo, remember X") — an

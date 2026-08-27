@@ -2,8 +2,9 @@
 name: security-deep-checklist
 description: >-
   Deep security (資安) audit — blue-team informed defensive review beyond a quick diff
-  scan. Trigger on "資安檢核", "資安健檢", "security audit", "找漏洞" on a module/project,
-  deployment/config posture review, air-gapped risk assessment, "如果被攻擊我們看得到嗎", or named
+  scan. Trigger on "資安檢核", "資安健檢", "程式碼資安稽核", "資安稽核", "security audit",
+  "找漏洞" on a module/project, deployment/config posture review (部署與設定的資安姿態),
+  air-gapped risk assessment, "如果被攻擊我們看得到嗎", or named
   vulnerability classes (XSS, SQL injection, CSRF, supply chain 投毒…) as the review goal.
   Modes: (A) code-level audit, (B) deployment & environment posture, (C) detection &
   response readiness. NOT for a quick pre-merge scan (→ /security-review); no

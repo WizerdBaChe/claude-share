@@ -63,13 +63,14 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `code-review-deep-checklist` | Deep/holistic code review: single review, project health, dependency fitness. |
 | `config-self-audit` | Auditing one config artifact — a skill, hook, or rule — cheaply. |
 | `design-system-suite` | Design tokens and contracts across a multi-product frontend suite. |
+| `diagram-authoring` | **New 2026-08-27.** Precision diagram production & gap finding: structural text model first, geometry self-check asserts, a fabrication firewall, mandatory gap report. The production third of the `architecture-diagramming/` capability set; its theory lives in two `product-design-thinking` references it cites rather than copies. |
 | `env-cleanup` | File-level cleanup of a config environment or project tree; archives, never deletes. |
 | `literature-search-extract` | Finding scholarly sources and extracting into evidence tables, with citation traceability. |
 | `mechanism-share-packaging` | **New 2026-08-17.** Exporting a behavioural MECHANISM — an operating mode spanning hooks, tools, wiring and docs — into a governed share repo: scope it as a runtime, land each file where the target's structure says, sweep the ripples arrival causes, loop the target's gate. Delegation is its first hard rule — the target repo's collection rules stay authoritative and are never restated inside it. `compact-recovery/` and `red-team/` are its two live runs. |
 | `motion-design` | Motion/animation methodology + Three.js. `vendor/lottiefiles/` is third-party MIT, verbatim. |
 | `product-design-thinking` | Heavyweight design mode for a new product: prior-art sweep, then build-ready docs. |
 | `project-retrospective` | End-of-project extraction of lessons into a guide + rules snippet. |
-| `scientific-research-guide` | Research-methodology advisory. **Domain profiles excluded from this share** — see `domains/README.md`; the template, manifest format, and expansion spec ship. |
+| `scientific-research-guide` | Research-methodology advisory. **Domain profiles excluded from this share** — see `domains/README.md`; the template, manifest format, and expansion spec ship. The eval suite left with them 2026-08-27 — it had become the withheld profiles' routing test harness (manifest `[[not_shipped]]` carries the reversal). |
 | `security-deep-checklist` | Defensive security audit: code, deployment posture, detection readiness. |
 | `skill-co-upgrade` | **New 2026-08-16.** Field-test loop: run a real task through a skill, collect gaps under "a gap exists iff the executor had to BYPASS the skill to do it right", verify every citation, hand off via disposition files. |
 | `skill-share-packaging` | Exporting a skill for others, or auditing a downloaded one. Includes `scripts/prescan.py`. |
@@ -143,6 +144,21 @@ The dispatcher that sends these prompts is still **not** here, and the
 and why. The method-level write-up remains
 `claude-ops/ops/references/external-dispatch.md`; this folder is that document's
 executable half.
+
+## `architecture-diagramming/` — the diagram capability set, packaged for verification
+
+New 2026-08-27. The third mechanism export, and the first whose parts live in
+`skill-toolkit/skills/` rather than beside the map: theory (two
+`product-design-thinking` references — view selection, integrity instrument),
+production (`diagram-authoring`, collected the same day), audit
+(`code-review-deep-checklist` Mode B's view layer). This folder is the
+integration map plus the checklist that lets an outside verifier test the SET
+rather than three skills separately.
+
+| File | What it is |
+|---|---|
+| `README.md` | The capability set (中文): three independent failure shapes of architecture diagrams, the two-entry loop (design entry / audit entry), file-and-ownership table, install set with its side-by-side requirement, notation coverage grid (incl. Petri-slice ownership), failure modes when a part is missing, de-identification notes. |
+| `ACCEPTANCE.md` | Fourteen-item blind-runnable external checklist (中文): trigger/routing probes incl. a negative one, theory/production/audit items, stress items on the fabrication firewall — plus what the source environment verified 2026-08-27 and which evidence cells stay open (PPTX carrier, BPMN branch, two never-live-fired probes). |
 
 ## `agents/` — subagent definitions
 

@@ -59,6 +59,16 @@ one-line intent statement or mark items "untraceable" (Scope Rules).
 - External-dependency assumptions: is the behavior being relied on (data format,
   units, boundary conditions) actually understood, or used because "it looked like
   it would work"?
+- Calibration expiry: for every constant justified by a MEASUREMENT (window sizes,
+  thresholds, timeouts, batch caps, sampling rates — grep the file for "measured",
+  "實測", "we sampled", or a recorded n), ask what EVENT would invalidate it, not
+  when it was last checked. A justification comment is evidence the value was once
+  right, and it is the reason nobody re-questions it. Two findings live here: the
+  constant has no named invalidating event (`review.state.calibration-expiry`), and
+  — the expensive one — that event has already happened. Constants calibrated
+  against an EXTERNAL artifact (another tool's file format, a third-party API shape,
+  a corpus you do not control) expire by default; treat "no expiry trigger" as a
+  finding there even when the current value still holds.
 - Data consistency: formats / units / timezones / precision consistent across the
   whole code path.
 - Upstream input-shape assumptions explicitly validated, or silently relied upon
@@ -205,6 +215,20 @@ intended machine must be reconstructed first, then the code checked against it.
    - **Restart & trap states**: process death mid-transition — is persisted
      state re-entrant? Does every non-terminal state have an exit (timeout,
      retry, compensation)? A reachable state with no exit is a trap → finding.
+   - **Substrate liveness (the machine's own apparatus can be absent)**: the table
+     above enumerates what the ANSWER can be. Ask separately what happens when the
+     thing that computes the answer cannot start — a worker/thread that fails to
+     construct, a subprocess that is not installed, a browser capability that is
+     absent, a remote service that never accepts the connection. Restart & trap
+     states above assumes the machine ran; this asks about a machine that never
+     began. Three questions, each a finding if unanswered: (a) is "apparatus
+     unavailable" a NAMED state, distinct from every content-level failure? (b) does
+     the failure carry enough to act on — which apparatus, why, where — or does it
+     collapse into one generic code? (c) is there a degraded path, and if an
+     alternative implementation already exists in the codebase, why is it not wired
+     to this one? Compare against any sibling machine in the same project that DOES
+     model unavailability: a codebase that models it for one apparatus and not
+     another is showing you the gap, not a limitation.
    - **Concurrent transitions**: two events racing on the same entity — is the
      transition atomic (transaction, versioned/compare-and-swap update), or is
      lost-update/double-transition possible?
