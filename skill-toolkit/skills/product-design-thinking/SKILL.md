@@ -1,15 +1,17 @@
 ---
 name: product-design-thinking
 description: >-
-  High-rigor DESIGN/PLANNING mode for a new product or complex new feature/subsystem:
-  first-principles decomposition, mandatory prior-art search BEFORE designing,
-  convergence into build-ready documents (Concept Note / CIM / RPD / PIM / PSM / DSL
-  semantic contract). Trigger on new product ideas, NEW TOOL/utility design
-  (「新工具設計」), feasibility evaluation, or planning a complex feature with an
-  undecided approach — including MID-CONVERSATION; also PSM-grade / build-ready
-  remediation planning for an EXISTING product (「PSM等級修正案」). Deliberately
-  heavyweight — NOT for bug fixes, small additions, or implementing an existing
-  spec. Full disambiguation: ~/.claude/skill-trigger-dict.md.
+  High-rigor DESIGN/PLANNING mode (進入設計模式) for a new product or complex
+  new feature/subsystem: 第一性原理 (first-principles) decomposition, prior-art
+  search BEFORE designing, convergence into build-ready documents (Concept Note
+  / CIM / RPD / PIM / PSM / DSL semantic contract). Trigger on new product
+  ideas (新產品構想/想法), NEW TOOL/utility design (「新工具設計」), feasibility
+  evaluation, 重新架構/換技術路線 (re-architecture), or planning a complex
+  feature with an undecided approach — including MID-CONVERSATION; also
+  PSM-grade remediation planning for an EXISTING product (「PSM等級修正案」).
+  Deliberately heavyweight — NOT for 單一缺陷修復, small additions, or
+  implementing an existing spec (按既有規格施工). Full disambiguation:
+  ~/.claude/skill-trigger-dict.md.
 ---
 
 # Product Design Thinking
@@ -27,15 +29,40 @@ engineering choice comes with a plain-language reason and a recommendation
 
 ## Where the detail lives
 
-This file is the spine — the phases, the ladder, and the two things that get missed
-when they are not in front of you (the language column, and what blocks a rung).
-Load a reference file when you reach its phase; don't preload all three.
+This file is the spine — the phases, the mode tiers, the ladder, and the two things
+that get missed when they are not in front of you (the language column, and what
+blocks a rung). Load a reference file when you reach its phase; don't preload them.
 
 | Load | When |
 |---|---|
 | `references/prior-art-sweep.md` | Phase 1 — before proposing any architecture |
-| `references/design-rules.md` | Phase 2 — while shaping architecture; includes security-by-design |
-| `references/document-ladder.md` | Phase 3 — writing/verifying any rung; sole-source contract bar |
+| `references/design-rules.md` | Phase 2 — while shaping architecture; includes security-by-design. Also at Verification: the gap register's distortion test and the PIM security section resolve into this file |
+| `references/representation-models.md` | Phase 2–3 — any behavior/architecture view (which diagram answers which question); at the Phase 0 tier call; and at Verification — the per-tier view set is the standard SDD gate 5 checks against |
+| `references/view-integrity-checks.md` | Phase 2–3 — before any drawn view ships (per-view soundness); and at Verification — the integrity + cross-view correspondence audit (feeds gate condition c and SDD gate 5) |
+| `references/document-ladder.md` | Phase 3 — writing/verifying any rung; sole-source contract bar; SDD pitfall gates |
+
+## Mode tiers (模式分級) — depth chosen at Phase 0 exit, never at trigger time
+
+One depth axis, three tiers, named by ladder shape. The trigger envelope is
+UNCHANGED: tiers scale depth after the skill fires — 單一缺陷修復, casual
+小工具/腳本, and 按既有規格施工 still don't enter design mode at all. Scale
+drivers (2026-08-27 intake): module span; long-lived state / persistent data;
+concurrency & shared resources (async jobs, queues, GPU/locks, multi-agent);
+external contracts / a second executor.
+
+| Tier | When (drivers) | Ladder & gate shape |
+|---|---|---|
+| 速寫 Sketch | zero drivers: single module, no persistent state, no concurrency, no external consumer | ONE doc — a one-page Concept Note (pain, boundaries, acceptance) + ≤2 views + a 施工卡-lite build section. CIM/PIM collapse into it; verification degrades to an inline cross-check (every boundary/business rule appears in the acceptance list). Phase 1 narrows to OSS inventory + environment check with a 3-line hypothesis sheet — **ask-before-hand-rolling never relaxes** |
+| 標準 Standard | any driver EXCEPT concurrency/multi-executor: 2–3 modules, or lifecycle/persistent state, or an external consumer | Concept Note + PIM-lite (glossary, INV-n, statecharts, module contracts) + a proportionate traceability pass + PSM to the sole-source bar. Full 4-step Phase 1 sweep |
+| 全梯 Full-ladder | concurrency or resource contention, multi-subsystem/product scale, migration, or multiple executors | the full ladder as written in Phase 3 — CIM → PIM+DSL → Verification (HARD gate) → PSM — plus ADRs and per-subsystem views; full sweep + literature slice where warranted |
+
+Unsure between two tiers → take the higher, or ask in one line. Escalation is
+a one-way ratchet re-checked at every phase exit: a second lifecycle entity or
+state explosion ⇒ ≥標準 Standard; discovered contention / async fan-out ⇒ 全梯
+Full-ladder for that subsystem (Petri slice); a second executor joins ⇒ ≥標準
+with formalized contracts. Every tier change is recorded in the doc;
+de-escalation additionally requires an explicit user ruling. Per-tier default
+view sets: `references/representation-models.md`.
 
 ## Phase 0 — First-principles frame (before any solution talk)
 
@@ -54,6 +81,8 @@ Answer in writing, with the user, before designing anything:
    instead of silently keeping them.
 5. **Boundaries — what this will NOT do**: write them down. "不要為了擴充而擴充" is a
    standing order; if the core need is already met, recommend stopping.
+6. **Tier call**: close the phase by picking the mode tier (table above) and
+   recording tier + why + what it skips in the design doc.
 
 ## Phase 1 — Prior art & open-source sweep (before designing complex parts)
 
@@ -75,7 +104,10 @@ threat-model-lite and least-privilege items are in the same file.
 ## Phase 3 — Converge into build-ready documents
 
 The output of this mode is documents, not code. Match whichever rung the user is at;
-don't regenerate upstream docs already fixed ("拍板的施工合約").
+don't regenerate upstream docs already fixed ("拍板的施工合約"). The mode tier sets
+the ladder shape: 速寫 Sketch collapses the rungs into one doc (inline verification
+per the tier table); 標準 Standard and 全梯 Full-ladder keep the gates below at
+full strength.
 
 | Rung | What it pins down | Language |
 |---|---|---|
@@ -92,8 +124,13 @@ concept whose original Chinese wording carries the meaning stays Chinese inside 
 English section — keep it and gloss it rather than force a lossy translation.
 
 **Gates worth remembering without opening the reference file:**
-- Verification is a HARD gate: an orphan in the traceability matrix blocks entry to
-  PSM until it is resolved or the user waives it explicitly.
+- Verification is a HARD gate. It blocks entry to PSM on any of: (a) a traceability
+  orphan in either direction; (b) a contradiction within or across rungs — including
+  a premise falsified by the document's own open questions; (c) a model defect that
+  admits no correct implementation (unreachable or non-terminating state,
+  unsatisfiable invariant). Each blocking finding is resolved or explicitly waived
+  by the user; the two lower severities (user-ruling-required / should-fix) are
+  defined in the ladder's deliverable-shape section.
 - A sole-basis doc may not delegate normative content to archived files — archive is
   provenance, never spec.
 - An item missing files/contracts/error paths/rollback/test mapping/acceptance is a

@@ -35,10 +35,9 @@ lifetimes, and they go to different places:
    key / current / why / evidence / history / rollback.
 
 Why not one chronological log: it grows as O(changes) while its value is
-O(rules), so it needs rotation forever — and rotation evicts the OLDEST
-rationale, which is the most settled and therefore the most load-bearing.
-`audit-archive/` is frozen as the pre-2026-08-11 historical log for
-exactly this reason; see its header for the ruling it lost.
+O(rules), so rotation evicts the OLDEST rationale, which is the most settled
+and load-bearing — `audit-archive/` is frozen for exactly this reason (its
+header names the ruling it lost).
 
 ### Version-control boundary (anchor: vc-boundary)
 
@@ -103,18 +102,54 @@ and `20-dispatch.md` §3 already covers the class — bump nothing else.
 ❌ Paste the same pitfall paragraph into lessons.md, dispatch, AND CLAUDE.md —
 three copies that will drift apart and contradict each other.
 
+### §2a Where an ENFORCEMENT goes — by TRIGGER SHAPE, not by importance
+
+Folded in 2026-08-21 from `lessons.md` L-011 (hits 1–4). A rule written into
+a layer whose trigger shape does not match its danger moment reads as durable
+and is dead: `lessons.md` fires only when grepped, `ops/*` only when CLAUDE.md
+routes there, global CLAUDE.md only on a trigger-word match — which is
+unreliable for rules that must fire MID-ACTION, when the model is already
+confident and reading past reminders (L-009 recurred for a month under such a
+line).
+
+| The rule's trigger is… | Layer | Why |
+|---|---|---|
+| a named tool call with inspectable input | PreToolUse hook — deny beats warn (a denial forces the corrected call at the cost of one retry) | the harness executes it; the model cannot skip it |
+| a task-shaped judgement ("when designing X…") | global CLAUDE.md conditional rule | always in context; fires on trigger-word match |
+| "someone is already investigating this topic" | `ops/lessons.md`, as the detail the shorter layers point AT | greppable, never self-firing |
+| an OMISSION — the violation is "the step never happened" | **P1** gate the SUBSTITUTE commission (PreToolUse on the substitute's tools) · **P2** make the ABSENCE greppable (a literal marker a sweep enumerates: `PROVISIONAL`, `hits:`, `DEVIATION:`) · **P3** an end-of-action gate (e.g. SubagentStop) | an absence fires no event; P1 when the substitute is a tool call, P2 when a durable artifact is read later, P3 when it is knowable only once the work is finished |
+
+Conditions that travel with the table: (1) when a hook carries the enforcement,
+the CLAUDE.md line stays and changes job — it is the explanation the denial
+cites, and both name the lessons entry so they cannot drift; (2) an omission
+gate NARROWS WITHIN the harness's injected instructions, never contradicts them
+(user ruling 2026-08-14) — where the harness withholds an action, the gate
+surfaces the decision to the user instead of taking it; (3) a hook that does
+not run is itself silent, so every P1/P3 hook ships with a proof-of-life line
+in `ops/references/integrity-sweep.md` in the SAME commit. **LAYER ≠ SURFACE**:
+before shipping any trigger, find the last recorded instance of the failure AS
+A TOOL CALL in the transcript corpus and confirm the trigger sees that shape —
+two traps in the same language measured opposite surfaces in the same week
+(L-011 hit 3/hit 4); price each surface (ms × fires) rather than registering
+all of them. And the table does not apply itself: a lessons card whose `hits:`
+reaches 2 is routed through this table before it is considered finished — that
+is the reading of §4.4 it was missing.
+
 ## §3 Trim discipline (keeping this from becoming an unread constitution)
 
 - Triggers (defaults, mechanically nudged by `hooks/ops_health_nudge.py` —
-  change the two together; sweep check 7 catches drift). **WHY each value is
-  what it is lives in `ops/rule-registry.md` — do not restate it here** (§2).
+  change the two together; **sweep check 7 catches a drifted UNIT and sweep
+  check 7b a drifted VALUE** — check 7 alone never covered the number, which
+  is how the two rows below sat at 15K and 20K while the hook enforced 19,968
+  and 28K, found 2026-08-27). **WHY each value is what it is lives in
+  `ops/rule-registry.md` — do not restate it here** (§2).
   **Two classes, and they are not the same kind of rule:**
 
   **(a) Unconditional — charged every session whether used or not. The number
   IS the budget; a hard cap is correct here.**
   | trigger | value | unit as measured |
   |---|---|---|
-  | global `CLAUDE.md` (trim/merge, never append) | ~15K | **bytes** (`getsize`) |
+  | global `CLAUDE.md` (trim/merge, never append) | 19,968 (19.5K) | **bytes** (`getsize`) |
   | skill frontmatter description (× every skill, plugins included) | ~800 | **chars** (`len`) |
 
   **(b) On demand — charged only when something routes to it. The cap is a
@@ -123,17 +158,32 @@ three copies that will drift apart and contradict each other.
   per read first, and treat the number as the signal to look, not the goal.**
   | trigger | value | unit as measured |
   |---|---|---|
-  | any `ops/*.md` — except `lessons.md` and `rule-registry.md` | ~18K | **bytes** (`getsize`) |
-  | `skill-trigger-dict.md` | ~20K | **bytes** (`getsize`) |
+  | any `ops/*.md` — except `lessons.md` and `rule-registry.md` | ~22K | **bytes** (`getsize`) |
+  | `skill-trigger-dict.md` | 28K | **bytes** (`getsize`) |
   | any `SKILL.md` body | ~300 | lines |
   | entry file `OPS.md` | ~60 | lines (not hook-enforced) |
   | `ops/lessons.md` | ~30 | unfolded entries |
 
-  Bytes, not chars, because bytes track TOKEN cost: measured across this corpus
-  bytes/token holds at 3.8–4.1 (±4%) while chars/token ranges 2.3–4.0 (77%
-  spread) — UTF-8 gives CJK 3 bytes and tokenizers charge CJK ~3–4× Latin, so
-  the two scale together. Rotation of the frozen `audit-archive/` is
+  Bytes, not chars, because bytes track TOKEN cost (measured: `rule-registry.md`
+  key `cap measurement unit`). Rotation of the frozen `audit-archive/` is
   retired — rationale goes to the registry, which grows with the rule count.
+- **A file that exists once PER OWNER carries its owner in the BASENAME.**
+  `SKILL.md` may stay generic — the harness requires that name and the
+  directory disambiguates it. Anything else that repeats across skills, tools
+  or projects (backlogs, status pages, notices, intake sheets) is named
+  `<owner>-<role>.md`, owner first, matching the convention already used by
+  `references/PatentsGrabber-context.md` and
+  `outputs/skill-reviews/literature-search-extract-gaps-*.md`.
+  **Why the basename and not the path:** a global search, a grep result list,
+  and an editor tab all show the basename alone. Measured 2026-08-27: 14 files
+  named `FUTURE-WORK.md` existed under `~/.claude` (2 live, 12 in worktrees,
+  archives and backups) and the user could not tell from a search which skill
+  any of them belonged to. Both live ones were renamed owner-first that day;
+  the frozen copies were left alone, because renaming inside `archive/` and
+  `backups/` falsifies a record of what the file was called at the time.
+  **When renaming, a git path pinned to an OLD commit keeps the OLD name** —
+  `git show <sha>:<old/path>` must not be "corrected", or the replay it
+  supports stops resolving (see `ops/lessons.md` L-033's positive control).
 - **A size trigger means EXTRACT, not DELETE.** Over cap, the legitimate moves
   are: move detail behind a pointer — `skills/<name>/references/` for skills,
   **`ops/references/` for ops files** (pointer from the owning §; no `OPS.md`
@@ -145,8 +195,8 @@ three copies that will drift apart and contradict each other.
   boundary case — makes the file shorter and the rule weaker, and it is
   invisible in a line count. If a pass cannot get under cap without cutting a
   distinct rule, that IS the signal to raise the cap (with the failed pass
-  recorded as the evidence), the same way CLAUDE.md went 12K→15K and ops files
-  10K→12K→15K. Never trade completeness for the number.
+  recorded as the evidence), the same way CLAUDE.md went 12K→15K→19.5K and ops
+  files 10K→12K→15K→18K→22K. Never trade completeness for the number.
 - **Birth budgets** (prevention beats trimming — a new artifact must be born
   within budget, not grow into a trim candidate): skill description ≤700
   chars stating purpose + trigger phrases + top 1–2 NOT-cases, detailed
@@ -167,8 +217,17 @@ three copies that will drift apart and contradict each other.
 - **Constant binding** (a different failure from naming — same name, drifting
   value): any threshold existing BOTH as rule text and in a mechanism states
   its unit at both sites and carries a drift check. Rule text is not a source
-  of truth; the mechanism is. Case and check: `rule-registry.md` key `cap
-  measurement unit`, sweep check 7.
+  of truth; the mechanism is. **The unit and the value need SEPARATE checks,
+  and naming only one leaves the other uncovered** — that is not a hypothesis:
+  this bullet named sweep check 7 (a `grep` for `getsize`/`len(...)`, which can
+  only see the unit) as *the* drift check, and under it three cap values drifted
+  across four sites for up to 12 days, including inside the enforcing hook's own
+  docstring (2026-08-27). Unit → sweep check 7. Value → sweep check 7b
+  (`python tools/ops-health-test/check_cap_binding.py`, which reads the
+  mechanism and compares every restating site). Case: `rule-registry.md` key
+  `cap measurement unit`. **The stronger move, where it is available, is to
+  delete the restatement rather than check it** — the hook's docstring now
+  names its constants instead of copying their values, and a name cannot drift.
 - **Birth schema** (record types): a NEW record-document type must declare at
   birth its minimum field set — at least an id-or-date anchor, a status/verdict,
   a why, and an evidence-or-link field — plus its owning file, and register in

@@ -147,15 +147,20 @@ its files still resolve the library by absolute path, so the reasoning holds.
 The same pass removed two further pointers to that library from
 `skill-toolkit/skill-trigger-dict.md`, which had been naming the drive path in
 this skill's own dictionary entry."""
-fallback = """None. `skill-toolkit/` ships 15 of the source's 18 skills; this is
-one of the three missing, named here so the count is not silently short. (Counts
+fallback = """None. `skill-toolkit/` ships 16 of the source's 21 skills; this is
+one of the five missing, named here so the count is not silently short. (Counts
 updated 2026-08-16: the source gained `skill-co-upgrade`, which DOES ship, and
 every '13 of 14' in this repo was stale by one on both sides. Updated again
 2026-08-17: the source had by then gained three more — `mechanism-share-packaging`,
 which now ships, and the two knowledge packs below, which do not — so '14 of 15'
-had been stale for weeks in the same way. The lesson repeating here is that a
-COUNT is a claim about the source, and this file has no check that re-reads the
-source's skill list; only a human or model going and looking does.)"""
+had been stale for weeks in the same way. Updated again 2026-08-27: the source
+was at 21 — it had gained `diagram-authoring`, which ships as of today's
+architecture-diagramming round, and two machine-bound wrappers `graph-query` /
+`media-fetch-pipeline`, which do not (entries below) — so '15 of 18' had been
+stale by three on both sides, the same lesson a third time. The lesson repeating
+here is that a COUNT is a claim about the source, and this file has no check
+that re-reads the source's skill list; only a human or model going and looking
+does.)"""
 
 [[not_shipped]]
 path = "skills/render-perf"
@@ -199,6 +204,83 @@ answer, `skill-toolkit/skills/` ships nothing equivalent and this repo does not
 pretend otherwise; `claude-ops/ops/30-judgment.md` R7 covers only when to go
 looking something up rather than answer from memory, which is the meta-rule, not
 the knowledge."""
+
+[[not_shipped]]
+path = "skills/graph-query"
+disposition = "excluded-by-decision"
+reason = """Added at the source after the 2026-08-17 sweep; adjudicated
+2026-08-27 when the architecture-diagramming round refreshed the trigger
+dictionary it appears in. It is the query front-end to a derived knowledge
+graph that a machine-local tool (the source's tools/graph-snapshot) builds over
+that environment's own rules/hooks/skills tree — the graph, its freshness
+stamps, and the builder are all environment-bound state. Shipped without them,
+the skill is a description of queries the reader cannot run: the
+deny-hook-pointing-at-a-missing-script failure with different spelling.
+Its dictionary section was removed in the same round (two-part act, row-2
+inverse) — see skill-toolkit/skill-trigger-dict.md edits.
+REVIEW-WHEN: the graph-snapshot tool itself ships (nothing under the source's
+tools/ has that entry today), or the skill gains a mode that answers without
+the derived graph."""
+fallback = """None. For "what must be read together with X" questions, the
+shipped layers answer differently: the ops files name their read-together sets
+inline, and `claude-ops/ops/rules-usage-dict.md` maps rule-to-layer ownership;
+for link-integrity questions the honest shipped answer is grep."""
+
+[[not_shipped]]
+path = "skills/media-fetch-pipeline"
+disposition = "excluded-by-decision"
+reason = """Added at the source after the 2026-08-17 sweep; adjudicated
+2026-08-27 in the same dictionary refresh. A thin trigger-and-guardrail wrapper
+around a local `mfp` CLI (its own project on the source machine, not part of
+the ~/.claude tree): the skill's content is exit-code semantics and refusal
+rules for a binary this repo does not carry, so shipping it would export a
+trigger surface whose every action fails at the first shell call.
+Its dictionary section and two quick-table rows were removed in the same round
+(two-part act) — see skill-toolkit/skill-trigger-dict.md edits.
+REVIEW-WHEN: the mfp CLI is published somewhere a reader can install from."""
+fallback = """None; nothing shipped cites it. What travels even from this entry
+is the shape: a skill as a permission-and-refusal contract around one tool —
+triggers, exit-code semantics, hard refusals, no logic of its own."""
+
+[[not_shipped]]
+path = "skills/scientific-research-guide/evals/evals.json"
+disposition = "excluded-by-decision"
+reason = """UN-SHIPPED 2026-08-27, reversing a [[collected]] verbatim entry that
+was true when written: the v1 suite (2026-07-12, five cases) tested the generic
+five-gate advisory framework and shipped cleanly. The source suite has since
+grown to 14 cases whose prompts, expected outputs and grading evidence quote
+the WITHHELD domain profiles at row level — trigger strings, Node pitfall rows,
+JESD-standard traps, cluster routing tables. Refreshing it verbatim would
+re-export, through the eval side door, the exact subject-matter knowledge the
+domains/ decision keeps home; keeping the stale v1 copy would be a standing
+check-V finding misdescribed as verbatim. Neither is honest, so the file
+leaves. This entry records a reversal, not deleted history — the v1 copy
+remains in git history, and nothing shipped cites the file (grepped
+2026-08-27).
+REVIEW-WHEN: the domain profiles themselves ship (their harness follows them),
+or the source splits framework cases from profile cases into separate files."""
+fallback = """The skill still carries `evals/fixtures/research-state.example.md`
+(a neutral fixture, unaffected). Authoring eval cases against your own domain
+profiles is the same act as authoring the profiles — see
+`domains/domain-expansion-guide.md`."""
+
+[[not_shipped]]
+path = "ops/references/harness-measurements.md"
+disposition = "excluded-by-decision"
+reason = """Cited four times by the refreshed `environment.md` (2026-08-27
+arrival). It is the measurement ledger BEHIND environment.md's dated fact
+blocks — probes, incidents, token-cost numbers of the source machine's
+harness build, kept separate precisely so the facts file stays a facts file.
+The facts (with their as-of stamps) ship in environment.md; the ledger is
+records of one machine's builds, the class this repo already excludes as
+'dated internal reports quoting real work'. Not audited line-by-line for
+identifiers, which an exclusion does not require and a collection would.
+REVIEW-WHEN: an adopter actually asks for the evidence behind an
+environment.md block, or the source promotes part of the ledger into a rule."""
+fallback = """environment.md itself: every block carries its conclusion and its
+as-of date, and its own standing instruction is to RE-MEASURE on your machine
+when the as-of is older than the build you run — which is also the honest
+answer for a different machine regardless of what the source measured."""
 
 [[not_shipped]]
 path = "tools/"
@@ -905,7 +987,10 @@ edits = [
 [[collected]]
 path = "claude-ops/ops/30-judgment.md"
 source = "~/.claude/ops/30-judgment.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-08-27 refresh (procedure B): the R2 absence-claims example arrived citing its incident by a session id; the id is a pointer into the source's private session store (an explicit COLLECTION-RULES scrub class) and is removed, here as well as there — the date + incident name ('2026-08-27 CPO incident') stay, which is how the claim remains checkable by the person who has the source.",
+]
 
 [[collected]]
 path = "claude-ops/ops/40-maintenance.md"
@@ -962,6 +1047,7 @@ edits = [
   "7 session UUIDs in Evidence: lines -> 'session (a local transcript)'. The schema (session | digest | locator | captured) is the instructive part and is kept whole; the id points at a transcript no reader can open. Same wording already declared for hooks/model_cap_guard.py.",
   "3 evidence locators: the absolute drive prefix stripped, leaving the project-relative path (e.g. '<drive>:/<work-root>/Foo/SECURITY-POLICY.md' -> 'Foo/SECURITY-POLICY.md'). COLLECTION-RULES.md rule 2 forbids scrubbing a path that resolves, and the tail still identifies the file for anyone who has the repo; only the machine-specific prefix goes.",
   "L-010: two pointers to the same private asset-library entry removed, and the portable equivalent (`npx playwright screenshot` plus the settle call stated one line above) put in their place.",
+  "2026-08-27 (architecture-diagramming round, B4 sweep): an EIGHTH session UUID found surviving in L-013's evidence locator — the line's first field had been scrubbed to 'session (a local transcript)' while its locator kept the full transcript path (session UUID + the work-root project slug). Same declared class as the seven above; -> 'the session's own local transcript jsonl'. The main.log line numbers and turn timestamps stay — they are the checkable part.",
 ]
 
 [[collected]]
@@ -977,7 +1063,10 @@ status = "verbatim"
 [[collected]]
 path = "claude-ops/ops/references/integrity-sweep.md"
 source = "~/.claude/ops/references/integrity-sweep.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-08-27 refresh (procedure B): two probe-payload examples arrived with a cwd naming the source's second-drive work root (the scrub class added 2026-08-16). Both replaced with \"x\", the file's own convention for a semantically-arbitrary probe cwd — its sibling probe on the same page already uses it.",
+]
 
 [[collected]]
 path = "claude-ops/ops/references/project-map.md"
@@ -1064,7 +1153,10 @@ status = "verbatim"
 [[collected]]
 path = "global-claude-md/rules/shader-failure-modes.md"
 source = "~/.claude/rules/shader-failure-modes.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-08-27 refresh (procedure B): the re-glob measurement sentence arrived naming the source's second-drive work root as the corpus location -> 'the local work root'. The corpus size (1,361 files) and every recall number stay — they are the evidence; the path is not.",
+]
 
 [[collected]]
 path = "skill-toolkit/skill-trigger-dict.md"
@@ -1074,6 +1166,9 @@ edits = [
   "asset-vault section: two absolute paths to a private asset library and its sibling GUI repo removed. The skill itself is excluded-by-decision (see [[not_shipped]] skills/asset-vault), and its dict entry now says so instead of naming locations the reader cannot reach.",
   "2026-08-17: the whole `## 知識包 (Knowledge Packs)` section removed — its two entries route to `render-perf` and `system-design`, which do not ship (see their [[not_shipped]] entries). Leaving a router pointing at absent skills is COLLECTION-RULES.md's row-2 inverse, and it is the failure a 2026-08-16 refresh committed at scale with twelve domain-profile rows.",
   "2026-08-17, the same edit finished properly: the quick-routing table near the end of the file carried its OWN two rows for the same pair (長列表卡頓 -> render-perf, 要不要上 MQ -> system-design), and removing the section left them pointing at nothing. A router is not one place in a file whose whole job is routing — grep the skill NAME, not the section heading. `engineering:system-design` on the plugin list is a different skill and stays.",
+  "2026-08-27 refresh: `### graph-query` section removed — it fronts a derived knowledge graph built by a machine-local tool (tools/graph-snapshot) that does not ship (see [[not_shipped]] skills/graph-query). Same row-2-inverse class as the knowledge-pack removal; no quick-table row existed for it.",
+  "2026-08-27 refresh: `### media-fetch-pipeline` section AND its two quick-table rows removed — the skill wraps a local `mfp` CLI this repo does not carry (see [[not_shipped]] skills/media-fetch-pipeline). Grep-the-name found both places, per the 2026-08-17 lesson above.",
+  "2026-08-27 refresh: scientific-research-guide 領域特化 block condensed to a share note, and its two photonics quick-table rows removed — the expanded source text enumerates the author's own research-domain profiles, none of which ship (`domains/_routing.md` deliberately ships row-less; same decision family as domain-expansion-guide.md §3.1's edit). Domain-profile capability is still described, as a thing the reader authors for their own fields.",
 ]
 # REFRESHED 2026-08-17, procedure B, and worth recording why it was even
 # opened: the shipped copy was stale by three skill sections and check V could
@@ -1083,6 +1178,12 @@ edits = [
 # staleness surfaced only because this round shipped one of the three skills
 # and went looking for its dictionary entry. Anything `edited` here can be
 # carrying the same debt; the detector is a reader, not the gate.
+# REFRESHED 2026-08-27, procedure B (architecture-diagramming round): the
+# source had gained three skill sections since 2026-08-17 — diagram-authoring
+# (ships this round, its rows stay) and graph-query / media-fetch-pipeline
+# (machine-bound, removed; entries above) — plus an expanded research-domain
+# block (condensed; entry above). The three 2026-08-17 edits re-applied
+# cleanly on the moved source.
 
 [[collected]]
 path = "skill-toolkit/skills/ai-coding-guardrails/SKILL.md"
@@ -1166,6 +1267,24 @@ status = "edited"
 edits = [
   "the 'worked example lives in the hub repo' pointer: two absolute paths into a private repo replaced by a description of what those two documents contain, so the reader can build the equivalent. PRE-EXISTING: these two paths were published in this file before 2026-08-16 and were invisible to the gate until tools/sharelib.py gained the absolute-local-path pattern.",
 ]
+
+[[collected]]
+path = "skill-toolkit/skills/diagram-authoring/SKILL.md"
+source = "~/.claude/skills/diagram-authoring/SKILL.md"
+status = "verbatim"
+
+[[collected]]
+path = "skill-toolkit/skills/diagram-authoring/references/carrier-playbook.md"
+source = "~/.claude/skills/diagram-authoring/references/carrier-playbook.md"
+status = "edited"
+edits = [
+  "Provenance section: the field-test gap-ledger pointer (a dated file under the source's outputs/ tree, which does not ship) replaced with a prose note that the ledger stays in the source environment's review records. FT-1/FT-3/FT-5 ids kept — they are how the claim stays checkable by the person who has the source.",
+]
+
+[[collected]]
+path = "skill-toolkit/skills/diagram-authoring/references/notation-precision.md"
+source = "~/.claude/skills/diagram-authoring/references/notation-precision.md"
+status = "verbatim"
 
 [[collected]]
 path = "skill-toolkit/skills/env-cleanup/SKILL.md"
@@ -1400,6 +1519,26 @@ source = "~/.claude/skills/product-design-thinking/references/prior-art-sweep.md
 status = "verbatim"
 
 [[collected]]
+path = "skill-toolkit/skills/product-design-thinking/references/representation-models.md"
+source = "~/.claude/skills/product-design-thinking/references/representation-models.md"
+status = "verbatim"
+# Collected 2026-08-27 (architecture-diagramming round). Its PROMOTED note cites
+# a representation-selection rule adopted into the source's global CLAUDE.md the
+# same day; global-claude-md/CLAUDE.md is a template snapshot that predates the
+# rule. DEFERRED to the next global-claude-md refresh (re-applying that file's
+# template edits is its own procedure-B round); until then the interim note
+# lives in architecture-diagramming/README.md.
+
+[[collected]]
+path = "skill-toolkit/skills/product-design-thinking/references/view-integrity-checks.md"
+source = "~/.claude/skills/product-design-thinking/references/view-integrity-checks.md"
+status = "verbatim"
+# Collected 2026-08-27. The CPO 共封裝光學 example in §3 is a considered KEEP:
+# a public industry term anchoring the data-gap class, not subject-matter
+# knowledge from the withheld domain profiles (same boundary the old dictionary
+# drew when it shipped domain NAMES while the profiles stayed home).
+
+[[collected]]
 path = "skill-toolkit/skills/project-retrospective/SKILL.md"
 source = "~/.claude/skills/project-retrospective/SKILL.md"
 status = "verbatim"
@@ -1450,11 +1589,6 @@ edits = [
   "§3 authoring rule 5: 'put it in STATUS.md' -> 'put it in a status file' — STATUS.md is an internal status artifact that does not ship.",
   "Appendix: a share note added above the directory tree, saying the tree is the source environment's layout kept as a worked example and that the profile files it names do not ship.",
 ]
-
-[[collected]]
-path = "skill-toolkit/skills/scientific-research-guide/evals/evals.json"
-source = "~/.claude/skills/scientific-research-guide/evals/evals.json"
-status = "verbatim"
 
 [[collected]]
 path = "skill-toolkit/skills/scientific-research-guide/evals/fixtures/research-state.example.md"
@@ -1676,6 +1810,17 @@ path_position_ok = [
     "<phenomenon_or_method>", "<terminology>", "<topic>",
     # citation identifiers
     "<doi>", "<isbn>",
+    # 2026-08-27 refresh arrivals, each confirmed a genuine parameter:
+    # environment.md's records path documents the SHAPE of the local session
+    # record (`projects/<slug>/<cliSessionId>.jsonl`) — the runtime supplies
+    # the id, the reader substitutes nothing;
+    "<cliSessionId>",
+    # integrity-sweep.md's stream-annotation probe — any interpreter-run
+    # script of the reader's own makes the positive control;
+    "<script>",
+    # config-self-audit's desktop-cache counting recipe — the glob pattern
+    # the check under audit uses, quoted as a parameter of the recipe.
+    "<pattern>",
     # env-cleanup scan output columns
     "<file-count>", "<newest-mtime>",
     # COLLECTION-RULES.md diff recipe: the reader supplies both sides
@@ -1699,6 +1844,19 @@ command_position_ok = [
 # allow — narrow, reasoned exceptions to the leak patterns. file AND kind must
 # match exactly; `match` further narrows by substring. No wildcards.
 # ---------------------------------------------------------------------------
+
+[[allow]]
+file = "claude-ops/ops/references/integrity-sweep.md"
+kind = "absolute local path (non-system drive)"
+# `match` is the tree name alone, not the full drive path: writing the path
+# here would make this manifest a finding in its own right (the email-address
+# allow below records the same rule).
+match = "proj"
+reason = """A probe payload's deliberately fictional cwd, arrived with the
+2026-08-27 refresh: the drive letter X was chosen at the source precisely
+because it is nobody's real tree (the same probe's outer cwd is the file's
+usual arbitrary \"x\"). It is planted data for a hook test, the same class as
+the gate's own fixtures two entries down."""
 
 [[allow]]
 file = "tools/test_share_gate.py"

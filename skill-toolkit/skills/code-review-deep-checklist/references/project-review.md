@@ -107,6 +107,43 @@ inventory (ruleId namespace `review.contract.*`):
   are already security-deep-checklist territory — record them as `sec.*`
   discovery candidates, do not re-audit them here.
 
+## Architecture View Reconstruction & Integrity Audit（體檢視圖層）
+
+The lenses above audit principles; this lens audits the PICTURE the project
+claims to have — and rebuilds it when there is none. Findings namespace:
+`review.arch.view-*` (output-contract.md §2). Instrument:
+`~/.claude/skills/product-design-thinking/references/view-integrity-checks.md`;
+view selection / tier view set: `representation-models.md` beside it.
+
+- **Reconstruct from code, not from docs**: build the Standard-tier view set
+  (representation-models.md) from the codebase itself — a component/C4 view
+  from the import graph + entry points; a statechart per lifecycle entity
+  (same reconstruction discipline as single-review.md §10, applied
+  project-wide); ONE sequence pair (success + failure/retry) per critical
+  entry point; decision tables where guards are rule-dense. Structural text
+  models first (node/edge lists, state×event matrices) — they are the
+  auditable artifact and the re-review baseline; render only after they
+  check out.
+- **Integrity pass**: run view-integrity-checks §1 on each reconstructed
+  view; every failed check is a finding (`review.arch.view-gap` — e.g. a
+  reachable event with no handling cell, an interface with no contract row;
+  per-unit FSM defects found in Mode A keep their `review.state.*` ruleIds).
+- **Correspondence pass**: run §2 across the reconstructed set AND against
+  the project's existing diagrams — an existing diagram is a CLAIM about the
+  code, exactly like doc-drift above; every mismatch files as
+  `review.arch.view-inconsistency` with the drifting elements named.
+- **Gap table**: emit the §3 gap report; `data-gap` rows mark what the code
+  cannot answer (a state no one writes, an interface with no contract, an
+  entry point reaching nothing) — those are findings about the SYSTEM, not
+  about the drawing.
+- **留檔 (archival)**: the reconstructed views + gap table ship WITH the
+  report (same basename — embedded mermaid/SVG or a `<report-basename>-views/`
+  folder) and are named in coverage.json as units; they are the baseline the
+  next recurring review diffs against, like findings (persisting/resolved).
+  Presentation-grade rendering for humans (HTML/PPTX) hands off to
+  diagram-authoring — this mode's embedded views need to be correct, not
+  polished.
+
 ## Risk-Management Lens
 
 - Is there a formalized risk list with extra verification for high-risk components
@@ -133,3 +170,5 @@ Beyond the standard contract in SKILL.md:
   review/refactor attention should concentrate.
 - Trend framing: state explicitly what should be re-measured at the next recurring
   review so the numbers become a trend line.
+- The reconstructed view set + gap table, archived beside the report (view-audit
+  lens above) — re-derived and diffed at the next recurring review.

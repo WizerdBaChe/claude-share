@@ -29,7 +29,8 @@ Write the protocol block; it ships as an appendix of the deliverable:
     logged with its reason.
 - **Information sources planned**: at least 2 independent scholarly databases (e.g.
   Semantic Scholar + Crossref/OpenAlex) + 1 preprint server where the field uses one
-  + citation chasing + any local corpus (prism / user PDF library). English-only
+  + citation chasing + any local corpus listed live in `../connectors/registry.json`
+  (a user PDF library, a reference manager). English-only
   searching must be an explicit, justified protocol decision (rubric §6 language skew).
 - **Extraction targets**: the P1 target list, verbatim.
 

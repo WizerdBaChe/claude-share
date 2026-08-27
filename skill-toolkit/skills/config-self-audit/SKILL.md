@@ -2,15 +2,16 @@
 name: config-self-audit
 description: >-
   Cheap audit of durable Claude Code config; fixes only after consent. DEFAULT
-  mode (ONE artifact): a skill, hook, subagent definition (`agents/*.md`), global
-  CLAUDE.md rule, or settings.json change — trigger when asked to
-  audit/check/review one, when a NEW skill/hook/subagent was just authored here
-  (before declaring it done), or when a /doctor-style report needs verifying.
-  ADOPTION mode: config copied in from another environment, or a `reconciled: no`
-  stamp — audits RELATIONS between rules: trigger collisions, ordering,
-  mechanisms that did not ship. NOT for authoring skills (→ skill-creator), ONE
-  third-party skill (→ skill-share-packaging), or file cleanup (→ env-cleanup).
-  Disambiguation: ~/.claude/skill-trigger-dict.md.
+  mode (ONE artifact): a skill, hook, subagent definition, global CLAUDE.md
+  rule, or settings.json change — trigger on 稽核/audit/review one
+  (「檢查這個 hook」「這條規則安不安全」「安全性遺漏 (security gap)、乾淨度」),
+  when a NEW skill/hook/subagent was just authored here, or when a
+  /doctor-style report needs verifying. ADOPTION mode: config copied from
+  another environment, or a `reconciled: no` stamp — audits
+  RELATIONS between rules: trigger collisions, ordering, unshipped mechanisms.
+  NOT for authoring skills (→ skill-creator), ONE third-party skill
+  (→ skill-share-packaging), or file cleanup (→ env-cleanup). Disambiguation:
+  ~/.claude/skill-trigger-dict.md.
 ---
 
 # Config Self-Audit
@@ -172,7 +173,10 @@ commands in `references/telemetry.md` §2:
 - **Cross-surface duplicates:** check every source reaching the skill listing, not
   just `~/.claude/skills` — plugin namespaces (`<plugin>:<skill>`) and the desktop
   skills cache — BOTH roots under `%APPDATA%/Claude/local-agent-mode-sessions/`:
-  `skills-plugin/` (15 as of 2026-08-12) and `*/*/rpm/plugin_*/skills/` (35).
+  `skills-plugin/*/*/skills/*/SKILL.md` and `*/*/rpm/plugin_*/skills/*/SKILL.md`.
+  Unit = SKILL.md FILES per root (`find <cache dir> -path '*/<pattern>' | wc -l`,
+  integrity-sweep check 9 split by root): 15 / 35 on 2026-08-12, same on
+  2026-08-22; a dir-level count (1 / 5) is a unit mismatch, not a moved layout.
   Checking only the first misses the larger one.
   Same name or description = routing ambiguity plus wasted listing budget, and a
   copy rots the moment the canonical file changes. If a documented cache root

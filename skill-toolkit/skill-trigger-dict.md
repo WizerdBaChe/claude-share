@@ -12,7 +12,7 @@
 ## 審查家族 (Review Family) — 最容易互相誤觸，先看這區
 
 ### code-review-deep-checklist（深度審查方法論 / deep-methodology review）
-- 關鍵詞：深入review、完整審查、健檢 (health check)、代碼異味 (code smell)、需求追溯 (traceability)、選型評估 (dependency fitness)、全專案審查 (whole-project review)
+- 關鍵詞：深入review、完整審查、架構健檢 (architecture health check)、代碼異味 (code smell)、需求追溯 (requirement traceability)、選型評估 (dependency fitness)、全專案審查 (whole-project review)
 - 精準句型：
   - Mode A：「幫我**深入 review** 這個 PR/檔案」/ "do a **deep review** of this file"
   - Mode B：「幫**整個專案**做架構**健檢**」/ "whole-project architecture health check"
@@ -38,7 +38,7 @@
 - 避免說法：「資安健檢」「整個專案找漏洞」（→ security-deep-checklist）
 
 ### security-deep-checklist（深度資安稽核 / blue-team informed security audit）
-- 關鍵詞：資安檢核、資安健檢 (security health check)、找漏洞 (vulnerability sweep)、XSS、SQL injection、CSRF、部署安全 (deployment posture)、供應鏈 (supply chain)、內網/不聯網風險 (air-gapped risk)、偵測與應變 (detection & response)、OWASP
+- 關鍵詞：資安檢核、資安健檢 (security health check)、找漏洞 (vulnerability sweep)、部署安全 (deployment posture)、供應鏈 (supply chain)、內網/不聯網風險 (air-gapped risk)、偵測與應變 (detection & response)、OWASP（單詞漏洞名 XSS/SQLi/CSRF 已移除 2026-08-17——語料中僅以引用語境出現；description 仍涵蓋，漏洞類別當「審查目標」講出來時仍會路由）
 - 精準句型：
   - Mode A：「幫這個模組/專案做**程式碼資安稽核**」/ "security audit of this module"
   - Mode B：「檢查**部署與設定**的安全姿態」/ "deployment security posture review"
@@ -62,8 +62,9 @@
 - 避免說法：「幫我深審這段 AI 產的 code」（單一改動 → deep-checklist Mode A §9）
 
 ### config-self-audit（Claude Code 設定檔稽核）
-- 關鍵詞：稽核skill (audit skill)、檢查hook、這條global規則安全嗎
-- 精準句型：「幫我 audit 這個 skill/hook/CLAUDE.md 規則」— 只審 Claude Code 設定物件，不審專案代碼
+- 觸發實態（量測 2026-08-17，30 fires）：主要為**程序觸發**——新寫完 skill/hook 的收尾驗證、co-upgrade 迴圈內的稽核步、明講 skill 名；30 次僅 1 次由自然語句路由。關鍵詞列只描述口語觸發的少數面。
+- 關鍵詞：稽核這個skill (audit this skill)、檢查這個hook、安全性遺漏 (security gap)、乾淨度、這條規則安不安全
+- 精準句型：「幫我 audit 這個 skill/hook/CLAUDE.md 規則」/「這個 skill 有沒有安全性遺漏或乾淨度問題」— 只審 Claude Code 設定物件，不審專案代碼
 - **兩個 mode**：預設 mode 審**單一物件**；**adoption mode** 審「從別的環境搬進來的設定」之間的**關係**（觸發碰撞、順序、機制沒跟著到）。觸發詞：「移植過來的規則跟原本的打架」「我把別人的設定 repo 併進來了」、或磁碟上有 `reconciled: no` 戳記。搬進來的**單一** skill 走 `skill-share-packaging` Mode B，不走這裡
 - 與官方 `/doctor`（`/checkup`）的分工：本 skill **自足**，`/doctor` 是最低優先的可選輸入，其輸出一律當未驗證宣稱。判定理由與 2026-07-25 實測細節見 SKILL.md §9 與 `skills/config-self-audit/references/telemetry.md`
 
@@ -77,6 +78,7 @@
 - 適用時機：對話中途出現設計需求也應觸發，不限開場；中途沒中時，明講 skill 名稱（「用 product-design-thinking 來做」）100% 命中
 - 也觸發：「給我 **PSM 等級**的修正案/重規劃」「build-ready 的修正規劃文件」— 既有產品的修正**規劃**仍屬本 skill（產出物是 PSM 嚴謹度的文件），只有「按既有 PSM 施工」才不觸發（2026-07-12 新增，源自 ops/lessons.md L-002：未觸發導致差分式偷薄文件被當成唯一施工依據）
 - 也觸發：把既有功能**換成完全不同的技術路線**（re-architecture、搬平台、換渲染路徑）——即使它以「實作任務」的措辭出現。判別子：要做的東西有業界專有名詞（"3D photo"、"parallax"、"LDI"…）＝有公認做法，選架構前的 prior-art 查證屬設計工作（2026-08-16 新增，源自 3D-photo-engine H-3 否決：Web 重架構被當實作任務，兩個 Phase 後才發現業界標準做法便宜一個數量級）
+- 模式分級（2026-08-27 新增）：觸發後於 Phase 0 出口選**深度**，不影響觸發判定 — 速寫 Sketch（單模組、無持久化/並行）／標準 Standard／全梯 Full-ladder（完整梯級 CIM→PIM→Verification→PSM）。只調深度：小修/小工具腳本/按圖施工依舊不觸發；分級表與升級棘輪在 SKILL.md
 - 避免說法：bug 修復、按圖施工、小型加功能、「寫個小工具/腳本」（都不觸發，這是重量級模式）
 
 ### design-system-suite（多產品共用設計系統）
@@ -84,8 +86,17 @@
 - 精準句型：「把幾個 app 統一到共用 design tokens + 主題包」
 - 避免說法：單一 app 的樣式調整（不觸發）
 
+### diagram-authoring（精準圖示繪製與缺口檢測 / precision diagram production & gap finding）
+- 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (FSM/statechart)、時序圖/序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、圖要放進 HTML/PPTX/簡報
+- 精準句型：「把這個系統畫成方塊圖＋狀態機圖，缺的接口標出來」/「用現有資料重建 CPO 全架構圖，找出缺口」/「這組圖要能放進簡報（PPTX 可編輯）」
+- 邊界：選哪種圖（理論）→ product-design-thinking `references/representation-models.md`（本 skill 只消費）；圖的健全性檢核 → 同目錄 `view-integrity-checks.md`；資料圖表（軸/序列/分佈）→ dataviz；UI mockup/版面 → design；Artifact 頁面機制 → artifact-design/artifact-diagramming；PPTX 檔案機制 → anthropic-skills:pptx
+- 避免說法：「畫個長條圖/趨勢圖/dashboard」（資料視覺化 → dataviz）、「幫我設計這個頁面/mockup」（→ design）
+
 ### engineering:system-design（單一系統/服務架構設計）
 - 精準句型：「幫我設計一個處理 X 的系統/API/資料模型」— 範圍窄於 product-design-thinking
+
+### product-management:write-spec（寫 PRD/spec）
+- 精準句型：「把這個功能想法寫成一份 PRD」
 
 ---
 
@@ -131,7 +142,7 @@
   - 方法：「三組數據 n=6，**該用哪個統計檢定**？」/「這個**實驗怎麼設計對照組**」
   - 投稿：「**投稿前**方法學上還要補什麼？」
 - 性質：顧問型，預設只診斷/建議/寫規劃文件；**未經明確要求不寫程式、不動資料**（明確要求則照做並套方法論）。
-- 領域特化 (domain profiles)：內建 plasmonic waveguide（SPP/近場光學/SERS/FDTD-FEM 模擬方法論）— 該領域研究問題也觸發本 skill；新增領域依 `domains/domain-expansion-guide.md`。
+- 領域特化 (domain profiles)：來源環境另維護多支領域 profile（該領域的研究問題也直接觸發本 skill；載入清單以 `domains/_routing.md` 為唯一真實來源）。**本分享不含任何 profile 檔** — 它們是作者自身研究領域的主題知識（見 `domains/` 資料夾的 README 與列數為零的 `_routing.md`）；請依 `domains/domain-expansion-guide.md` 自建自己的領域列。
 - 避免說法：「幫我做一份有來源的深度研究報告」（查某主題 → deep-research）、「純寫程式/修 bug」（→ engineering skills）、「寫 PRD」（→ product-management:write-spec）
 
 ### literature-search-extract（文獻檢索與萃取服務 / literature search & extraction service）
@@ -146,14 +157,14 @@
 
 ## 素材庫 (Asset Library)
 
-### asset-vault（個人跨棧素材庫操作 / personal cross-stack asset library；此 skill 未隨本 repo 出貨，見 tools/share-manifest.toml）
+### asset-vault（個人跨棧素材庫操作 / personal cross-stack asset library）
 - 關鍵詞：素材庫、元件庫、抽進素材庫 (extract to vault)、查素材庫 (check the vault)、有沒有現成的X、可重用素材 (reusable asset)、素材庫健檢
 - 精準句型：
   - Mode A：「把 X **抽進素材庫**」/ "extract this into the asset library"
   - Mode B：「**查素材庫**有沒有現成的 loader/dialog/parser」；建置任務中遇到通用能力需求時 AI 應**自觸發**先查庫再手刻
   - Mode C：「**素材庫健檢**」→ validate.py 完整性檢查
 - 避免說法：「設計素材庫新功能/改架構」（設計層 → product-design-thinking）、「清理素材庫無關檔案」（→ env-cleanup）、「多產品**套件**統一 design tokens/theme packs」（跨 app 設計系統方法論 → design-system-suite；asset-vault 只管「單件素材入庫/取用」）
-- 邊界：GUI 接口 (gui/gui-contract.json) 鎖版，已由一個姊妹 repo 實作為可瀏覽目錄（新增 kind 要同步該 repo 的 FAMILIES 家族表）；素材永不刪除只 deprecated
+- 邊界：GUI 接口 (gui/gui-contract.json) 鎖版，已由姊妹 GUI repo 實作為可瀏覽目錄（新增 kind 要同步該 repo 的 FAMILIES 家族表）；素材永不刪除只 deprecated
 
 ---
 
@@ -236,6 +247,9 @@
 | 新系統的權限/驗證怎麼設計 | product-design-thinking (Phase 2 security-by-design) |
 | 深入 review 這個 PR | code-review-deep-checklist (A) |
 | 全專案架構健檢 | code-review-deep-checklist (B) |
+| 把系統/資料畫成方塊圖・FSM・爆炸圖（要精準、可驗證） | diagram-authoring |
+| 從既有資料重建全架構、標出缺口 | diagram-authoring（audit drawing 模式） |
+| 哪種圖適合表達 X（選型理論） | product-design-thinking `representation-models.md` |
 | 套件 X 還適合嗎 | code-review-deep-checklist (C) |
 | 我這個實驗/研究下一步該做什麼 | scientific-research-guide |
 | 該用哪個統計檢定 / 實驗怎麼設計 | scientific-research-guide |

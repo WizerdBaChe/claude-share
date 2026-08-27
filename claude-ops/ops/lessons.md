@@ -482,7 +482,7 @@ non-match, scheme-less URL, cross-server scoping, `navigate back`, dev-server
 `preview_start`, missing blocklist, malformed stdin): 10/10.
 Evidence: session (a local transcript) | digest unrecorded |
 locator: `%APPDATA%\Claude\logs\main.log` lines 59189/59744 (`GPU process gone`)
-vs `~/.claude/projects/D--AIWork/8ee03a1f-536c-4570-aa35-3049e4568fe5.jsonl`
+vs the session's own local transcript jsonl,
 turns at 23:59:26 and 00:08:32 (`preview_start` on the same URL); WebGPU stack
 captured out-of-process, Playwright 1.62.1 | captured 2026-08-12
 

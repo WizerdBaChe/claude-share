@@ -28,7 +28,9 @@ skills that need literature input mid-workflow.
 - **Zero fabrication is the hard constraint.** Never invent a citation, DOI, page number,
   author list, numeric value, or quotation. If a needed fact was not found, say "not found
   in searched sources" — an honest gap is a valid deliverable; a plausible-looking fake
-  reference is the worst possible failure of this skill.
+  reference is the worst possible failure of this skill. **Attaching a real source to a
+  claim it does not make is the same sin in a better disguise** — it passes identifier
+  resolution and reads as well-sourced. P4.5 is where that gets caught.
 - **Access honesty.** Distinguish what you actually read. Tag every source with an access
   level (see P3) and never present abstract-only knowledge as if the full text was read.
 - **Copyright boundary.** Quote sparingly (short excerpts with quotation marks + locator);
@@ -108,10 +110,18 @@ abstract-summarizing, which is the anti-pattern this skill exists to prevent.
 - **Mixed** — supplied sources as the core plus targeted supplemental search;
   `search_trail` must distinguish supplied vs discovered sources.
 
-Tool priority: **a local corpus / reference-manager MCP if available** (e.g. `prism`,
-a Zotero MCP, an Obsidian-vault MCP — these rank/relate sources the user already
-collected; they do not search the web) → **WebSearch/WebFetch** against scholarly
-indexes for discovery. The skill must remain fully functional with web search alone. Per-channel strategies, identifier resolution, local-corpus tool usage, and citation-chasing
+Tool priority: **registered connectors whose declared source class matches the need**
+(`connectors/registry.json` — local systems holding primary documents: patents, a keyed
+publisher API, a rendering browser; **probe before routing**, a stale process returns 404
+and a 404 reads as "no results") → **a local corpus / reference-manager MCP if available**
+(a Zotero MCP, an Obsidian-vault MCP, a folder of the user's PDFs — these rank/relate
+sources the user already collected; they do not search the web. Which one is live is a
+registry question, not a memory question: as of 2026-08-27 none is, so this rung is
+usually skipped) → **WebSearch/WebFetch** against scholarly
+indexes for discovery. The skill must remain fully functional with web search alone.
+Connector routing, the secret boundary (the agent may RUN a tool holding a key and may
+never READ the key), and per-connector field mappings live in `references/connectors.md`.
+Per-channel strategies, identifier resolution, local-corpus tool usage, and citation-chasing
 rules live in `references/search-sources.md` — read it before any `standard`/`exhaustive`
 search. Core principles:
 - Build queries from: core terms + synonyms/aliases + field-specific vocabulary; iterate
@@ -175,6 +185,20 @@ Worked examples per information-need type (including wrong-vs-right contrasts an
 pre-P5 checklist) live in `references/extraction-playbook.md` — read it when running P4
 on a non-trivial extraction.
 
+### P4.5 — Verification gate (between extraction and delivery)
+Self-report is not a check: the judgement that a citation is sound cannot come from the
+same pass that wrote it. Before P5, write an **evidence ledger** — one JSONL row per
+load-bearing claim carrying the claim, identifier, locator, access tag, the **exact
+support span** it rests on, and the path to the retrieved text — then run
+`verify/citecheck.py` on it. Naming the span is what makes support falsifiable: a script
+cannot judge whether a source supports a claim, but it can prove the quoted words are
+(or are not) in the retrieved text. Persist the ledger and the retrieved text BEFORE
+running the gate — a gate must never be able to destroy the evidence it rejects.
+Scope by depth: `quick` skips the file (identifier resolution still applies);
+`standard` covers load-bearing claims and every number entering a table; `exhaustive`
+covers everything. Protocol, repair order, and the set-level checks the script cannot
+make: `references/verification-gate.md`.
+
 ### P5 — Synthesis into the requested deliverable
 Assemble extracted items into the `output_format`, in the requested `language`:
 - Every load-bearing claim: inline citation + access tag, e.g. `(Smith 2024, Table 2) [full]`.
@@ -219,6 +243,10 @@ Assemble extracted items into the `output_format`, in the requested `language`:
 | Quote pack | exact wording needed (definitions, standards) | short quotes + full locators |
 
 ## Failure modes to actively avoid
+
+Numbered by history, not by severity — **#8 is the dangerous one**: it survives every
+other check on this list and is invisible in the finished document.
+
 1. **Fabricated or "reconstructed" citations** — the cardinal sin; verify every
    identifier resolves before including it.
 2. **Abstract-only knowledge dressed as full-text reading** — the access tag exists to
@@ -230,12 +258,25 @@ Assemble extracted items into the `output_format`, in the requested `language`:
 6. **Unbounded search** — respect the depth quota and stopping rule; log the boundary.
 7. **Single-cluster evidence** — "consensus" drawn from one citation bubble, one
    group, or one language; run the rubric's bias/coverage check before P5.
+8. **A real source cited for something it does not say** — the identifier resolves, the
+   author is right, the paper exists, and the claim is not in it. Measured: ALCE
+   (arXiv:2305.14627) found even the best systems lack complete citation support 50% of
+   the time; Search Arena (arXiv:2506.05334) found readers rate answers *higher* for
+   carrying more citations even when those citations do not support the claim — so
+   citation density reads as rigor and this failure is rewarded, not caught. P4.5 exists
+   for this one: name the support span, then prove it is in the text.
 
 ## Reference map
 
-All six reference files ship with the skill; load each on demand at the point the
+All eight reference files ship with the skill; load each on demand at the point the
 pipeline names it. The P1→P5 pipeline is self-sufficient at `quick`/`standard` depth
 without them; they are required for `exhaustive` depth and non-trivial extraction.
+- `references/connectors.md` — P2 routing for registered data systems (patents, keyed
+  APIs, rendering browsers), access-ceiling and cost rules, per-connector field maps.
+  Contract and secret boundary: `connectors/README.md`; probe: `connectors/probe.py`.
+- `references/verification-gate.md` — P4.5 protocol: evidence ledger, what the gate may
+  and may not rule on, repair order. Tool: `verify/citecheck.py` (`--selftest` for its
+  two-sided calibration).
 - `references/portability.md` — READ FIRST when running outside Claude Code (other
   agents / web LLMs): capability slots, substitutes, degradation honesty. Else skip.
 - `references/search-sources.md` — per-channel query strategies, identifier resolution,

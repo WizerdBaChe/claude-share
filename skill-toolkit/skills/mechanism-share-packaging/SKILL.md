@@ -3,12 +3,12 @@ name: mechanism-share-packaging
 description: >-
   Exporting a BEHAVIORAL MECHANISM — an operating mode spanning hooks, tools,
   wiring, and docs — from a live agent environment into a governed share repo,
-  plus a self-sufficient hand-off bundle. Trigger on 「把這個機制/運作模式打包
-  分享」「這套機制輸出到 share repo」"export this mechanism", "package this
-  operating mode". ONE skill crossing the machine boundary → skill-share-packaging.
-  Auditing/adopting a foreign rules layer → config-self-audit adoption mode.
-  This skill ORCHESTRATES; the target repo's own collection rules stay
-  authoritative and are never restated here.
+  plus a self-sufficient hand-off bundle. Trigger on
+  「把這個機制/運作模式打包分享」「這套機制輸出到 share repo」"export this
+  mechanism", "package this operating mode". ONE skill crossing the machine
+  boundary → skill-share-packaging. Auditing/adopting a foreign rules layer →
+  config-self-audit adoption mode. This skill ORCHESTRATES; the target repo's
+  own collection rules stay authoritative and are never restated here.
 ---
 
 # Mechanism Share Packaging

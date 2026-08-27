@@ -4,10 +4,11 @@ description: >-
   Deep-methodology code review — only when the user explicitly asks for a DEEP /
   HOLISTIC / PROJECT-WIDE pass: "深入review", "完整審查", "健檢", full code-smell taxonomy,
   requirement traceability, or dependency/選型 fitness audit. Modes: (A) single file/PR
-  deep review, (B) whole-project architecture health, (C) dependency fitness. NOT for
-  routine pre-merge checks ("review this before I merge" → /code-review) or debt backlog
-  deliverables (→ engineering:tech-debt). Full disambiguation:
-  ~/.claude/skill-trigger-dict.md.
+  deep review, (B) whole-project architecture health, (C) dependency fitness audit:
+  套件選型評估、依賴適配 (dependency fitness)、「套件還適不適合」,
+  "is library X still the right fit". NOT for routine pre-merge checks
+  ("review this before I merge" → /code-review) or debt backlog deliverables
+  (→ engineering:tech-debt). Full disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # Code Review Deep Checklist
@@ -24,6 +25,7 @@ safe to merge", stop and use /code-review instead.
 |---|---|---|
 | Deep review of one PR/diff/file/module | A: Single review | [references/single-review.md](references/single-review.md) |
 | Whole-project / architecture health check | B: Project review | [references/project-review.md](references/project-review.md) |
+| Whole-project but through ONE lens (state machines, error paths, a named subsystem) | B, focused | project-review.md + the matching single-review.md section |
 | "Is library/framework/syntax X still right for us?" / audit dependencies | C: Fitness audit | [references/dependency-fitness.md](references/dependency-fitness.md) |
 | Full health check ("整體健檢") | B then C | both project files |
 
@@ -39,18 +41,44 @@ Answer these before opening the diff; they set intensity and lens:
 2. **Context before diff**: read the PR description, linked spec/design doc, and the
    "why" first. A context-free review catches "is the code written correctly" but
    misses "does this approach solve the right problem".
-3. **Three-pass reading cadence**: pass 1 skim for scope + red flags; pass 2 deep on
-   core logic (most time here); pass 3 sweep naming/comments/style. Never start at
-   line 1 in detail mode — that's how architectural issues get missed.
+3. **Reading cadence, by mode.** Mode A (a diff): pass 1 skim for scope + red flags;
+   pass 2 deep on core logic (most time here); pass 3 sweep naming/comments/style.
+   Never start at line 1 in detail mode — that's how architectural issues get missed.
+   Mode B has no diff to skim; traverse instead — follow each lifecycle field to every
+   write site, follow each entry point to the code it reaches, and follow each
+   load-bearing claim in the project's docs to the code that should satisfy it. The
+   shared rule is the same: never let the first file you open set the agenda.
 4. **Six quality dimensions** as a standing mental checklist: Correctness,
    Completeness, Performance, Readability, Maintainability, Extensibility. Keep all
    six live so attention doesn't collapse onto one.
-5. **Cheap tools before expensive attention**: when reviewing LOCALLY, actually run
-   the linter/typecheck/tests before manual reading and report their output — don't
-   assume. When commenting on a REMOTE PR with CI, assume CI covers them and don't
-   duplicate. Reserve judgment-level attention for what tools can't decide.
+5. **Cheap tools before expensive attention**, in three tiers. **(a)** When reviewing
+   LOCALLY, actually run the linter/typecheck/tests first and report their output —
+   don't assume. When commenting on a REMOTE PR with CI, assume CI covers them and
+   don't duplicate. A green run is a fact about the gates, not a finding: expect tier
+   (a) to produce none. **(b)** Inventory the project's OWN measurement and
+   verification scripts (`scripts/`, `tools/`, npm scripts, anything a doc quotes a
+   number from) and re-run the ones the review will rely on — a number quoted in a
+   document is a claim until you have reproduced it, and re-running it is also how you
+   learn what it samples (item 7). **(c)** When a claim rests on data you can actually
+   reach, write a throwaway probe that imports the project's real modules (never a
+   reimplementation) and answers it directly; keep it in the repo's gitignored scratch
+   dir and cite the command in the report so the number is re-runnable. Reserve
+   judgment-level attention for what none of the three can decide.
 6. **Business-requirement alignment is a separate check from technical correctness.**
    Code can be flawless and solve the wrong problem. Verify both independently.
+7. **Trust a number only after checking the instrument.** When a claim rests on a
+   measurement — the project's own script, a benchmark, a coverage figure, your own
+   probe — two checks come before believing it. **Instrument independence**: does the
+   instrument share a defect with the thing it measures? A script that deliberately
+   calls the real production code path (usually the correct design, so it cannot
+   drift) inherits that path's sampling, filtering and truncation, so a defect THERE
+   is invisible by construction; the cure is one external control that reads the same
+   data a different way, not a better script. **Population match**: does the metric's
+   population match the population the CLAIM is about? A corpus-wide average placed
+   beside a step that inspects a sorted first page answers a different question, and
+   the mismatch makes a correct field report look like a reporting error. Report the
+   ruler beside the rate — n, population, sampling, and the visible window whenever
+   the consumer sees an ordered subset.
 
 ## Scope Rules (conflict-resolution — these override checklist enthusiasm)
 
@@ -77,8 +105,12 @@ and keep this skill consistent with the user's global preferences:
   requirement to trace to.
 - **Rendering code caveat.** If the reviewed code produces something a human looks
   at (UI, shader, canvas, plot), the verdict may cover the data path only — state
-  that visual correctness is unverified and end with a numbered manual-acceptance
-  checklist (steps + expected result each).
+  that visual correctness is unverified. Then check whether the project ALREADY has a
+  manual-acceptance artifact (a UAT card, a QA script, a release checklist). If it
+  does, do not emit a rival one: map each visual finding onto the existing items —
+  covered / needs a new item / this item's expected observation is now wrong — and
+  deliver that delta, naming the file. Only when no such artifact exists do you end
+  with your own numbered checklist (steps + expected result each).
 - **Report artifact.** When the user wants the review as a document: NEW file,
   never overwrite an existing report; human-readable body in Traditional Chinese
   with English technical terms inline.
@@ -101,6 +133,9 @@ and keep this skill consistent with the user's global preferences:
   (detection); rewriting/maintaining the docs → engineering:documentation;
   a prioritized doc-debt backlog → engineering:tech-debt.
 - The "requirement is wrong / feature needs redesign" → product-design-thinking.
+- Presentation-grade rendering of Mode B's reconstructed views (HTML/PPTX
+  deliverables for humans) → diagram-authoring; Mode B embeds working views in
+  the report and runs the view-integrity instrument itself.
 
 ## Severity & output contract (all modes)
 
@@ -111,8 +146,11 @@ writing any finding. Non-negotiables: alongside the human report, emit
 projection); every finding has a stable identity (`ruleId` in the `review.`
 namespace + anchor + instance → fingerprint) so re-reviews diff as
 new/persisting/resolved/reopened; coverage is inventory-FIRST — enumerate the
-review units before reading code, disposition every one, claim `complete` only
-when nothing is deferred. This is the light contract: identity + coverage only,
+review units at the granularity you can see BEFORE reading, appending anything
+discovered later rather than re-drawing the boundary, and disposition every one.
+`complete` requires an empty `deferred`; a focused review declares its `scope` and
+puts out-of-lens units in `explicitExclusions`, so it can reach `complete` against
+that declared scope. This is the light contract: identity + coverage only,
 no evidence-receipts pipeline (that belongs to security-deep-checklist).
 
 Report findings ranked, each with:
@@ -151,18 +189,31 @@ Report findings ranked, each with:
   gate) → Mode A §11 per-PR both-sides check; Mode B contract & twin-logic
   inventory. Docs asserting things the code no longer does → Mode B doc-drift
   spot-check (detection only; rewriting → engineering:documentation).
+- A machine whose every modelled outcome is correct, with no state for its own
+  apparatus failing to start (worker, subprocess, browser capability, remote
+  service) — every transition check passes and the whole feature is unreachable
+  → Mode A §10 substrate liveness.
+- A constant that WAS measured, is documented with its evidence, and has since
+  expired because the external thing it measured changed — the justification
+  comment is precisely why nobody re-questions it → Mode A §6 calibration expiry.
+- A metric that is correct and answers a different question than the claim beside
+  it, or that shares its blind spot with the code it measures, so a true field
+  report gets read as a reporting error → Part 0.7.
 
 ## Reference files
 
 - [references/single-review.md](references/single-review.md) — Mode A: design &
   correctness, error handling & tests, security, style, requirement–data
-  consistency, full code-smell taxonomy, quantifiable debt metrics, AI-code checks,
-  stateful-logic/FSM consistency (§10 — gated: stateful units only),
-  cross-boundary contract consistency (§11 — gated: boundary contracts only).
+  consistency (incl. calibration expiry), full code-smell taxonomy, quantifiable debt
+  metrics, AI-code checks, stateful-logic/FSM consistency (§10 — gated: stateful units
+  only; includes substrate liveness), cross-boundary contract consistency (§11 —
+  gated: boundary contracts only).
 - [references/project-review.md](references/project-review.md) — Mode B:
   systems-engineering principles, coupling/cohesion, cross-module state
   ownership, contract & twin-logic drift (incl. documentation-drift
-  spot-check), SOLID at project scope, risk and organizational debt management.
+  spot-check), architecture-view reconstruction & integrity audit (view set
+  rebuilt from code + gap table), SOLID at project scope, risk and
+  organizational debt management.
 - [references/dependency-fitness.md](references/dependency-fitness.md) — Mode C:
   six-layer fitness evaluation, build-vs-buy, lock-in assessment.
 - [references/output-contract.md](references/output-contract.md) — all modes:

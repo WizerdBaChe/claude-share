@@ -14,8 +14,9 @@ the same pipeline with substituted bindings.
 |---|---|---|---|---|
 | `web_search` | P2 discovery/mixed paths | WebSearch | Tavily / Brave (metered) / DDGS (best-effort) / SearXNG / built-in browsing of a web LLM | discovery path unavailable → only source-provided and local-corpus modes remain; say so up front |
 | `page_fetch` | P3 verification, P4 extraction, scholarly APIs (Crossref/OpenAlex/arXiv return JSON/XML over plain GET) | WebFetch | any HTTP GET/fetch tool; browsing tool that renders pages | items cap at `[abstract]` from search snippets; credibility checks limited — record in `gaps` |
-| `extract_render` | JS-heavy/anti-bot pages (optional) | — (WebFetch limit) | Tavily extract / Exa contents / self-hosted Firecrawl (see search-sources.md provider table) | keep honest `[partial]`/`[abstract]` tags; never reconstruct |
-| `local_corpus` | corpus-first routing (optional) | prism MCP | Zotero/reference-manager MCP; a local PDF folder the host can read; files the user uploads in a web LLM | skip the corpus rung; empty ≠ "literature not found" |
+| `extract_render` | JS-heavy/anti-bot pages, **and any page WebFetch 403s on** | a headless browser MCP (`playwright-headless`); a logged-in browser MCP (`claude-in-chrome`) only when the page needs the user's session | Tavily extract / Exa contents / self-hosted Firecrawl (see search-sources.md provider table) | keep honest `[partial]`/`[abstract]` tags; never reconstruct |
+| `local_tool` | a registered connector holding primary documents behind a key or a local process (optional) | `connectors/registry.json` + `connectors/probe.py` | any CLI/loopback service the host can run without seeing its credential | drop that source class; say which one and what it cost (`connectors.md`) |
+| `local_corpus` | corpus-first routing (optional) | whatever `connectors/registry.json` lists as a live `local_corpus` — none as of 2026-08-27 (prism retired) | Zotero/reference-manager MCP; a local PDF folder the host can read; files the user uploads in a web LLM | skip the corpus rung; empty ≠ "literature not found" |
 | `pdf_read` | `[full]` extraction from PDFs (optional) | Read tool on PDF | file upload + native PDF reading (web LLMs); OCR pipeline | extract from HTML/abstract versions; tag honestly |
 | `file_write` | file deliverables (optional) | Write | canvas / downloadable file features | inline delivery — already the default; file output needs explicit request anyway |
 | `subagent_dispatch` | evals only — never required for a run | Agent tool | none needed | ignore |
@@ -35,7 +36,9 @@ the same pipeline with substituted bindings.
    degradation is not.
 5. **Invariants that never degrade**, regardless of profile: zero fabricated citations;
    access-level tags reflect what was actually read; locator per extracted item;
-   uncertainty marked, gaps reported rather than filled.
+   uncertainty marked, gaps reported rather than filled; **every load-bearing claim names
+   the span it rests on** (P4.5) — the span check needs no tool at all if the host can
+   hold the retrieved text, so a degraded profile is never a reason to skip it.
 
 ## Claude-only constructs — ignore, do not emulate
 
@@ -44,7 +47,7 @@ the same pipeline with substituted bindings.
 - Cross-skill handoffs named in SKILL.md (deep-research, scientific-research-guide…):
   if the named skill does not exist in this runtime, absorb the need into the honest
   `gaps` output or ask the user — do not silently claim the handoff happened.
-- MCP tool names (`mcp__prism__*` etc.): reference implementations of a slot, not
+- MCP tool names (`mcp__playwright-headless__*` etc.): reference implementations of a slot, not
   requirements.
 
 ## Copies and adaptation

@@ -2,52 +2,64 @@
 
 Companion to SKILL.md P2 — applies to the **discovery** and **mixed** paths only; on
 the source-provided path do not expand the literature set beyond the supplied sources
-(see SKILL.md P2 routing). Channel facts below (endpoints, auth, limits) were verified by
-web search on **2026-07-07**; they are volatile. If a channel behaves differently than
-described (404s, auth walls, new limits), re-verify with a web search before concluding
-the channel is unusable, and update this file.
+(see SKILL.md P2 routing). Channel facts below (endpoints, auth, limits) are volatile:
+base verified **2026-07-07**, OpenAlex and Semantic Scholar re-verified **2026-08-26**.
+If a channel behaves differently than described (404s, auth walls, new limits),
+re-verify with a web search before concluding the channel is unusable, and update this
+file.
+
+**review-when** (the events that invalidate this file, not a calendar): a channel
+returns 401/403/409 where this file says keyless · a rate limit or quota quoted here is
+contradicted by a live response header · a channel is used for the first time in >60
+days · a connector in `../connectors/registry.json` changes status. Any of those is a
+re-verify trigger for **that channel only** — the whole file does not rot at once, and
+re-verifying all of it on a schedule is how a currency rule turns into a chore nobody
+runs. Stamp the date beside the fact you changed, as the two 2026-08-26 entries do.
 
 ## Tool routing (read first)
 
 Two fundamentally different tool classes serve P2:
 
-1. **`prism` MCP (`mcp__prism__*`)** — a LOCAL corpus tool. It ranks, relates, and
-   exports nodes inside universes the user has already ingested. It does NOT search the
-   web and cannot discover sources outside the corpus.
+1. **Local-corpus tools** — they rank, relate, and export sources the user has ALREADY
+   collected. They do NOT search the web and cannot discover anything outside the
+   corpus. Whichever one is live, the routing rules are the same, and an empty local
+   result never means "literature not found".
 2. **WebSearch / WebFetch** — discovery of new sources on the open web, plus direct
    fetching of scholarly API endpoints (Crossref, OpenAlex, arXiv export — these return
    JSON/XML that WebFetch can read).
 
-`prism` is the reference implementation of the local-corpus slot; any reference-manager
-MCP (e.g. a Zotero MCP, an Obsidian-vault MCP) slots into the same routing rules —
-local tool = already-collected corpus only, and an empty local result never means
-"literature not found". Verify the specific server's actual tool set before relying on
-it; the table below is prism-specific.
+> **`prism` is RETIRED (user ruling 2026-08-27)** — the MCP server is off and the system
+> behind it is being rebuilt. Do not route to it, do not probe for it, and do not record
+> its absence in `gaps`: an absent retired channel costs no coverage. The prism-specific
+> tool table that used to live here has moved to the tombstone in
+> `../connectors/registry.json`, so a reader who meets the name in an older
+> `search_trail` can find out what happened to it. If the rebuilt system returns under a
+> new name, register it as a NEW connector. What it taught the slot is kept below.
 
-**Routing rule:** start with `prism list_topics` ONLY when the question plausibly
-concerns a topic the user has curated before (it's one cheap call — when in doubt,
-check). If a matching universe exists, rank inside it first; web search then fills gaps
-and finds newer work. If no universe matches, go straight to WebSearch — do not treat an
-empty prism result as "literature not found".
+**Routing rule:** consult `../connectors/registry.json` for a `local_corpus` connector
+with status `live`/`available`, and use it ONLY when the question plausibly concerns
+material the user has curated before. If one matches, rank inside it first; web search
+then fills gaps and finds newer work. If none is live — the situation as of 2026-08-27,
+with `local_pdf_library` awaiting a path and `zotero_local` unbuilt — go straight to
+WebSearch. Never treat an empty or absent local corpus as "literature not found".
 
-### prism MCP usage
+### What survives prism — the rules, which were never prism-specific
 
-| Tool | Use for | Notes |
-|---|---|---|
-| `list_topics` | discover available universes/topic lenses + node counts | call first; a universe with few nodes ⇒ thin coverage, weight web search higher |
-| `rank_by_topic` | rank corpus nodes against a topic | pass `description` for an ad-hoc lens (not persisted), or `topic_id` for a saved lens; `top_k` default 20 |
-| `get_citation_map` | ranked citable list + manual-link chains for a saved topic | requires `topic_id`; the corpus-side analogue of citation chasing |
-| `get_node` | metadata + digest/excerpt (≤500 chars) for one node | the excerpt is NOT full text — extraction from a prism node alone is at most `[partial]` |
-| `similar_nodes` | neighbors of a known-relevant node | corpus-side "more like this" |
-| `export_bibliography` | BibTeX / CSL-JSON for selected nodes | for the `sources` field of the result contract |
+The per-tool table that used to sit here is gone with the server. These four rules were
+written for prism but belong to the SLOT, so they bind whatever fills it next (Zotero, a
+PDF folder, the rebuilt system):
 
-Access-tag rule for prism-sourced items: a node digest supports `[partial]` at best;
-to claim `[full]`, fetch and read the actual document (via its identifier) yourself.
-
-**Fallback to WebSearch when:** no universe matches the question; the matching universe
-is stale relative to the question's recency needs; `rank_by_topic` returns low-relevance
-nodes; or the extraction targets need full text that the corpus digest can't provide.
-Always log in `search_trail` whether prism was used, skipped, or unavailable.
+- **Rank inside the corpus first, then let web search fill gaps and find newer work.**
+  A curated corpus is a relevance shortcut, never a coverage claim.
+- **A digest or excerpt is `[partial]` at best.** To claim `[full]`, fetch and read the
+  actual document via its identifier. This is the rule that stops a tidy corpus summary
+  from being mistaken for having read the paper.
+- **Fall back to WebSearch when** nothing matches the question, the corpus is stale
+  relative to the question's recency needs, ranking returns low-relevance items, or the
+  extraction targets need full text the corpus cannot provide.
+- **Log in `search_trail` whether a local corpus was used, skipped, or unavailable** —
+  with one exception added 2026-08-27: a RETIRED channel is not "unavailable", it is
+  gone, and listing it every run trains the reader to skim the trail.
 
 ## Per-channel strategies (web)
 
@@ -62,9 +74,12 @@ request volume — rate limits below matter mainly as "don't loop fetches" guida
 - Best use: quick citation-count sanity checks and finding which venues host a topic.
 
 ### Semantic Scholar (papers, citation graph)
-- API: `api.semanticscholar.org/graph/v1/` — works unauthenticated at a shared, low
-  rate; free API key raises it (~1 request/s baseline as of verification). Fine for
-  this skill's volumes via WebFetch.
+- API: `api.semanticscholar.org/graph/v1/` — works unauthenticated. Re-verified
+  2026-08-26 against the official tutorial: unauthenticated callers **share a single
+  key**, so the effective rate depends on everyone else's traffic and is throttled under
+  load; an individual free key buys a **guaranteed 1 request/s across all endpoints**.
+  The key is therefore a *floor*, not a raise — do not treat keyless as equivalent under
+  load. Fine for this skill's volumes via WebFetch either way.
 - Strengths: citation contexts, TLDRs, `references`/`citations` endpoints — the
   cheapest programmatic backward/forward chasing.
 - Query strategy: `/paper/search?query=...` with field list
@@ -80,15 +95,29 @@ request volume — rate limits below matter mainly as "don't loop fetches" guida
 - NOT full text and often no abstract — metadata authority only.
 
 ### OpenAlex (broad scholarly graph)
-- API: `api.openalex.org` — **requires an API key since 2026-02-13** (credit-based
-  free tier covers typical interactive use; keyless calls get only a small trial
-  allowance then 409s). If keyless calls fail, fall back to Semantic Scholar/Crossref.
+- API: `api.openalex.org` — **requires an API key since 2026-02-13**. Re-verified
+  2026-08-26 from the openalex-users announcement: keyed = 100,000 credits/day
+  (singleton 1, list 10, search 100–1,000); **keyless = 100 credits/day for testing,
+  then 409**. The **polite pool and the `mailto=` parameter were eliminated** in the
+  same change — do not send one, and do not treat OpenAlex as a keyless channel.
+  Without a key, fall back to Semantic Scholar/Crossref and log it in `gaps`.
+- **Caution when re-verifying:** `github.com/ourresearch/openalex-docs` was archived
+  2026-07-23 and still says "You don't need an API key" — a stale primary-looking
+  source that contradicts the live one. Prefer the announcement/help centre, and treat
+  an archived doc repo as secondary.
 - Strengths: ~250M works, concepts/venues/authors as first-class entities, good for
   "who works on X" and coverage checks.
 
 ### arXiv (physics/math/CS preprints)
-- API: `export.arxiv.org/api/query` — free, no key; be gentle (~1 request per 3 s,
-  single connection; arXiv actively 429s bursty clients as of early 2026).
+- API: `export.arxiv.org/api/query` — free, **no key and no account** (re-verified
+  2026-08-27 against arXiv's Terms of Use for APIs; an arXiv login unlocks nothing here).
+  Pacing is a ToU requirement, not advice: **1 request per 3 s, ONE connection at a
+  time**. 429s have been reported since ~2026-02-25 even against clients that pace
+  correctly, so back off once, retry once, then degrade — never loop.
+- This skill's own scripts send a contact-bearing User-Agent to arXiv (registry entry
+  `arxiv`, approved 2026-08-27). That consent is **arXiv-only**: Crossref's polite pool
+  and Unpaywall were declined the same day, so no contact goes to them. WebFetch sends
+  its own User-Agent and is anonymous to arXiv regardless.
 - Query strategy: `search_query=all:"exact phrase"+AND+cat:physics.optics`-style field
   and category filters; resolve known IDs directly via `abs/<id>`.
 - Always check whether an arXiv preprint was later published (Crossref/Semantic
@@ -104,7 +133,11 @@ request volume — rate limits below matter mainly as "don't loop fetches" guida
 
 ### IEEE Xplore (EE/CS/photonics)
 - API exists but requires a registered developer account + manually issued key —
-  assume UNAVAILABLE for this skill. Use instead: WebSearch scoped
+  assume UNAVAILABLE **unless `ieee_xplore` is `live` in `../connectors/registry.json`**;
+  a key would arrive through that connector, never through the conversation. Note the
+  two-stage trap recorded there: a key alone buys metadata + abstracts, and `[full]`
+  additionally needs the subscription behind it — the probe must report which of the two
+  is actually live, because the failure is otherwise silent. Use instead: WebSearch scoped
   `site:ieeexplore.ieee.org`, and extract from the public landing page (abstract,
   figures list, references are visible) → typically `[abstract]` or `[partial]`;
   full text is usually paywalled → paywall handling per P3.
@@ -145,25 +178,35 @@ When the user points to a folder of paper PDFs they already have:
 - **Collection bias**: a personal library reflects its owner's reading history. At
   `standard`/`exhaustive` depth, complement it with web channels, and mark in
   `search_trail` which claims rest ONLY on the local library (rubric §6 bubble check).
-- **With prism**: if the collection is ingested in prism, rank/relate there first, then
-  Read the underlying PDF for `[full]`-level extraction (a prism digest alone stays
-  `[partial]`).
+- **With a corpus tool over the same folder**: if the collection is also indexed by a
+  live `local_corpus` connector, rank/relate there first, then Read the underlying PDF
+  for `[full]`-level extraction — a digest alone stays `[partial]`.
 
 ## Degradation ladder & cost transparency
 
 When a planned channel fails (auth wall, 429/409 bursts, outage), substitute down this
 ladder instead of aborting P2, and record every substitution in `search_trail`:
 
+0. Registered connectors (`../connectors/registry.json`) — authoritative primary
+   documents held locally or behind the user's own key. A connector that probes FAIL
+   drops out of the ladder for this run; say which one and what class of source went
+   with it (`connectors.md`) →
 1. Keyed/limited APIs (OpenAlex keyed, Semantic Scholar keyed tier) →
 2. Free unkeyed APIs (Semantic Scholar shared tier, Crossref polite pool, arXiv export,
    PubMed E-utilities) →
 3. WebSearch site-scoped queries + landing-page WebFetch (always available) →
 3b. **Extraction fallback** — when WebFetch cannot render a needed page (JS-heavy,
-   anti-bot, blocked publisher page), try an extraction-capable provider *if available*
-   before downgrading the access tag: Tavily extract, Exa contents, or a self-hosted
-   Firecrawl instance (same "if available" slot logic as prism). If none is available,
-   keep the item at `[abstract]`/`[partial]` honestly — never reconstruct content. →
-4. prism local corpus alone (coverage limited to ingested docs — flag in `gaps`).
+   anti-bot, blocked publisher page, or a plain **403** — measured 2026-08-26 on
+   perplexity.ai), render it before downgrading the access tag. In Claude Code the
+   binding is a browser MCP: `playwright-headless` first, `claude-in-chrome` only when
+   the page genuinely needs the user's logged-in session (say so in `search_trail` —
+   it spends their authenticated identity). Elsewhere: Tavily extract, Exa contents, or
+   a self-hosted Firecrawl instance. If none is available, keep the item at
+   `[abstract]`/`[partial]` honestly — never reconstruct content. →
+4. A live `local_corpus` connector alone (coverage limited to what was ingested — flag
+   in `gaps`). **As of 2026-08-27 there is none**, so the ladder currently bottoms out
+   at rung 3: if web search and rendering both fail, the honest output is "not found in
+   searched sources", not a further fallback.
 
 Rules:
 - Never retry-loop a rate-limited endpoint: back off once, retry once, then degrade.

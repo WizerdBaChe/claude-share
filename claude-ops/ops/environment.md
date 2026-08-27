@@ -46,11 +46,25 @@ over SendMessage-resume; if a resume is genuinely needed (context too costly
 to rebuild), disclose the model escalation to the user before sending.
 Details + evidence: `ops/lessons.md` L-001, hook header.
 
-## Dispatch mechanisms available (as-of 2026-08-12)
+## Dispatch mechanisms available (as-of 2026-08-26, CLI 2.1.246)
 
 - **Agent tool**: per-call `model` (haiku/sonnet/opus/fable) and custom
   `subagent_type` from `agents/`. Model precedence: call param > agent
-  frontmatter > inherit the main-loop model.
+  frontmatter > inherit the main-loop model — EXCEPT `subagent_type: "fork"`,
+  which ignores `model` and always inherits the parent's.
+- **Spawns run in the BACKGROUND by default, and forking is on by default.**
+  In an interactive session every non-teammate spawn is backgrounded unless
+  `run_in_background: false` — pass that only when the very next action depends
+  on the result. `subagent_type: "fork"` inherits the full conversation and the
+  prompt cache; a plain `Agent` call starts fresh.
+- **Fan-out has hard ceilings**: 20 concurrent subagents and 200 spawns per
+  session (both overridable by env var). Plan against these, not "unbounded".
+- **Cross-session messaging is a THIRD dispatch path** and it works on Windows
+  as of 2.1.239: `ListAgents` to discover sessions on this machine, then
+  `SendMessage`. Unlike a subagent it talks to a session that already has its
+  own context; unlike external dispatch it stays inside Claude Code.
+  Versions, citations and the reconciliation that produced this block:
+  `ops/references/harness-measurements.md` §Dispatch semantics.
 - **Capability is set in the definition, not at dispatch** (verified
   2026-08-12): a definition that omits `tools:` inherits every tool a subagent
   may hold — including `Edit`/`Write` — so "read-only" written in a prompt
@@ -58,10 +72,13 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
   `permissionMode` is defence-in-depth only: a parent session in `acceptEdits`
   or `bypassPermissions` overrides it, and a parent in `auto` mode makes the
   frontmatter value be ignored outright.
-- **Workflow tool**: deterministic fan-out; per-`agent()` call supports
-  `model`, `effort` (low/medium/high/xhigh/max), `schema` (machine-enforced
-  output-format contract — prefer this over prompt-side format pleading),
-  `isolation: 'worktree'`, `agentType`.
+- **Workflow tool — NOT AVAILABLE IN THIS ENVIRONMENT.** `settings.json` sets
+  `"disableWorkflows": true`, which drops the tool definition outright; it is
+  absent from the tool list, so nothing here may route to it (verified
+  2026-08-26 against a live 2.1.246 session). Dynamic workflows and ultracode
+  go with it. Kept on record because the choice is a live setting, not a fact
+  about the product — flipping that key restores it. What it offers when
+  enabled: `harness-measurements.md` §Dispatch semantics.
 - **Effort is NOT settable per Agent-tool call** (verified 2026-08-12 against
   the live tool schema + `code.claude.com/docs/en/sub-agents`). Two setpoints
   only: the `effort:` frontmatter field in an `agents/*.md` file (overrides the
@@ -74,22 +91,15 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
 
 ## Red-team / reviewer separation (as-of 2026-08-16 — SUPERSEDES the 2026-07-07 entry)
 
-A cross-family reviewer NOW EXISTS. The previous entry said "no independent
-second CLI agent from a different model family is available… do not spend time
-looking for one"; that was true when written and is false now. It is corrected
-here rather than merely deleted, because it is the shape of stale fact that does
-not read as stale — a session would have obeyed it and never looked.
-
-Two options, in order:
+A cross-family reviewer NOW EXISTS (the 2026-07-07 entry said the opposite —
+true then, false now; why it is corrected rather than deleted, and the
+measurement: `ops/references/harness-measurements.md`). Two options, in order:
 
 1. **External dispatch** (`## External dispatch tier` below) — genuinely a
-   different model family, free, no credential. Measured 2026-08-16 on a real
-   commit: 3 anchored findings in 110 s, two overlapping a sonnet control's
-   seven and one the control missed in both of its runs (a reproduced
-   `TypeError`). Route red-team here first.
+   different model family, free, no credential. Route red-team here first.
 2. **Fallback, unchanged**: fresh-context sonnet (high effort), never the
    author, adversarial framing — for anything the external tier may not see
-   (see the redline rules below).
+   (redline rules below).
 
 ## External dispatch tier (as-of 2026-08-16)
 
@@ -171,119 +181,158 @@ change). Detail: `ops/references/browser-pane-pixel-route.md`. review-when:
 the pane gains an always-visible surface, or `<browser_surfaces>` wording
 changes.
 
-**Enforcement**: `hooks/ui_verify_guard.py` (PreToolUse matcher
-`mcp__(Claude_Browser\|claude-in-chrome)__(computer\|javascript_tool)`, plus a
-PostToolUse javascript_tool matcher). Denies a `getComputedStyle` call with no
-settle token; denies a screenshot until a `visibilityState` probe has run
-(marker `%TEMP%\claude-ui-verify-guard\<session>.probe`, 300s TTL); and ROUTES
-— deny + ready-to-run headless command — when the probe's RESULT was `hidden`
-(PostToolUse writes the result into the marker; parse failure degrades to the
-plain gate). `visible` unlocks the pane screenshot, so visible+timeout stays a
-distinct fault. Escape hatch: literal `intentional-midflight` stands down the
-L-010 branch. Tested 2026-08-16: 19/19 (`tools/ui-verify-test/`) + live
-(marker annotated `hidden`, route denial fired). Known gap: hook header
-(`read_page`-inferred styles invisible — theoretical).
-
-**Pane-scope enforcement (as-of 2026-08-14, re-verified 2026-08-16)**:
-`hooks/browser_pane_scope_guard.py` (PreToolUse, matcher
-`mcp__(Claude_Browser\|claude-in-chrome)__(navigate\|preview_start)`) logs
-every pane navigation to `telemetry/browser-nav.jsonl` (live — the app's own
-log never records preview URLs) and enforces an **ALLOWLIST**: loopback hosts
-allowed by the hook itself; anything else needs
-`hooks/browser-pane-allowlist.json`, edited only by the user; denials are loud
-and route to claude-in-chrome (separate process, never denied) / WebFetch /
-headless Playwright. The blocklist file survives only to annotate deny
-messages with recorded crash reasons.
-Standing reason, evidence (7/7), history, and the third-party rule of thumb
-(unchanged; promote on a second independent incident): `rule-registry.md`
-"in-app Browser pane" + `lessons.md` L-013.
+**Enforcement** (hooks, not recall): `hooks/ui_verify_guard.py` denies an
+unsettled `getComputedStyle`, denies a screenshot until a `visibilityState`
+probe has run, and ROUTES to the headless command when the probe said `hidden`
+(`visible` unlocks the pane screenshot, so visible+timeout stays a distinct
+fault); `hooks/browser_pane_scope_guard.py` (as-of 2026-08-14, re-verified
+2026-08-16) logs every pane navigation to `telemetry/browser-nav.jsonl` and
+enforces the pane **ALLOWLIST** (`hooks/browser-pane-allowlist.json`, user-edited;
+denials route to claude-in-chrome / WebFetch / headless Playwright). Matchers,
+marker paths, TTLs, test counts, escape hatch, standing reason (7/7) and the
+third-party rule of thumb (promote on a second independent incident):
+`ops/references/browser-pane-pixel-route.md` "Enforcement", `rule-registry.md`
+"in-app Browser pane", `lessons.md` L-013.
 
 **Out-of-process pictures — the DEFAULT pixel route (as-of 2026-08-16,
-measured)**: headless Playwright in its own process. Full probe
-(hover+settle+`--shot`) 1.4s, `npx playwright screenshot` 1.5s, PNGs
-delivered; the hidden pane: 5s timeout, none. The `playwright` package
-resolves ONLY from the npx cache, so `node ui-probe.mjs` needs a dir tree
-with playwright installed. Recipes, resolution facts, representativeness
-limits, E-6 flag research, asset + browser paths:
-`ops/references/browser-pane-pixel-route.md`.
+measured)**: headless Playwright in its own process (full probe 1.4 s, `npx
+playwright screenshot` 1.5 s, PNGs delivered; the hidden pane: 5 s timeout,
+none). The `playwright` package resolves ONLY from the npx cache. Recipes,
+resolution facts, representativeness limits, E-6 flag research, asset + browser
+paths: `ops/references/browser-pane-pixel-route.md`.
 
-## Instruction-loading mechanics (as-of 2026-08-11, Claude Code 2.1.220)
+**Playwright MCP — one user-scope server (as-of 2026-08-25, `playwright-chrome`
+removed)**: `playwright-headless` (`--browser chrome --headless --isolated`:
+the installed Chrome 151 in new-headless mode, no window, nothing persists,
+accessibility snapshots as the cheap read and screenshots on demand;
+`browser_navigate` 0.5 s measured). Durable install + re-register/remove
+commands + the config rationale: `tools/playwright-mcp/README.md`. Playwright-
+launched Chromium carries `--disable-backgrounding-occluded-windows` (grep'd),
+so L-009 does not apply to it. Separate process, so L-013's allowlist and the
+`hidden`-probe hook do not apply and are NOT wired to it (user upheld
+2026-08-23). review-when: `@playwright/mcp` bump (bundled playwright-core
+1.63-alpha expects chromium r1237, sidestepped only by the `chrome` channel);
+Claude Code changes the tool-search default (re-measure per-turn cost).
 
-Measured, not read off the docs — the docs describe path-scoping and
-user-level rules separately and never state that the two compose.
+`playwright-chrome` (`--extension`: attach to the user's running Chrome via
+the Playwright Extension, real logged-in state) was trialed alongside it
+2026-08-23 and removed 2026-08-25: it failed silently (`browser_tabs list`
+returned empty, no error) because `PLAYWRIGHT_MCP_EXTENSION_TOKEN` only skips
+a manual "allow this connection?" click inside the extension's own UI — no MCP
+tool can drive that click, and even a corrected token needs a session restart
+to take effect (stdio env is read once at server spawn) that no in-session
+tool can trigger. For a logged-in task, use `mcp__claude-in-chrome__*` instead.
+Full mechanism + decision record: `tools/playwright-mcp/README.md` "Why
+`playwright-chrome` was removed", `ops/rule-registry.md` "Playwright MCP".
 
-| Carrier | Charged at session start? | Verified how |
-|---|---|---|
-| `~/.claude/CLAUDE.md` | yes, in full | hook log, `load_reason: session_start` |
-| `@path` imports inside it | yes ("imported files still load at launch") | official docs only |
-| `~/.claude/rules/x.md` **without** `paths:` | yes | probe `_probe-always.md`, 2 runs |
-| `~/.claude/rules/x.md` **with** `paths:` | **no** | same 2 runs — absent from startup |
-| ...the same file, when a matching file is read | loaded then | probe `_probe-match.md`, `load_reason: path_glob_match`, content observed in context |
-| skill | only when invoked/judged relevant | official docs |
+## Instruction-loading mechanics (as-of 2026-08-18, Claude Code 2.1.233 —
+## re-verified after the 2.1.220 review trigger fired)
+
+Measured, not read off the docs (how each row was verified, the observability
+hook, `load_reason` values, trim effect sizes and the startup baseline:
+`ops/references/harness-measurements.md`).
+
+| Carrier | Charged at session start? |
+|---|---|
+| `~/.claude/CLAUDE.md` | yes, in full — and again after every `/compact` |
+| `@path` imports inside it | yes |
+| `~/.claude/rules/<name>.md` **without** `paths:` | yes |
+| `~/.claude/rules/<name>.md` **with** `paths:` | **no** — loaded when a matching file is read |
+| skill | only when invoked/judged relevant |
 
 So the only carriers that reduce startup cost are: delete/merge, a
 `paths:`-scoped user rule, or a skill. Splitting into imports or unscoped
 rules saves nothing. Sinking an INTENT-triggered rule into `ops/` makes it a
 ghost rule (`lessons.md` L-011) — `ops/*` is reached only via CLAUDE.md's
-project-operations clause.
+project-operations clause. Trim effect sizes are below the measurement noise
+floor (a ~0.5% signal in a ~13k-token per-session spread), so judge
+context-budget work by adherence evidence (`telemetry/rule-loads.jsonl` shows
+the rule firing when it should) and the on-disk inventory, never by a token
+delta; CLAUDE.md is ~11% of the startup floor — the roster dominates.
 
-**Observability**: `hooks/instructions_loaded_logger.py` (InstructionsLoaded,
-logging only, fail-open) appends to `telemetry/rule-loads.jsonl`. Payload
-fields: `file_path`, `memory_type`, `load_reason`. Startup-cost baseline:
-`tools/context-budget/startup_baseline.py`.
-
-`load_reason` values observed so far: `session_start`, `path_glob_match`,
-and **`compact`** — CLAUDE.md is re-injected after every `/compact`, so its
-byte cost is paid per compaction as well as per session. Blind spot: only
-CLAUDE.md has ever emitted this event. `MEMORY.md` is injected (it appears in
-context) but never appears in the log, so the logger cannot be used to prove a
-memory file did or did not load.
-
-**Trim effect sizes are below the measurement noise floor.** The E1 trim
-removed 1,286 B net (~320 tokens at 4 chars/token) from a startup prompt whose
-observed per-session spread in this project is 57.3k-70.4k tokens. A ~0.5%
-signal cannot be recovered from a ~13k-token range no matter how many sessions
-are collected, so "the MIN floor drops after the change" is not a usable
-acceptance test. Judge context-budget work by adherence evidence
-(`rule-loads.jsonl` shows the rule firing when it should) and by the on-disk
-inventory, not by a token delta.
-
-**Bash results carry no exit code** (measured 2026-08-11). A successful Bash
-`toolUseResult` is a dict of `interrupted / isImage / noOutputExpected /
-stderr / stdout`; on failure it degenerates to a plain string beginning
-`"Exit code N"` and the result block is flagged `is_error: true`. So
-`is_error` is exactly "the shell reported non-zero" -- no divergence exists to
-find between them. The gap that matters is upstream: `cmd || true` and
-`cmd | head` both exit 0 while the command inside failed, and both were
-observed reporting `is_error: false` with `FAILED` sitting in stdout. Any gate
-keying on `is_error` must also sniff stdout, or downgrade piped / `||`-guarded
-verifications to "weak" rather than counting them as verified.
-
-**Baseline for `C--Users-gunda--claude`** (24 sessions since 2026-07-25):
-startup prompt MIN 36,742 / MEDIAN 58,891 tokens; always-loaded instruction
-files 17,139 B. CLAUDE.md is therefore ~11% of the floor (estimate) — the
-dominant startup cost is the tool/MCP/skill roster, not the rules.
+**Bash results carry no exit code** (measured 2026-08-11): `is_error` is
+exactly "the shell reported non-zero", so `cmd || true` and `cmd | head` report
+success with `FAILED` in stdout. Any gate keying on `is_error` must also sniff
+stdout, or downgrade piped / `||`-guarded verifications to "weak".
 
 ## Auto-mode environment scoping (as-of 2026-08-16, Claude Code claude.exe 2026-08-15 build)
 
 `settings.json` `autoMode.environment` is applied UNCONDITIONALLY, in every
 project — the classifier reads user + managed + `--settings` scopes only and
-DELIBERATELY ignores project `.claude/settings.json` / `settings.local.json`
-(anti-injection: a repo must not be able to set its own classifier rules), so
-there is no per-project filter, re-derivation, or supported per-project
-carrier. Scopes CONCATENATE (personal entries extend managed ones, never
-remove them). The setup flow writes to userSettings (docs silent; verified in
-the binary: setup/reset both target `"userSettings"`, and projectSettings/
-localSettings autoMode is ignored with a logged warning). The block is
-"spliced into the classifier prompt on every auto-mode decision" (verbatim
-binary string; an over-size warning says "consider pruning stale entries").
-Consequence: project-specific facts written there leak into every other
-project's auto-mode decisions — keep the block org/user-generic; a
+deliberately ignores project-level settings (anti-injection), scopes
+CONCATENATE, and the block is spliced into the classifier prompt on every
+auto-mode decision. Consequence: project-specific facts written there leak into
+every other project's auto-mode decisions — keep the block org/user-generic; a
 project-bound profile has no home other than per-invocation `--settings`.
-Incident: an NTUMail2TG session wrote a project profile there 2026-08-16;
-user removed it same day. Evidence: code.claude.com/docs/en/auto-mode-config
-(externally verified) + `claude.exe` string probe (locally verified, minified
-source — behaviour-level claims only).
+Evidence (docs + binary string probe) and the 2026-08-16 incident:
+`ops/references/harness-measurements.md`.
+
+## Local toolchain — measured, not assumed (as-of 2026-08-18)
+
+Every line here was run on this machine on 2026-08-18. Three of them are traps
+that no rule recorded before that sweep, and all three fail LOUDLY but with a
+message that does not name the cause.
+
+| Fact | Value | Why it is written down |
+|---|---|---|
+| PowerShell | **5.1.26100.9168 Desktop; `pwsh` NOT installed** | every PS 5.1 caveat in CLAUDE.md applies unconditionally — there is no PS7 to fall back to |
+| Bash tool's shell | **Git Bash / MSYS2, `/usr/bin/bash` 5.2.37, `MINGW64_NT`** | see next row |
+| `bash` from PowerShell | **`C:\Windows\system32\bash.exe` → WSL Ubuntu** | TRAP: a different OS with a different filesystem view. `bash -c` from PowerShell does NOT reach the Bash tool's shell. WSL has Ubuntu + docker-desktop registered |
+| `python` | 3.12.7 at `AppData\Local\Programs\Python\Python312` | works |
+| `python3` | **`AppData\Local\Microsoft\WindowsApps\python3.exe` — the Store shim** | TRAP: always fails with "Python was not found; run without arguments to install from the Microsoft Store". 6 hits in the 10-day sweep. Use `python`, never `python3` |
+| `rg` | **not on PATH** | TRAP: the Grep TOOL ships its own ripgrep and works, but a bare `rg` inside a Bash command does not |
+| node / npm | v24.14.1 / 11.11.0 | |
+| dotnet SDK | 10.0.301 | |
+| git | 2.51.0.windows.2; `core.autocrlf=true` in the SYSTEM gitconfig | superseded for `~/.claude` by its committed `.gitattributes` (2026-08-18) |
+| ACP / OutputEncoding | **65001 both**; Culture zh-TW, UICulture en-US | why a missing `.ps1` BOM has no symptom on THIS machine while breaking any CP950 machine — `outputs/script-encoding-audit-2026-08-16.md` |
+| OS / RAM | Windows 11 Home build 26200 / 31.2 GB | |
+| GPU | RTX 5070 Laptop, **8,151 MiB per `nvidia-smi`** (+ integrated Radeon 610M) | `Win32_VideoController.AdapterRAM` reports 4 GB — a 32-bit field overflow, NOT a smaller card. Do not "correct" the 8 GB figure from it |
+| CPU | Ryzen 9 8940HX, 16C/32T | |
+
+## Execution surface — CLI headless vs Desktop (measured 2026-08-22 on CLI 2.1.238 / Desktop-bundled claude.exe 2.1.237)
+
+**CLI is now 2.1.246 (2026-08-26); this block's re-verify trigger has fired.**
+The ROUTING below still holds; every measured NUMBER is eight builds old and
+unre-verified — re-probe registered as E10 in
+`reports/2026-08-26-cc-version-reconcile-2.1.200-2.1.246.md`.
+
+Same engine, different host: Desktop is the same Claude Code engine (its own
+bundled `%APPDATA%\Claude\claude-code\<ver>\claude.exe`) behind a larger
+host-injected prefix and different defaults, so the same work costs more there.
+The standing consequences:
+
+- **For autonomous coding work in Desktop pick Bypass, not Auto** — permission
+  mode is about HALF the Desktop premium, so expect to save half, not all; the
+  other half is the host itself and has no verified knob.
+- **Do NOT trim remote connectors for cost.** They are deferred-loaded; turning
+  28 tools off moved the session-start prefix by single-digit tokens.
+- **Records**: every session, CLI or Desktop, writes
+  `~/.claude/projects/<slug>/<cliSessionId>.jsonl` — the only durable LOCAL
+  record. A session viewed through Remote Control is a server-side mirror whose
+  live view ends with the process; it is not a local record.
+
+**Every number behind those four — arm sizes, ratios, p-values, T0 counts, the
+E3 C2B cell, the exact record paths — is in `references/harness-measurements.md`
+§Execution surface (extracted 2026-08-27, `40-maintenance.md` §3). Quote from
+there with its staleness caveat, never from memory.**
+
+**Routing (user ruling 2026-08-22):** unattended / batch / long / subagent
+fan-out / needs `--max-budget-usd`, `--output-format json` (note: `--max-turns`
+is NOT in `claude --help` — an Agent SDK option only; re-checked at 2.1.246) →
+CLI headless (`claude -p`) or `claude --bg` + `claude agents` · diff
+line-comments / Browser-pane preview / parallel sidebar / Dispatch / computer
+use → Desktop · GUI view or approval of a RUNNING CLI session → Remote Control
+(`claude --remote-control`, in-session `/rc`) on claude.ai/code, mobile,
+Desktop; whole-session move → `/desktop` (one-way) · after-the-fact disclosure
+of any session → the JSONL via
+`tools/session-find.py` (live tail: claude-code-trace) · Desktop session into
+the CLI → `claude --resume <cliSessionId>` (undocumented direction; try
+`--fork-session` first).
+
+Re-verify this block (move its `as-of`) when: the Desktop-bundled claude.exe or
+the CLI minor version changes; the auto-mode instruction or the Workflow tool
+schema changes; the bench is re-run, or a pending probe lands (those are
+tracked with the measurements, not here).
 
 Re-verify a block (and move its `as-of`) when: model names in the harness
 change; the Agent or Workflow tool schema changes; the user revises the cost

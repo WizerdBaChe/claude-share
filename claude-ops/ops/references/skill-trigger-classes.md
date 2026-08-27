@@ -115,7 +115,7 @@ class: user-manual
 source: utterance
 on-fire: ask-first    # a full deep pass is a long commitment
 zero-means: expected — the description requires an explicit DEEP/HOLISTIC ask.
-proc: Modes: (A) single file/PR deep review, (B) whole-project architecture health, (C) dependency fitness.
+proc: Modes: (A) single file/PR deep review, (B) whole-project architecture health, (C) dependency fitness audit:
 
 ## config-self-audit
 class: always-on
@@ -160,7 +160,7 @@ class: conditional
 source: utterance
 on-fire: execute      # user ruling: Phase 0 asks anyway; 15 fires, 0 false positives
 zero-means: would need the situation checked first; measured 15 fires, healthy.
-proc: first-principles decomposition, mandatory prior-art search BEFORE designing, convergence into build-ready documents
+proc: decomposition, prior-art search BEFORE designing, convergence into build-ready documents
 
 ## project-retrospective
 class: phase-gated
