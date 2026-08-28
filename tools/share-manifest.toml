@@ -1278,13 +1278,17 @@ path = "skill-toolkit/skills/diagram-authoring/references/carrier-playbook.md"
 source = "~/.claude/skills/diagram-authoring/references/carrier-playbook.md"
 status = "edited"
 edits = [
-  "Provenance section: the field-test gap-ledger pointer (a dated file under the source's outputs/ tree, which does not ship) replaced with a prose note that the ledger stays in the source environment's review records. FT-1/FT-3/FT-5 ids kept — they are how the claim stays checkable by the person who has the source.",
+  "Deliverable-location section: the field-test gap-ledger pointer (a dated file under the source's outputs/ tree, which does not ship) replaced with a prose note that the ledger stays in the source environment's review records. FT-1/FT-3/FT-5 ids kept — they are how the claim stays checkable by the person who has the source.",
+  "Provenance section (2026-08-28 refresh): the archify borrow-ledger pointer (a second dated analysis file under the same non-shipping outputs/ tree) replaced with the same prose note. B-3/B-5 ids kept for the same reason.",
 ]
 
 [[collected]]
 path = "skill-toolkit/skills/diagram-authoring/references/notation-precision.md"
 source = "~/.claude/skills/diagram-authoring/references/notation-precision.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "Provenance section (2026-08-28 refresh): the archify borrow-ledger pointer (a dated analysis file under the source's outputs/ tree, which does not ship) replaced with a prose note that the ledger and its field evidence stay in the source environment's review records. B-1/B-2/B-6 ids kept — checkable by the person who has the source.",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/env-cleanup/SKILL.md"

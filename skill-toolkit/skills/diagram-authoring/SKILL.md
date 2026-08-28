@@ -81,10 +81,19 @@ PPTX shapes) — auto-layout mermaid may never carry them.
    confirms it in the real environment — passing asserts prove the data
    path, not the picture.
 
+Report verification with fixed fields: `visual_review: passed | skipped
+(reason) | failed (defect)` plus `correction_rounds: n` — automated
+evidence reports as *pending* until the user confirms. Repairs stay inside
+the bounded-repair budget (notation-precision.md §4); overruns are
+reported, never absorbed.
+
 **Step 6 — Deliver.** The diagram + legend + gap report + the regeneration
 source (structural text model and the build script / mermaid source), so the
 diagram is re-derivable when the system changes. A diagram whose source
-model is lost is a screenshot, not a document.
+model is lost is a screenshot, not a document. Precision carriers
+(SVG/HTML/PPTX) add a receipt — SHA-256 + byte count of model/script and
+artifact; a passing Step-5 run freezes the artifact, and any post-freeze
+edit reopens Step 5 (freeze/receipt discipline: carrier-playbook.md).
 
 ## Handoffs (do not absorb neighboring skills' jobs)
 

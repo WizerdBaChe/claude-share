@@ -122,7 +122,11 @@ half-translate.
 Zip the folder for transport. Write a share-notes file NEXT TO the package (not
 inside it) — **named `SHARE-NOTES.md`, because A0 globs for that name and a
 differently-named file is invisible to the next export**. Record: what was
-removed/rewritten vs canonical, date, and the canonical commit.
+removed/rewritten vs canonical, date, and the canonical commit. Describe
+removed values by CLASS — never quote a scrubbed value in the notes; the
+record of a removal must not itself carry the leak (the manifest/changelog
+twin of this rule fired live in mechanism-share-packaging's 2026-08-17 and
+2026-08-27 runs).
 
 Write it for A0, not just for the recipient. Each entry states what was changed
 and **whether it must survive the next export** — a scrub of a research topic

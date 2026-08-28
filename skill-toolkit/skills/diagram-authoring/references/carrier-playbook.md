@@ -34,6 +34,13 @@ consumer and by the precision the claim needs — never by drawing convenience.
   mega-diagram — each toggleable layer still passes its own view checks.
   If it can fail at runtime (fonts, JS init), failures must announce
   themselves (global rule) — a silent blank canvas is a defect.
+  **Containment measurement** (B-5): before delivery, assert at named
+  desktop viewports (1440×900 and 1920×1080 minimum)
+  `document.documentElement.scrollWidth <= window.innerWidth` and
+  `scrollHeight <= window.innerHeight` — no horizontal page scroll, first
+  screen holds the diagram. Repair by redistributing authored layout;
+  never by `overflow:hidden`, clipping, an inner diagram scroller, or text
+  below the notation-precision §2 minimum.
 - **PPTX**: native shapes + **connectors bound to shape anchors** (they
   survive the user moving boxes — the point of an editable deck). One
   diagram per slide + legend; overflow → a hierarchy of slides with a
@@ -52,6 +59,12 @@ after a system change starts from the model — editing pixels/shapes directly
 and back-porting later is the drift path. If the user hand-edits the PPTX,
 the next regeneration DIFFS against the model and reports; it never silently
 overwrites their edits (previously-accepted-work rule).
+
+**Freeze + receipt** (B-3): the delivery note records SHA-256 + byte count
+of the model/build script AND of each rendered artifact. A passing Step-5
+run freezes the artifact; any later edit — appearance-review fixes
+included — reopens Step 5 before the receipt is re-issued. An artifact
+that no longer matches its receipt is not the delivered artifact.
 
 ## Deliverable location & verification environment (this machine)
 
@@ -75,7 +88,10 @@ the source environment's review records):
 
 ## Provenance
 
-2026-08-27, born with diagram-authoring. Review-when: a renderer in this
+2026-08-27, born with diagram-authoring. 2026-08-28: freeze/receipt and
+containment measurement adopted from tt-a1i/archify (MIT); the borrow
+ledger (B-3/B-5) stays in the source environment's review records.
+Review-when: a renderer in this
 environment changes (mermaid version bump altering layout, a different PPTX
 render path) — re-check the precision-ceiling column against it, and re-test
 the three environment facts in the section above.

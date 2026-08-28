@@ -25,7 +25,12 @@ docs, 9 gate findings swept to 0 in three loops). The ripple checklist below
 is that run's findings, generalized. Second run: red-team, 2026-08-17 (7
 collected files, 2 authored docs, 1 gate finding, 1 disposition narrowed from
 `excluded-by-decision` to `partial`) — its findings are in "Failure modes seen
-live", and the checklist held without amendment.
+live", and the checklist held without amendment. Third run:
+architecture-diagramming, 2026-08-27 (5 collected + 8 in-scope refreshes +
+2 authored, plus 23 source-drift refreshes forced by the gate's source
+comparison; 34 findings to 0 in four loops; 1 previously-collected file
+un-shipped) — findings below; the
+checklist held, with one refinement to the counts item.
 
 ## Hard rules
 
@@ -181,3 +186,42 @@ classes do not change — they are properties of "arrival", not of any repo.
   that three unrelated additions had falsified weeks earlier. Report it, do
   not fix it — what ships is the user's ruling, and a packaging round is the
   wrong place to make it.
+
+### 2026-08-27, third run (architecture-diagramming)
+
+- **`--source` makes the round repo-wide — budget for it at M1.** The
+  source-comparison check reads EVERY collected file, not the mechanism's: a
+  target not source-compared for ten days turned a 13-file round into a
+  36-file one (23 lagging verbatim files, each a procedure-B refresh). The
+  gate loop is the most expensive place to discover scope, so measure the lag
+  at M1 (run the target's source comparison read-only, count the findings)
+  and declare the sync as part of the round before collecting anything. The
+  B4 read of THAT incoming content — not the mechanism's own files — is where
+  the round's real leak findings lived: a session id in a rules file's new
+  example, the work-root path in probe payloads and in a measurement
+  sentence, and an eighth escaped UUID in a file whose declared edits already
+  named seven of the same class. A declared edit list is a spec, and specs
+  have escapees: grep the CLASS over the whole file, never just re-apply the
+  enumerated instances.
+- **The eval side door.** An eval suite is content, not fixture. The target's
+  copy had shipped clean as a small generic suite; the source's current
+  version had become the routing test harness for the exact knowledge the
+  repo withholds — prompts, expected outputs and grading evidence quoting the
+  withheld files at row level. Refresh-verbatim exports the withheld
+  knowledge; keep-stale misdescribes the copy as verbatim; the verdict that
+  stays inside the rules is UN-shipping — reverse the collected entry into a
+  not-shipped disposition that narrates the reversal, keep history in git,
+  and sweep the indexes that described the skill as shipping its evals.
+- **The record re-trips the gate, manifest edition.** The second run's
+  changelog lesson, one file over: manifest edit strings and an allow-entry's
+  own match field quoted the literals they existed to remove (a path, a
+  session id), making the paperwork a finding — or a leak — in its own right.
+  The class is "any record OF a removal", not "the changelog": describe the
+  removed value by class, write the allow match name-only (the target's
+  email-allow carried this fix as a comment all along), and never quote the
+  value in the record of removing it.
+- **Counts item, one refinement.** "Report, do not fix" (second run) applies
+  to sentences the round never touches. When the SAME sentence carries both a
+  count your arrival falsifies and one that was already stale, fixing half a
+  sentence publishes a false whole — rewrite the sentence true, and log the
+  pre-existing half as an audit correction in the changelog entry.

@@ -148,6 +148,12 @@ storming 明訂為探索輔助、不是可稽核產物。
   carrier-playbook.md 的現場測試 ledger 指標(指向來源私有 outputs/ 樹的
   dated 檔)改為描述句;FT-1–FT-5 編號保留——那是讓主張可被有來源的人查證
   的部分。
+- **2026-08-28 refresh**:來源側第二輪真火後,skill 本體新增六項驗證紀律
+  (B-1〜B-6,借自 tt-a1i/archify,MIT:診斷物件格式、修復次序+有界修復、
+  凍結+SHA-256 收據、visual_review 三態回報、視窗含納量測、幾何自檢儀器
+  前置條件);三支集合檔隨之重刷(SKILL.md 仍 verbatim)。新增**兩筆內容
+  編輯**,同一類:來源新增的借用帳指標(指向同一棵不出貨的 outputs/ 樹的
+  dated 分析檔)改為描述句,B-n 編號保留。
 - view-integrity-checks.md §3 的 CPO 例子是**經考慮的保留**:公開產業術語、
   data-gap 類的錨定範例,不是被扣住不出貨的領域 profile 知識(界線與舊字典
   出貨領域名、不出貨 profile 檔一致)。
