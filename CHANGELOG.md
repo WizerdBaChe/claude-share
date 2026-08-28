@@ -9,6 +9,29 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-28 — F1/F2 field-round hardenings: reference-resolution + artifact-skill techniques
+
+Second refresh the same day: the morning round predates the source's two
+audit-drawing field rounds, so three files lagged. What came in:
+`notation-precision.md` §4 gained the display:none instrument precondition
+(987 false overlaps from hidden tab panes), the count-only-diagnostic
+completeness rule, and — found by the second round's framework reuse — a
+`url(#id)` reference-resolution assert with a positive-control calibration
+rule (the first round's ACCEPTED deliverable had shipped 56 dangling
+arrowhead-marker references through both machine rungs and the human gate);
+its §3 sequence bullet now states whole-deliverable symbol consistency
+outranks the notation's own arrowhead convention. `carrier-playbook.md`
+gained single-defs discipline and the lifelines-as-containers sequence
+pattern. `skill-co-upgrade/SKILL.md` (verbatim) gained an artifact-skill
+techniques section: the consumer-position round (reuse-as-audit) and the
+post-acceptance defect protocol. Procedure B throughout — the three
+declared pointer→prose edits re-applied exactly, diffs equal to the edit
+lists. Ripple: ACCEPTANCE's verified-evidence section gained the
+third/fourth-round bullet. M1 lag note, same class the previous entry
+recorded: only the verbatim file fired check V — both edited-status files
+aged invisibly and were refreshed by sweep, not by a check.
+Gate CLEAN with `--source` (163 compared), tests green.
+
 ## 2026-08-28 — architecture-diagramming: verification discipline refresh (B-1..B-6)
 
 Refresh round, one day after the set first shipped. The source ran a second
