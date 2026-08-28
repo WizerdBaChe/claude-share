@@ -98,12 +98,43 @@ A failed assert is a layout bug to fix, not a note to ship. These asserts
 prove geometry only — the human appearance gate (SKILL.md Step 5.3) still
 applies after them.
 
+**Diagnostic output format** (B-1): failures are emitted as diagnostic
+objects, not bare strings — `{code, subject, evidence, supportedFixes}`:
+a stable kebab-case code (`label-overlap`, `edge-through-node`,
+`anchor-off-node`, …), the exact elements affected, the measured values
+proving the violation, and ≥1 concrete suggested fix with coordinates when
+computable ("move label to (330,114) or dy +24"). A diagnostic the repairer
+can act on without re-deriving the geometry is the point; "label overlap:
+A × B" alone is not a finished diagnostic.
+
+**Instrument preconditions** (B-6): the assert set compares `getBBox()`
+rectangles in ONE untransformed coordinate space — no `transform` on any
+element inside the asserted scene (the pan/zoom wrapper itself exempt), or
+every bbox is mapped through its CTM first. Assert the precondition itself:
+the checker's first field run produced 36 false "overlaps" from one
+transformed legend group, and a checker wrong in bulk is an instrument
+fault, not a layout fault (gate-calibration rule).
+
+**Repair order & bounded repair** (B-2): fix in this order, re-running the
+asserts after every edit — (1) model/schema errors, (2) node overlap /
+out-of-canvas, (3) edge-through-node + endpoint anchoring, (4) crossings,
+shared corridors, route rhythm, (5) label clearances. Per diagnostic at
+most 2 focused repair rounds; if two consecutive rounds do not reduce the
+failure count, stop and report the unresolved diagnostics truthfully.
+Never delete a semantic label (contract, direction, protocol, sync/async)
+to pass a check — a label may be dropped only with an argument that both
+endpoints fully imply it, stated in the delivery note.
+
 ## Provenance
 
 Distilled 2026-08-27 from Moody 2009 — nine principles: semiotic clarity,
 perceptual discriminability, semantic transparency, complexity management,
 cognitive integration, visual expressiveness, dual coding, graphic economy,
 cognitive fit (verified via web search 2026-08-27) — plus standard UML/C4
-drawing practice. Review-when: a carrier appears whose geometry cannot be
+drawing practice. 2026-08-28: §4 diagnostic format, instrument
+preconditions, and repair order adopted from tt-a1i/archify (MIT); the
+borrow ledger (B-1/B-2/B-6) and its field evidence stay in the source
+environment's review records.
+Review-when: a carrier appears whose geometry cannot be
 asserted (e.g. hand-drawn import) — add its verification story there or
 refuse precision claims on it.

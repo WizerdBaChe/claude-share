@@ -9,6 +9,38 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-28 — architecture-diagramming: verification discipline refresh (B-1..B-6)
+
+Refresh round, one day after the set first shipped. The source ran a second
+field test (the set drawn against itself) and adopted six verification
+disciplines from tt-a1i/archify (MIT) into the skill body: diagnostic objects
+with stable codes and suggested fixes, a fixed repair order with bounded
+repair and a label-preservation rule, freeze + SHA-256 receipts, a
+`visual_review` tri-state with correction-round counts, viewport containment
+measurement for the HTML carrier, and instrument preconditions for the
+geometry assert set. The three set files came over per procedure B:
+`SKILL.md` still verbatim; `notation-precision.md` verbatim → edited (one
+edit — the new borrow-ledger pointer, a dated analysis file under the
+source's non-shipping outputs/ tree, replaced with prose; the B-ids stay);
+`carrier-playbook.md` re-applied its 2026-08-27 edit and gained a second of
+the same class. Audit correction, recorded in place: that 2026-08-27 edit
+was declared against the Provenance section, but the pointer it removed
+lives in the Deliverable-location section — the declaration now names the
+right section.
+
+M1 lag measurement: four V findings — the two in-scope files plus both
+packaging skills (`mechanism-share-packaging`, `skill-share-packaging`),
+whose sources had gained their own 2026-08-27 third-run findings; both
+refreshed verbatim after a clean B4 read. One lag the gate cannot see:
+`carrier-playbook.md` is status `edited`, so check V's only question
+("still differs from source?") stays true while the copy ages — its refresh
+happened because the round swept the set, not because a check fired.
+Ripples: the README's de-identification note gained a dated bullet (its
+"one content edit" count was about to become false), and ACCEPTANCE gained
+the second field run's evidence — including the instrument blind spot the
+run caught (transformed-group bbox misreads) that became the new
+precondition assert. Gate CLEAN with `--source` (163 compared), tests 11/11.
+
 ## 2026-08-27 — architecture-diagramming: the diagram capability set ships as one loop
 
 Third mechanism export (after `compact-recovery/`, `red-team/`), and the first
