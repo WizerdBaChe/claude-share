@@ -28,6 +28,14 @@ consumer and by the precision the claim needs — never by drawing convenience.
   structural model wherever possible — layout code is reviewable, while
   hand-placed numbers drift. Keep the generation script/data next to the
   artifact (Step 6 regeneration rule).
+  Defs discipline: emit ONE `<defs>` block per document and let the §4
+  reference-resolution check prove every `url(#id)` resolves — a dangling
+  marker renders as a silently missing arrowhead (F1 v1.0 incident,
+  2026-08-28). Sequence views on this carrier (field-proven F2): lifelines
+  = narrow full-height CONTAINER rects (through-node-exempt by class,
+  borders anchorable), headers = separate nodes, messages = horizontal
+  edges at distinct y — the block-diagram assert set then holds unchanged;
+  activation bars may be declared-omitted.
 - **HTML**: adds interaction; keep it self-contained (no external assets —
   required for Artifacts, healthy everywhere). Layer toggles and hover
   detail are how ONE deliverable serves both overview and depth without a
@@ -91,6 +99,8 @@ the source environment's review records):
 2026-08-27, born with diagram-authoring. 2026-08-28: freeze/receipt and
 containment measurement adopted from tt-a1i/archify (MIT); the borrow
 ledger (B-3/B-5) stays in the source environment's review records.
+2026-08-28 (F2 field round): SVG defs discipline + sequence-as-containers
+pattern.
 Review-when: a renderer in this
 environment changes (mermaid version bump altering layout, a different PPTX
 render path) — re-check the precision-ceiling column against it, and re-test

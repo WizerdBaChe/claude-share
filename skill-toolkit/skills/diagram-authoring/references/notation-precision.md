@@ -59,9 +59,13 @@ in parentheses so the source stays traceable (list verified by web search
   `event [guard] / action`; self-transitions loop outside the node;
   history/parallel notation only together with the prose semantics note
   (view-integrity-checks §1).
-- **Sequence**: lifelines equally spaced; activation bars shown; async
-  arrows open-headed vs sync filled — and the legend says so; the scenario
-  name is in the title.
+- **Sequence**: lifelines equally spaced; activation bars shown (or their
+  omission declared); async vs sync arrowheads distinct — and the legend
+  says so; the scenario name is in the title. In a mixed deliverable
+  (sequence beside structural views) whole-deliverable symbol consistency
+  (§1) outranks this notation's arrowhead convention: keep the
+  deliverable's own sync/async encoding and declare the deviation in the
+  legend (F2 2026-08-28).
 - **DFD / pipeline**: uniform flow direction; stores/externals visually
   distinct from processes; error flows dashed AND colored (dual coded).
 - **Timing**: shared time axis with units and tick marks; every constraint
@@ -88,7 +92,16 @@ reads, no screenshots involved):
   that only the appearance rung caught — the assert set itself needs the
   calibration the §2 rule implies);
 - font-size ≥ the §2 minimum; text/fill contrast ≥ 4.5:1;
-- numbered chips (when used, §3) disjoint from every non-container node rect.
+- numbered chips (when used, §3) disjoint from every non-container node rect;
+- every `url(#id)` reference (arrow markers above all) resolves to a defined
+  element in the same document — a browser drops a dangling reference
+  SILENTLY, so the symptom is a missing glyph that no geometry assert
+  measures and the human gate reliably misses (F1 v1.0 2026-08-28: 56
+  undefined arrowhead references passed both machine rungs AND user
+  acceptance; found only when F2 reused the framework). Calibrate with a
+  positive control: remove one def, the check must fire. The general move:
+  a presence-of-glyph appearance property gets CONVERTED into a DOM
+  reference assert whenever the carrier allows, not left to the eye.
 
 For PPTX: shape coordinates are deterministic EMU values from the build
 script — assert the same invariants on the script's data BEFORE writing the
@@ -105,15 +118,23 @@ a stable kebab-case code (`label-overlap`, `edge-through-node`,
 proving the violation, and ≥1 concrete suggested fix with coordinates when
 computable ("move label to (330,114) or dy +24"). A diagnostic the repairer
 can act on without re-deriving the geometry is the point; "label overlap:
-A × B" alone is not a finished diagnostic.
+A × B" alone is not a finished diagnostic — and neither is a bare count:
+a crossing check reports WHICH pair at WHICH point, never just "1 found"
+(F1 2026-08-28: a count-only crossing diagnostic forced a manual hunt for
+the pair).
 
-**Instrument preconditions** (B-6): the assert set compares `getBBox()`
-rectangles in ONE untransformed coordinate space — no `transform` on any
-element inside the asserted scene (the pan/zoom wrapper itself exempt), or
-every bbox is mapped through its CTM first. Assert the precondition itself:
-the checker's first field run produced 36 false "overlaps" from one
-transformed legend group, and a checker wrong in bulk is an instrument
-fault, not a layout fault (gate-calibration rule).
+**Instrument preconditions** (B-6; extended after field run F1 2026-08-28):
+the assert set compares `getBBox()` rectangles in ONE untransformed
+coordinate space — no `transform` on any element inside the asserted scene
+(the pan/zoom wrapper itself exempt), or every bbox is mapped through its
+CTM first. And the content must actually RENDER when measured: `getBBox()`
+on `display:none` content returns zero rects, so a tabbed/multi-view
+deliverable measures in a temporary all-views-rendered mode and asserts
+each scene's bbox is non-zero before trusting any rectangle. Assert both
+preconditions themselves: the checker's first run produced 36 false
+overlaps from one transformed legend group, its second deliverable 987
+from hidden tab panes — a checker wrong in bulk is an instrument fault,
+not a layout fault (gate-calibration rule).
 
 **Repair order & bounded repair** (B-2): fix in this order, re-running the
 asserts after every edit — (1) model/schema errors, (2) node overlap /
@@ -135,6 +156,8 @@ drawing practice. 2026-08-28: §4 diagnostic format, instrument
 preconditions, and repair order adopted from tt-a1i/archify (MIT); the
 borrow ledger (B-1/B-2/B-6) and its field evidence stay in the source
 environment's review records.
+2026-08-28 (F2 field round): §4 reference-resolution check (F1 v1.0
+dangling-marker incident) and §3 sequence consistency-precedence note.
 Review-when: a carrier appears whose geometry cannot be
 asserted (e.g. hand-drawn import) — add its verification story there or
 refuse precision claims on it.

@@ -87,6 +87,25 @@ rationale), never weaken — consent-gate wording keeps full strength.
   third round is not testing, it is luck. Keep the untested flag until a real
   run confirms.
 
+## Artifact-skill techniques (skills that produce deliverables)
+
+Adopted 2026-08-28 from the diagram-authoring F1/F2 field series (a planned
+field test, not a formal loop round; user-directed adoption).
+
+- **Consumer-position round (reuse-as-audit)**: make one round REUSE the
+  previous round's artifact as a component (copy its framework, import its
+  output). Acceptance examines a deliverable from the reader's seat; reuse
+  exercises it from a consumer's seat and surfaces what both machine checks
+  and the human gate miss (measured: F2's framework copy exposed 56
+  silently-missing arrowheads in the ACCEPTED F1 deliverable — two
+  verification rungs and a user gate had all passed it).
+- **Post-acceptance defect = loop data, not an emergency**: report it with a
+  proposed version bump and let the user rule — never silently fix an
+  accepted artifact. The fix ships WITH the check that would have caught the
+  class (positive-control calibrated: break one instance, the check must
+  fire), and the round re-verifies the artifact's accepted behaviours
+  unchanged. The check, not the fix, is what upgrades the skill.
+
 ## Convergence and stopping
 
 Findings should converge (measured: 14 → 7 → 4 → 4, structural → seam-level).
