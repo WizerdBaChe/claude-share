@@ -7,6 +7,50 @@ reviewed for local machine identifiers before being copied here, and since
 
 Licensed under [MIT](LICENSE).
 
+---
+
+## 🆕 The architecture-diagram capability set, drawn with its own toolchain
+
+**→ [`architecture-diagramming/capability-set.html`](architecture-diagramming/capability-set.html)** — five views, self-checking, regenerable.
+Clone and open it in a browser; the page measures its own geometry on load and
+prints the verdict in its header.
+
+Most architecture diagrams are unfalsifiable. They look complete because
+whoever drew them filled in the parts the data did not have, and nothing in the
+pipeline could tell the difference. This set makes that expensive on three
+independent fronts, and then it does the thing that is easy to promise and
+awkward to actually do: **it turns the instrument on itself.**
+
+The page above is the scan of this very mechanism, produced by the mechanism.
+Not a mock-up of one.
+
+| What it claims | How you check it without trusting us |
+|---|---|
+| **Nothing on the diagram is invented.** Every node and every edge carries an `ev` evidence anchor naming the file it was read out of. | The schema *rejects the build* without one — delete an `ev` and `node capability-set.build.mjs` throws instead of drawing. The anchors are visible in the model. |
+| **The geometry is measured, not eyeballed.** Label overlap, anchors on borders, viewBox clipping, grid snap, edges through nodes, crossings vs a declared budget, an 11px font floor, dangling `url(#id)` references. | Open the page: the header says `幾何自檢：PASS（5 視圖）` and the report below lists 1,493 measured label pairs. It ran in your browser, on your machine, on the bytes you have. |
+| **The instrument is calibrated in both directions.** A checker that has never gone red is not evidence. | Rename one marker id out of the `<defs>` block and reload: exactly 25 `dangling-reference` diagnostics — the exact count of references to it. Rebuild and it returns to 0. We ran that; you can re-run it in a minute. |
+| **The artifact is frozen by a receipt.** | `build()` prints a sha256. Re-run it with no edits and the bytes are identical, so a diff means something changed. Pinned to LF in [`.gitattributes`](.gitattributes) — without that pin a CRLF checkout silently invalidates every receipt with all tests green. |
+| **The gaps are a deliverable, not a disclaimer.** | The page's last table is its own gap report: five entries, including one marked `inherent` (a human appearance judgement cannot be machine-checked) and one marked `by design` (no timing view, because none of the five questions was a timing question). |
+
+What it is made of — four layers, one loop, two entry points:
+
+- **理論 (theory)** — which diagram answers which question, and what each one
+  structurally *cannot* prove. One home, referenced by everyone else, never copied.
+- **生產 (production)** — the source-data gate, structural text model first,
+  carrier choice, and a three-rung verification ladder.
+- **稽核 (audit)** — reconstruct the views from the *code*, not from the docs,
+  run the same instrument, and file the result as next round's baseline.
+- **執行 (execution)** — `archdiag/`: the library that makes the above run.
+  Its own motivating defect is worth the price of admission: two copies of a
+  self-check framework drifted apart **within one day**, and both reports still
+  printed PASS. A checker that can fork is worse than no checker, because it is
+  still being believed.
+
+Read the mechanism: [`architecture-diagramming/README.md`](architecture-diagramming/README.md) ·
+verify it yourself: [`ACCEPTANCE.md`](architecture-diagramming/ACCEPTANCE.md) (blind-runnable, fourteen items).
+
+---
+
 ## Start here — pick your lane
 
 **Never read this repo before?** → Lane A.
@@ -79,10 +123,10 @@ the model: any mechanism name is an example, verify before relying on it.
 | `skill-toolkit/` | Portable AI-agent skills and a bilingual trigger dictionary, reviewed for personal identifiers and local paths. |
 | `interop-layer/` | Cross-agent sync layer: compiles a portable rules subset into global instruction files for other agents. Method depth is delegated, not shipped. |
 | `environment-guide/` | Human-facing philosophy, operator manual, and commit-message conventions, including a full migration checklist. |
-| `hooks/` | **New 2026-08-14, twelve hooks since 2026-08-16.** The mechanical enforcement layer the rules had been citing without shipping: destructive-command deny-list, subagent model cap, browser-pane measurement and scope guards, session health nudge, four shadow probes (delivery gate, context runway, fieldwork threshold, rule-load logger), and the compact-recovery trio (pre-compact bookmark, post-compact pointer card, transcript read-window guard) plus the mounting template. All fail-open. |
+| `hooks/` | **New 2026-08-14, sixteen hooks since 2026-08-29.** The mechanical enforcement layer the rules had been citing without shipping: destructive-command deny-list, subagent model cap, browser-pane measurement and scope guards, session health nudge, four shadow probes (delivery gate, context runway, fieldwork threshold, rule-load logger), the compact-recovery trio (pre-compact bookmark, post-compact pointer card, transcript read-window guard), and **new 2026-08-29** four shell/git guards — the Bash tool's silent transport defects, two Windows-PowerShell traps that both fail in the direction the author does not expect, and a wrong-branch commit guard written after the prose ritual ran and did not gate. Plus the mounting template. All fail-open, and three of the four new ones ANNOTATE rather than deny, because their backtests said the gate cannot determine intent. |
 | `compact-recovery/` | **New 2026-08-16.** Post-compact recall as an operating mode: a PreCompact/SessionStart bookmark-and-pointer-card bridge over the three hooks above, plus the digest generator (`preserve.py`) their grep-first ladder leans on — what a `/compact` summary drops stays recoverable at on-demand token cost. Ships with a seven-item real-fire acceptance checklist. |
 | `red-team/` | **New 2026-08-17.** Adversarial review made machine-checkable: a prompt shape that makes fabrication expensive, a mechanical anchor/scope gate that separates a citation slip from an invented quote, and an adversarial layer that sends each finding to a refuter which may not be its author. Layers 2–4 need no model at all. Ships with a blind-runnable acceptance checklist. |
-| `architecture-diagramming/` | **New 2026-08-27.** The architecture-diagram capability set — theory (view selection + integrity instrument, two `product-design-thinking` references), production (`diagram-authoring`), audit (`code-review-deep-checklist` Mode B view layer) — packaged as one mechanism: integration map, install set, and a fourteen-item external acceptance checklist. The skills live in `skill-toolkit/skills/`; this folder is the loop and its verification. |
+| `architecture-diagramming/` | **New 2026-08-27, executable half added 2026-08-29.** The architecture-diagram capability set — theory (view selection + integrity instrument, two `product-design-thinking` references), production (`diagram-authoring`), audit (`code-review-deep-checklist` Mode B view layer) — packaged as one mechanism: integration map, install set, and a fourteen-item external acceptance checklist. The skills live in `skill-toolkit/skills/`; this folder is the loop, its verification, and now `archdiag/` — the library that turns a view model into a self-checking HTML deliverable with a sha256 freeze receipt. |
 | `agents/` | **New 2026-08-14.** The eight subagent definitions `claude-ops/ops/20-dispatch.md` routes to, each with a `tools:` capability allowlist and a defined output contract. |
 | `thinking-notes/` | Twelve numbered design-thinking notes. Argument, not policy — nothing there binds a reader. |
 | `tools/` | The publishing gate — leak, placeholder, reference-disposition, structure, collection-provenance and dead-declaration checks, plus an opt-in source comparison — and `COLLECTION-RULES.md`, the procedure for deciding what may be collected in the first place. Its two procedures are worth reading even if you never collect: **A** for a file that is not here yet, **B** for one that is, because running A over B's files is what a 2026-08-16 refresh did to six deliberate decisions. |

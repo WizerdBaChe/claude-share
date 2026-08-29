@@ -63,10 +63,45 @@ reference 檔,生產與稽核兩顆 skill 都**指過去引用、不複寫**—�
 | `../skill-toolkit/skills/diagram-authoring/references/notation-precision.md` | 生產:畫法 | Physics of Notations 派生繪圖規則、各圖種畫法慣例、幾何自檢斷言組 |
 | `../skill-toolkit/skills/diagram-authoring/references/carrier-playbook.md` | 生產:載體 | mermaid/SVG/HTML/PPTX 精度天花板與驗證路徑、再生紀律 |
 | `../skill-toolkit/skills/code-review-deep-checklist/references/project-review.md` | 稽核 | Mode B 體檢視圖層:從 code 重建視圖、integrity pass、與既有圖比對、留檔 |
+| `archdiag/`(11 檔,**2026-08-29 新收**) | 生產:執行層 | 把上面那些紀律變成會跑的程式:schema 驗證 → build-time 幾何斷言 → marker 閉合 → 決定性輸出 → sha256 收據;`selfcheck.mjs` 是頁內第四段自檢的**唯一來源**;`route.mjs` 正交走線;`delta.mjs` 模型 diff |
 
 配套(消歧義):`../skill-toolkit/skill-trigger-dict.md` 有三列速查——精準繪製
 → diagram-authoring;選型理論 → representation-models;全架構重建找缺口 →
 audit-drawing 模式。
+
+## `archdiag/`:紀律變成會跑的程式(2026-08-29)
+
+前四項是散文紀律,這一項不是。它存在的理由是一次**一天內就發生的漂移**:
+兩份 audit 交付各自帶一份「頁內自檢框架」的副本,其中一份多了第 8 項檢查、
+另一份沒有——而兩邊的報告都印 PASS。**一份會漂移的檢查器比沒有檢查器更糟,
+因為它還在被信任。** 所以檢查器只准有一份:
+
+| 模組 | 負責 | 為什麼是它 |
+|---|---|---|
+| `index.mjs` | `build(opts)`:schema → build-time 幾何斷言 → marker 閉合 → 輸出 → sha256 收據 | 任何一關失敗就 throw,不會產出「看起來對」的檔案 |
+| `schema.mjs` | 型別、列舉、id 解析、宣告形狀 | **只裁決它能判定的事**;聚合方式、視圖選擇、節點位置屬語意,永遠留給人 |
+| `asserts.mjs` | 寫檔前、在模型資料上:格線對齊、錨點貼邊、正交 | 在像素存在之前就否決 |
+| `selfcheck.mjs` | 頁內第 1–8 項檢查 + 儀器前置條件 | **唯一來源**。build 腳本自帶副本就是把上面那個缺陷放回來 |
+| `emit.mjs` | 樣式、`nodeSvg`/`viewSvg`/`DEFS`/`pageHtml` | 決定性:同樣的輸入 ⇒ 同樣的位元組(收據才有意義) |
+| `route.mjs` | 正交走線 + 標籤置放,藏在 `RouterProvider` 介面後 | 節點位置是**輸入不是輸出**(位置帶語意);交叉數超過宣告值不會硬畫,回診斷 |
+| `delta.mjs` | 模型層 diff(幾何 vs 語意分類、缺席邊分開算) | 取代一次量到約 12 分鐘的手工比對 |
+| `vendor/archify-geometry.mjs` | 幾何原語,取自 tt-a1i/archify(MIT),逐字 | 上游 rect 形狀在呼叫邊界轉接,不就地改 |
+
+三個**性質**(不是使用說明,是這批資產的不變式):
+
+1. **決定性輸出。** 同樣的模型 ⇒ 同樣的位元組。所以 sha256 可以當凍結收據:
+   驗收過的交付物換了位元組,就不是驗收過的那一份。
+2. **檢查器只有一份。** 也因此它的任何修改都必須跑**雙向校準**——弄壞一個
+   已知案例要看到它變紅,復原要看到它變綠。從來沒紅過的檢查器等於沒校準。
+3. **行尾被釘死。** 收據是位元組的雜湊,而 template literal 會繼承來源檔的
+   行尾——所以本 repo 的 `.gitattributes` 把 `archdiag/**` 釘成 LF。少了這個
+   pin,一次 CRLF checkout 就能在**測試全綠、內容零變動**的情況下作廢每一張
+   收據。這正是它自己 `MAINTENANCE.md` M1 要防的那件事。
+
+不隨附的是來源環境的 build 腳本(在不出貨的 `outputs/` 樹裡)。出貨的是
+**函式庫本體 + README 裡的 `build()` 契約**——build 腳本是照著那份契約寫的,
+本資料夾的 [`archdiag-capability-set.html`](archdiag-capability-set.html) 就是
+用出貨的這份程式碼現做的一份,可以當範例讀。
 
 ## 安裝
 
@@ -140,6 +175,26 @@ storming 明訂為探索輔助、不是可稽核產物。
   global-claude-md refresh 收。採用者讀 representation-models.md 本體即得
   同一條規則。
 
+## 自我參照的那一份 (`capability-set.html`)
+
+[`capability-set.html`](capability-set.html) 是這套集合**用自己的工具鏈畫自己**
+的成果,再生源是 [`capability-set.build.mjs`](capability-set.build.mjs)。它同時
+是三件事:機制的架構掃描結果、`build()` 契約的可讀範例、以及 `archdiag` 出貨
+副本的煙霧測試。
+
+五張視圖各答一個問題(一問題一主圖):(1) 誰擁有哪一層 (2) 設計入口資料流
+(3) 稽核入口資料流 (4) 驗證階梯狀態機 (5) archdiag 模組依賴。第 4 張刻意是
+狀態機而非時序圖——**完整性主張只有狀態機扛得住**,時序圖只是一條情境。
+
+頁尾第三張表是**缺口表**,不是免責聲明:五筆,含一筆 `inherent`(人審判準
+無法機器化)與一筆 `by design`(整組沒有時序視圖,因為這五個問題沒有一個是
+時間問題)。缺口是產物,這條規則對自己也適用。
+
+量測結果(2026-08-29,本 repo 內、用本 repo 出貨的程式碼):建置期首跑通過;
+49/49 邊機器走線、0 人工修正、實際交叉全 0;頁內自檢 PASS / 0 診斷 / 1,493
+組標籤配對;正對照恰好 25 筆 `dangling-reference` 後還原歸零;重跑 sha256
+位元組相同。**外觀人審那一段仍是開的**——見 `ACCEPTANCE.md` 最後一段。
+
 ## 識別化說明 (de-identification)
 
 依本 repo `tools/COLLECTION-RULES.md`;每筆編輯宣告於 `tools/share-manifest.toml`:
@@ -160,3 +215,12 @@ storming 明訂為探索輔助、不是可稽核產物。
 - carrier-playbook.md 的 headless 驗證三事實(port 服法、截圖落點)是**來源
   機器的實測值**,檔內附 review-when 復查配方;採用者環境不同就照配方重測,
   別直接信值。
+- **2026-08-29(執行層收錄)**:`archdiag/` 11 檔進來,其中 9 檔 verbatim。
+  兩筆編輯,同一類、都已宣告:`MAINTENANCE.md` 的維護儀式指令操作在來源
+  不出貨的 `outputs/diagram-authoring/` 樹上,指令逐字保留、上方加share note
+  說明採用者的對應目錄;`carrier-playbook.md` 的 `Reference builds:` 那行
+  (三支同樣在 `outputs/` 裡的 build 腳本)改為描述句,並補上函式庫在本 repo
+  的落點。同輪本 repo 新增 `.gitattributes` 把 `archdiag/**` 釘成 LF——**這不是
+  格式偏好,是收據的前提**:少了它,一次 CRLF checkout 就能在測試全綠的情況下
+  作廢每一張已驗收交付物的 sha256。`vendor/archify-geometry.mjs` 是第三方
+  (tt-a1i/archify,MIT)逐字收錄,檔頭帶上游授權行與 review-when。
