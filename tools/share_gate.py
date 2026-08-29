@@ -363,8 +363,17 @@ def check_structure(manifest, files, f):
                   "it has to be valid first")
             mounted = []
         mounted = [m for m in mounted if m.endswith(".py")]
+        # DIRECT children of hooks/ only. Narrowed 2026-08-29, when
+        # hooks/tests/test_transcript_read_guard.py arrived: a hook's regression
+        # matrix is run by hand, and mounting a test as a hook would put a test
+        # harness on every matched tool call. The narrowing is one directory
+        # level, not a name heuristic, so a real hook cannot slip through it by
+        # being called test_*.py; case 7 of test_share_gate.py is the positive
+        # control that an unmounted HOOK is still caught, and case 11 is the
+        # negative control for exactly this exemption.
         shipped = {p.split("/")[-1] for p in files
-                   if p.startswith("hooks/") and p.endswith(".py")}
+                   if p.startswith("hooks/") and p.endswith(".py")
+                   and p.count("/") == 1}
         for name in sorted(shipped - set(mounted)):
             f.add("S", "hooks/settings.example.json", 0,
                   f"{name} ships but is not mounted",

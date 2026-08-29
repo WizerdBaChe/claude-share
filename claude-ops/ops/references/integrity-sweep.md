@@ -535,6 +535,21 @@ python -X utf8 tools/graph-snapshot/tests/test_smoke.py   # 41 checks; 6 drive e
 #     edit was lost — restore check 15); a FINDING standing for days with no
 #     harvest (run the graph-query skill's J3 flow). Rule-registry key
 #     `graph rot watchdog`.
+# 27. archdiag receipt regression (born 2026-08-29 with the F3 close-out).
+#     Frozen audit deliverables (dit-audit-f1 / prism-audit-f2 / mfp-audit-f3)
+#     carry sha256 receipts; the library that emits them is shared, so ONE
+#     edit under tools/archdiag/ can change every accepted artifact's bytes
+#     with every test green — the motivating case is the eol hazard (commit
+#     6fbe14c: a CRLF checkout would have corrupted all receipts silently).
+#     Regeneration MUST be a byte-level no-op:
+for b in outputs/diagram-authoring/*.build.mjs; do node "$b" >/dev/null || echo "BUILD FAILED: $b"; done
+git status --porcelain outputs/diagram-authoring/*.html   # must print nothing
+#     Act on: any diff = receipt drift — find the library edit that caused it;
+#     an INTENDED change is a version bump per the post-acceptance protocol
+#     (user ruling, D-043), never a silent regen. BUILD FAILED = a build
+#     script rotted (API drift in the library). Full instrument ritual
+#     (selfcheck calibration, LF pins, router acceptance):
+#     tools/archdiag/MAINTENANCE.md.
 ```
 
 ## Check 7's rationale (added 2026-08-12)

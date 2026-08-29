@@ -170,5 +170,17 @@ Beyond the standard contract in SKILL.md:
   review/refactor attention should concentrate.
 - Trend framing: state explicitly what should be re-measured at the next recurring
   review so the numbers become a trend line.
+  **A trigger-carrying metric is a control, not a trend.** When a metric carries a
+  named trigger condition ("split at fan-in 4", "act on the third consumer", any
+  count crossing a declared floor), the dated report must not be its only home:
+  nothing re-reads a report between recurring reviews, so a met condition fires
+  nothing (measured 2026-08-29: a 2026-08-27 Mode B review recorded "stack.py
+  split trigger = fan-in 4"; the fourth consumer landed within days; the met
+  trigger was found only by an unrelated audit re-measuring independently). Land
+  the trigger in a home the project executes or re-reads — a fitness-function
+  test in the project's own gate (preferred: assert the metric, name the
+  recorded decision in the failure message), else the project CLAUDE.md
+  invariants section or the decisions file's open block. The report keeps the
+  measurement; the trigger moves to an asset.
 - The reconstructed view set + gap table, archived beside the report (view-audit
   lens above) — re-derived and diffed at the next recurring review.

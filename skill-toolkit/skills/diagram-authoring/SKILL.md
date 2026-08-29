@@ -32,7 +32,7 @@ in the same directory.
 | Figure inside a doc (design doc, README, report) | Doc figure | mermaid if auto-layout suffices; inline SVG when position/alignment carry meaning |
 | Standalone deliverable to view/share | Standalone | self-contained HTML (inline SVG + pan/zoom) or an Artifact |
 | Editable slides humans will present/annotate | Deck | PPTX via anthropic-skills:pptx — native shapes + bound connectors, never baked images |
-| Reconstruct an EXISTING system from data and find holes（體檢繪圖、找缺口） | Audit drawing | any of the above + mandatory gap report |
+| Reconstruct an EXISTING system from data and find holes（體檢繪圖、找缺口） | Audit drawing | any of the above + mandatory gap report; precision view-set → `tools/archdiag` (carrier-playbook §archdiag) |
 
 ## Workflow
 

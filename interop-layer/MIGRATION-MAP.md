@@ -15,10 +15,18 @@ mechanism-layer translation. Human operating manual: README.md (中文).
 
 ## Portability classes (per asset)
 
-- **Verbatim-compile** (→ portable-core.md blocks): language rules, git
-  workflow, evidence-over-claims, decision charter, pre-existing-issue
-  attribution, file hygiene, canonical-method discipline, volatile-fact
-  verification, done definition, approach-wrong signals, scope restraint.
+- **Verbatim-compile** (→ portable-core.md blocks): the user's own standing
+  preferences — the rules no documentation can supply, which is exactly why
+  they have to travel. The authoritative membership list is the block set in
+  `portable-core.md` itself (`parse_blocks()` reads it; `build` prints
+  `blocks=`/`bytes=` per target). This file deliberately does not restate
+  it: the restatement here still named 11 items on 2026-08-16, five blocks
+  behind the real set, while §Profiles a few lines below was current — an
+  enumeration kept in two places gets read as fact from whichever copy rots
+  first. Membership is decided by a TEST, not by a list: a rule belongs here
+  iff it binds the same way on any platform with no platform mechanism
+  needed to fire it at the right moment. Anything that needs a trigger is
+  method-shaped — see "Delegate to the target" below.
 - **Translate per target** (genesis prompt): permission boundaries,
   cost/model-cap enforcement, health/anti-bloat checks. If the target has
   no equivalent extension point, DEGRADE to a prose rule in its AGENTS.md

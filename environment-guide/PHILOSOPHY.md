@@ -1,3 +1,11 @@
+---
+xi: 1
+what: ~/.claude 環境哲學——規則背後的為什麼與整體形狀 (non-normative worldview; rules win on conflict)
+tags: [philosophy, environment]
+aliases: [環境哲學, 世界觀, 為什麼這樣設計, philosophy, design rationale]
+status: live
+---
+
 # 環境哲學與遷移指南 (Environment Philosophy & Migration Guide)
 
 > **這份文件不是規定。** 它是這個 `~/.claude` 環境的世界觀說明——寫給人看的

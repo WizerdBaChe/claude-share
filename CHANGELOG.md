@@ -9,6 +9,120 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-08-29 — full source sync: the M1 lag class swept, and the diagram set ships its executable half
+
+The round the previous two entries kept predicting. Both of them recorded the
+same lag note — an `edited`-status file ages invisibly, because check V's only
+question ("does it still differ from the source?") stays true while the copy
+rots — and both refreshed only the files the round happened to be about. This
+one swept all 43 of them by comparing each source file's last-commit date
+against its repo copy's. **Twenty were behind, and check V could see exactly
+two.** The oldest had been stale since 2026-08-21.
+
+### What came in
+
+**Refreshed (procedure B, 20 files).** `lessons.md` had missed the source's
+2026-08-21 restructure into card + detail; `rule-registry.md`, `20-dispatch.md`,
+`ops_health_nudge.py`, `settings.example.json`, `global-claude-md/CLAUDE.md`,
+`PHILOSOPHY.md`, `MIGRATION-MAP.md`, `workflow-checkpoint/SKILL.md`,
+`browser_pane_scope_guard.py`, the whole `scientific-research-guide` set and the
+two `diagram-authoring` files followed. Every declared edit re-applied and
+re-diffed; three edit lists changed and say why (below).
+
+**Four shell/git enforcement hooks**, each cited by a rule file this repo
+already ships, which is what forced the verdict — check R does not accept
+silence. `shell_transport_guard.py` (the Bash tool's three SILENT transport
+defects: backslash-run collapse, the ~7.7 KB ceiling, MSYS `/flag` rewriting),
+`ps_errorpref_guard.py` and `ps_pipeline_close_guard.py` (two Windows-PowerShell
+traps that each fail in the direction the author does not expect), and
+`branch_commit_guard.py` (the compensating control for two incidents where the
+prose ritual RAN and did not gate — it was a non-gating spectator in a `&&`
+chain). All four portability-scanned before collection, which is the 2026-08-14
+lesson applied rather than recited. Three of the four ANNOTATE and never deny,
+because their own backtests proved the gate cannot determine intent — the
+backslash branch flagged 112 commands of which 89 had SUCCEEDED, most of them
+the author already compensating.
+
+**`hooks/tests/test_transcript_read_guard.py`** — the regression matrix that
+guard's docstring names twice, 22 cases including every alias form and every
+accepted bypass. Check S had to be narrowed for it (direct children of `hooks/`
+only): mounting a test as a hook would put a test harness on every matched tool
+call. The narrowing ships with its negative control, case 12, and `case()` grew
+an `expect_absent` parameter — until now a control could only assert that the
+gate said SOMETHING, including the very finding it was meant to prove absent.
+
+**`architecture-diagramming/archdiag/`, eleven files** — the diagram capability
+set's executable half, and the third folder to follow the `red-team/` pattern of
+shipping the running code behind a method already published as prose. The
+library's motivating defect is the reason it exists: two copies of a self-check
+framework drifted apart within ONE day and both reports still printed PASS.
+`selfcheck.mjs` is now the single source of that script, and the shape of that
+invariant is visible in view 5 of the page below. `vendor/archify-geometry.mjs`
+is third-party (tt-a1i/archify, MIT), verbatim.
+
+**Two `ops/references/` detail files** — `dispatch-templates.md` and
+`shared-tree-git.md`. These are the class this round was watching for: the
+refresh REPLACED shipped prose with pointers to them (20-dispatch.md's worked
+contract example and five template field lists; lessons.md's L-023 detail).
+Taking the refresh without the pointees would have been a net content LOSS
+disguised as a sync.
+
+### What this repo authored
+
+`.gitattributes`, pinning `architecture-diagramming/archdiag/**` to LF. Not a
+formatting preference: the html that library emits carries a sha256 freeze
+receipt, and a CRLF checkout would invalidate every one of them with all tests
+green and no content change behind it. Shipping the library without the pin
+would have shipped an asset whose stated invariant this repo breaks.
+
+`architecture-diagramming/capability-set.build.mjs` + `capability-set.html` —
+the capability set drawn with its own toolchain, through the copy of the library
+that ships here. Five views (structure / design entry / audit entry /
+verification ladder as a STATE MACHINE, because completeness claims cannot ride
+on a sequence view / module graph), each with an evidence anchor on every node
+and edge. Measured: build-time checks passed first run; 49/49 edges
+machine-routed with 0 hand fixes and 0 actual crossings; in-page self-check PASS
+with 0 diagnostics over 1,493 label pairs, read from a real browser on a
+loopback server; positive control produced exactly 25 `dangling-reference`
+diagnostics (the exact reference count) and restoring returned 0; the rebuild
+reproduced sha256 `aaeaf9d0…4a4d` byte for byte (60,232 bytes on disk; `build()`'s printed `bytes` is `html.length`, i.e. UTF-16 units, so it reads smaller on a CJK page — the receipt is the sha256 and is unaffected). **The third rung — human
+appearance review — is open**, and is the cell the page's own gap report marks
+`inherent`. `ACCEPTANCE.md` gained section E: four items that need no skill
+installed, only Node, and the README gained the promo section this scan fed.
+
+### Corrections found while sweeping
+
+- `domain-expansion-guide.md` carried its share note **twice**, back to back —
+  a duplication from an earlier re-application that no mechanical check could
+  see. Re-applied once.
+- `hooks/browser_pane_scope_guard.py` went `edited` → `verbatim`: the source
+  rewrote the denial text this round and the private pointer the edit existed to
+  remove is gone upstream. Keeping the status would have made check V assert a
+  difference that no longer exists, which is exactly the finding that catches a
+  DROPPED edit — it has to stay meaningful.
+- `transcript_read_guard.py`'s third edit narrowed to docstring-only: the source
+  rewrote its deny message into a constraint-only form whose new contract
+  forbids precisely the read-elsewhere pointer the edit was rewriting. Recorded
+  rather than dropped — a vanished anchor is a signal to re-read, and the
+  re-read said the source had fixed it upstream.
+- `_routing.md` and `user-supplied-citations.md` needed their template edits
+  re-established for the second and third time. Both grew: the source had added
+  five domain-specific routing sections and a dated-observation discipline
+  respectively, so the round kept every generic addition and dropped only the
+  rows and rulings that are about files this share does not carry. Restoring a
+  template must not silently discard the format work done since.
+- `<card>` retired from the placeholder vocabulary by check D — lessons.md's
+  Evidence schema line was rewritten upstream and nothing used the token any more.
+
+Six real leaks caught by check L on the way in (four work-root paths in
+`lessons.md`, six in `rule-registry.md`, the settings template's interpreter
+paths), plus 38 session ids scrubbed by hand — the class no pattern catches.
+Four illustrative paths got narrow `[[allow]]` entries instead, each one an
+example inside a defect explanation rather than a location.
+
+Gate CLEAN with `--source` (181 collected files compared), tests 12/12, the hook
+matrix 22/22, interop 14/14, red-team 10/10 + 8/8.
+
 ## 2026-08-28 — F1/F2 field-round hardenings: reference-resolution + artifact-skill techniques
 
 Second refresh the same day: the morning round predates the source's two

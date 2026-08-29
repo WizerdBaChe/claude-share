@@ -53,6 +53,16 @@ collected_roots = [
     # Seven collected files (five .py, two prompt templates) beside the same
     # two name-exempt authored docs.
     "red-team/",
+    # 2026-08-29 (full sync round): the folder shipped as prose on 2026-08-27
+    # and gained its executable half today. The root is the SUBDIRECTORY, not
+    # the folder: `archdiag/` holds the eleven collected files, while the folder
+    # around it holds repo-authored work — the map, the checklist, and the
+    # self-drawn view set with its build script. Scoping the root to where the
+    # collected files actually are keeps check C's question exact ("does this
+    # copied file declare its source?") instead of leaning on a name heuristic
+    # to excuse everything authored here. Declared on arrival, which is the
+    # whole difference between this list's first three entries and its last.
+    "architecture-diagramming/archdiag/",
 ]
 
 # ---------------------------------------------------------------------------
@@ -85,6 +95,11 @@ foreign_roots = [
 "PHILOSOPHY.md" = "environment-guide/PHILOSOPHY.md"
 "OPERATOR-GUIDE.md" = "environment-guide/OPERATOR-GUIDE.md"
 "COMMIT-TEMPLATES.md" = "environment-guide/COMMIT-TEMPLATES.md"
+# 2026-08-29: the diagram-authoring skill routes to `tools/archdiag` by its
+# SOURCE path (its own heading says "this machine"). Narrower than the `tools/`
+# exclusion below and declared first, so check R resolves the citation instead
+# of reading it as an undeclared dependency.
+"tools/archdiag/" = "architecture-diagramming/archdiag/"
 
 # ---------------------------------------------------------------------------
 # not_shipped — assets this repo NAMES but does not contain.
@@ -697,10 +712,15 @@ _superseded_edits = [
 [[collected]]
 path = "hooks/browser_pane_scope_guard.py"
 source = "~/.claude/hooks/browser_pane_scope_guard.py"
-status = "edited"
-edits = [
-  "denial text: dropped one pointer to the same private asset-library entry; the headless-Playwright fallback it named is kept",
-]
+status = "verbatim"
+# RETIRED 2026-08-29 (procedure B, and status verbatim now follows). The source
+# rewrote the denial text this round: the private asset-library pointer is gone
+# upstream, replaced by the playwright-headless MCP server and the tools/ui-shot
+# probe (the latter under the `tools/` exclusion, which check R resolves). With
+# nothing left to remove, keeping an `edited` status would make check V assert a
+# difference that no longer exists — the "declared edited but byte-identical"
+# finding is the one that catches a dropped edit, and it must stay meaningful.
+edits = []
 
 [[collected]]
 path = "hooks/settings.example.json"
@@ -750,7 +770,7 @@ status = "edited"
 edits = [
   "CONFIG CORPUS_ROOTS: removed a second-drive mirror root (an absolute path on a non-system drive — the leak class sharelib.py learned on 2026-08-16) -> a comment inviting the adopter's own roots; the two CLAUDE_DIR-relative roots ship as-is",
   "docstring: dropped the scheduled-task name that feeds that mirror (a private-asset pointer; the capability description stays) and re-pointed the INV-8 comparison at compact-recovery/preserve.py, where that file lives in this repo",
-  "docstring + deny message: rule-registry entry name -> 'your own rule registry' / compact-recovery/README — the entry postdates the shipped claude-ops snapshot",
+  "docstring: rule-registry entry name -> 'your own rule registry' — the entry postdates the shipped claude-ops snapshot. NARROWED 2026-08-29: this edit used to cover the deny message too, and the 2026-08-29 source revision rewrote that message into a constraint-only form (its new DENY-MESSAGE CONTRACT forbids exactly the read-elsewhere pointer the old edit was rewriting). The anchor is gone at the source, so the edit is docstring-only; recorded rather than dropped, because a vanished anchor is a signal to re-read, and here the re-read says the source fixed it upstream.",
 ]
 
 [[collected]]
@@ -982,6 +1002,7 @@ source = "~/.claude/ops/20-dispatch.md"
 status = "edited"
 edits = [
   "§4b redlines: two absolute paths naming the operator's own share and publication trees replaced by 'the operator's own share and publication trees'. Which CLASS of location is redlined is the rule; which drive it sits on is a machine fact and a pointer into a private tree.",
+  "§7a (2026-08-29 arrival): a share note added under its 'registration is mechanised' claim, saying the registering hook and the ticket board behind it do not ship (both declared under [[not_shipped]]) and that steps 1-3 are done by hand here. The section is kept whole: what it asks for is right either way, and only the question of who writes the row changes.",
 ]
 
 [[collected]]
@@ -1280,6 +1301,7 @@ status = "edited"
 edits = [
   "Deliverable-location section: the field-test gap-ledger pointer (a dated file under the source's outputs/ tree, which does not ship) replaced with a prose note that the ledger stays in the source environment's review records. FT-1/FT-3/FT-5 ids kept — they are how the claim stays checkable by the person who has the source.",
   "Provenance section (2026-08-28 refresh): the archify borrow-ledger pointer (a second dated analysis file under the same non-shipping outputs/ tree) replaced with the same prose note. B-3/B-5 ids kept for the same reason.",
+  "Audit view-set toolchain section (2026-08-29 sync, third of the same class): the `Reference builds:` line named three `outputs/diagram-authoring/*.build.mjs` scripts that do not ship -> prose saying they stay in the source environment, plus the shipped location of the library itself (`architecture-diagramming/archdiag/`) and the pointer to its README's build() contract. Relocating an asset is a two-part act: the collection, and the edit to whatever routed at it.",
 ]
 
 [[collected]]
@@ -1569,6 +1591,7 @@ status = "edited"
 edits = [
   "Gate A Step 0 example: a named domain profile replaced by <that_field>, since no base profile ships.",
   "the domains/ file list: restored the note that this share ships no base profiles, and that with an empty manifest Gate A finds no matching row and the generic Layer-A framework carries the turn. Without it the skill instructs the reader to load files that are not there.",
+  "2026-08-29: Gate A's new Step-0 resolution ladder (rung 2) routed fuzzy questions through `_routing.md`'s Clusters/disambiguation sections, which this share's template does not carry -> 'whatever cluster/disambiguation sections `_routing.md` carries'. The ladder itself — literal anchor, scope match, ask-one-question, generic framework — ships whole; it is method, and rung 2 works against the reader's own sections.",
 ]
 
 [[collected]]
@@ -1577,6 +1600,8 @@ source = "~/.claude/skills/scientific-research-guide/domains/_routing.md"
 status = "template"
 edits = [
   "the manifest ships with its FORMAT and four template rows, no real ones. The live manifest lists the author's own research fields, and those profiles are excluded from this share — so shipping the rows would point Gate A at twelve files that are not here, which is a load failure rather than a no-op. Re-established 2026-08-16 after a verbatim refresh reintroduced them.",
+  "RE-ESTABLISHED AGAIN 2026-08-29, and the edit grew: the source had added five domain-specific sections since (Clusters, two disambiguation tables, the CPO homing ruling, the lint exception register). Each is a routing RULING about profiles this share does not carry, so each ships as nothing rather than as a ruling about files the reader does not have. The generic additions of the same rounds are kept: Step-0 item 5 (fuzzy routing), the NFKC matching rule, and the three new Maintenance bullets, whose worked examples name domain files under the same illustrative-filename convention domains/README.md already states.",
+  "one internal pointer repaired as part of the removal: item 5 said to route by 'the Clusters / disambiguation sections below', which the removal made dangle -> 'whatever cluster / disambiguation sections you add below'. The same sentence in the skill's own Gate A Step 0 ladder got the matching edit (see that entry).",
 ]
 
 [[collected]]
@@ -1591,7 +1616,7 @@ status = "edited"
 edits = [
   "§3.1: the list of existing base profiles replaced by 'every base profile in the source environment', since none of them ship.",
   "§3 authoring rule 5: 'put it in STATUS.md' -> 'put it in a status file' — STATUS.md is an internal status artifact that does not ship.",
-  "Appendix: a share note added above the directory tree, saying the tree is the source environment's layout kept as a worked example and that the profile files it names do not ship.",
+  "Appendix: a share note added above the directory tree, saying the tree is the source environment's layout kept as a worked example and that the profile files it names do not ship. CORRECTED 2026-08-29: the previous copy carried this note TWICE, back to back — a duplication introduced by an earlier re-application and invisible to every mechanical check. Re-applied once.",
 ]
 
 [[collected]]
@@ -1626,6 +1651,7 @@ source = "~/.claude/skills/scientific-research-guide/references/user-supplied-ci
 status = "template"
 edits = [
   "the live file is a citation inbox for the author's own research topics — ~40 supplied URLs, per-source access-tier judgements and promotion candidates. The FORMAT ships (identity-grouping table, access tags, the untriaged inbox convention); the rows do not. Re-established 2026-08-16 after a verbatim refresh reintroduced them.",
+  "RE-ESTABLISHED AGAIN 2026-08-29, with the source's generic upgrades folded in rather than dropped: triage rules 9 (a Checked (date) per promotion row, with review-when naming an EVENT) and 10 (dated batch notes), rule 2's versioned-identifier clause, rule 3's 'an access tag is a dated observation' clause, the promotion table's new Checked (date) column, and the two Maintenance bullets that depend on them. The rows, the three real track names and the Scope line stay out. Restoring a template must not silently discard the format work done since.",
 ]
 
 [[collected]]
@@ -1742,6 +1768,265 @@ source = "~/.claude/thinking-notes/12-legacy-revival-campaign.md"
 status = "verbatim"
 
 # ---------------------------------------------------------------------------
+# 2026-08-29 — full source sync. Three groups arrive together:
+#   (a) four shell/git enforcement hooks the refreshed rule files cite;
+#   (b) the archdiag audit-drawing library, cited by the refreshed
+#       diagram-authoring skill — the architecture-diagramming set's
+#       executable half, the same move red-team/ made for the review set;
+#   (c) two ops/references/ detail files the refresh REPLACED shipped prose
+#       with pointers to. (c) is the class the round watched for: a refresh
+#       that turns content into a pointer silently removes content unless the
+#       pointee comes with it.
+# ---------------------------------------------------------------------------
+
+[[not_shipped]]
+path = "ops/references/lessons-detail.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-29. The source split `ops/lessons.md` (2026-08-21) into
+a CARD per entry plus the full record here: the original write-up, every
+recurrence block, retraction, provenance note and corpus number, verbatim and
+append-only, 1,959 lines. The cards ship — Context / Pitfall / Fix / Detection /
+Recurrences is the transferable part, and it is what a pre-task grep is for.
+The detail file is the evidence layer behind them: dated incident narratives
+quoting real work on one machine, the class this repo already excludes, and the
+same reasoning as `ops/references/harness-measurements.md` above (facts ship,
+the ledger behind them does not). Not audited line-by-line for identifiers,
+which an exclusion does not require and a collection would.
+REVIEW-WHEN: an adopter asks for the narrative behind a specific L-id, or the
+source promotes part of the detail file into a rule."""
+fallback = """`claude-ops/ops/lessons.md` itself. Every card carries the
+mechanism, the fix, the cheap detection check, and its `hits:` count — a
+climbing count under an unchanged Fix is the system's own evidence that the fix
+does not work, and that signal is entirely in the card. What you do not get is
+the per-incident story; cross-references of the form "L-011 hit 3" resolve in
+the detail file and read as dead pointers here, which is the visible half of
+this exclusion."""
+
+[[not_shipped]]
+path = "hooks/session_board_register.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-29. Cited by `claude-ops/ops/20-dispatch.md` §7a, which
+arrived in this round's refresh saying "registration is mechanised — you owe
+exactly one field". The hook is one half of the source's session board: it
+writes a ticket row into `tools/session-board/tickets.json` on PostToolUse of
+`spawn_task`. The board itself is under the `tools/` exclusion above and is not
+a rules asset, so shipping the writer alone would mount a hook that appends to a
+file no adopter has. Excluded as a pair with its store, not as a judgement about
+the hook's portability (it is portable)."""
+fallback = """§7a's three steps done by hand, which is what the source did
+before 2026-08-21 and what the section still describes step by step — a
+distinctive opening sentence, the `deliverables` field, and the cwd check. The
+section's own edit for this share says so; the degradation is one line of
+bookkeeping per dispatched ticket, not a lost capability."""
+
+[[not_shipped]]
+path = "hooks/secret_file_guard.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-29. Mounted by the source's settings.json and therefore
+named in `hooks/settings.example.json`'s omission list. It gates reads of one
+operator's own secret-bearing files; the policy IS the file list, and a file
+list for someone else's machine is not a rule. No shipped file cites it as a
+mechanism, so nothing here degrades."""
+fallback = """None needed — nothing in this share depends on it. If you want the
+shape, `hooks/dangerous_command_guard.py` is the same deny-list pattern with a
+portable subject."""
+
+[[not_shipped]]
+path = "hooks/project_registry_gist.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-29. Mounted by the source's settings.json (SessionStart)
+and named in the template's omission list. It injects a compressed digest of the
+source's own project registry — `references/PROJECTS.md`'s live rows, which this
+repo ships only as a header and one example row. The hook without the inventory
+prints an empty card."""
+fallback = """`claude-ops/references/PROJECTS.md` (the format) plus the
+prior-art rule in `global-claude-md/CLAUDE.md` that the injected card serves.
+Fill the registry first; the injection is an optimisation over reading it."""
+
+[[not_shipped]]
+path = "ops/cc-reconciled.json"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-29. A machine-written reconciliation stamp cited twice by
+`claude-ops/ops/rule-registry.md`: which harness build this environment's rules
+were last curated against. Its content is one machine's build ids and dates —
+a runtime record, not a rule, and wrong for any other install the moment it is
+copied."""
+fallback = """The rule-registry entries themselves state what reconciliation is
+FOR and when it is due; the stamp is the source's own bookkeeping of when it
+last ran. An adopter's equivalent is whatever their own curation step writes."""
+
+[[not_shipped]]
+path = "skills/literature-search-extract/verify/staleclaim.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-08-29. Cited once by a `claude-ops/ops/lessons.md` card as
+the check that caught a stale-claim class. It belongs to the
+`literature-search-extract` skill's verification lane, whose two reference files
+are already excluded above (`references/connectors.md`,
+`references/verification-gate.md`) — this is the executable half of the same
+lane, and shipping it alone would leave a script whose contract lives in files
+this share does not carry."""
+fallback = """The lesson card states the failure and the check in prose, which
+is what the citation is for. The skill itself ships and works without the
+verification lane; what you lose is the mechanical stale-claim pass."""
+
+[[not_shipped]]
+path = "skills/scientific-research-guide/STATUS.md"
+disposition = "excluded-by-decision"
+reason = """RE-DECLARED 2026-08-29 — it had been named in the skill's own
+strip-on-share note since 2026-08-16 but never carried an entry, and check R
+only started asking when a refreshed lessons.md card cited it. An internal
+status artifact of one skill's build-out: what is authored, what is planned,
+which profiles are half-migrated. The source's own packaging note lists it as
+strip-on-share, and COLLECTION-RULES.md rule 8 makes that statement outrank a
+re-reading of the file."""
+fallback = """`skill-toolkit/skills/scientific-research-guide/domains/README.md`
+states what ships and what does not, which is the only part of a status file an
+adopter can act on. `domain-expansion-guide.md`'s share edit already re-points
+its one "put it in STATUS.md" instruction at "a status file" of your own."""
+
+# --- (a) the four shell/git enforcement hooks ------------------------------
+# Collected 2026-08-29. Every one is cited by a rule file this repo already
+# ships, which is what forced the verdict: check R does not accept silence.
+# All four were portability-scanned first (the 2026-08-14 lesson: three hooks
+# were written off as machine-bound for a month and were not), and all four
+# resolve their paths through `os.path.expanduser`/`Path.home()`.
+
+[[collected]]
+path = "hooks/shell_transport_guard.py"
+source = "~/.claude/hooks/shell_transport_guard.py"
+status = "verbatim"
+
+[[collected]]
+path = "hooks/ps_errorpref_guard.py"
+source = "~/.claude/hooks/ps_errorpref_guard.py"
+status = "edited"
+edits = [
+  "docstring, backtest section: the corpus's second-drive mirror root -> 'a local session-archive mirror'. The corpus SIZE (3,405 deduplicated calls, 56 days) is the checkable part and stays; the drive it sat on is a machine fact.",
+  "docstring, incident line: the absolute path of the .ps1 that voided the run -> the project-relative tail `_bench-claude-arms/tools/run_arm.ps1`. Rule 2: the tail identifies the file for anyone who has the repo; only the machine prefix goes.",
+  "compose(), the RUNTIME annotation: the same absolute path plus its line numbers removed from the fix advice. This one is a deny-message-class edit — the text is emitted into a live session, so a pointer no reader can open is worse there than in a docstring. The fix SHAPE (save the preference, Continue around the native call, check $LASTEXITCODE, restore) is what the sentence is for and is kept whole.",
+]
+
+[[collected]]
+path = "hooks/ps_pipeline_close_guard.py"
+source = "~/.claude/hooks/ps_pipeline_close_guard.py"
+status = "edited"
+edits = [
+  "docstring, WHY A HOOK: the absolute path of the retrospective that raised ruling #8 -> its project-relative tail. The ruling number and the file name stay — they are how the claim stays checkable by the person who has the source.",
+]
+
+[[collected]]
+path = "hooks/branch_commit_guard.py"
+source = "~/.claude/hooks/branch_commit_guard.py"
+status = "edited"
+edits = [
+  "INCIDENT LOG and FALSE-POSITIVE LOG, 4 places: session ids -> 'a local session' / 'the peer session' / 'a peer session'. Same declared class as claude-ops/ops/lessons.md's Evidence lines — the id points at a transcript no reader can open. Every commit sha, date, branch name and recovery step stays; those are the record.",
+  "FP-2: an absolute home path quoted inside the false-positive's own example command -> `~/.claude`. The example is about a quote-blind segment split, which the tilde form demonstrates just as well.",
+]
+
+[[collected]]
+path = "hooks/tests/test_transcript_read_guard.py"
+source = "~/.claude/hooks/tests/test_transcript_read_guard.py"
+status = "verbatim"
+
+# --- (b) archdiag: the audit-drawing library -------------------------------
+# Collected 2026-08-29 into `architecture-diagramming/archdiag/`, which is why
+# that folder is now a collected_root. The skill's own pointer says
+# `tools/archdiag` — the source path — and `[source_map]` carries the mapping;
+# `carrier-playbook.md` gained a share edit naming the shipped location.
+# The reference build scripts (`outputs/diagram-authoring/*.build.mjs`) stay in
+# the source's deliverable tree, which the `outputs/` exclusion already covers:
+# what ships is the library plus the `build()` contract in its README, which is
+# what a build script is written against.
+# LF PIN: the emitted html's sha256 IS the deliverable's freeze receipt, and a
+# CRLF checkout would change every receipt with no content change behind it.
+# The source pins this with .gitattributes; so does this repo, added the same
+# day (`architecture-diagramming/archdiag/** text eol=lf`). Shipping the library
+# without the pin would ship an asset whose stated invariant this repo breaks.
+
+[[collected]]
+path = "architecture-diagramming/archdiag/README.md"
+source = "~/.claude/tools/archdiag/README.md"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/MAINTENANCE.md"
+source = "~/.claude/tools/archdiag/MAINTENANCE.md"
+status = "edited"
+edits = [
+  "the maintenance ritual's commands operate on the source's `outputs/diagram-authoring/` build scripts, which do not ship. A share note above them says so and states the adopter's equivalent (their own build scripts, same two commands). The commands themselves are kept verbatim — they are the ritual, and rewriting them into a shape nobody has run would be worse than a pointer the note explains.",
+]
+
+[[collected]]
+path = "architecture-diagramming/archdiag/index.mjs"
+source = "~/.claude/tools/archdiag/index.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/schema.mjs"
+source = "~/.claude/tools/archdiag/schema.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/asserts.mjs"
+source = "~/.claude/tools/archdiag/asserts.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/selfcheck.mjs"
+source = "~/.claude/tools/archdiag/selfcheck.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/emit.mjs"
+source = "~/.claude/tools/archdiag/emit.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/tables.mjs"
+source = "~/.claude/tools/archdiag/tables.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/route.mjs"
+source = "~/.claude/tools/archdiag/route.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/delta.mjs"
+source = "~/.claude/tools/archdiag/delta.mjs"
+status = "verbatim"
+
+[[collected]]
+path = "architecture-diagramming/archdiag/vendor/archify-geometry.mjs"
+source = "~/.claude/tools/archdiag/vendor/archify-geometry.mjs"
+status = "verbatim"
+# Third-party: geometry primitives vendored from tt-a1i/archify (MIT), clone
+# 12106be (2026-08-28), under the source's own borrow ruling of 2026-08-29. The
+# header carries the upstream licence line and the review-when. Kept verbatim on
+# purpose — the file's own instruction is that its rect shape is adapted at the
+# call boundary and never edited in place.
+
+# --- (c) the two ops/references detail files -------------------------------
+# Collected 2026-08-29 because this round's refresh REPLACED shipped prose with
+# pointers to them: 20-dispatch.md's worked contract example and five template
+# field lists moved into dispatch-templates.md, and lessons.md's L-023 detail
+# into shared-tree-git.md. Taking the refresh without the pointees would have
+# been a net content LOSS disguised as a sync.
+
+[[collected]]
+path = "claude-ops/ops/references/dispatch-templates.md"
+source = "~/.claude/ops/references/dispatch-templates.md"
+status = "verbatim"
+
+[[collected]]
+path = "claude-ops/ops/references/shared-tree-git.md"
+source = "~/.claude/ops/references/shared-tree-git.md"
+status = "edited"
+edits = [
+  "§1 routing ruling and the attribution paragraph, 2 places: the second-drive work root naming the operator's project tree -> 'a project tree elsewhere' / 'a project work root elsewhere'. Which CLASS of tree is meant is the rule; which drive it sits on is a machine fact and a pointer into a private tree. Commit shas, dates and the incident counts stay.",
+]
+
+# ---------------------------------------------------------------------------
 # placeholders — POSITION, not vocabulary.
 #
 # Free prose templates are not the gate's business; there are ~160 of them and
@@ -1787,13 +2072,19 @@ substitution = [
     # hooks/settings.example.json — the only two genuinely machine-bound values
     # in the whole hook layer; Claude Code expands neither ~ nor $VARS there.
     "<PYTHON_EXE>", "<CLAUDE_HOME>",
+    # claude-ops/ops/rule-registry.md (2026-08-29 sync): the source machine's
+    # work root and its transcript-mirror root, in two runnable examples.
+    "<WORK_ROOT>", "<MIRROR_ROOT>",
 ]
 
 # Genuine template parameters that legitimately sit in a path.
 # Reviewed 2026-08-14; each names what it stands for, which `<URL>` did not.
 path_position_ok = [
     # record/report naming
-    "<YYYY-MM-DD>", "<YYYYMMDD>", "<date>", "<id>", "<card>", "<type>",
+    "<YYYY-MM-DD>", "<YYYYMMDD>", "<date>", "<id>", "<type>",
+    # <card> retired 2026-08-29 by check D: lessons.md's Evidence schema line
+    # was rewritten upstream from `digest <memory-archive/digests/<card>.md>` to
+    # `digest <path>`, and the token had nothing using it from that moment on.
     "<name>", "<short-name>", "<slug>", "<N>", "<x>",
     # session records (compact-recovery round, 2026-08-16): the compacted
     # session's own id, which the reader sees in their runtime paths — the
@@ -1840,6 +2131,13 @@ path_position_ok = [
 # Tokens allowed on a runnable line — the reader is expected to fill them in.
 command_position_ok = [
     "<dir>", "<copy-dir>", "<username>", "<email>", "<hooks path>",
+    # 2026-08-29, shared-tree-git.md's recovery recipes: `git cat-file -e
+    # <sha>:<path>` — both are the reader's own, and no real value could be
+    # printed here that would work in their tree.
+    "<sha>", "<path>",
+    # rule-registry.md's two glob-fitness / transcript-scan examples: the roots
+    # they scan are the reader's own work and mirror trees.
+    "<WORK_ROOT>", "<MIRROR_ROOT>",
     # README.md Lane B: only the reader knows which SHA they last read.
     "<the-sha-you-last-read>",
 ]
@@ -1992,3 +2290,47 @@ kind = "secret-shaped assignment"
 match = "api_key = \"ABCDEF"
 reason = """KNOWN_TRUE calibration sample for the assignment shape. The value is
 a run of the alphabet, chosen so it is recognisable as a fixture on sight."""
+
+# --- 2026-08-29 sync round: four illustrative paths, none of them a location --
+# All four are EXAMPLES inside a defect explanation. The leak patterns are
+# position-blind by design — which is why they caught the six real ones this
+# round — so each is exempted narrowly, by file + kind + a `match` that is not
+# itself a drive path (writing the sample verbatim would make this manifest a
+# finding in its own right; the integrity-sweep entry above records that rule).
+
+[[allow]]
+file = "global-claude-md/CLAUDE.md"
+kind = "absolute local path (non-system drive)"
+match = "\\a"
+reason = '''The Bash-tool backslash-collapse example: a drive letter followed by
+two one-letter segments, which the tool delivers with every separator gone.
+Segment names that short are chosen so the transform is readable at a glance; it
+names no directory on any machine, and removing it would delete the
+demonstration the rule exists to give.'''
+
+[[allow]]
+file = "hooks/ps_errorpref_guard.py"
+kind = "absolute local path (non-system drive)"
+match = "\\p"
+reason = """A regex comment's example of an explicit executable token at command
+position. Single-letter placeholders inside a pattern comment, not a path — the
+comment's whole job is to show the three shapes EXE_TOKEN must match."""
+
+[[allow]]
+file = "hooks/ps_errorpref_guard.py"
+kind = "absolute local path (non-system drive)"
+match = "\\x.exe"
+reason = """The same comment block's call-operator example, showing the
+unambiguous quoted form beside the ambiguous `& $x` that var_kind() exists to
+classify. Same class as the entry above; both are what the pattern is written
+against."""
+
+[[allow]]
+file = "hooks/shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = "/Program "
+reason = """The MSYS path-conversion example (L-029): MSYS rewrites the argument
+`/PID` into a path under the Git installation before a Windows-native exe sees
+it. It is the DEFECT'S OUTPUT, produced by the Git install rather than chosen by
+anyone, and both the docstring and the runtime annotation are unreadable without
+it. A system-root path besides, which the patterns exempt everywhere else."""

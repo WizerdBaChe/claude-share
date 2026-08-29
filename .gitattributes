@@ -1,0 +1,56 @@
+# Line endings, pinned as a property of the asset — not left to a per-machine
+# `core.autocrlf`, which is invisible to the repo and to every future clone.
+#
+# This repo has a remote and is cloned on unknown platforms, so the DEFAULT is
+# plain `text=auto`: git stores LF and each checkout gets its platform's
+# ending. Only the exceptions below pin a specific ending, and each one names
+# the property that breaks without it.
+
+* text=auto
+
+# --- Receipt-stable regeneration assets ----------------------------------
+# archdiag emits html whose sha256 IS the deliverable's freeze receipt (B-3 in
+# the skill). Multi-line template literals inherit the SOURCE file's endings,
+# so a CRLF checkout of the library would push \r\n into every emitted file and
+# change every receipt with no content change behind it. Writer (node, LF) and
+# checkout must agree. The source environment pins the same paths for the same
+# reason; shipping the library without the pin would ship an asset whose stated
+# invariant this repo breaks. `index.mjs` additionally normalizes \r\n at
+# emission, so a receipt survives even a CRLF-editing tool touching a source.
+architecture-diagramming/archdiag/**            text eol=lf
+# The build script and its emitted page are pinned for the same reason, one
+# level up: a multi-line template literal inherits ITS OWN file's endings, and
+# the emitted html must stay byte-equal on disk to what build() wrote or its
+# receipt is no longer comparable in place. (index.mjs also normalizes \r\n at
+# emission — belt and braces, same property, and neither alone is enough: the
+# normalizer protects the OUTPUT, this line protects the working-tree copy.)
+architecture-diagramming/*.build.mjs            text eol=lf
+architecture-diagramming/*.html                 text eol=lf
+
+# --- Files a POSIX loader reads directly ---------------------------------
+# A CR inside a shebang makes the kernel look for an interpreter literally
+# named "bash\r".
+*.sh    text eol=lf
+
+# --- Windows-native scripts: stated, not inherited ------------------------
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# --- Binary safety net ----------------------------------------------------
+# None tracked today. Listed in advance because the damage from normalizing a
+# binary is silent corruption, and the moment one is added is the moment
+# nobody is thinking about this file.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary

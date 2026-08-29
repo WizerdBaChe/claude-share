@@ -1,5 +1,12 @@
 # hooks/ — 機械強制層
 
+> **十六支 hook（2026-08-29 起）。** 2026-08-14 首次收錄十二支，2026-08-29 補齊
+> 四支殼層／git 強制層（`shell_transport_guard`、`ps_errorpref_guard`、
+> `ps_pipeline_close_guard`、`branch_commit_guard`）——那四支都被本 repo 已出貨的規則檔
+> 引用當作機制，卻一直沒附；這正是下面那段警語講的同一類漏宣告，只是換了一批檔案。
+> 四支全部先過可攜性掃描才收。`settings.example.json` 掛載其中**每一支**，這是它的
+> 不變式；`tests/` 底下的回歸矩陣不掛載（測試不是 hook）。
+
 > 這批檔案是 2026-08-14 才補進本 repo 的。在那之前，`claude-ops/` 與
 > `environment-guide/` 有 20 多處引用它們當作「機械強制」的依據，但檔案一個都沒附，
 > 而 manifest 把原因寫成「machine-bound（綁機器）」——**那個判斷是錯的**。
@@ -33,8 +40,13 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | `instructions_loaded_logger.py` | InstructionsLoaded | 只做觀測：哪些指令檔在什麼時候被載入。是決定「哪條規則可以搬去 path-scoped」的證據來源 |
 | `compact_bookmark.py` | PreCompact | **2026-08-16，compact-recovery 三支之一**（總覽與召回紀律：[`../compact-recovery/README.md`](../compact-recovery/README.md)）。壓縮前把 transcript 路徑／行數／大小／trigger 寫成書籤，再 best-effort 跑 preserve.py，讓活 session 的摘要卡在壓縮當下就存在 |
 | `compact_pointer.py` | SessionStart `compact` | 壓縮後注入 ~130 token 指標卡：digest 優先、原檔壓縮前區段（lines 1..N）、兩個召回觸發條件、視窗紀律。書籤缺失時出降級卡而非沉默 |
-| `transcript_read_guard.py` | PreToolUse `Read` | 語料根目錄下 >128KB 的檔案，無 `limit` 或 >120 行一律 deny，訊息內附合規路徑（先 Grep 定位再視窗讀）。Grep／Glob 不受影響，小檔自由讀 |
+| `transcript_read_guard.py` | PreToolUse `Read` | 語料根目錄下 >128KB 的**會談紀錄 (session record)** 無 `limit` 或 >120 行一律 deny，訊息只講限制與重試方式。**2026-08-29 起身分改看形狀不看位置**：`.jsonl`／`digests/` 下的 `.md` 才算紀錄，同目錄的 WebFetch 快取、PDF、索引檔自由讀（誤擋 2 次後的修正，docstring 有誤報紀錄與決策表） |
+| `shell_transport_guard.py` | PreToolUse `Bash` | **2026-08-29 新收**。Bash tool 三個**靜默**傳輸缺陷：連續反斜線減半（標註不擋——4,913 次呼叫回測顯示 89/112 命中其實是作者在補償）、≥7,700 B 指令被 OS 截斷（可判定，直接擋）、MSYS 把 `/c`、`/PID` 改寫成路徑（標註）。否決前先把整條指令寫進 telemetry |
+| `ps_errorpref_guard.py` | PreToolUse `Write\|PowerShell` | **2026-08-29 新收**。`$ErrorActionPreference='Stop'` 管到原生 exe 時**兩個方向都錯**：stderr 被重導時無害警告變終止錯誤；非零 exit code 反而完全不觸發。只標註不擋。掛在 Write 而非 Edit/Bash 是回測結果：53 個真實 payload 有 47 個經 Write 進來 |
+| `ps_pipeline_close_guard.py` | PreToolUse `PowerShell` | **2026-08-29 新收**。`… \| Select-Object -First N` 會**關閉管線並殺掉上游行程**：`python build.py \| Select-Object -First 5` 不是「跑完取前 5 行」，是跑到第 5 行殺掉、回傳 exit 255。同一份回測說這支的真實表面和上一支相反（PowerShell 3411 / Write 0），所以掛載點不同 |
+| `branch_commit_guard.py` | PreToolUse `Bash\|PowerShell` | **2026-08-29 新收**。`~/.claude` 內的 checkout 上 `git commit` 時 HEAD 不在 `main` 就擋，除非帶 `[branch-ok]` 或該 worktree 有 opt-in 檔。兩次真實事故（commit 落到同伴 session 的分支）的補償控制——原本的散文儀式當時**有跑，但它在 `&&` 鏈裡不具否決權** |
 | `settings.example.json` | — | 掛載範本，見下 |
+| `tests/test_transcript_read_guard.py` | — | `transcript_read_guard.py` 的回歸矩陣（22 個案例，含每個已知繞過形式）。**手動跑，不是 hook**：`python hooks/tests/test_transcript_read_guard.py` |
 
 ## 安裝
 

@@ -58,6 +58,41 @@ consumer and by the precision the claim needs — never by drawing convenience.
 - **draw.io / external editors**: only on explicit user request; export SVG
   for verification and note that round-trip fidelity is unverified here.
 
+## Audit view-set toolchain (this machine): tools/archdiag
+
+For audit-drawing view sets (C4 / statechart / DFD / sequence panes with the
+in-page §4 self-check), do NOT hand-author a per-file framework — that class
+drifted within one day (F1↔F2 check-set divergence, the S1 motivating case).
+Build through `~/.claude/tools/archdiag/`:
+
+- `build()` (index.mjs): schema validation (`ev` evidence anchors required on
+  every node/edge — Step 0 enforced mechanically) → build-time geometry
+  asserts → marker closure → deterministic emission → sha256 receipt line.
+  Byte-stable: identical model ⇒ identical bytes.
+- `route(view, {grid})` (route.mjs): orthogonal corridors + pill placement
+  behind the `RouterProvider` seam (default `'channel'`). Author node rects
+  by hand (positions carry semantics — D-042); leave edges without `pts`,
+  then `applyRoutes()`. Field-accepted F3 2026-08-29: 89/89 edges routed,
+  0 corridor hand-fixes (F1/F2 baseline: 4–5 per round), first-render §4
+  PASS, user visual gate passed incl. corridor aesthetics. The named
+  alternative `'archify-adapted'` stays spec'd-not-built.
+- `delta.mjs`: model differ (B-9 automation) — `stripOverlay()` recovers the
+  base from an overlay-flagged view; diff the UNROUTED models (routed `pts`
+  are geometry noise). Absent-type edges are counted apart by design.
+- Verification: serve + navigate per the headless notes below, then read
+  `window.__geometryReport` — `{pass, diagnostics, stats}`; the measuring
+  pass runs once on load with every pane rendered (no tab-clicking needed).
+- Invariants and the maintenance ritual (receipt regression after ANY library
+  edit, selfcheck calibration, eol pins): `tools/archdiag/README.md` +
+  `tools/archdiag/MAINTENANCE.md`; environment sweep item: integrity-sweep
+  check 27.
+
+Reference builds (mfp-audit-f3 routed — current pattern; dit-audit-f1 /
+prism-audit-f2 hand-routed pts, frozen receipts) stay in the source
+environment's deliverable tree. In this share the library itself ships as
+`architecture-diagramming/archdiag/`; its README carries the `build()`
+contract a build script is written against.
+
 ## Source-of-truth & regeneration
 
 The structural text model (Step 2) plus the generation script IS the

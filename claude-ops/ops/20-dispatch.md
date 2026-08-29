@@ -65,16 +65,16 @@ becomes "no mechanism used" (`lessons.md` L-011 P2; sweep check 12).
    decide the verdict; **(C) open-ended judgment** (what's wrong / what's
    missing — the shape IS the answer's value) → NO schema up front: acquire
    free-form first, then convert each claim into a verifiable unit and
-   machine-check after. Measured 2026-08-16 (2×2 arms, same task, same
-   model): a schema-first contract suppressed the INVESTIGATION itself — 1
-   tool call vs 8/18, no companion files read, zero empirical probes — not
-   merely the output's shape; free-first cost ~1.6× tokens / ~2× wall-clock,
-   which is the price of the investigation, not overhead. Orthogonal to the
-   class: each acceptance layer stacked on one output still rules only on
-   what IT can determine (global gate rule; `lessons.md` L-019). State the goal, not the proof ritual — "prove your
-   own work passes" invites an expensive self-verification loop. The worker
-   self-checks FORMAT compliance only; ACCEPTANCE verification belongs to
-   the dispatcher with fresh context (`10-command-loop.md` Step 6).
+   machine-check after. Measured 2026-08-16 (2×2 arms, same task/model): a
+   schema-first contract suppressed the INVESTIGATION itself (1 tool call vs
+   8/18), not merely the output's shape; free-first cost ~1.6× tokens —
+   the price of the investigation, not overhead. Orthogonal to the class:
+   each acceptance layer stacked on one output still rules only on what IT
+   can determine (global gate rule; `lessons.md` L-019). State the goal, not
+   the proof ritual — "prove your own work passes" invites an expensive
+   self-verification loop. The worker self-checks FORMAT compliance only;
+   ACCEPTANCE verification belongs to the dispatcher with fresh context
+   (`10-command-loop.md` Step 6).
 3. **Report format** — the shape of the conclusion + where artifacts land.
 4. **Redlines** — the explicit do-not-touch list (rule-tier files, production,
    anything the project protects).
@@ -82,12 +82,7 @@ becomes "no mechanism used" (`lessons.md` L-011 P2; sweep check 12).
    able to reach into a path the worker CAN read. A worker that can't read what
    it needs tends to fabricate a plausible answer rather than report the gap.
 
-✅ "Goal: unify date formats (downstream parser needs ISO-8601 — that's why).
-Acceptance: `python check_dates.py out/` prints OK. Output: JSON per schema in
-schema.json. Redlines: don't touch archive/. Read first: spec.md (copied to
-your scratch dir)."
-❌ "Clean up the dates in these files, you know what I mean" — no acceptance,
-no format, no redlines; whatever comes back is unreviewable.
+Worked ✅/❌ pair for this contract: `ops/references/dispatch-templates.md`.
 
 ## §3 Gotchas when dispatching to an external CLI agent (verify in your env)
 
@@ -185,38 +180,16 @@ works now".
 
 ## §6 Dispatch templates (fill brackets; contract parts are non-negotiable)
 
-**T1 Search/inventory** (read-only): task / motivation / scope (explicit globs)
-/ match criteria + one worked example / output path + format (count →
-categorized list, each `file:line` + ≤80-char excerpt) / redline: write only
-the report file / reply: count + top 3 findings.
-
-**T2 Implementation**: task + spec-file path (spec as file, not pasted) / read
-first: self-sufficient materials / to-do (one verifiable action per line) /
-design constraints stated as fixed / acceptance commands / redlines / reply:
-≤5-line summary + acceptance output + known limitations.
-
-**T3 Refactor/batch edit**: old→new pattern + scope / motivation /
-**do-not-touch list (more important than the change list)** / per-file verify
-command / batch cap of N files with a count per batch / ambiguous cases →
-"needs a human" list, never guessed / output: change list + skipped list +
-verify output.
-
-**T4 Research** (read-only + one report): question / background + what decision
-it feeds / starting sources (worker may add a few, each with URL + one-line
-justification) / live search required, no training-data recall; every claim
-cited / output structure: conclusion first → comparison table → verdicts
-(adopt / don't / needs-human, each with evidence; mark uncertainty, never
-fabricate) / reply: one-line method + top 3 conclusions.
-
-**T5 Review/red-team** (read-only, never the author): target / context (runs
-unattended? touches user data?) / cross-reference paths / focus areas ranked
-by risk / verdict: PASS/FAIL first line + WARNING list (HIGH/MED/LOW, each
-with `file:line` + failure scenario) / adversarial stance: raise at least 3
-specific challenges.
-
-Template rules of thumb: long spec → file first, then dispatch; acceptance is
-written for the worker but the dispatcher still spot-checks (never a
-substitute); on re-dispatch, put the previous failure output in "read first".
+Five shapes — **T1 search/inventory** (read-only), **T2 implementation**
+(spec as a file, acceptance commands), **T3 refactor/batch edit** (the
+do-not-touch list outranks the change list; ambiguous cases → "needs a human",
+never guessed), **T4 research** (read-only + one report; live search, every
+claim cited), **T5 review/red-team** (read-only, never the author; PASS/FAIL
+first line + ranked WARNING list + ≥3 specific challenges). Field lists and
+the worked §2 example: `ops/references/dispatch-templates.md`. Rules of thumb:
+long spec → file first, then dispatch; acceptance is written for the worker but
+the dispatcher still spot-checks; on re-dispatch, put the previous failure
+output in "read first".
 
 ## §7 The report contract (what a worker hands back)
 
@@ -227,14 +200,95 @@ substitute); on re-dispatch, put the previous failure output in "read first".
 - Any numeric or factual claim carries a source; no source → label
   "unverified". Never fabricate.
 
+## §7a Supervising a dispatched ticket (do the registration AT dispatch time)
+
+A dispatched session cannot be identified after the fact — two id namespaces
+nothing on disk joins, and transcripts contaminated by cross-session messages
+so only the OPENING user turn binds cleanly (measured 2026-08-21; evidence in
+`tools/session-board/README.md`).
+
+> **Share note.** Neither half of that mechanism ships here: the registering
+> hook (`hooks/session_board_register.py`) and the ticket board it writes into
+> (`tools/session-board/`) are both declared in `tools/share-manifest.toml`
+> under `[[not_shipped]]`. In this share the three steps below are done BY
+> HAND — which is what the source did before 2026-08-21, and what the steps
+> already describe. Only the question of who writes the row changes; every
+> field, and the reason each one exists, is unchanged.
+
+**Registration is mechanised — you owe exactly one field.** Steps 2 and 3 below
+used to be prose here, and prose is what this repo measured failing (L-011 hit
+3, L-023 hit 2). `hooks/session_board_register.py` writes the entry on
+PostToolUse of `spawn_task`, taking `task_id` from the response and `title`,
+`cwd` and `match` from the call — the only real dispatch surface (32
+spawn_task vs 0 Workflow; `Agent` calls are subagents the board does not scan;
+`tools/session-board/sweep-dispatch-surface.py` re-derives it).
+
+1. **Open the prompt with a sentence that appears nowhere else**, and never quote
+   another ticket's opening sentence in a message. The hook copies that first
+   line verbatim into `match`; it is still yours to make distinctive. (It cuts
+   the phrase before any character JSON escapes, and writes `match: null` rather
+   than a weak one — the board then says UNBOUND, which is correct.)
+2. **Fill in `deliverables` — the one field a machine cannot infer.** The hook
+   writes `null`, which the board prints as `NOT DECLARED` in magenta with the
+   edit to make. Replace it with the paths the ticket must produce, or with `[]`
+   if it deliberately has none (e.g. "commit these paths") and put the
+   verification command in `note`. `[]` and `null` are different states on
+   purpose: `[]` says you decided, `null` says nobody has. Inventing a path to
+   watch is still worse than watching nothing.
+3. **Check the cwd if the ticket is started in a worktree.** The hook records
+   the cwd passed to `spawn_task`, or the dispatching session's if none was
+   passed; a worktree session's real cwd differs and the board will report
+   UNBOUND until you correct it.
+
+Nothing else is owed. If the board says `UNBOUND` for a ticket you just
+dispatched, the hook did not run — check `telemetry/session-board-register.jsonl`
+and `ops/references/integrity-sweep.md` check 22, do not re-add the entry by
+hand and leave the cause in place.
+
+Then supervise with `tools/session-board/session-board.ps1 -TicketFile ...`, run
+twice a few minutes apart. Division of authority, because neither side can
+answer the other's half:
+
+| question | authority |
+|---|---|
+| is it still running? title? `local_` id? | `ccd_session_mgmt list_sessions` |
+| which transcript is which ticket? quiet for how long? what did it produce? | the board |
+
+**Never read completion from silence.** A quiet transcript cannot be told apart
+from stuck, waiting-on-permission, or thinking; raising the threshold only moves
+the misjudgement later. Judge by the deliverable — `ops/lessons.md` L-025 (B4),
+where a monitor that trusted silence harvested an empty deliverable. `QUIET +
+deliverable ABSENT` is a session to go and look at, not a finished one.
+
+**A tree with a peer in it shares HEAD, `.git/index` AND the working tree** —
+the rule lines, each measured on a real incident (2026-08-17, 2026-08-21 ×2):
+- Do not `git checkout -b` while a peer session is live — moving HEAD redirects
+  their next commit onto your branch. Additive, zero-behaviour-change work goes
+  straight onto the current branch; anything larger waits for the baton-pass.
+- A ref move (`git update-ref`, `git branch -f`) WITHOUT a following `checkout`
+  leaves the shared index stale, and the next commit in ANY session silently
+  records every path it does not know about as a DELETION (52 files, no error,
+  `merge-base --is-ancestor` still says yes — ANCESTRY AND CONTENT ARE
+  DIFFERENT QUESTIONS).
+- After ANY commit in a shared tree: **`git show --stat HEAD`, read for what you
+  did NOT write** — deletions are the loud case; ABSORPTION of a peer's
+  uncommitted edit into your commit (content correct, provenance gone, every
+  check green) is the quiet one. If you must commit a path a peer has dirty,
+  carry their provenance in the message and stage nothing else of theirs.
+- To verify SOMEONE ELSE'S publish, ask the content question — `git cat-file -e
+  <sha>:<path>` or a tracked-file count — not `--is-ancestor`.
+Routing by coupling class, the full commit ritual, attribution (by what a commit
+TOUCHES, never by which session looks busy) and the recovery recipes:
+`ops/references/shared-tree-git.md` (the canonical home of `lessons.md` L-023).
+
 ## §8 Token discipline (main-session hygiene)
 
-- Batch micro-tasks: each dispatch has fixed overhead — **measured 2026-08-14 at
-  ~49K tokens of preamble for one `general-purpose` worker with zero tool uses**
-  (`rule-registry.md` → subagent instruction surface). Don't send sub-minute
-  tasks one at a time; one worker, several items, each verified individually.
-  The currency §1 actually buys is MAIN-CONTEXT preservation, not total tokens:
-  below roughly that size, reading it yourself is cheaper both ways.
+- Batch micro-tasks: each dispatch has fixed overhead — ~49K tokens of preamble
+  per `general-purpose` worker (`rule-registry.md` → subagent instruction
+  surface). Don't send sub-minute tasks one at a time; one worker, several
+  items, each verified individually. The currency §1 buys is MAIN-CONTEXT
+  preservation, not total tokens: below roughly that size, reading it yourself
+  is cheaper both ways.
 - Small reference material: pass a path anyway (keeps the prompt short and the
   material updatable).
 - Large tool output: check size first; read tail/summary before deciding to
@@ -247,10 +301,9 @@ substitute); on re-dispatch, put the previous failure output in "read first".
 `skill-trigger-dict.md`、層級歸一~四節）。模型上限與 tier 映射見
 `ops/environment.md`。該表只管 subagent，不是 main-loop model 的預設。
 
-**effort 不是 per-call**（查證 2026-08-12，見 `environment.md`）：自訂 agent 的
-強度寫死在該檔 frontmatter 的 `effort:`，派工當下改不了。下表「強度」欄記錄的是
-各定義**已經釘住**的值，不是給 dispatcher 填的參數；要改就改定義檔。
-`model` 仍可 per-call 覆寫。
+**effort 不是 per-call**（`environment.md` Dispatch mechanisms）：下表「強度」欄
+是各定義檔 frontmatter **已經釘住**的值，不是 dispatcher 可填的參數；要改就改
+定義檔。`model` 仍可 per-call 覆寫。
 
 | 任務形狀 (task shape) | agentType | model × effort（定義檔已釘） | 能力邊界 |
 |---|---|---|---|
@@ -266,27 +319,21 @@ substitute); on re-dispatch, put the previous failure output in "read first".
 | 研究/多源查證 | `general-purpose` + T4 契約 | sonnet × 繼承 | 全繼承 |
 | 品味/政策措辭/模糊判斷 | **不派工** — 主 session 自做（`30-judgment.md` R6） | — | — |
 
-能力邊界是**強制的**，不是提示：唯讀角色的 `tools` 白名單不含 `Edit`/`Write`，
-且 `permissionMode: dontAsk` 會自動拒絕 allowlist 以外的動作。派工時不要要求
-唯讀 agent 順手修好——它做不到，只會浪費一輪。反之，實作型角色**刻意不設**
-`permissionMode`，因為 `dontAsk` 會連 `Edit` 一起拒絕（allowlist 沒有它）。
-
-skill 觸發：每個定義都保留 `Skill` 工具，body 只指示「查執行期 roster」而不寫死
-skill 名稱，所以新增 skill 自動生效、不需回頭改定義。**移除 `Skill` 會靜默關閉
-整個 skill 機制**（`lessons.md` L-014）。
+能力邊界是**強制的**，不是提示（`environment.md` Dispatch mechanisms）：唯讀角色
+的 `tools` 白名單不含 `Edit`/`Write`，派工時不要要求它順手修好——做不到，只會浪費
+一輪；實作型角色**刻意不設** `permissionMode`（`dontAsk` 會連 `Edit` 一起拒絕）。
+每個定義都保留 `Skill` 工具——**移除它會靜默關閉整個 skill 機制**（`lessons.md`
+L-014）。
 
 消歧（易混淆組）：
 - `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`：
   skill 是**方法論**（快速抓蟲/深度健檢），agent 是**執行載體**。主 session 收件
   紅隊時派 `code-reviewer` agent；使用者主動要求 review 時走 skill 路由
   （`skill-trigger-dict.md` 審查家族）。內建 `/code-review` 與 `/verify`
-  **不能用 `skills:` 預載**（官方明載，理由是預載只取自模型可調用的集合）。
-  但實測 2026-08-12：subagent 的 roster **仍然列出**它們，所以「subagent 能不能
-  實際叫起來」未經驗證 —— 派工時不要依賴它，改派 `code-review-deep-checklist`
-  或在交辦訊息裡直接給方法。
+  **不能用 `skills:` 預載**，subagent 能否自行叫起未經驗證（2026-08-12）——
+  派工時不要依賴它，改派 `code-review-deep-checklist` 或在交辦訊息裡直接給方法。
 - `software-architect` vs `Plan`：單純要一份實作計畫 → `Plan`；要 ADR/選型
   trade-off → `software-architect`；要任務拆分與派工建議 → 那是 dispatcher
-  本人的工作（`10-command-loop.md`），不外派。
-  （`management-tech-lead` 已於 2026-08-12 封存：三個分支全部路由離開它，
-  留著只是名冊噪音。）
+  本人的工作（`10-command-loop.md`），不外派。（`management-tech-lead` 已於
+  2026-08-12 封存。）
 - 其餘 agent 按 description 對號入座；本表只列高頻與易混淆者。

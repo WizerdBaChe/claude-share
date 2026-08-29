@@ -49,7 +49,8 @@ avoiding the need to replay full conversation history and saving usage.
    project's phase-log. Steps 5 and §B then act on this answer instead of
    asking again.
 2. Upon consent, **draft** a high-quality but concise phase summary (do not compact yet).
-3. **Resolve the record home FIRST**, then write to `<home>/<project>-phase-log.md`:
+3. **Resolve the record home FIRST** — and note whether it is git-tracked, which
+   decides step 6b's branch — then write to `<home>/<project>-phase-log.md`:
    - If the project already keeps records somewhere (an existing
      `<project>-phase-log.md` in `~/.claude/references/` OR
      `<project-root>/references/`), that existing home WINS — never start a
@@ -76,7 +77,9 @@ avoiding the need to replay full conversation history and saving usage.
    ends); if yes, append D-/P- entries and refresh the `## Now` block (frontier /
    premises / open) in `references/<project>-decisions.md` (format and
    write-triggers: `~/.claude/ops/60-bootstrap.md` §G — create lazily). Skip
-   silently if nothing qualifies.
+   silently if nothing qualifies. A journal entry written here is a checkpoint
+   artifact: step 6b persists it with the phase-log — an uncommitted, unhanded
+   D-/P- entry is the same defect as an uncommitted section.
 5c. **Map sweep** (write-time half only — freshness is checked at session start,
    §C step 1, never here): if `references/<project>-map.md` exists, ask whether
    any `[infer]` in its `## Open [infer]` section got confirmed this phase — each
@@ -95,8 +98,40 @@ avoiding the need to replay full conversation history and saving usage.
    live in the file's header comment.
    Then run `python ~/.claude/tools/project-dashboard.py` to regenerate the derived
    views; if Python is unavailable, say so and continue — the checkpoint never
-   blocks on the dashboard.
-7. After writing, **report** which file and which Phase section was written.
+   blocks on the dashboard. The row is a checkpoint artifact: step 6b persists
+   it with the phase-log; the dashboard's derived views are regenerable and are
+   NOT staged unless the repo already tracks them.
+6b. **Persist** — the step that turns the section into a checkpoint. Property of
+   the asset: **a phase-log section (and the glossary / journal / PROJECTS.md
+   row this checkpoint edited) that is uncommitted AND unhanded is incomplete**;
+   the deliverable is the record in git or in a named hand-off, never the file
+   in the working tree. Measured 2026-08-21: 17 complete, correct record
+   artifacts from 5 projects — 5 of them phase logs — sat uncommitted in
+   `~/.claude` for up to 109 h because every writer stopped at "the file is
+   written". Route by tracking state, then by coupling class:
+   - **Record home not git-tracked**: say so in step 7's report; nothing else.
+   - **Git-tracked, and the tree is yours or the coupling class allows it**
+     (additive record work on a disjoint domain — `ops/references/shared-tree-git.md`
+     §1): commit NOW, in this step, not at session end, by the ritual of the
+     same file §2 carried here by reference — `git branch --show-current` →
+     stage the EXPLICIT paths this checkpoint touched (never `-A`; never a
+     peer's dirty path without their provenance in the message, §4) →
+     `git commit -F <msgfile>` (`docs(<project>): checkpoint Phase <N> — <slug>`)
+     → `git show --stat HEAD`, read for what you did NOT write.
+   - **Git-tracked, tree shared, and the coupling class says SERIALIZE**
+     (same workstream in two sessions, or a peer's in-flight work in a path you
+     would stage): do NOT commit — **hand off explicitly**: name the dirty paths
+     and the session/baton that owns the commit (identified by what it touches,
+     never by cwd), and message that session if a hailing tool is available
+     (§1 names the current one). The hand-off line is the deliverable here.
+   L-023 routing is the caveat, not an exception: committing mid-session in a
+   shared tree caused every L-023 incident, so this step NEVER reads "always
+   commit" — it reads "commit or hand off, routed, and name which".
+7. After writing, **report** which file and which Phase section was written AND
+   how it was persisted: the commit sha from 6b's `git show --stat HEAD`, or the
+   hand-off line (paths + owning session/baton), or "home not tracked". A
+   report that names the file but none of the three is reporting an incomplete
+   checkpoint.
 8. Then proceed to §B (ask whether to /compact).
 
 ### Phase-Log Section Format (follow this order and headings strictly; write all content in English)
@@ -149,7 +184,7 @@ avoiding the need to replay full conversation history and saving usage.
    `cleanupPeriodDays` (default 30) WILL delete both halves eventually. On
    the source machine a daily mirror task copies transcripts to an archive
    directory outside the retention window (ruling D-033); with one, check
-   `_mirror-logs\last-run-status.txt` shows a recent OK, then set
+   its own last-run status shows a recent OK, then set
    `archived: yes` and move on. If the mirror is absent or stale, offer to
    copy the session's `.jsonl` (and its `<id>/subagents/` folder, if present)
    to the archive folder manually. NEVER parse the jsonl internals — the
@@ -180,4 +215,5 @@ avoiding the need to replay full conversation history and saving usage.
 ## Design Principles
 - Always **seek consent** before writing files or compacting.
 - The phase-log is an **index / entry** — details live in separate files. Keep them separate to balance searchability and low read cost.
+- A checkpoint lives in **git or in a named hand-off**, never only in a working tree — the file is the carrier, the commit (or the baton) is the deliverable (§A 6b).
 - The goal is always: **let the next session take over by reading just one small file**.
