@@ -2,14 +2,14 @@
 name: scientific-research-guide
 description: >-
   Scientific research ADVISORY companion (natural / engineering science): diagnoses the
-  current research stage and recommends next actions — research questions,
-  literature-review planning (PRISMA), experiment design (controls/sampling),
-  statistical test choice, model V&V and uncertainty, fit interpretation,
-  reproducibility / submission readiness. Trigger on
-  「我的研究卡在…」「這個實驗怎麼設計」「該用哪個統計檢定」「投稿前要補什麼」. Non-intrusive: advice first; writes code or
-  touches data only on explicit request. Ships domain profiles (plasmonic waveguides /
-  SPP / SERS, topological insulators) — research questions in those fields also trigger.
-  NOT for cited topic reports (→ deep-research). Full disambiguation:
+  research stage and recommends next actions — research questions, literature review
+  (PRISMA), experiment design (controls/sampling), statistical test choice, model V&V and
+  uncertainty, fit interpretation, reproducibility / submission readiness. Trigger on
+  「我的研究卡在…」「這個實驗怎麼設計」「該用哪個統計檢定」「投稿前要補什麼」. Advice first; writes code or
+  touches data only on explicit request. Domain profiles — plasmonic waveguide / 波導 /
+  SPP / SERS, topological insulator, vertical GaN, microLED, silicon photonics,
+  光子封裝 / packaging reliability, CPO / 共封裝光學 — questions in those fields trigger it
+  too. NOT for cited topic reports (→ deep-research). Profile list + disambiguation:
   ~/.claude/skill-trigger-dict.md.
 ---
 
@@ -69,12 +69,45 @@ of which domain files exist and when to load each — and resolve the field in t
 2. **Sub-profiles.** For that domain, scan the manifest's `sub-profile` rows (specialized
    branches — a material system, phenomenon, or method that shares the domain's first
    principles but adds its own traps/methods/triggers, e.g. Bi₂Se₃, WAL, HOTI under TI). On
-   a trigger match, load it too and **activate its own Node 6/8 triggers** the same way as
-   the base profile's. `reference`/`boundary` rows are pulled only when their specific topic
-   is explicitly engaged (a `boundary` row routes the user *out* to a sibling domain).
+   a trigger match, load it too and **activate its standing triggers** (its Node 6 rows and
+   other trigger-bearing columns) the same way as the base profile's. `reference`/`boundary`
+   rows are pulled only when their specific topic is explicitly engaged (a `boundary` row
+   routes the user *out* to a sibling domain).
 
-If no base profile matches, proceed with the generic framework and say so; do not improvise
-domain-expert claims without Gate B verification.
+**Step 0 resolution ladder** (how a match is decided — a fuzzy question is routed, not guessed):
+1. **Literal anchor hit** — the user's wording contains a row's trigger keyword → load;
+   standing triggers fire normally. Match **case-sensitively** (`TI`, `RIN`, `SPP` and 35 other
+   short acronyms hit inside ordinary words once lower-cased) but **variant-insensitively**:
+   compare in Unicode NFKC, so `Bi₂Se₃` matches the manifest's `Bi2Se3`, `Z2` matches `Z₂`,
+   `μLED` matches `µLED`, and a full-width or superscript spelling matches its plain form. The
+   manifest lists one spelling per term and relies on this (`_routing.md` § How Gate A uses
+   this manifest).
+2. **Scope match, no literal hit** (vague/fuzzy phrasing): match the described physical
+   system and observable against the rows' `Covers / role` column and whatever
+   cluster/disambiguation sections `_routing.md` carries. Exactly one candidate → load it and **state the routing
+   basis in one line** ("loading X — the question is about ⟨scope⟩") so a misroute is visible
+   and correctable; never answer silently from a guessed profile.
+3. **Two-plus candidates** (typically within a cluster) → ask ONE routing question taken from
+   the relevant disambiguation table's own axis (those tables are pre-written clarification
+   scripts), instead of speculatively loading several profiles. A question genuinely spanning
+   two profiles still loads both and states which owns the governing constraint. On a pure
+   retrieval turn (Step 0.5) do NOT block the handoff with a routing question — pick the
+   best-scope candidate as search context and state the basis.
+4. **No candidate** → proceed with the generic framework and say so; do not improvise
+   domain-expert claims without Gate B verification.
+Never compensate for a missed fuzzy match by adding broad manifest keywords — keywords are
+precision anchors (a false load is worse than prose routing, `_routing.md` § Maintenance);
+recall for fuzzy phrasing is owned by this ladder.
+
+**Step 0.5 — Scope check (fires after Step 0, before the diagnosis).** If the turn carries no
+research-stage question — it is purely retrieval or extraction ("find me 5 papers on X", "make an
+evidence table", "what does this paper say") — do NOT run the tier mapping or the six-part
+diagnosis, and do NOT fire a loaded profile's pitfall/decision triggers *at the user*. Hand the
+search to `literature-search-extract` with a request contract (Gate B); a loaded domain profile is
+then search **context** (vocabulary, known key sources, what to extract) only. If a methodology risk
+is genuinely at stake, offer it in one line and let the user pull. Answering a booklist request with
+a stage diagnosis is over-triggering, not thoroughness. (Added 2026-08-24 after eval case 11 — the
+negative control — showed the wiring forced the opposite.)
 
 **Step 1 — Tier mapping.** Map their description onto the tier framework:
 
@@ -186,15 +219,31 @@ The skill is three-layered: Layer A is the generic tier framework
 `domains/`, Layer C is the user's session context. When a profile is loaded (Gate A Step 0),
 its content *sharpens* every gate rather than replacing them:
 
-- **Constraint warnings** — the profile's「不可違反的物理約束」and「常見假設陷阱」tables are
-  standing if-then rules. When the user's description matches a trap's trigger condition
-  (e.g. "Drude model for Au at visible wavelengths"), warn immediately and cite the profile's
-  correct practice — regardless of what the user asked about.
-- **Plausibility check** — when the user reports a number for a profile-listed quality
-  metric, compare against the typical range. Outside the range (too good OR too bad) →
-  ask whether it was cross-validated by an independent method before interpreting it.
-- **Decision-trigger checklist** — each profile ends with a「決策觸發點清單」; treat each
-  entry as a Gate A sub-hook: user says/does X → perform the listed confirm/warn/suggest.
+- **Standing trigger set** — a loaded profile's triggers are the trigger-bearing columns its
+  nodes already carry, each with one home (`domain-expansion-guide.md` §3.6): Node 1's
+  「不可違反的物理約束」and its mandatory Decision point; Node 2's `Common misuse` column;
+  Node 4's `Common error` column; **Node 6's `Trigger condition` column (the primary home)**;
+  and the Conflict Notes' confirmation questions. When the user's description matches one
+  (e.g. "Drude model for Au at visible wavelengths"), warn/ask immediately and cite the
+  profile's correct practice — regardless of which *part* of their work they asked about.
+  There is no separate trigger checklist node. This applies within an advisory turn; on a
+  pure retrieval/extraction turn the profile is context only and its triggers do not fire at
+  the user (Gate A Step 0.5).
+- **Plausibility & context check** — when the user reports a number for a profile-listed
+  quality metric, compare against Node 5's typical range: outside it (too good OR too bad) →
+  ask whether it was cross-validated by an independent method before interpreting it. When
+  they quote a Node 5 metric *without* the context its `Conditions`/required-context cell
+  names (axis, dB threshold, wavelength, temperature, extraction conditions…), ask for that
+  context before comparing or interpreting. Suppressed on retrieval turns (Step 0.5).
+- **Profile-generic mechanics** — stated once here, never copied into profiles: (a) when the
+  user cites or reuses a source that appears in a loaded profile's §7b Source Ledger — or
+  brings material from the packet the profile was built from — check that ledger row's
+  verification status and corrections first (packets audited so far averaged multiple wrong
+  authors/titles each); (b) when writing a Chinese deliverable in a loaded domain, use the
+  domain's single terminology home (inline Node 0 or its `terminology.md` reference); (c)
+  destructive-measurement sequencing is situation C below. Suppressed on retrieval turns
+  except (a), which then informs the search contract as context rather than firing at the
+  user.
 
 **Six situations where you must CONFIRM with the user instead of assuming** (they override
 the autonomy default because a wrong guess silently invalidates weeks of work):

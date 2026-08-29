@@ -53,18 +53,32 @@ def gate(*args):
     return p.returncode, p.stdout + p.stderr
 
 
-def case(name, expect_fail, expect_in_output, mutate, restore):
+def case(name, expect_fail, expect_in_output, mutate, restore,
+         expect_absent=()):
+    """`expect_absent` (added 2026-08-29) is what makes a NEGATIVE control real.
+
+    Until it existed, a control case could only assert that the gate said
+    something — so an exemption case passed as long as SOME finding appeared,
+    including the finding it was supposed to prove absent. Case 12 is the first
+    to need it: it plants a file that must produce a check-C finding and must
+    NOT produce a check-S one, and those two assertions cannot be written as a
+    single substring test.
+    """
     mutate()
     try:
         rc, out = gate()
         ok_rc = (rc == 1) if expect_fail else (rc == 0)
-        ok_txt = all(s in out for s in expect_in_output)
+        ok_txt = (all(s in out for s in expect_in_output)
+                  and not any(s in out for s in expect_absent))
         status = "PASS" if (ok_rc and ok_txt) else "FAIL"
         print(f"[{status}] {name}  (exit {rc})")
         if status == "FAIL":
             for s in expect_in_output:
                 if s not in out:
                     print(f"         expected to see: {s!r}")
+            for s in expect_absent:
+                if s in out:
+                    print(f"         expected NOT to see: {s!r}")
             print("         --- gate output ---")
             print("         " + out.strip().replace("\n", "\n         "))
         return status == "PASS"
@@ -263,6 +277,37 @@ def main():
                           "no provenance entry"],
         mutate=plant_stray,
         restore=remove_stray,
+    ))
+
+    # 12 — CONTROL for the 2026-08-29 narrowing of check S5. A .py under
+    #      hooks/tests/ is a regression matrix run by hand, not a hook, and must
+    #      NOT be reported as an unmounted hook. Case 7 above is the half that
+    #      fails without the check; this is the half that fails without the
+    #      exemption, and a one-sided calibration is what the manifest's own
+    #      gate rule forbids. Note the fixture is planted a directory DOWN: the
+    #      narrowing is by path depth, so a file with the same name directly
+    #      under hooks/ would still fire — which is what keeps it narrow.
+    hook_test = ROOT / "hooks" / "tests" / "__unmounted_test_for_test__.py"
+
+    def plant_hook_test():
+        hook_test.parent.mkdir(exist_ok=True)
+        hook_test.write_text("# planted by test_share_gate.py\n", encoding="utf-8")
+        subprocess.run(["git", "-C", str(ROOT), "add", "--", str(hook_test)],
+                       capture_output=True)
+
+    def remove_hook_test():
+        subprocess.run(["git", "-C", str(ROOT), "rm", "--cached", "-q", "--",
+                        str(hook_test)], capture_output=True)
+        hook_test.unlink(missing_ok=True)
+
+    results.append(case(
+        "control: a test under hooks/tests/ is not an unmounted hook",
+        expect_fail=True,
+        expect_in_output=["__unmounted_test_for_test__.py",
+                          "no provenance entry"],
+        expect_absent=["__unmounted_test_for_test__.py ships but is not mounted"],
+        mutate=plant_hook_test,
+        restore=remove_hook_test,
     ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")

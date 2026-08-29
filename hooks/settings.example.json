@@ -13,20 +13,30 @@
     "on is worse than no allowlist. The `ask` entries are the important half —",
     "they make the config edit itself a confirmed action.",
     "",
-    "Two of the source environment's mounts are omitted rather than left",
-    "pointing at files you do not have: the external-dispatch hooks that gate a",
-    "dispatcher this share does not ship. Both are declared in",
-    "tools/share-manifest.toml with the reason. A third omission ended",
-    "2026-08-16: the SessionEnd memory-pipeline script now ships as",
-    "compact-recovery/preserve.py, but its mount stays out of this file — it",
-    "points outside hooks/, and this template mounts hooks/ and nothing else;",
-    "the optional SessionEnd block lives in compact-recovery/README.md.",
+    "OMISSIONS, named rather than left pointing at files you do not have (all",
+    "declared in tools/share-manifest.toml with a reason):",
+    "  · the two external-dispatch hooks — they gate a dispatcher this share",
+    "    does not ship;",
+    "  · session_board_register.py and project_registry_gist.py — each is one",
+    "    half of a source-environment tool (the session board, the project",
+    "    registry) that does not ship; the rule they serve degrades to the",
+    "    by-hand steps stated in claude-ops/ops/20-dispatch.md §7a;",
+    "  · secret_file_guard.py — a local secrets policy, not a portable rule;",
+    "  · the SessionEnd memory-pipeline mount — its script now ships as",
+    "    compact-recovery/preserve.py, but the mount still points outside",
+    "    hooks/ and this template mounts hooks/ and nothing else; the optional",
+    "    SessionEnd block lives in compact-recovery/README.md.",
     "Every hook in hooks/ IS mounted here — if you find one that is not, that is",
-    "a defect in this template, not a recommendation.",
+    "a defect in this template, not a recommendation. The one .py under hooks/",
+    "that is deliberately NOT mounted is hooks/tests/test_transcript_read_guard.py:",
+    "it is that guard's regression matrix, run by hand (`python",
+    "hooks/tests/test_transcript_read_guard.py`), not a hook. Mounting a test as",
+    "a hook would put a test harness on every matched tool call.",
     "",
     "Verify after wiring: run each hook by hand with empty stdin and check it",
-    "exits 0 — e.g. `<PYTHON_EXE> <CLAUDE_HOME>/hooks/ops_health_nudge.py < /dev/null`.",
-    "Every hook here is fail-open, so a silent exit 0 is the healthy state."
+    "exits 0 (they are all fail-open), then confirm the matcher fires on a real",
+    "call. A hook registered at a path that does not exist makes python exit 2,",
+    "which Claude Code treats as a blocking error for every matched tool call."
   ],
   "permissions": {
     "allow": [
@@ -57,7 +67,7 @@
       "Edit(~/.claude/rules/**)"
     ]
   },
-  "model": "sonnet",
+  "model": "haiku",
   "hooks": {
     "PreToolUse": [
       {
@@ -66,6 +76,16 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dangerous_command_guard.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/shell_transport_guard.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/branch_commit_guard.py\"",
             "timeout": 5
           }
         ]
@@ -101,12 +121,6 @@
         ]
       },
       {
-        "_comment": [
-          "HIGH-VOLUME matcher: one Python start (~100ms) on every Read/Grep/Glob.",
-          "Acceptable for a bounded measurement window, not as a permanent tax —",
-          "the hook's own docstring states the exit criterion. Mount it while you",
-          "want the measurement; unmount it when you have one."
-        ],
         "matcher": "Read|Grep|Glob",
         "hooks": [
           {
@@ -117,11 +131,26 @@
         ]
       },
       {
-        "_comment": [
-          "compact-recovery trio, part 1 of 3 (overview: compact-recovery/README.md).",
-          "Denies an unbounded Read of large session-transcript files; the deny",
-          "message itself states the compliant grep-then-windowed-read path."
-        ],
+        "matcher": "Write|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ps_errorpref_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ps_pipeline_close_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Read",
         "hooks": [
           {
@@ -134,12 +163,6 @@
     ],
     "PostToolUse": [
       {
-        "_comment": [
-          "The SECOND half of ui_verify_guard.py. It is one file mounted on two",
-          "events: PreToolUse denies an unprobed screenshot, PostToolUse reads the",
-          "probe RESULT and routes on it. Mount both or the hook only denies and",
-          "never routes."
-        ],
         "matcher": "mcp__(Claude_Browser|claude-in-chrome)__javascript_tool",
         "hooks": [
           {
@@ -150,28 +173,8 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/context_runway_shadow.py\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "PreCompact": [
       {
-        "_comment": [
-          "compact-recovery trio, part 2 of 3. Before the summary lands, writes a",
-          "bookmark (transcript path, line count, trigger) that the SessionStart",
-          "pointer card reads, then best-effort refreshes digest cards via",
-          "<CLAUDE_HOME>/tools/memory-pipeline/preserve.py (ships in",
-          "compact-recovery/; skip installing it and the hook silently skips the",
-          "refresh — the bookmark still works)."
-        ],
         "matcher": "",
         "hooks": [
           {
@@ -194,11 +197,6 @@
         ]
       },
       {
-        "_comment": [
-          "compact-recovery trio, part 3 of 3. Matcher 'compact' fires after both",
-          "manual and auto compaction; SessionStart stdout is injected into the",
-          "fresh context, which is what lets the pointer card reach the model."
-        ],
         "matcher": "compact",
         "hooks": [
           {
@@ -232,8 +230,24 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/context_runway_shadow.py\"",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
-  "enableWorkflows": true,
-  "effortLevel": "medium"
+  "disableWorkflows": true,
+  "effortLevel": "medium",
+  "cleanupPeriodDays": 3650,
+  "env": {
+    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0"
+  }
 }
