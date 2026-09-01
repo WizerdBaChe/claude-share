@@ -36,8 +36,11 @@ drift, so the exemption is not rediscovered as a violation.
 grep -L 'Skill' agents/*.md
 # 2. phantom tooling in any instruction file — names no tool here provides
 #    (40-maintenance and rule-registry quote the names as history; exclude them)
-grep -rn "task_memo\|AI Team OS" --include=*.md agents/ skills/ ops/ *.md \
-  | grep -v -E '40-maintenance|rule-registry|lessons\.md|integrity-sweep'
+#    Scope widened 2026-09-01: references/ rules/ interop/ tools/ added — the
+#    original scope excluded where such mentions actually live (same defect
+#    class as LABEL-REGISTRY §5, found by the gate-integrity audit).
+grep -rn "task_memo\|AI Team OS" --include=*.md agents/ skills/ ops/ references/ rules/ interop/ tools/ *.md \
+  | grep -v -E '40-maintenance|rule-registry|lessons\.md|integrity-sweep|decisions\.md|phase-log|session-digest|graph-snapshot/out'
 # 3. writes aimed at a retired destination (frozen files pass Test-Path, and a
 #    RENAMED one does not even do that - the write just fails silently either
 #    way, so the instruction reads as correct forever). The log was frozen
@@ -46,8 +49,8 @@ grep -rn "task_memo\|AI Team OS" --include=*.md agents/ skills/ ops/ *.md \
 #    This check found four such files at the freeze and still missed a fifth
 #    (skill-share-packaging said "Log the export in ~/.claude/Global_skill_
 #    update.md") for four days - so read a hit as guilty until read.
-grep -rn "Global_skill_update" --include=*.md agents/ skills/ ops/ *.md \
-  | grep -v -E '40-maintenance|rule-registry|frozen|凍結|已凍結|RETIRED|historical|NOT |integrity-sweep'
+grep -rn "Global_skill_update" --include=*.md agents/ skills/ ops/ references/ rules/ interop/ tools/ *.md \
+  | grep -v -E '40-maintenance|rule-registry|frozen|凍結|已凍結|RETIRED|historical|NOT |integrity-sweep|decisions\.md|phase-log|session-digest|graph-snapshot/out'
 # and the same question for the CURRENT destinations, which is the general form:
 grep -rnE 'Log (the|this|it) .{0,20}in `?~?/?[A-Za-z0-9_./-]+\.md' --include=*.md skills/ agents/ ops/
 # 4. agent colors outside the eight documented values

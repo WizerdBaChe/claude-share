@@ -11,7 +11,9 @@ environment facts (step B) and a durable task ledger (step C). Without them,
    `references/<project>-phase-log.md` (if the `workflow-checkpoint` skill has been
    used), `references/<project>-tickets.md`, `references/<project>-context.md`
    (domain glossary, §E — if present), `references/<project>-decisions.md`
-   (§G — if present, re-confirm its `## Now` premises before acting), and grep
+   (§G — if present, re-confirm its `## Now` premises before acting),
+   `references/<project>-session-digest.md` (session footprint, E-9 — skim the
+   newest 3 entries only), and grep
    `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
    **`references/<project>-map.md` (§H) is read LAST and only after its
    fingerprint verifies** — verifying after reading has already spent the tokens
