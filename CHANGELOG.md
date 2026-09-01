@@ -9,6 +9,81 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-02 — the first outside run comes back, and the whole repo is re-aligned behind it
+
+Two refreshes in one day, both forced by evidence rather than by a calendar.
+
+**The external run (commit `4052285`).** The first verifier outside the source
+environment ran `architecture-diagramming` at `46be565` on macOS Codex
+Chromium: the build was deterministic (sha match), the `mFill` positive control
+added exactly 25 `dangling-reference`, and the baseline reported **44
+`label-overlap`** on bytes the source environment had passed. The source
+reproduced all 44 by forcing `font-family:"Noto Sans TC"` — every pair was a
+node's 13px title against its 11px subtitle at 18px baseline distance, a
+2.63px bbox gap under Segoe UI (0.63px of margin over PAD=2) that tall-leading
+CJK fallbacks cross. The fix went into the layout, not the tolerance:
+`emit.mjs` `NODE_TEXT` (subtitle baseline +3px, shared with `route.mjs`'s
+offline estimate — whose stale copy of the old number placed two pills into
+the subtitle's real rect on the first rebuild), `selfcheck.mjs` gains a
+`receipt` (engine, DPR, computed family, bbox/size ratio) so a PASS names the
+font that measured, `MAINTENANCE.md` M6 is a five-font substitution sweep.
+`ACCEPTANCE.md` #16 now asks the verifier for the receipt; the shipped
+`capability-set.html` was rebuilt (`6bf15797…4688`). The owner refused the
+verifier's suggestions to exempt title/subtitle pairs or make the tolerance
+renderer-configurable: both make the instrument pass by measuring less.
+
+**The alignment (five branches, merged `a47c55e`).** Check V with the source
+mounted found 28 findings across 20 files; a per-file drift measurement over
+the 47 `edited`/`template` entries (which V cannot see) found the same lag
+class the 2026-08-29 entry described. Five parallel workers, one worktree
+each, ran procedure B over everything:
+
+- **Refreshed**: 30 files across `claude-ops/ops/` (`lessons.md` +381 lines,
+  `rule-registry.md`, `environment.md`, `05-authority.md`, `10-command-loop.md`,
+  `60-bootstrap.md`, `rules-usage-dict.md`, `integrity-sweep.md`), the global
+  CLAUDE.md template, `interop-layer/portable-core.md`, four hooks
+  (`ops_health_nudge.py` gains check 17 with its private mirror path turned into
+  an env var, `compact_pointer.py`, `transcript_read_guard.py`,
+  `ui_verify_guard.py`), the trigger dict (full source rewrite since 08-27;
+  six declared edits re-applied, two new ones for skills that do not ship),
+  and twelve skill files (`product-design-thinking/SKILL.md`'s Mode A/B split,
+  the review family, `scientific-research-guide`, `motion-design`,
+  `workflow-checkpoint`, `design-system-suite`). 17 files verified FRESH and
+  left alone. Three previously declared scrub edits in `rule-registry.md` /
+  `lessons.md` were found silently reverted in the last-shipped copy — the
+  exact blind spot check V's docstring names — and re-applied.
+- **Source working-copy state carried, with acks**: ten files (`agents/`
+  frontend developer, `05-authority.md`, `rule-registry.md`,
+  `rules-usage-dict.md`, global CLAUDE.md, `portable-core.md`,
+  `code-review-deep-checklist/SKILL.md`, `motion-design/local/env-bridge.md`,
+  `product-design-thinking/references/design-rules.md` and
+  `document-ladder.md`) were content-dirty at the source (other sessions'
+  in-flight edits). Owner ruling: align to what is on disk; each entry carries
+  a dated `source_dirty_ack` with the numstat and "re-collect and drop the ack
+  when it lands".
+- **Collected (procedure A)**: `audience-fit` (six files — the post-production
+  audience-adaptation skill; two references are the owner's own guides carried
+  verbatim, `ui-copy-stance.md` and `SKILL.md` scrubbed of deliverable
+  pointers), three path-scoped rules (`deliverable-doc-refs.md`,
+  `office-deck-deliverables.md`, `visual-gate-scope.md` — reference
+  implementations in the owner's private asset library became prose; a
+  safety/fitness read found nothing machine-only beyond illustrative Windows
+  examples and nothing harmful to follow elsewhere), `ops/references/uat.md`
+  (the manual-acceptance checklist axis the CLAUDE.md `[BC]` line points at —
+  untracked at the source, acked as such), and
+  `literature-search-extract/scripts/zotero_ris_export.py`.
+- **Not shipped, newly declared**: `hooks/xi_card_guard.py` + its test (a
+  shadow hook over `tools/cross-index` and `telemetry/`, both excluded; also
+  added to the settings template's omissions list), `skills/post-brief` (the
+  loop over two excluded tools), `skills/model3d-pipeline` (owner ruling: later,
+  through the mechanism-packaging route). The `tools/` and
+  `media-fetch-pipeline` directory dispositions gained dated per-file re-check
+  notes for what arrived beneath them.
+- **Counts**: skill-toolkit 16 → 17 skills; `global-claude-md/rules/` 2 → 5.
+
+Gate with the source mounted: CLEAN, 192 collected files compared, 12/12 gate
+tests. Source state for the round: `d06708c` (2026-09-02).
+
 ## 2026-08-29 — full source sync: the M1 lag class swept, and the diagram set ships its executable half
 
 The round the previous two entries kept predicting. Both of them recorded the
