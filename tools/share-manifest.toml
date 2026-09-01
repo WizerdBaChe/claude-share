@@ -256,6 +256,15 @@ REVIEW-WHEN: the mfp CLI is published somewhere a reader can install from."""
 fallback = """None; nothing shipped cites it. What travels even from this entry
 is the shape: a skill as a permission-and-refusal contract around one tool —
 triggers, exit-code semantics, hard refusals, no logic of its own."""
+# PER-FILE RE-CHECK 2026-09-02: this disposition was written for the skill
+# root and had never been re-examined against `extensions/` specifically
+# (COLLECTION-RULES "re-check per FILE, not per root" — the failure mode
+# named in the tools/ entry below). `extensions/brief.md`, `quotestack.md`,
+# `transcript.md`, `translatedoc.md` are all skill-level extension docs that
+# extend the same excluded `mfp` CLI's capability set (post-brief, quote
+# extraction, transcript, translated-doc lanes) — same dependency, same
+# verdict. No new content changes the reasoning above; extended rather than
+# split into four entries.
 
 [[not_shipped]]
 path = "skills/scientific-research-guide/evals/evals.json"
@@ -341,6 +350,43 @@ ways:
     maintenance surface rather than a capability. A deferral that survives its
     round becomes an entry nobody re-reads — the same decay this manifest exists
     to stop — so it is settled here instead of restated.
+PER-FILE RE-CHECK 2026-09-02 (three more directories the 2026-08-16 split
+never examined — new since that round, caught only because this round's file
+list happened to name specific files under each):
+  · `tools/cross-index/` (`.gitignore`, `README.md`,
+    `register_scheduled_task.ps1`, `registry.json`, `scheduled_emit.py`,
+    `xi.py`, `xi_cards.py`, `xi_scan.py`) — `registry.json` carries real
+    absolute store roots on this machine's own home tree and several
+    second-drive private trees (an asset library, a backlog list of further
+    second-drive projects), the class this manifest's leak patterns exist to
+    catch; `scheduled_emit.py` drives a
+    Windows Task Scheduler job via `register_scheduled_task.ps1`. Not a
+    "serves records this share does not carry" case so much as a
+    "the file itself IS the private record" case — templating registry.json
+    down to structure-only would still leave a live index over a tree the
+    adopter does not have. `hooks/xi_card_guard.py`'s own not_shipped entry
+    (2026-09-02, above the shell/git hooks block) depends on this verdict.
+  · `tools/post-brief/` (`pb.py`, `README.md`) — `pb.py`'s own docstring
+    states the dependency plainly: it is "the loop around `mfp brief`, and
+    only the half a machine can do," calling the `mfp` CLI (excluded,
+    `skills/media-fetch-pipeline` above) and reading/writing `mfp`'s own
+    on-disk analysis-store layout. `skills/post-brief/SKILL.md`'s own
+    not_shipped entry (2026-09-02, above) depends on this verdict.
+  · `tools/trigger-probe/` (`trigger_probe.py`, `dict_review_pack.py`,
+    `calibration.json`, `sidecar-roster.toml`, `docs/`, `tests/`, and the
+    per-skill `suites/*.toml` fixtures, including `diagram-authoring.toml`) —
+    a skill-trigger-dictionary calibration harness: golden prompts +
+    expected-skill assertions scored against `skill-trigger-dict.md` for
+    recall/precision. Portable in principle (no machine-bound paths seen),
+    but every suite file is meaningless without `trigger_probe.py` to run it,
+    and no shipped file cites any suite by name — including
+    `diagram-authoring.toml`, whose skill DOES ship: the skill's own SKILL.md
+    description is the trigger contract, and nothing points a reader at this
+    fixture. Same "TESTS FOR HOOKS THIS REPO SHIPS" reasoning the 2026-08-16
+    ruling above applied to ops-health-test/e2-gate-test/context-budget,
+    reached the same way: not collected, and this file is not a live
+    deferral — the harness itself has not been proposed for collection at all
+    this round.
 Note: this repo's own `tools/` is a different thing, built here, not
 collected."""
 fallback = """None needed for the record-serving tools; the rules they support
@@ -735,6 +781,7 @@ edits = [
   "2026-08-16 re-derivation against the source's committed settings.json: added the two mounts for the hooks collected this round (fieldwork_threshold_notice.py on Read|Grep|Glob, context_runway_shadow.py on UserPromptSubmit), matchers and timeouts as the source wires them, plus a _comment on the first about its per-call cost. Removed the two external-dispatch mounts along with the SessionEnd one — three omissions now, all named in _README. Before this the template mounted 7 hooks while 9 shipped, which is the same class of silent drift as an undeclared edit: the file claims to be the mounting template and was quietly short.",
   "2026-08-16 (second round): added the PostToolUse mount for ui_verify_guard.py. The source turned that hook into a PreToolUse/PostToolUse router — PreToolUse denies an unprobed screenshot, PostToolUse reads the probe RESULT and routes on it — and the template carried only the first half, which would have shipped a hook that denies and never routes. Found because check S5 existed; S5 itself had to be corrected in the same pass, since its first version treated one hook on two events as a duplicate and would have reported the correct wiring as a defect.",
   "2026-08-16 (third round): added the three compact-recovery mounts as the source wires them — compact_bookmark.py on PreCompact (timeout 60), compact_pointer.py on SessionStart matcher 'compact' (timeout 10), transcript_read_guard.py on PreToolUse matcher 'Read' (timeout 5) — each with a _comment naming its half of the mechanism; the _README omission count went three -> two.",
+  "2026-09-02: added xi_card_guard.py to the _README omissions list. The source's live settings.json mounts it on PostToolUse(Write|Edit); it does not ship (see the hooks/xi_card_guard.py not_shipped entry, same round) because its registry and parser under tools/cross-index/ do not ship either. No new mount added to the template's `hooks` block — the omission note is the whole edit.",
 ]
 
 # --- compact-recovery (2026-08-16, third round) ----------------------------
@@ -1307,9 +1354,34 @@ edits = [
 ]
 
 [[collected]]
+path = "global-claude-md/rules/deliverable-doc-refs.md"
+source = "~/.claude/rules/deliverable-doc-refs.md"
+status = "edited"
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows `52\t0
+rules/deliverable-doc-refs.md` — another session's uncommitted addition (two
+new asset-property blocks: 'one slide is one screen' viewport-overflow rule
+with its three-stage CSS/JS fix, a measured-viewport rule, plus a new gate-d
+'measured fit-gate' and a 'controls belong on the load-bearing path' rule
+under Hard gates). Carried as-is per this round's ruling. Re-collect and drop
+this ack when the source edit lands."""
+edits = [
+  "'Do not reinvent' paragraph: 'AssetVault item `briefing-deck-shell` (`assets/pattern-template/html-css/briefing-deck-shell/`) is the reference implementation' -> 'a reference implementation lives in the source environment's asset library' — a private asset library that does not ship (same class as carrier-playbook.md's edits). The five measured pitfalls that follow are the transferable content and stay whole.",
+  "'one slide is one screen' block, closing sentence (in the round's dirty addition): 'AssetVault `briefing-deck-shell` (README §版面吻合)' -> 'the source environment's asset library (README §版面吻合)' — same class, same asset.",
+  "'Hard gates beat proof-reading' paragraph: 'summarized in the vault asset's README' -> 'summarized in that implementation's README' — same class; reworded to read against the earlier edit's phrasing rather than re-naming the vault.",
+]
+
+[[collected]]
 path = "global-claude-md/rules/frontend-layering.md"
 source = "~/.claude/rules/frontend-layering.md"
 status = "verbatim"
+
+[[collected]]
+path = "global-claude-md/rules/office-deck-deliverables.md"
+source = "~/.claude/rules/office-deck-deliverables.md"
+status = "edited"
+edits = [
+  "Opening paragraph: 'Reference implementation with these fixes verbatim: AssetVault `assets/pattern-template/python/pptx-deck-builder/`' -> 'Reference implementation with these fixes verbatim: a reference implementation lives in the source environment's asset library' — a private asset library that does not ship, same class and same edit shape as this round's deliverable-doc-refs.md refresh.",
+]
 
 [[collected]]
 path = "global-claude-md/rules/shader-failure-modes.md"
@@ -1318,6 +1390,32 @@ status = "edited"
 edits = [
   "2026-08-27 refresh (procedure B): the re-glob measurement sentence arrived naming the source's second-drive work root as the corpus location -> 'the local work root'. The corpus size (1,361 files) and every recall number stay — they are the evidence; the path is not.",
 ]
+
+[[collected]]
+path = "global-claude-md/rules/visual-gate-scope.md"
+source = "~/.claude/rules/visual-gate-scope.md"
+status = "edited"
+source_dirty_ack = """2026-09-02: the source has this file as an UNTRACKED new
+file (`git status --porcelain` reports `?? rules/visual-gate-scope.md`) —
+not committed anywhere yet, a stronger case than the tracked-dirty files this
+round's other acks cover. Collected per the coordinator's 2026-09-02
+direction (it is already cited by the refreshed global CLAUDE.md template's
+path-scoped-rules index and by ops/lessons.md, and a sibling worker's gate
+run flagged the dangling citation), treating the on-disk working copy as this
+round's source of truth the same way the other dirty-source acks do.
+Re-collect and drop this ack once the file is committed at the source."""
+edits = [
+  "Opening paragraph: 'Written 2026-09-02 from media-fetch-pipeline Phase Z11.' -> 'Written 2026-09-02 from a media-fetch-pipeline UAT round.' — 'media-fetch-pipeline' is a project name (not a scrub target, hard rule 2); 'Phase Z11' is a pointer into that private project's own phase log, which this share does not carry and no reader can open — same private-pointer class as this round's audience-fit edits.",
+]
+# Safety/fitness judgment (2026-09-02, per coordinator request): (a) nothing
+# machine-specific beyond what already ships — the CSS/DOM methodology is
+# generic, and its one environment-specific reference ('the pane's steady
+# state is hidden... nobody is asked to front a window') already matches
+# established shipped language in global-claude-md/CLAUDE.md's own browser-pane
+# rule, backed by hooks/ui_verify_guard.py, which ships. (b) no instruction
+# here can cause harm if followed blindly elsewhere — it is a CSS selector fix
+# plus a testing-coverage methodology, no destructive commands, no credentials,
+# no host-specific assumptions. No escalation.
 
 [[collected]]
 path = "skill-toolkit/skill-trigger-dict.md"
@@ -1375,6 +1473,73 @@ status = "verbatim"
 path = "skill-toolkit/skills/ai-coding-guardrails/references/testing-ci.md"
 source = "~/.claude/skills/ai-coding-guardrails/references/testing-ci.md"
 status = "verbatim"
+
+# --- audience-fit (2026-09-02, first collection) ---------------------------
+# The owner authorised shipping the skill this round. Two references
+# (honest-data-readability.md, project-info-for-general-readers.md) are the
+# owner's own user-supplied guides and ship verbatim, unread-scrubbed beyond
+# the certification read every first collection requires — grepped for the
+# private-pointer classes below and clean. SKILL.md's source is content-dirty
+# (another session's uncommitted addition); collected as the working copy per
+# this round's source_dirty_ack.
+
+[[collected]]
+path = "skill-toolkit/skills/audience-fit/SKILL.md"
+source = "~/.claude/skills/audience-fit/SKILL.md"
+status = "edited"
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows `3\t1
+skills/audience-fit/SKILL.md` — another session's uncommitted addition (Mode B
+paragraph gains a UAT-rung routing clause: 「讀不讀得懂」 items go into
+`B. 體驗` rung B1 rather than `A. 必驗`, citing `ops/references/uat.md`, with
+an observability-failure carve-out for R2). Carried as-is per this round's
+ruling; the cited `ops/references/uat.md` is outside this worker's file list
+and its shipping status is not addressed here. Re-collect and drop this ack
+when the source edit lands."""
+edits = [
+  "Mode A, A1 bullet: the field-test pointer 'round-2 field proof: `ccfg-retrieval-audit-f1-owner-view.html` v2, user gate PASS 2026-08-31' -> 'round-2 field proof: an owner-view render that passed user gate 2026-08-31' — the file is a dated artifact under the source's outputs/ tree, which does not ship (same private-pointer class as diagram-authoring/references/carrier-playbook.md's edits). The ruling id (G-7) and the date stay; only the artifact filename is dropped.",
+]
+
+[[collected]]
+path = "skill-toolkit/skills/audience-fit/references/de-ai-flavor.md"
+source = "~/.claude/skills/audience-fit/references/de-ai-flavor.md"
+status = "verbatim"
+# Borrowed content: Nanako0129/sepia (MIT, © 2026 Nanako Tsai), attributed
+# in-file with license, author and source URL. Attribution present -> ships.
+
+[[collected]]
+path = "skill-toolkit/skills/audience-fit/references/honest-data-readability.md"
+source = "~/.claude/skills/audience-fit/references/honest-data-readability.md"
+status = "verbatim"
+# User-supplied guide (zh-TW), the owner's own writing. Read in full;
+# no account names, absolute paths, private-tree pointers, or third-party
+# text found.
+
+[[collected]]
+path = "skill-toolkit/skills/audience-fit/references/presentational-view.md"
+source = "~/.claude/skills/audience-fit/references/presentational-view.md"
+status = "verbatim"
+
+[[collected]]
+path = "skill-toolkit/skills/audience-fit/references/project-info-for-general-readers.md"
+source = "~/.claude/skills/audience-fit/references/project-info-for-general-readers.md"
+status = "verbatim"
+# User-supplied guide (zh-TW), the owner's own writing. Read in full; no
+# account names, absolute paths, or private-tree pointers found. Line 397/499
+# carry a stray `[cite:file:1]` artifact and a dangling cross-reference to
+# a sibling '架構說明寫作指南' document that is not part of this skill or the
+# source ~/.claude tree (predates the audience-fit split) — informational
+# quirks, not identifiers; left as-is, verbatim per the owner's authorisation.
+
+[[collected]]
+path = "skill-toolkit/skills/audience-fit/references/ui-copy-stance.md"
+source = "~/.claude/skills/audience-fit/references/ui-copy-stance.md"
+status = "edited"
+edits = [
+  "Header provenance line: 'sources: MFP decisions D-120/D-121, `docs/uat-asr-setup.md` items 2/21b/24/31/32, phase-log Z2' -> a prose note that the decision records and UAT checklist live in that project's own tree, not in this share. The scenario name (media-fetch-pipeline ASR-settings correction), the ruling date (2026-08-28), and the fact that Chinese examples are verbatim from the case all stay — this drops only the pointers into a private project's decision file and phase log, the private-tree-pointer class in hard rule 2.",
+  "R1 heading: '(D-120)' -> '(the MFP correction)' — same pointer class, same source project's decision id.",
+  "R2 heading: '(UAT 21b / 32)' -> '(the MFP correction's UAT findings)' — same class; the numbered UAT items resolve only inside the private project's own checklist file.",
+  "R6: 'a control that appears and disappears teaches nobody where it lives — MFP D-80' -> 'a control that appears and disappears teaches nobody where it lives (a finding from the same correction)' — same class.",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/code-review-deep-checklist/SKILL.md"
@@ -1518,6 +1683,27 @@ status = "verbatim"
 path = "skill-toolkit/skills/literature-search-extract/references/search-sources.md"
 source = "~/.claude/skills/literature-search-extract/references/search-sources.md"
 status = "verbatim"
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/scripts/zotero_ris_export.py"
+source = "~/.claude/skills/literature-search-extract/scripts/zotero_ris_export.py"
+status = "verbatim"
+# NEW 2026-09-02, first collection. Sibling-disposition judgment (per the
+# 2026-08-29 "(a) the four shell/git enforcement hooks" precedent above:
+# portability-scan each file rather than inherit its lane's verdict): the
+# skill's OTHER local-tool lane (`connectors/` — zotero_local.py, pdf_index.py,
+# probe.py, registry.json, .env.example — and `verify/` — citecheck.py,
+# staleclaim.py, whose own not_shipped entry is below) is machine-bound to a
+# locally-running Zotero HTTP connector, a local PDF index, and this
+# environment's registry, none of which ship. This script is different: pure
+# stdlib (urllib only), contacts only doi.org and api.crossref.org (an
+# explicit ALLOWED_HOSTS allowlist refuses any other host), no local-service
+# dependency, no machine-bound path — it is the file-import workaround
+# BECAUSE the local Zotero HTTP API cannot do named-collection targeting
+# (its own docstring). SKILL.md (not refreshed by this worker; out of this
+# file list) already cites `scripts/zotero_ris_export.py` by path and usage —
+# COLLECTION-RULES rule 6 forces a verdict, and the portability scan gives
+# ship, not exclude.
 
 # mechanism-share-packaging — collected 2026-08-17 (user ruling, red-team
 # round). Written the day after the skill's own second live run, which is why
@@ -2063,6 +2249,81 @@ states what ships and what does not, which is the only part of a status file an
 adopter can act on. `domain-expansion-guide.md`'s share edit already re-points
 its one "put it in STATUS.md" instruction at "a status file" of your own."""
 
+# --- new-files-since-2026-08-29 round (2026-09-02) --------------------------
+
+[[not_shipped]]
+path = "hooks/xi_card_guard.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-02. A PostToolUse(Write|Edit) SHADOW hook: on a
+qualifying write it resolves the touched path against
+`tools/cross-index/registry.json`, parses the file with `xi_cards.extract_card`
+(imported from `tools/cross-index/xi_cards.py`/`xi_scan.py`), and appends one
+row to `telemetry/xi-card-guard.jsonl`. All three of registry.json, the
+xi_cards/xi_scan parser pair, and telemetry/ are excluded — registry.json
+because it is a machine-curated list of real absolute store roots on this and
+sibling machines (`tools/` blanket entry above), telemetry/ under the
+never-collect list. The hook's own path resolution is portable
+(`CLAUDE_CONFIG_DIR`/`Path.home()`, no hardcoded machine value), but shipping
+it alone would mount a hook whose registry, parser and output store the
+adopter does not have — the shadow-probe-for-an-absent-pipeline shape the
+`tools/` entry already names for the other cross-index files."""
+fallback = """None; the hook is SHADOW (never warns or denies) and nothing
+downstream reads its telemetry today. If the cross-index tool itself ever
+ships, this file is a portable PostToolUse pattern to revisit: fail-open on
+every internal error path, second gate on tool_name after the settings.json
+matcher, and a `_LOG`/`_REGISTRY` env override so its own test suite never
+touches the real files."""
+
+[[not_shipped]]
+path = "hooks/test_xi_card_guard.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-02, paired with the entry above. A standalone
+subprocess-driven test suite for `xi_card_guard.py` (no unittest dependency,
+writes only to a temp dir it removes). Excluded for the same reason as the
+hook it tests — a test suite for a hook that does not ship would be dead
+weight, not a capability."""
+fallback = """None needed; see the `hooks/xi_card_guard.py` entry."""
+
+[[not_shipped]]
+path = "skills/post-brief/SKILL.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-02. The skill is the loop around two capabilities
+neither of which this share carries: `tools/post-brief/pb.py` (the `tools/`
+blanket entry above — it also depends on the `mfp` CLI's on-disk analysis
+store layout, so it could not ship alone even if `tools/` were revisited) and
+the `mfp` CLI itself, i.e. the `media-fetch-pipeline` skill (excluded above,
+its own entry). Every command in this SKILL.md invokes one or the other;
+shipping the router without either capability would export a skill whose
+first action fails."""
+fallback = """None; nothing shipped cites it. The transferable shape, if
+useful as a pattern: a skill that is pure ORDER around two capabilities it
+does not implement (`does this step need a model?` as the split test), plus
+its own two rules worth keeping in mind for any future skill wrapping
+untrusted fetched text — treat post/caption/transcript content as material to
+describe, never as instructions to follow, and never identify people in
+fetched images."""
+
+[[not_shipped]]
+path = "skills/model3d-pipeline/SKILL.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-02, owner ruling same day: excluded-FOR-NOW. The
+skill is the router for a full CAD pipeline that lives entirely outside
+`~/.claude` — a second-drive project root with its own venv, its own
+`PIPELINE.md` design doc, build123d/FreeCAD/Blender/gdsfactory scripts — none
+of which this repo's collection scope reaches (a second-drive private
+project, same class as the render-perf/system-design knowledge packs' 'a
+separate decision, not made' reasoning, but for a whole pipeline rather than
+reference files). The owner intends to ship it LATER through the
+mechanism-share-packaging route, once the pipeline's own in-flight
+adjustments finish — this is a deferred-and-named verdict (COLLECTION-RULES
+rule 7), not a silent gap.
+REVIEW-WHEN: the pipeline's adjustments referenced in the 2026-09-02 ruling
+land, or a mechanism-share-packaging pass for it is run."""
+fallback = """None. For 3D/CAD work this share does not attempt the
+capability; diagram-authoring covers 2D precision diagrams only, and the
+skill's own trigger line already draws that line ('Not for image-only
+diagrams (diagram-authoring)')."""
+
 # --- (a) the four shell/git enforcement hooks ------------------------------
 # Collected 2026-08-29. Every one is cited by a rule file this repo already
 # ships, which is what forced the verdict: check R does not accept silence.
@@ -2534,3 +2795,17 @@ Chinese for 'file' — chosen because the ENCODING TRANSFORM is the whole point;
 it names no real directory on any machine. The entry's own REAL probe
 evidence three lines down (a second-drive SSLD path) is a genuine value and
 is scrubbed, not exempted here — only this fictional illustration is."""
+
+[[allow]]
+file = "skill-toolkit/skills/literature-search-extract/scripts/zotero_ris_export.py"
+kind = "absolute local path (non-system drive)"
+# `match` is the path segment alone, not the drive-letter form the finding
+# reports: writing that form here would make this manifest a finding in its
+# own right (the SomePrivateTree allow above records the same rule).
+match = "path"
+reason = """NEW 2026-09-02. The module docstring's JSON schema example for the
+optional `attachments` field, whose drive letter and every path segment are
+literally the words 'path' and 'file' — a generic illustrative placeholder,
+not a real location on any machine. Same class as this file's own
+`test_share_gate.py` fixtures above, just authored by the source rather than
+by the gate."""
