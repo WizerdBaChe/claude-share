@@ -76,6 +76,23 @@ Step 2.5 修掉的缺陷、產生的 commit。回顧不是唯讀產物——讀�
 
 ---
 
+## 全案反問（5W1H 深入回顧）
+
+<!-- SKILL.md Step 2 的 5W1H 反問結果：對「全案／整段對話」而非單一項目發問。
+問題是依「這個專案的模型」逐軸推導出來的，不是抄固定清單——每軸先寫出實際
+問的專案特定問題，再寫答案，讓讀者能同時檢驗問題與答案。某軸對此專案確實
+無意義 → 一行明說並附理由，取代該軸，不得硬填泛用答案。答不出來的問題本身
+就是發現——同時列進涵蓋範圍或未解決的問題，不得靜默跳過。 -->
+
+- **Why**：〔本專案的問法：…〕→ [答案]
+- **What**：〔本專案的問法：…〕→ [答案]
+- **Who**：〔本專案的問法：…〕→ [答案]
+- **When**：〔本專案的問法：…〕→ [答案]
+- **Where**：〔本專案的問法：…〕→ [答案]
+- **How**：〔本專案的問法：…〕→ [答案]
+
+---
+
 ## 未解決的問題
 
 > 經過對帳（SKILL.md Step 3）後仍然開放的——這次沒解決、下次還要面對的：
@@ -192,6 +209,7 @@ step, not advisory. Before finalizing output, verify:
 - [ ] Document 1 has a TL;DR — readers who skim should still get the key takeaways
 - [ ] Document 1's coverage header names its sources, what is unrecoverable, AND what the retrospective itself changed (observed vs caused)
 - [ ] Unresolved problems are the RECONCILED list (Step 3) — closed items moved to 已關閉 with their closing evidence
+- [ ] The 5W1H section covers all six axes about the WHOLE project — each axis shows the project-specific question it derived (not the generic seed verbatim) OR a one-line reasoned opt-out; an unanswerable question is recorded as a finding (coverage header or 未解決的問題), never silently dropped
 
 ---
 
@@ -207,8 +225,13 @@ step, not advisory. Before finalizing output, verify:
 - Any decision that felt significant but wasn't explained clearly in the conversation?
 - Any pitfall you think is very easy to fall into again next time?
 
-Global-merge candidates (each needs your explicit yes — silence means no):
-| rule | verdict (adopt / merge into X / reject) | why |
+Global-rule candidates — FYI only, nothing is written to global CLAUDE.md in
+this retrospective; they accumulate for a dedicated batch session (SKILL.md
+Step 6.2):
+| rule | recommendation (adopt / merge into X / reject) | why |
+
+Accumulated backlog: N pending candidates across M files in the output
+directory — 批次處理時另開一個 session 即可，由你決定何時值得處理。
 
 [If README is stale or missing:] The project README is [stale/missing] — want me
 to refresh it from the retrospective content?"

@@ -1,14 +1,15 @@
 ---
 name: motion-design
 description: >-
-  Hub for motion and animation design methodology — timing, easing,
-  choreography, Disney principles, motion personality — for CSS, Framer
-  Motion, GSAP, Lottie, Spring, Three.js, or any animation system. Trigger on
-  UI animation, transitions, micro-interactions, loading/success/error states,
-  page transitions, scroll effects, brand motion identity, particles. NOT
-  design tokens across a product suite (→ design-system-suite) or storing a
-  reusable component (→ asset-vault, if you have an equivalent skill).
-  Disambiguation: ~/.claude/skill-trigger-dict.md.
+  Hub for motion, animation, and 3D/WebGL work. Motion design methodology —
+  timing, easing, choreography, Disney principles, motion personality — for
+  CSS, Framer Motion, GSAP, Lottie, Spring, or any animation system. Trigger
+  on UI animation, transitions, micro-interactions, loading/success/error
+  states, page transitions, scroll effects, brand motion identity, particles,
+  WebGL — 「這個按鈕的動效怎麼做（時長、緩動、編舞）」「定品牌動態識別」「轉場/微互動怎麼設計」「用 Three.js
+  做 X」「寫 shader/GLSL 效果」. NOT design tokens across a
+  product suite (→ design-system-suite) or storing a reusable component (→
+  asset-vault). Disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # motion-design — the animation hub
@@ -17,9 +18,9 @@ Router skill. The material lives in reference files; this page holds only the
 tables needed on almost every job, plus the routing table.
 
 **Read `local/env-bridge.md` before delivering any motion work** — it carries
-hard obligations (visual gate, FPS readout, self-announcing failures, the
-GLSL ES blank-screen trap, centralized tunables). Those outrank anything in
-`vendor/`.
+this machine's hard obligations (visual gate, FPS readout, self-announcing
+failures, the GLSL ES blank-screen trap, centralized tunables). Those outrank
+anything in `vendor/`.
 
 `vendor/` is third-party MIT content, unmodified. See `NOTICE.md`.
 

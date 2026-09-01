@@ -82,6 +82,15 @@ Flag as `consider` with remediation-cost estimate; escalate to `should-fix` only
 when the smell demonstrably blocks this change's correctness or the next known
 change.
 
+The taxonomy below is a CATALOG (floor), not a march-through script. Map it onto
+the code's actual paradigm and model first: smell families that cannot apply
+(OO-inheritance smells in procedural/functional code, class-shape smells in a
+config repo or shader) get a one-line reasoned skip in the coverage note, never
+a forced finding — and derive the paradigm-specific smells the catalog lacks
+(hook/effect misuse and prop drilling in React, global-state mutation in
+shaders, resource lifetime in async pipelines) from the code's own model,
+reporting which derived smells were checked.
+
 **Bloaters**
 - Long Method — doing too much; unseparated responsibilities.
 - Large Class — too many fields/methods, blurred responsibility boundary.

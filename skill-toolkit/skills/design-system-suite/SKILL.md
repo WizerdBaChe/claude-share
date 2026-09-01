@@ -3,9 +3,10 @@ name: design-system-suite
 description: >-
   Contract-first methodology + Day-1 checklist for MULTI-PRODUCT frontend suites and
   shared design systems: bootstrapping a new product into a suite/hub, unifying sibling
-  apps under shared design tokens + theme packs, a versioned data-exchange contract,
-  cross-app navigation. Trigger when the user mentions design tokens, theme packs,
-  product suite/hub, or anti-silo cross-product needs. NOT for ordinary single-app
+  apps under shared design tokens + theme packs (主題包), a versioned data-exchange
+  contract, cross-app navigation. Trigger when the user mentions design tokens,
+  theme packs／主題包, 產品套件統一, product suite/hub, or anti-silo cross-product
+  needs（「把幾個 app 統一到共用 design tokens ＋ 主題包」）. NOT for ordinary single-app
   development or one-off styling. Full disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
