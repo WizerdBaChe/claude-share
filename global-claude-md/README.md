@@ -5,7 +5,18 @@
 ## 內容
 
 - `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。開頭有一段「Path-scoped rules」索引，指到下面 `rules/` 資料夾。
-- `rules/`：2026-08-11 新增。兩條原本內嵌在 `CLAUDE.md` 裡的規則被搬出來,改成只在讀到對應副檔名檔案時才載入的 `paths:`-scoped 規則檔——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`（GLSL 靜默失敗模式）。搬出來的理由：這兩條規則的觸發條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後**每個 session 啟動都不用再付它們的位元組成本**,只有真的讀到符合的檔案時才載入。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是 `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這兩條規則的內容併回 `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
+- `rules/`：現有五個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
+  新增其中兩條——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`
+  （GLSL 靜默失敗模式）——是把原本內嵌在 `CLAUDE.md` 裡的規則搬出來：這兩條規則的觸發
+  條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後
+  **每個 session 啟動都不用再付它們的位元組成本**,只有真的讀到符合的檔案時才載入。
+  2026-09-02 再新增三條，全都是直接以 scoped 規則檔的形式加入，未曾內嵌於 `CLAUDE.md`
+  本體——`deliverable-doc-refs.md`（人讀 HTML 交付物的代號/符號 define-before-use）、
+  `office-deck-deliverables.md`（programmatic PPTX 交付物的資產屬性）、
+  `visual-gate-scope.md`（CSS/瀏覽器驅動測試的視覺閘門範圍：量測墨水而非量測框、閘門要
+  普查整個類別而非只補上一次事故的洞）。要在自己的環境生效,必須放在對應機制存在的位置
+  (Claude Code 是 `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這
+  五條規則的內容併回 `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
 
 ## 去識別化 — 以及為什麼大部分路徑「原樣保留」
 
@@ -34,7 +45,13 @@
 3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` / `<LINE_ENDING_CONVENTION>` 四個佔位符換成該機器實際的 OS/shell/換行慣例；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 把 `rules/frontend-layering.md`、`rules/shader-failure-modes.md` 複製到目標機器的 `~/.claude/rules/`，才能讓 `CLAUDE.md` 開頭的 path-scoped 索引真的指到活的檔案。若目標環境沒有等效機制，直接把這兩份檔案的規則內容併回 `CLAUDE.md` 也可以。
+6. 把 `rules/` 下五份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
+   `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`）
+   複製到目標機器的 `~/.claude/rules/`。這是 path-scoped 規則機制實際運作所需的檔案；
+   `CLAUDE.md` 開頭的 path-scoped 索引行目前只列出前兩條，後三條尚待該索引補上（見本檔
+   內容一節的 2026-09-02 補記）——索引落後於實際檔案不影響規則檔本身的內容，只影響
+   「session 啟動時要不要主動提示這條規則存在」。若目標環境沒有等效機制，直接把這五份
+   檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
 ## 快照細節
@@ -43,6 +60,17 @@
 - 檢查範圍：使用者名稱、電子郵件、帳號、機器綁定的 OS/shell/路徑資訊。
 - 結果：檔案本身無使用者個資；「Environment」小節的機器綁定設定（Windows 11 + PowerShell 5.1 + CRLF）已改為佔位符。`~/.claude/ops/*` 與 `~/.claude/skill-trigger-dict.md` 引用判定為可攜路徑（`~` 不含使用者名稱），故原樣保留，並在本 README 補上與本 repo `claude-ops/`、`skill-toolkit/` 的對應表，取代原先過度抽象化的 `<OPS_DIR>` 寫法。
 - 2026-08-11 refresh：新增 path-scoped rules 索引行與 `rules/` 資料夾（兩條規則從 `CLAUDE.md` 本體搬出）；瀏覽器面板 UI 驗證那條規則改寫為「hook-enforced where the environment provides such a hook」，並附加行內註解說明原文額外指名一支 PreToolUse hook；relaxation gate 那條加了一則「Opus 主迴圈模型 = L1」的 standing ruling（附註解說明這是原作者自己的授權裁定，非泛用建議）；移除的 `## Architecture`（FSD）小節內容原樣搬進新的 `rules/frontend-layering.md`；GLSL 靜默失敗模式的括號子句搬進新的 `rules/shader-failure-modes.md`。無新增個資。
+- 2026-09-02 refresh：`rules/` 新增三份 path-scoped 規則檔，直接以規則檔形式收錄（不是從
+  `CLAUDE.md` 本體搬出）——`deliverable-doc-refs.md`（`**/*.{html,htm}`：人讀 HTML 交付物
+  的代號/符號 define-before-use＋版面/資產性質規則）、`office-deck-deliverables.md`
+  （`**/*pptx*.py` + `**/*.pptx`：programmatic PPTX 交付物的資產屬性）、
+  `visual-gate-scope.md`（`**/*.css` 等：視覺閘門要量測墨水而非框，且要普查整個控制項
+  類別）。前兩者原文都指向來源環境一個未隨此包出貨的私有素材庫（`AssetVault`）作為參考
+  實作，已改寫為「參考實作留在來源環境的素材庫中」的敘述性文字；第三者原文指向來源另一
+  私有專案（media-fetch-pipeline）自己的階段紀錄編號（Phase Z11），已改寫為不具體指向
+  該紀錄的敘述。三者皆不影響規則內容本身。無新增個資。來源端 `visual-gate-scope.md` 在
+  收錄當下尚未提交（`git status` 顯示 untracked），以工作副本收錄，見
+  `tools/share-manifest.toml` 該條目的 `source_dirty_ack`。
 - 這是時間點快照，不是自動同步目標。
 
 ## 授權
