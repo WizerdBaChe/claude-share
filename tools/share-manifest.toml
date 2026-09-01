@@ -1240,6 +1240,13 @@ status = "verbatim"
 path = "skill-toolkit/skills/code-review-deep-checklist/SKILL.md"
 source = "~/.claude/skills/code-review-deep-checklist/SKILL.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source working-copy delta at collection time was
+`+4 -1` (git diff --numstat against HEAD d06708c) — another session's
+uncommitted in-flight edit (added the FLOOR/extra-dimension sentence to the
+six-smells step and the UAT-checklist ranking sentence to the manual-acceptance
+step), carried here as-is per this round's ruling ("align the share to what is
+here now"). Re-collect and drop this ack once that edit lands as a commit at
+the source."""
 
 [[collected]]
 path = "skill-toolkit/skills/code-review-deep-checklist/references/dependency-fitness.md"
@@ -1423,6 +1430,15 @@ edits = [
 path = "skill-toolkit/skills/motion-design/local/env-bridge.md"
 source = "~/.claude/skills/motion-design/local/env-bridge.md"
 status = "edited"
+source_dirty_ack = """2026-09-02: source working-copy delta at collection time was
+`+10 -5` (git diff --numstat against HEAD d06708c) — another session's
+uncommitted in-flight edit to §1 (the manual-acceptance-checklist wording, now
+citing `ops/references/uat.md` and a consequence-ranked A/B stress-path split),
+carried here as-is per this round's ruling ("align the share to what is here
+now"). Note: `ops/references/uat.md` is a new source file not in this share's
+file list and not shipped — the pointer routes to something the adopter cannot
+open; flagged for the dispatcher, not resolved here (outside this worker's file
+list). Re-collect and drop this ack once the source edit lands as a commit."""
 edits = [
   "shader section: the two vendor/threejs/ file pointers replaced by 'see a Three.js reference for API specifics — this package does not ship one'.",
   "asset-vault section: an absolute path to a private registry.json replaced by 'check its registry, see that skill's own docs for where yours lives'.",
@@ -2126,6 +2142,11 @@ path_position_ok = [
     "<p>",      # rule-registry.md: `references/<p>-decisions.md` — the PROJECT's name
     "<layer>",  # project-retrospective: `<layer>/from-retrospective.md` — the adopter's rules-layer dir
     "<home>",   # workflow-checkpoint: `<home>/<project>-phase-log.md` — the record home resolved one line above
+    # literature-search-extract/SKILL.md (2026-09-02 refresh arrival, Zotero
+    # collection close-out step): `references/<collection>-bib.json` — the
+    # reader's own Zotero collection name, stated one clause later as "the
+    # collection name IS the project's Zotero collection name".
+    "<collection>",
 ]
 
 # Tokens allowed on a runnable line — the reader is expected to fill them in.

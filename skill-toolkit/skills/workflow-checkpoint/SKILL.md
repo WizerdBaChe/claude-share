@@ -4,9 +4,10 @@ description: >-
   Phase archiving + context reconstruction. Fires inside ONE long session, not
   only across sessions. (a) A phase boundary passes and work goes on later —
   proactively ASK whether to checkpoint. Boundaries are usually SPOKEN, not
-  committed: 「先到這邊」「本輪的終止」「收尾」「我會再新開 session/對話」,
-  UAT/驗收 passing, a key document delivered (spec/design/施工卡), or work
-  shifting from discussion into implementation. (b) A session opens with
+  committed: 「先到這邊」「本輪的終止」「收尾」「我會再新開 session/對話」
+  「先設計（留文件）再動手」, UAT/驗收 passing, a key document delivered
+  (spec/design/施工卡), or work shifting from discussion into implementation
+  — that last shift IS a boundary. (b) A session opens with
   「繼續這個專案 / recap / 接續上次」 — rebuild from the phase-log alone. Do NOT
   fire on minor edits, single-file changes, pure Q&A, or mid-phase work. Work
   continues → here; project ENDS with lessons extraction →
@@ -164,6 +165,7 @@ avoiding the need to replay full conversation history and saving usage.
 
 - Multiple checkpoints = multiple `# Phase Checkpoint` sections in the same file, appended chronologically.
 - `Date` uses the current date (with time if needed); relative dates (e.g., "today") must be converted to absolute dates.
+- **Series hand-off naming duty (`ops/lessons.md` L-039)**: if `Open Questions / TODO` hands the next round a deliverable in a series (deck v2, report round N, audience-fit edition), that line NAMES the mandatory inputs — the predecessor deliverables AND their review/acceptance records, by path. A hand-off line that names only the plan ("assemble from X + Y") is how the next round opens blind: the summary becomes the sole material authority and the prior-art gate never arms.
 
 ---
 
@@ -172,11 +174,18 @@ avoiding the need to replay full conversation history and saving usage.
 1. **Ask first**: "要不要現在對這段對話做 /compact？"
 2. Upon consent (note: `/compact` is a user command — the model cannot execute it directly):
    - Remind the user (in Chinese): "phase-log 已記錄耐久上下文，這段對話可以放心有損壓縮。"
-   - Provide a suggested compact note in **English** for the user to run as `/compact <key points>`. Prioritize preserving:
+   - Provide a suggested compact note in **English** for the user to run as `/compact <key points>`.
+     **Derive the note's contents from THIS session's own shape** — what kind of
+     work it held (design round, implementation, audit, a deliverable series),
+     and what the continuation will reach for first — never by transcribing the
+     list below verbatim. The list is the FLOOR every project continuation
+     needs preserved, not the note's outline; add the session-specific items
+     the list cannot know, and skip a floor item only with the reason stated:
      - Project name and the structure / completion status of Phase 1 through Phase N
      - Key decision summaries from the most recent phase(s)
      - Modified files and their rough purpose
      - Critical rules that will definitely be needed to continue the project (design principles, important constraints)
+     - For any in-flight deliverable series: the consulted prior-art list BY NAME (deliverables 1..N-1 + their review records) — a prior-art verdict survives compaction only as a named list, never as "already done" (`ops/lessons.md` L-039)
      - A reminder line that global language rules stay in force after compaction (replies in Traditional Chinese; machine-read output in English)
    - Safe to drop: debug details, outdated option exploration, step-by-step trial-and-error history.
 3. **Transcript fate (state it, don't assume it)**: compaction deletes nothing —
@@ -196,6 +205,7 @@ avoiding the need to replay full conversation history and saving usage.
 
 1. **Minimum tokens first**: read only `references/<project>-phase-log.md`, plus `references/<project>-context.md` if it exists (domain glossary — small, prevents vocabulary drift across sessions), plus the `## Now` block of `references/<project>-decisions.md` if it exists. Do not replay history; do not read the entire repo first.
    - **Premise re-confirmation (mandatory for continuing tasks)**: before acting, re-confirm the `## Now` premises — re-verify P-env facts (they rot), and re-state P-intent / P-validity premises to the user in one short block. Origin-(user) premises are never auto-overturned: if evidence now contradicts one, ask with the evidence attached (`~/.claude/ops/30-judgment.md` R2 overturn hierarchy).
+   - **Series-continuation inputs (`ops/lessons.md` L-039)**: if the resumed work produces deliverable N of a series (deck v2, report round N, audience-fit edition), the predecessor deliverables + their review records named in the phase-log hand-off line are READ INPUTS before any design work — deferred past this step: NOT part of the minimum read; do it after the user picks the Phase/TODO (step 4), before designing. The phase-log is a pointer to them, never their substitute, and its summary never counts as the prior-art check already run for the new round. Hand-off line missing the names (pre-L-039 checkpoint)? Locate them now (project 交付/ folder, decisions journal) rather than proceeding on the summary alone.
    - **Map fingerprint check (read-time, do it HERE not at checkpoint)**: if `references/<project>-map.md` exists, verify it BEFORE reading it — `git merge-base --is-ancestor <generated-from> HEAD`, then `git diff --name-only <generated-from>..HEAD` scoped to its `covers` globs. FRESH replaces a repo scan entirely; DRIFT means patch from the diff; STALE means regenerate. Reading first and verifying after spends exactly the tokens the check exists to save. The verdict is a P-env premise — report it in the block above. Algorithm and write classes: `~/.claude/ops/references/project-map.md` §6/§9.
    - **Fallback — phase-log missing or clearly stale** (session died before a
      checkpoint was written): tell the user reconstruction will cost more than a

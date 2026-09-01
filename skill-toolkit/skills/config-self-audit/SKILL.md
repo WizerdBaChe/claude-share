@@ -189,6 +189,16 @@ commands in `references/telemetry.md` §2:
   standing failure — use AD2, which reads bodies instead of grepping them.
 - New enumerable labels (`Mode X`, `L2`, `Tier-3`, a checklist's numbering) must
   clear `~/.claude/LABEL-REGISTRY.md` §4 (`40-maintenance.md` §3 Label birth).
+- **Hardcoded-enumeration classification (added 2026-08-31).** Every list the
+  artifact instructs an executor to APPLY (questions to ask, items to cover,
+  checks to run) is one of: (a) a **determinate gate/contract** — machine-checked,
+  parsed downstream, or a self-check keys on it — fixed wording is correct there;
+  (b) an **analytical/elicitation list** aimed at a varying object (a project,
+  code, a deliverable) — the artifact must instruct deriving the items from the
+  object's own model, demote the written list to seed/floor, and allow a
+  reasoned per-item opt-out. A type-(b) list presented as the definition is a
+  finding (precedent: project-retrospective's 5W1H axes, fixed 2026-08-31;
+  first sweep: top-5 skills by usage, same date).
 
 ### 5. Performance / token cost
 - Hooks on `PreToolUse`/`PostToolUse` with matcher `*` run on EVERY tool call — flag

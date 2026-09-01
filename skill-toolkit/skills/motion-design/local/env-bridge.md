@@ -15,11 +15,16 @@ the picture.* Everything this skill covers renders something a human looks at.
 - A change is done when **the user has confirmed it in the real environment**.
 - Because motion cannot be statically verified, every delivery here ends with a
   **manual-acceptance checklist** (`[BC]` rule): numbered steps, concrete action
-  + expected observation per step, executable blind by a non-author, with **no
-  fewer stress-path items than happy-path items**. For motion specifically the
-  stress path means: rapid re-trigger / spam-clicking, interrupting an animation
-  mid-flight, tab-switch and return (rAF throttling), window resize during
-  animation, and `prefers-reduced-motion: reduce` enabled.
+  + expected observation per step, executable blind by a non-author, ranked by
+  consequence into `A. 必驗` (≤7) then `B. 體驗` — never grouped by component or
+  technique (`ops/references/uat.md`).
+- For motion the stress paths are: rapid re-trigger / spam-clicking, interrupting
+  an animation mid-flight, tab-switch and return (rAF throttling), window resize
+  during animation, and `prefers-reduced-motion: reduce` enabled. These outrank
+  the happy-path item on the same surface — an interrupted animation that leaves
+  a stuck element or a leaked rAF loop is an `A` item (it breaks operation),
+  while "the ease curve feels right" is `B3`. If a change has none of these
+  paths, say so in one line rather than omitting them.
 
 ## 2. Failures must announce themselves
 

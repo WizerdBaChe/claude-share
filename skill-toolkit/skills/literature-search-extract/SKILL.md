@@ -164,6 +164,13 @@ Paywall handling: report the paywall, extract what is legally visible, suggest t
 retrieve it via institutional access if the source is load-bearing. Do not attempt to
 circumvent access controls.
 
+Locally-supplied PDF the Read tool refuses as "password-protected": probe before
+believing it — `fitz.open(path)` and check `needs_pass`/`is_encrypted` (a permissions
+flag alone makes readers refuse a file that is NOT encrypted; rewriting via pypdf does
+not fix the refusal). Working recipe (SSLD 2026-08-31): pymupdf `get_text()` per page
+plus `get_pixmap(dpi≈110)` page renders read as images — full text AND figure
+dimensions recovered. A genuinely user-password-protected file goes back to the user.
+
 ### P4 — Extraction (the core competency)
 For each selected source, work through the P1 target list against the section map:
 - **Go to the section where the target lives** (P1 table); do not extract Results claims
@@ -212,6 +219,18 @@ Assemble extracted items into the `output_format`, in the requested `language`:
   contract (Mode 2) explicitly requests a file deliverable — never because the content
   is long. When writing, always a NEW file (never overwrite an existing report), in
   Traditional Chinese for human readers; Mode 2 machine-consumed returns stay in English.
+- **Zotero collection close-out (standing step for project literature waves).** When the
+  project keeps a Zotero collection, every wave close-out appends the wave's newly READ
+  papers (papers only — never vendor datasheets, patents, or press; secondary-only
+  citations stay out) to the project's bib JSON (`references/<collection>-bib.json`;
+  item schema documented in `scripts/zotero_ris_export.py`), then regenerates the RIS:
+  `python scripts/zotero_ris_export.py <bib.json> --collection-name "<Zotero collection>"
+  --out-dir <project>/references`, followed by the same command with `--check`. The
+  collection name IS the project's Zotero collection name; the user refreshes Zotero via
+  File → Import of the RIS (re-import duplicates existing items — merge via Duplicate
+  Items, or hand the user a delta RIS of only the new wave). Never push via
+  localhost:23119 — /api/ is read-only and /connector/saveItems cannot target a named
+  collection (verified 2026-08-31; review-when: Zotero adds a writable local API).
 
 ## Resilience & session economy
 
@@ -265,6 +284,12 @@ other check on this list and is invisible in the finished document.
    carrying more citations even when those citations do not support the claim — so
    citation density reads as rigor and this failure is rewarded, not caught. P4.5 exists
    for this one: name the support span, then prove it is in the text.
+9. **Dispatcher seed anchors trusted over the corpus** — a caller's "known papers"
+   list is hints, not ground truth: the caller may transcribe entries from another
+   paper's bibliography that the project never actually read. Grep-verify every seed
+   against the recorded corpus before including it; reject and REPORT the misses
+   (SSLD 2026-08-31: 3 of the dispatcher's anchors existed only inside a source's own
+   reference list — correctly refused, dispatcher confirmed the seeds were wrong).
 
 ## Reference map
 

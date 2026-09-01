@@ -50,7 +50,10 @@ Answer these before opening the diff; they set intensity and lens:
    shared rule is the same: never let the first file you open set the agenda.
 4. **Six quality dimensions** as a standing mental checklist: Correctness,
    Completeness, Performance, Readability, Maintainability, Extensibility. Keep all
-   six live so attention doesn't collapse onto one.
+   six live so attention doesn't collapse onto one. The six are the FLOOR — derive
+   any extra dimension this code's model demands (determinism for build scripts,
+   accessibility for UI, numerical stability for simulation) and name what was
+   added.
 5. **Cheap tools before expensive attention**, in three tiers. **(a)** When reviewing
    LOCALLY, actually run the linter/typecheck/tests first and report their output —
    don't assume. When commenting on a REMOTE PR with CI, assume CI covers them and
@@ -110,7 +113,10 @@ and keep this skill consistent with the user's global preferences:
   does, do not emit a rival one: map each visual finding onto the existing items —
   covered / needs a new item / this item's expected observation is now wrong — and
   deliver that delta, naming the file. Only when no such artifact exists do you end
-  with your own numbered checklist (steps + expected result each).
+  with your own numbered checklist (steps + expected result each), ranked per
+  `ops/references/uat.md`: `A. 必驗` (≤7, consequence-ordered) then `B. 體驗`, never
+  grouped by surface. A delta onto an existing card inherits THAT card's order —
+  don't re-rank someone else's artifact from a review.
 - **Report artifact.** When the user wants the review as a document: NEW file,
   never overwrite an existing report; human-readable body in Traditional Chinese
   with English technical terms inline.

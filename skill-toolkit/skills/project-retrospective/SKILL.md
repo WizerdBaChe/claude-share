@@ -34,8 +34,8 @@ ends — that is `workflow-checkpoint`'s job.
 2.5 Triage any LIVE defect the scans surfaced → 3. Reconcile the open list →
 4. Draft + ONE consolidated check-in → 5. Output documents →
 6. Write project-level rules (unless project CLAUDE.md IS global) → global
-merge (only with the explicit yes from step 4) → close-out → mechanical
-self-check → log
+candidates DEFERRED to the accumulation file + backlog count reported (never
+written here) → close-out → mechanical self-check → log
 ```
 
 Before starting, read `references/extraction-taxonomy.md` (classification) and
@@ -60,6 +60,36 @@ output formats there): 1 Technical Decisions · 2 Pitfalls & Bugs (each with
 cost, times hit, and status) · 3 Effective Workflows · 4 Project Constraints &
 Context · 5 User Preferences · 6 Reusable Principles · 7 The Clean Path (only
 when the project is an instance of a repeatable kind).
+
+**5W1H deep-question pass (part of the review, not optional — added
+2026-08-31).** The category scan classifies what HAPPENED; this pass
+interrogates what SHOULD have happened. After mapping items to categories, ask
+5W1H of the WHOLE project/conversation, not of individual items.
+
+**The questions are DERIVED per project, not copied from a fixed list.** For
+each of the six axes, first ask what that axis MEANS for THIS project's model
+(its kind, its deliverables, its stakes, how it could have failed), then write
+the sharpest project-specific question(s) the axis yields — a data pipeline's
+"Where" is about data boundaries and trust seams, a UI project's is about
+device/viewport scope, a rules-layer project's is about which layer a rule
+lives in. The seed questions below are the FLOOR — the generic reading each
+axis must at least cover — never the ceiling and never the literal wording:
+- **Why** — did the delivered thing answer the original need, or a drifted
+  version of it?
+- **What** — what was built vs. asked; what was silently dropped or added?
+- **Who** — who was each deliverable for, and did its form fit that consumer?
+- **When** — where did the time actually go, and what decided that?
+- **Where** — which boundaries were drawn wrong or drawn late?
+- **How** — which method/route would we swap next time, on what evidence?
+
+An axis that is genuinely meaningless for this project's model is SAID to be
+(one line, with why) — never force-filled with a generic answer; that
+statement replaces the axis in Document 1. Answers feed Document 1's
+「全案反問（5W1H）」 section — each axis records the derived question it
+actually asked, so a reader can judge the question, not just the answer — and
+may surface new Category items the scan missed. A question that CANNOT be
+answered from the available sources is itself a finding — record it in the
+coverage header or 未解決的問題, never silently skip it.
 
 ## Step 2.4: Rule sibling scan — after extraction, because it eats Step 2's output
 
@@ -119,13 +149,15 @@ instead — never copy an open list from anywhere without checking it.
 
 ## Step 4: Draft, then ONE consolidated check-in
 
-Draft everything BEFORE asking: Document 1, Document 2, the global-merge
+Draft everything BEFORE asking: Document 1, Document 2, the global-rule
 candidate table (Step 6.2's four gates), and the README status check (Step 6.3).
 Then ask the user **once**, covering every ruling in a single message — use the
 check-in template in `references/output-templates.md` §"Step 4 check-in
-template" (extracted items summary; the two probe questions; the global-merge
-candidate table where **each rule needs an explicit yes — silence means no**;
-the README question only if stale/missing). Only include a question when different answers lead to materially different work.
+template" (extracted items summary; the two probe questions; the global-rule
+candidate table shown **for information/correction only — do NOT ask for
+per-rule adoption; global writes never happen in this skill (Step 6.2)** —
+plus the accumulated pending-candidate count; the README question only if
+stale/missing). Only include a question when different answers lead to materially different work.
 Do NOT ask who the audience is — the skill always produces both documents.
 Incorporate the answers, then move to output.
 
@@ -165,7 +197,7 @@ trigger frequency (cut from the bottom, cut material stays in Document 1);
 every rule tagged BOTH `[from: category]` AND `[dest: project | global |
 lessons]` — two destinations only when the project has no rules layer.
 
-## Step 6: Merge into CLAUDE.md + close out (MANDATORY)
+## Step 6: Project rules write + global-candidate deferral + close out (MANDATORY)
 
 After producing the documents, do ALL of the following in order (do not skip — this is the deliverable, not optional):
 
@@ -173,12 +205,12 @@ After producing the documents, do ALL of the following in order (do not skip —
    global one.** Resolve the project's CLAUDE.md path and compare it to
    `~/.claude/CLAUDE.md`. If they are the same file (a dotfiles or agent-config
    repository, where the project root and the configuration root coincide),
-   STOP: this step's no-consent write would silently execute Step 6.2's gated
-   write, and "zero-behaviour-change" is FALSE for the global rules file. In
-   that case skip this step's CLAUDE.md write entirely, route every rule
-   through Step 6.2's four gates and Step 4's explicit yes, and say so in the
-   check-in; the `[dest: project]` rules then go to whatever rules layer the
-   repo actually has (`ops/`, `rules/`), never the global file. Otherwise:
+   STOP: writing "project" rules there would write the global rules file,
+   which this skill NEVER does (Step 6.2 defers every global candidate). In
+   that case skip this step's CLAUDE.md write entirely, route `[dest: global]`
+   candidates through Step 6.2's deferral, and say so in the check-in; the
+   `[dest: project]` rules then go to whatever rules layer the repo actually
+   has (`ops/`, `rules/`), never the global file. Otherwise:
    merge Document 2's `[dest: project]` rules into the repo's rules layer if it
    has one — into the layer file whose scope already matches, else a new
    `<layer>/from-retrospective.md` — and REGISTER that file wherever the layer
@@ -199,8 +231,20 @@ After producing the documents, do ALL of the following in order (do not skip —
    files** — a zero-behaviour-change documentation write (default branch is
    fine); do not leave a dirty working tree.
 
-2. **Global merge — four gates, and only with Step 4's explicit yes.** A rule
-   reaching global `~/.claude/CLAUDE.md` must pass ALL four:
+2. **Global candidates — triage, ACCUMULATE, and report; NEVER write global
+   here (user ruling 2026-08-31, supersedes the per-rule explicit-yes flow).**
+   This skill no longer merges anything into `~/.claude/CLAUDE.md` and no
+   longer asks the user to adopt rules one by one. Global candidates are
+   organized into the persistent candidates file (below) so a FUTURE dedicated
+   session can batch-process them; this skill's whole duty to the user is to
+   report the accumulated backlog size — the user decides when the pile is
+   worth a batch session. Do not push for that session, and never treat the
+   check-in's silence as anything: there is nothing to approve here.
+
+   The four gates still run — as TRIAGE producing a per-candidate
+   recommendation (adopt / merge into X / reject) for the batch session, not
+   as a write authorization. A candidate destined for global would have to
+   pass ALL four:
    - (a) **Generalizable — and checked, not estimated.** Judge this on Step
      2.4's rule-sibling-scan results, never on reasoning alone. A rule that two
      projects arrived at independently is evidence-backed; a rule seen once is
@@ -220,22 +264,26 @@ After producing the documents, do ALL of the following in order (do not skip —
      rejected it — say so explicitly, with the old verdict and what changed.
      The rejected-candidate history lives in `global-rule-candidates-*.md`,
      not in Document 2.
-   Present candidates as the Step-4 table (rule | verdict: adopt / merge into X /
-   reject | why), recommend a MINIMAL set, and say how many lines it adds.
-   Execute ONLY the rules that received an explicit yes in Step 4's check-in —
-   NEVER write global without it; no answer means no global write. Match the
-   existing conditional-section style (append/merge, never overwrite).
+   Present candidates as the Step-4 table (rule | recommendation: adopt /
+   merge into X / reject | why) for information/correction only.
    **Persist the full candidate table** — including every rejection and its
    why — as `global-rule-candidates-[project-name]-[date].md` in the output
-   directory. The file's header MUST state the batch's execution status
-   (executed / rejected / judged-but-deferred / not yet ruled) with the user's
-   ruling verbatim, and its tail MUST carry a section "Input for the next
-   Step 2.4" saying, per candidate, what new evidence would re-open it. A
-   candidate with no status is invisible to the next round — it cannot tell
-   "judged and rejected" from "judged and parked" from "never ruled", and
-   those three answer "re-propose?" differently. That file IS the
-   rejected-candidate history a future Step 2.4 scans; if it is not written,
-   the next project has no record that a candidate was ever judged.
+   directory. The file's header MUST state the batch's status — default is now
+   `judged-but-deferred (pending batch session)`; `executed` may only ever be
+   written by the batch session, never by this skill — and its tail MUST carry
+   a section "Input for the next Step 2.4" saying, per candidate, what new
+   evidence would re-open it. A candidate with no status is invisible to the
+   next round — it cannot tell "judged and rejected" from "judged and parked"
+   from "never ruled", and those three answer "re-propose?" differently. That
+   file IS both the rejected-candidate history a future Step 2.4 scans AND the
+   work queue the batch session consumes; if it is not written, the candidates
+   simply vanish.
+   **Report the accumulated backlog (the deliverable of this step)**: glob
+   `global-rule-candidates-*.md` in the output directory, count the candidates
+   in files whose header status is still pending/deferred, and state it in the
+   check-in or close-out: "N pending global-rule candidates across M files —
+   批次處理時另開一個 session 即可". The count, not a question, is what the
+   user acts on.
 
 3. **Close-out visibility gate.** Two checks:
    - Update the project's row in `~/.claude/references/PROJECTS.md` (status →
@@ -261,11 +309,12 @@ After producing the documents, do ALL of the following in order (do not skip —
    - The PROJECTS.md row actually changed and carries the document paths.
    - If Step 6.2 judged any candidates,
      `global-rule-candidates-[project-name]-[date].md` exists, records every
-     rejection (not only the adopted set), and carries the batch's execution
-     status in its header.
+     recommendation including rejections, carries a header status (default
+     `judged-but-deferred (pending batch session)`), and the accumulated
+     backlog count was actually reported to the user.
    Report any failure and fix it instead of declaring done.
 
-5. **Record it where that kind of fact lives.** NOT `audit-archive/` — frozen 2026-08-11, it takes no new entries and must not be recreated. Route by fact type: the event (which files changed, how to undo) → the git commit message; a global CLAUDE.md rule that changed its standing value → replace that rule's entry in `~/.claude/ops/rule-registry.md`, compressing the old value into `history:`; a pitfall actually hit during the project → `~/.claude/ops/lessons.md` as a new `L-nnn`. Cover BOTH the project-CLAUDE.md write and (if it happened) the global merge; use the record-entry shape in `references/output-templates.md` §"Step 6.5 record-entry shape". Always convert relative dates to an absolute timestamp. Append, never overwrite.
+5. **Record it where that kind of fact lives.** NOT `audit-archive/` — frozen 2026-08-11, it takes no new entries and must not be recreated. Route by fact type: the event (which files changed, how to undo) → the git commit message; a global CLAUDE.md rule that changed its standing value → replace that rule's entry in `~/.claude/ops/rule-registry.md`, compressing the old value into `history:`; a pitfall actually hit during the project → `~/.claude/ops/lessons.md` as a new `L-nnn`. Cover the project-CLAUDE.md write (global merges no longer happen in this skill — the future batch session records its own); use the record-entry shape in `references/output-templates.md` §"Step 6.5 record-entry shape". Always convert relative dates to an absolute timestamp. Append, never overwrite.
 
 ## Output Principles
 
