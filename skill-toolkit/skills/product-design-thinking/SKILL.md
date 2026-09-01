@@ -1,16 +1,18 @@
 ---
 name: product-design-thinking
 description: >-
-  High-rigor DESIGN/PLANNING mode (進入設計模式) for a new product or complex
-  new feature/subsystem: 第一性原理 (first-principles) decomposition, prior-art
-  search BEFORE designing, convergence into build-ready documents (Concept Note
-  / CIM / RPD / PIM / PSM / DSL semantic contract). Trigger on new product
-  ideas (新產品構想/想法), NEW TOOL/utility design (「新工具設計」), feasibility
-  evaluation, 重新架構/換技術路線 (re-architecture), or planning a complex
-  feature with an undecided approach — including MID-CONVERSATION; also
-  PSM-grade remediation planning for an EXISTING product (「PSM等級修正案」).
-  Deliberately heavyweight — NOT for 單一缺陷修復, small additions, or
-  implementing an existing spec (按既有規格施工). Full disambiguation:
+  High-rigor DESIGN/PLANNING mode (進入設計模式). Mode A 從零新建: a new
+  product or complex feature/subsystem. Mode B 增能: a capability increment to
+  a live system — a reusable tool/program, skill, pipeline stage or
+  check/檢測項 with persistence or other consumers
+  (新增能力、擴充既有 pipeline、可複用工具、審核/檢測機制、其他 session
+  會調用的工具). 第一性原理 (first-principles) 拆解, prior-art search
+  BEFORE designing, build-ready docs (Concept Note/CIM/PIM/PSM/DSL
+  semantic contract). Triggers: 新產品構想/想法, 「新工具設計」, feasibility
+  evaluation, 重新架構/換技術路線 (re-architecture), undecided-approach
+  complex features (incl. MID-CONVERSATION), PSM-grade remediation
+  (「PSM等級修正案」). Heavyweight — NOT for 單一缺陷修復, one-shot scratch
+  scripts, small in-product tweaks, or 按既有規格施工. Disambiguation:
   ~/.claude/skill-trigger-dict.md.
 ---
 
@@ -29,9 +31,10 @@ engineering choice comes with a plain-language reason and a recommendation
 
 ## Where the detail lives
 
-This file is the spine — the phases, the mode tiers, the ladder, and the two things
-that get missed when they are not in front of you (the language column, and what
-blocks a rung). Load a reference file when you reach its phase; don't preload them.
+This file is the spine — the entry modes, the phases, the mode tiers, the ladder,
+and the things that get missed when they are not in front of you (the language
+column, what blocks a rung, and the Mode B increment duties). Load a reference
+file when you reach its phase; don't preload them.
 
 | Load | When |
 |---|---|
@@ -41,11 +44,53 @@ blocks a rung). Load a reference file when you reach its phase; don't preload th
 | `references/view-integrity-checks.md` | Phase 2–3 — before any drawn view ships (per-view soundness); and at Verification — the integrity + cross-view correspondence audit (feeds gate condition c and SDD gate 5) |
 | `references/document-ladder.md` | Phase 3 — writing/verifying any rung; sole-source contract bar; SDD pitfall gates |
 
+## Entry modes — Mode A 從零新建 / Mode B 增能, decided at trigger time
+
+Two ways IN; the depth axis (tiers below) is a separate choice made at Phase 0
+exit. **Mode A**: a new product/tool/subsystem with no host system — phases run
+as written. **Mode B (capability increment)**: a new capability added to a LIVE
+system — the increment creates a new OPERATIONAL UNIT (tool/program, skill,
+hook, pipeline stage, check/gate, mechanism) AND at least one of:
+(1) it persists as infrastructure future sessions/tools will re-invoke — it
+lands in tools/, skills/, hooks, cron, or a registry, not in a scratchpad;
+(2) it has consumers other than its author (another session, tool, gate, or
+person relies on its output). Neither — or an ask carrying NO
+persistence/consumer signal — ⇒ scratch work, outside; the test re-runs at
+the moment the unit is about to be KEPT (registered/committed), including
+mid-task growths nobody asked for by name (速寫 Sketch minimum then).
+In-product 小型加功能 (no new unit) stays outside as before. The test is
+**persistence + consumers, never "工具大小"** — recorded miss: 2026-08
+capability rounds (reusable tools + 檢測項) bypassed design mode because
+increment phrasing read as excluded "small additions". Skill authoring
+splits: designing the CAPABILITY is Mode B here; authoring/optimizing the
+SKILL.md artifact is skill-creator — design first when complexity warrants,
+then hand off; a routine skill with a settled approach goes straight there.
+
+Mode B keeps every phase and ADDS the increment interrogation:
+1. **Host contract** (Phase 0): which system it extends; who calls it; what
+   breaks in the host if it misbehaves; which already-ACCEPTED host behaviours
+   it touches — list them; the regression duty covers increments, not just
+   bug fixes.
+2. **Internal prior art first** (Phase 1): the sweep starts INSIDE — project
+   registry / PROJECTS.md / cross-index / graph-snapshot / AssetVault — and
+   records an explicit extend-vs-new verdict before any external search.
+3. **Ownership & registration set** (Phase 0, re-checked at close-out): which
+   skill/rule/doc owns the new unit, and the full registration list named AT
+   DESIGN TIME (trigger-dict entry, registry row, index enrolment,
+   watchdog/check coverage). Registration breaches are born at build time,
+   not discovered at watchdog time.
+4. **Instrument duties** (Phase 2): a check/gate shipped with the increment
+   follows the gate rules — severity by consumer, calibration with a positive
+   AND a negative control before its verdict is trusted.
+Mode B defaults to 速寫 Sketch or 標準 Standard by the driver table below;
+Full-ladder only when its drivers are genuinely present.
+
 ## Mode tiers (模式分級) — depth chosen at Phase 0 exit, never at trigger time
 
 One depth axis, three tiers, named by ladder shape. The trigger envelope is
-UNCHANGED: tiers scale depth after the skill fires — 單一缺陷修復, casual
-小工具/腳本, and 按既有規格施工 still don't enter design mode at all. Scale
+UNCHANGED: tiers scale depth after the skill fires — 單一缺陷修復, one-shot
+scratch scripts (fail the Mode B entry test), and 按既有規格施工 still don't
+enter design mode at all. Scale
 drivers (2026-08-27 intake): module span; long-lived state / persistent data;
 concurrency & shared resources (async jobs, queues, GPU/locks, multi-agent);
 external contracts / a second executor.
@@ -83,6 +128,13 @@ Answer in writing, with the user, before designing anything:
    standing order; if the core need is already met, recommend stopping.
 6. **Tier call**: close the phase by picking the mode tier (table above) and
    recording tier + why + what it skips in the design doc.
+
+Items 1–5 are the FLOOR of the interrogation, not its script: phrase each in
+the product's own terms, and derive the product-model-specific questions the
+list cannot know (a data product asks about ownership/provenance; a realtime
+product about its latency budget; a multi-tenant one about isolation). An item
+genuinely meaningless for this product is said to be, with why — never
+force-answered with a generic line.
 
 ## Phase 1 — Prior art & open-source sweep (before designing complex parts)
 

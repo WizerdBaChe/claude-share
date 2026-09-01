@@ -18,6 +18,10 @@ Load while shaping the architecture, before writing the PIM.
 - **Self-checkable**: design the verification path in — health endpoints, smoke-test
   fixtures, a sample input with a known-correct output. Decide now which of
   UNIT / SIT / UAT layers this product needs, and list acceptance items per layer.
+  Test LAYERS are a machine-side split; the UAT layer's own items are ranked by
+  consequence (`A. 必驗` ≤7 → `B. 體驗`), never re-grouped by module or by which
+  layer they came from — `ops/references/uat.md`. Anything a UNIT/SIT layer
+  already covers does not reappear as a human item.
 - **Maintainable & documented**: plan the asset set — user README vs DEV_README
   split, phase log (`workflow-checkpoint`), i18n/language module if user-facing.
   This user ships bilingual zh-TW/EN products by default; ask early rather than

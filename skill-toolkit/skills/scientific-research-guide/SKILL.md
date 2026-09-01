@@ -1,16 +1,17 @@
 ---
 name: scientific-research-guide
 description: >-
-  Scientific research ADVISORY companion (natural / engineering science): diagnoses the
-  research stage and recommends next actions — research questions, literature review
-  (PRISMA), experiment design (controls/sampling), statistical test choice, model V&V and
-  uncertainty, fit interpretation, reproducibility / submission readiness. Trigger on
-  「我的研究卡在…」「這個實驗怎麼設計」「該用哪個統計檢定」「投稿前要補什麼」. Advice first; writes code or
-  touches data only on explicit request. Domain profiles — plasmonic waveguide / 波導 /
-  SPP / SERS, topological insulator, vertical GaN, microLED, silicon photonics,
-  光子封裝 / packaging reliability, CPO / 共封裝光學 — questions in those fields trigger it
-  too. NOT for cited topic reports (→ deep-research). Profile list + disambiguation:
-  ~/.claude/skill-trigger-dict.md.
+  Scientific research ADVISORY companion (自然/工程科學): diagnoses the
+  research stage, recommends next actions — research questions, literature
+  review (PRISMA), experiment design (controls/sampling), statistical test
+  choice, model V&V and uncertainty, fit interpretation,
+  reproducibility/submission readiness. Trigger on
+  「我的研究卡在…」「研究流程走到哪、下一步該做什麼」「這個實驗怎麼設計」「該用哪個統計檢定」「投稿前要補什麼」.
+  Advice first; code/data touched only on explicit request. Domain profiles —
+  plasmonic waveguide/波導/SPP/SERS, topological insulator, vertical GaN,
+  microLED, silicon photonics, 光子封裝/packaging reliability, CPO/共封裝光學
+  — questions in those fields trigger it too. NOT for cited topic reports
+  (→ deep-research). Profiles + disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # Scientific Research Guide
