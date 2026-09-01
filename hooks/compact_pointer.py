@@ -10,10 +10,29 @@ hook-enforced by transcript_read_guard.py).
 
 WHY THIS CANNOT DEFEAT COMPACTION. Compaction saves RESIDENT tokens, re-paid
 on every subsequent turn; recall spends ON-DEMAND tokens once per query. The
-card costs ~130 resident tokens against the ~500k it points at. The only
+card costs ~220 resident tokens (~130 base + ~90 intake re-arm) against the
+~500k it points at. The only
 behaviour that would re-inflate context — a wholesale re-read — is what the
 guard denies. Measured ladder economics: digest ~1% of raw (50KB vs 4.3MB,
 one real session, 2026-08-05).
+
+SECOND JOB (2026-08-31, ops/lessons.md L-039): the card also RE-ARMS the
+task-intake gates. A compact summary rewrites how tasks ARRIVE ("create
+deliverable N" arrives as "execute a settled list"), which silently disarms
+every task-shape trigger (global prior-art gate, domain-skill trigger words)
+while the summary inherits sole material authority — measured in SSLD Phase 5,
+where the miss cost five material deck sections. The [intake re-arm] block
+(~90 resident tokens) states that a prior-art verdict survives compaction only
+as a NAMED consulted-list, never as "already done"; the prose layer it cites
+is the global CLAUDE.md prior-art bullet's series-continuation trigger
+(40-maintenance §2a's hook-over-prose principle — this is an injection hook
+with no enforcement power, NOT a condition-(1) deny/explain pairing).
+Asymmetry, by design: a MANUAL compact can carry the verdict forward because
+workflow-checkpoint §B writes the consulted-list into the compact note; an
+AUTO-compact has no note-writing moment, so it almost always re-arms the gate
+even when prior-art just ran — the conservative default (fail toward
+re-verifying), stated here so the firing right after a completed check reads
+as intended, not as a bug.
 
 PLATFORM CONTRACT (verified 2026-08-16, code.claude.com hooks.md): SessionStart
 stdout IS injected as context (living proof: ops_health_nudge's line at every
@@ -25,8 +44,7 @@ DEGRADED MODE IS DELIBERATE: a missing bookmark (compact predating this
 mechanism, or a bookmark write failure) yields a minimal card from stdin's
 transcript_path instead of silence — the card IS the deliverable and a silent
 blank is a defect. Errors still exit 0 (fail-open).
-review-when: same events as compact_bookmark.py (policy home:
-compact-recovery/README).
+review-when: same events as compact_bookmark.py (compact-recovery/README, platform-contract notes).
 """
 import json
 import os
@@ -101,6 +119,16 @@ def main() -> None:
         "digest's per-turn truncation cut it; there Read only located windows "
         "(offset, limit<=120 — hook-enforced). Never re-read wholesale: recall "
         "is on-demand tokens, not context re-inflation.",
+        "[intake re-arm] (independent of the Recall restriction above — this "
+        "concerns PROJECT files, not the session transcript/digest.) The "
+        "summary rewrote how tasks ARRIVE, not what they are — intake gates "
+        "key on the deliverable's own shape. First NEW deliverable/design "
+        "round after this compact: the prior-art gate counts as NOT yet run — "
+        "its verdict survives compaction only as a NAMED list of what was "
+        "consulted, never as 'already done'; producing deliverable N of a "
+        "series makes deliverables 1..N-1 + their review records mandatory "
+        "inputs; a single-source ruling covers only its named axis (numbers "
+        "!= narrative). Ref: ops/lessons.md L-039.",
     ]))
     sys.exit(0)
 

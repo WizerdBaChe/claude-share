@@ -639,6 +639,7 @@ source = "~/.claude/hooks/ops_health_nudge.py"
 status = "edited"
 edits = [
   "check 11 (project ops-relaxation level) gated on `ops/05-authority.md` being present. `ops-relaxation` is defined by claude-ops/ops/05-authority.md, and taking the hooks lane without the ops lane is a supported outcome here — the lanes are independent. Ungated, such an adopter is nagged every session about a key defined nowhere they can read and satisfiable by no file they own; a permanently-on alarm is the kind nobody reads, and it would train them past the other eleven checks. NOT back-flowed: the source machine always has the ops layer, so the same gate there could only mask a real ghost-rule failure, which is check 4's job.",
+  "2026-09-02: source grew a new check 17 (session-transcript mirror heartbeat, D-052 item 5) since the prior collection. Its default MIRROR_MARKER was an absolute path on a non-system drive (a private mirror root) -> dropped to an env-var-only default (empty string), which the existing archive-root gate already treats as absence-is-normal (same as CC_BIN); the scheduled-task name (ClaudeSessionTranscriptMirror-Daily) dropped from the docstring and both live msgs.add() strings -- a scheduled-task name is a named scrub class, the capability description ('check your mirror task's scheduler entry') stays; the same private absolute mirror-logs path (non-system drive) in the FAIL-state message dropped for 'your mirror log directory'. The tool pointer tools/claude-session-transcript-mirror.ps1 and ruling id D-033/D-052 are kept -- same treatment this file already gives tools/cc-delta/cc_delta.py in check 16, a repo-relative path is not a scrub target even when this derived repo does not itself ship the tool. The docstring's review-when also cited a rule-registry.md key ('session mirror heartbeat') that postdates the shipped claude-ops snapshot (verified: absent from claude-ops/ops/rule-registry.md) -> 'your own rule registry', same treatment as hooks/transcript_read_guard.py's identical-class edit.",
 ]
 
 [[collected]]
@@ -762,6 +763,13 @@ edits = [
   "docstring: a project name + local session id ('Prism session 94a45532') -> 'one real session' — the id points at a transcript no reader can open; the measured ladder economics (50KB vs 4.3MB, ~1% of raw) and the date are kept, because those are the part a reader can act on",
   "docstring review-when: rule-registry entry name -> compact-recovery/README, same reason as compact_bookmark.py",
 ]
+# 2026-09-02 refresh: source grew a SECOND JOB (intake-gate re-arm, ops/lessons.md
+# L-039) since the prior collection — a docstring paragraph plus an [intake
+# re-arm] block in the printed card. Scanned for scrub targets and found none:
+# it cites ops/lessons.md L-039 (lesson id, not a scrub target), a project name
+# (SSLD Phase 5, not a scrub target) and claude-ops/ops/40-maintenance.md §2a
+# (verified: that file ships in this repo). Carried in verbatim; the edits list
+# above is unchanged.
 
 [[collected]]
 path = "hooks/transcript_read_guard.py"
@@ -772,6 +780,12 @@ edits = [
   "docstring: dropped the scheduled-task name that feeds that mirror (a private-asset pointer; the capability description stays) and re-pointed the INV-8 comparison at compact-recovery/preserve.py, where that file lives in this repo",
   "docstring: rule-registry entry name -> 'your own rule registry' — the entry postdates the shipped claude-ops snapshot. NARROWED 2026-08-29: this edit used to cover the deny message too, and the 2026-08-29 source revision rewrote that message into a constraint-only form (its new DENY-MESSAGE CONTRACT forbids exactly the read-elsewhere pointer the old edit was rewriting). The anchor is gone at the source, so the edit is docstring-only; recorded rather than dropped, because a vanished anchor is a signal to re-read, and here the re-read says the source fixed it upstream.",
 ]
+# 2026-09-02 refresh: the source reworded both anchors the two path/task edits
+# above land on (docstring now reads 'mirror root changes with the scheduled
+# task (ClaudeSessionTranscriptMirror-Daily)' and CORPUS_ROOTS' inline comment
+# changed from 'daily robocopy mirror' to the same). Re-applied against the new
+# wording — same removals, same targets — the edits list above still describes
+# them accurately and is unchanged.
 
 [[collected]]
 path = "compact-recovery/preserve.py"

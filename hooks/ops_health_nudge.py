@@ -37,6 +37,9 @@ read):
  16. installed Claude Code != the build ops/ was reconciled against
      -> run tools/cc-delta/cc_delta.py (every project, not just ~/.claude;
      stat()-gated, see the CC_STAMP block; a missing stamp is itself reported)
+ 17. session-transcript mirror marker FAIL, missing, or older than
+     MIRROR_STALE_DAYS -> the backup task may be dead while cleanupPeriodDays
+     deletion keeps running (reads MIRROR_MARKER, one small file)
 NO THRESHOLD NUMBER APPEARS IN THIS DOCSTRING, and none may be added. Every
 line above names the CONSTANT; the constant's assignment below is the single
 site that carries the value. This is a property of the file, not a style
@@ -169,6 +172,26 @@ WATCHDOG_STATUS = os.path.join(HOME, "tools", "graph-snapshot", "out",
 # why/history/review-when: ops/rule-registry.md, key `cc version reconcile`.
 CC_STAMP = os.path.join(HOME, "ops", "cc-reconciled.json")
 CC_BIN = os.path.expanduser("~/.local/bin/claude.exe")
+
+# Check 17. Days the session-transcript mirror's marker may age before its
+# daily task (decisions D-033) is
+# presumed dead. PROVISIONAL by the check-15 argument: daily carrier, 3
+# tolerates two off days. The FAIL state fires regardless of age -- the
+# mirror is the only thing between cleanupPeriodDays deletion and the
+# transcripts. Run HISTORY lives beside the marker in run-ledger.tsv
+# (append-only; the jsonl count may only grow under the COPY-ONLY contract).
+# why/history/review-when: your own rule registry.
+# The env var is the TEST SEAM (hermetic fixtures in tools/ops-health-test);
+# the archive-root gate in the check makes a host without the archive silent
+# by design (same absence-is-normal call as CC_BIN in check 16).
+# SHARE EDITION: no default marker path ships here -- the source's default was
+# an absolute path on a non-system drive (a private mirror root, the same
+# leak class handled in transcript_read_guard.py CORPUS_ROOTS). Point
+# OPS_NUDGE_MIRROR_MARKER at your own marker file; an unset/empty value's
+# parent dir will not exist, so the check below stays silent by the same
+# absence-is-normal rule as CC_BIN.
+MIRROR_STALE_DAYS = 3
+MIRROR_MARKER = os.environ.get("OPS_NUDGE_MIRROR_MARKER") or ""
 
 # ---- output budget and severity ------------------------------------------
 # The line is injected into EVERY session's context, so the number of findings
@@ -498,6 +521,50 @@ def main():
         )
     except Exception:
         pass
+
+    # 17. session-transcript mirror heartbeat (born 2026-09-01, D-052 item 5).
+    #     The mirror (tools/claude-session-transcript-mirror.ps1, D-033) is
+    #     the only thing between cleanupPeriodDays deletion and the
+    #     transcripts, and it was silent-when-dead: it wrote a marker nobody
+    #     read. This reads that one small marker; run HISTORY lives beside it
+    #     in run-ledger.tsv (append-only; jsonl count may only grow under the
+    #     COPY-ONLY contract — a drop between lines means archive loss).
+    #     is_home-scoped like 15: the remedy is machine maintenance. Fail-open.
+    if is_home:
+        try:
+            mirror_root = os.path.dirname(os.path.dirname(MIRROR_MARKER))
+            if not os.path.isdir(mirror_root):
+                pass   # host without the archive: absence is normal (CC_BIN)
+            elif not os.path.isfile(MIRROR_MARKER):
+                msgs.add(
+                    "session-transcript mirror marker missing — the backup "
+                    "may have never run: check your mirror task's scheduler "
+                    "entry, then run "
+                    "tools/claude-session-transcript-mirror.ps1",
+                    SEV_ALARM, "session mirror marker missing"
+                )
+            else:
+                age = (time.time() - os.path.getmtime(MIRROR_MARKER)) / 86400
+                with open(MIRROR_MARKER, encoding="utf-8-sig") as f:
+                    first = f.readline().strip()
+                if first.startswith("FAIL"):
+                    msgs.add(
+                        "session-transcript mirror FAILED its last run ("
+                        + first + ") — transcripts are unprotected against "
+                        "cleanupPeriodDays deletion: see your mirror log "
+                        "directory",
+                        SEV_ALARM, "session mirror failed"
+                    )
+                elif age > MIRROR_STALE_DAYS:
+                    msgs.add(
+                        f"session-transcript mirror silent {age:.1f}d "
+                        f"(>{MIRROR_STALE_DAYS}d) — its daily task may be "
+                        "dead: check your mirror task's scheduler entry, "
+                        "then run tools/claude-session-transcript-mirror.ps1",
+                        SEV_ALARM, "session mirror silent"
+                    )
+        except Exception:
+            pass
 
     # 2. oversized ops files -- ONE message for all of them: the remedy is
     #    shared, and this line is charged every session.
