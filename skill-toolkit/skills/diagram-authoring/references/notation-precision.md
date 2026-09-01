@@ -134,7 +134,21 @@ each scene's bbox is non-zero before trusting any rectangle. Assert both
 preconditions themselves: the checker's first run produced 36 false
 overlaps from one transformed legend group, its second deliverable 987
 from hidden tab panes — a checker wrong in bulk is an instrument fault,
-not a layout fault (gate-calibration rule).
+not a layout fault (gate-calibration rule). Third precondition (external
+validation 2026-09-02): a text `getBBox()` includes the font's leading,
+and that height varies by family (~7% between Segoe UI and Noto Sans TC;
+macOS CJK fallbacks sit at the tall end) — so a label-clearance PASS is a
+fact about the FONT THAT MEASURED, not about the bytes. Design label
+spacing with headroom (gap ≥ PAD + the metric spread, measured ≈ +1.5px),
+and make the report carry a render receipt (engine, DPR, computed
+font-family, and a measured bbox-height/font-size ratio as the metric
+fingerprint); a PASS without the receipt is not comparable across
+environments. The failure this rule closes: a 18px title→subtitle
+baseline distance left 0.63px of margin under Segoe UI and passed every
+local gate, then reported 44 overlaps in an external Chromium — the same
+one-sided calibration class as the 56 dangling markers. Never widen the
+padding or exempt "designed" pairs to make such a report pass; fix the
+spacing (user ruling 2026-09-02).
 
 **Repair order & bounded repair** (B-2): fix in this order, re-running the
 asserts after every edit — (1) model/schema errors, (2) node overlap /

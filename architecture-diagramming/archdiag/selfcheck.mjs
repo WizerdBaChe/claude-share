@@ -35,8 +35,22 @@ export function inPageScript({ grid = 8, viewCount, notes = {} }) {
   const D = (code, subject, evidence, fixes) => diags.push({ code, severity: 'error', subject, evidence, supportedFixes: fixes });
 ${precond2}
   document.body.classList.add('measuring');
+  // render receipt (2026-09-02): a label-clearance PASS is a fact about the
+  // font that measured, not about the bytes — bbox height includes leading
+  // and varies ~7% by family (Segoe UI 1.364× vs Noto Sans TC 1.455×; an
+  // external macOS Chromium reported 44 label-overlap on bytes this machine
+  // passed). Record engine, DPR, the computed family and a measured
+  // height/size ratio so reports are comparable across environments.
+  let receipt = null;
   try {
     const PAD = 2, EPS = 2, GRIDU = ${grid};
+    const probe = document.querySelector('svg.dia text.lbl');
+    receipt = {
+      engine: navigator.userAgent, dpr: window.devicePixelRatio, viewport: [window.innerWidth, window.innerHeight],
+      fontFamily: probe ? getComputedStyle(probe).fontFamily : null,
+      fontMetricRatio: probe ? +(probe.getBBox().height / parseFloat(probe.getAttribute('font-size'))).toFixed(3) : null,
+      pad: PAD,
+    };
     for (const svg of document.querySelectorAll('svg.dia')) {
       const view = svg.dataset.view;
       // precondition #1: no transform inside the scene
@@ -129,13 +143,16 @@ ${check8}
   }
   const status = document.getElementById('geoStatus');
   const detail = document.getElementById('geoDetail');
-  window.__geometryReport = { pass: diags.length === 0, diagnostics: diags, stats };
+  window.__geometryReport = { pass: diags.length === 0, diagnostics: diags, stats, receipt };
+  const receiptLine = receipt
+    ? 'measured under: ' + receipt.fontFamily + ' (bbox/size ' + receipt.fontMetricRatio + '), dpr ' + receipt.dpr + ', ' + receipt.engine
+    : 'measured under: (receipt unavailable)';
   if (diags.length === 0) {
     status.textContent = '幾何自檢：PASS（${viewCount} 視圖）'; status.className = 'pass';
-    detail.textContent = 'PASS\\n' + stats.join('\\n');
+    detail.textContent = 'PASS\\n' + stats.join('\\n') + '\\n' + receiptLine;
   } else {
     status.textContent = '幾何自檢：FAIL（' + diags.length + '）'; status.className = 'fail';
-    detail.textContent = JSON.stringify(diags, null, 1) + '\\n---\\n' + stats.join('\\n');
+    detail.textContent = JSON.stringify(diags, null, 1) + '\\n---\\n' + stats.join('\\n') + '\\n' + receiptLine;
     console.error('geometry diagnostics', diags);
   }
 })();`;

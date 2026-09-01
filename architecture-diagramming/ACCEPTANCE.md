@@ -51,7 +51,7 @@
 | # | 動作 | 預期觀察 |
 |---|---|---|
 | 15 | `node architecture-diagramming/capability-set.build.mjs` | 印出 `written: … bytes; schema + build-time asserts passed; sha256 …`;**再跑一次,sha256 完全相同、`git status` 對該 html 沒有任何變動**(決定性輸出＝收據的前提) |
-| 16 | 起一個 loopback 靜態伺服器開 `capability-set.html`,讀 `window.__geometryReport` | `pass: true`、`diagnostics: []`、`stats` 五列,標頭顯示「幾何自檢：PASS(5 視圖)」。**不要用 `file://`** ——多數 headless 會擋 |
+| 16 | 起一個 loopback 靜態伺服器開 `capability-set.html`,讀 `window.__geometryReport` | `pass: true`、`diagnostics: []`、`stats` 五列、**`receipt` 一組**(engine / dpr / 實際 fontFamily / fontMetricRatio),標頭顯示「幾何自檢：PASS(5 視圖)」。**不要用 `file://`** ——多數 headless 會擋。**回報時附上 receipt**:一個 PASS 只證明「在那個字型 metric 下」通過——首位外部驗證者(2026-09-02,macOS Codex Chromium)在同一份位元組上得到 44 筆 `label-overlap`,根因是 CJK fallback 字型的 bbox 含 leading 較高、舊版標題↔副標基線距 18px 只留 0.63px 餘裕;已改為 21px 並加 receipt,本機以強制 `font-family:"Noto Sans TC"` 精確重現後歸零(五組字型掃描 0 筆,`archdiag/MAINTENANCE.md` M6)。若你的環境仍紅,請連 receipt 一起回報,不要調 PAD |
 | 17 | **正對照(必做,不是選配)**:把該 html 的 `<defs>` 裡 `id="mFill"` 改名後重載 | FAIL,且 `dangling-reference` 診斷數**恰好等於**該 marker 的引用數(本頁為 25)。重跑第 15 項還原後回到 PASS。**沒看它紅過的檢查器不算校準過** |
 | 18 | 從模型裡任意刪掉一個節點或邊的 `ev` 欄位,重跑第 15 項 | build **throw**、不產檔,訊息點名該元素缺 evidence anchor。這就是編造防火牆的可執行面——第 13 項考的是同一條紀律,只是換人執行 |
 
@@ -92,9 +92,11 @@
   - **雙向校準已做**:把 `#mFill` 改名出 `<defs>` → 恰好 25 筆
     `dangling-reference`(＝該 marker 的引用數),還原後回到 0;
   - **收據性質已驗**:重跑 build 後 sha256 與首跑完全相同
-    (`aaeaf9d0…4a4d`,60,232 bytes),位元組零差異。
-    (附帶一筆:`build()` 印的 `bytes` 是 `html.length`,算的是 UTF-16 單元,
-    CJK 頁面會小於實際 UTF-8 位元組數——收據用的是 sha256,不受影響。)
+    (2026-08-29 原值 `aaeaf9d0…4a4d`;**2026-09-02 刷新後 `6bf15797…4688`,
+    61,376 bytes**——副標 +3px 與 receipt 改了位元組,所以收據換值;外部驗證者
+    2026-09-02 在 `46be565` 上重跑兩次得到的正是舊值,決定性成立),位元組零差異。
+    (`build()` 印的 `bytes` 自 2026-08-31 起為 UTF-8 位元組數,可直接對檔案大小;
+    更早版本印的是 `html.length`(UTF-16 單元),CJK 頁面會偏小——收據一律用 sha256。)
   這一輪同時是 `archdiag` 出貨副本的煙霧測試:上面每個數字都是這份 repo 的
   程式碼跑出來的,不是來源環境的轉述。
 - **證據仍空的格**,由驗證者補:PPTX 載體(規則已寫、來源環境尚無真火紀錄)

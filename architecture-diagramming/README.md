@@ -195,6 +195,14 @@ storming 明訂為探索輔助、不是可稽核產物。
 組標籤配對;正對照恰好 25 筆 `dangling-reference` 後還原歸零;重跑 sha256
 位元組相同。**外觀人審那一段仍是開的**——見 `ACCEPTANCE.md` 最後一段。
 
+**2026-09-02 外部驗證修正**:首位外部驗證者(macOS Codex Chromium)在同一份
+位元組上得到 44 筆 `label-overlap`——不是版面真的碰撞,是 CJK fallback 字型
+的 `getBBox()` 含 leading 較高,而標題↔副標 18px 基線距只留 0.63px 餘裕。來源
+環境以強制 `font-family:"Noto Sans TC"` **精確重現**(44,各視圖 9/9/7/8/11)。
+修法在版型不在容忍值:副標基線 +3px(`emit.mjs` `NODE_TEXT`,router 估算同源)、
+`__geometryReport.receipt` 記錄實際量測字型/DPR/引擎、`MAINTENANCE.md` M6 五組
+字型掃描。上面那段 PASS 因此要讀成「在 Segoe UI 下 PASS」——現在報告會自己說。
+
 ## 識別化說明 (de-identification)
 
 依本 repo `tools/COLLECTION-RULES.md`;每筆編輯宣告於 `tools/share-manifest.toml`:
