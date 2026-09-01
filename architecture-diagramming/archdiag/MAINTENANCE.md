@@ -50,6 +50,24 @@ is a property of these assets, event-triggered — not a schedule.
   `emit.mjs` FILL/EDGE keys (schema.mjs imports them). Never enumerate them a
   second time anywhere — a second list is a fork that drifts.
 
+- **M6 — Font-substitution sweep after ANY `emit.mjs` layout edit or
+  `selfcheck.mjs` #1 edit (born 2026-09-02, external validation intake).**
+  `getBBox()` height includes leading and varies by family (~7% between
+  Segoe UI and Noto Sans TC); a PASS measured under one font is a
+  source-environment fact, not a portability claim — an external macOS run
+  reported 44 `label-overlap` on the same bytes this machine passed. Serve
+  every committed deliverable (R1), then in-page force
+  `text{font-family:<F>!important}` for each of Segoe UI / Noto Sans TC /
+  Microsoft JhengHei / Yu Gothic / Arial, re-run the pair scan with the
+  shipped PAD, and require 0 under all five. Noto Sans TC is the tallest
+  metric available locally and reproduced the macOS count exactly (44,
+  per-view 9/9/7/8/11) — it is the local proxy for the CJK fallback class.
+  Do NOT widen PAD or exempt title/subtitle pairs to pass this sweep (user
+  ruling 2026-09-02, Q2): fix the layout so the gap has headroom. The
+  `receipt` block in `window.__geometryReport` records which font actually
+  measured (see selfcheck.mjs) — a report without it is not comparable
+  across environments.
+
 ## Reference (參考) — procedures
 
 - **R1 — Render-verify recipe**: serve the folder

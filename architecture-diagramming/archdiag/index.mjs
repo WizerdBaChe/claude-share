@@ -32,6 +32,12 @@ export function build(opts) {
   const html = pageHtml(opts).replace(/\r\n/g, '\n');
   fs.writeFileSync(outPath, html, 'utf8');
   const sha256 = crypto.createHash('sha256').update(html).digest('hex');
-  console.log('written:', outPath, html.length, 'bytes; schema + build-time asserts passed; sha256', sha256);
-  return { html, bytes: html.length, sha256 };
+  // bytes = ENCODED length (utf8), never html.length: the string length counts
+  // UTF-16 code units and understates every CJK page — measured 2026-08-31 on
+  // ccfg-retrieval-audit-f1.html (37,408 "bytes" logged vs 41,328 on disk); a
+  // receipt whose count cannot be checked against the file is the L-012 proxy
+  // shape. sha256 was always over utf8 bytes and is unchanged.
+  const bytes = Buffer.byteLength(html, 'utf8');
+  console.log('written:', outPath, bytes, 'bytes; schema + build-time asserts passed; sha256', sha256);
+  return { html, bytes, sha256 };
 }

@@ -7,7 +7,9 @@ description: >-
   爆炸圖式架構、關聯圖）, incl. reconstructing an EXISTING system (e.g. CPO
   全架構) with an explicit gap report（找缺口）. Carriers: Mermaid sketch,
   precise SVG, self-contained HTML, editable PPTX. Trigger on 畫架構圖、精準繪製、
-  把 X 畫成圖、從資料重建架構圖、圖要放進簡報/HTML. NOT data charts/plots
+  把 X 畫成圖、從資料重建架構圖、機制/系統架構檢查・架構盤點 (audit — fires
+  without any 圖 word; deliverable = verifiable diagram + gap report + 檢查項)、
+  圖要放進簡報/HTML. NOT data charts/plots
   (→ dataviz), NOT UI mockups (→ design), NOT which-view-selection theory
   (→ product-design-thinking representation-models). Full disambiguation:
   ~/.claude/skill-trigger-dict.md.

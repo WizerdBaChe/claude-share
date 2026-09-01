@@ -26,7 +26,7 @@
 // point normalization are vendored verbatim. Corridor scanning, crossing
 // budget, pill placement, and B-1 output are archdiag-native.
 
-import { cjkW } from './emit.mjs';
+import { cjkW, NODE_TEXT } from './emit.mjs';
 import {
   segmentIntersectsRect,
   routeHonorsEndpointSides,
@@ -165,7 +165,10 @@ function estimateTextRects(view) {
     (n.l || []).forEach((ln, i) => {
       const lw = cjkW(ln, 11);
       const lx = n.kind === 'ext' ? n.x + n.w / 2 - lw / 2 : n.x + 12;
-      add(lx, n.y + 38 + i * 15 - 11, lw, 14);
+      // baseline offsets come from emit.mjs NODE_TEXT — never a literal here
+      // (2026-09-02: a stale 38 let the router place two pills into the
+      // subtitle's real rect after the emitter moved to 41).
+      add(lx, n.y + NODE_TEXT.subDy + i * NODE_TEXT.subLh - 11, lw, 14);
     });
     if (n.ov) { const bw = cjkW('未驗收', 11); add(n.x + n.w - 8 - bw, n.y + n.h - 19, bw, 14); }
   }

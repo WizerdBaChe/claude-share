@@ -15,6 +15,17 @@ import { inPageScript } from './selfcheck.mjs';
 // ---------- shared styling (single source; F2 superset: ov + absent) ----------
 const FILL = { block: '#dbeafe', ext: '#e2e8f0', store: '#fef3c7', state: '#dcfce7', proc: '#dbeafe', port: '#ede9fe' };
 const STROKE = { block: '#2563eb', ext: '#64748b', store: '#b45309', state: '#16a34a', proc: '#2563eb', port: '#7c3aed' };
+// Node text layout — SINGLE SOURCE for both the emitter and route.mjs's
+// offline text-rect estimate (a second copy of these numbers is the fork
+// that drifts: the router placed pills against a stale y+38 on 2026-09-02).
+// subDy 41 (was 38): the 13px title's bbox bottom and the 11px subtitle's
+// bbox top must stay ≥ PAD (2px) apart under EVERY fallback font — bbox
+// height includes leading and varies ~7% by family (Segoe UI 1.364× vs Noto
+// Sans TC 1.455×). At 18px baseline distance the gap was 2.63px on Segoe UI
+// and 1.0–1.45px on Noto Sans TC → 44 label-overlap in an external macOS run.
+// +3 measured: worst-font gap 4.0px; +4 starts touching the neighbour below.
+// See MAINTENANCE.md M6.
+const NODE_TEXT = { titleDy: 20, subDy: 41, subLh: 15 };
 const OVL = { fill: '#ffedd5', stroke: '#ea580c' }; // branch-only overlay (un-accepted)
 const EDGE = {
   call:  { stroke: '#64748b', dash: '', marker: 'mOpen' },   // synchronous call / import
@@ -43,10 +54,10 @@ function nodeSvg(n) {
   if (n.kind === 'stateT') s += `<rect x="${n.x + 4}" y="${n.y + 4}" width="${n.w - 8}" height="${n.h - 8}" rx="12" fill="none" stroke="${STROKE.state}" stroke-width="1.2"/>`;
   const cx = n.kind === 'ext' ? n.x + n.w / 2 : n.x + 12;
   const anchor = n.kind === 'ext' ? 'middle' : 'start';
-  s += `<text class="lbl" x="${cx}" y="${n.y + 20}" font-size="13" font-weight="700" fill="#0f172a" text-anchor="${anchor}">${esc(n.t)}</text>`;
+  s += `<text class="lbl" x="${cx}" y="${n.y + NODE_TEXT.titleDy}" font-size="13" font-weight="700" fill="#0f172a" text-anchor="${anchor}">${esc(n.t)}</text>`;
   if (n.ov) s += `<text class="lbl" x="${n.x + n.w - 8}" y="${n.y + n.h - 8}" font-size="11" font-weight="700" fill="#c2410c" text-anchor="end">未驗收</text>`;
   if (n.l?.length) {
-    const tspans = n.l.map((ln, i) => `<tspan x="${cx}" y="${n.y + 38 + i * 15}">${esc(ln)}</tspan>`).join('');
+    const tspans = n.l.map((ln, i) => `<tspan x="${cx}" y="${n.y + NODE_TEXT.subDy + i * NODE_TEXT.subLh}">${esc(ln)}</tspan>`).join('');
     s += `<text class="lbl" font-size="11" fill="#334155" text-anchor="${anchor}">${tspans}</text>`;
   }
   return s + '</g>';
@@ -83,7 +94,7 @@ function viewSvg(v) {
   return s.join('\n');
 }
 
-export { FILL, STROKE, OVL, EDGE, esc, cjkW, nodeSvg, viewSvg };
+export { FILL, STROKE, OVL, EDGE, NODE_TEXT, esc, cjkW, nodeSvg, viewSvg };
 
 // ---------- marker defs (single source; build-time closure in index.mjs:
 // every EDGE marker must resolve here — determinable face of check #8) ----------
