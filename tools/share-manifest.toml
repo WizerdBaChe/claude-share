@@ -1673,11 +1673,34 @@ status = "verbatim"
 path = "skill-toolkit/skills/product-design-thinking/references/design-rules.md"
 source = "~/.claude/skills/product-design-thinking/references/design-rules.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source working copy carries an uncommitted
+4-line-added / 0-removed delta (git diff --numstat) — a UAT-item ranking note
+under 'Self-checkable' (`A. 必驗` / `B. 體驗` consequence ranking, citing the
+new `ops/references/uat.md`). Another session's in-flight, uncommitted edit,
+carried as-is per this round's ruling (align to what is on disk now) — not a
+decision made here. The new citation makes share_gate.py's check R flag this
+file ("cites `ops/references/uat.md`, which this repo does not ship"); that is
+expected to resolve at merge — `ops/references/uat.md` is being collected as
+`claude-ops/ops/references/uat.md` by the ops-layer worker in this same round
+(source_map already maps `ops/` there), not by this entry. Re-collect and drop
+this ack once the source commits its delta."""
 
 [[collected]]
 path = "skill-toolkit/skills/product-design-thinking/references/document-ladder.md"
 source = "~/.claude/skills/product-design-thinking/references/document-ladder.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source working copy carries an uncommitted
+3-line-added / 1-line-removed delta (git diff --numstat) — the §7 Handoff
+manual-acceptance-checklist line gained the same `A. 必驗` / `B. 體驗`
+consequence-ranking clause as design-rules.md, citing the new
+`ops/references/uat.md`. Another session's in-flight, uncommitted edit, carried
+as-is per this round's ruling (align to what is on disk now) — not a decision
+made here. The new citation makes share_gate.py's check R flag this file
+("cites `ops/references/uat.md`, which this repo does not ship"); that is
+expected to resolve at merge — `ops/references/uat.md` is being collected as
+`claude-ops/ops/references/uat.md` by the ops-layer worker in this same round
+(source_map already maps `ops/` there), not by this entry. Re-collect and drop
+this ack once the source commits its delta."""
 
 [[collected]]
 path = "skill-toolkit/skills/product-design-thinking/references/prior-art-sweep.md"
