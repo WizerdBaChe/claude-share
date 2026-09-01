@@ -71,6 +71,19 @@ observed identity and the resulting level in one line. This is a user grant
 recorded once, not a self-relaxation; a project CLAUDE.md `ops-relaxation:`
 line still overrides it, and every other tier follows the ask flow above.
 
+**Standing ruling (user, 2026-08-30)**: a **Fable-family** main-loop model runs
+at **L2 (fully relaxed)** in every project — same mechanics as the 2026-08-11
+grant: state observed identity + level in one line, never ask. Safety boundary
+of the grant, stated explicitly because L2 is the loosest level: it loosens
+SCAFFOLDING ONLY for the main session. Invariants (§1) — evidence-based done,
+reviewer ≠ author, subagent model cost cap, rule-tier write protection,
+ask-at-value-forks, irreversible-action confirmation — and every
+hook-enforced rule (model_cap_guard, branch/secret guards, ui_verify_guard)
+bind exactly as at L0; subagents still receive hard rules; the deviation-note
+duty (`[deviated] <rule ref> — <reason>`) remains mandatory and skipping it
+voids the relaxation for that task. A project CLAUDE.md `ops-relaxation:`
+line still overrides in either direction.
+
 **Hard boundaries at every level**:
 - The model NEVER self-relaxes. No user answer → L0.
 - Subagents always receive hard rules regardless of level (they run at
@@ -123,8 +136,8 @@ seconds becomes a fake gate the user skims past.
     1. Interpretation forks: <ambiguity> → chose <reading> because <why>;
        isolation point: <module/param that flips the call if wrong>
     2. Boundary inputs: <inputs/states that break it, trimmed to known env>
-    3. Acceptance: <blind-executable checks; mark machine-checkable vs
-       human-eye items>
+    3. Acceptance: <machine-checkable checks first; then human-eye items
+       ranked `A 必驗` (≤7) → `B 體驗` per `references/uat.md`>
     4. Non-goals & degradation: <explicitly out>; drop <X→Y→Z>, core <W>
 
 **Carrier**: inline in the response for single-session tasks; AS the plan

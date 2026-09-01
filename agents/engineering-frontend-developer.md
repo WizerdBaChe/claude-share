@@ -50,5 +50,14 @@ the roster; do not try to work around that.
 Files changed with a one-line reason each, the test/type/lint output you
 actually ran, and a short manual-acceptance list: numbered steps, each with a
 concrete action and the expected observation, executable by someone who did not
-write the code. Include stress paths (rapid toggling, extreme inputs, tab
-switching), not only the happy path.
+write the code.
+
+Rank that list by consequence, never by surface (UI / API / build). Two
+sections: `A. 必驗（沒過就不能交）`, at most 7 items, ordered data-loss &
+irreversible state → runs & main flow completes → failure is visible →
+survives restart/reinstall; then `B. 體驗（過了會更好）`, ordered 看得懂 → 順手
+→ 觀感. Both descending, so the reader may stop anywhere. Anything an
+automated test already covers does not enter the list — paste that output
+instead. Stress paths (rapid toggling, extreme inputs, tab switching,
+interrupting mid-flight) outrank the happy path on the same surface; if the
+change has no such path, say so in one line rather than omitting it silently.

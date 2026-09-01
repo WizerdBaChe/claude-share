@@ -175,6 +175,22 @@
 - headroom is DELIBERATELY thin (the 17K era ran at ~80 B and that was the
   point): a cap with comfortable headroom is not a cap. Amendment-only
   territory; no new rule fits without a sink, a merge, or an argued raise.
+- 2026-08-31 trim-pass verdict (value UNCHANGED — recorded so the next
+  addition doesn't repeat the analysis): a user-directed pass compressed
+  22,338 → 19,957 B without cutting any distinct rule, but it CONSUMED THE
+  WORDING RESERVE — everything with a sink is now behind a pointer (shell
+  numbers → L-024, ui-verify denial enumeration → the hook docstring,
+  rule-file globs → their own frontmatter), and the pass's red-team measured
+  the marginal quality cost: 2 should-fix regressions from compression (a
+  lost vault-index split; an altitude drift in the gate rule's Chinese half
+  vs `30-judgment.md` R2) had to be restored. Pre-armed conclusion for the
+  NEXT sink-empty addition: route straight to an argued raise (suggested
+  +2,560 B → 22,528, following the +2–2.5K pattern) rather than another
+  compression pass — the reserve is spent and further compression has
+  measured negative marginal value. A raise NOW was evaluated (user prompt
+  2026-08-31) and declined: the raise trigger never fired (no distinct rule
+  was cut) and this entry's own doctrine says thin headroom IS the decision
+  point, not a defect.
 - history: 12K (birth) → 15K (2026-08-01, after the failed trim pass) → 17K
   (2026-08-16, T-015 closed; the 15K state had 276 B headroom, i.e. the next
   rule breached, which is what made it a ticket rather than a routine trim);
@@ -183,8 +199,9 @@
   amend-don't-append reading of the thin margin) → **19,968 B (2026-08-18,
   user ruling; 2 new rules + 3 amendments from the shell-error sweep, after
   two compression passes and a sink check that came back empty)**
-- review-when: any proposed global-CLAUDE.md change (headroom ~719 B — re-run
-  find-a-sink / merge / argue-the-raise), or a rule in this file gains a valid
+- review-when: any proposed global-CLAUDE.md change (headroom ~11 B as of
+  2026-08-31, reserve spent — re-run find-a-sink / merge, then argue the raise
+  per the 2026-08-31 verdict above), or a rule in this file gains a valid
   `paths:` sink and can leave. Also: once the shell-guard hook ships, re-judge
   whether bullet 2 can shrink and the cap come back down.
 - rollback: `hooks/ops_health_nudge.py` `CLAUDE_MD_CAP`; `40-maintenance.md` §3
@@ -399,6 +416,41 @@
 - rollback: restore `git show 9ad18b4:ops/lessons.md` over
   `ops/lessons.md` and delete the detail file (sweep 5b then reports 0 vs 27,
   which is the intended signal that the split was undone).
+
+### `UAT_A_CAP` — manual-acceptance checklist: rank axis and `A` item budget
+- current: a manual-acceptance checklist is two consequence-ranked sections —
+  `A. 必驗` (≤ **7** items; 資料與不可逆狀態 → 運作與使用 → 失敗看得見 → 換環境
+  存活) then `B. 體驗` (看得懂 → 順手 → 觀感) — both descending, continuously
+  numbered, and never grouped by module, technology, or surface. Admission is
+  gated twice: machine-checkable → not an item at all (paste the test output);
+  then blocks shipping → A, merely annoys the user → B, neither → not written.
+  Owner: `ops/references/uat.md`. Binding short form: global CLAUDE.md `[BC]`
+  line. Eleven carriers, enumerated in that file's §8.
+- why: user ruling 2026-09-01 —「檢驗項目太容易膨脹，開一堆的檢驗項目等於沒驗」.
+  Count is not coverage, and a list long enough to be skipped is worse than no
+  list, because the delivery still reads as verified. Rank is what makes
+  stopping early SAFE — the reader's actual behaviour — and the cap moves the
+  "what matters least" decision from the reader (who resolves it by not
+  running anything) to the author.
+- evidence: PROVISIONAL — 7 is a first value, not a measurement. What settles
+  it: at each round where the user reports back, record how many A items were
+  actually run before they stopped. A routinely-unrun tail lowers the cap; a
+  genuine need for more than 7 blockers is a SCOPING finding (split the
+  acceptance pass per milestone) rather than a cap problem. Observations
+  append to this entry.
+- history: born 2026-09-01, replacing the 2026-08 form (items ordered by
+  SURFACE — UI / API / build — with stress-path parity enforced BY COUNT).
+  That quota was itself an inflation driver: parity can only be satisfied
+  upward. Its teeth survive as a rank tie-breaker (中斷／重入／極端輸入
+  outranks the happy path on the same surface) plus a required one-line "this
+  change has no such path" claim, so silence is no longer a passing answer.
+  Regression case for the loosening: `ops/references/uat.md` §6.
+- review-when: (a) a delivery needs an A section over 7 and does NOT split the
+  pass — twice means the cap is wrong rather than the deliveries; (b) the user
+  reports running the list to the end every time, which would mean rank is
+  doing no work and only the cap is active.
+- rollback: revert the carriers listed in `ops/references/uat.md` §8 and delete
+  that file; the pre-ruling wording is the parent of the commit that adds it.
 
 ### `TRAIL_SIZE_CAP` — audit trail rotation trigger
 - current: 60 * 1024 chars, but **the rotation model is being retired** —
@@ -771,7 +823,11 @@
   path, newline count, trigger, ts — no jsonl parsing per the standing
   format-unstable ruling) then runs memory-pipeline `preserve.py` (<=45s) so the
   LIVE session's digest exists at recall time; SessionStart("compact") injects a
-  ~130-token pointer card (digest-first ladder + the two recall triggers);
+  ~220-token pointer card (digest-first ladder + the two recall triggers, plus
+  the [intake re-arm] block since 2026-08-31: intake gates are NOT satisfied by
+  the compact summary — a prior-art verdict survives compaction only as a
+  NAMED consulted-list; deliverable-series inputs = deliverables 1..N-1 +
+  review records; a single-source ruling covers only its named axis — L-039);
   PreToolUse(Read) denies reads of SESSION-RECORD-shaped files (`*.jsonl`, or
   `*.md` under a `digests/` dir) under `projects/` + `memory-archive/` +
   any configured mirror root when size > 128KB AND (no `limit` or
@@ -802,7 +858,7 @@
   (3 tested accepted bypasses: UNC admin share, NTFS hardlink, renamed copy)
   live in the hook docstring; all of it pinned by the regression matrix
   (22/22 green 2026-08-29, incl. bypass pins + real-file positive controls). Measured: digest = 1.1% of raw (50,849B/4,448,760B,
-  Prism 94a45532); 19/19 real-data acceptance runs 2026-08-16 including
+  one real session); 19/19 real-data acceptance runs 2026-08-16 including
   live-session digest refresh proof (mtime_age 0s). Guard REAL-fired the same
   day: live PreToolUse deny on a 4.2MB corpus read in the authoring session —
   hooks apply mid-session, no restart. FULL-CHAIN REAL FIRE 2026-08-16 21:59
@@ -819,11 +875,15 @@
   (card should read trigger=auto).
 - history: born 2026-08-16. Compact on-disk geometry evidence (boundary
   appended in-place, session id retained) recorded the same day in
-  memory/session-transcript-archive.md, correcting its first draft.
+  a local memory note, correcting its first draft. 2026-08-31:
+  card gained the [intake re-arm] block (~90 tokens; summary-handoff gate
+  disarm, SSLD Phase 5 incident — `ops/lessons.md` L-039; proposal
+  `drafts/2026-08-31-compact-rearm/APPLY.md`; positive control: synthetic
+  SessionStart payload prints both blocks, degraded mode included).
 - review-when: a CC update changes compact geometry (recheck: compact_boundary
   line numbers in `projects/*/*.jsonl` — mid-file = unchanged) or
   PreCompact/SessionStart stdin fields; the mirror root moves with
-  `ClaudeSessionTranscriptMirror-Daily`; a recurring Bash `cat`/`Get-Content`
+  the scheduled copy job that feeds it; a recurring Bash `cat`/`Get-Content`
   bypass on corpus files is the event that extends guard coverage to the shell
   path; a new corpus-root tenant that IS .jsonl-shaped but not a session
   record (shape identity over-matches), or records written in a non-.jsonl
@@ -1453,6 +1513,26 @@
   provisional — daily task, so 3 tolerates two missed days), live count grown,
   or premise under **90%** (`gs_watchdog.PREMISE_FLOOR`, the design's
   pre-registered line).
+
+### session mirror heartbeat — ops-health check 17 + the mirror's run ledger
+- current: the daily transcript mirror (`tools/claude-session-transcript-mirror.ps1`,
+  the scheduled copy job that feeds it, 13:00, D-033) writes a last-run
+  marker + an append-only `run-ledger.tsv` (status, exit, jsonl count, MB —
+  the count may only grow under the COPY-ONLY contract; a drop between lines
+  means archive loss). Surfacing: `ops_health_nudge.py` check 17 reads the
+  marker at session start (cwd == `~/.claude`, report-only, fail-open): FAIL
+  marker fires regardless of age; marker older than **3 days**
+  (`MIRROR_STALE_DAYS`, provisional — same two-missed-days argument as check
+  15) fires; marker missing inside an existing archive root fires; a host
+  without the archive root is silent by design. Test seam:
+  `OPS_NUDGE_MIRROR_MARKER` env var (5 hermetic cases in ops-health-test,
+  3 known-TRUE / 2 known-FALSE).
+- why: D-052 item 5 (user ruling 2026-09-01) — the mirror was silent-when-dead:
+  it wrote a marker nobody read, and the discovery moment for a dead backup is
+  the data-loss moment.
+- review-when: the archive moves off any configured mirror root (constant
+  `MIRROR_MARKER` + the ps1's `$Dest` change together), or cleanupPeriodDays
+  semantics change in Claude Code (re-derive the staleness tolerance).
 - why: measured 2026-08-26 — live-surface broken links went 14 → 38 in the six
   days nobody ran the audit, then 38 → 0 in one harvest round. The integrity
   report only pays rent when something runs it, and SessionStart is the only

@@ -281,27 +281,6 @@ Evidence: session (a local transcript) | locator:
 table; `telemetry/rule-loads.jsonl` empty after reading a `.tsx` | captured 2026-08-11
 Detail: `lessons-detail.md` §L-012
 
-## L-014 2026-08-12 tags: agents|subagent|tools|capability|skills|silent-failure|config hits: 1
-Context: rewriting `agents/*.md`; a `tools:` allowlist was added so "read-only
-reviewer" stopped being prose. The proposed list was `Read, Glob, Grep`.
-Pitfall: `tools:` is an allowlist, and `Skill` is a tool — that list would have
-silently and permanently disabled every skill the agent could invoke (the
-official wording: omitting `Skill` is the documented way to PREVENT skill use).
-General shape: tightening a capability boundary silently removes capabilities
-you were not thinking about — an allowlist written against one axis (write
-access) cuts every other axis it intersects (skills, search, MCP). Near-misses
-in the same edit: dropping `Bash` removes `git diff`; `permissionMode: dontAsk`
-auto-denies anything outside `settings.json`'s allowlist, which has no `Edit`.
-Fix: after writing any `tools:` list, enumerate what it REMOVES and check that
-against (a) skill invocation, (b) the agent's own verification path, (c) the
-session permission allowlist. Read-only = the write tools are absent and
-everything else survives.
-Detection: `grep -L 'Skill' agents/*.md` must be empty unless a definition
-deliberately forbids skills (sweep check 1).
-Evidence: `code.claude.com/docs/en/sub-agents`; caught in review before
-dispatch | captured 2026-08-12
-Detail: `lessons-detail.md` §L-014
-
 ## L-015 2026-08-12 tags: verify|claim-calibration|design-docs|self-review|scope-gating|research hits: 1
 Context: Prism R9 `DESIGN-06`, self-audited hours later against the artifacts
 it superseded — six findings, three instructive and NOT one class.
@@ -325,29 +304,6 @@ Evidence: session (a local transcript) | locator:
 `Prism/research-r9/AUDIT-04-design06-self-audit-and-legacy-fit-2026-08-12.md`
 F-1/F-4/F-5/F-6 | captured 2026-08-12
 Detail: `lessons-detail.md` §L-015
-
-## L-016 2026-08-15 tags: verify|hooks|checks|acceptance-eval|config|silent-failure|self-audit hits: 1
-Context: interop maintenance — three independent checks examined in one day,
-all incapable of failing, none broken in a way anything reports.
-Pitfall: A CHECK THAT CANNOT FAIL IS INDISTINGUISHABLE FROM ONE THAT PASSES,
-three ways: (1) the predicate is satisfied by the wrong thing
-(`ops_health_nudge` check 11 keyed on the token `ops-relaxation:`, which the
-global CLAUDE.md mentions in prose — it had never fired correctly since birth);
-(2) nothing invokes it (`interop.py status` exited 1 for four days, nobody ran
-it); (3) its subject was retired (eval 8 required a directory that no longer
-existed). Silence is the healthy signal for a nudge, a status report and an
-unrun eval alike.
-Fix: (a) test the check against a POSITIVE case, not just the corpus
-(`tools/ops-health-test/`, case "PROSE MENTION ONLY -> must fire"); (b) a
-mention is not a declaration — match the VALUE shape (`ops-relaxation: L1`),
-anchored to line start; (c) a report needs a cheap automatic caller (check 12
-routes to `status` instead of re-implementing it).
-Detection when you cannot write a test: ask "what input would make this print
-something?" — if the answer takes real thought or names a file that no longer
-exists, it is already broken.
-Evidence: commits 9480f39 / 8fab5cb / 9521c20; `grep -rn "ops-relaxation:"
-~/.claude` on 2026-08-15 | captured 2026-08-15
-Detail: `lessons-detail.md` §L-016
 
 ## L-017 2026-08-16 tags: rules-design|checklists|security|invariants|verify|remediation hits: 2
 Context: NTUMail2TG — security prerequisite EP-1 written as "`D:\` must not
@@ -474,23 +430,6 @@ Evidence: session (a local transcript) | locator: commit
 Category 2 | captured 2026-08-16
 Detail: `lessons-detail.md` §L-020
 
-## L-021 2026-08-16 tags: env|powershell|shell|git|quoting hits: 1
-Context: `git commit -m @''...''@` from PowerShell 5.1 with a here-string that
-contained embedded double quotes.
-Pitfall: PS 5.1's native argument encoder does NOT escape embedded `"` for the
-child process — the quote ends the argument mid-message, git parsed the tail as
-pathspecs, the commit silently did not happen while the rest of the chain kept
-running (merge "Already up to date", branch deleted un-merged). Here-strings
-solve MULTILINE, not EMBEDDED-QUOTE; messages without inner quotes work for
-months before one hits.
-Fix: for any native-exe argument that may contain `"` in PS 5.1, write the
-content to a file and pass the file (`git commit -F <msgfile>`), or drop the
-inner quotes (global CLAUDE.md Environment). Verify after any chained git
-sequence — and (amended 2026-08-21 from L-023 hit 2) `git log --oneline -1`
-answers WHETHER a commit landed, never WHERE; pair it with `git branch
---show-current`, or name the branch: `git log --oneline -1 <branch>`.
-Detail: `lessons-detail.md` §L-021
-
 ## L-022 2026-08-16 tags: signal-processing|thresholds|ml-depth|imaging|diagnosis hits: 1
 Context: 3D Photo Synthesis Engine — cutting depth discontinuities out of an
 ML-predicted depth map (edge masking; mesh culling).
@@ -564,7 +503,7 @@ Evidence: hit 1 unrecorded | hits 2-3: commits `3121530`, `9d56150`, `0b257e7`
 Detail: `lessons-detail.md` §L-023 (recovery recipes as first written, the
 provenance note, the escalation ruling)
 
-## L-024 2026-08-18 tags: env|shell|bash|powershell|tool-routing|silent-failure|encoding|line-endings|runaway hits: 9
+## L-024 2026-08-18 tags: env|shell|bash|powershell|tool-routing|silent-failure|encoding|line-endings|runaway hits: 11
 Context: a 10-day sweep of every shell call in the transcript corpus (6,544
 deduplicated calls, 370 errors) asking why PowerShell errored 4× more than
 Bash. Answer: three silent defects in the Bash tool's command TRANSPORT, plus
@@ -629,7 +568,21 @@ minutes later. Rule unchanged -- route search to Grep/Glob -- but add the check
 that would have caught it anyway: **before backgrounding anything, ask whether
 its exit condition is reachable.** A command that cannot succeed cannot stop.
 
-## L-025 2026-08-21 tags: verify|instruments|calibration|measurement|silent-failure|self-audit|first-use|tooling|gate-design hits: 1
+Tenth hit (2026-09-01, media-fetch-pipeline) — the LINE-ENDING half again, and
+the ROUTING fix again did NOT hold: `sed -i` was reached for to rewrite a route
+prefix in a committed CRLF file with Edit available, and GNU sed handed back the
+whole file as LF. Same shape as hit 8's `cat >>`, different verb — so the
+carrier is not "avoid heredocs", it is **any shell text-edit silently
+renormalizes a file's endings**. Detection held, by luck rather than design:
+git's own `LF will be replaced by CRLF` warning on `git add`, over a committed
+`.gitattributes`; nothing was lost. §2a routing (owed once `hits:` ≥ 2, done
+here rather than deferred): `sed -i` against a repo file is "a named tool call
+with inspectable input", the row the table sends to a **PreToolUse deny**,
+alongside the backslash trap already carried by `shell_transport_guard`. NOT
+built this round — named so the eleventh hit is a decision to build it rather
+than a tenth rediscovery.
+
+## L-025 2026-08-21 tags: verify|instruments|calibration|measurement|silent-failure|self-audit|first-use|tooling|gate-design|forensics hits: 2
 Context: bench-claude-arms, a 22-run controlled study. Its OBJECT got every
 control (held-out suite calibrated both ways, differential fuzzing, mutation
 testing); its own working tooling got none, and at least six improvised
@@ -664,8 +617,24 @@ it in my fixture?" (a third ticket).
 Detection: a script emits a verdict/aggregate; a unanimous verdict over n≥3;
 "I am writing an unplanned checker right now" — known at the moment, unlike
 "is this output load-bearing?", the judgement demonstrably got wrong six times.
-Evidence: session (a local transcript) | digest
-`memory-archive/digests/D--AIWork/187fd681-....md` L428 L462 L1115 L1137 L1195
+Recurrences: hit 2 (2026-09-01, media-fetch-pipeline) — the instrument was a
+repetition loop hunting an INTERMITTENT test failure, and (b) fired as written:
+the idiom being "fixed" passed **19/19** across three conditions built to
+amplify it (10 plain runs, 5 full checks, 1 shared-module-graph, 3 cold-cache),
+so the loop could not see the phenomenon at all, and the repair shipped
+labelled UNPROVEN instead of claimed — the fix HELD. **New failure class the
+card did not carry: the loop recorded only EXIT CODES and discarded each run's
+OUTPUT**, so the single failure it did catch (1 in 57 runs, on the *fixed*
+code) has no diagnosable record and never returned in 40 further runs. When
+repeating an operation to measure a RATE, persist every run's full output: for
+a rare failure the first capture is the only capture, and a count cannot tell
+two different causes apart. §2a routing — base-rate half is already enforced in
+global CLAUDE.md (量測判決先量閒置基準…從不失敗的正對照等於沒有對照) and it
+fired; the evidence half stays in this greppable layer, whose trigger shape
+("someone is already investigating a flaky failure") matches, since a hook
+would have to recognise "a loop that throws away stdout" and prices badly.
+Evidence: session (a local transcript) | the digest generated for that
+session, L428 L462 L1115 L1137 L1195
 L1273-L1295 L910 | `_bench-claude-arms\RETRO_INDEX_2026-08-21.md`
 clusters A/B; `REVIEW_RETRO_ADVERSARIAL_2026-08-21.md` C-1/C-2/C-3/C-6 |
 captured 2026-08-21. Cross-project occurrences: graph-snapshot 2026-08-20,
@@ -901,18 +870,18 @@ open one.
 Detection: `can't open file '...hooks/*.py'` on every shell call, in every
 session at once; `git status` showing a registered hook as `??`.
 Attribution (corrected 2026-08-27, and the correction is itself the lesson):
-the guard was authored/registered by session `dazzling-dijkstra-9c5682-17`,
-whose advice I followed; the file was RESTORED by a different session,
-`223b04ef` — the same session whose commits caused incidents #1 and #2. I
+the guard was authored/registered by the authoring session, whose advice I
+followed; the file was RESTORED by a different session, the restoring session
+— the same session whose commits caused incidents #1 and #2. I
 thanked the wrong session in writing, twice, because I assumed the session that
 messaged me was the session that acted. In a shared tree, **the party who tells
 you about a change is not necessarily the party who made it**; attribute from
 the record (`git log`, the artifact's own log), never from who is in the
-conversation. Caught by `dazzling-dijkstra-9c5682-17` correcting a mistake that
+conversation. Caught by the authoring session correcting a mistake that
 flattered it.
 Evidence: session (a local transcript) | locator: attribution
 recorded in `hooks/branch_commit_guard.py` docstring on main (`85774aa`, line
-~49: "blocked until a local session restored the file from main into the
+~49: "blocked until that session restored the file from main into the
 working tree"); my echoed-payload deny is logged there as FP-2, a false
 positive, not a true block; outage ~01:05–01:08 2026-08-27 | captured
 2026-08-27
@@ -1003,6 +972,7 @@ non-empty the first time.
 Evidence: session (a local transcript) | commits `d0104b7`,
 `3412885`, `49b857f` | model: `media-fetch-pipeline/docs/asr-readiness-view-model.md` §7
 | project journal P-57.
+Detail: `lessons-detail.md` §L-036
 
 ## L-037 2026-08-28 tags: verify|test-design|ui-testing|visual-gate|frontend|claim-calibration hits: 1
 Context: same session. Six assertions had just been written for one defect
@@ -1035,40 +1005,164 @@ returns, and it returns in the region the assertions do not scope.
 Evidence: session (a local transcript) | commit `3412885` |
 project journal P-58 | the render that caught it: three panel states at
 1180x1400 @2x.
+Detail: `lessons-detail.md` §L-037
 
-## L-038 2026-08-29 tags: hook-design|gate-design|false-positive|identity-by-path|deny-message|prompt-injection|subagent|asset-property hits: 1
-Context: transcript_read_guard.py denied subagent Reads of WebFetch-cached
-arXiv PDFs. The cache lives under `projects/<slug>/<sid>/tool-results/` — the
-same root as live transcripts — and the hook's identity test was "under a
-corpus root AND >128KB ⇒ session record". Two subagents were hit: one fully
-blocked, one bypassed via pdftotext, and both classified the deny message as a
-prompt-injection attempt.
-Pitfall: two distinct mechanisms, one incident. (1) **Identity-by-path rots
-the moment the directory gains a new tenant.** The harness started caching
-WebFetch downloads inside the transcript tree; "location = identity" silently
-became false (36 non-record files >128KB at audit). Sharper: the docstring
-DECLARED "asset property, not a path instruction" while the code implemented a
-path prefix test — a declared invariant is not the implemented one, and the
-declaration made the gap invisible to review. (2) **A deny message that
-asserts the identity of an arbitrary file, claims "Policy:" authority, and
-instructs the reader to go read another directory is shape-identical to prompt
-injection.** A well-calibrated subagent that just fetched a PDF and is told
-"this is 3.5 MB of session record; Policy: …; read <redlined dir> instead"
-SHOULD refuse — it holds a falsifiable counter-fact. The better the agents,
-the worse this failure mode gets.
-Fix: (1) identify the asset by SHAPE (`*.jsonl`, digest `*.md` under
-`digests/`), keep the root only as scope; name the invalidating event in
-review-when ("a new tenant class appears under a corpus root"). (2) Deny-
-message contract, now asserted by test: constraint + retry mechanics only —
-name the hook as the source, no authority claims, no read-elsewhere
-imperatives, nothing the reader can falsify. Loosening the gate shipped with
-the regression case reproducing its original catch (big .jsonl unbounded →
-deny) per the global loosening rule.
-Detection: a hook denial reported as an "injection attack" by a subagent; or
-any guard whose deny fires on a file the agent itself just created/fetched.
-Evidence: hooks/tests/test_transcript_read_guard.py (11 hermetic + 6 live
-cases); registry entry "compact recovery" evidence line 2026-08-29; diagnosis
-delivered cross-session by the SSLD front-end research session (W1/W2 events).
+## L-039 2026-08-31 tags: retrieval|prior-art|compact|handoff|cross-session|scope-creep|deliverable-series|intake hits: 1
+Context: SSLD Phase 5 presentation round, opened right after a compact. The
+round used only the kickoff doc + compact summary; the professor-reviewed
+prior deck (SSLD_WG_Glass_FAU, 3 pptx + adversarial-review record) and the
+SRG sub-profile were pulled only after the user prompted. The late pull
+changed the deliverable in five places; two were impossible without the
+prior-work folder — the miss was material, not procedural.
+Pitfall: SUMMARY-HANDOFF GATE DISARM. A lossy summary (compact summary; a
+phase-log section at reconstruction; a worker ticket) rewrites how the task
+ARRIVES — "create deliverable N" arrives as "execute a settled list" — and
+every intake trigger (prior-art gate, domain-skill trigger words) keys on the
+ARRIVAL shape, so none fires while the summary inherits sole material
+authority. Two amplifiers: (1) single-source scope creep — a ruling scoped to
+one axis ("numbers come from the kickoff doc") read as authority over ALL
+content; (2) deposit gap — the predecessor deliverables + review records had
+no index entry anywhere (miss-ledger MISS-A family), so even an armed gate had
+nothing to hit. Sibling, not the same card: R2 absence-claims (CPO,
+2026-08-27) fires at CLAIM time; this one fails earlier, at INTAKE — neither
+fix repairs the other's half.
+Fix: (a) hook-carried re-arm at the danger moment — `compact_pointer.py`'s
+post-compact card gains an [intake re-arm] block: the gates are NOT satisfied
+by the summary; a prior-art verdict survives compaction only as a NAMED list
+of what was consulted, never as "already done". (b) global CLAUDE.md
+prior-art bullet gains the third trigger — continuing a deliverable series
+makes deliverables 1..N-1 + their review records mandatory inputs, and a
+single-source ruling covers only its named axis. (c) workflow-checkpoint
+§A/§B/§C — a checkpoint or compact note handing off a deliverable round NAMES
+the mandatory input set; reconstruction reads the phase-log as a pointer,
+never as prior-art-done.
+Detection: a deliverable round that opens by reading only its arrival
+documents; the phrase "single source" applied to an axis it never ruled on.
+Evidence: session (a local transcript) | locator:
+`references/SSLD-phase-log.md` Phase 5 Decisions bullet "Global info not
+proactively consulted"; user mechanism analysis 2026-08-31 (this session) |
+captured 2026-08-31
+Detail: `lessons-detail.md` §L-039
+
+## L-040 2026-08-30 tags: hook-design|gate-design|telemetry|shadow-mode|coverage-blind-spot|measurement|instrument-check|batch-operation|verify hits: 1
+(Renumbered 2026-08-31 from a duplicate "L-039" minted in parallel by another
+session on 2026-08-30; the summary-handoff entry keeps L-039 — CLAUDE.md,
+compact_pointer.py, workflow-checkpoint and rule-registry cite it by number;
+this entry had no landed external citation. Same precedent as L-035.)
+Context: E-1 graduation review of `hooks/xi_card_guard.py` (cross-index M3 card
+guard, mounted `edff5a5` in SHADOW). Telemetry read 20 rows, 100% `ok`. During
+the review main advanced to `45fa4eb` — a backfill carding 11 files under
+`reports/**/*.md`, squarely inside the store's `covers` — and the telemetry
+gained ZERO rows.
+Pitfall: **a tool-matched hook measures the TOOL, not the EFFECT.** The guard
+is `PostToolUse` with matcher `Write|Edit`; the backfill wrote all 11 files
+from a script (mtimes spanned 3.5 ms: 20:37:48.262–.265), so no Write/Edit
+tool call ever occurred and the hook correctly did not fire. The docstring
+scopes the guard to "the file this tool call just touched", but the mental
+model it invites — and that the shadow rate is then read as — is "writes into
+covered paths". Those two differ exactly on bulk operations. The population
+that bypasses the guard is **the highest-risk one**: batch backfill is where
+card-grammar errors are most likely and least reviewed. A shadow rate computed
+over tool-call writes therefore systematically under-samples the very traffic
+the gate exists to catch, and a graduation argument built on that rate inherits
+the bias without showing it.
+Fix: before graduating any shadow gate, state its coverage as a FRACTION of the
+effect it claims to guard, not as a verdict distribution over what it happened
+to see. Cross-check the tool-call count against an effect-side count (here:
+`git diff --name-only <mount>..HEAD` filtered by `covers`, vs telemetry rows) and
+report the gap as a named limitation. Where the gap matters, either extend the
+instrument to the effect (a pre-commit/scan-side check) or exclude the bypassing
+path from the argument explicitly.
+Detection: same-second/sub-millisecond mtime clusters across many covered files
+with no corresponding telemetry rows; more generally, `covers`-matching paths in
+`git diff` over the observation window that have no row. **Rule out "hook is
+dead" first** — a single deliberate tool-call write into a covered path should
+produce a row (it did: row 21, `ts 1788094025`, `ok / valid-card`), which is what
+proves the zero is tool-shape and not an outage.
+Scope (verified, not assumed): `xi_card_guard.py` is currently the ONLY hook on a
+`PostToolUse` `Write|Edit` matcher. The mechanism is not unique to it — any
+tool-matched hook has it. Live sibling: `fieldwork_threshold_notice.py` (matcher
+`Read|Grep|Glob`) is blind to reads done with Bash `cat`/`grep`, and bypass-
+permissions mode ACTIVELY instructs sessions to read that way, so its blind spot
+is not hypothetical. `ps_errorpref_guard.py` (`Write|PowerShell`) is the same
+shape. The other shadow hooks are NOT affected — they sit on non-file events
+(`context_runway_shadow` UserPromptSubmit, `delivery_gate_shadow` SubagentStop,
+`session_board_register` spawn_task, `extdispatch_route_shadow` Agent|Workflow).
+See also: L-038 — same family ("the declared invariant is not the implemented
+one"), opposite direction: L-038's gate fired WRONGLY from path identity, this
+one fails to fire at all from tool identity.
+Evidence: session (a local transcript) | locator `telemetry/xi-card-guard.jsonl` rows 1-20 vs commit `45fa4eb` (11 files, mtime 20:37:48.262-.265) and row 21 `ts 1788094025` | review record `references/cross-index-e1-interim-review-2026-08-30.md` §4 | captured 2026-08-30
+Detail: `lessons-detail.md` §L-040
+
+## L-041 2026-08-31 tags: office-interop|pptx|hyperlink|canonical-probe|com|artifact-format|encoding|desktop-app hits: 1
+Context: SSLD professor PPTX decks. Local-file jump links built with
+`Path.as_uri()` failed UAT — PowerPoint's only message was "cannot open the
+specified file". The path contained CJK; the URI was percent-encoded UTF-8,
+which PowerPoint mis-decodes.
+Pitfall: GUESSING A DESKTOP APP'S ARTIFACT FORMAT FROM THE STANDARD. Office
+apps consume their own dialect, not the spec: PowerPoint stores local links as
+`file:///D:\dir\檔.html` — raw backslashes, CJK unencoded — and rejects the
+spec-correct percent-encoded form. Iterating on plausible variants (relative
+paths, forward slashes, different encodings) is unbounded guessing with a
+one-bit error message.
+Fix: TOOL-AS-ORACLE CANONICAL PROBE — drive the app itself (COM) to produce
+the same construct against the same target, unzip the output, read what it
+stored, replicate byte-for-byte, then assert the generated artifact matches
+that format in the build. One probe replaced the whole guess space and the
+gate keeps it fixed. Same move in reverse closes the visual loop: COM
+`SaveAs(dir, 18)` renders every slide to PNG (locale-dependent filenames —
+投影片N.PNG) for eyeball acceptance. Related but distinct from the global
+"look up the canonical method" rule: that reaches for DOCUMENTATION; this
+reaches for the CONSUMER'S OWN OUTPUT, which wins whenever app behavior and
+spec diverge.
+Detection: a desktop app rejects generated files/links/fields with a generic
+error while hand-made equivalents work; any format decision about an Office
+artifact made from memory of the OPC/URI spec.
+Evidence: session (a local transcript) continuation
+(2026-08-31) | probe: PowerPoint COM AddShape + Hyperlink.Address → rels
+`Target="file:///WORK\SSLD_...\p2_inplane_single.html"` | fix carrier:
+`rules/office-deck-deliverables.md` + AssetVault `pptx-deck-builder`
+(link_button + check_links assert) | captured 2026-08-31
+Detail: `lessons-detail.md` §L-041
+
+## L-042 2026-09-01 tags: verify|invariants|composition|api-design|refactor|silent-failure|proof-scope|naming hits: 1
+Context: media-fetch-pipeline's two transcript verbs — `correct` (substitutes
+inside a cue) and `tidy` (deletes whole cues). Each was written as the LAST
+step, owning its transformation, its record AND its file names; each proves
+itself, `tidy.apply` by asserting that putting the removals back rebuilds its
+input exactly, which is this project's only guard against the one defect class
+it cannot see downstream (content deletion).
+Pitfall: **A PROOF IS RELATIVE TO ITS OWN INPUT, SO IT DOES NOT COMPOSE.**
+Chain the two by hand and the second step's input is an intermediate nobody
+keeps, so「the record can rebuild the original」silently weakens to「it can
+rebuild a file that no longer exists」— no test fails, no error appears, and
+the sentence everyone quotes is simply no longer the one that holds. The
+cheaper symptoms are the only visible ones and they read as cosmetic: the same
+content took two NAMES depending on the order run (`.corrected.tidy` vs
+`.tidy.corrected`), seven files landed where four were wanted, and the two
+machine records ended up in two coordinate systems — run the deleting step
+first and the other record's cue indices refer to a file the user does not
+have. The user reported it as「這兩個不應該互斥」, i.e. as a UX complaint; the
+composition-safety half was underneath and nobody had looked.
+Fix: one layer owns the composition — stage ORDER (index-preserving stages
+before index-collapsing ones, so every stage's record stays in the SOURCE's
+coordinates and the order stops being the caller's choice), naming, and ONE
+end-to-end proof that reverses every stage and must reproduce the ORIGINAL
+before a byte is written. Deliberately redundant against today's two stages:
+it is the check that still holds when a third arrives. A regression test
+plants a fault BOTH stages pass — the substituting step asserts cue count and
+timestamps, never that only the proposed spans changed — which only the
+composition catches.
+Detection: two operations that each self-verify and can be run one after the
+other. Ask what each proof's baseline IS: if it is "my input" rather than "the
+artifact the user holds", chaining voids it. Second tell, cheap and visible
+from outside: **an order of operations that changes output NAMES** — that is
+the same defect wearing a cosmetic disguise, and it is what gets reported.
+Evidence: session unrecorded | locator: `media-fetch-pipeline/`
+`src/mfp/refine.py` (`run`'s reversal, `_inverse`, `ORDER`),
+`tests/unit/test_refine.py::TestItCanBeUndoneBackToTheOriginal`;
+`references/media-fetch-pipeline-decisions.md` P-70 / D-141 carries the
+two-order measurement table | commits 207e944, 2ec2b84 | captured 2026-09-01
 
 ## Archived (folded into another file, or retired)
 
@@ -1088,6 +1182,17 @@ delivered cross-session by the SSLD front-end research session (W1/W2 events).
 > together and the live count reached 32): same `hits: 1` bar and no by-number
 > CLAUDE.md citation, but the carrier is a durable RULE FILE rather than a hook
 > — or the mechanism the card warned about is retired outright.
+>
+> Third pass 2026-08-31 (unfolded 34, nudge-flagged; run together with the
+> L-036..L-038 detail backfill): same bar — `hits: 1`, hook or durable-rule-file
+> carrier, no by-number global CLAUDE.md citation. Folded L-014 / L-016 /
+> L-021 / L-038 (34 -> 30). Evaluated and KEPT on carrier grounds: L-007
+> (header-scan discipline lives only in recall), L-018 / L-028 / L-036 / L-037
+> (fix carried by project code or practice, no ~/.claude hook or rule file),
+> L-022 (hypothesis tier, global candidate H-6 still deferred), L-030
+> (computed-value assert carried by no hook/rule file), L-031 (carrier is tool
+> code + regression tests; no rule file states the general rule); L-033 stays
+> cited by number (`40-maintenance.md` §3).
 
 - **L-002** (2026-07-12 · verify|docs|design|evidence) — PSM/delta-doc failure
   modes: normative content delegated via 「沿用」 to an ARCHIVED base under a
@@ -1144,3 +1249,73 @@ delivered cross-session by the SSLD front-end research session (W1/W2 events).
   only **ANNOTATES** — the deny is deferred pending a corpus backtest — so this is
   the weakest of the three folds, and the keywords above are spelled out precisely
   because the hook will not stop anyone. Full record: `lessons-detail.md` §L-029.
+- **L-014** (2026-08-12 · agents|subagent|tools|capability|skills|silent-failure|config)
+  — `tools:` is an ALLOWLIST and `Skill` is a tool: a "read-only" list written
+  against one axis (write access) silently cuts every axis it intersects —
+  skill invocation, search, MCP, the agent's own verification path. Folded
+  2026-08-31: detection is executable in `integrity-sweep.md` check 1
+  (`grep -L 'Skill' agents/*.md` must be empty) and every `agents/*.md` cites
+  the entry inline. Promote back on recurrence. Full record:
+  `lessons-detail.md` §L-014.
+- **L-016** (2026-08-15 · verify|hooks|checks|acceptance-eval|config|silent-failure|self-audit)
+  — a check that CANNOT fail is indistinguishable from one that passes:
+  predicate satisfied by the wrong thing (prose mention vs the value shape
+  `ops-relaxation: L1`), nothing invokes it, or its subject retired; silence
+  is the healthy signal for a nudge, a status report and an unrun eval alike.
+  Folded 2026-08-31: carried by the global CLAUDE.md automated-gate rule
+  (known-TRUE + known-false calibration), `tools/ops-health-test/` positive
+  cases, and the rule-registry rows; the family's live successor is L-032.
+  Promote back on recurrence. Full record: `lessons-detail.md` §L-016.
+- **L-021** (2026-08-16 · env|powershell|shell|git|quoting) — PS 5.1's
+  native-arg encoder does not escape embedded `"`: a here-string commit
+  message ends mid-argument, git parses the tail as pathspecs, the commit
+  silently does not happen while the chain keeps running (branch deleted
+  un-merged). Folded 2026-08-31: the fix is verbatim in global CLAUDE.md
+  Environment (`git commit -F <msgfile>` / stdin, never inline;
+  `merge-base --is-ancestor` after chained git; `git log -1` answers WHETHER
+  not WHERE — pair with `git branch --show-current` or name the branch) and
+  in the `shared-tree-git.md` commit ritual, with `branch_commit_guard.py`
+  enforcing the branch half. Promote back on recurrence. Full record:
+  `lessons-detail.md` §L-021.
+- **L-038** (2026-08-29 · hook-design|gate-design|false-positive|identity-by-path|deny-message|prompt-injection|subagent|asset-property)
+  — identity-by-path rots when a corpus root gains a new tenant (WebFetch PDF
+  caches under `**/tool-results/` denied as session records); a deny message
+  asserting a file's identity + "Policy:" authority + a read-elsewhere
+  imperative is shape-identical to prompt injection, and a well-calibrated
+  subagent rightly refuses it. Folded 2026-08-31: carried by
+  `hooks/transcript_read_guard.py` itself (shape-based identity,
+  canonicalize-first, constraint-form deny message) and pinned by
+  `hooks/tests/test_transcript_read_guard.py` (22 cases incl. deny-message
+  contract + accepted-bypass pins); decision table + false-positive log +
+  boundaries ledger live in the hook docstring. Promote back on recurrence.
+  Full record: `lessons-detail.md` §L-038.
+
+## L-043 2026-09-01 tags: coverage-blind-spot|testing|silent-failure|refactor|dead-path|multi-surface|gate-design|verify hits: 1
+Context: media-fetch-pipeline reaches one feature from two surfaces — a CLI
+verb and an HTTP route the desktop calls. A 2026-08-30 refactor split
+`stack.py` and moved three names into `captions`/`cues`. The route's imports
+were updated; the CLI handler's function-local import was not.
+Pitfall: **`mfp stack` raised ImportError before doing anything, for two days,
+with 2,500 tests green and the GUI feature working normally.** Every signal a
+person consults said fine. The suite was green because no test invoked that
+handler; the product looked healthy because the OTHER surface reached the same
+capability through correct imports. Two conditions produced it and both are
+ordinary: imports deferred into a handler (deliberate here — a missing Pillow
+must not stop `doctor` from reporting that Pillow is missing) are unchecked
+until that handler runs; and a capability with two entry points has a majority
+path that gets exercised and a minority path that does not. The minority path
+does not degrade — it is dead, completely, and says nothing.
+Fix: a static gate that resolves every `from <package>.… import …` in the
+package, including function-local ones, so a moved symbol fails in CI rather
+than on a machine. Calibrated by restoring the original broken import and
+watching it go red. **Its first run reported 28 failures and every one was
+false** — `from pkg import submodule` names a submodule, and the package has
+no attribute for it until something imports it; the instrument was wrong, not
+the tree, and believing it would have "fixed" 28 correct lines.
+Detection: ask which code paths NO test invokes — not which lines are
+uncovered, which is a different and weaker question. Two tells, both cheap:
+a capability offered from more than one surface where only one surface has
+tests; and any refactor that MOVES a name, since deferred imports do not
+resolve at import time and nothing else will notice. The generalization worth
+carrying: a green suite plus a working product is not evidence about a path
+neither of them travels.

@@ -155,6 +155,17 @@ ticket, explain the reorder when reporting.
    rescheduled with notice? Before ending the turn, check for any ticket still
    marked active and owned by you (including one interrupted by an incoming
    message — answer the interruption, then continue the in-flight task).
+4. **Digest the session** (E-9): made a commit or delivery file, took a user
+   ruling, or dispatched a subagent → append `## <date> s:<session-id-8>` plus
+   did / rulings / deposits / next (≤8 lines) to
+   `references/<project>-session-digest.md`, creating it lazily with a card.
+   Anti-drift: only non-drifting fields are duplicated (sha / path / date /
+   `D-NNN` id) — a phase checkpoint written this session makes `next:` a
+   pointer to it and collapses `did:` to one line; a ruling already recorded
+   as `D-NNN` (`60-bootstrap.md` §G) is cited by id, never restated; on any
+   conflict the phase log / decisions journal is authoritative. Pure Q&A,
+   chat, and read-only sessions: skip. Spec + trigger rationale:
+   `references/session-digest-e9-design.md`.
 
 ✅ "Done: X. Evidence: Y. Next: Z. Also: lesson L-007 logged."
 ❌ Answer an interrupting question, end the turn, and leave the half-finished
@@ -171,5 +182,5 @@ migration silently parked forever.
 5 Dispatch: contract + redlines + self-sufficient materials
 6 Intake: spot-check → red-team → sign-off (never relax criteria)
 7 Zoom out: plan still valid? queue-jump? backfill?
-8 Close out: report / feed the loop / reconcile commitments
+8 Close out: report / feed the loop / reconcile commitments / digest
 ```

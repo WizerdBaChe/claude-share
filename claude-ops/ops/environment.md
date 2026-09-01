@@ -289,6 +289,23 @@ message that does not name the cause.
 | GPU | RTX 5070 Laptop, **8,151 MiB per `nvidia-smi`** (+ integrated Radeon 610M) | `Win32_VideoController.AdapterRAM` reports 4 GB — a 32-bit field overflow, NOT a smaller card. Do not "correct" the 8 GB figure from it |
 | CPU | Ryzen 9 8940HX, 16C/32T | |
 
+## Display & UI-build premise (as-of 2026-08-31, user-stated — not measured)
+
+Primary screens: **2560×1440 (16:9)** or **2560×1600 (16:10)**, Windows custom
+scaling **150%**. Derived (from those two facts, not probed): logical viewport
+≈ **1707×960 / 1707×1067**, browser `devicePixelRatio` 1.5 — verify in-page
+before any pixel-exact claim depends on it.
+
+**Baseline rule (owner: user, 2026-08-31)**: screen-related build premises are
+judged against an **FHD-class baseline** (簡易判定以 FHD 為基礎); special
+aspect ratios / ultrawide are OPT-IN extra adaptation when actually needed,
+never a default requirement. Consequence: when confirming premises for
+UI/viewport/canvas/layout work, assume this display + 150% scaling, and trim
+generic boundary-case lists accordingly (CLAUDE.md boundary/compatibility
+`[BC]` rule — these are now KNOWN environment facts, not guesses).
+
+review-when: the user reports a new monitor or a changed scaling factor.
+
 ## Execution surface — CLI headless vs Desktop (measured 2026-08-22 on CLI 2.1.238 / Desktop-bundled claude.exe 2.1.237)
 
 **CLI is now 2.1.246 (2026-08-26); this block's re-verify trigger has fired.**

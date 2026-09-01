@@ -873,6 +873,14 @@ edits = [
 path = "interop-layer/portable-core.md"
 source = "~/.claude/interop/portable-core.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 25 insertions,
+4 deletions for this file at d06708c — the `visual-acceptance` block's
+manual-acceptance checklist rewritten to the two-section rank form (`A. 必驗`
+≤7 items / `B. 體驗`, consequence-ordered, admission gated by "can a machine
+check it" then "would failing it block shipping") in place of the older
+stress-path-parity instruction, another session's uncommitted edit at the
+source. Collected as the working copy on disk per this round's ruling.
+review-when: re-collect and drop this ack once it lands in a source commit."""
 
 [[collected]]
 path = "interop-layer/acceptance-evals.md"
@@ -937,6 +945,13 @@ status = "verbatim"
 path = "agents/engineering-frontend-developer.md"
 source = "~/.claude/agents/engineering-frontend-developer.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 11 insertions,
+2 deletions for this file at d06708c — the manual-acceptance checklist section
+of its Output contract rewritten to the two-section rank form (`A. 必驗` /
+`B. 體驗`, consequence-ordered, ≤7-item A cap) in place of the older prose
+stress-path instruction, another session's uncommitted edit at the source.
+Collected as the working copy on disk per this round's ruling.
+review-when: re-collect and drop this ack once it lands in a source commit."""
 
 [[collected]]
 path = "agents/engineering-security-engineer.md"
@@ -990,6 +1005,12 @@ status = "verbatim"
 path = "claude-ops/ops/05-authority.md"
 source = "~/.claude/ops/05-authority.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 2 insertions,
+2 deletions for this file at d06708c — the §4.0 template's Acceptance line
+reworded to point at `references/uat.md`'s A/B rank form instead of a bare
+"blind-executable checks" instruction, another session's uncommitted edit at
+the source. Collected as the working copy on disk per this round's ruling.
+review-when: re-collect and drop this ack once it lands in a source commit."""
 
 [[collected]]
 path = "claude-ops/ops/10-command-loop.md"
@@ -1064,10 +1085,32 @@ _superseded_edits = [
 path = "claude-ops/ops/lessons.md"
 source = "~/.claude/ops/lessons.md"
 status = "edited"
+# Refreshed 2026-09-02 (align-2026-09-02-w1-ops round). The source ledger grew
+# a lot since the last refresh: L-039 through L-043 arrived as new full
+# entries, L-014/L-016/L-021/L-038 were compressed into one-line "folded"
+# summaries (a 2026-08-31 trim pass — the full entries this copy used to carry
+# for them are gone from the source at those positions, by design, and the
+# refresh correctly drops them too), and L-024/L-025's hit counts moved. A
+# byte-for-byte re-apply of the edits list below, anchored on the fresh
+# content, found the SAME pattern as `rule-registry.md` this round: several
+# instances the old wording implied were already scrubbed had drifted back to
+# raw source values (an untouched Evidence line reads identical to a correctly
+# re-applied one in a diff against a STALE repo copy — check V's documented
+# blind spot). Re-scanned the whole file for the two declared identifier
+# classes rather than trusting the old count: 21 session UUIDs (not 7), one
+# codename-style session id (`dazzling-dijkstra-9c5682-17`, two mentions, plus
+# its paired short-form id `223b04ef`, two mentions — a format the old edits
+# list never named), 7 drive-prefixed paths (not 3, all naming a second-drive
+# work root), and one private memory-archive digest locator combining a
+# session id with a drive-name fragment. All scrubbed below. L-010's two
+# asset-library pointers (declared 2026-08-16) re-checked and still correct as
+# collected — that entry did not move.
 edits = [
-  "7 session UUIDs in Evidence: lines -> 'session (a local transcript)'. The schema (session | digest | locator | captured) is the instructive part and is kept whole; the id points at a transcript no reader can open. Same wording already declared for hooks/model_cap_guard.py.",
-  "3 evidence locators: the absolute drive prefix stripped, leaving the project-relative path (e.g. '<drive>:/<work-root>/Foo/SECURITY-POLICY.md' -> 'Foo/SECURITY-POLICY.md'). COLLECTION-RULES.md rule 2 forbids scrubbing a path that resolves, and the tail still identifies the file for anyone who has the repo; only the machine-specific prefix goes.",
-  "L-010: two pointers to the same private asset-library entry removed, and the portable equivalent (`npx playwright screenshot` plus the settle call stated one line above) put in their place.",
+  "21 session UUIDs (was 7) in Evidence: lines -> 'session (a local transcript)'. The schema (session | digest | locator | captured) is the instructive part and is kept whole; the id points at a transcript no reader can open. Same wording already declared for hooks/model_cap_guard.py.",
+  "1 codename-style session id (`dazzling-dijkstra-9c5682-17`, L-034, 2 mentions) -> 'the authoring session', distinguished from the second session in the same incident (`223b04ef`, 2 mentions, one inside a quoted hook-docstring line) -> 'the restoring session' / 'that session'. Same scrub class as the UUIDs, different format; the attribution NARRATIVE (two different sessions, who gets credited for what) is kept whole since that is the lesson's own point.",
+  "8 evidence locators (was 3): the absolute drive prefix stripped, leaving the project-relative path (e.g. '<drive>:/<work-root>/Foo/SECURITY-POLICY.md' -> 'Foo/SECURITY-POLICY.md'; '_bench-claude-arms\\...' keeps its tree name, drops only the drive+root). COLLECTION-RULES.md rule 2 forbids scrubbing a path that resolves, and the tail still identifies the file for anyone who has the repo; only the machine-specific prefix goes. Includes one new instance this round, L-041's PowerPoint-COM probe evidence (a second-drive root distinct from the usual work root, same scrub class) -> drive+root stripped, same treatment.",
+  "L-025's digest locator ('memory-archive/digests/D--AIWork/<session-id-prefix>-....md', a private path combining a session-id fragment with a drive-name fragment) -> 'the digest generated for that session'; the line numbers beside it (the checkable part) stay.",
+  "L-010: CORRECTION to this line's own prior wording, found while re-checking it this round — the source no longer reads `npx playwright screenshot` at Fix (4) (that phrasing predates this entry and the source has since moved to naming the tool by capability, 'the out-of-process tool: AssetVault `ui-state-probe` (utility/node)'); that form was ALREADY the text in both the source and the previous repo copy, so no substitution is active here any more. Left as-is: a bare tool NAME inside a capability description, not a resolvable path into a private tree, is the same class already carried unremarked elsewhere in this file (e.g. L-041's 'AssetVault `pptx-deck-builder`'). Kept as a line item so the next refresh does not have to re-derive why no diff appears here.",
   "2026-08-27 (architecture-diagramming round, B4 sweep): an EIGHTH session UUID found surviving in L-013's evidence locator — the line's first field had been scrubbed to 'session (a local transcript)' while its locator kept the full transcript path (session UUID + the work-root project slug). Same declared class as the seven above; -> 'the session's own local transcript jsonl'. The main.log line numbers and turn timestamps stay — they are the checkable part.",
 ]
 
@@ -1100,27 +1143,88 @@ source = "~/.claude/ops/references/skill-trigger-classes.md"
 status = "verbatim"
 
 [[collected]]
+path = "claude-ops/ops/references/uat.md"
+source = "~/.claude/ops/references/uat.md"
+status = "verbatim"
+# Added 2026-09-02 (align-2026-09-02-w1-ops round), ruled by the dispatcher
+# after a sibling worker's check-R finding: multiple already-shipped files cite
+# this as the owner of the `manual-acceptance checklist` record type — global
+# CLAUDE.md's `[BC]` line, ops/rules-usage-dict.md §7, ops/05-authority.md §4,
+# ops/rule-registry.md `UAT_A_CAP`, all in this round's collected set — so
+# COLLECTION-RULES.md decision-procedure row 2 forces a verdict rather than a
+# silent gap. Read whole (151 lines); no account name, absolute home/second-
+# drive path, session id, or private-tree pointer found — every path cited is
+# repo-relative, and the one Chinese user-ruling quote (§0, 2026-09-01) is
+# content, not an identifier. Verbatim.
+source_dirty_ack = """2026-09-02: untracked at the source (never committed,
+absent from `git status --porcelain` as a tracked path at d06708c). Collected
+as the working copy on disk per this round's ruling for untracked/dirty files.
+review-when: re-collect and drop this ack once the source commits the file —
+check its content still matches verbatim at that point, since an untracked
+file can change without any commit trail to diff against."""
+
+[[collected]]
 path = "claude-ops/ops/rule-registry.md"
 source = "~/.claude/ops/rule-registry.md"
 status = "edited"
-# Refreshed 2026-08-16 (compact-recovery round): check V caught this copy
-# lagging the source, which had gained two entries the same day ('compact
-# recovery' and 'browser-pane pixel route'). Both arrive with the refresh. The
-# edits below touch ONLY the compact-recovery entry; the pixel-route entry's
-# evidence/rollback pointers (outputs/, backups/, drafts/, tools/ui-*) are
-# repo-relative evidence-trail pointers of the same class this file already
-# carried ('archive/agents-2026-08-12/') and stay as collected.
+# Refreshed 2026-09-02 (align-2026-09-02-w1-ops round). Check V would have
+# caught this copy lagging the source badly: two whole new entries (`UAT_A_CAP`,
+# "session mirror heartbeat"), a trim-pass verdict paragraph, and an updated
+# headroom figure had all landed at the source with nothing here reflecting
+# them. CORRECTION to the 2026-08-16 edits list below: re-applying it against
+# fresh source bytes found THREE of its four items already silently reverted
+# in the copy this round replaced ('Prism 94a45532' un-scrubbed at its
+# evidence line, 'memory/session-transcript-archive.md' un-scrubbed at its
+# history line, `ClaudeSessionTranscriptMirror-Daily` un-scrubbed at its
+# review-when line) — check V's own documented limit (it can't tell "differs
+# by the declared edits" from "differs because the source moved on") is why
+# nobody caught this until a byte-for-byte re-apply did. All three re-applied
+# here, plus the SAME scheduled-task-name class found a second, undeclared
+# instance in the newly-arrived "session mirror heartbeat" entry (its `current`
+# line names the same task) and the same mirror-root-path class found a second
+# undeclared instance in that entry's own review-when line — both scrubbed
+# to the same wording as their sibling instances, consistent treatment per
+# COLLECTION-RULES.md step B4. Two more pre-existing, previously-undeclared
+# instances of the drive-path-strip class turned up while re-applying
+# (the `_bench-claude-arms` tree cited with its full drive prefix, at an
+# evidence line and inside the ruling #8 citation) plus one 1,361-file
+# shader-glob measurement mirroring
+# `global-claude-md/rules/shader-failure-modes.md`'s own declared edit, and one
+# more session id (a `graph-query` tool-call citation) — all now declared below
+# instead of living only in the diff. `WORK_ROOT`/`MIRROR_ROOT` placeholder
+# substitutions (declared in `[placeholders]` since the 2026-08-29 sync) were
+# already correctly anchored and carried through unchanged.
 edits = [
   "compact-recovery entry, current: a second-drive mirror root path -> 'any configured mirror root', matching the shipped transcript_read_guard.py whose CONFIG carries the same edit",
-  "compact-recovery entry, evidence, 2 places: a session id beside a project name ('Prism 94a45532') -> 'one real session'; 'authoring session <id>' -> 'the authoring session' — the ids point at transcripts no reader can open; every measurement and date stays",
+  "compact-recovery entry, evidence: a session id beside a project name ('Prism 94a45532') -> 'one real session' — the id points at a transcript no reader can open; every measurement and date stays",
+  "compact-recovery entry, review-when, 2 places (its own line plus the newly-arrived session-mirror-heartbeat entry's `current` line): the scheduled-task name feeding the mirror -> 'the scheduled copy job that feeds it'",
   "compact-recovery entry, history: a named artifact under the never-collect memory/ tree -> 'a local memory note'",
-  "compact-recovery entry, review-when: the scheduled-task name feeding the mirror -> 'the scheduled copy job that feeds it'",
+  "FULL-CHAIN REAL FIRE entry, current: 'authoring session <id>' -> 'authoring a local session'",
+  "session-mirror-heartbeat entry (arrived 2026-09-02), review-when: the same second-drive mirror root path -> 'any configured mirror root', same class and wording as the compact-recovery entry above",
+  "3 places, evidence/citation lines: the `_bench-claude-arms` tree's full drive prefix stripped -> `_bench-claude-arms/...` (tree name kept — same class as `claude-ops/ops/references/shared-tree-git.md`'s declared edit)",
+  "gate-integrity / shader-glob measurement line: the drive prefix on the work root -> 'the work root', mirroring `global-claude-md/rules/shader-failure-modes.md`'s declared edit for the identical measurement claim",
+  "graph-query tool-call citation: a session id ('session 926f3d39') -> 'a local session'",
 ]
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 55 insertions,
+0 deletions for this file at d06708c — the whole `UAT_A_CAP` entry and the
+whole "session mirror heartbeat" entry, both uncommitted at the source.
+Collected as the working copy on disk per this round's ruling for dirty
+source files; both entries read clean of scrub-worthy content (repo-relative
+paths and dated evidence throughout) except the one mirror-root path handled
+above. review-when: re-collect and drop this ack once these two entries land
+in a source commit."""
 
 [[collected]]
 path = "claude-ops/ops/rules-usage-dict.md"
 source = "~/.claude/ops/rules-usage-dict.md"
 status = "verbatim"
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 2 insertions,
+1 deletion for this file at d06708c — the 驗收 row and the record-type table
+both gained a `manual-acceptance checklist` / `references/uat.md` citation,
+another session's uncommitted edit at the source (the same file this round
+also collected fresh, per the dispatcher's ruling on the cross-group finding).
+Collected as the working copy on disk per this round's ruling.
+review-when: re-collect and drop this ack once it lands in a source commit."""
 
 [[collected]]
 path = "claude-ops/references/PROJECTS.md"
@@ -1131,9 +1235,15 @@ live project index, and its dirty state is its normal state. Nothing here tracks
 those rows: this copy is the HEADER plus one worked example, and the source's row
 content is excluded by the [[not_shipped]] entry above. The finding is correct and
 structurally permanent for this file, which is why the ack has no review-when: it
-would fire on every run forever."""
+would fire on every run forever.
+RE-VERIFIED 2026-09-02 (align-2026-09-02-w1-ops round): source `git diff
+--numstat` shows 5 insertions, 4 deletions at d06708c this round specifically
+— a new `post-brief` row plus a one-line edit elsewhere in the live table.
+Confirmed still row-only (no header/column-semantics touched), so the ack's
+own claim stands unchanged; still no review-when, for the same reason."""
 edits = [
   "the live file's rows are real project names, paths and status. Header, column semantics and one worked example row ship; the inventory does not. Declared in the [[not_shipped]] 'references/PROJECTS.md' entry as `partial`.",
+  "Maintainer-list bullet: `tools/project-dashboard.py reads this table as its project list.` -> `a dashboard tool can read this table as its project list.` FOUND UNDECLARED 2026-09-02 while re-verifying this entry: `tools/project-dashboard.py` is `excluded-by-decision` under the `[[not_shipped]] path = \"tools/\"` entry, so naming it here is a routing pointer into an absent tool (COLLECTION-RULES.md row-2 inverse) — the same class already handled elsewhere in this file's own header (see the maintainers list above, which never names a source-only script either). Was already correctly substituted in the shipped copy; only the declaration was missing.",
 ]
 
 [[collected]]
@@ -1159,11 +1269,27 @@ edits = [
 path = "global-claude-md/CLAUDE.md"
 source = "~/.claude/CLAUDE.md"
 status = "template"
+# Refreshed 2026-09-02 (align-2026-09-02-w1-ops round), closing the DEFER left
+# by `skill-toolkit/skills/product-design-thinking/references/representation-
+# models.md`'s 2026-08-27 note: this template snapshot predated the source's
+# representation-selection rule (and, it turned out, a great deal more — the
+# whole file's prose had been tightened/reworded at the source since this
+# template was last built, byte-for-byte re-apply was the only way to tell
+# staleness from an active edit). All four edits below re-anchored on fresh
+# content and still hold; two needed wording updates, noted inline.
+source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 2 insertions,
+2 deletions for this file at d06708c — the path-scoped-rules index gained a
+`visual-gate-scope.md` entry and the `[BC]` manual-acceptance-checklist line
+was reworded to point at `ops/references/uat.md`'s rank form, another
+session's uncommitted edit at the source. Collected as the working copy on
+disk per this round's ruling (both changes are inside the header line and the
+Engineering-judgement bullet, neither is one of the four template edits
+above). review-when: re-collect and drop this ack once it lands in a commit."""
 edits = [
   "Environment bullet: OS, default/secondary shell and line-ending convention -> <OS_NAME> / <DEFAULT_SHELL_NAME> / <SECONDARY_SHELL_NAME> / <LINE_ENDING_CONVENTION>, with a placeholder note naming the original values so the adopter knows what shape of answer belongs there.",
-  "relaxation-gate bullet: placeholder note added (no text changed) — the standing L1 ruling is the author's own grant about their own tolerance for autonomy, not a recommendation.",
+  "relaxation-gate bullet: placeholder note added (no text changed). UPDATED 2026-09-02: note's wording pluralised ('standing rulings', 'tiers/levels') — the source gained a second standing ruling (Fable-family -> L2, 2026-08-30) since the note was last written; both are the author's own grant about their own tolerance for autonomy, not a recommendation.",
   "Language section: placeholder note added (no text changed) — it encodes one author's reply-language preference.",
-  "REVERSED 2026-08-16, and recorded rather than quietly dropped: the previous copy also genericised the browser-pane bullet away from `hooks/ui_verify_guard.py` because the repo did not ship that hook. It has shipped since 2026-08-14, so the note's premise was false and the bullet is now verbatim. Same round restored the two PowerShell/Windows bullets the previous copy had DELETED outright: they are transferable defect knowledge (PS 5.1 native-arg quoting; Python raw strings for Windows paths), interop-layer/portable-core.md was shipping them the whole time, and deleting a rule is the over-scrub class this gate exists to catch.",
+  "REVERSED 2026-08-16, and recorded rather than quietly dropped: the previous copy also genericised the browser-pane bullet away from `hooks/ui_verify_guard.py` because the repo did not ship that hook. It has shipped since 2026-08-14, so the note's premise was false and the bullet is now verbatim. Same round restored the two PowerShell/Windows bullets the previous copy had DELETED outright: they are transferable defect knowledge (PS 5.1 native-arg quoting; Python raw strings for Windows paths), interop-layer/portable-core.md was shipping them the whole time, and deleting a rule is the over-scrub class this gate exists to catch. RE-VERIFIED 2026-09-02: still verbatim/present in fresh source, no action needed.",
 ]
 
 [[collected]]
@@ -2334,3 +2460,19 @@ reason = """The MSYS path-conversion example (L-029): MSYS rewrites the argument
 it. It is the DEFECT'S OUTPUT, produced by the Git install rather than chosen by
 anyone, and both the docstring and the runtime annotation are unreadable without
 it. A system-root path besides, which the patterns exempt everywhere else."""
+
+[[allow]]
+file = "claude-ops/ops/lessons.md"
+kind = "absolute local path (non-system drive)"
+match = "\\dir"
+reason = """L-041's GENERIC illustration of PowerPoint's own link-storage
+dialect — a one-line demonstration of the raw-backslash, CJK-unencoded
+`file:///` form PowerPoint writes, versus the spec-correct percent-encoded
+form it rejects. (No example is spelled out in this comment on purpose —
+writing one would make this file a finding under its own pattern, the same
+reason `sharelib.py`'s own LEAK_PATTERNS comment gives.) Both path segments in
+the source line are literal placeholder words — an English generic + 檔,
+Chinese for 'file' — chosen because the ENCODING TRANSFORM is the whole point;
+it names no real directory on any machine. The entry's own REAL probe
+evidence three lines down (a second-drive SSLD path) is a genuine value and
+is scrubbed, not exempted here — only this fictional illustration is."""

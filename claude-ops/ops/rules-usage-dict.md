@@ -103,7 +103,7 @@ opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 | 主題 | CLAUDE.md 已管 | ops/ 補充的維度 |
 |---|---|---|
 | 重試上限 | 「同一視覺症狀第 2 次未修就停手、做對照分析」 | 泛化到派工：任何問題兩輪未解，第三次必須換法（`20-dispatch.md` §5） |
-| 驗收 | 「無法靜態驗證的改動附人工驗收清單」「視覺閘門需人確認」 | 機器可查驗收先於方法、living proof（`10` Step 4、`30` R2） |
+| 驗收 | 「無法靜態驗證的改動附人工驗收清單」「視覺閘門需人確認」 | 機器可查驗收先於方法、living proof（`10` Step 4、`30` R2）；清單本身的分段、排序軸與收錄門檻＝`references/uat.md`（該紀錄型別的 owner） |
 | 檔案衛生 | archive-not-delete、報告開新檔 | 規則檔分層權限與修剪紀律（`40`） |
 | 查證優先 | 「概念性錯誤先查 canonical 方法再改」 | 一般化為 C2/C6 思考習慣（`50-coach.md`） |
 
@@ -151,6 +151,7 @@ opencode 反向依賴未決項：`ops/references/inbound-routing.md`。
 | evidence block | session_id / digest / locator / captured_at | `70-evolution.md` §2 | 2026-08-11 起：新 lessons 條目與 guardrail 提案的 problem 欄（舊資料不回填） |
 | phase-log section | project / phase / status / date + Goals / Decisions / Changes / Open Questions | `workflow-checkpoint` SKILL.md | 每次 checkpoint |
 | boundary contract | 0 premises / 1 forks / 2 boundary inputs / 3 acceptance / 4 non-goals (≤18 行) | `05-authority.md` §4 | L1/L2（已鬆綁）× Tier-2 實作任務 |
+| manual-acceptance checklist（人工驗收清單／UAT） | 兩段：`A. 必驗`（≤7 項，後果由高到低：資料與不可逆狀態 → 運作與使用 → 失敗看得見 → 換環境存活）+ `B. 體驗`（看得懂 → 順手 → 觀感）；跨段連續編號；每項＝一個具體動作 + 預期觀察、非作者可盲測；空段寫 `無`；**不得以模組／技術面分組**；機器驗得到的不收錄（改貼測試輸出）；人眼項目需有免破壞的檢視入口 | `ops/references/uat.md` | 交付含「只有人跑得出／看得出來」的部分時（全域 CLAUDE.md `[BC]`；L1/L2 有 boundary contract 時併入其 §3，不另開一份） |
 | refutability statement | holds-when / overturned-by / evidence-tier / not-covered | `30-judgment.md` R2 | Tier-2 交付全欄；Tier-1 一行；T0 免 |
 | rule-registry entry | key / current / why / evidence / history / review-when / rollback；**值是猜測時 `evidence` 以 `PROVISIONAL` 開頭 + 何者可定案 + 觀測寫回本條目**（2026-08-13）；**值依賴本庫以外的事實時（harness 預設、平台能力、廠商文件、未量測的比率）必填 `review-when:`，寫「哪個可觀察事件會使它失效」而非日期**（2026-08-14） | `ops/rule-registry.md` 頭部 | 規則值、上限、常設裁定設定或變更時（就地取代該鍵）；**含「先出貨的猜測值」——未登記的猜測沒有資料落點，會靜默變成永久值**；**含「注入層預設 × 本機收窄」一節——harness 注入文字會隨產品改版靜默變動** |
 | change event | trigger / change (before→after) / result / rollback | git commit message | 每次 🔴/🟡 變更 |

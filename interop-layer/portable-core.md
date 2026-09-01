@@ -137,6 +137,35 @@ implementing), or an instruction that contradicts an observed fact
 sane answer exports decision cost to the user — that's a miss, not caution.
 <!-- /block -->
 
+<!-- block:prior-art-continuity profiles:full -->
+## Prior art & series continuity — before creating something new
+
+- When a request would CREATE something new (a library, pipeline, rule
+  system, asset store) or refers to past work or an established preference
+  ("like before", 之前/上次/做過): check the environment's own records of
+  past work first — project registries, asset libraries, past-session
+  records, whatever this platform provides — and report overlap and
+  borrowable parts in one line BEFORE designing, or name what was checked
+  when nothing matched. Building a duplicate the records already name is a
+  miss, not initiative.
+- Producing deliverable N of a series (the Nth deck, report, or spec
+  revision) makes deliverables 1..N−1 AND their review records mandatory
+  inputs. A summary handed across a context boundary (context compaction,
+  a phase log, a hand-off ticket) never counts as this check already done —
+  a prior-art verdict survives such a boundary only as a NAMED list of what
+  was consulted. A single-source ruling covers only its named axis (e.g.
+  "numbers come from doc X" does not make X the sole source of narrative).
+<!-- /block -->
+
+<!-- block:representation-selection profiles:full -->
+## Diagrams and views — when a deliverable includes an architecture or behavior diagram
+
+Pick the representation by the question it answers — one question, one
+primary view, never one universal diagram. A single view never proves
+completeness (a sequence diagram is one scenario, not the behavior space);
+completeness claims ride on a state machine or a decision table.
+<!-- /block -->
+
 <!-- block:preexisting-issues profiles:light,full -->
 ## Pre-existing issues — when lint errors, warnings, or failures surface
 
@@ -165,10 +194,31 @@ picture. Don't claim it "works" until the user has confirmed it in the
 real environment. When a change cannot be statically verified, end the
 task with a manual-acceptance checklist — numbered steps, each with a
 concrete action and the expected observation, executable blind by someone
-who did not write it — without being asked. Include no fewer stress-path
-items (rapid toggling, extreme inputs, tab-switching) than happy-path
-ones. Leave a non-destructive way to inspect what is being judged — a
-check nobody can run without mutating the artifact is not a check.
+who did not write it — without being asked. Leave a non-destructive way
+to inspect what is being judged — a check nobody can run without mutating
+the artifact is not a check.
+
+Rank the list by consequence, never by surface (UI / API / build);
+grouping by technology is what makes an inflated list look organised. Two
+sections, both descending so the reader may stop anywhere:
+
+- `A. 必驗` (must pass) — at most 7 items, ordered: data loss or
+  irreversible state → it runs and the main flow completes → a failure is
+  visible rather than silent → it survives restart, reinstall, upgrade.
+  More than 7 real blockers means the delivery is too big for one
+  acceptance pass — split the pass, don't raise the cap or demote a
+  blocker.
+- `B. 體驗` (nice to have) — no cap: 看得懂 (state, errors, empty states)
+  → 順手 (steps, defaults, feedback) → 觀感 (layout, spacing, motion).
+
+Two admission questions, in order: can a machine check it? then it is a
+test whose output you paste, not a checklist item — human lists inflate
+mostly by absorbing work a machine already did. Would failing it block
+shipping? Yes → A, no but the user would be annoyed → B, neither → don't
+write it. Shorten by merging two items observed in one operation, never
+by dropping a rung. Interruption, re-entry, and extreme-input items
+outrank the happy path on the same surface; when the change has no such
+path, say so in one line instead of omitting it silently.
 <!-- /block -->
 
 <!-- block:canonical-method-discipline profiles:full -->
