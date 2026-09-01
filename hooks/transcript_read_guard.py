@@ -45,8 +45,8 @@ FALSE-POSITIVE LOG (convention: counted in the owning hook's docstring):
 WHY A SIZE GATE IN BYTES: token risk tracks bytes, not lines — one transcript
 jsonl line can exceed 100KB, so a line-count rule alone is gameable; and
 without the gate, tiny mirrored files would need a `limit` for no reason.
-Both thresholds are PROVISIONAL (record their fate in your own rule registry);
-observed denials that were LEGITIMATE whole-file needs are the settling data.
+Both thresholds are PROVISIONAL (registry: "compact recovery");
+observed denials that were LEGITIMATE whole-file needs get appended there.
 
 DECISION TABLE (pinned by hooks/tests/test_transcript_read_guard.py and the
 2026-08-29 boundary probe; DENY only when ALL four columns hold):

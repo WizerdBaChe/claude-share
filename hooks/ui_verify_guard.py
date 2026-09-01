@@ -59,6 +59,19 @@ readers, which are the high-volume ones.
 
 Fail-open by design: any parse error exits 0 so a guard bug never blocks work.
 Tests: tools/ui-verify-test/test_ui_verify_guard.py.
+
+OBSERVED FALSE POSITIVES (running count — this IS the loosening trigger's
+evidence; add to it, do not reset it). A denial that correctly enforced the
+probe-first/route rule is NOT an FP even if it annoyed; an FP is a denial
+where the denied call was already compliant or outside the rule's intent:
+  (none recorded as of 2026-09-01 — section added by the gate-integrity
+  audit: this was the one enforcement hook in the set with no FP ledger)
+Loosening trigger: 3 recorded FPs => run a narrowing pass (the sibling
+guards' convention, see secret_file_guard.py), with the FP cases folded into
+tools/ui-verify-test/ as the must-pass floor before any loosening ships.
+review-when: the harness changes the PostToolUse payload shape (the marker
+degrades to "unknown"/fail-open — check the annotate branch still parses), or
+a new browser surface (mcp__* prefix) joins the environment (extend matchers).
 """
 import json
 import os
