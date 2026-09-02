@@ -9,6 +9,56 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-02 (second entry) — the repo becomes the source of a cloud environment
+
+Until today this repo described an environment; from today it can also
+*install* one. Opened in Claude Code on the web, where every session starts in
+an ephemeral container with an empty `~/.claude`, the repo now puts the source
+environment back before the first turn — "LikeLocal".
+
+**What landed.** A tracked project-scope `.claude/settings.json` whose
+SessionStart hook runs `cloud-bootstrap/bootstrap.py install`: 180 files into
+the container's `~/.claude` — the global CLAUDE.md with its four machine
+placeholders rendered (Linux / bash / no secondary shell / LF) and the adopter
+notes dropped, `rules/`, the 22-file ops layer with a measured cloud
+`environment.md` overlaid on the Windows one, `references/PROJECTS.md`, the
+trigger dict and all 17 skills, all 16 hooks and both JSON lists, the 8
+agents, the three environment-guide documents, `preserve.py` at the path
+`compact_bookmark.py` calls, `archdiag/` at the path `diagram-authoring`
+routes to, the thinking notes, and a user-scope `settings.json` carrying the
+template's permissions/env/`disableWorkflows` but neither `model` nor
+`effortLevel` (host-managed). The same settings file mounts every hook
+matcher-for-matcher with `hooks/settings.example.json`, through
+`.claude/hooks/run-hook.sh` — a shim that execs the repo copy and exits 0 when
+it cannot, so a missing hook can never become the blocking python exit 2 that
+`branch_commit_guard.py` incident #3 records. Both shell hooks are inert unless
+`CLAUDE_CODE_REMOTE=true`, so on the operator's own machine nothing runs twice.
+
+**Verified in the container.** `bootstrap.py verify`: all 16 hooks exit 0 on
+an empty payload; `model_cap_guard.py` denies `model: opus` and allows
+`sonnet`; `dangerous_command_guard.py` denies `git push --force` and allows
+`git status`; 16 mount sites over 15 hooks plus the chained nudge cover all 16.
+Installing the skills was observed to register them in the running session
+without a restart. The one thing NOT measured — whether a fresh container's
+first system prompt sees the CLAUDE.md the same session's SessionStart hook
+wrote — is acceptance item A1 in `cloud-bootstrap/README.md`.
+
+**Gate changes.** Check S1 refused any tracked `.claude/` path; it now admits
+paths declared in a new `[structure] tracked_exceptions` table (path-exact,
+reasoned), and a new D4 fails a declaration whose path is no longer tracked.
+Test case 13 proves both directions. Check V and the test's case 10 refuse a
+`--source` that carries `cloud-bootstrap.json`: that tree is a copy of this
+repo, and comparing the repo with itself would pass every `edited` entry as
+byte-identical for the wrong reason. One regression the suite caught before
+it shipped: tracking `.claude/settings.json` made check R's suffix match
+resolve every rule file's citation of the SOURCE `settings.json` to it, and
+case 2 went red — the resolver now ignores the repo's own `.claude/` files. A
+root `CLAUDE.md` records the repo's own working rules and the
+`ops-relaxation: L2` standing ruling.
+
+Gate: CLEAN over 229 tracked files; 12/12 gate tests run, case 10 (check V)
+skipped loudly because the container's `~/.claude` is this repo's own copy.
+
 ## 2026-09-02 — the first outside run comes back, and the whole repo is re-aligned behind it
 
 Two refreshes in one day, both forced by evidence rather than by a calendar.

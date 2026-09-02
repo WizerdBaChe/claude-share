@@ -1,0 +1,225 @@
+{
+  "_README": [
+    "Project-scope settings for running THIS REPO as the cloud environment's source",
+    "(Claude Code on the web). Two jobs: (1) SessionStart installs the shares into the",
+    "container's ~/.claude via cloud-bootstrap/bootstrap.py; (2) every hook in hooks/",
+    "is mounted through .claude/hooks/run-hook.sh, a fail-open shim that execs the repo",
+    "copy and exits 0 when it cannot. Both scripts exit 0 immediately unless",
+    "CLAUDE_CODE_REMOTE=true, so on the operator's own machine this file is inert and",
+    "the user-scope settings.json keeps mounting the same hooks exactly once.",
+    "",
+    "Mounts mirror hooks/settings.example.json event-for-event and matcher-for-matcher",
+    "(the invariant: every .py directly under hooks/ is mounted here exactly as the",
+    "template mounts it), with ONE deliberate difference: ops_health_nudge.py is not a",
+    "SessionStart sibling but is chained inside session-start.sh AFTER the install, on",
+    "the same stdin — siblings run in parallel, and on a fresh container the nudge",
+    "would stat() an ops/ that does not exist yet. $CLAUDE_PROJECT_DIR is expanded by the shell Claude Code",
+    "runs hook commands through on Linux; the template's <PYTHON_EXE>/<CLAUDE_HOME>",
+    "substitution is unnecessary here because the shim resolves both at run time.",
+    "",
+    "permissions / env are carried from the template; model and effortLevel are NOT",
+    "(the cloud host sets both per session). cloud-bootstrap/README.md is the manual."
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(mkdir *)",
+      "Bash(python3 tools/share_gate.py*)",
+      "Bash(python3 tools/test_share_gate.py*)",
+      "Bash(python3 cloud-bootstrap/bootstrap.py*)",
+      "WebSearch"
+    ],
+    "ask": [
+      "Edit(~/.claude/CLAUDE.md)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(~/.claude/settings.local.json)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/.claude/rules/**)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh\"",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" compact_pointer.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" dangerous_command_guard.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" shell_transport_guard.py",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" branch_commit_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" model_cap_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__(computer|javascript_tool)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" ui_verify_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__(navigate|preview_start)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" browser_pane_scope_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" fieldwork_threshold_notice.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" ps_errorpref_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" ps_pipeline_close_guard.py",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" transcript_read_guard.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__(Claude_Browser|claude-in-chrome)__javascript_tool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" ui_verify_guard.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" compact_bookmark.py",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" delivery_gate_shadow.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" instructions_loaded_logger.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/run-hook.sh\" context_runway_shadow.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

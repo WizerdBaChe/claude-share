@@ -29,8 +29,14 @@ Every case is a real incident, not a hypothetical:
                      The exemption's fails-without-it half is case 9: the live
                      tree now holds compact-recovery/ACCEPTANCE.md, so the
                      old gate fails the current-tree control.
+ 12  CONTROL         a .py under hooks/tests/ is not an unmounted hook
+ 13  structure       a tracked .claude/ path with its [structure] declaration
+                     re-pointed fires check S, and the re-pointed declaration
+                     fires check D4 (2026-09-02, cloud-bootstrap round: the
+                     repo now tracks its own project-scope settings and two
+                     shell hooks so a cloud container can install from it)
 
-Two of the eleven assert that the gate stays QUIET. That ratio is deliberate: a
+Three of the thirteen assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -249,7 +255,15 @@ def main():
     # 10 — check V, which needs a source tree. Skipped LOUDLY when there is
     #      none: an adopter has no source, and this must never read as a pass.
     src = Path.home() / ".claude"
-    if src.is_dir() and (src / "hooks").is_dir():
+    if (src / "cloud-bootstrap.json").is_file():
+        # 2026-09-02: in a cloud container ~/.claude is INSTALLED FROM THIS
+        # REPO by cloud-bootstrap/bootstrap.py — pointing V at it would compare
+        # the repo with a copy of itself and pass every `edited` entry as
+        # "byte-identical", i.e. the exact finding this case exists to prove,
+        # produced for the wrong reason. Skipped loudly, same as no source.
+        print(f"[SKIP] source-verify: {src} is a cloud-bootstrap copy of this "
+              f"repo, not a source tree — check V not exercised")
+    elif src.is_dir() and (src / "hooks").is_dir():
         results.append(case_v(src))
     else:
         print(f"[SKIP] source-verify: no source tree at {src} — check V not exercised")
@@ -308,6 +322,27 @@ def main():
         expect_absent=["__unmounted_test_for_test__.py ships but is not mounted"],
         mutate=plant_hook_test,
         restore=remove_hook_test,
+    ))
+
+    # 13 — the [structure] tracked_exceptions declaration is load-bearing in
+    #      BOTH directions (2026-09-02, cloud-bootstrap round). Re-pointing the
+    #      `.claude/settings.json` entry at a path nobody tracks must (a) make
+    #      the real, still-tracked settings file a check-S finding again — the
+    #      exemption is what lets it ship, and (b) make the re-pointed entry a
+    #      check-D4 finding — a standing exemption for a path nobody publishes
+    #      is exactly the dead declaration the D checks exist for. Case 9 is
+    #      the other half: with the declaration intact the current tree passes.
+    man_repointed = man_saved.replace(
+        'path = ".claude/settings.json"',
+        'path = ".claude/__not_tracked_for_test__.json"', 1)
+    assert man_repointed != man_saved, "structure fixture no longer matches"
+    results.append(case(
+        "structure exception: undeclared tracked .claude/ path fires S, dead entry fires D",
+        expect_fail=True,
+        expect_in_output=[".claude/settings.json", "tracked path contains /.claude/",
+                          "__not_tracked_for_test__.json", "not a tracked file"],
+        mutate=lambda: MANIFEST.write_text(man_repointed, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
     ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")

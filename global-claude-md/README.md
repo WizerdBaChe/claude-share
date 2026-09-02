@@ -54,6 +54,11 @@
    檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
+在 Claude Code on the web 開這個 repo 時，步驟 1–3、6 由
+[`../cloud-bootstrap/bootstrap.py`](../cloud-bootstrap/bootstrap.py) 在 SessionStart
+自動完成（佔位符渲染成 Linux／bash／LF，次要 shell 子句刪除，`<!-- Placeholder note -->`
+全部拿掉；repo 內這份範本不動）。
+
 ## 快照細節
 
 - 來源：`~/.claude/CLAUDE.md`，複製於 2026-08-02；refreshed 2026-08-06、2026-08-11。

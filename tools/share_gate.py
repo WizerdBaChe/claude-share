@@ -260,7 +260,13 @@ def _resolves(key, source_map, tracked, citing_file):
     # an exact-prefix rule reports those as missing when they are right there.
     # Deliberately loose: the failure worth catching is "nothing by this name
     # exists anywhere", not "it resolved via a different parent".
-    if any(p.endswith("/" + key) or p == key for p in tracked):
+    # …but never via the repo's own `.claude/` files (2026-09-02): the moment
+    # `.claude/settings.json` became tracked, every rule file's citation of the
+    # SOURCE environment's `settings.json` (a [[not_shipped]] partial) started
+    # resolving to it, and test case 2 went red — the project-scope file is
+    # this repo's runtime, not a shipped copy of the asset the rules cite.
+    if any((p.endswith("/" + key) or p == key) and not p.startswith(".claude/")
+           for p in tracked):
         return True
     return False
 
@@ -283,16 +289,40 @@ def _claims_source_env(raw, key, source_map, source_env_roots):
 FORBIDDEN_TRACKED = ("/.claude/", "__pycache__/", "/archive/")
 
 
+def _structure_exceptions(manifest):
+    """[structure] tracked_exceptions entries that carry both a path and a
+    reason. An entry without a reason does not match — the same rule
+    `sharelib.allowed()` applies to [[allow]]."""
+    return [e for e in manifest.get("structure", {}).get("tracked_exceptions", [])
+            if e.get("path") and e.get("reason")]
+
+
 def check_structure(manifest, files, f):
     tracked = set(files)
 
     # S1 — nothing that is personal-by-default may be tracked at all.
+    #
+    # Exception (2026-09-02, cloud-bootstrap round): this repo became the
+    # SOURCE of a Claude Code cloud environment, which only works if the repo
+    # itself carries a project-scope `.claude/settings.json` and the two shell
+    # hooks it mounts. Those are not personal state — they are the mounting
+    # template made live — but the segment rule cannot tell that from a leaked
+    # `settings.local.json`, so each tracked exception is DECLARED in
+    # share-manifest.toml `[structure] tracked_exceptions`, path-exact, with a
+    # reason, and check D4 reports a declaration whose path is no longer
+    # tracked. Same shape as [[allow]]: narrow, reasoned, and dead-checked.
+    exempt = {e.get("path") for e in _structure_exceptions(manifest)}
     for rel in files:
+        if rel in exempt:
+            continue
         probe = "/" + rel
         for bad in FORBIDDEN_TRACKED:
             if bad in probe:
                 f.add("S", rel, 0, f"tracked path contains {bad}",
-                      "untrack it; these are personal/history by default")
+                      "untrack it; these are personal/history by default — or, "
+                      "for a project-scope settings/hook file this repo mounts "
+                      "on purpose, declare it under [structure] "
+                      "tracked_exceptions with a reason")
 
     # S2 — exactly one SKILL.md per skill, at the skill root.
     skills = sorted({p.split("/")[2] for p in files
@@ -546,6 +576,17 @@ def check_dead(manifest, files, f):
                       "the text that used it was rewritten; drop the token so "
                       "the vocabulary stays a description of this repo")
 
+    # D4 — a [structure] tracked_exceptions entry whose path is not tracked
+    # (added 2026-09-02 with the exception itself, so it is dead-checked from
+    # birth rather than joining the list of declarations nobody re-reads).
+    for e in _structure_exceptions(manifest):
+        if e["path"] not in tracked:
+            f.add("D", manifest_rel, 0,
+                  f"[structure] tracked_exceptions names {e['path']!r}, "
+                  "which is not a tracked file",
+                  "remove the entry; a standing exemption for a path nobody "
+                  "publishes reads as coverage")
+
 
 # --- V: verify against a real source tree ------------------------------------
 
@@ -593,6 +634,16 @@ def check_verify(manifest, files, f, source_root):
     root = Path(source_root).expanduser()
     if not root.is_dir():
         print(f"FATAL: --source {source_root} is not a directory")
+        sys.exit(2)
+    if (root / "cloud-bootstrap.json").is_file():
+        # 2026-09-02: a tree carrying this marker was INSTALLED FROM THIS REPO
+        # by cloud-bootstrap/bootstrap.py (a Claude Code cloud container's
+        # ~/.claude). Comparing the repo with a copy of itself would report
+        # every `edited` entry as byte-identical and every `verbatim` one as
+        # matching — a green V that verified nothing. Refuse, loudly.
+        print(f"FATAL: --source {source_root} is a cloud-bootstrap copy of this "
+              f"repo (cloud-bootstrap.json present), not a source tree; "
+              f"check V would compare the repo with itself")
         sys.exit(2)
 
     # Content-dirty paths at the source, by line count. --numstat, not

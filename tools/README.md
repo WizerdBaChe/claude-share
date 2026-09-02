@@ -41,7 +41,7 @@ python tools/test_share_gate.py                   # 驗收閘門本身：10 個�
 | **L** | leak | email、JWT、有前綴的 API key、secret 形狀的賦值、32 字元以上 hex、**任何帳號**的絕對家目錄路徑、私網 IP | 移除，或在 `[[allow]]` 寫一筆有理由的例外 |
 | **P** | placeholder | 佔位符出現在**路徑位置**（緊鄰 `/`）或**指令位置**（行首是 `python`/`git`/`cd`…），以及同一 token 在單一檔案被當獨立值用 ≥4 次 | 還原真實值，或在 `[placeholders]` 宣告該 token |
 | **R** | reference | 引用了來源環境的資產（`hooks/…`、`~/.claude/…`、`ops/…`）但 repo 沒附、manifest 也沒宣告 | 在 `[source_map]` 建立對應，或加一筆 `[[not_shipped]]` |
-| **S** | structure | 巢狀 `SKILL.md`、缺 `SKILL.md`、clone 後會消失的空目錄、被追蹤的 `.claude/`／`__pycache__/`／`archive/`、技能清單表與實際樹不一致 | 修樹 |
+| **S** | structure | 巢狀 `SKILL.md`、缺 `SKILL.md`、clone 後會消失的空目錄、被追蹤的 `.claude/`／`__pycache__/`／`archive/`、技能清單表與實際樹不一致 | 修樹。**2026-09-02 起唯一例外**：`[structure] tracked_exceptions` 逐路徑、附理由宣告的 `.claude/` 檔（本 repo 自己的 project-scope settings 與兩支殼層 hook，讓雲端容器能從 repo 自我安裝）；D4 會抓宣告了卻沒被追蹤的路徑 |
 | **C** | collection | 從來源環境搬進來的檔案（`collected_roots` 底下）沒登記出處、沒登記狀態，或狀態不是 `verbatim` 卻沒列出每一處改動 | 補 `[[collected]]` 條目 |
 | **D** | dead-declaration | 已經對不上任何東西的宣告：`[[allow]]` 要豁免的那個發現已經不在、`[[not_shipped]]` 說沒出貨的檔案現在出貨了、`[placeholders]` 宣告的 token 全 repo 沒人用 | 刪掉那筆。過期的例外會一直被讀成「有在管」 |
 | **V** | source-verify | *（要 `--source`）* 宣告 `verbatim` 卻和來源不一樣、宣告 `edited`/`template` 卻和來源**完全一樣**（＝宣告過的改動不見了）、宣告的來源路徑已不存在 | 重收、補回改動，或改掉那個宣告 |
@@ -109,5 +109,8 @@ python tools/share_gate.py || exit 1
   「豁免的對象已經不存在」，但抓不到「一開始就寫太寬」。
 - **V 是選配，而且只對「手上同時有兩棵樹」的人有效。** 採用者沒有來源樹可指，
   所以它預設不跑；它不會靜默跳過——沒下 `--source` 就是沒跑，輸出裡看得出來。
+  在雲端容器裡 `~/.claude` 是本 repo 用 `cloud-bootstrap/` 裝出來的副本，不是來源樹：
+  閘門看到那裡的 `cloud-bootstrap.json` 標記會拒絕（exit 2），`test_share_gate.py`
+  的 case 10 也會明說跳過。拿 repo 跟自己比不是驗證。
 - **V 也證明不了「這次該不該重收」。** 它只回答「檔案和宣告是否一致」。來源自己
   改壞了、而你照抄，V 一樣是綠的。

@@ -50,6 +50,11 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 
 ## 安裝
 
+> 在 Claude Code on the web 開這個 repo 的話，下面三步都不用做：repo 根目錄的
+> `.claude/settings.json` 會在 SessionStart 把這十六支裝進容器的 `~/.claude/hooks/`
+> 並逐支掛載（經 `.claude/hooks/run-hook.sh`，fail-open 的殼）。手冊與驗收：
+> [`../cloud-bootstrap/README.md`](../cloud-bootstrap/README.md)。
+
 1. 把 `*.py` 與兩份 `browser-pane-*.json` 複製到你的 `~/.claude/hooks/`。
 2. 打開 `settings.example.json`，把需要的區塊**併進**你自己的 `settings.json`
    （不要整個覆蓋），並替換兩個佔位符：

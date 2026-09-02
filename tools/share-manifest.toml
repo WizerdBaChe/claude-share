@@ -2809,3 +2809,19 @@ literally the words 'path' and 'file' — a generic illustrative placeholder,
 not a real location on any machine. Same class as this file's own
 `test_share_gate.py` fixtures above, just authored by the source rather than
 by the gate."""
+
+# ---------------------------------------------------------------------------
+# structure — tracked paths that check S1 would otherwise refuse (a segment
+# from FORBIDDEN_TRACKED), each path-exact with a reason. Added 2026-09-02
+# when this repo became the SOURCE of a Claude Code cloud environment: the
+# container installs the shares from the repo at SessionStart, which needs a
+# project-scope settings file and the two shell hooks it mounts to be tracked
+# IN the repo. Nothing else under .claude/ is tracked (.gitignore), and check
+# D4 fails an entry here whose path is no longer tracked.
+# ---------------------------------------------------------------------------
+[structure]
+tracked_exceptions = [
+  { path = ".claude/settings.json", reason = "project-scope settings: SessionStart runs cloud-bootstrap/bootstrap.py, and every hook in hooks/ is mounted through .claude/hooks/run-hook.sh. Not personal state — it is hooks/settings.example.json made live for the cloud container, with model/effortLevel deliberately absent (host-managed). Inert outside CLAUDE_CODE_REMOTE=true." },
+  { path = ".claude/hooks/session-start.sh", reason = "the SessionStart installer wrapper: gates on CLAUDE_CODE_REMOTE, runs the installer with its log in a file, prints a one-line card, then chains hooks/ops_health_nudge.py on the same stdin so the nudge sees the tree the install just wrote." },
+  { path = ".claude/hooks/run-hook.sh", reason = "fail-open mount shim: execs the repo copy of hooks/<name>.py and exits 0 when it cannot, so a missing hook file never becomes a blocking python exit 2 on every matched tool call (hooks/branch_commit_guard.py incident #3)." },
+]

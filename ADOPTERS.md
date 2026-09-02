@@ -32,6 +32,14 @@ neutral and copy files out.
 not instructions to the reader. That line is a mitigation, not a mechanism.
 Placement is the mechanism.
 
+**The one deliberate exception (2026-09-02): the operator's own cloud sessions.**
+Opened in Claude Code on the web, this repo IS the working directory, and it
+uses that on purpose — a tracked `.claude/settings.json` installs the shares
+into the container's `~/.claude` at session start (`cloud-bootstrap/`). Every
+part of that machinery exits immediately unless `CLAUDE_CODE_REMOTE=true`, so
+cloning the repo onto your own machine does not trigger it; the placement
+warning above still applies to you.
+
 ## What this repo names but does not ship
 
 Rule files here cite hooks, a `settings.json`, project indexes and dated audit

@@ -17,9 +17,21 @@ shape it has; start with `claude-ops/ops/OPS.md` if you want the rules themselve
 | `CHANGELOG.md` | This repo's own sync history — when each share was copied, what changed. |
 | `Global_skill_update.md` | The source environment's evolution log. **Frozen 2026-08-11** — historical reading only; going forward, standing rationale lives in `claude-ops/ops/rule-registry.md` and per-change detail lives in commit messages. Still the single most informative narrative file here. |
 | `AGENTS.md` | This map. |
+| `CLAUDE.md` | **New 2026-09-02.** Project rules for sessions working IN this repo (the gate before push, re-install after touching copied content, never fix a collected file for the cloud) and the recorded `ops-relaxation: L2` standing ruling. The only CLAUDE.md here that IS instructions to the reader; `global-claude-md/CLAUDE.md` remains a described document. |
 | `LICENSE` | MIT. |
 | `.gitattributes` | **New 2026-08-29.** Line endings as a property of the asset rather than of whoever's `core.autocrlf` is in play. The default is `text=auto` (this repo is cloned on unknown platforms); the one path that pins `eol=lf` is `architecture-diagramming/archdiag/**`, because the html that library emits carries a sha256 freeze receipt and a CRLF checkout would invalidate every one with no content change behind it. |
 | `archive/` | Retired material kept locally for traceability, gitignored — not part of the published repo. |
+| `.claude/settings.json` | **New 2026-09-02.** Project-scope settings that make the repo the source of a cloud environment: SessionStart runs the installer, and every hook in `hooks/` is mounted through the shim below, matcher-for-matcher with `hooks/settings.example.json`. Declared as a tracked exception in the manifest's `[structure]` table. |
+| `.claude/hooks/session-start.sh` | **New 2026-09-02.** Gates on `CLAUDE_CODE_REMOTE`, runs `cloud-bootstrap/bootstrap.py install` with its log in a file, prints the one-line card, then chains `hooks/ops_health_nudge.py` on the same stdin. |
+| `.claude/hooks/run-hook.sh` | **New 2026-09-02.** Fail-open mount shim: execs the repo copy of `hooks/<name>.py`, exits 0 when it cannot, and is inert outside a remote session. |
+
+## `cloud-bootstrap/` — the repo as the source of a cloud environment
+
+| File | What it is |
+|---|---|
+| `README.md` | Manual (中文): mechanism, copy map, why hooks mount from project scope, expected `[ops-health]` lines in the cloud, a seven-item live acceptance list, the deliberate boundaries (no memory, no interop, no external dispatch tier, no model/effort pin), platform-contract review-whens. |
+| `bootstrap.py` | The installer: `install` (idempotent copy + render into `~/.claude`, writes a marker), `verify` (files present, no leftover placeholder, every hook exits 0 on an empty payload, the two deny guards deny a known-bad and allow a known-good payload, mounts match `hooks/`), `status`, `summary`. |
+| `ops-environment.cloud.md` | The container's `ops/environment.md`: same block headings as the source machine's file so every cross-reference lands, each block dated and marked measured / carried / absent. |
 
 ## `claude-ops/ops/` — the operating rules layer
 

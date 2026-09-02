@@ -59,6 +59,9 @@ already, it probably hasn't changed" is a documented failure mode in this
 repo's own history, not a hypothetical.
 **Going to copy files onto a machine?** → Lane C, and read
 [`ADOPTERS.md`](ADOPTERS.md) first.
+**Opening this repo in Claude Code on the web?** → nothing to do: since
+2026-09-02 the repo installs itself into the container's `~/.claude` at
+session start (Lane D).
 
 ### Lane A — first read
 
@@ -114,6 +117,18 @@ the model: any mechanism name is an example, verify before relying on it.
 3. [`interop-layer/acceptance-evals.md`](interop-layer/acceptance-evals.md) — a
    port with no eval run is not a finished port.
 
+### Lane D — the repo as the source of a cloud environment (new 2026-09-02)
+
+For the operator's own use: a Claude Code on the web session on this repo gets
+the source environment back — global `CLAUDE.md` (rendered for Linux/bash/LF),
+`rules/`, the ops layer, all 17 skills, all 16 hooks mounted, the 8 agents —
+installed into the ephemeral container's `~/.claude` by
+[`cloud-bootstrap/bootstrap.py`](cloud-bootstrap/bootstrap.py), which the
+tracked [`.claude/settings.json`](.claude/settings.json) runs at SessionStart.
+Manual, boundaries and the live acceptance list:
+[`cloud-bootstrap/README.md`](cloud-bootstrap/README.md). Everything in that
+lane is inert outside a remote session, so Lanes A–C are unchanged by it.
+
 ## Shares
 
 | Folder | Contents |
@@ -130,6 +145,7 @@ the model: any mechanism name is an example, verify before relying on it.
 | `agents/` | **New 2026-08-14.** The eight subagent definitions `claude-ops/ops/20-dispatch.md` routes to, each with a `tools:` capability allowlist and a defined output contract. |
 | `thinking-notes/` | Twelve numbered design-thinking notes. Argument, not policy — nothing there binds a reader. |
 | `tools/` | The publishing gate — leak, placeholder, reference-disposition, structure, collection-provenance and dead-declaration checks, plus an opt-in source comparison — and `COLLECTION-RULES.md`, the procedure for deciding what may be collected in the first place. Its two procedures are worth reading even if you never collect: **A** for a file that is not here yet, **B** for one that is, because running A over B's files is what a 2026-08-16 refresh did to six deliberate decisions. |
+| `cloud-bootstrap/` + `.claude/` | **New 2026-09-02.** The repo as the SOURCE of a Claude Code cloud environment: an idempotent installer that copies the shares into the container's `~/.claude` (rendering the global CLAUDE.md's four machine placeholders, overlaying a measured cloud `ops/environment.md`), a project-scope `settings.json` that runs it at SessionStart and mounts every hook through a fail-open shim, and a `verify` that proves each hook fails open and the two deny guards deny. Inert outside `CLAUDE_CODE_REMOTE=true`. The gate's check S now admits the three tracked `.claude/` files by declaration (`[structure]` in the manifest, dead-checked by D4). |
 
 ## Where things are
 

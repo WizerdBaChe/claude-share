@@ -10,4 +10,15 @@ __pycache__/
 skill-toolkit/skills/scientific-research-guide/archive/
 /archive/
 *.lock
-.claude/
+
+# .claude/ is personal-by-default (tools/COLLECTION-RULES.md "Never collect"),
+# with three tracked exceptions that make this repo the SOURCE of the cloud
+# environment: the project-scope settings and the two shell hooks they mount.
+# Each is declared in tools/share-manifest.toml [structure] with its reason;
+# anything else under .claude/ (settings.local.json, caches) stays ignored.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+.claude/hooks/*
+!.claude/hooks/session-start.sh
+!.claude/hooks/run-hook.sh
