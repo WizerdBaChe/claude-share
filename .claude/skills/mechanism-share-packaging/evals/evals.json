@@ -1,0 +1,30 @@
+{
+  "skill_name": "mechanism-share-packaging",
+  "run_info": "Eval 1 satisfied by the live first export (compact-recovery -> <share-repo>, 2026-08-16), which PRECEDED and produced this skill; the skill body is that run's procedure distilled. Eval 2 pending the next real mechanism export executed THROUGH the skill (first true field test — run skill-co-upgrade on it).",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "額外整理這版壓縮法用到的機制與檔案們，我要實體可用的，用來作為分享機制…放置位置就放在 <share-repo>，順便照那邊的規則進版控，有識別化問題記得處理",
+      "expected_output": "Reads the target repo's governance first (COLLECTION-RULES, manifest, gate); records source SHA + dirty-path accountability; scopes the mechanism as a runtime set (3 hooks + the tool they shell to + docs); places hooks in the existing hooks/ layer and the mode in a new self-contained share folder; byte-verbatim copies with declared surgical de-id edits (diff == edit list exactly); authors mode README + real-fire ACCEPTANCE; sweeps ripples (mounting invariant, prose counts, old dispositions, root registration); loops the gate to exit 0 with --source; builds a gitignored repo-layout zip; branch -> merge; push only on user approval.",
+      "files": [],
+      "assertions": [
+        {"text": "Target repo governance read BEFORE any copy; no rule content duplicated into the skill's own reasoning", "passed": true, "evidence": "Live run: COLLECTION-RULES.md + manifest formats + gate semantics read first; all de-id verdicts cited their rule numbers; delegation preserved (share copies re-pointed at the mode README, not at restated rules)."},
+        {"text": "Per-file normalized diff equals the declared edit list exactly", "passed": true, "evidence": "4 collected files, 11 hunks total, verified with the target's own tr -d '\\r' diff recipe against the manifest edits lists — no undeclared deviation."},
+        {"text": "Ripple sweep catches count/disposition/invariant drift caused by the arrival", "passed": true, "evidence": "Live run corrected: hooks nine->twelve in two docs, template omission list three->two, memory-pipeline exclusion partially superseded in place, settings.example edits list amended with reversal note, compact-recovery/ registered in collected_roots on creation day."},
+        {"text": "Gate loops to exit 0 with source comparison; gate-side fixes ship with their failing-case test", "passed": true, "evidence": "9 findings -> 0 across three loops; ACCEPTANCE.md authored-name exemption shipped with negative-control case 11, suite 11/11; final gate CLEAN re-run before push."},
+        {"text": "Source environment unchanged after the export", "passed": true, "evidence": "SHA 519342c recorded at M1 and re-verified at close; the only source commit that day (f7ba840, registry-name reference fix) was a separate user-ordered task, not a packaging side effect."}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "把 <某個新機制> 打包分享到 <治理 repo>。(next real export, executed through this skill)",
+      "expected_output": "Same procedure, on a mechanism this skill has never seen; the field test doubles as the skill-co-upgrade run — every step the executor must BYPASS the skill to do right is a recorded gap.",
+      "files": [],
+      "assertions": [
+        {"text": "Scope list (M2) written down before any copy, naming each file's runtime role", "passed": null, "evidence": ""},
+        {"text": "M0 invariant list produced and every M6 item explicitly checked against it", "passed": null, "evidence": ""},
+        {"text": "No step required bypassing the skill (skill-co-upgrade gap count = 0), or each bypass became a recorded gap", "passed": null, "evidence": ""}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "skill_name": "config-self-audit",
+  "run_info": "Written 2026-08-12 when the skill gained a second (adoption) mode whose trigger words sit adjacent to skill-share-packaging Mode B and env-cleanup. Purpose is MODE and SKILL routing, not procedure depth. Assertions marked passed:true were verified statically against the live descriptions on 2026-08-12; assertions marked passed:null need a fresh session each and are deliberately not claimed. Doctrine: a FAIL is fixed by sharpening the description, never by loosening the assertion. Eval 4 found a real one-way boundary on first write; sharpening skill-share-packaging pushed it to 813/800 chars, so the same edit also trimmed 'auditing your own config content'->'your own config content' and 'cleaning stray files'->'stray files' to land at 779. Recorded because a routing fix that silently breaks a budget is the next defect.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我剛寫完一個 hook，幫我 audit 一下再收工。",
+      "expected_output": "config-self-audit, DEFAULT mode. Runs the §1-§9 checklist against that one hook only: §2 existence gate first (interpreter path, event name, registration in settings.json), then claims-vs-implementation, security blast radius, per-call cost for PreToolUse/PostToolUse matchers. Does NOT enter adoption mode and does NOT sweep the config tree.",
+      "files": [],
+      "assertions": [
+        {"text": "Stays in default mode — no AD1-AD5, no provenance grep", "passed": null, "evidence": ""},
+        {"text": "Runs §2 existence gate before any other section", "passed": null, "evidence": ""},
+        {"text": "Scope stays on the one hook; declines a full-tree sweep if tempted", "passed": null, "evidence": ""},
+        {"text": "Description states the default-mode trigger 'a NEW skill/hook/subagent was just authored here (before declaring it done)'", "passed": true, "evidence": "Live description, 2026-08-12: the clause is present and names hook explicitly."}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我把別人的設定 repo 併進我的 ~/.claude 了，幫我檢查有沒有問題。",
+      "expected_output": "config-self-audit, ADOPTION mode. Runs AD1 first (provenance grep), then AD2 trigger-collision table reading rule BODIES side by side, AD3 cross-reference and supersession-tag resolution, AD4 with the §2 gate INVERTED, AD5 inherited values flagged not fixed. Produces a reconciliation ledger. Does NOT hand off to skill-share-packaging (this is a layer, not one skill).",
+      "files": [],
+      "assertions": [
+        {"text": "Enters adoption mode, not default mode", "passed": null, "evidence": ""},
+        {"text": "Runs AD1 before the other AD checks", "passed": null, "evidence": ""},
+        {"text": "States that the §2 existence gate is INVERTED here — a dangling mechanism reference is the finding, not a reason to void one", "passed": null, "evidence": ""},
+        {"text": "Does not batch-fix AD5 inherited values; asks per row", "passed": null, "evidence": ""},
+        {"text": "Description carries an adoption trigger reachable from this sentence ('config copied in from another environment')", "passed": true, "evidence": "Live description, 2026-08-12: 'ADOPTION mode: config copied in from another environment, or a `reconciled: no` stamp'."}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "移植過來的規則跟原本的打架，幫我看一下。",
+      "expected_output": "Same as eval 2 — adoption mode. This is the Chinese phrasing of the same situation and must route identically. The operative signal is 'rules that came from elsewhere' plus 'conflict with existing ones', which is AD2's definition.",
+      "files": [],
+      "assertions": [
+        {"text": "Routes to config-self-audit adoption mode, not to a generic conflict discussion", "passed": null, "evidence": ""},
+        {"text": "Builds the AD2 trigger-collision table rather than grepping for shared wording — an adaptation pass paraphrases, so grep is blind", "passed": null, "evidence": ""},
+        {"text": "Chinese trigger phrase appears in the trigger dict entry for this skill", "passed": true, "evidence": "skill-trigger-dict.md config-self-audit entry, 2026-08-12: 「移植過來的規則跟原本的打架」 and 「我把別人的設定 repo 併進來了」 both listed; quick table has 搬進來的規則跟原本的打架 → adoption mode."}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "我從網路上抓了一個 skill，想裝之前先幫我檢查安不安全。",
+      "expected_output": "skill-share-packaging Mode B, NOT config-self-audit. One third-party artifact, security-first: quarantine outside ~/.claude/skills/, audit the author's environment coupling, data-collection surface and instruction hygiene. config-self-audit must decline and route.",
+      "files": [],
+      "assertions": [
+        {"text": "Routes to skill-share-packaging, not config-self-audit", "passed": null, "evidence": ""},
+        {"text": "config-self-audit description carries a NOT-clause naming skill-share-packaging for the ONE-skill case", "passed": true, "evidence": "Live description, 2026-08-12. Verify: grep -c 'third-party skill (→ skill-share-packaging)' skills/config-self-audit/SKILL.md == 1. (The word ONE precedes it across a line wrap, so grep the clause without it.)"},
+        {"text": "skill-share-packaging carries the reciprocal boundary for the LAYER case (§4 requires mutual disambiguation)", "passed": true, "evidence": "Added 2026-08-12 after this eval exposed a one-way boundary: its description previously said only 'auditing your own config content (→ config-self-audit)', which covers default mode but not an adopted layer. Now reads 'Mode B is ONE skill; a whole rules LAYER → config-self-audit adoption mode.' Verify: grep -c 'a whole rules LAYER' skills/skill-share-packaging/SKILL.md == 1. This is the first defect these evals found, and fixing it cost budget — see run_info."}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "幫我清一清 .claude 裡面沒在用的檔案。",
+      "expected_output": "env-cleanup Mode A, NOT config-self-audit. File-level classification by presence and orphanhood, writes a candidate report, asks per category, archives rather than deletes. config-self-audit audits CONTENT of a named artifact and must not be pulled in by the word .claude.",
+      "files": [],
+      "assertions": [
+        {"text": "Routes to env-cleanup, not config-self-audit", "passed": null, "evidence": ""},
+        {"text": "Mutual disambiguation exists on both sides", "passed": true, "evidence": "config-self-audit: 'NOT for ... file cleanup (→ env-cleanup)'. env-cleanup: 'NOT for auditing one artifact's content (→ config-self-audit)'. Verified live 2026-08-12."}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "幫我看一下 motion-design 底下 vendor/ 那些從別人 repo 抄來的東西有沒有問題。",
+      "expected_output": "config-self-audit ADOPTION mode on an already-installed import. Should find the adopted-from stamps in NOTICE.md via AD1, scope to the stamped set, and NOT re-run a security audit (that was skill-share-packaging Mode B on 2026-08-01 and is recorded). The distinguishing value is AD3 cross-reference resolution and AD5 inherited defaults, which a security audit does not ask about.",
+      "files": ["skills/motion-design/NOTICE.md"],
+      "assertions": [
+        {"text": "AD1 finds the existing stamps instead of reporting no provenance", "passed": true, "evidence": "grep -rln 'adopted-from:' returns skills/motion-design/NOTICE.md (2 stamps) plus the 8 agents/*.md, as of 2026-08-12. Before stamping it returned 0 files."},
+        {"text": "AD3 resolves cross-references relative to each containing directory, not flat", "passed": true, "evidence": "2026-08-12 pass: 29 links, 0 broken. A flat resolution reports 2 false positives (../reference/property-selection.md and motion-personality.md), so the per-directory method is load-bearing."},
+        {"text": "AD5 flags the package's prescriptive defaults but classifies them as payload, not contamination", "passed": true, "evidence": "2026-08-12 pass found 'Never exceed 1/3 screen without intermediate keyframe' and 'Always three motion layers'; recorded in NOTICE.md ledger as domain advice, and the rule distinguishing agent-behaviour values from domain-advice values was added to references/imported-config.md."},
+        {"text": "Does not re-run the security checks already recorded for the 2026-08-01 import", "passed": null, "evidence": ""}
+      ]
+    }
+  ]
+}

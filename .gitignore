@@ -10,4 +10,13 @@ __pycache__/
 skill-toolkit/skills/scientific-research-guide/archive/
 /archive/
 *.lock
-.claude/
+
+# `.claude/` stays ignored on `main`: ADOPTERS.md promises this repo is reference
+# material, not a live config, and a tracked `.claude/` would install itself into
+# anyone who opens the clone as a workspace. The three negations below exist ONLY
+# on the `claude/cloud-env-*` branch, which is never merged — see .claude/README.md.
+.claude/*
+!.claude/rules/
+!.claude/skills/
+!.claude/README.md
+!.claude/sync-from-repo.sh

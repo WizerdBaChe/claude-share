@@ -1,0 +1,200 @@
+---
+name: product-design-thinking
+description: >-
+  High-rigor DESIGN/PLANNING mode (進入設計模式). Mode A 從零新建: a new
+  product or complex feature/subsystem. Mode B 增能: a capability increment to
+  a live system — a reusable tool/program, skill, pipeline stage or
+  check/檢測項 with persistence or other consumers
+  (新增能力、擴充既有 pipeline、可複用工具、審核/檢測機制、其他 session
+  會調用的工具). 第一性原理 (first-principles) 拆解, prior-art search
+  BEFORE designing, build-ready docs (Concept Note/CIM/PIM/PSM/DSL
+  semantic contract). Triggers: 新產品構想/想法, 「新工具設計」, feasibility
+  evaluation, 重新架構/換技術路線 (re-architecture), undecided-approach
+  complex features (incl. MID-CONVERSATION), PSM-grade remediation
+  (「PSM等級修正案」). Heavyweight — NOT for 單一缺陷修復, one-shot scratch
+  scripts, small in-product tweaks, or 按既有規格施工. Disambiguation:
+  ~/.claude/skill-trigger-dict.md.
+---
+
+# Product Design Thinking
+
+A staged thinking protocol for new-product / complex-feature design. The document
+chain follows an MDA-style ladder (CIM → PIM+DSL → Verification → PSM+DSL →
+Implement). Derived from this user's real product pipeline and from recurring failure
+modes found in a 2026-07 session-history audit: reinvented wheels, premature
+implementation, camera/UX semantics decided unilaterally, designs that drifted from
+intent, and effort spent where an open-source solution already existed.
+
+User profile to respect throughout: product-minded, NOT deep-technical. Every
+engineering choice comes with a plain-language reason and a recommendation
+("我不太懂詳細技術" — explain trade-offs, don't just list options).
+
+## Where the detail lives
+
+This file is the spine — the entry modes, the phases, the mode tiers, the ladder,
+and the things that get missed when they are not in front of you (the language
+column, what blocks a rung, and the Mode B increment duties). Load a reference
+file when you reach its phase; don't preload them.
+
+| Load | When |
+|---|---|
+| `references/prior-art-sweep.md` | Phase 1 — before proposing any architecture |
+| `references/design-rules.md` | Phase 2 — while shaping architecture; includes security-by-design. Also at Verification: the gap register's distortion test and the PIM security section resolve into this file |
+| `references/representation-models.md` | Phase 2–3 — any behavior/architecture view (which diagram answers which question); at the Phase 0 tier call; and at Verification — the per-tier view set is the standard SDD gate 5 checks against |
+| `references/view-integrity-checks.md` | Phase 2–3 — before any drawn view ships (per-view soundness); and at Verification — the integrity + cross-view correspondence audit (feeds gate condition c and SDD gate 5) |
+| `references/document-ladder.md` | Phase 3 — writing/verifying any rung; sole-source contract bar; SDD pitfall gates |
+
+## Entry modes — Mode A 從零新建 / Mode B 增能, decided at trigger time
+
+Two ways IN; the depth axis (tiers below) is a separate choice made at Phase 0
+exit. **Mode A**: a new product/tool/subsystem with no host system — phases run
+as written. **Mode B (capability increment)**: a new capability added to a LIVE
+system — the increment creates a new OPERATIONAL UNIT (tool/program, skill,
+hook, pipeline stage, check/gate, mechanism) AND at least one of:
+(1) it persists as infrastructure future sessions/tools will re-invoke — it
+lands in tools/, skills/, hooks, cron, or a registry, not in a scratchpad;
+(2) it has consumers other than its author (another session, tool, gate, or
+person relies on its output). Neither — or an ask carrying NO
+persistence/consumer signal — ⇒ scratch work, outside; the test re-runs at
+the moment the unit is about to be KEPT (registered/committed), including
+mid-task growths nobody asked for by name (速寫 Sketch minimum then).
+In-product 小型加功能 (no new unit) stays outside as before. The test is
+**persistence + consumers, never "工具大小"** — recorded miss: 2026-08
+capability rounds (reusable tools + 檢測項) bypassed design mode because
+increment phrasing read as excluded "small additions". Skill authoring
+splits: designing the CAPABILITY is Mode B here; authoring/optimizing the
+SKILL.md artifact is skill-creator — design first when complexity warrants,
+then hand off; a routine skill with a settled approach goes straight there.
+
+Mode B keeps every phase and ADDS the increment interrogation:
+1. **Host contract** (Phase 0): which system it extends; who calls it; what
+   breaks in the host if it misbehaves; which already-ACCEPTED host behaviours
+   it touches — list them; the regression duty covers increments, not just
+   bug fixes.
+2. **Internal prior art first** (Phase 1): the sweep starts INSIDE — project
+   registry / PROJECTS.md / cross-index / graph-snapshot / AssetVault — and
+   records an explicit extend-vs-new verdict before any external search.
+3. **Ownership & registration set** (Phase 0, re-checked at close-out): which
+   skill/rule/doc owns the new unit, and the full registration list named AT
+   DESIGN TIME (trigger-dict entry, registry row, index enrolment,
+   watchdog/check coverage). Registration breaches are born at build time,
+   not discovered at watchdog time.
+4. **Instrument duties** (Phase 2): a check/gate shipped with the increment
+   follows the gate rules — severity by consumer, calibration with a positive
+   AND a negative control before its verdict is trusted.
+Mode B defaults to 速寫 Sketch or 標準 Standard by the driver table below;
+Full-ladder only when its drivers are genuinely present.
+
+## Mode tiers (模式分級) — depth chosen at Phase 0 exit, never at trigger time
+
+One depth axis, three tiers, named by ladder shape. The trigger envelope is
+UNCHANGED: tiers scale depth after the skill fires — 單一缺陷修復, one-shot
+scratch scripts (fail the Mode B entry test), and 按既有規格施工 still don't
+enter design mode at all. Scale
+drivers (2026-08-27 intake): module span; long-lived state / persistent data;
+concurrency & shared resources (async jobs, queues, GPU/locks, multi-agent);
+external contracts / a second executor.
+
+| Tier | When (drivers) | Ladder & gate shape |
+|---|---|---|
+| 速寫 Sketch | zero drivers: single module, no persistent state, no concurrency, no external consumer | ONE doc — a one-page Concept Note (pain, boundaries, acceptance) + ≤2 views + a 施工卡-lite build section. CIM/PIM collapse into it; verification degrades to an inline cross-check (every boundary/business rule appears in the acceptance list). Phase 1 narrows to OSS inventory + environment check with a 3-line hypothesis sheet — **ask-before-hand-rolling never relaxes** |
+| 標準 Standard | any driver EXCEPT concurrency/multi-executor: 2–3 modules, or lifecycle/persistent state, or an external consumer | Concept Note + PIM-lite (glossary, INV-n, statecharts, module contracts) + a proportionate traceability pass + PSM to the sole-source bar. Full 4-step Phase 1 sweep |
+| 全梯 Full-ladder | concurrency or resource contention, multi-subsystem/product scale, migration, or multiple executors | the full ladder as written in Phase 3 — CIM → PIM+DSL → Verification (HARD gate) → PSM — plus ADRs and per-subsystem views; full sweep + literature slice where warranted |
+
+Unsure between two tiers → take the higher, or ask in one line. Escalation is
+a one-way ratchet re-checked at every phase exit: a second lifecycle entity or
+state explosion ⇒ ≥標準 Standard; discovered contention / async fan-out ⇒ 全梯
+Full-ladder for that subsystem (Petri slice); a second executor joins ⇒ ≥標準
+with formalized contracts. Every tier change is recorded in the doc;
+de-escalation additionally requires an explicit user ruling. Per-tier default
+view sets: `references/representation-models.md`.
+
+## Phase 0 — First-principles frame (before any solution talk)
+
+Answer in writing, with the user, before designing anything:
+
+1. **Irreducible pain**: what user pain must this remove? One sentence. If the pain
+   can't be stated without naming a technology, it's a solution in search of a
+   problem — push back.
+2. **Why must this exist**: what happens if it's never built? Who is the first real
+   user (often the user themself — design for their actual environment)?
+3. **Essential core vs accident**: strip to the minimal capability that still removes
+   the pain. Everything else is a labeled extension, not scope.
+4. **Inherited design objects**: when reworking an existing concept/PIM, challenge
+   every pre-existing design object ("特定某種設計物件") — does it need to exist?
+   What's the first-principles alternative? Raise the questionable ones with the user
+   instead of silently keeping them.
+5. **Boundaries — what this will NOT do**: write them down. "不要為了擴充而擴充" is a
+   standing order; if the core need is already met, recommend stopping.
+6. **Tier call**: close the phase by picking the mode tier (table above) and
+   recording tier + why + what it skips in the design doc.
+
+Items 1–5 are the FLOOR of the interrogation, not its script: phrase each in
+the product's own terms, and derive the product-model-specific questions the
+list cannot know (a data product asks about ownership/provenance; a realtime
+product about its latency budget; a multi-tenant one about isolation). An item
+genuinely meaningless for this product is said to be, with why — never
+force-answered with a generic line.
+
+## Phase 1 — Prior art & open-source sweep (before designing complex parts)
+
+Run this BEFORE proposing an architecture, not after a failed build. Four steps,
+detailed in `references/prior-art-sweep.md`: write a hypothesis sheet, then search
+current canonical approaches, inventory OSS candidates (and **ask** before
+hand-rolling what a maintained library does), state the differentiation honestly, and
+confirm the real deploy environment. Load that file now if this phase is live.
+
+## Phase 2 — Systems-engineering design rules
+
+Full rule set in `references/design-rules.md`. The two that most often decide the
+round: **semantics over implementation** (bend the PSM's bridge, never the PIM's
+meaning — a semantic that can't be bridged is a user ruling, not your call), and
+**UX semantics are user decisions** (interaction behaviour is confirmed by question
+before it is designed in). Security is decided here too, not retrofitted — the
+threat-model-lite and least-privilege items are in the same file.
+
+## Phase 3 — Converge into build-ready documents
+
+The output of this mode is documents, not code. Match whichever rung the user is at;
+don't regenerate upstream docs already fixed ("拍板的施工合約"). The mode tier sets
+the ladder shape: 速寫 Sketch collapses the rungs into one doc (inline verification
+per the tier table); 標準 Standard and 全梯 Full-ladder keep the gates below at
+full strength.
+
+| Rung | What it pins down | Language |
+|---|---|---|
+| Concept Note / CIM | Pain, actors, business rules, boundaries — business language only | Traditional Chinese |
+| PIM + semantic contract | Concepts, relations, glossary, INV-n invariants, state machines | **Bilingual** — Chinese for concepts, relations, rationale (the user intervenes here); English for glossary terms, INV-n IDs, schema/type names, state names, because downstream docs and code quote them verbatim |
+| Verification gate | Traceability matrix, semantic gap register | Chinese narrative, English for the IDs being traced |
+| PSM / 施工卡 / remediation plan | Stack, file layout, contracts, milestones, acceptance | **English spec body** — files touched, contracts, schemas, milestone steps, commands, error paths, rollback, machine-checkable acceptance. **Traditional Chinese (+ inline English) only on the user's ruling surfaces**: measured results / 盤點, ADR rationale, decision register, manual UAT checklist, degradation declaration, open questions |
+
+Why the PSM row is not "docs → Chinese": a PSM's next reader is an implementing
+session, not the user. Defaulting it to Chinese because it is a `.md` under `docs/`
+is a recorded miss (2026-07-25). This row implements the global CLAUDE.md **File
+output** rule, which stays authoritative if the two ever diverge. Escape hatch: a
+concept whose original Chinese wording carries the meaning stays Chinese inside an
+English section — keep it and gloss it rather than force a lossy translation.
+
+**Gates worth remembering without opening the reference file:**
+- Verification is a HARD gate. It blocks entry to PSM on any of: (a) a traceability
+  orphan in either direction; (b) a contradiction within or across rungs — including
+  a premise falsified by the document's own open questions; (c) a model defect that
+  admits no correct implementation (unreachable or non-terminating state,
+  unsatisfiable invariant). Each blocking finding is resolved or explicitly waived
+  by the user; the two lower severities (user-ruling-required / should-fix) are
+  defined in the ladder's deliverable-shape section.
+- A sole-basis doc may not delegate normative content to archived files — archive is
+  provenance, never spec.
+- An item missing files/contracts/error paths/rollback/test mapping/acceptance is a
+  SKELETON and must be labeled so. Shipping it unlabeled is the expensive failure:
+  the next session builds on it believing it was complete.
+
+Everything else about the rungs — the per-rung content bar, sole-source contract
+rules, 選型 blocks, change-tracking discipline, and the handoff checklist — is in
+`references/document-ladder.md`.
+
+## Token discipline
+
+This mode is expensive by design — use it only at genuine design/planning boundaries.
+Inside a session, converge: once a decision is confirmed, stop revisiting it; put long
+research detail into the design doc, not the conversation.
