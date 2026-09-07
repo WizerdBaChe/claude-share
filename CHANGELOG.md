@@ -9,6 +9,103 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-07 — a seven-worker refresh, and the round the manifest leaked in its own prose
+
+Source `d06708c` → `27196ab`. 104 files changed, 33 of them new; the manifest
+goes 192 → 225 `[[collected]]`, 33 → 46 `[[not_shipped]]`, 21 → 23 `[[allow]]`.
+Seven parallel workers over disjoint path sets, each writing a manifest
+FRAGMENT rather than the file itself, merged here. The dispatcher did no
+fieldwork; the merge step did, and that turned out to matter twice.
+
+**Came in.** `skills/ux-walkthrough` (SKILL.md + three references) — task-level
+UX walkthrough, born 2026-09-07 at the source and already routed to by a file
+that ships. `skills/literature-search-extract` gains its whole evidence loop:
+27 files under `loop/` (`runs.py`, `reflux.py`, `idkey.py`, schemas, a test
+suite with fixtures) plus `consumers/registry.json`, the generated
+`references/bridge.md`, and `references/feedback-loop.md`. Three hooks —
+`appdata_view_guard.py`, and the compact-recovery pair
+`compact_loss_record.py` (PostCompact) + `handoff_snapshot.py` (a shared
+library, no event). `agents/work-card-executor.md` makes it nine agent types.
+`global-claude-md/rules/verification-ladder.md`, the rungs-0-to-5 evidence
+ladder. `architecture-diagramming/archdiag/tokens.mjs`, the palette's WCAG
+check. `project-retrospective/references/global-candidate-triage.md`.
+64 already-shipped files were re-aligned by procedure B — 36 verbatim that had
+drifted, 23 `edited`, 5 `template`.
+
+**Edited, and one class of edit dominates.** `ops/lessons.md` arrived
+restructured at the source: a 1321-line narrative ledger became a 439-line
+generated index over an `ops/lessons/` record tree. The index ships; the tree
+does not, so the header's source-side tooling is generalised and its
+`generated-from:` sha256 is dropped — a receipt over an input nobody here holds
+is a dead pointer wearing a hash. The same call removed the fourteen sha256
+freeze receipts from `archdiag/MAINTENANCE.md`'s re-issue table (the seven
+artifacts live in the source's `outputs/`), keeping the byte-growth column,
+which is the portable half. `references/bridge.md`'s receipt was KEPT, with a
+reasoned `[[allow]]`: its input ships and `loop/runs.py check --registry`
+recomputes it.
+
+**The round's own mistake, found by the gate.** After the merge, `share_gate.py`
+reported 88 findings — and 38 of them were leaks in the manifest itself, every
+one a worker writing out the real value in the sentence recording that it had
+scrubbed that value. Private tree roots, an account name, a full source sha,
+session ids. The manifest had already been fixed for exactly this twice earlier
+the same day, in prose describing a scheduled-task scrub that spelled the task
+name. All 38 rewritten to name the class and keep the anchor. Recorded here
+rather than quietly: **a scrub target is still a scrub target inside a sentence
+about scrubbing it**, and a fragment written by a worker who never runs the gate
+is where that rule stops being obvious.
+
+**Two cross-worker races, both caught at the merge.** W1a deleted two
+`rules-usage-dict.md` §7 rows because `literature-search-extract/loop/*` was not
+in the tree when it looked; W5 then shipped that subtree, making the deletion
+over-scrub — the failure this repo is named after. Rows restored, scrubbed
+instead of dropped, and W1a's edit records rewritten to carry the reversal. The
+mirror image: W6 found the shipped archdiag docs citing `tokens.mjs` while W3
+dropped a pointer to it for being absent. `tokens.mjs` was collected and W3's
+drop reverted. Both were honest verdicts that a parallel round made false before
+they landed.
+
+**Excluded, with a disposition each.** `ops/lessons/` (55 record files carrying
+session ids and pointers into excluded trees). Four skills: `knowledge-vault`
+and `app-residue-sweep` on established precedent (a private-tree operator; half
+a mechanism whose body is in the excluded `tools/`), and the `paper-distill` /
+`paper-story` pair, whose deliverables and `evals/` are one lab's templates,
+voice and talk records — deferred-and-named with a review-when, the
+`model3d-pipeline` treatment. Three more hooks (`intake_guard.py`,
+`intake_match_shadow.py`, `unattended_run.py`), each one half of a tool this
+repo does not carry. The literature skill's `connectors/` and `verify/` halves,
+which are machine-bound. A 2026-08-27 deferral on `representation-models.md` was
+CLOSED under rule 7 after verifying the cited rule is present in current source.
+
+**The gate changed, and paid for both changes.** Check S5 gained an
+`[[unmounted_hook]]` declaration: `handoff_snapshot.py` is a library with no
+event, and the check's own remediation line had promised an `_README`
+escape hatch that nothing read — so its only possible verdict was a veto on a
+correctly shipped file. The hatch is narrow (reason mandatory, no wildcards) and
+expires: a declaration for a file that becomes mounted is itself a finding, which
+is test case 13. Check S4 was widened from one skill inventory table to two after
+`AGENTS.md`'s was found two skills behind by reading — measured against that file
+first (the pattern matches its skill table and none of its five others), and
+shipped with case 14 as its positive control. Suite 12 → 14, all passing.
+
+**Verified, both directions.** `tokens.mjs` was calibrated before being called
+verified: live run 0 fail / 1 warn / exit 0; positive control (dark `FILL.block`
+on a scratch copy) 2 fail / exit 2. The third run is the one worth keeping —
+mutating a node's *text* colour leaves it silent, because its TEXT and SURFACE
+values are hand-transcribed in its own header while only `FILL`/`STROKE`/`OVL`/
+`EDGE` are imported. The instrument covers palette contrast, not every emitted
+foreground. Both runs are now `ACCEPTANCE.md` items 19 and 19b, with a
+review-when on the transcribed table.
+
+**Also**: `compact-recovery/` documents its own gap — the recorder ships, its
+audit tool does not, so the `compact-loss.jsonl` it writes has no reader here;
+said in the README rather than left to be found. Pre-existing leaks fixed in
+passing: an account name in `ops/environment.md` and two in
+`environment-guide/`, all inside copies declared `verbatim` and published for
+several rounds; a ticket id and a scheduled-task name in `ops_health_nudge.py`.
+A false `[[not_shipped]]` claim on `verify/staleclaim.py` (it named two entries
+that did not exist) was corrected.
+
 ## 2026-09-02 — the first outside run comes back, and the whole repo is re-aligned behind it
 
 Two refreshes in one day, both forced by evidence rather than by a calendar.
