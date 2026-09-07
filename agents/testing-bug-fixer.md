@@ -3,7 +3,8 @@ name: testing-bug-fixer
 description: >
   Root-cause diagnosis and minimal repair of a specific defect. Use for
   bug 修復、根因定位、這個錯誤怎麼來的、works in staging but not prod. Fixes the
-  cause, not the symptom.
+  cause, not the symptom. Executing a build-ready work card (施工卡) is not a
+  bug fix — that goes to work-card-executor.
 tools: Read, Glob, Grep, Edit, Write, Bash, PowerShell, Skill
 model: sonnet
 effort: high

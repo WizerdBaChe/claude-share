@@ -108,7 +108,8 @@ per-project journal，新 session 從最新條目恢復進度並**重新確認�
 ├── hooks/                     機械強制層：model_cap_guard、ops_health_nudge
 ├── backups/<date>/            改動前快照（gitignored——git 本身已是歷史）
 ├── archive/                   退役內容（gitignored，磁碟保留）
-└── projects/<slug>/memory/    ⚠️ 自動記憶——在版控之外（見遷移第 3 步）
+└── projects/<slug>/memory/    自動記憶——2026-09-06 起納入版控（同層的
+                                transcript 仍在版控外）
 ```
 
 各層的信任順位：使用者當下指示 > 全域 CLAUDE.md > 專案 CLAUDE.md >
@@ -129,10 +130,16 @@ ops/ > skill 內文。字典與索引永遠只是索引，本體以各自的檔�
 - `interop/`(跨 agent 同步層:可攜規則唯一源 + 編譯器 + 遷移地圖;
   手冊見 `interop/README.md`)
 - `settings.json`（權限與 hook 掛載的形狀有價值；路徑要改，見下）
+- `projects/<slug>/memory/*.md`：自動記憶（2026-09-06 納入，全機 79 檔）。本節
+  原本把它列為 Tier 2「有價值但在版控之外」，理由是「因為 `projects/` 含對話
+  內容所以整目錄被 gitignore」——那是**粒度的意外，不是判斷**：memory 子目錄
+  本身是精煉過的事實，而且它沒有第二個家（memory 從不寫進它描述的那個專案
+  repo，這裡就是唯一一份）。實際後果是三種狀態裡最糟的一種：79 檔只有 5 檔被
+  `git add -f` 進去，而沒進去的 74 檔看起來跟「刻意排除」的一模一樣。現在的
+  界線是一條資產屬性——**精煉後的記憶進版控，原始會談紀錄不進**——寫在
+  `.gitignore`，不靠任何人記得下 `-f`。
 
 **Tier 2 —— 有價值但在版控之外，遷移要另外搬**：
-- `projects/<slug>/memory/`：自動記憶。因為 `projects/` 含對話內容所以整目錄
-  被 gitignore，但 memory 子目錄本身是精煉過的事實，值得手動複製。
 - `backups/`、`archive/`：git 已涵蓋大部分歷史，通常可不搬。
 
 **不是資產，不要搬**：`plugins/`（marketplace 快取，可再生）、
@@ -151,8 +158,10 @@ sessions/telemetry/cache 等執行期狀態、任何 credentials。
 2. **修機器綁定路徑**：`settings.json` 的 hooks 指向絕對 Python 路徑
    （例如 `C:/Users/<user>/.../Python312/python.exe`）——新機器必改。
    這是已知的第一大遷移坑。
-3. **搬記憶**：從舊機器複製 `projects/<slug>/memory/` 到新機器對應位置
-   （slug 由工作目錄路徑派生，跨機器可能不同——以新機器實際產生的為準）。
+3. **改記憶的 slug**：記憶自 2026-09-06 起隨 clone 一起到位，不必手搬；但
+   slug 由工作目錄路徑派生（例如 `C--Users-<user>--claude`），換機器或換
+   使用者名稱就會變——把 clone 下來的 `projects/<舊slug>/memory/` 移到新機器
+   實際產生的 `projects/<新slug>/memory/`，否則 Claude Code 讀不到。
 4. **重建 `ops/environment.md`**：模型層級對映、可用派工機制、成本上限
    政策都是環境事實，不能從記憶假設——照 `ops/20-dispatch.md` §0 重新確認。
 5. **活體驗證**：手動跑一次兩支 hook（healthy 應靜默；用壓低門檻確認會觸發）、

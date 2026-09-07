@@ -91,19 +91,23 @@ status: live
 | `ops/`（12 檔） | 專案作業規則層 |
 | `skills/`（52 檔） | 自製 skills 本體 |
 | `hooks/`（7 個 .py + 1 資料檔） | `model_cap_guard.py`（subagent 模型上限）、`ops_health_nudge.py`（健康提醒 + 放寬等級提醒）、`dangerous_command_guard.py`（危險 shell 指令）、`ui_verify_guard.py`（瀏覽器窗格量測紀律 L-009/L-010）、`browser_pane_scope_guard.py`（窗格導航記錄 + 已知崩潰站點封鎖 L-013，配 `browser-pane-blocklist.json`）、`instructions_loaded_logger.py`（規則載入遙測）、`delivery_gate_shadow.py`（交付閘門，shadow）— 皆以 `~/.claude` 解析路徑，可攜 |
-| `agents/`（8 檔） | 自訂 subagent 定義。全部於 2026-08-12 依本環境重寫（前身是第三方 ai-team-os 套件的 22 個定義，其餘已封存）。每個都帶 `tools:` 能力白名單且必含 `Skill`；路由表 `ops/20-dispatch.md`，政策 `ops/rule-registry.md` |
+| `agents/`（9 檔） | 自訂 subagent 定義。8 檔於 2026-08-12 依本環境重寫（前身是第三方 ai-team-os 套件的 22 個定義，其餘已封存）；`work-card-executor.md` 於 2026-09-04 新增（高強度照卡施工者，effort high；SSLD T41 首用）。每個都帶 `tools:` 能力白名單且必含 `Skill`；路由表 `ops/20-dispatch.md`，政策 `ops/rule-registry.md`。注意：新定義檔不會立即出現在 Agent 工具，harness 稍後才重新載入（L-046） |
 | `interop/` | 跨 agent 同步層（編譯器 + 地圖 + 驗收） |
 | `thinking-notes/` | 設計思考筆記（編號系列） |
 | `reports/`（部分） | 少數被追蹤的報告 |
 
-### 2.2 記憶（❗不在 git，最容易漏搬的資產）
+### 2.2 記憶（2026-09-06 起在 git 內，但 slug 仍要自己對）
 
-- 位置：`projects/C--Users-gunda--claude/memory/`（`MEMORY.md` 索引 +
+- 位置：`projects/C--Users-<user>--claude/memory/`（`MEMORY.md` 索引 +
   一事實一檔）。
-- slug 是**專案路徑衍生**的：路徑中非字母數字的字元轉 `-`。換了機器
-  或使用者名稱，slug 會不同 → 必須搬到**新路徑對應的新 slug 目錄**，
-  否則 Claude Code 找不到（見 3.5）。
-- `projects/` 其餘內容是對話紀錄（transcript），屬執行期狀態，不搬。
+- **在版控內**（2026-09-06 起，全機 79 檔）：`.gitignore` 只放行
+  `projects/*/memory/*.md`，同層的 transcript／ledger／canary／subagent
+  目錄仍然全部排除。所以記憶隨 clone 一起到位，不必手搬。
+- 但 slug 是**專案路徑衍生**的：路徑中非字母數字的字元轉 `-`。換了機器
+  或使用者名稱，slug 會不同 → clone 下來的 memory 要移到**新路徑對應的
+  新 slug 目錄**，否則 Claude Code 找不到（見 3.5）。
+- `projects/` 其餘內容是對話紀錄（transcript），屬執行期狀態，不進 git、
+  也不搬。
 
 ### 2.3 有價值但刻意不進 git（選擇性搬運）
 
@@ -118,10 +122,11 @@ status: live
   `ide/`、`cache/`、`downloads/`、`session-env/`、`.last-cleanup`。
 - **秘密（絕不搬、絕不進 git）**：`.credentials.json` — 新機器重新
   登入即重生；`mcp-needs-auth-cache.json` 同理。
-- **機器管理**：`plugins/`（重裝）、根目錄 `AGENTS.md`（codex 遺留，
-  interop build 會處理目標端）。
-- **interop 目標端產物**（`~/.codex/AGENTS.md` 等）：是建置產物，
-  新機器跑 `interop.py build` 重生，永不手搬。
+- **機器管理**：`plugins/`（重裝）。根目錄 `AGENTS.md` 曾是 codex 遺留，
+  2026-09-05 隨 Codex 清除一併封存到來源環境自己的封存區（一個非系統碟
+  的路徑，此處不列出），不再存在，也不搬。
+- **interop 目標端產物**（`~/.config/opencode/AGENTS.md`）：是建置產物，
+  新機器跑 `interop.py build` 重生，永不手搬。codex 目標端 2026-08-15 已移除。
 
 ---
 
@@ -142,8 +147,9 @@ status: live
    `python3`，路徑分隔與引號格式也要跟著改。
    驗證：`python <hooks path>/ops_health_nudge.py < /dev/null; echo $?`
    → 輸出 0。
-5. **搬記憶**：算出新機器的 slug（新專案路徑，非字母數字轉 `-`），
-   把舊 memory 放到 `~/.claude/projects/<新slug>/memory/`。
+5. **對記憶的 slug**：記憶已隨 clone 到位（2.2），只要算出新機器的 slug
+   （新專案路徑，非字母數字轉 `-`），把 clone 下來的
+   `projects/<舊slug>/memory/` 移到 `~/.claude/projects/<新slug>/memory/`。
    驗證：開新 session，確認 MEMORY.md 內容出現在模型的記憶脈絡中
    （直接問它記得什麼即可）。
 6. **重建授權面**：interactive session 跑 `/mcp` 重新授權 MCP、重裝

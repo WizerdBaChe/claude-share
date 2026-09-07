@@ -25,6 +25,17 @@ changing what the machine ENFORCES.
    — that diff IS
    the justification for building new. No articulable diff → adopt or extend
    instead of building. (Adopted from lifeos-memory skill-author Step 0.)
+5. **Never leave a window where a REGISTERED guardrail file is absent.** A hook
+   named in `settings.json` that does not exist on disk is an outage, not a
+   warning: the guard is silently open in every session until someone happens
+   to notice. Converting an untracked hook to tracked is
+   `git checkout <branch> -- <path>` (no window), never delete-then-merge; a
+   hook that genuinely must go is **unregistered in `settings.json` first**;
+   and when a merge IS the restore step, prove it will run
+   (`git merge --no-commit --no-ff`, or clear every collision) before removing
+   what it is supposed to bring back. Recovery of last resort is a
+   **fail-CLOSED stub** written in place — a broken tool beats a silently open
+   one. (`lessons.md` L-034.)
 
 ✅ "PreToolUse hook X misfires in unrelated repos — proposal: gate it on
 project id; risk: gate too narrow, hook silent where wanted; rollback signal:

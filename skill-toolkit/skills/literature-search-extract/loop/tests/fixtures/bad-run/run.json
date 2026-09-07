@@ -1,0 +1,19 @@
+{
+ "schema": "lse-runs/run@1",
+ "run": {"id": "20260903_bad-fixture", "created": "2026-09-03T10:00:00+08:00", "revision": 1, "mode": 1,
+         "depth": "quick", "state": "delivered", "filed": true, "home": "<fixture>", "wasRevisionOf": null},
+ "request": {"purpose": "fixture: the bad side", "question": "什麼是 Ag 的 SPP 傳播長度", "source_types": "papers", "scope": "",
+             "output_format": "inline summary", "depth": "quick", "language": "zh-TW", "caller": "user", "preset": null},
+ "result": {
+  "findings": "Template-stripped Ag reaches L_spp of 22 μm at 633 nm (Park 2022) [full].",
+  "sources": [
+   {"citation": "Park 2022", "identifier": "DOI 10.0000/fake.2022.234", "key": "DOI 10.0000/fake.2022.234", "aliases": [], "zotero_key": null,
+    "access_level": "full", "locators_used": [], "unresolved": false, "unresolved_basis": null}
+  ],
+  "gaps": [], "confidence": [], "search_trail": ["WebSearch only"]
+ },
+ "ledger": {"path": "ledger.jsonl", "rows": 0, "citecheck": null},
+ "deliverables": [], "keys": [], "review_when": [], "handoff": [], "related": [], "domain": "",
+ "provenance": {"wasAttributedTo": "fixture", "wasGeneratedBy": "fixture"},
+ "invalidation": {"wasInvalidatedBy": null, "invalidatedAtTime": null, "claims": []}
+}

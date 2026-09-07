@@ -18,6 +18,16 @@ Read it before the first dispatch of a session; update it when facts change
 (it lists its own refresh triggers). If it's missing or stale, re-establish
 the facts first — never dispatch on remembered model ids.
 
+**A NEW `agents/*.md` definition is not dispatchable when it is written.** The
+roster the Agent tool validates against is a snapshot the harness refreshes on
+its own schedule — no documented trigger, no setting, and the type check runs
+before any hook, so nothing of ours sees the failure. After authoring a
+definition, spend one read-only PROBE dispatch before relying on it; while it
+returns `Agent type '<name>' not found`, run the work on an existing definition
+plus a `model:` override and journal that as an interim policy, so unwinding it
+is a status flip rather than a rewrite. The later "New agent types are now
+available" notice is the all-clear. (`lessons.md` L-046.)
+
 ## §1 Core rule: the dispatcher does no fieldwork
 
 The dispatcher's job: read tickets, dispatch, receive conclusions, verify,
@@ -313,6 +323,7 @@ TOUCHES, never by which session looks busy) and the recovery recipes:
 | 前端實作 | `frontend-developer` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
 | 寫測試、QA 驗證 | `testing-qa-engineer` / `api-tester` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
 | Bug 根因定位與修復 | `testing-bug-fixer` | sonnet × **high** | 可寫 + Bash/PowerShell |
+| 照卡施工（build-ready 施工卡、契約已定、要高強度執行者） | `work-card-executor`（2026-09-04 新增，SSLD T41 首用） | sonnet × **high**（判斷型卡經使用者核可後 `model: opus` 覆寫＋`[user-approved-top-tier]`） | 可寫 + Bash/PowerShell；只動卡片 Objects；分岔即停 |
 | 紅隊/審查（reviewer ≠ author） | `code-reviewer`（fresh context） | sonnet × **high** | **唯讀**（Read/Glob/Grep/Skill + dontAsk） |
 | 安全審查 | `security-engineer` | sonnet × **high** | **唯讀** + WebSearch/WebFetch |
 | 架構規劃（派工版） | `Plan`（內建）或 `software-architect` | sonnet × **high** | architect 可寫文件，不可執行 shell |
@@ -324,6 +335,12 @@ TOUCHES, never by which session looks busy) and the recovery recipes:
 一輪；實作型角色**刻意不設** `permissionMode`（`dontAsk` 會連 `Edit` 一起拒絕）。
 每個定義都保留 `Skill` 工具——**移除它會靜默關閉整個 skill 機制**（`lessons.md`
 L-014）。
+
+兩個**目前未使用**的載入面（2026-09-06 對 2.1.257 調和補記）：`skills:` 前置
+載入（把指名 skill 的全文放進 worker，是「規則到不了 worker」的直接解法，代價
+是每次派工付全額 token——要用先量成本）、sibling roster（`SendMessage` 互通的
+前提，且是啟動當下的快照，之後才命名的 agent 不會出現）。條件、限制與該不該用：
+記在 source 端的派工語意量測筆記中（未隨此 repo 收錄）。
 
 消歧（易混淆組）：
 - `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`：

@@ -64,7 +64,9 @@ rationale), never weaken — consent-gate wording keeps full strength.
 3. **Upgrader leg.** Verify every quote against the artifact before adopting
    — a citation that does not match voids that gap, not the report. Adopt or
    narrow; honor the 不建議改 list; run `config-self-audit` on the edited
-   artifact; commit via branch → `--no-ff` merge; write the **disposition**
+   artifact; commit via branch → `--no-ff` merge (in `~/.claude` itself the
+   branch-commit guard requires committing on `main` — commit there
+   directly; round-1 ux-walkthrough field data 2026-09-07); write the **disposition**
    beside the report, named `<skill>-gaps-round<N>-<date>-disposition.md` —
    the name is load-bearing: step 0's lookup depends on it (per-gap verdict |
    where it landed | adjustments and why), ending with the **sharpest next

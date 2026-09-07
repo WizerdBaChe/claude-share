@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lse-runs/run@1",
+  "title": "literature-search-extract evidence run (run.json) — design references/lse-feedback-loop-design.md §3.5",
+  "type": "object",
+  "required": ["schema", "run", "request", "reuse_check", "result", "ledger", "deliverables", "keys",
+               "review_when", "handoff", "related", "domain", "provenance", "invalidation"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "lse-runs/run@1"},
+    "run": {
+      "type": "object",
+      "required": ["id", "created", "revision", "mode", "depth", "state", "filed", "home", "wasRevisionOf"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[0-9]{8}_[A-Za-z0-9][A-Za-z0-9_\\-]*$"},
+        "created": {"type": "string", "minLength": 10},
+        "revision": {"type": "integer", "minimum": 1},
+        "mode": {"enum": [1, 2]},
+        "depth": {"enum": ["quick", "standard", "exhaustive"]},
+        "state": {"enum": ["open", "checked", "delivered", "invalidated", "superseded", "aborted"]},
+        "filed": {"type": "boolean"},
+        "home": {"type": "string"},
+        "wasRevisionOf": {"type": ["string", "null"]},
+        "model": {"type": "string"},
+        "skill_version": {"type": "string"}
+      }
+    },
+    "request": {
+      "type": "object",
+      "required": ["purpose", "question", "source_types", "scope", "output_format", "depth", "language", "caller", "preset"],
+      "properties": {
+        "purpose": {"type": "string"},
+        "question": {"type": "string", "minLength": 3},
+        "source_types": {"type": "string"},
+        "scope": {"type": "string"},
+        "output_format": {"type": "string"},
+        "depth": {"enum": ["quick", "standard", "exhaustive"]},
+        "language": {"type": "string"},
+        "caller": {"type": "string"},
+        "preset": {"type": ["string", "null"]}
+      }
+    },
+    "reuse_check": {
+      "type": "object",
+      "required": ["ran_at", "terms", "matches", "trail_line"],
+      "properties": {
+        "ran_at": {"type": "string", "minLength": 10},
+        "terms": {"type": "array", "items": {"type": "string"}},
+        "matches": {"type": "array", "items": {"type": "string"}},
+        "trail_line": {"type": "string", "pattern": "^reuse check: "}
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["findings", "sources", "gaps", "confidence", "search_trail"],
+      "properties": {
+        "findings": {"type": "string"},
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["citation", "identifier", "key", "aliases", "zotero_key", "access_level", "locators_used", "unresolved", "unresolved_basis"],
+            "properties": {
+              "citation": {"type": "string"},
+              "identifier": {"type": "string"},
+              "key": {"type": "string", "pattern": "^(doi|arxiv|isbn|patent|pmid|unresolved):\\S+$"},
+              "aliases": {"type": "array", "items": {"type": "string"}},
+              "zotero_key": {"type": ["string", "null"]},
+              "access_level": {"enum": ["full", "partial", "abstract", "secondary"]},
+              "locators_used": {"type": "array", "items": {"type": "string"}},
+              "unresolved": {"type": "boolean"},
+              "unresolved_basis": {
+                "type": ["object", "null"],
+                "properties": {"title_norm": {"type": "string"}, "surname": {"type": "string"}, "year": {"type": "string"}, "extra": {"type": "string"}}
+              },
+              "version": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "gaps": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"type": "array"},
+        "search_trail": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "required": ["path", "rows", "citecheck"],
+      "properties": {
+        "path": {"type": "string"},
+        "rows": {"type": "integer", "minimum": 0},
+        "citecheck": {
+          "type": ["object", "null"],
+          "required": ["ran_at", "fail", "warn", "path"],
+          "properties": {"ran_at": {"type": "string"}, "fail": {"type": "integer"}, "warn": {"type": "integer"}, "path": {"type": "string"}}
+        }
+      }
+    },
+    "deliverables": {
+      "type": "array",
+      "items": {"type": "object", "required": ["kind", "path", "consumer"],
+                "properties": {"kind": {"enum": ["inline", "file"]}, "path": {"type": ["string", "null"]}, "consumer": {"type": "string"}}}
+    },
+    "keys": {"type": "array", "items": {"type": "string", "pattern": "^(doi|arxiv|isbn|patent|pmid|unresolved):\\S+$"}},
+    "review_when": {
+      "type": "array",
+      "items": {"type": "object", "required": ["trigger", "text"],
+                "properties": {"trigger": {"enum": ["T-1", "T-2", "T-3", "T-4"]}, "text": {"type": "string"}}}
+    },
+    "handoff": {
+      "type": "array",
+      "items": {"type": "object", "required": ["to", "key", "reason"],
+                "properties": {"to": {"type": "string"}, "key": {"type": "string"}, "reason": {"type": "string"}}}
+    },
+    "related": {"type": "array", "items": {"type": "string"}},
+    "domain": {"type": "string"},
+    "provenance": {
+      "type": "object",
+      "required": ["wasAttributedTo", "wasGeneratedBy"],
+      "properties": {"wasAttributedTo": {"type": "string"}, "wasGeneratedBy": {"type": "string"}}
+    },
+    "invalidation": {
+      "type": "object",
+      "required": ["wasInvalidatedBy", "invalidatedAtTime", "claims"],
+      "properties": {
+        "wasInvalidatedBy": {"type": ["string", "null"]},
+        "invalidatedAtTime": {"type": ["string", "null"]},
+        "claims": {"type": "array"}
+      }
+    }
+  }
+}

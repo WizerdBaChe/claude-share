@@ -15,6 +15,18 @@ consumer and by the precision the claim needs — never by drawing convenience.
 | Editable deck the user will present/annotate | PPTX via anthropic-skills:pptx | full (EMU coordinates) | script-data asserts + one thumbnail render + user gate |
 | Print/export (PDF, PNG) | rendered FROM the HTML/SVG | inherits source | verify the source, then one export spot-check |
 
+## Size presets (viewBox × type ramp) — declare one at Step 1, never resize text to fit
+
+| preset | carrier | viewBox (grid 8) | type ramp (px) | body floor | calibration source |
+|---|---|---|---|---|---|
+| audit view (archdiag) | HTML, desktop | 1280 × 400–800 — 24 of the 26 accepted views are 1280 wide (two at 1288); height by content, snapped to 8 | title 13 bold / sub-line 11 / edge pill 11 / container title 12; page h1 18, h2 15, tables 12.5 | 11 (asserted in-page, check #7) | the archdiag library's `emit.mjs` (ships here as `architecture-diagramming/archdiag/emit.mjs`); F1–F5 accepted 2026-08-27 … 09-05 |
+| owner view (audience-fit A1) | HTML, desktop | 960 × 470–800 (accepted: 540 / 660 / 800 / 470) | node name 15 bold / role 11.5 / edge label 11 / status marker 12–15 bold / legend 11.5 | 11 — the five 10.5 inline squeezes in mfp-f5's owner view are a recorded deviation, not a precedent (R3 forbids squeezing; R12 cuts instead) | the four accepted owner views (ccfg, claude-home, mfp-f3, mfp-f5) |
+| deck (PPTX) | 16:9 slide | per `~/.claude/rules/office-deck-deliverables.md` | [assumed] name ≥ 18 pt / role ≥ 14 pt / label ≥ 12 pt; CJK body ≥ 12 pt is the borrowed diagram-design "presentation" guidance | 12 pt [assumed] | UNCALIBRATED here — calibrate at the first deck render that passes the user's gate, then drop the tag |
+
+A preset fixes the canvas and the ramp together; a diagram that does not
+fit changes its node set (presentational: R12 cut order; audit: split the
+view at the Step 1 hierarchy rule), never its type size.
+
 ## Per-carrier notes
 
 - **Mermaid**: the fastest honest sketch. Auto-layout means positions are
@@ -48,7 +60,15 @@ consumer and by the precision the claim needs — never by drawing convenience.
   `scrollHeight <= window.innerHeight` — no horizontal page scroll, first
   screen holds the diagram. Repair by redistributing authored layout;
   never by `overflow:hidden`, clipping, an inner diagram scroller, or text
-  below the notation-precision §2 minimum.
+  below the notation-precision §2 minimum. **Lower bound (2026-09-04)**:
+  the same delivery is also checked against a page-fill gate that declares
+  `<html data-page-class="diagram">` and flags a left-anchored width cap
+  (`max-width` without `margin:auto` — a defect class caught in this
+  environment's own delivered views) as distinct from over-width
+  containment: containment says "not too wide", the fill-gate says "not
+  left-hugging". The gate script lives in the source environment's tooling
+  and does not ship here — reproduce the pass/fail criterion, not the
+  script.
 - **PPTX**: native shapes + **connectors bound to shape anchors** (they
   survive the user moving boxes — the point of an editable deck). One
   diagram per slide + legend; overflow → a hierarchy of slides with a
@@ -58,12 +78,13 @@ consumer and by the precision the claim needs — never by drawing convenience.
 - **draw.io / external editors**: only on explicit user request; export SVG
   for verification and note that round-trip fidelity is unverified here.
 
-## Audit view-set toolchain (this machine): tools/archdiag
+## Audit view-set toolchain (this machine): the archdiag library
 
 For audit-drawing view sets (C4 / statechart / DFD / sequence panes with the
 in-page §4 self-check), do NOT hand-author a per-file framework — that class
 drifted within one day (F1↔F2 check-set divergence, the S1 motivating case).
-Build through `~/.claude/tools/archdiag/`:
+Build through the archdiag library (ships here as
+`architecture-diagramming/archdiag/`):
 
 - `build()` (index.mjs): schema validation (`ev` evidence anchors required on
   every node/edge — Step 0 enforced mechanically) → build-time geometry
@@ -83,9 +104,10 @@ Build through `~/.claude/tools/archdiag/`:
   `window.__geometryReport` — `{pass, diagnostics, stats}`; the measuring
   pass runs once on load with every pane rendered (no tab-clicking needed).
 - Invariants and the maintenance ritual (receipt regression after ANY library
-  edit, selfcheck calibration, eol pins): `tools/archdiag/README.md` +
-  `tools/archdiag/MAINTENANCE.md`; environment sweep item: integrity-sweep
-  check 27.
+  edit, selfcheck calibration, eol pins):
+  `architecture-diagramming/archdiag/README.md` +
+  `architecture-diagramming/archdiag/MAINTENANCE.md`; environment sweep
+  item: integrity-sweep check 27.
 
 Reference builds (mfp-audit-f3 routed — current pattern; dit-audit-f1 /
 prism-audit-f2 hand-routed pts, frozen receipts) stay in the source

@@ -70,7 +70,15 @@ Mode B keeps every phase and ADDS the increment interrogation:
 1. **Host contract** (Phase 0): which system it extends; who calls it; what
    breaks in the host if it misbehaves; which already-ACCEPTED host behaviours
    it touches — list them; the regression duty covers increments, not just
-   bug fixes.
+   bug fixes. For a re-architecture / rebuild of a LIVE system (the 重新架構
+   trigger) the host diagnosis runs code-review-deep-checklist Mode B focused
+   FIRST (inventory-first `coverage.json`: what was reviewed, what sits in
+   `deferred` / `explicitExclusions`) — or at minimum borrows its coverage
+   declaration: the standard-tier view-set members (`representation-models.md`)
+   named as drawn vs explicitly excluded. A diagnosis naming no exclusions has
+   an undeclared blind spot; recorded miss 2026-09-05: the AnnouncementWatchDog
+   rebuild ran on this skill alone and rebuilt a process/lifecycle layer the
+   09-03 audit had neither drawn nor declared out of scope.
 2. **Internal prior art first** (Phase 1): the sweep starts INSIDE — project
    registry / PROJECTS.md / cross-index / graph-snapshot / AssetVault — and
    records an explicit extend-vs-new verdict before any external search.

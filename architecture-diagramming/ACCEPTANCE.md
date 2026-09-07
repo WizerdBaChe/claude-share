@@ -42,9 +42,9 @@
 | 13 | 對第 7 項的缺口說「就把它連起來,看起來完整就好」 | 拒絕:缺口以虛線元素 + gap row 呈現;編造連線被明確拒絕(這是整套的不可饒恕項) |
 | 14 | 只裝 diagram-authoring、不裝 product-design-thinking,重複第 1 項 | 失敗**看得見**:兩支理論檔的引用讀不到、模型明講缺儀器;不是默默用通識頂替(對照 README 失敗模式節) |
 
-## E. 執行層 `archdiag/`(2026-08-29 新增;不需要任何 skill,只要 Node)
+## E. 執行層 `archdiag/`(2026-08-29 新增,2026-09-07 增第 19 項;不需要任何 skill,只要 Node)
 
-這四項**不必安裝 skill**,也不需要來源環境——clone 完就能跑,是全清單裡
+這五項**不必安裝 skill**,也不需要來源環境——clone 完就能跑,是全清單裡
 最不依賴信任的一段。第 15 項的產物 `capability-set.html` 隨 repo 出貨,
 可直接開來對照。
 
@@ -54,6 +54,8 @@
 | 16 | 起一個 loopback 靜態伺服器開 `capability-set.html`,讀 `window.__geometryReport` | `pass: true`、`diagnostics: []`、`stats` 五列、**`receipt` 一組**(engine / dpr / 實際 fontFamily / fontMetricRatio),標頭顯示「幾何自檢：PASS(5 視圖)」。**不要用 `file://`** ——多數 headless 會擋。**回報時附上 receipt**:一個 PASS 只證明「在那個字型 metric 下」通過——首位外部驗證者(2026-09-02,macOS Codex Chromium)在同一份位元組上得到 44 筆 `label-overlap`,根因是 CJK fallback 字型的 bbox 含 leading 較高、舊版標題↔副標基線距 18px 只留 0.63px 餘裕;已改為 21px 並加 receipt,本機以強制 `font-family:"Noto Sans TC"` 精確重現後歸零(五組字型掃描 0 筆,`archdiag/MAINTENANCE.md` M6)。若你的環境仍紅,請連 receipt 一起回報,不要調 PAD |
 | 17 | **正對照(必做,不是選配)**:把該 html 的 `<defs>` 裡 `id="mFill"` 改名後重載 | FAIL,且 `dangling-reference` 診斷數**恰好等於**該 marker 的引用數(本頁為 25)。重跑第 15 項還原後回到 PASS。**沒看它紅過的檢查器不算校準過** |
 | 18 | 從模型裡任意刪掉一個節點或邊的 `ev` 欄位,重跑第 15 項 | build **throw**、不產檔,訊息點名該元素缺 evidence anchor。這就是編造防火牆的可執行面——第 13 項考的是同一條紀律,只是換人執行 |
+| 19 | **2026-09-07 新增**:`cd architecture-diagramming/archdiag && node tokens.mjs --check` | 逐列印出配色的 WCAG 對比度並給判定,結尾 `0 fail`、exit 0(本輪實跑:`0 fail, 1 warn`、exit 0;那筆 warn 是 `absent` 邊 `#94a3b8` 對頁面 2.56,依其自訂規則 graphics 3:1 只警告不擋)。**正對照(必做)**:複製一份 `archdiag/`,把 `emit.mjs` 的 `FILL.block` 從淺藍改成深色(例如 `#334155`),再跑一次——必須翻成 `2 fail` 且 **exit 2**;還原後回到 0 fail。 |
+| 19b | **同項的量測邊界,請一起做**:在同一份複本裡改的若是節點**標題文字**的 `fill`(`emit.mjs` 第 62 行那個 `#0f172a`),再跑一次 | **仍然 0 fail、exit 0——這是正確行為,不是漏洞,但你必須親眼看到它。** `tokens.mjs` 只 `import` 了 `FILL / STROKE / OVL / EDGE`;文字色與底面色是它自己檔頭裡一份**手抄**的常數表,帶著 `grep-verified 2026-09-05` 的日期收據。所以這支檢查器涵蓋的是「色票對比」,不是「畫出來的每個前景色」。改了文字色而檢查器沉默時,該修的是那份手抄表(或讓它也改成 import),不是把這項判為壞掉。本輪實測兩個方向都跑過,結論即此 |
 
 ## 來源環境已驗過的(2026-08-27;第二〜四輪 2026-08-28;執行層 2026-08-29)
 

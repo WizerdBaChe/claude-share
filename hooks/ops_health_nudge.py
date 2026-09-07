@@ -12,7 +12,10 @@ Checks (all cheap, no network; ONE subprocess in the steady state -- check 14's
 SECOND one, but only after the claude binary's stat() fingerprint moves, which
 is rare and measured at 86-102 ms. Every other check is stat() or a small
 read):
-  1. ops/lessons.md unfolded entries over LESSON_CAP    -> trim pass due
+  1. lesson intake report (`intake.py report --nudge`) -> route a hits>=2
+     record through 40-maintenance S2a / a folded-but-recurring fix did not
+     hold / a status projection drifted (replaced the LESSON_CAP entry count
+     on 2026-09-07; ONE extra subprocess, 1.5 s budget, every cwd)
   2. any ops/*.md over SIZE_CAP                 -> extract pass due
      (excl. lessons.md and rule-registry.md -- see SIZE_CAP_EXEMPT)
   3. rule registry idle over TRAIL_IDLE_DAYS    -> degradation check due
@@ -78,8 +81,13 @@ import time
 HOME = os.path.expanduser("~/.claude")
 OPS = os.path.join(HOME, "ops")
 SKILLS = os.path.join(HOME, "skills")
-LESSON_CAP = 30
-SIZE_CAP = 22 * 1024   # BYTES per ops/*.md (getsize). REVIEW TRIGGER, not a
+# RETIRED 2026-09-07: the unfolded-entry cap on ops/lessons.md (36 at retirement;
+# history under rule-registry key `LESSON_CAP`). ops/lessons.md is now a
+# GENERATED index of ops/lessons/ (tools/closeout-intake) and has no count cap
+# (design S-7: the count was after-the-fact back-pressure that produced batch
+# rewrites); the live signal is `intake.py report --nudge`, check 1 below.
+INTAKE_REPORT_TIMEOUT = 1.5   # seconds; the report parses ~50 small files
+SIZE_CAP = 26 * 1024   # BYTES per ops/*.md (getsize). REVIEW TRIGGER, not a
                        # budget: ops files are charged only when something
                        # routes to them, and Phase 2 measured the whole
                        # always-loaded surface at ~5% of context and cached, so
@@ -91,15 +99,22 @@ SIZE_CAP = 22 * 1024   # BYTES per ops/*.md (getsize). REVIEW TRIGGER, not a
                        # both yielded extractable concrete (3.7K and 3.9K to
                        # ops/references/), and what remained in 20-dispatch
                        # (20.9K) is rules and routing tables.
+                       # 22K -> 26K on 2026-09-06, THIRD firing, user ruling.
+                       # First firing whose review found real concrete AND
+                       # left the file still over: environment.md 25,399 ->
+                       # 24,156 lossless into its own sink, and 24,156 > cap.
+                       # If environment.md fires AGAIN after a pass that moved
+                       # real content, the honest answer is not a fourth raise
+                       # but SIZE_CAP_EXEMPT -- see the registry entry.
                        # why/history: ops/rule-registry.md, key `ops file cap`;
                        # unit: key `cap measurement unit`. CLAUDE_MD_CAP below
                        # is deliberately NOT raised with it -- different class.
 # Files whose size tracks the CORPUS, not bloat: an over-cap reading on these
 # has no extract remedy, and a permanently-on alarm is one nobody reads. Their
-# real degradation checks are elsewhere -- lessons.md has LESSON_CAP (entries,
-# not bytes); rule-registry.md is bounded by the rule count and checked by
-# 40-maintenance.md S4.1 (an entry for a rule nobody uses). why/history:
-# ops/rule-registry.md, key `ops file cap`.
+# real degradation checks are elsewhere -- lessons.md is a generated index
+# whose signal is `intake.py report` (check 1); rule-registry.md is bounded by
+# the rule count and checked by 40-maintenance.md S4.1 (an entry for a rule
+# nobody uses). why/history: ops/rule-registry.md, key `ops file cap`.
 SIZE_CAP_EXEMPT = {"lessons.md", "rule-registry.md"}
 TRAIL_IDLE_DAYS = 45
 DESC_CAP = 800          # chars, skill frontmatter description — this is the
@@ -108,8 +123,8 @@ BODY_CAP = 300          # lines, whole SKILL.md. Charged only on invoke, not at
                         # session start. Over cap means EXTRACT to references/,
                         # never compress in place. why/history:
                         # ops/rule-registry.md
-CLAUDE_MD_CAP = 19968      # BYTES (19.5 KB). why/history: ops/rule-registry.md
-DICT_CAP = 28 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
+CLAUDE_MD_CAP = 23040      # BYTES (22.5 KB). why/history: ops/rule-registry.md
+DICT_CAP = 42 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # reasoning as SIZE_CAP: the dict is charged only on a
                        # routing miss. Raised 20K->24K on 2026-08-15 after
                        # tools/skill-routing-audit.py showed the file's problem
@@ -124,6 +139,19 @@ DICT_CAP = 28 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # false matches 10->1 on the worst entry -- the review
                        # the trigger asked for happened; raising the cap after
                        # it is this rule's own stated intended outcome.
+                       # Raised 28K->42K on 2026-09-04 after dict-review round
+                       # 2 (outputs/dict-review-round2-2026-09-04.md): first
+                       # round to move a coverage number (schedule and
+                       # update-config 0% -> 100%), 3 phantom targets
+                       # tombstoned, DEAD 13->8. It also checked the RULER:
+                       # the audit reads only `關鍵詞：` lines and puts \b
+                       # around ASCII tokens, so an entry with no keyword line
+                       # -- and any ASCII token written flush against Chinese
+                       # -- cannot match. Both biases understate the dict; the
+                       # verdict survived both controls anyway. T-023 carries
+                       # the tool fix. File 40,222 B = 93.5% of the new cap:
+                       # headroom is ~2 skill sections ON PURPOSE, so the next
+                       # expansion re-runs this decision.
                        # Provisional. why/history: ops/rule-registry.md, key
                        # `routing dict cap`.
 # RETIRED 2026-08-11: `Global_skill_update.md` is frozen as the historical
@@ -184,13 +212,13 @@ CC_BIN = os.path.expanduser("~/.local/bin/claude.exe")
 # The env var is the TEST SEAM (hermetic fixtures in tools/ops-health-test);
 # the archive-root gate in the check makes a host without the archive silent
 # by design (same absence-is-normal call as CC_BIN in check 16).
+MIRROR_STALE_DAYS = 3
 # SHARE EDITION: no default marker path ships here -- the source's default was
 # an absolute path on a non-system drive (a private mirror root, the same
 # leak class handled in transcript_read_guard.py CORPUS_ROOTS). Point
 # OPS_NUDGE_MIRROR_MARKER at your own marker file; an unset/empty value's
 # parent dir will not exist, so the check below stays silent by the same
 # absence-is-normal rule as CC_BIN.
-MIRROR_STALE_DAYS = 3
 MIRROR_MARKER = os.environ.get("OPS_NUDGE_MIRROR_MARKER") or ""
 
 # ---- output budget and severity ------------------------------------------
@@ -351,23 +379,48 @@ def main():
     except OSError:
         pass
 
-    # 1. unfolded lesson count
+    # 1. lesson intake report. Replaced the LESSON_CAP unfolded-entry count and
+    #    the misfiled-card check on 2026-09-07 (closeout-capture R4 M2): the
+    #    ledger is now ops/lessons/ (one record per file, born only through
+    #    intake.py add) and ops/lessons.md is GENERATED from it, so "count the
+    #    headings" and "a heading below ## Archived" have no meaning any more
+    #    (the position-based count also lied twice, L-047 hit 2). The report
+    #    derives its lines from each record's ## Events: (a) hits >= 2 never
+    #    folded -> route through 40-maintenance S2a; (b) folded but recurring
+    #    -> the fix did not hold; (c) dormant; (d) status projection drifted.
+    #    `--nudge` prints at most two lines, each carrying its remedy. Runs in
+    #    every cwd (lessons are global). Fail-open: a timeout, a missing tool
+    #    or a non-zero exit prints nothing -- sweep check 5 runs the full
+    #    `intake.py check --against HEAD --index` two-sided.
+    # SHARE EDITION: tools/closeout-intake/ does not ship in this repo -- its
+    # store (ops/lessons/) and CLI are source-environment-only, the same
+    # tools/ exclusion class as tools/session-board/ (see hooks/intake_guard.py's
+    # not_shipped entry, same round). The subprocess below therefore always
+    # raises FileNotFoundError, caught by the except clause -- exactly the "a
+    # missing tool ... prints nothing" branch the check's own comment above
+    # already names as a legitimate silent no-op, the same treatment check 16
+    # gives a missing ops/cc-reconciled.json.
     try:
-        with open(os.path.join(OPS, "lessons.md"), encoding="utf-8") as f:
-            body = f.read().split("## Archived")[0]
-        n = len(re.findall(r"^## L-\d+", body, re.M))
-        if n > LESSON_CAP:
-            msgs.add(
-                f"ops/lessons.md has {n} unfolded entries (>{LESSON_CAP}): "
-                "run the trim pass (ops/40-maintenance.md S3)",
-                SEV_QUEUE, f"lessons.md {n} entries"
-            )
-    except OSError:
+        r = subprocess.run(
+            [sys.executable,
+             os.path.join(HOME, "tools", "closeout-intake", "intake.py"),
+             "report", "--nudge"],
+            capture_output=True, text=True, encoding="utf-8",
+            errors="replace", timeout=INTAKE_REPORT_TIMEOUT)
+        if r.returncode == 0:
+            for line in r.stdout.splitlines():
+                line = line.strip()
+                if line:
+                    # label = the finding without its remedy clause, so a
+                    # truncated tail still names WHAT was dropped
+                    label = re.split(r"\s[—-]\s", line, 1)[0][:70]
+                    msgs.add(line, SEV_QUEUE, label)
+    except Exception:
         pass
 
     # 14. stale uncommitted work in THIS tree -- cwd == ~/.claude only, so other
     #     projects pay nothing. Born 2026-08-21 from the stale-path attribution
-    #     ticket (task_406a32d8): 17 complete, correct record artifacts from 5
+    #     ticket: 17 complete, correct record artifacts from 5
     #     projects sat uncommitted here for up to 109 hours. Every session that
     #     wrote them followed the record-keeping discipline; none committed,
     #     because this repo has NO remote -- no push, no PR, no CI -- so
@@ -436,9 +489,15 @@ def main():
     #     in the six days nobody ran the audit, then 38 -> 0 in one harvest
     #     round; rot is fast, and the integrity report only pays rent when
     #     something runs it. Fires on: watchdog silent too long (carrier
-    #     presumed dead) / links grew since last run / premise metric under
-    #     its floor (the finding text comes from gs_watchdog.evaluate, the
-    #     tested single source of that judgment). is_home-scoped like check
+    #     presumed dead) / a nonzero live-surface count, with its growth named
+    #     when it grew / MOC lag / a failed build (the finding text comes from
+    #     gs_watchdog.evaluate, the tested single source of that judgment).
+    #     NOT on the premise metric since 2026-09-06 (user ruling): its floor
+    #     has no reachable path -- every one of its broken links is in a
+    #     historical record where a dead link is correct -- so it alarmed
+    #     forever and shared the message with live_broken, which does not.
+    #     Still measured, still REFUTED in the report, `premise_under_floor`
+    #     in the status file. is_home-scoped like check
     #     14: the remedy is ~/.claude maintenance and would be noise anywhere
     #     else. Fail-open. why/thresholds/review-when: ops/rule-registry.md,
     #     key `graph rot watchdog`.
@@ -448,7 +507,7 @@ def main():
                 msgs.add(
                     "graph rot watchdog has never run — "
                     "`python tools/graph-snapshot/gs_watchdog.py`, and check "
-                    "the ClaudeGraphSnapshotWatchdog-Daily scheduled task",
+                    "your graph-watchdog task's scheduler entry",
                     SEV_ALARM, "graph watchdog never ran"
                 )
             else:
@@ -462,16 +521,34 @@ def main():
                         f"graph rot watchdog silent {age:.1f}d "
                         f"(>{WATCHDOG_STALE_DAYS}d) — its daily task may be "
                         "dead: run `python tools/graph-snapshot/gs_watchdog.py`"
-                        " and check ClaudeGraphSnapshotWatchdog-Daily",
+                        " and check your graph-watchdog task's scheduler entry",
                         SEV_ALARM, "graph watchdog silent"
                     )
                 elif wd.get("finding"):
-                    msgs.add(
-                        "graph rot watchdog: " + str(wd["finding"])
-                        + " — harvest due: read tools/graph-snapshot/out/"
-                        "integrity-report.md (graph-query skill, J3)",
-                        SEV_ALARM, "graph rot reported"
-                    )
+                    finding = str(wd["finding"])
+                    # The remedy follows the finding (round 4, audit G-1): a
+                    # lagging MOC is regenerated, not harvested. 2026-09-06:
+                    # read the KIND the watchdog decided, instead of matching
+                    # substrings of a sentence it may reword -- the old branch
+                    # keyed on the literal "broken links", and the day that
+                    # sentence became "3 live-surface broken link(s)" it would
+                    # have silently picked the wrong remedy. The substring
+                    # arm stays as the fallback for a status file written by
+                    # an older watchdog.
+                    kind = wd.get("remedy_kind")
+                    if kind is None:
+                        kind = ("regenerate" if "MOC lags" in finding and not any(
+                                k in finding for k in ("broken link", "premise", "FAILED"))
+                                else "harvest")
+                    if kind == "regenerate":
+                        remedy = (" — regenerate: gsnap.py baseline / build / verify, "
+                                  "then `python -X utf8 tools/graph-snapshot/gsnap.py "
+                                  "emit-moc`, and commit references/_moc")
+                    else:
+                        remedy = (" — harvest due: read tools/graph-snapshot/out/"
+                                  "integrity-report.md (graph-query skill, J3)")
+                    msgs.add("graph rot watchdog: " + finding + remedy,
+                             SEV_ALARM, "graph rot reported")
         except Exception:
             pass
 

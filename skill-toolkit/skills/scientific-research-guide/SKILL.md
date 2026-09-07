@@ -11,7 +11,7 @@ description: >-
   plasmonic waveguide/波導/SPP/SERS, topological insulator, vertical GaN,
   microLED, silicon photonics, 光子封裝/packaging reliability, CPO/共封裝光學
   — questions in those fields trigger it too. NOT for cited topic reports
-  (→ deep-research). Profiles + disambiguation: ~/.claude/skill-trigger-dict.md.
+  (→ literature-search-extract, exhaustive depth). Profiles + disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # Scientific Research Guide
@@ -75,30 +75,15 @@ of which domain files exist and when to load each — and resolve the field in t
    rows are pulled only when their specific topic is explicitly engaged (a `boundary` row
    routes the user *out* to a sibling domain).
 
-**Step 0 resolution ladder** (how a match is decided — a fuzzy question is routed, not guessed):
-1. **Literal anchor hit** — the user's wording contains a row's trigger keyword → load;
-   standing triggers fire normally. Match **case-sensitively** (`TI`, `RIN`, `SPP` and 35 other
-   short acronyms hit inside ordinary words once lower-cased) but **variant-insensitively**:
-   compare in Unicode NFKC, so `Bi₂Se₃` matches the manifest's `Bi2Se3`, `Z2` matches `Z₂`,
-   `μLED` matches `µLED`, and a full-width or superscript spelling matches its plain form. The
-   manifest lists one spelling per term and relies on this (`_routing.md` § How Gate A uses
-   this manifest).
-2. **Scope match, no literal hit** (vague/fuzzy phrasing): match the described physical
-   system and observable against the rows' `Covers / role` column and whatever
-   cluster/disambiguation sections `_routing.md` carries. Exactly one candidate → load it and **state the routing
-   basis in one line** ("loading X — the question is about ⟨scope⟩") so a misroute is visible
-   and correctable; never answer silently from a guessed profile.
-3. **Two-plus candidates** (typically within a cluster) → ask ONE routing question taken from
-   the relevant disambiguation table's own axis (those tables are pre-written clarification
-   scripts), instead of speculatively loading several profiles. A question genuinely spanning
-   two profiles still loads both and states which owns the governing constraint. On a pure
-   retrieval turn (Step 0.5) do NOT block the handoff with a routing question — pick the
-   best-scope candidate as search context and state the basis.
-4. **No candidate** → proceed with the generic framework and say so; do not improvise
-   domain-expert claims without Gate B verification.
-Never compensate for a missed fuzzy match by adding broad manifest keywords — keywords are
-precision anchors (a false load is worse than prose routing, `_routing.md` § Maintenance);
-recall for fuzzy phrasing is owned by this ladder.
+**Step 0 resolution ladder** — a fuzzy question is ROUTED, not guessed. Four rungs, in
+order: (1) literal anchor hit → load; (2) scope match with no literal hit → load the single
+candidate and **state the routing basis in one line**, never answer silently from a guessed
+profile; (3) two-plus candidates → ask ONE routing question off the disambiguation table's own
+axis instead of loading several; (4) no candidate → generic framework, and say so. The matching
+rules each rung depends on (case-SENSITIVE but NFKC variant-INSENSITIVE, and why), the
+retrieval-turn exception to rung 3, and the standing prohibition on widening manifest keywords
+to compensate for a missed fuzzy match: `_routing.md` § How Gate A uses this manifest — which
+this step already has open.
 
 **Step 0.5 — Scope check (fires after Step 0, before the diagnosis).** If the turn carries no
 research-stage question — it is purely retrieval or extraction ("find me 5 papers on X", "make an

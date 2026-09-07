@@ -72,7 +72,9 @@ tables, and copy-paste templates live in the reference files.
    actions, risk-tier index, test requirements), pointing into `docs/` for depth.
 2. **Architecture Guardrails** — enforce invariants in CI, not in review comments.
    MVG: one dependency-direction lint (dependency-cruiser / import-linter / ArchUnit)
-   whose error message contains the fix instruction.
+   whose error message contains the fix instruction. Each named invariant states
+   the evidence rung it carries (`rules/verification-ladder.md`, path-scoped so it
+   fires on test/gate files rather than on this rarely-invoked skill).
 3. **Eval & Test Harness** — tests are the control plane for AI code quality, not
    just a safety net; quality ≈ 80% test coverage + 20% prompt quality. MVG: every
    incident fix must land with a test reproducing the failure before the incident

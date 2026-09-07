@@ -13,8 +13,10 @@ environment facts (step B) and a durable task ledger (step C). Without them,
    (domain glossary, §E — if present), `references/<project>-decisions.md`
    (§G — if present, re-confirm its `## Now` premises before acting),
    `references/<project>-session-digest.md` (session footprint, E-9 — skim the
-   newest 3 entries only), and grep
-   `~/.claude/ops/lessons.md` for the project name. Never assume a fresh start.
+   newest 3 entries only), and run
+   `python ~/.claude/tools/closeout-intake/intake.py match --project <name>`
+   for the project's lesson cards (≤3; `grep ~/.claude/ops/lessons.md` is the
+   fallback). Never assume a fresh start.
    **`references/<project>-map.md` (§H) is read LAST and only after its
    fingerprint verifies** — verifying after reading has already spent the tokens
    the check exists to save. Its verdict is a P-env premise: report it in the

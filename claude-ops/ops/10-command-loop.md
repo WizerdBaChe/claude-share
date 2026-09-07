@@ -26,8 +26,10 @@ reviews nobody can act on — the action was performed, the outcome missed.
 ## Step 1 — Check the ledger before acting
 
 Three quick checks: (a) task tracker — already started, maybe half-done?
-(b) `ops/lessons.md` and past notes — already hit and solved? (c) skill/tool
-catalogue — a tool for exactly this already exists?
+(b) the lessons ledger — grep `ops/lessons.md` for a prior hit (the source's
+tag-overlap match tool is source-only and not shipped here) — and past notes
+— already hit and solved? (c) skill/tool catalogue — a tool for exactly this
+already exists?
 
 **Why**: in long-running agent environments the dominant waste is reinvention —
 duplicate mechanisms built because nobody looked first.
@@ -148,9 +150,13 @@ ticket, explain the reorder when reporting.
 1. **Report**: one-sentence conclusion first → key details → next step. Large
    deliverables by path, not pasted.
 2. **Feed the loop**: route the lesson per `40-maintenance.md` §2 (check for an
-   existing entry first). A decision with rejected options, a ≥2-round
-   problem, or a plan deviation also lands in the project's decision journal
-   (`60-bootstrap.md` §G write-triggers).
+   existing entry first). A global-level pitfall is a structured record: front
+   matter `what` / `tags`, `## Record` with `locator:`, `## Context` /
+   `## Pitfall` / `## Fix` [+ `## Detection`, `## Narrative` for the verbatim
+   rest], added through a guarded intake process (source-only tooling, not
+   shipped here) rather than by hand-editing the lessons ledger. A decision
+   with rejected options, a ≥2-round problem, or a plan deviation also lands
+   in the project's decision journal (`60-bootstrap.md` §G write-triggers).
 3. **Reconcile commitments**: everything you said you'd do — done, or
    rescheduled with notice? Before ending the turn, check for any ticket still
    marked active and owned by you (including one interrupted by an incoming

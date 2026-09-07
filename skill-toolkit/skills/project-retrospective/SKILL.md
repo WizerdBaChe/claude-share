@@ -29,17 +29,16 @@ ends — that is `workflow-checkpoint`'s job.
 ## Overall Flow
 
 ```
-1. Read durable records, then scan conversation → 2. Classify & extract →
-2.4 Rule sibling scan (probes come from Step 2's output) →
-2.5 Triage any LIVE defect the scans surfaced → 3. Reconcile the open list →
-4. Draft + ONE consolidated check-in → 5. Output documents →
-6. Write project-level rules (unless project CLAUDE.md IS global) → global
-candidates DEFERRED to the accumulation file + backlog count reported (never
-written here) → close-out → mechanical self-check → log
+1. Read durable records, then scan conversation → 2. Classify & extract → 2.4
+Rule sibling scan (probes from Step 2's output) → 2.5 Triage any LIVE defect
+the scans surfaced → 3. Reconcile the open list → 4. Draft + ONE consolidated
+check-in → 5. Output documents → 6. Write project-level rules (unless project
+CLAUDE.md IS global) → global candidates DEFERRED to the accumulation file +
+backlog count reported (never written here) → close-out → mechanical
+self-check → log
 ```
 
-Before starting, read `references/extraction-taxonomy.md` (classification) and
-`references/step1-source-reading.md` (Step 1's full source protocol).
+Before starting, read `references/extraction-taxonomy.md` + `references/step1-source-reading.md`.
 
 ## Step 1: Read the durable records FIRST, then scan the conversation
 
@@ -179,9 +178,8 @@ Document 1/2 under a DIFFERENT name (an earlier milestone, an old project
 name), the new document's header must state `Supersedes <old file>`, naming
 any rule of the old file this round REWROTE (not merely added to) — otherwise
 a future Step 2.4 reads both versions side by side with no way to tell which
-is current. Use the
-templates from `references/output-templates.md`; both documents' AUTHORITATIVE
-format specs also live there (§"Document 1 format" / §"Document 2 format"):
+is current. Use the templates from `references/output-templates.md`; both
+documents' AUTHORITATIVE format specs live there too (§"Document 1/2 format"):
 
 ### Document 1: `retrospective-[project-name]-[date].md`
 Human-readable experience guide, user's preferred language (default:
@@ -241,49 +239,23 @@ After producing the documents, do ALL of the following in order (do not skip —
    worth a batch session. Do not push for that session, and never treat the
    check-in's silence as anything: there is nothing to approve here.
 
-   The four gates still run — as TRIAGE producing a per-candidate
-   recommendation (adopt / merge into X / reject) for the batch session, not
-   as a write authorization. A candidate destined for global would have to
-   pass ALL four:
-   - (a) **Generalizable — and checked, not estimated.** Judge this on Step
-     2.4's rule-sibling-scan results, never on reasoning alone. A rule that two
-     projects arrived at independently is evidence-backed; a rule seen once is
-     a hypothesis. Record which it is in the candidate table's "why" column.
-   - (b) **Not already covered** — read the current `~/.claude/CLAUDE.md` AND the
-     skill descriptions before proposing. A rule that duplicates an
-     always-triggering skill is charged twice; the fix is that skill's trigger,
-     not a new global line.
-   - (c) **Not better merged** — if it is the *how* of an existing rule, propose
-     it as an amendment to that rule, not a new one. Two rules competing for one
-     situation is worse than one rule that is slightly longer.
-   - (d) **Worth its rent** — global is charged to every session. Rank by
-     observed occurrences across projects, not by how important it feels. A
-     sharp rule that fires twice a year belongs in `~/.claude/ops/lessons.md`,
-     not global. A rule whose occurrence count went UP because of this
-     project's evidence should be re-proposed even if a previous retrospective
-     rejected it — say so explicitly, with the old verdict and what changed.
-     The rejected-candidate history lives in `global-rule-candidates-*.md`,
-     not in Document 2.
-   Present candidates as the Step-4 table (rule | recommendation: adopt /
-   merge into X / reject | why) for information/correction only.
-   **Persist the full candidate table** — including every rejection and its
-   why — as `global-rule-candidates-[project-name]-[date].md` in the output
-   directory. The file's header MUST state the batch's status — default is now
-   `judged-but-deferred (pending batch session)`; `executed` may only ever be
-   written by the batch session, never by this skill — and its tail MUST carry
-   a section "Input for the next Step 2.4" saying, per candidate, what new
-   evidence would re-open it. A candidate with no status is invisible to the
-   next round — it cannot tell "judged and rejected" from "judged and parked"
-   from "never ruled", and those three answer "re-propose?" differently. That
-   file IS both the rejected-candidate history a future Step 2.4 scans AND the
-   work queue the batch session consumes; if it is not written, the candidates
-   simply vanish.
-   **Report the accumulated backlog (the deliverable of this step)**: glob
-   `global-rule-candidates-*.md` in the output directory, count the candidates
-   in files whose header status is still pending/deferred, and state it in the
-   check-in or close-out: "N pending global-rule candidates across M files —
-   批次處理時另開一個 session 即可". The count, not a question, is what the
-   user acts on.
+   Three things happen, in order, and the details of all three are in
+   `references/global-candidate-triage.md` — read it before doing this step:
+   - **Triage** each candidate against the four gates (generalizable — checked
+     against Step 2.4, not estimated / not already covered / not better merged
+     into an existing rule / worth its rent), producing a recommendation of
+     adopt / merge into X / reject. Present them as the Step-4 table for
+     information and correction only.
+   - **Persist** the full table, rejections included, as
+     `global-rule-candidates-[project-name]-[date].md` in the output directory,
+     with a header STATUS (default `judged-but-deferred (pending batch
+     session)`; only the batch session may ever write `executed`) and a tail
+     section saying what new evidence would re-open each candidate. Unwritten,
+     the candidates simply vanish; unstatused, the next round cannot tell
+     "rejected" from "parked" from "never ruled".
+   - **Report the accumulated backlog** — glob the candidates files, count
+     those still pending, and state the number. That count IS this step's
+     deliverable.
 
 3. **Close-out visibility gate.** Two checks:
    - Update the project's row in `~/.claude/references/PROJECTS.md` (status →
@@ -324,9 +296,5 @@ conditional not blanket · rules with context (a "why" per rule) · layered
 cannot be known). Full statements: `references/output-templates.md` §"Output
 principles".
 
-## Notes
-
-- For long conversations, do a keyword scan first (errors, decisions, preferences) before reading fully
-- Don't stuff in everything — only extract turning points, corrections, and explicit choices
-- If the project has no clear name, ask the user or default to "this-project"
-- (Document 2's format mandate and Step 6's non-optional close-out are stated in full at Steps 5–6; not repeated here.)
+Reading and extraction habits (keyword-scan first, extract turning points not
+everything, naming fallback): `references/step1-source-reading.md` §Habits.

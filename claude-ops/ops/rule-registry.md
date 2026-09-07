@@ -138,7 +138,29 @@
 - rollback: `backups/2026-08-12/`
 
 ### `CLAUDE_MD_CAP` — global CLAUDE.md always-loaded budget
-- current: **19,968 bytes (19.5 KiB)** — user ruling 2026-08-18
+- current: **23,040 bytes (22.5 KiB)** — user ruling 2026-09-06
+- 2026-09-06's argument for THIS raise, on the same terms the entry demands.
+  The fold pass ran the find-a-sink test first and found exactly ONE cluster
+  with a real destination: the four `[BC]` rules, whose mechanics moved to
+  `05-authority.md` §4a — a genuine sink, because §4 there already named all
+  four and stated when a live boundary contract supersedes them — with their
+  TRIGGERS kept in CLAUDE.md so they still fire (−685 B). Two restatement
+  deletions followed (the path-rule index's reference impls/gate paths/re-glob
+  dates, −703 B; the relaxation-gate ask procedure, the `[unattended-run]`
+  obligation list, the ledger flag list, the prior-art tool paths and the
+  browser-pane detail, −545 B). One new rule was added, from this round's own
+  defect: a gate's predicate must not be a POSITION in a growing artifact
+  (+360 B). Net 23,587 → 22,014 B, bullet headings 42 → 39 with no rule
+  dropped. The residual fails all three sinks the nudge names: the remaining
+  39 bullets trigger on TASK SHAPE, so no `paths:` glob can carry them, and a
+  rule parked in a low-traffic home is what `lessons.md` L-048 hit 2 measured
+  (the verification-ladder text sat in a skill invoked in 0 archived sessions).
+  Compressing further is what the 2026-08-31 verdict already priced at negative
+  marginal value. **Applied at 23,040, which is 512 B ABOVE the 22,528 the
+  2026-08-31 pre-armed conclusion suggested** — the proposal argued from the
+  post-pass size (22,014) plus ~1 KiB, and the user approved that value; the
+  extra 512 B is headroom this entry's doctrine still says must not be treated
+  as spendable. Next addition runs find-a-sink and merge FIRST, as before.
 - why: CLAUDE.md is loaded IN FULL every session, so bytes here are the only
   instruction bytes that are unconditionally charged. Trim or merge, never
   append — and the cap's job is to force that question at a decision point,
@@ -198,12 +220,18 @@
   H-4 provider discriminator, H-2 representation rung — 0 new rules, per the
   amend-don't-append reading of the thin margin) → **19,968 B (2026-08-18,
   user ruling; 2 new rules + 3 amendments from the shell-error sweep, after
-  two compression passes and a sink check that came back empty)**
-- review-when: any proposed global-CLAUDE.md change (headroom ~11 B as of
-  2026-08-31, reserve spent — re-run find-a-sink / merge, then argue the raise
-  per the 2026-08-31 verdict above), or a rule in this file gains a valid
-  `paths:` sink and can leave. Also: once the shell-guard hook ships, re-judge
-  whether bullet 2 can shrink and the cap come back down.
+  two compression passes and a sink check that came back empty)** →
+  **23,040 B (2026-09-06, user ruling; the `[BC]` extraction + two restatement
+  deletions + 1 new rule, sink check empty for the residual)**
+- review-when: any proposed global-CLAUDE.md change (headroom 1,026 B as of
+  2026-09-06 — the wording reserve is still spent, so re-run find-a-sink /
+  merge FIRST and treat the headroom as unspendable), or a rule in this file
+  gains a valid `paths:` sink and can leave. Also: once the shell-guard hook
+  ships, re-judge whether bullet 2 can shrink and the cap come back down; and
+  if `05-authority.md` §4a proves to be a home nobody reads (the L-048 hit-2
+  test: count its loads), the `[BC]` extraction must be reversed rather than
+  left as prose in a cold file — which would put ~685 B back and re-open this
+  value.
 - rollback: `hooks/ops_health_nudge.py` `CLAUDE_MD_CAP`; `40-maintenance.md` §3
 
 ### `BODY_CAP` — SKILL.md body line cap
@@ -231,8 +259,8 @@
 - rollback: `hooks/ops_health_nudge.py` `DESC_CAP`
 
 ### routing dict cap
-- current: **28K bytes on `skill-trigger-dict.md`, ROLE = REVIEW TRIGGER**
-  (2026-08-17, after dict-review round 1). Firing means "run the routing
+- current: **42K bytes on `skill-trigger-dict.md`, ROLE = REVIEW TRIGGER**
+  (2026-09-04, after dict-review round 2). Firing means "run the routing
   audit and correct the entries it reports as fiction", NOT "extract detail".
 - why: same class (b) argument as `ops file cap` — charged only on a routing
   miss — plus one this file has that the ops files do not. `tools/skill-routing
@@ -271,8 +299,42 @@
     which fire anyway — so the review this trigger asks for has NOT happened and
     a third raise is not earned. Recorded here rather than acted on because the
     session that found it was fixing the nudge, not the dict.
+    **CLOSED 2026-09-04 by round 2 below.**
+  - `2026-09-04 37,369 B`: round 2 — **audit found dead entries removed AND the
+    instrument checked**, then raised 28K→42K. First firing to move a coverage
+    number: `schedule` and `update-config` 0% → 100% after their vocabulary was
+    rewritten from their own measured fires; DEAD 13→8; DEAD-but-firing 4→1 (the
+    survivor is a user naming the skill outright, not a vocabulary defect); 3
+    phantom targets tombstoned (`/review`, `verify`,
+    `product-management:write-spec` — none installed, none in the catalog); one
+    live-surface broken link fixed. **The ruler was checked first, and it is
+    biased:** `load_entries()` reads only `關鍵詞：`, so 10 entries carrying only
+    `精準句型：` printed DEAD by construction (folding that line in adds 205
+    occurrences and ZERO hits — the fix is to label the state, not to parse
+    more); and `compile_tokens()` wraps ASCII tokens in `\b`, which never
+    matches ASCII written flush against CJK (control: HIT 21→28,
+    workflow-checkpoint 16%→24%). Both biases understate the dict, and the "the
+    dict does not explain real routing" verdict survives both. Evidence: a
+    dated review note under the source's outputs/ tree, which this repo does
+    not ship; tool fix carried by T-023.
+    Not an "entries true" reading, so the three-in-a-row test has not started.
+  - `2026-09-04 (same day, T-023 DONE)`: the three biases are fixed, so the
+    numbers three lines up are now the numbers of a RETIRED ruler. Re-measured
+    on one corpus (1,982 turns, old tool vs new): HIT 21→28, occurrences
+    534→620, and a new `LATE` column shows **71** turns whose words appeared
+    and whose own skill fired later in the same session, past the 6-event
+    window. `workflow-checkpoint` alone: coverage 16%→24%, LATE 50. The
+    direction of the 2026-09-04 verdict is unchanged — the dict still explains
+    a minority of routing — but **"0% coverage" must not be quoted on its own
+    any more**: quote it with LATE, or it overstates the fiction. `LOOKAHEAD`
+    was deliberately NOT widened (that would manufacture causation) and
+    `精準句型` deliberately NOT tokenised (+205 occurrences, +0 hits). Tests:
+    `tools/skill-routing-audit-test/` — 14 two-sided cases, 4/8 against the
+    pre-fix copy, so they bite.
 - history: 20K (birth) → **24K (2026-08-15**, user ruling, after the first
-  routing audit) → **28K (2026-08-17**, after dict-review round 1). The
+  routing audit) → **28K (2026-08-17**, after dict-review round 1) → **42K
+  (2026-09-04**, user ruling, after dict-review round 2; the file lands at
+  93.5% on purpose so the next expansion re-runs the decision). The
   2026-08-15 breach was the first time anything checked whether its contents
   corresponded to reality. **The 2026-08-17 raise was never recorded here** and
   this entry read "24K" until 2026-08-27, while `40-maintenance.md` §3 read
@@ -334,11 +396,12 @@
   count can measure it).
 
 ### ops file cap
-- current: **22K bytes per `ops/*.md`, and its ROLE is a REVIEW TRIGGER, not a
-  budget** (2026-08-15; 22K since 2026-08-21). **Scope: `lessons.md` and `rule-registry.md` are exempt**
+- current: **26K bytes per `ops/*.md`, and its ROLE is a REVIEW TRIGGER, not a
+  budget** (2026-08-15; 26K since 2026-09-06). **Scope: `lessons.md` and `rule-registry.md` are exempt**
   (`SIZE_CAP_EXEMPT`) - their size tracks the CORPUS, not bloat, so an over-cap
   reading has no extract remedy and can only nag forever. Their real degradation
-  checks are elsewhere: `LESSON_CAP` (entries, not bytes) and S4.1 ghost rules.
+  checks are elsewhere: `intake.py report` over the per-record events (key
+  `INTAKE`; `LESSON_CAP` retired 2026-09-07) and S4.1 ghost rules.
 - why: the budget reading was never supported by a measurement, and Phase 2
   supplied one that refutes it. The entire always-loaded instruction surface we
   control is ~39.8 KB (~10,200 tokens) - about 5% of a 200K context, and
@@ -375,22 +438,106 @@
   instruction-loading probes, Bash-result shape, auto-mode evidence, reviewer
   correction → `references/harness-measurements.md`; hook mechanics →
   `references/browser-pane-pixel-route.md` "Enforcement" → 16.6K.
+  **2026-09-06 environment.md 25,399 B: review found extractable concrete, and
+  it was NOT ENOUGH — the first firing where that happened.** Moved: the
+  Playwright MCP flags/measurements and the whole `playwright-chrome` removal
+  narrative (a REMOVED server, described in full, whose mechanism already lived
+  in two other files) → `references/browser-pane-pixel-route.md` §"Playwright
+  MCP servers"; the hook-enforcement and pixel-route paragraphs compressed to
+  fact + pointer, their detail already being in that file. −1,243 B lossless,
+  to 24,156 B — still 1,628 B over. What remains is the measured-fact tables
+  this file exists to BE (toolchain traps, dispatch semantics, cost-cap policy,
+  display premises), and §3 forbids compressing those to fit. So this firing is
+  the one the settling procedure above did not anticipate: not "found nothing"
+  (the trigger worked — it produced a real extraction), but "found something
+  and the file is still over", which is the signature of a file whose size
+  tracks the ENVIRONMENT rather than bloat. Proposal, with this pass as its
+  evidence: `drafts/2026-09-06-ops-size-cap/APPLY.md`. Not self-applied —
+  `SIZE_CAP` lives in `hooks/`, so it needs the named authorization
+  `70-evolution.md` §1 invariant 1 requires.
+  Same day, same check, a second finding worth keeping separate:
+  `20-dispatch.md` went 16 BYTES over on an edit made in the same session that
+  was reading this entry. It was not a raise case — the added material was
+  detail with a designated sink (`references/harness-measurements.md`
+  §Dispatch semantics), and moving it took the file to 98.4%. A 16-byte breach
+  is the clearest possible demonstration that the number is a review trigger
+  and not a budget.
 - history: 10K (birth) -> 12K (2026-08-06, after a failed trim pass) -> 15K
   (2026-08-13, after another) -> 18K (2026-08-15, role changed to review
   trigger; the first raise justified by a measurement of what the bytes cost
   rather than by an inability to cut them) -> 22K (2026-08-21, after a review
   that found and extracted concrete from both firing files and still left
-  20-dispatch.md at 20.9K of rules)
+  20-dispatch.md at 20.9K of rules) -> **26K (2026-09-06, user ruling,
+  proposal `drafts/2026-09-06-ops-size-cap/APPLY.md`)**. The third firing was
+  the first of a THIRD kind the 2026-08-15 settling procedure never
+  anticipated: it armed for "review found extractable concrete" or "review
+  found nothing", and this one found real concrete AND left the file over
+  (environment.md 25,399 -> 24,156 B lossless into
+  `references/browser-pane-pixel-route.md`, still 1,628 B past 22K). 26K
+  clears the reviewed state with ~2.4K headroom, which puts the two files
+  nearest behind it -- 20-dispatch 22,167 B and 40-maintenance 21,302 B -- at
+  83% and 80%, where a review trigger should sit right after a review.
 - review-when: three consecutive firings resolve as "reviewed, nothing to
   extract, raised" (see evidence); OR a measurement shows the always-loaded
   surface is no longer cached or no longer a small share of context, which
-  would restore the budget reading.
+  would restore the budget reading. **AND (armed 2026-09-06): environment.md
+  fires again after a pass that moved real content** -- then the honest answer
+  is not a fourth raise but a RECLASSIFICATION into `SIZE_CAP_EXEMPT` on the
+  same ground as `lessons.md` ("size tracks the corpus, not bloat"). It is NOT
+  exempt today and should not be: the 2026-09-06 pass proves it still has an
+  extract remedy, and exempting it now would remove the pressure that produced
+  that extraction.
 - rollback: `git show 425a7e5^:hooks/ops_health_nudge.py` (pre-check14, 18K value);
   `git show fe2dc3f^:hooks/ops_health_nudge.py` (pre-sizecap-18k); dated backups pruned;
   `40-maintenance.md` S3 table row
 
-### lessons ledger shape — one card per entry, full record in `references/lessons-detail.md`
-- current: `ops/lessons.md` holds one CARD per entry (header line with the
+### `LESSON_CAP` — unfolded entries in `ops/lessons.md` (RETIRED)
+- current: **RETIRED 2026-09-07 (intake cutover, key `INTAKE`)** — the ledger
+  is `ops/lessons/` (one record per file) and `ops/lessons.md` is a GENERATED
+  index with NO count cap: the cap was after-the-fact back-pressure whose only
+  relief was a fold pass, which is what produced the periodic several-hundred-
+  line rewrites (R2 evaluation RC2/RC3). The live signal is per record now:
+  `intake.py report` (hits ≥ 2 never folded → §2a; folded but recurring). The
+  constant, the nudge check and the `check_cap_binding.py` binding were removed
+  in the same commit. Value at retirement: 36. What follows is history.
+- was: **36 unfolded entries** — user ruling 2026-09-06. Counted as
+  `^## L-\d+` headings over the WHOLE file: folding removes an entry's heading
+  and leaves a `- **L-nnn**` bullet, so the heading set IS the unfolded set.
+- why: class (b), a REVIEW TRIGGER rather than a budget — the ledger is charged
+  only when something greps it, and its size tracks the corpus of real
+  incidents. The number's job is to force a fold pass at a decision point. The
+  floor is not zero: an entry with `hits:` >= 2 is never folded (a climbing hit
+  count is the live evidence a fix does not work), and entries cited by number
+  from global CLAUDE.md or `40-maintenance.md` must stay resolvable in place.
+- evidence: the 4th fold pass (2026-09-06) applied the bar unchanged from
+  passes 1–3 — `hits: 1`, a hook or durable rule file carries the fix, no
+  by-number global CLAUDE.md citation — folded 9 entries, and STOPPED at 33.
+  Named reasons for the 33: 16 at `hits:` >= 2, 5 cited by number, 8 kept on
+  carrier grounds by the 2026-08-31 pass, 2 carried only by project code, 2
+  with a carrier too young to have been read even once (the L-048 hit-2 test).
+  Going lower means folding entries whose fix lives only in recall, which §3
+  names as the signal to raise the cap with the failed pass as evidence.
+  36 = that floor + a 3-entry margin; the margin is not theoretical — L-053 was
+  written the same hour and took the live count to 34.
+- history: ~30 (birth, `40-maintenance.md` §3) → 36 (2026-09-06, user
+  ruling) → **retired 2026-09-07 (intake)**. The measured count was WRONG for the five days before this raise:
+  the check split the file at `## Archived` and read 32 while the truth was 42
+  (`lessons.md` L-047 hit 2), so the pre-raise number was never a real reading.
+- review-when: the never-foldable population (`hits:` >= 2) passes 20 — that
+  population, not the total, is what sets the floor. Also whenever the fold BAR
+  itself changes (e.g. if "carried by project code" becomes foldable), because
+  the floor moves with it.
+- rollback: `hooks/ops_health_nudge.py` `LESSON_CAP`; `40-maintenance.md` §3
+  table (b); `tools/ops-health-test/check_cap_binding.py` `FIXTURE_CAPS`.
+  Backup: `backups/2026-09-06/ops_health_nudge.py` (pre-change).
+
+### lessons ledger shape — one card per entry, full record in `references/lessons-detail.md` (SUPERSEDED)
+- current: **SUPERSEDED 2026-09-07 by `INTAKE` (next entry)** — the two-file
+  hand-written shape is retired: `ops/references/lessons-detail.md` is FROZEN
+  (header says so) with every section imported verbatim into
+  `ops/lessons/L-nnn.md` `## Narrative`, and `ops/lessons.md` is generated.
+  What follows is history.
+- was: `ops/lessons.md` holds one CARD per entry (header line with the
   only `hits:` field / Context / Pitfall / Fix / Detection / Recurrences /
   Evidence / Detail pointer); `ops/references/lessons-detail.md` holds the FULL
   RECORD under the same `## L-nnn` heading, verbatim and append-only, with
@@ -416,6 +563,84 @@
 - rollback: restore `git show 9ad18b4:ops/lessons.md` over
   `ops/lessons.md` and delete the detail file (sweep 5b then reports 0 vs 27,
   which is the intended signal that the split was undone).
+
+### `INTAKE` — lesson intake store `ops/lessons/`, generated index, event-derived state
+- current: since 2026-09-07 (closeout-capture R4, claude-config Phase 23) a
+  lesson is ONE file `ops/lessons/L-nnn.md` — xi-card front matter + `## Record`
+  (id / kind / created / session / project / **locator** / digest) + capped
+  Context / Pitfall / Fix / Detection + unbounded verbatim `## Narrative` +
+  append-only `## Events` — born only through
+  `python tools/closeout-intake/intake.py add --from <draft>` after validation
+  D1–D9 (INV-1), never rewritten (INV-2: `hooks/intake_guard.py` DENIES
+  Write/Edit/shell writes to `ops/lessons/` and `ops/lessons.md`; later facts
+  are `intake.py event L-nnn --kind recurrence|fold|supersede|retract`). `hits`
+  and lifecycle state (live / dormant / folded / superseded / retracted) are
+  DERIVED from `## Events` (INV-4); the front-matter `status:` line is the one
+  tool-rewritten projection in xi vocabulary (S-9). `ops/lessons.md` is a
+  GENERATED index of capped cards (INV-5, `intake.py render`) with NO count cap;
+  the `## L-nnn` heading shape is kept so citations and gsnap keep resolving.
+  Sub-keys — values are PROVISIONAL and live in the code; the registry NAMES
+  them and never restates them (a second site would be a drift surface):
+  - `INTAKE_FIELD_CAPS` — `intake_core.DEFAULT_CAPS`, byte caps on Context /
+    Pitfall / Fix / Detection; overflow belongs in `## Narrative` and the D5
+    reject names the bytes to move. review-when: `intake.py report` shows
+    > 20 % of new records rejected on D5 twice in one week.
+  - `INTAKE_INJECT_BUDGET` — `intake_core.DEFAULT_BUDGET`, max cards / max
+    bytes per `intake.py match` (INV-7). review-when: the shadow telemetry
+    `telemetry/intake-match.jsonl` median `bytes` exceeds it.
+  - `INTAKE_LOCK_STALE_S` — `intake.Lock` stale age for `<id>.lock`.
+    review-when: a `stale lock broken` line appears for a holder that was
+    still alive (a false break), or controls C-95/C-96 start failing.
+- why: the hand-written two-file ledger needed 11 manual steps at ~190k
+  context — 77 % of writing sessions skipped the detail file, ids collided
+  twice, and a count cap whose only relief was a fold pass produced the
+  periodic "大型重整" (R2 evaluation RC1–RC5). User premise (2026-09-07): fix
+  the schema at capture time so later processing loses less — every
+  processing step loses or changes something, so processing APPENDS events
+  and derives views; it never rewrites the record.
+- evidence: `intake.py import --verify` 54 ids both ways, `## Narrative` bytes
+  equal to both legacy sources; `tools/closeout-intake/controls.py` C-01..C-96
+  ALL PASS (a positive and a negative control per rule, a 20-process id race,
+  render idempotence, a Hypothesis property on the match budget, tampered-
+  source import, stale/fresh lock, guard payloads); design verification
+  (sonnet, author ≠ verifier) BLOCKED 3/2/9 → resolved in design v1.1.
+- history: born 2026-09-07; supersedes `lessons ledger shape` (2026-08-21) and
+  retires `LESSON_CAP`; sweep checks 5/5b/5c/5d replaced by `intake.py check
+  --against HEAD --index` + the guard proof-of-life.
+- review-when: a second record kind (`kind: digest`) enters — BR-10c
+  mechanisation (registered kinds only) is the labelled extension; or the
+  match hook graduates from shadow (a user gate; its criterion is pending).
+- rollback: revert the M2 commit (guard + registration set); the M1 store is
+  unaffected. Pre-cutover ledger: `git show fa08fa3:ops/lessons.md`;
+  `archive/lessons-cutover-2026-09/NOTE.md`.
+- owner / spec: semantics `references/closeout-capture-r3-design-2026-09-07.md`
+  §4; build contract `references/closeout-capture-r3-psm-2026-09-07.md`; usage
+  and record format `tools/closeout-intake/README.md` (rules-usage-dict §7).
+
+### `PAGE_FILL` — human-facing HTML uses the width it is given; classes are data
+- current: a page declares `<html data-page-class="…">`; class rows + thresholds
+  live in `tools/page-fill-gate/page_classes.json` (document-short centred &
+  symmetric, min fill 0.35 · document-long / deck / dashboard reach ≥ 0.85 ·
+  tool ≥ 0.90 · diagram centred-or-fill, min fill 0.60; left-anchored cap =
+  right void − left void > 15 % of the content width → FAIL at a gating
+  viewport, WARN at 1280×610 and on any INFERRED class). Property text:
+  `ops/environment.md` §Display; rule carrier: `rules/deliverable-doc-refs.md`.
+- why: user ruling 2026-09-04 — one shell's `max-width:1060px` had become 13
+  deliverables at 60–69 % fill and no gate had a word for "unused width"
+  (`lessons.md` L-048). Thresholds are FIRST VALUES set from the 268-file scan
+  (negatives 96–99 %, positives 60–69 %); the user preferred proportional
+  allocation over pixel caps for every class including tools.
+- evidence: a dated width-void diagnosis note under the source's outputs/
+  tree, which this repo does not ship; `tools/page-fill-gate/README.md` §基準;
+  `tests/test_fill_gate.py` (two-sided per class).
+- history: 2026-09-04 created (five decisions D1–D4 + registry-over-enum on the
+  user's "avoid re-classifying later" instruction).
+- review-when: the screen / scaling in `environment.md` changes; a page ships
+  on an inferred class and draws a second human report (add the row); a
+  threshold produces a false FAIL on an accepted page (lower it HERE with the
+  page named, never by exempting the page in prose).
+- rollback: remove the CLAUDE.md line + the two rule paragraphs; the tool and
+  registry can stay as an advisory instrument.
 
 ### `UAT_A_CAP` — manual-acceptance checklist: rank axis and `A` item budget
 - current: a manual-acceptance checklist is two consequence-ranked sections —
@@ -521,8 +746,13 @@
 - history: unchanged since birth
 - rollback: `ops/environment.md` "Subagent cost cap"
 
-### `~/.claude/AGENTS.md` — keep on disk, out of version control
-- current: kept, untracked. Do NOT delete and do NOT re-add to git. (2026-07-09)
+### `~/.claude/AGENTS.md` — SUPERSEDED 2026-09-05: archived with the Codex cleanup
+- current: file no longer exists on disk. USER ruling 2026-09-05 (clean slate
+  before reinstalling Codex): it was moved to a dated archive folder outside
+  this tree (2026-09-05) and the user will delete the archive. Do NOT recreate
+  it; the `.gitignore` line stays so a future codex env-copy cannot slip into
+  git.
+- previous (2026-07-09 → 2026-09-05): kept, untracked. Do NOT delete and do NOT re-add to git.
 - why: USER ruling. It is a codex env-copy leftover — not the interop source
   (`interop/portable-core.md` is) and not a deploy target.
 - evidence: its pointers (`~/.Codex/ops/05-authority.md`) resolve to nothing
@@ -554,6 +784,44 @@
 - review-when: a git REMOTE is added. The no-remote premise is the only reason
   the three account-name hits were acceptable; re-run the `interop.py` leak
   scan before the first push. (Was an ad-hoc `note:` until 2026-08-14.)
+
+### `projects/*/memory/*.md` — tracked (the rest of `projects/` is not)
+- current: TRACKED (2026-09-06, user ruling "memory 那半追蹤的狀態也一起處理
+  掉"). `.gitignore` re-includes exactly `projects/*/memory/*.md` — 79 files
+  across every project slug — via `projects/*` + directory negations; every
+  other tenant of `projects/` (transcripts `*.jsonl`, `*.ledger.jsonl`,
+  `*.canary.json`, subagent dirs, `tool-results/`) stays ignored, including a
+  non-`.md` file placed INSIDE a memory dir.
+- why: the boundary is an asset property — **distilled memory is versioned,
+  raw session records are not** — not a per-file decision anyone must remember.
+  `PHILOSOPHY.md` §3 had already recorded that the memory subdir is Tier-2
+  "精煉過的事實" excluded ONLY because its PARENT carries conversation content:
+  an accident of granularity, not a ruling. It is also the single copy —
+  memory is never written into the project repo it describes — so an untracked
+  memory store has no history and no second home.
+- evidence: the state this replaced was the worst of the three. 5 of the 79
+  files had been `git add -f`'d one at a time as sessions happened to notice
+  (first at `9e1ea0b`, last at `d5a2791`); the other 74 were indistinguishable
+  from deliberate exclusions. Boundary verified two-sided before the commit:
+  `git status --untracked-files=all -- projects/` listed 74 paths, ALL matching
+  `*/memory/*.md` (74 untracked + 5 tracked = 79 on disk, exact); `git
+  check-ignore -q` still ignores `<sid>.jsonl`, `<sid>.ledger.jsonl`,
+  `<sid>.canary.json`, `projects/*/tool-results/**`, `projects/*/<uuid>/**`
+  and a hypothetical `memory/secret.jsonl` / `memory/digests/x.md`. Leak-scanned
+  the 74 incoming files for credential shapes (`sk-`, `gh[pousr]_`, PRIVATE KEY,
+  api-key/password assignments): every hit was prose ABOUT tokens, no values —
+  and there is no git remote, so tracking added no new exposure. `check-ignore
+  -v` prints the matching line even when the match is a NEGATION, so the
+  positive control was re-run on the exit code, not on the printed pattern.
+- history: gitignored as part of a blanket `projects/` since the repo's birth
+  → half-tracked by force-add 2026-08-26…2026-09-05 → boundary rule 2026-09-06
+- rollback: `.gitignore`; restore the single line `projects/` and
+  `git rm --cached -r projects/`
+- review-when: (a) a git REMOTE is added — same premise as the `references/`
+  entry above, and memory carries more personal fact per byte than any other
+  tracked directory: re-run the leak scan and re-decide BEFORE the first push;
+  (b) the harness starts writing a non-`.md` artifact into `memory/` that is
+  worth keeping (the rule would then be excluding it silently).
 
 ## Harness defaults — where the local layer narrows within them
 
@@ -754,12 +1022,36 @@
   49,711 and 49,227 tokens (1% apart). The planned 4-role probe (~200K tokens)
   was CANCELLED as redundant once the doc made a categorical claim that the
   existing two probes already tested from both directions.
+- re-read 2026-09-06 against build 2.1.257 (cc-delta reconcile; the carrier
+  fired for the second time). The four load-bearing claims all STILL HOLD
+  verbatim in the doc: Explore and Plan are the only subagents that omit
+  CLAUDE.md and git status, and there is no per-agent setting to change that;
+  the full CLAUDE.md hierarchy reaches every other subagent; auto memory never
+  reaches a non-fork subagent; the main conversation reading Explore/Plan
+  results with full context is the doc's own stated mitigation. No probe was
+  spent — the entry rests on this doc page making a categorical claim, and the
+  claim is unchanged, so two ~50K-token probes would re-test a constant.
+  What DID change is that the list GREW, by four items this layer had never
+  written down: (a) **preloaded skills** — an agent's `skills:` field puts the
+  FULL text of a named skill into the worker, which is a lever aimed exactly at
+  the cost problem this entry measures, and no definition in `agents/` uses it;
+  (b) **sibling roster** — a system reminder listing `main` and every other
+  NAMED agent as valid `SendMessage` targets, v2.1.206+, present only when the
+  worker's tools include `SendMessage` and another agent has a name; (c)
+  `includeGitInstructions`, which can remove the git-status snapshot; (d) fork
+  subagents, which inherit the parent conversation instead of starting fresh.
+  (a) and (b) are now noted in `20-dispatch.md` §roster; (c) and (d) change no
+  rule here yet.
 - history: the Explore exception sat unverified in `20-dispatch.md`'s roster
   table from birth; cost was never measured; the auto-memory gap was unknown
-  until 2026-08-15
+  until 2026-08-15; doc re-read 2026-09-06 (2.1.257) — claims unchanged, list
+  grew by four
 - review-when: a Claude Code upgrade changes the "what loads at startup" list —
   it is product behaviour, not contract, and the whole entry rests on one doc
-  page plus two probes against build 2.1.226/2.1.229.
+  page plus two probes against build 2.1.226/2.1.229. Re-checking is CHEAP and
+  is the doc page, not the probes: fetch `code.claude.com/docs/en/sub-agents`
+  §"What loads at startup" and diff the bullet list against the four claims
+  above. Spend a probe only if a claim moved.
 - rollback: n/a — a measurement, not a setting
 
 ## Mechanisms
@@ -782,6 +1074,17 @@
 - rollback: unregister from `settings.json`; commits 4239d27 / 44fe7e4
 
 ### context runway (`hooks/context_runway_shadow.py`)
+
+**Status 2026-09-05: GRADUATED at the 300k band** (user ruling C/D3) — visible notice
+asking for a handoff snapshot (`cache/handoff/<session>.md`, `hooks/handoff_snapshot.py`);
+150k band stays shadow; second condition is now "no fresh snapshot", not "no phase-log".
+Siblings: `compact_bookmark.py` PreCompact deny on auto (D1) — **DISABLED same day**: platform
+controls #2/#3 showed 2.1.257 ignores the deny on the auto path (`DENY_ENABLED=False`, code kept);
+`compact_loss_record.py` PostCompact recorder + `tools/compact-loss-audit/`. Auto-compact window
+400k via `CLAUDE_CODE_AUTO_COMPACT_WINDOW` (settings.json env; verified to override `--autocompact`).
+Design + results: `references/compaction-pipeline-design.md` §7. Live-verified: the 300k notice
+fired in a local session and a snapshot was written. Still unverified: Desktop honours the env;
+auto summaries honour CLAUDE.md Compact Instructions — the first Desktop session past 400k decides.
 - current: UserPromptSubmit, SHADOW ONLY — logs the notice it would emit,
   stdout stays empty even though this is one of only three events whose stdout
   Claude would actually see (`SessionStart`, `UserPromptSubmit`,
@@ -817,6 +1120,28 @@
   landing accuracy has been judged on real rows (that judgement IS the
   graduation decision, and it judges the WORDING at that moment, not the band).
 - rollback: unregister `UserPromptSubmit` from `settings.json`.
+
+### process ledger (`tools/process-ledger/`, general) + unattended run (`hooks/unattended_run.py`, branch)
+Irreducible principle (user ruling 2026-09-05, design §0): process data written AT ORIGIN in distilled
+form, read MECHANICALLY at every resumption, never washed. General branch, any session: decision charter
+appends every choice+reason to `projects/<proj>/<session>.ledger.jsonl` (beside the transcript — the
+one tree the daily mirror copies; cache/telemetry are cleanup targets); runway hook writes
+`cache/handoff/current-session.json` each prompt and, at the 150k band (D3 AMENDED: canary only, no
+checkpoint nag), plants the canary pair in `<session>.canary.json`; `compact_pointer.py` injects the
+last 40 ledger rows after compaction; `run_audit.py` scores F1/F4/F6 + canary for any session, F3/F7
+only under a manifest. Offline branch below adds the manifest and the two guards.
+Live 2026-09-05 (design `references/long-run-probe-design.md`, tools `tools/process-ledger/`).
+One manifest (`cache/handoff/<session>.run.json`, written when a prompt carries `[unattended-run]`;
+every other field optional — scope defaults to cwd/**, canary auto-generated, deliverables/acceptance
+model-derived via `ledger.py manifest` and marked `filled_by: model`, user ruling 2026-09-05 "no form-filling")
+feeds two FAIL-class guards that rule only on determinable facts: PreToolUse Write/Edit outside
+scope ∪ deliverables ∪ carriers → deny; Stop with a question-ending final message or no
+`reports/*-run-<slug>.md` → block (max 2 per manifest). Ledger = project registers (borrowed) +
+`ledger.py add` appendix; `report.py` skeleton; `run_audit.py` F1/F3/F4/F6/F7 + canary, advisory.
+Controls: `tools/process-ledger/controls.py` 31/31 + `tools/compact-loss-audit/hook_controls.py` 26/26 (positive + negative, isolated config dir).
+Not covered: shell-side writes, prose scope, mid-message questions. review-when: Stop/PreToolUse
+hook contract changes; any control FAIL. Tier-B compliance meter:
+`tools/compact-loss-audit/notice_compliance.py` (first row: fable 1/1, denominator 1).
 
 ### compact recovery (`hooks/compact_bookmark.py` + `compact_pointer.py` + `transcript_read_guard.py`)
 - current: PreCompact("") writes `cache/compact-recovery/<sid>.json` (transcript
@@ -1164,8 +1489,8 @@
   claims only. (2026-08-16)
 - why: user premise — the foreground is not commandeerable, so `hidden` is the
   steady state and probe-then-retry was a ritual with a foregone answer.
-  Brief + dispositions: `outputs/browser-pane-visibility-brief-2026-08-16.md`,
-  `outputs/browser-pane-visibility-outcome-2026-08-16.md`.
+  Brief + dispositions: a dated pair of browser-pane visibility notes under
+  the source's outputs/ tree, which this repo does not ship.
 - evidence: headless 1.4–1.5s WITH pixels vs pane 5s timeout with none; fresh
   pane born hidden/0×0/rAF-stalled; archive-wide 80 pane-screenshot calls vs
   853 DOM/state reads; hook suite 19/19 (`tools/ui-verify-test/`); live
@@ -1257,7 +1582,8 @@
   vs Bash-writing-a-file 5.2% (15/291) and inline `python - <<'PY'` 6.1%
   (36/586); Grep 0.9% vs PowerShell-searching 17.4% (38/218). Write and
   PowerShell probed against all three limits and have none.
-  Report `outputs/shell-command-error-audit-2026-08-18.md`; `lessons.md` L-024.
+  Report a dated shell-command error audit under the source's outputs/ tree,
+  which this repo does not ship; `lessons.md` L-024.
 - history: no routing rule existed before this entry (grep of CLAUDE.md,
   AGENTS.md, ops/*, skill-trigger-dict.md returned nothing) → born 2026-08-18
 - review-when: Claude Code updates — run `tools/shell-audit/PROBES.md` P1/P2/P4
@@ -1303,8 +1629,8 @@
   the compensation shape asserted NOT vetoed, fail-open on malformed stdin, and
   E1 proving the rejected command is persisted in full BEFORE the veto
   (`telemetry/shell-transport-guard.jsonl`) — a denied heredoc body exists
-  nowhere else. Probes and mechanism:
-  `outputs/shell-command-error-audit-2026-08-18.md`; `lessons.md` L-024.
+  nowhere else. Probes and mechanism: a dated shell-command error audit under
+  the source's outputs/ tree, which this repo does not ship; `lessons.md` L-024.
 - history: born 2026-08-18. Design corrected in the same session, BY the
   backtest, from "deny both" to "deny size / annotate backslashes" — the
   correction is the entry's main content and should not be re-derived.
@@ -1513,10 +1839,21 @@
   provisional — daily task, so 3 tolerates two missed days), live count grown,
   or premise under **90%** (`gs_watchdog.PREMISE_FLOOR`, the design's
   pre-registered line).
+- round 4 (2026-09-03, obsidian_Nathan D-24 — audit G-1 "MOC lag undetected"):
+  the status file also carries `moc_lag_files` (content-defined lag from
+  `gs_moc.lag_report`: would `emit-moc` change any `references/_moc` file for
+  this graph); `evaluate()` JOINS its findings in priority order (build FAILED
+  alone > links grew > MOC lags > premise floor) instead of letting the
+  long-standing premise alarm shadow the rest; check 15 picks the remedy by
+  finding (MOC lag → regenerate `baseline/build/verify` + `emit-moc` and commit
+  `references/_moc`; otherwise harvest). Detection only — the task never writes
+  a tracked file (user ruling: B/C/D rejected, see the design record
+  `references/obsidian_Nathan-round4-design.md` §2.3). Task settings owed by
+  the user (D-27): `StartWhenAvailable` + `ExecutionTimeLimit PT30M`.
 
 ### session mirror heartbeat — ops-health check 17 + the mirror's run ledger
 - current: the daily transcript mirror (`tools/claude-session-transcript-mirror.ps1`,
-  the scheduled copy job that feeds it, 13:00, D-033) writes a last-run
+  task `the scheduled copy job that feeds it` 13:00, D-033) writes a last-run
   marker + an append-only `run-ledger.tsv` (status, exit, jsonl count, MB —
   the count may only grow under the COPY-ONLY contract; a drop between lines
   means archive loss). Surfacing: `ops_health_nudge.py` check 17 reads the
@@ -1543,9 +1880,63 @@
   three-sided control run 2026-08-26 (growth fires / stale fires / healthy
   silent); first task run exit 0, log line in `out/watchdog-task.log`.
 - history: born 2026-08-26 (Phase 2 gap-fill round, user-approved 🔴 change).
+  **2026-09-06, first harvest actually run against the number** (commit
+  `633f1fa`): of the 9 live-surface broken links, **zero were a missing
+  file**. Four resolver classes, each a shape the corpus writes routinely and
+  the instrument had no word for — a path AT A COMMIT (`git show <sha>:path`),
+  a suffix past the extension (`x.py.pre-check15`, which also made a DELETED
+  `settings.json.pre-E2` resolve clean against the live file — the same bug
+  certifying a rollback pointer that is gone), a dated `skills/*/evals/` run
+  record that must never be edited, and an evidence line declaring its own
+  root (a `locator:` line built from an absolute private path). Fixed in the
+  resolver, not in the
+  corpus: 9 → 0, total broken 324 → 308, smoke checks 77 → 92. The report's
+  three calibration probes had all PASSED throughout — they test whether the
+  gate can say yes and no, not whether its object vocabulary covers the
+  corpus (`ops/lessons.md` L-033 hit 2). The live/historical predicate was
+  also in THREE copies (this file's consumer, `gs_moc.py`, `gs_watchdog.py`)
+  under a comment claiming one; collapsed into
+  `gs_watchdog.is_live_surface()`, which is where `FROZEN_SEGMENTS` could
+  then land once.
+  The **premise metric was deliberately not touched**: 89.2% → 89.6%, still
+  REFUTED against the pre-registered ≥90% floor. The floor is a claim about
+  the corpus; the resolver fix is a claim about the ruler; they were kept
+  separable on purpose, and the fact that the fix does not cross the floor is
+  the evidence that they are.
+  **2026-09-06, second ruling the same day — the ALARM CHANNEL** (user
+  ruling; `gs_watchdog.evaluate`): the channel carries the live-surface COUNT,
+  its growth, MOC lag and a failed build. It no longer carries the premise
+  metric. Reason: after the resolver fix, 308 of the metric's 308 broken links
+  sit in historical records where a dead link is CORRECT (a change log naming
+  a file that existed then), so the ≥90% floor has no path to being met short
+  of rewriting history — it alarmed every session forever, and it shared its
+  message with `live_broken`, the number that does mean something. The metric
+  is still measured, the verdict is still **REFUTED** in the integrity report
+  (where an unmet design premise belongs), and `premise_under_floor` +
+  `premise_floor_pct` are in the status file so re-arming is one edit. **The
+  pre-registered number and its floor were NOT redefined** — only the channel
+  changed. Second change in the same commit: the count now fires at any
+  nonzero LEVEL, not only on growth. Growth alone sufficed while the number
+  had no reachable zero; it reached 0 the same day, so a count sitting at 3
+  run after run (delta 0) would otherwise have gone quiet. Third: the hook's
+  remedy branch reads `remedy_kind` from the payload instead of matching
+  substrings of a sentence the watchdog owns — the old arm keyed on the
+  literal "broken links" and would have picked the wrong remedy the moment
+  the wording became "3 live-surface broken link(s)"; the substring arm
+  survives as the fallback for an older status file, with that exact
+  regression as a test case.
 - review-when: the daily task is removed or the machine's scheduling story
   changes; graph-snapshot's covers change enough that "live surface" means
-  something else; the premise floor is re-ruled.
+  something else; the premise floor is re-ruled. **Also: any session that
+  finds a live-surface finding to be a false positive** — the number's whole
+  value is that 0 means 0, and one standing false positive turns the harvest
+  into noise. **And: a rule or lesson file acquiring a prose note telling a
+  human not to let a tool "fix" something** — that note names a class the tool
+  cannot see and belongs in the tool's fixtures instead (L-033 hit 2).
+  **And (armed 2026-09-06): the premise metric crossing back above its floor,
+  or a session wanting it to alarm again** — the measurement never stopped, so
+  re-arming is one condition in `evaluate()`, and the status file already
+  carries both the rate and the verdict.
 - rollback: `backups/2026-08-26/ops_health_nudge.py.pre-check15`;
   `schtasks /Delete /TN "ClaudeGraphSnapshotWatchdog-Daily" /F`; delete
   `tools/graph-snapshot/gs_watchdog.py` + `watchdog-task.ps1`.

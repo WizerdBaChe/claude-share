@@ -297,6 +297,27 @@ readout.
   instrument fault until a positive control says otherwise — calibrate,
   then believe; and a new mechanism's first real output never feeds a
   downstream step in the same motion — put a known-answer input between them.
+- A gate reads the EMITTED artifact, never the producer's own intermediate
+  state: a renderer that re-runs its own layout and grades the result is
+  one piece of code judging itself, and it will agree with itself. And a
+  gate's object vocabulary must cover every class the governing rule names
+  — a rule about LINES cannot be checked by a test that only knows about
+  text boxes. When the same complaint recurs after N fixes, the first
+  question is not "what else is broken" but "which object class does the
+  complaint name that my model has no word for".
+- A gate's predicate must not be a POSITION in an artifact that grows — a
+  region, a dense identifier, an offset. Normal growth moves items across
+  the boundary while the reported number stays plausible, so the failure
+  is silent and long-lived. Prefer the position-free form (count the
+  things themselves) and flag the out-of-region case as its own finding.
+- An escape hatch that leaves no record makes the rule and reality diverge
+  silently, and the SPLIT state it produces is worse than either pure
+  state: the items nobody overrode are indistinguishable from deliberate
+  exclusions. For any rule with a per-item override, name the VIEW that
+  lists every use of that override. If there is none, the override is the
+  defect. (Most overrides pass this by construction because they leave a
+  mark a search can reach — a suppression comment, a tag in a message. The
+  dangerous ones write nothing anywhere.)
 - When authoring an invariant, checklist item, gate, or standing rule:
   write it as a property of the ASSET ("this file must never contain X"),
   not as an instruction about a path ("when editing foo, remember X") — an
@@ -304,6 +325,61 @@ readout.
   resting on a fact outside the repo gets a review trigger naming the
   EVENT that invalidates it: a control that rots silently is worse than
   none, because it is still being trusted.
+<!-- /block -->
+
+<!-- block:verification-ladder profiles:full -->
+## Evidence rungs — when a test, gate, or invariant claims something
+
+State which rung of evidence a claim carries, and never claim a rung above
+what the domain allows or below what it demands.
+
+0. Example tests — a scenario, never a property.
+1. Exhaustive enumeration — the right stop when the domain is FINITE (an
+   enum, a transition table, a small product). Exhaustive tests ARE the
+   proof; nothing above adds truth. Derive the enumeration from the table,
+   do not hand-list it.
+2. Property-based test — the DEFAULT for a pure function over an infinite
+   domain (strings, paths, numbers, lists). Name the property in the test
+   name; let generators encode the boundary structure (neighbours of a
+   value, not uniform noise).
+3. Symbolic or concolic counterexample search — only when rung 2 keeps
+   passing but a counterexample is suspected AND the code is analysable. A
+   tool's "confirmed" is a statement about ITS model of the language, not
+   about the code; if the known-true positive did not pass through the same
+   path, the verdict is about the tool. "Not analysable" and "timeout" are
+   recorded as such, never read as verified.
+4. Proof of a mirrored model plus a differential test against the real
+   implementation — reach for it when a universal statement ("for every
+   input …") is itself the deliverable and must be quoted as proven.
+5. The verified core replaces the implementation — correctness-critical
+   and performance allows.
+
+Two rules bind the ladder. Every rung ≥ 2 ships a known-true positive — a
+mutant or a historic bug the check actually fails on — and runs it in the
+same invocation as the real check: a property that has never failed is not
+known to be measuring anything. And the rung is written where the claim
+is: the test's name, the gate's status line, the invariant's record. A
+rung claimed in prose only is rung 0.
+<!-- /block -->
+
+<!-- block:depth-tier profiles:full -->
+## Depth tier — pick one before answering an analysis or design question
+
+- T0 — factual question, mechanical edit, executing a settled decision:
+  answer directly.
+- T1 — non-trivial claims: tag each as locally verified / needs external
+  check / user's decision, and verify the load-bearing ones.
+- T2 — two or more of: it is a design, plan, or evaluation deliverable; it
+  is hard to reverse; it rests on volatile external facts; the requester
+  asked for depth, completeness, or a full assessment. T2 gets a two-pass
+  treatment: build the answer, then attack it against its own premises
+  before delivering.
+
+The requester can force either end ("quick answer" → T0, "think hard" →
+T2). When signals conflict — the task looks trivial but is irreversible —
+ask; otherwise choose the LOWER tier and offer the deeper pass. An active
+heavyweight method already in play takes precedence; do not stack a second
+protocol on top of it.
 <!-- /block -->
 
 <!-- block:approach-wrong-signals profiles:full -->

@@ -29,8 +29,16 @@ Every case is a real incident, not a hypothetical:
                      The exemption's fails-without-it half is case 9: the live
                      tree now holds compact-recovery/ACCEPTANCE.md, so the
                      old gate fails the current-tree control.
+ 12  CONTROL         a .py under hooks/tests/ is a hand-run regression matrix,
+                     not an unmounted hook
+ 13  dead declaration an [[unmounted_hook]] naming a hook that IS mounted. The
+                     expiry half of the escape hatch added 2026-09-07; case 7
+                     stays the half that proves an undeclared one still fires.
+ 14  inventory drift AGENTS.md's skill table missing a shipped skill — the
+                     positive control for the same-day widening of check S4
+                     from one inventory table to two.
 
-Two of the eleven assert that the gate stays QUIET. That ratio is deliberate: a
+Three of the fourteen assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -308,6 +316,50 @@ def main():
         expect_absent=["__unmounted_test_for_test__.py ships but is not mounted"],
         mutate=plant_hook_test,
         restore=remove_hook_test,
+    ))
+
+    # 13 — the LOOSENING added 2026-09-07 pays for itself. check S5 gained an
+    #      [[unmounted_hook]] escape hatch so a hook-layer library (no event to
+    #      mount at) stops being a permanent veto. Case 7 is still the half that
+    #      proves an UNDECLARED unmounted hook fires; this is the half that
+    #      proves the hatch cannot be left standing after it stops applying —
+    #      point the live declaration at a file that IS mounted and the
+    #      declaration itself must be reported, exactly as check D reports a
+    #      stale [[allow]]. Without this, "declare it and move on" would be a
+    #      mute button with no expiry.
+    man_stale = man_saved.replace('file = "hooks/handoff_snapshot.py"',
+                                  'file = "hooks/context_runway_shadow.py"', 1)
+    assert man_stale != man_saved, "unmounted_hook fixture no longer matches"
+    results.append(case(
+        "dead declaration: an [[unmounted_hook]] for a hook that IS mounted",
+        expect_fail=True,
+        expect_in_output=["[[unmounted_hook]] declares context_runway_shadow.py",
+                          "mounted or does not ship"],
+        mutate=lambda: MANIFEST.write_text(man_stale, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
+    ))
+
+    # 14 — check S4 was widened 2026-09-07 to read AGENTS.md's skill table as
+    #      well as skill-toolkit/README.md's. A widening needs its own positive
+    #      control or it is a line of code nobody has seen fire: drop one row
+    #      from the SECOND table and the finding must name AGENTS.md, not the
+    #      file that was already covered. Case 9 (current tree) is the negative
+    #      half — it fails the moment the widening reports a table that is fine.
+    #      Read and restored as BYTES: unlike the other fixtures in this file,
+    #      AGENTS.md is CRLF, and a text round-trip would hand it back to the
+    #      tree as LF — a test that silently rewrites the file it borrowed.
+    agents_path = ROOT / "AGENTS.md"
+    agents_saved = agents_path.read_bytes()
+    agents_cut = b"".join(
+        l for l in agents_saved.splitlines(keepends=True)
+        if not l.startswith(b"| `ux-walkthrough` |"))
+    assert agents_cut != agents_saved, "AGENTS.md inventory fixture no longer matches"
+    results.append(case(
+        "inventory drift: AGENTS.md's skill table missing a shipped skill",
+        expect_fail=True,
+        expect_in_output=["AGENTS.md", "ux-walkthrough", "differs from the tree"],
+        mutate=lambda: agents_path.write_bytes(agents_cut),
+        restore=lambda: agents_path.write_bytes(agents_saved),
     ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")

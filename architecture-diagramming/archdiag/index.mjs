@@ -9,7 +9,7 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { validateViews } from './schema.mjs';
-import { buildAsserts } from './asserts.mjs';
+import { buildAsserts, a11yAsserts } from './asserts.mjs';
 import { pageHtml, DEFS, EDGE } from './emit.mjs';
 
 export function build(opts) {
@@ -30,6 +30,11 @@ export function build(opts) {
   // receipts survive a CRLF checkout/editor touching the sources (endings
   // are also pinned LF in .gitattributes — belt and braces, same property).
   const html = pageHtml(opts).replace(/\r\n/g, '\n');
+  // a11y contract (B-3, 2026-09-05) — read from the EMITTED page, not the
+  // model: role="img" + aria-labelledby → first-child <title> + <desc>, ids
+  // unique. Determinable ⇒ FAIL before any bytes are written.
+  const a11yProblems = a11yAsserts(html);
+  if (a11yProblems.length) throw new Error('A11Y FAILED:\n- ' + a11yProblems.join('\n- '));
   fs.writeFileSync(outPath, html, 'utf8');
   const sha256 = crypto.createHash('sha256').update(html).digest('hex');
   // bytes = ENCODED length (utf8), never html.length: the string length counts
@@ -38,6 +43,6 @@ export function build(opts) {
   // receipt whose count cannot be checked against the file is the L-012 proxy
   // shape. sha256 was always over utf8 bytes and is unchanged.
   const bytes = Buffer.byteLength(html, 'utf8');
-  console.log('written:', outPath, bytes, 'bytes; schema + build-time asserts passed; sha256', sha256);
+  console.log('written:', outPath, bytes, 'bytes; schema + build-time asserts + a11y passed; sha256', sha256);
   return { html, bytes, sha256 };
 }

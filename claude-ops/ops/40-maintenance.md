@@ -29,6 +29,19 @@ lifetimes, and they go to different places:
    rollback (backup path or commit). This is the record that decays: it is
    worth most on the day it is written, and `git log`/`git log -S` already
    index it perfectly.
+   **Every path and count in `change` is read off `git show --stat` (or
+   `git diff --cached --name-only` before committing — both verified by
+   running them, which is the point), never off memory of what was edited**
+   — added 2026-09-06 after three of these in one session
+   (`ops/lessons.md` L-012 hit 4). The failure is not carelessness: the tool
+   prints at one grain and the sentence claims another (a COUNT "1 of 8 files
+   rewritten" becomes a NAME; a test TAIL becomes a TOTAL; the list of files
+   EDITED becomes the list COMMITTED, which differs whenever one is
+   gitignored). The wrong half always sits beside a true half, so re-reading
+   the message confirms it. A message that names a file the commit does not
+   contain is a defect in the record, not a typo — correct it in a FOLLOWING
+   commit, never by amending: a trail that edits itself to look right is not
+   a trail.
 2. **The standing reason** — why the rule holds its CURRENT value →
    **`ops/rule-registry.md`**, keyed by the rule, not the date. Changing a rule
    REPLACES its entry and compresses the old value into `history:`. Fields:
@@ -56,9 +69,26 @@ not its age.
   2026-07-09 `AGENTS.md` ruling after it was rotated out. If you are about to
   move rationale into `archive/` or `backups/`, you are about to lose it;
   move it somewhere tracked instead.
-- **Known open tension**: top-level `references/` is gitignored by a
-  2026-07-19 user ruling, but now holds phase logs and decision journals,
-  which are durable rationale by this test. Flagged 2026-08-11, unruled.
+- **A file that must be tracked but is IGNORED is a rule defect — never
+  `git add -f` it.** The force-add keeps the file and throws away everything
+  else: the reason is unrecorded, the pattern that was wrong stays wrong for
+  the next file, and the directory ends up SPLIT, which is worse than either
+  side — the siblings nobody forced look exactly like deliberate exclusions.
+  Fix the pattern (anchor it, narrow it) or add a negation that NAMES why, in
+  the `.gitignore` itself. Detection: `git ls-files -ic --exclude-standard`
+  must print nothing (integrity sweep check 28); it is the only view in which
+  a force-add is visible at all.
+  Evidence: the check was born RED on 2026-09-06 — five files, three distinct
+  causes (an unanchored pattern eating a test fixture, an archive subtree six
+  tracked files cite, and the archive NOTEs the blanket ignore was guaranteed
+  to drop). All three, with the fixes, are in check 28 itself.
+- **Settled, was an open tension**: top-level `references/` was gitignored by a
+  2026-07-19 ruling and holds phase logs and decision journals — durable
+  rationale by this test. Ruled 2026-08-11: TRACKED, except the two generated
+  dashboard views. Standing reason + the leak-scan premise:
+  `ops/rule-registry.md` §`references/`. (The "flagged, unruled" wording stood
+  here for 26 days after the ruling — a rule text and its registry entry
+  disagreeing is exactly the rot `review-when` exists to stop.)
 
 ## §1 Tiering: who can change what
 
@@ -78,7 +108,7 @@ directory — a rule-tier write from a sandbox, unreviewed.
 
 | Lesson type | Destination |
 |---|---|
-| One-off technical gotcha (command, API quirk, environment fact) | `ops/lessons.md` (bump hit-count if it recurs; mark superseded when replaced) |
+| One-off technical gotcha (command, API quirk, environment fact) | the lessons ledger, added through a guarded intake process (source-only tooling, not shipped here) that also handles recurrence and supersession events — never hand-edit the generated index `ops/lessons.md` directly |
 | Dispatch/scheduling lesson | one line in the matching section of `20-dispatch.md` |
 | Judgment lesson | a new ✅/❌ example under the matching R-rubric in `30-judgment.md` — NOT a new numbered rule (a genuinely new rule is a 🔴/🟡-tier change) |
 | Requester preference / ruling | global CLAUDE.md (🔴 — via confirmation; end-of-project batches go through the `project-retrospective` skill) |
@@ -149,7 +179,7 @@ is the reading of §4.4 it was missing.
   IS the budget; a hard cap is correct here.**
   | trigger | value | unit as measured |
   |---|---|---|
-  | global `CLAUDE.md` (trim/merge, never append) | 19,968 (19.5K) | **bytes** (`getsize`) |
+  | global `CLAUDE.md` (trim/merge, never append) | 23,040 (22.5K) | **bytes** (`getsize`) |
   | skill frontmatter description (× every skill, plugins included) | ~800 | **chars** (`len`) |
 
   **(b) On demand — charged only when something routes to it. The cap is a
@@ -158,11 +188,10 @@ is the reading of §4.4 it was missing.
   per read first, and treat the number as the signal to look, not the goal.**
   | trigger | value | unit as measured |
   |---|---|---|
-  | any `ops/*.md` — except `lessons.md` and `rule-registry.md` | ~22K | **bytes** (`getsize`) |
-  | `skill-trigger-dict.md` | 28K | **bytes** (`getsize`) |
+  | any `ops/*.md` — except `lessons.md` and `rule-registry.md` | ~26K | **bytes** (`getsize`) |
+  | `skill-trigger-dict.md` | 42K | **bytes** (`getsize`) |
   | any `SKILL.md` body | ~300 | lines |
   | entry file `OPS.md` | ~60 | lines (not hook-enforced) |
-  | `ops/lessons.md` | ~30 | unfolded entries |
 
   Bytes, not chars, because bytes track TOKEN cost (measured: `rule-registry.md`
   key `cap measurement unit`). Rotation of the frozen `audit-archive/` is
@@ -196,7 +225,7 @@ is the reading of §4.4 it was missing.
   invisible in a line count. If a pass cannot get under cap without cutting a
   distinct rule, that IS the signal to raise the cap (with the failed pass
   recorded as the evidence), the same way CLAUDE.md went 12K→15K→19.5K and ops
-  files 10K→12K→15K→18K→22K. Never trade completeness for the number.
+  files 10K→12K→15K→18K→22K→26K. Never trade completeness for the number.
 - **Birth budgets** (prevention beats trimming — a new artifact must be born
   within budget, not grow into a trim candidate): skill description ≤700
   chars stating purpose + trigger phrases + top 1–2 NOT-cases, detailed

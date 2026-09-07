@@ -13,6 +13,12 @@
     "on is worse than no allowlist. The `ask` entries are the important half —",
     "they make the config edit itself a confirmed action.",
     "",
+    "env.CLAUDE_CODE_AUTO_COMPACT_WINDOW widens the auto-compact trigger to 400k",
+    "tokens. The compact-recovery mechanism's bands (context_runway_shadow.py:",
+    "150k/300k) and its own docstrings are calibrated assuming this window; drop",
+    "the key (or lower it) and the notices simply fire earlier relative to the",
+    "platform default, nothing breaks.",
+    "",
     "OMISSIONS, named rather than left pointing at files you do not have (all",
     "declared in tools/share-manifest.toml with a reason):",
     "  · the two external-dispatch hooks — they gate a dispatcher this share",
@@ -25,16 +31,38 @@
     "  · xi_card_guard.py — a shadow probe for a cross-index pipeline this",
     "    share does not carry (registry.json names real absolute store roots,",
     "    its parser lives in tools/cross-index/); telemetry/ is excluded too;",
+    "  · intake_guard.py and intake_match_shadow.py — the DENY guard and the",
+    "    shadow match probe for the lesson-intake store (ops/lessons/); both",
+    "    are one half of tools/closeout-intake/ (the CLI that alone can write",
+    "    that store), which this share does not carry. intake_guard.py's own",
+    "    deny message points at that CLI, so shipping the guard without it",
+    "    would block writes to a path this repo does not even ship (ops/lessons/",
+    "    itself is excluded — only the generated ops/lessons.md index ships).",
+    "    No by-hand fallback is named here; author your own lesson-record",
+    "    convention if you want one.",
+    "  · unattended_run.py (three mounts: PreToolUse scope guard, UserPromptSubmit",
+    "    kickoff, Stop) — the whole [unattended-run] carrier is built on",
+    "    tools/process-ledger/ (ledger.py, report.py), which this share does not",
+    "    carry: the Stop guard's own block condition requires a report file only",
+    "    that tool can generate, so shipping the hook without it would block",
+    "    every session end once a run is kicked off. No fallback named; the",
+    "    obligations text (scope discipline, a canary pair, a stop report) is a",
+    "    pattern to re-implement against your own process-tracking tool, not a",
+    "    file to copy.",
     "  · the SessionEnd memory-pipeline mount — its script now ships as",
     "    compact-recovery/preserve.py, but the mount still points outside",
     "    hooks/ and this template mounts hooks/ and nothing else; the optional",
     "    SessionEnd block lives in compact-recovery/README.md.",
     "Every hook in hooks/ IS mounted here — if you find one that is not, that is",
-    "a defect in this template, not a recommendation. The one .py under hooks/",
-    "that is deliberately NOT mounted is hooks/tests/test_transcript_read_guard.py:",
-    "it is that guard's regression matrix, run by hand (`python",
-    "hooks/tests/test_transcript_read_guard.py`), not a hook. Mounting a test as",
-    "a hook would put a test harness on every matched tool call.",
+    "a defect in this template, not a recommendation. Two .py files under hooks/",
+    "are deliberately NOT mounted, neither is a defect: hooks/tests/",
+    "test_transcript_read_guard.py is that guard's regression matrix, run by",
+    "hand (`python hooks/tests/test_transcript_read_guard.py`), not a hook —",
+    "mounting a test as a hook would put a test harness on every matched tool",
+    "call; hooks/handoff_snapshot.py is a plain shared library (snapshot_path,",
+    "is_fresh, notice) imported by compact_bookmark.py, compact_pointer.py and",
+    "context_runway_shadow.py — it has no event to mount at, the same way a",
+    "Python module you import is not itself wired into an event.",
     "",
     "Verify after wiring: run each hook by hand with empty stdin and check it",
     "exits 0 (they are all fail-open), then confirm the matcher fires on a real",
@@ -90,6 +118,10 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/branch_commit_guard.py\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/appdata_view_guard.py\""
           }
         ]
       },
@@ -188,6 +220,18 @@
         ]
       }
     ],
+    "PostCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/compact_loss_record.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
@@ -251,6 +295,7 @@
   "effortLevel": "medium",
   "cleanupPeriodDays": 3650,
   "env": {
-    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0"
+    "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000"
   }
 }

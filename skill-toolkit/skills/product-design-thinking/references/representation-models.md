@@ -35,6 +35,9 @@ the statechart + decision table, with sequence pairs as scenario evidence.
 | 條件組合很多時，規則到底輸出什麼 | Decision table (/tree) | no time dimension — pair with an FSM or activity view |
 | 系統發生過什麼 domain event、誰觸發誰反應 | Event storming / event model | exploratory aid, not an executable spec |
 | 系統由哪些責任單元構成、部署在哪、依賴方向 | C4 / component / deployment | says nothing about behavior order or state |
+| 既有系統的某個機制怎麼運作、哪裡斷（稽核既有系統、找缺口） | Audit view-set — C4/component + statechart per lifecycle entity + sequence pair per entry point, each with evidence anchors (diagram-authoring audit mode; the archdiag library, shipped here as `architecture-diagramming/archdiag/`) | one question per view: an UNDRAWN view is invisible unless the Step 6 coverage declaration names it; says nothing about doc-vs-code drift (that is Mode B's evidence) |
+| 文件說的跟 code 一樣嗎／整個 codebase 有沒有漏看（要覆蓋保證） | Inventory + drift table with working views embedded (code-review-deep-checklist Mode B; `coverage.json` `deferred` / `explicitExclusions`) | a focused lens hides everything in `explicitExclusions` by design; working views are not presentation-grade (it calls diagram-authoring back for that) |
+| 給 owner／非作者的一頁：這系統是什麼、現在健康嗎 | Presentational owner view — aggregated capability nodes + status markers (audience-fit A1 profile, `presentational-view.md`) | carries NO completeness claim (R5); aggregation merges truth markers (R4); a projection of the audit set, never its substitute |
 
 ## Pairing rules (blind-spot compensation)
 

@@ -1,11 +1,15 @@
 # compact-recovery — 壓縮後找得回去的運作模式 (post-compact recall operating mode)
 
-> 這不是單一工具,是一組**運作模式 (operating mode)**:三支 hook、一支摘要卡產生器、
-> 一條召回紀律,合起來回答一個問題——`/compact` 之後,摘要裡沒有的東西要怎麼找回來,
-> 而且**不能**把壓縮省下的 context 又整份吃回去。
+> 這不是單一工具,是一組**運作模式 (operating mode)**:四支 hook、一支共用函式庫、
+> 一支摘要卡產生器、一條召回紀律,合起來回答一個問題——`/compact` 之後,摘要裡沒有
+> 的東西要怎麼找回來,而且**不能**把壓縮省下的 context 又整份吃回去。
 >
 > 2026-08-16 於來源環境全鏈真火驗收通過(含壓縮當下的實際觸發);細節見
 > [`ACCEPTANCE.md`](ACCEPTANCE.md)。
+>
+> **2026-09-07 擴充**:原本的三支 hook 之外,來源長出了第四支 `compact_loss_record.py`
+> (PostCompact:**只記錄不判斷**)與一支共用函式庫 `handoff_snapshot.py`。兩支都收了,
+> 但它們帶進一個誠實的缺口,寫在這裡而不是留給你發現——見下面〈交接快照與損失紀錄〉。
 
 ## 問題形狀
 
@@ -81,7 +85,28 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 | `../hooks/compact_bookmark.py` | `<CLAUDE_HOME>/hooks/` | PreCompact:寫書籤 + 順跑 preserve |
 | `../hooks/compact_pointer.py` | `<CLAUDE_HOME>/hooks/` | SessionStart("compact"):注入指標卡 |
 | `../hooks/transcript_read_guard.py` | `<CLAUDE_HOME>/hooks/` | PreToolUse(Read):視窗紀律硬強制 |
+| `../hooks/compact_loss_record.py` | `<CLAUDE_HOME>/hooks/` | PostCompact:每次壓縮寫一列紀錄(**不下判斷**) |
+| `../hooks/handoff_snapshot.py` | `<CLAUDE_HOME>/hooks/` | 共用函式庫,**不掛任何事件**;上面三支 import 它 |
 | `preserve.py` | `<CLAUDE_HOME>/tools/memory-pipeline/` | 歸檔 + digest 卡產生器(零依賴、零模型、零網路) |
+
+### 交接快照與損失紀錄(2026-09-07 收錄,含一個誠實的缺口)
+
+`handoff_snapshot.py` 是純函式庫:算出交接快照的路徑、判斷它是否**新鮮**(自寫入
+那一輪以來 context 成長未超過門檻)、產生提示字串。它沒有事件可掛,所以刻意不出現
+在 `settings.example.json` 的掛載清單裡——那份清單的不變式是「出貨的 hook 全掛、
+沒出貨的不掛」,而它不是 hook。缺了它,import 它的三支會在載入時就壞掉,所以它跟
+那三支是一組,不是可選項。
+
+`compact_loss_record.py` 遵守一條這個環境自己的閘門規則:**閘門可能拒絕的東西,要在
+閘門跑之前就落盤**。它在每次壓縮後寫一列到 `telemetry/compact-loss.jsonl`(session、
+觸發方式、書籤區段、快照狀態、壓縮前被 Write/Edit 過的路徑清單),然後就結束——
+「摘要是否完整」「摘要是否誤導」這兩個判斷要等壓縮後的幾輪才有材料,當下判不了。
+
+**缺口(講在前面)**:下判斷的那一半是來源的 `tools/compact-loss-audit`,屬於本 repo
+整個排除的 `tools/` 樹,**不出貨**。所以你拿到的是一份**只會累積、沒有人讀**的
+`compact-loss.jsonl`,除非你自己寫審計端。它是可用的原始資料(欄位語意在該 hook 的
+docstring 裡寫得很完整),但別以為裝上去就有判決。每第 N 次自動壓縮它會回一句
+`additionalContext` 說「該審了」——在沒有審計工具的環境裡,那句話目前指向空無一物。
 
 `compact_bookmark.py` 以 `<CLAUDE_HOME>/tools/memory-pipeline/preserve.py` 這個
 路徑呼叫 preserve——裝在別處它只會安靜跳過(fail-open),digest 那一階梯子退化為
@@ -89,8 +114,9 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 
 ## 安裝
 
-1. 複製四個檔案到上表位置。
-2. 把下面三個區塊**併進**你的 `settings.json`(`<PYTHON_EXE>`、`<CLAUDE_HOME>`
+1. 複製六個檔案到上表位置(`handoff_snapshot.py` 一定要跟著,它是另外三支的
+   import 對象;少了它那三支載入即失敗)。
+2. 把下面四個區塊**併進**你的 `settings.json`(`<PYTHON_EXE>`、`<CLAUDE_HOME>`
    換成絕對路徑;Claude Code 不展開 `~` 與環境變數):
 
 ```json
@@ -112,6 +138,17 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 ```
 
 (已有 `SessionStart` 陣列就把這個 entry 追加進去,不要蓋掉原有的。)
+
+```json
+"PostCompact": [
+  { "matcher": "",
+    "hooks": [ { "type": "command",
+      "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/compact_loss_record.py\"",
+      "timeout": 30 } ] }
+]
+```
+
+(這一支只寫紀錄檔;審計端不在本 repo,理由見上節。不掛它,其餘三支照常運作。)
 
 ```json
 "PreToolUse": [
@@ -140,7 +177,7 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 Get-Content NUL | & "<PYTHON_EXE>" "<CLAUDE_HOME>/hooks/compact_pointer.py"
 ```
 
-5. 跑一次 `/compact` 走 [`ACCEPTANCE.md`](ACCEPTANCE.md) 的七項清單。
+5. 跑一次 `/compact` 走 [`ACCEPTANCE.md`](ACCEPTANCE.md) 的九項清單。
    **複製不等於生效**——hooks 對進行中的 session 立即套用(來源環境實測),
    但驗收要看的是卡片真的出現,不是檔案在不在。
 

@@ -27,11 +27,27 @@ Transcript internals are NOT parsed (standing ruling: the jsonl format is
 unstable, treat it as opaque); this hook counts raw
 newlines only.
 
+SECOND JOB — AUTO-COMPACT BOUNDED DENY (user ruling D1, 2026-09-05; design:
+references/compaction-pipeline-design.md). PreCompact MAY block a compaction
+(`permissionDecision: deny`, verified code.claude.com hooks.md 2026-09-05), and
+that turn is the one "note-writing moment" the auto path never had. When
+trigger == "auto" and no FRESH handoff snapshot exists
+(handoff_snapshot.is_fresh), this hook denies with an additionalContext that
+asks the model to write cache/handoff/<session>.md; repeated on every attempt
+until a fresh snapshot exists, at most MAX_DENIES per session (state:
+cache/handoff/<session>.deny.json) — see deny_auto_once for why one-shot failed. Manual compactions are never denied — the user is in control
+there and workflow-checkpoint §B already carries the note. The bookmark is
+written on BOTH branches (a denied attempt still marks where the record was).
+Thrash guard: the changelog documents a circuit breaker after repeated auto-
+compact failures; MAX_DENIES bounds our contribution. Platform behaviour is
+recorded in deny_auto_once's docstring and design §7 as each control runs;
+degradation order: drop the deny, keep the notice + instructions.
+
 Fail-open, silent: any error exits 0 with no output. Living proof: the
 bookmark file, cache/compact-recovery/<session_id>.json.
 review-when: a Claude Code update changes compact on-disk geometry (boundary
-no longer appended in-place) or renames PreCompact stdin fields — the
-re-check recipe lives in compact-recovery/README (platform-contract notes).
+no longer appended in-place) or renames PreCompact stdin fields — the re-check
+recipe lives in compact-recovery/README (platform-contract notes).
 """
 import json
 import os
@@ -88,7 +104,76 @@ def main() -> None:
                        capture_output=True, timeout=PRESERVE_TIMEOUT_S)
     except Exception:
         pass
+
+    if str(payload.get("trigger", "")) == "auto":
+        try:
+            deny_auto_once(transcript, session)
+        except Exception:
+            pass
     sys.exit(0)
+
+
+MAX_DENIES = 3              # per session while no fresh snapshot exists; then allow unconditionally
+DENY_ENABLED = False        # DISABLED 2026-09-05 after platform control #3 (see deny_auto_once docstring).
+                            # review-when: Claude Code changelog mentions PreCompact deny/block on
+                            # auto-compaction, or a version bump past 2.1.257 — re-run
+                            # tools/compact-loss-audit/hook_controls.py + the platform control.
+
+
+def deny_auto_once(transcript: Path, session: str) -> None:
+    """Deny auto-compaction while no fresh snapshot exists, at most MAX_DENIES times per session.
+
+    PLATFORM CONTROLS 2026-09-05 (Claude Code 2.1.257, haiku, window 100k via env):
+      #2 one session — ONE deny: compaction began 0.5 s after the deny, no
+         model turn in between.
+      #3 another session — deny on EVERY attempt (count reached 3/3): three
+         auto compactions, each starting within a second of its deny; no model
+         turn, no snapshot written, and the additionalContext/systemMessage
+         never appeared in the transcript.
+    Verdict: on this build the auto path does not honour a PreCompact deny (the
+    docs say it can block; observed: it does not), so no note-writing moment can
+    be manufactured here. DENY_ENABLED=False keeps the code for a re-test; the
+    pipeline degrades to: 300k runway notice (live-verified the same day in
+    one session) + CLAUDE.md Compact Instructions + 400k window + recorder.
+    Also observed: with a 100k window compaction fired at ~62k main-loop context
+    (preTokens ~75k incl. the pending tool result) — the platform keeps a
+    reserve below the configured window, so 400k should fire around 330–370k.
+    """
+    if not DENY_ENABLED:
+        return
+    import handoff_snapshot as hs
+    import context_runway_shadow as runway
+    total = runway.context_total(transcript)
+    state = hs.HANDOFF_DIR / f"{session}.deny.json"
+    if hs.is_fresh(transcript, session, total):
+        try:
+            state.unlink()  # fresh snapshot: reset the budget for the next cycle
+        except Exception:
+            pass
+        return
+    try:
+        st = json.loads(state.read_text(encoding="utf-8"))
+        count = int(st.get("count", 0))
+    except Exception:
+        count = 0
+    if count >= MAX_DENIES:
+        return              # budget spent: allow (degradation: summary + Compact Instructions)
+    hs.HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
+    state.write_text(json.dumps({"count": count + 1, "last_deny": int(time.time()), "context": total}),
+                     encoding="utf-8")
+    msg = hs.notice(
+        session, total,
+        f"Auto-compaction is imminent and was deferred ({count + 1}/{MAX_DENIES}) so state can be saved first")
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreCompact",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": "auto-compact deferred: no fresh handoff snapshot",
+            "additionalContext": msg,
+        },
+        "additionalContext": msg,
+        "systemMessage": msg,
+    }, ensure_ascii=False))
 
 
 if __name__ == "__main__":

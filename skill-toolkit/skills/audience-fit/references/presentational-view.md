@@ -20,13 +20,27 @@ layout per artifact; never transplant it.
 
 - **R1 One page, one reader question** — usually 「這系統是什麼、現在
   健康嗎」. Anything answering a different question goes elsewhere.
-- **R2 Nodes AND edges — a diagram, not a card grid.** An architecture
-  view keeps node 感: boxes joined by drawn flows, where every arrow
-  states a real call/feed relationship and position encodes flow in one
-  consistent direction. A layout where adjacency substitutes for
-  connection is a table wearing a diagram's clothes. Aggregate the
-  engineering model to capability-level nodes (roughly 12–18 per view),
-  then draw the edges that actually exist between them.
+- **R2 Nodes AND edges — a diagram, not a card grid — on a counted
+  budget.** An architecture view keeps node 感: boxes joined by drawn
+  flows, where every arrow states a real call/feed relationship and
+  position encodes flow in one consistent direction. A layout where
+  adjacency substitutes for connection is a table wearing a diagram's
+  clothes. Aggregate the engineering model to capability-level nodes, then
+  draw the edges that actually exist between them. Two dials, declared
+  before drawing (diagram-authoring Step 1 close-line):
+  - *Count dial* — the ladder is calibrated from the accepted A1 renders,
+    not borrowed: 「全景」 one page = the standing tier — the four accepted
+    owner views produced between 2026-08-30 and 09-05
+    hold 11–24 named nodes, 12–27 connectors, 4–14 edge labels; target
+    ≤ 18 nodes / ≤ 24 connectors, hard ceiling 24 / 27 (the largest
+    accepted instance sits there and reads as the limit, not the norm).
+    「精簡」 inset / slide panel = ≤ 9 nodes [assumed — no accepted
+    instance yet; calibrate at the first one]. Over the ceiling → cut in
+    the R12 order, never squeeze type (R3) or spacing (R10).
+  - *Wording dial* — who reads: 「owner」 = 白話名稱 + one-line role, no
+    file names or paths (R3 as written); 「operator／同事」 = the same, plus
+    the canonical name in parentheses on at most one line per node. The
+    dial changes text, never the node set.
 - **R3 Author-controlled text.** Node text = 白話名稱 (+ English term
   where needed) + at most one sub-line role. Line breaks are chosen by
   the author — fixed canvas / explicit tspans — never left to auto-wrap:
@@ -38,8 +52,11 @@ layout per artifact; never transplant it.
   disappear — an aggregated node is as unverified as its most-unverified
   member.
 - **R5 Aggregation carries its mapping**: a collapsed table (node →
-  canonical elements) lives in the page. The presentational view carries
-  NO completeness claim — the canonical model does; the footer says so.
+  canonical elements → **cut**: what R12 removed at which rung, or 「—」)
+  lives in the page. The presentational view carries NO completeness
+  claim — the canonical model does; the footer says so. The cut column is
+  how a reader learns what the page does not show without opening the
+  canonical page.
 - **R6 Flows show the happy path plus NAMED side-states.** Never draw a
   transition or edge the system does not have; simplification is
   omission, never invention (whitelist truth).
@@ -78,6 +95,17 @@ layout per artifact; never transplant it.
   checklist, not a glance: every edge's dx/dy classified against R10's
   three allowed kinds, every parallel pair's gap, every endpoint's border
   contact, every label's clearance.
+- **R12 Fixed cut order — when the R2 ceiling is exceeded, cut in this
+  order and nowhere else** (borrowed as structure from diagram-design's
+  degrade ladder, 2026-09-05; rungs re-derived from R3–R6): (1) role
+  sub-lines on leaf nodes → (2) edge labels that carry no status and
+  resolve no direction ambiguity → (3) merge sibling leaves into their
+  parent (truth markers merge, R4) → (4) drop leaf nodes with one edge and
+  no marker → (5) split into a second page with its own reader question
+  (R1). NEVER cut: a status marker (R4), an edge between surviving nodes
+  (R6), the mapping table (R5). Every cut is a row in the R5 cut column
+  with its rung number; a cut nobody can find in the table is an
+  invention by omission.
 
 ## Boundary note (standing until ruled otherwise)
 

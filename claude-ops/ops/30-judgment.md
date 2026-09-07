@@ -93,6 +93,15 @@ was exported to the user as a data request.
 "not found — checked: xi query (terms used), trigger-dict, vaults,
 session-find". (Evidence: `references/cross-index-misses.md` 2026-08-27 row.)
 
+**Corpus boundary** (2026-09-04, L-050): every layer of that ladder indexes
+SELF-AUTHORED records. A proposition with an EXTERNAL OBSERVER — what a user
+sees on a published page, what is deployed/installed/shipped, what another
+machine or account holds — is therefore never settled by running the ladder to
+its end: a full sweep supports only "corpus-only: not recorded here", never "no
+gap". Promote it with one authoritative probe of the owning system (R7 third
+class), or ship it as UNKNOWN. Running out of ladder is not evidence of absence
+when the thing was never in the corpus's universe to begin with.
+
 **Scope** (`lessons.md` L-015, the recurrence that proved this needed saying):
 the corollary covers DESIGN-RATIONALE prose, not only evidence prose. Once the
 findings sections have been disciplined, the untested claim hides in a
@@ -158,6 +167,14 @@ Stop retrying and change approach if ANY appears:
 copy the material into the worker's scratch dir (change the access path, not
 the attempt count).
 
+✅ Fourth report on the same figures, now "lines still overlap labels, dims
+not to drawing standard" after three occlusion fixes → do not add a sixth
+offset tweak; list the object classes the complaint names (lines, arrows,
+extension lines) and check whether the clearance model has a word for each.
+It had only "text box" — the model, not the tuning, was the defect
+(`ops/lessons.md` L-044; fix = one obstacle map + a gate that reads the
+emitted file).
+
 ## R5 — Minimum quality gates by deliverable type
 
 | Deliverable | Minimum gates |
@@ -188,7 +205,7 @@ allows. Three moves, in order:
 ❌ Silently picking the wording YOU find elegant for a user-facing policy
 line, without checking for an expressed preference.
 
-## R7 — When to reach for the web (and at what granularity)
+## R7 — Where a fact must be checked (web, local corpus, or the owning system)
 
 Search BEFORE asserting (never from memory) when the fact is volatile or
 environment-external: library/API versions and signatures, tool/CLI flags,
@@ -200,12 +217,31 @@ at lower cost: facts about THIS repo (grep), installed-tool behavior
 CLAUDE.md): output conceptually wrong → compare against the canonical method
 BEFORE editing again.
 
+**Third class — live external state (truth-maker test).** Before choosing WHERE
+to look, name what MAKES the proposition true, then ask: is the corpus I am
+about to search downstream of that thing? What a user of the published page /
+release / deployed service sees, what is installed on another machine, what a
+shared drive or account holds — each is made true by a system that never writes
+into this repo, so silence in a decisions journal, phase log or commit history
+means UNLOGGED, never unchanged. Ask the owning system itself (`gh release
+list`, `gh api`, the URL, `--version`, file mtime): a record ABOUT the act is
+not the state the act produced. Neither class above catches this — it is
+external and mutable (so memory fails) yet locally probeable, so it FEELS like
+the grep branch, and that feel IS the mis-route. Logs are event streams, not
+state projections: deriving state from one holds only if every state-changing
+event is logged AND nothing changes out of band; a single manual publish step
+breaks both. Cannot probe (offline, no auth) ⇒ report UNKNOWN, never "fine".
+❌ grep the phase log for "release" to decide whether the public Releases page
+is current — that evidence could not have come out differently (R2 proxy test);
+the page never writes into the log (L-012 hit 3, L-050).
+
 Granularity ladder — match the tool to the question:
 1. Quick lookup, ≤3 sources → do it inline yourself (`20-dispatch.md` §1).
 2. Multi-source, comparative, or "survey the options" → delegate as a T4
    research dispatch (`20-dispatch.md` §6).
-3. Decision-grade report the requester will act on → the `deep-research`
-   skill (per-claim adversarial verification).
+3. Decision-grade CITED report the requester will act on → `literature-search-extract`
+   at `depth: exhaustive` (PRISMA record, per-claim evidence ledger). The `deep-research`
+   skill this rung once named never existed on this machine (verified 2026-09-03).
 
 ❌ Quoting an API parameter list from training memory for a library that
 releases monthly — plausible, outdated.

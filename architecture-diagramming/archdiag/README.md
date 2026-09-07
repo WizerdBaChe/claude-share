@@ -27,15 +27,28 @@ dead only while the invariants below hold.
 - Marker closure: every `EDGE[*].marker` (and `mFill` for init arrows) must
   resolve inside `DEFS` — checked at build time in `index.mjs` (the
   determinable face of in-page check #8).
+- a11y contract (2026-09-05, B-3): every `svg.dia` carries `role="img"` and
+  `aria-labelledby` naming its FIRST child `<title id="t-<view>">` and the
+  `<desc id="d-<view>">` after it (the view's question); both ids unique in
+  the page. Asserted on the EMITTED page (`asserts.mjs` `a11yAsserts`, run by
+  `index.mjs` before writing) — never on the model.
+- Determinable ⇒ build FAIL, measured ⇒ in-page: a check that can be decided
+  from model data (grid, anchors, orthogonality, pill centre in a node,
+  shared anchor) lives in `asserts.mjs` AND is repeated in-page on the bytes;
+  a check that needs rendering (label bboxes, font metrics) lives in-page
+  only. A new in-page check ships with M2's two-sided calibration AND a run
+  over every accepted artifact — first-run red on all of them means the
+  threshold is wrong (2026-09-05, MAINTENANCE.md log).
 
 ## Modules
 
 | file | contents |
 |---|---|
-| `index.mjs` | `build(opts)` — schema → build-time asserts → marker closure → emit → write + sha256 receipt line. Throws on any problem (B-1-style list in the message). |
+| `index.mjs` | `build(opts)` — schema → build-time asserts → marker closure → emit → a11y assert on the emitted page → write + sha256 receipt line. Throws on any problem (B-1-style list in the message). |
 | `schema.mjs` | `validateViews(views)` structural validation (B-7); `NODE_KINDS`, `EDGE_TYPES`. |
-| `asserts.mjs` | `buildAsserts(views, grid)` — grid snap, anchor-on-border, orthogonality (pre-write, on model data). |
-| `selfcheck.mjs` | `inPageScript({grid, viewCount, notes})` — in-page §4 checks #1–#8 (label overlap, anchors, viewBox clip, grid, edge-through-node, crossings-vs-declared, font floor, url(#id) reference resolution) + instrument preconditions (no transform in scene; scene must render) + tab handler (the measuring pass depends on it). B-1 diagnostic objects; `window.__geometryReport`. |
+| `asserts.mjs` | `buildAsserts(views, grid)` — grid snap, anchor-on-border, orthogonality, pill centre inside a node, shared anchor (two edges on one side, 0 < gap < grid) — pre-write, on model data; `a11yAsserts(html)` — the a11y contract, on the emitted page. |
+| `selfcheck.mjs` | `inPageScript({grid, viewCount, notes})` — in-page §4 checks #1–#10 (label overlap, anchors, viewBox clip, grid, edge-through-node, crossings-vs-declared, font floor, url(#id) reference resolution, #9 label-over-node = pill centre inside a node, #10 shared-anchor) + instrument preconditions (no transform in scene; scene must render) + tab handler (the measuring pass depends on it). B-1 diagnostic objects; `window.__geometryReport` with a render `receipt` (engine, font, metric ratio). |
+| `tokens.mjs` | Style-token table + WCAG contrast check DERIVED from `emit.mjs` (`node tokens.mjs` prints the README table; `--check` exits 2 on a text/fill pair under AA 4.5:1). Roles, not hex, are the contract. |
 | `emit.mjs` | `FILL/STROKE/OVL/EDGE` styling, `esc/cjkW`, `nodeSvg/viewSvg` (ov overlay + 未驗收 badge, absent ✕ edges, multi-inits, lifeline containers), `DEFS`, `pageHtml`. |
 | `tables.mjs` | `table(headers, rows)` HTML table emitter. |
 | `route.mjs` | S2 — `route(view, {provider, grid})` orthogonal edge router + pill placer behind the `RouterProvider` seam (default `'channel'`); `applyRoutes(view, result)` splices results back. Node positions are inputs, never outputs (D-042). Never silently exceeds `declaredCrossings` — returns B-1 diagnostics proposing declarations/hints instead; a failed edge is named for hand authoring (assist-mode degradation is the same path). Named alternative provider `'archify-adapted'` is spec'd, not built — one interface, one implementation until field trial F3 demands the second. |
@@ -116,11 +129,58 @@ Measured vs the F1/F2 baselines (pre-registered:
   conditions both closed. `'archify-adapted'` stays spec'd-not-built (build
   trigger: a field round where `'channel'` misses its targets).
 
+## Style tokens (generated — `node tools/archdiag/tokens.mjs`; never hand-edit)
+
+Roles, not hex, are the contract (B-6 of the 2026-09-05 diagram-design borrow
+review: the token STRUCTURE was borrowed, the external palette was not). The
+hex values below are read from `emit.mjs` by `tokens.mjs`; the table is its
+output on 2026-09-05 — regenerate and diff before committing a palette edit.
+
+| role | meaning | fill | stroke | title text (AA ≥ 4.5) | secondary text |
+|---|---|---|---|---|---|
+| block | module / component (block) | `#dbeafe` | `#2563eb` | 14.63 | 8.49 |
+| ext | external actor / system (capsule) | `#e2e8f0` | `#64748b` | 14.48 | 8.4 |
+| store | data store | `#fef3c7` | `#b45309` | 16.03 | 9.3 |
+| state | state (statechart) | `#dcfce7` | `#16a34a` | 16.26 | 9.43 |
+| proc | process (same colour as block: it IS a block in a DFD) | `#dbeafe` | `#2563eb` | 14.63 | 8.49 |
+| port | port / boundary interface | `#ede9fe` | `#7c3aed` | 15.04 | 8.72 |
+| ov (overlay) | branch-only / 未驗收 (dashed border + badge) | `#ffedd5` | `#ea580c` | 15.58 | 4.52 |
+| pill | edge label | `#ffffff` | `#cbd5e1` | 10.35 | — |
+| container | composite boundary / lifeline | `#f8fafc` | `#94a3b8` | 7.24 | — |
+
+| edge type | meaning | stroke | dash | marker | vs page (graphics ≥ 3) |
+|---|---|---|---|---|---|
+| call | synchronous call / import | `#64748b` | solid | mOpen | 4.76 |
+| data | data flow | `#0f172a` | solid | mFill | 17.85 |
+| proto | async protocol (SSE / event) | `#0369a1` | solid | mProto | 5.93 |
+| egress | leaves the process boundary | `#b91c1c` | solid | mEgr | 6.47 |
+| warn | error flow (dual-coded: dashed) | `#b91c1c` | 6 4 | mEgr | 6.47 |
+| trans | FSM transition | `#0f172a` | solid | mFill | 17.85 |
+| eps | automatic transition | `#7c3aed` | 5 4 | mEps | 5.7 |
+| absent | contractual NON-dependency (dual-coded: dotted, ✕ glyph, no arrowhead) | `#94a3b8` | 2 3 | — | 2.56 |
+
+- **Contrast constraint**: every TEXT/fill pair ≥ 4.5:1 (WCAG AA) — `tokens.mjs
+  --check` exits 2 otherwise (determinable ⇒ FAIL). The 未驗收 badge on the
+  overlay fill sits at 4.52 — passing with no headroom; a badge colour edit
+  re-runs the check first. Edge strokes vs the page are graphics (3:1) and
+  only WARN — the consumer is the maintainer reading the output; the one
+  standing WARN is the `absent` stroke at 2.56, deliberately faint for a
+  NON-dependency and dual-coded (dotted + ✕ glyph, no arrowhead). Promotion
+  trigger: a user report that an absent edge cannot be told from the page.
+- **Dark inversion (rule, not built)**: a dark theme is a SECOND role→hex
+  map with the same roles that passes the same check and keeps the hue
+  ranks (blue module / grey external / amber store / green state / violet
+  port / orange un-accepted) — it never recolors a role's meaning, and
+  emitted markup never carries a hex twice. Deliverables declare
+  `color-scheme: light`; build the map only when a dark deliverable is
+  requested (review-when), behind the same `FILL/STROKE/EDGE` names.
+
 ## Maintenance
 
 Event-driven ritual (receipt regression, selfcheck calibration, LF pins,
-router acceptance, provider swap): [MAINTENANCE.md](MAINTENANCE.md).
-Environment sweep item: `ops/references/integrity-sweep.md` check 27.
+router acceptance, provider swap, token table regeneration):
+[MAINTENANCE.md](MAINTENANCE.md). Environment sweep item:
+`ops/references/integrity-sweep.md` check 27.
 
 ## S3 acceptance (2026-08-29)
 

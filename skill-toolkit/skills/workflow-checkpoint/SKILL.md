@@ -172,6 +172,11 @@ avoiding the need to replay full conversation history and saving usage.
 ## B. /compact Flow (after writing the checkpoint)
 
 1. **Ask first**: "要不要現在對這段對話做 /compact？"
+   (Scope, 2026-09-05: §B governs MANUAL compaction only. AUTO compaction at the
+   configured window is the platform's act; its note is the handoff snapshot in
+   `cache/handoff/<session>.md`, written without consent when the runway hook or
+   the PreCompact deny-once asks — `references/compaction-pipeline-design.md`.
+   At a spoken phase boundary, promote that snapshot into the phase-log section.)
 2. Upon consent (note: `/compact` is a user command — the model cannot execute it directly):
    - Remind the user (in Chinese): "phase-log 已記錄耐久上下文，這段對話可以放心有損壓縮。"
    - Provide a suggested compact note in **English** for the user to run as `/compact <key points>`.

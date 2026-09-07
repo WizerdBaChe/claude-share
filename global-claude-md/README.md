@@ -5,7 +5,7 @@
 ## 內容
 
 - `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。開頭有一段「Path-scoped rules」索引，指到下面 `rules/` 資料夾。
-- `rules/`：現有五個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
+- `rules/`：現有六個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
   新增其中兩條——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`
   （GLSL 靜默失敗模式）——是把原本內嵌在 `CLAUDE.md` 裡的規則搬出來：這兩條規則的觸發
   條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後
@@ -14,15 +14,18 @@
   本體——`deliverable-doc-refs.md`（人讀 HTML 交付物的代號/符號 define-before-use）、
   `office-deck-deliverables.md`（programmatic PPTX 交付物的資產屬性）、
   `visual-gate-scope.md`（CSS/瀏覽器驅動測試的視覺閘門範圍：量測墨水而非量測框、閘門要
-  普查整個類別而非只補上一次事故的洞）。要在自己的環境生效,必須放在對應機制存在的位置
-  (Claude Code 是 `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這
-  五條規則的內容併回 `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
+  普查整個類別而非只補上一次事故的洞）。2026-09-06 再新增第六條——`verification-ladder.md`
+  （一項不變量/閘門/測試主張要標明自己站在證據第幾階（0–5）；第 2 階以上都要附一個
+  已知為真的正控制）——同樣直接以 scoped 規則檔形式加入。要在自己的環境生效,必須放在
+  對應機制存在的位置(Claude Code 是 `~/.claude/rules/`);若目標環境沒有等效的
+  path-scoped 規則機制,把這六條規則的內容併回 `CLAUDE.md` 本體即可,只是會变回
+  「每 session 都付費」。
 
 ## 去識別化 — 以及為什麼大部分路徑「原樣保留」
 
 原始檔案本身未包含使用者名稱、電子郵件或帳號等個資。逐項檢查後只有一處真正屬於機器綁定資訊，其餘引用其實是可攜路徑，不需要泛化成佔位符：
 
-- **真正機器綁定、已改為佔位符**：「Environment」小節原文寫死「本機是 Windows 11、只用 PowerShell 5.1、換行為 CRLF」——這是單一機器的環境事實，不具可攜性。已替換為 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` / `<LINE_ENDING_CONVENTION>` 四個佔位符，並保留原始設定作為行內註解，供對照。（2026-08-16 更正：本節先前寫的是 `<SHELL_NAME_AND_VERSION>`，那個代號在 2026-08-06 該條規則改寫成「預設 shell / 次要 shell」兩欄時就不再使用，本文一直沒跟上。）
+- **真正機器綁定、已改為佔位符**：「Environment」小節原文寫死「本機是 Windows 11、只用 PowerShell 5.1」——這是單一機器的環境事實，不具可攜性。已替換為 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符，並保留原始設定作為行內註解，供對照。（2026-08-16 更正：本節先前寫的是 `<SHELL_NAME_AND_VERSION>`，那個代號在 2026-08-06 該條規則改寫成「預設 shell / 次要 shell」兩欄時就不再使用，本文一直沒跟上。2026-09-07 撤回：來源環境已把「換行為 CRLF」這條機器綁定陳述整條移除，不再是這裡的內容——原本對應的第四個佔位符 `<LINE_ENDING_CONVENTION>` 因此退役；本節現在只剩三個佔位符。同一小節仍保留一條可攜、非機器綁定的換行注意事項——「Write 只出純 LF、`cat >>` 疊在 CRLF 檔上會產生混合換行」——那條講的是工具行為而非本機設定，故不用佔位符。）
 - **`~/.claude/ops/*.md`、`~/.claude/skill-trigger-dict.md` 等路徑——刻意保留原樣，不改成佔位符**：`~` 在任何機器上都會展開成當前使用者的家目錄，本身就是可攜寫法，不會洩漏使用者名稱；把它硬改成 `<OPS_DIR>` 之類的抽象佔位符反而模糊了「這條路徑其實有明確、可直接使用的預設值」這件事。這些路徑對應到**本 repo 已經附贈的內容**：
 
   | CLAUDE.md 內的路徑 | 對應到本 repo 的哪裡 | 要能生效，需先放到 |
@@ -42,16 +45,16 @@
 
 1. 複製 `CLAUDE.md` 到目標環境的 `~/.claude/CLAUDE.md`。
 2. 依「去識別化」表格，把 [`claude-ops/ops/`](../claude-ops/ops/) 複製到 `~/.claude/ops/`，把 [`skill-toolkit/skill-trigger-dict.md`](../skill-toolkit/skill-trigger-dict.md) 複製到 `~/.claude/skill-trigger-dict.md`。
-3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` / `<LINE_ENDING_CONVENTION>` 四個佔位符換成該機器實際的 OS/shell/換行慣例；沒有需要區分的次要 shell 就把那一句刪掉。
+3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符換成該機器實際的 OS/shell；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 把 `rules/` 下五份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
-   `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`）
-   複製到目標機器的 `~/.claude/rules/`。這是 path-scoped 規則機制實際運作所需的檔案；
-   `CLAUDE.md` 開頭的 path-scoped 索引行目前只列出前兩條，後三條尚待該索引補上（見本檔
-   內容一節的 2026-09-02 補記）——索引落後於實際檔案不影響規則檔本身的內容，只影響
-   「session 啟動時要不要主動提示這條規則存在」。若目標環境沒有等效機制，直接把這五份
-   檔案的規則內容併回 `CLAUDE.md` 也可以。
+6. 把 `rules/` 下六份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
+   `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`、
+   `verification-ladder.md`）複製到目標機器的 `~/.claude/rules/`。這是 path-scoped
+   規則機制實際運作所需的檔案；`CLAUDE.md` 開頭的 path-scoped 索引行現已列出全部六條
+   （2026-09-07 補齊——先前索引只列出前兩條，後四條曾一度落後於實際檔案；索引落後於
+   實際檔案不影響規則檔本身的內容，只影響「session 啟動時要不要主動提示這條規則存
+   在」）。若目標環境沒有等效機制，直接把這六份檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
 ## 快照細節
@@ -70,7 +73,15 @@
   私有專案（media-fetch-pipeline）自己的階段紀錄編號（Phase Z11），已改寫為不具體指向
   該紀錄的敘述。三者皆不影響規則內容本身。無新增個資。來源端 `visual-gate-scope.md` 在
   收錄當下尚未提交（`git status` 顯示 untracked），以工作副本收錄，見
-  `tools/share-manifest.toml` 該條目的 `source_dirty_ack`。
+  `tools/share-manifest.toml` 該條目的 `source_dirty_ack`（2026-09-07 refresh 確認已提交，
+  見下一則，該 ack 已撤回）。
+- 2026-09-07 refresh：`CLAUDE.md` 本體大量更新（新增「authoring HTML page」、
+  `[unattended-run]`、Compact Instructions 等小節；relaxation gate 與 Prior-art check
+  等既有規則微調；path-scoped 索引行補齊為全部六條）；`rules/` 新增第六份規則檔
+  `verification-ladder.md`（見上）；`visual-gate-scope.md` 來源端已於 2026-08 之後正式
+  提交，內容與先前收錄的工作副本一致，故其 `source_dirty_ack` 撤回。「Environment」
+  小節撤回 `<LINE_ENDING_CONVENTION>` 佔位符（見「去識別化」一節）；`<OS_NAME>` /
+  `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符仍在。無新增個資。
 - 這是時間點快照，不是自動同步目標。
 
 ## 授權
