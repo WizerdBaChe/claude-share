@@ -2760,8 +2760,14 @@ status = "edited"
 edits = [
   "the maintenance ritual's commands operate on the source's `outputs/diagram-authoring/` build scripts, which do not ship. A share note above them says so and states the adopter's equivalent (their own build scripts, same two commands). The commands themselves are kept verbatim — they are the ritual, and rewriting them into a shape nobody has run would be worse than a pointer the note explains. UNCHANGED this round: same note, re-applied at the same location (right after the intro paragraph, before ## Mandatory) against the grown fresh-source text.",
   "NEW 2026-09-07: new '## Log — 2026-09-05: checks #9/#10 + a11y contract' section (source addition) contains one dead pointer, 'Record + ledger: `outputs/skill-reviews/diagram-design-borrow-review-2026-09-05.md` §六 B-1/B-2/B-3.' -> 'Record + ledger: the source environment's own skill-review record (outputs/, not shipped in this copy) §六 B-1/B-2/B-3.' — outputs/ tree excluded; capability description (a dated record with those section ids exists) kept, literal path dropped.",
+  "2026-09-07, second pass: the source gained a '## Log — 2026-09-07' section and a new review-when bullet, both recording the tokens.mjs transcription defect and its fix. Collected verbatim except for one added sentence, which is a share-copy fact rather than a source fact: this copy's own shipped artifact was rebuilt in the same commit and its sha256 prefix is named. The source's parallel line says its seven library artifacts' receipts are due for re-issue and that this session did not do it — kept as written, because a maintenance log that hides its own outstanding item is worth less than none.",
   "NEW 2026-09-07: the same section's re-issued-receipts table lost its two sha256 columns and its source-commit stamp, keeping the artifact names and the byte before→after column, with a paragraph underneath saying where the receipts were recorded and why they are not reproduced. The seven artifacts live in the source's outputs/ tree and do not ship, so fourteen 64-hex receipts would be values a reader has nothing to check against — the same dead-pointer class as the record citation above, one level more opaque. The portable half is what stays: the R-2 ruling that an a11y attribute change re-issues receipts, and the ~4-5 KB per-artifact growth that shows the change was bytes and not drawing. The gate's leak scanner reads any 32+ hex run as a hash, so it flagged all fourteen; that reading was right for the wrong reason, and the fix is removal rather than an [[allow]].",
 ]
+source_dirty_ack = """2026-09-07: same cause and same standing as the emit.mjs
+and tokens.mjs acks below — the source's 2026-09-07 maintenance-log entry was
+written there by this session before collection. The diff against the source
+working tree is exactly this entry's declared edits and nothing else.
+review-when: drop once ~/.claude commits the archdiag change."""
 
 [[collected]]
 path = "architecture-diagramming/archdiag/index.mjs"
@@ -2798,9 +2804,28 @@ path = "architecture-diagramming/archdiag/emit.mjs"
 source = "~/.claude/tools/archdiag/emit.mjs"
 status = "verbatim"
 # Confirmed byte-for-byte identical to fresh source (diff exit 0). Grown from
-# 169 to 176 lines: each svg.dia now emits role="img" + aria-labelledby +
+# 169 to 191 lines: each svg.dia now emits role="img" + aria-labelledby +
 # a <title id="t-<view>">/<desc id="d-<view>"> pair as its first children
 # (was a plain aria-label attribute). No scrub target.
+#
+# RE-COLLECTED 2026-09-07 (second pass, owner-directed): the source gained
+# exported `TEXT` and `SURFACE` tables and now writes every diagram foreground
+# and surface from them, including the page background in the CSS. This is a
+# fix AT THE SOURCE for a defect this repo's acceptance work surfaced — see
+# tools/COLLECTION-RULES.md hard rule 4, which was given its boundary clause in
+# the same commit: the source is read-only for de-identification, not immune to
+# its own bugs. Landed at the source, verified there (`node tokens.mjs --check`
+# = 0 fail / 1 warn / exit 0, markdown table byte-identical to before), then
+# collected. One emitted byte changed as a consequence — `background: #fff` ->
+# `#ffffff` — which re-froze this repo's one shipped artifact; rebuilt in the
+# same commit, sha256 starts b86bc0ae382f. Still verbatim, still no scrub target.
+source_dirty_ack = """2026-09-07: the source is dirty for this file because THIS
+SESSION made it dirty — the owner-directed TEXT/SURFACE export, landed at the
+source and verified there before collection. It is not another session's
+in-flight edit, and the copy here is byte-identical to the source working tree
+(diff exit 0). Committing the source is the owner's call and was not part of the
+instruction, so the state is declared rather than assumed away. review-when: drop
+this ack once ~/.claude commits the archdiag change."""
 
 # =============================================================================
 # PART 2 — first collections (procedure A)
@@ -3844,22 +3869,37 @@ status = "verbatim"
 # a control can feed it a known-bad pair. That is this environment's own
 # calibration rule shipped as running code, not prose about it.
 #
-# CALIBRATED HERE, BOTH WAYS, before it was declared verified — and the second
-# direction changed what this entry claims. Run in the repo copy: `node
-# tokens.mjs --check` = 0 fail / 1 warn / exit 0. Positive control on a scratch
-# copy: mutate `FILL.block` in emit.mjs to a dark slate -> 2 fail, exit 2.
-# NEGATIVE-LOOKING result that is the real finding: mutate the node TITLE's text
-# colour in emit.mjs instead and the check stays silent at 0 fail / exit 0.
-# It is not broken — `tokens.mjs` imports FILL/STROKE/OVL/EDGE, but its TEXT and
-# SURFACE colours are a HAND-TRANSCRIBED table in its own header, carrying a
-# `grep-verified 2026-09-05` receipt. So its object vocabulary covers "the
-# palette's contrast pairs", not "every foreground the emitter writes", and the
-# first control I reached for happened to land in the half it cannot see. Both
-# runs are written into architecture-diagramming/ACCEPTANCE.md items 19 and 19b
-# so the boundary ships with the instrument instead of being rediscovered.
-# review-when: emit.mjs changes a text or surface colour — the transcribed table
-# is the thing that goes stale, and nothing in the file would say so.
+# CALIBRATED BOTH WAYS BEFORE BEING CALLED VERIFIED — and the second direction
+# found a real defect, which the owner then had fixed at the source rather than
+# documented here as a limit. The sequence is worth keeping whole:
+#
+#   1. Run in the repo copy: 0 fail / 1 warn / exit 0.
+#   2. Control A — mutate `FILL.block` in emit.mjs on a scratch copy: 2 fail,
+#      exit 2. Instrument looks calibrated.
+#   3. Control B — mutate the node TITLE colour instead: **0 fail, exit 0**.
+#      Silent. `tokens.mjs` imported FILL/STROKE/OVL/EDGE but carried its own
+#      HAND-TRANSCRIBED TEXT/SURFACE table behind a `grep-verified 2026-09-05`
+#      receipt, so half its palette was graded against a copy of itself — inside
+#      a file whose header claims to be DERIVED from emit.mjs, enforcing the
+#      very rule (M5) it had quietly broken.
+#   4. Owner ruling 2026-09-07: fix it, at the source too. `emit.mjs` now
+#      exports TEXT/SURFACE and writes every foreground and surface from them;
+#      this file imports them and states no colour of its own.
+#   5. Re-run all three: 0 fail / exit 0 live; control A 2 fail / exit 2;
+#      control B **7 fail / exit 2** (all seven node fills). Both halves wired.
+#
+# Both controls are now architecture-diagramming/ACCEPTANCE.md items 19 and 19b,
+# with 19b carrying the history — an external verifier who runs only control A
+# is testing the half that never was broken. The generalised lesson is in the
+# source's own MAINTENANCE.md log for 2026-09-07: a header that says "derived
+# from X" is a claim, and only a control that changes X tests it.
+# review-when: a new text or surface colour is added to emit.mjs as a literal
+# instead of joining TEXT/SURFACE — coverage would shrink with nothing saying so.
 # LF-only, as `.gitattributes` pins for `architecture-diagramming/archdiag/**`.
+source_dirty_ack = """2026-09-07: same cause and same standing as the emit.mjs
+ack above — the source is dirty because this session's owner-directed fix landed
+there first. Copy is byte-identical to the source working tree (diff exit 0).
+review-when: drop once ~/.claude commits the archdiag change."""
 
 # ---------------------------------------------------------------------------
 # 2026-09-07 round — dispositions for what did not ship. Narrative: CHANGELOG.md.

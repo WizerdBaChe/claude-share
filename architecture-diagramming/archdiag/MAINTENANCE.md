@@ -167,8 +167,42 @@ drawing change.
   same-origin 1400×900 iframes and collects `contentWindow.__geometryReport`
   once all are ready (the pattern used above).
 
+## Log — 2026-09-07: the palette's other half stops being a transcription
+
+`tokens.mjs` claimed in its own header to be DERIVED from `emit.mjs` (M5: the
+palette is never listed a second time). It was — for `FILL`, `STROKE`, `OVL`
+and `EDGE`. Its `TEXT` and `SURFACE` tables were a hand copy carrying a
+`grep-verified 2026-09-05` receipt, so `--check` graded seven foreground and
+surface values against a snapshot of themselves.
+
+- **How it was found**: writing the acceptance item for the share copy, not by
+  reading. The first control reached for — mutate the node title colour in
+  `emit.mjs`, expect red — came back **0 fail, exit 0**. A second control on
+  `FILL.block` turned it red as expected. One instrument, two halves, only one
+  of them wired.
+- **Fix**: `emit.mjs` now defines and exports `TEXT` (title / sub / container /
+  badge) and `SURFACE` (pill + stroke, container + stroke, page) and uses them
+  at every emission site; `tokens.mjs` imports them and states no colour of its
+  own. Both controls now fire: title colour → 7 fail / exit 2, `FILL.block` →
+  2 fail / exit 2.
+- **M1 — receipts**: one emitted byte changed, `background: #fff` →
+  `background: #ffffff`, because the page background is now written from
+  `SURFACE.page` (it has to be: it is the surface every edge stroke is graded
+  against, and a gate may not read a copy of its own subject). Same class as
+  the 2026-09-05 a11y change and the same R-2 ruling applies — **the source
+  environment's 7 library artifacts' receipts are due for re-issue**; nothing
+  drawn changed. In THIS copy the one shipped artifact,
+  `architecture-diagramming/capability-set.html`, was rebuilt in the same
+  commit; its sha256 starts `b86bc0ae382f`.
+- **Generalised**: a file whose header says "derived from X" is making a claim,
+  and the only thing that tests it is a control that changes X. This one was
+  half-true for two days inside the file that exists to enforce M5.
+
 ## Review-when
 
+- A text or surface colour is added to `emit.mjs` → add it to `TEXT`/`SURFACE`
+  rather than inline, or `tokens.mjs` silently stops covering it. The tell is a
+  hex literal appearing in `nodeSvg`/`viewSvg`/the page CSS again (2026-09-07).
 - Playwright/headless-Chrome version change on this machine → `getBBox` font
   metrics may shift §4 label measurements: re-run the in-page check on
   F1/F2/F3 (report stays PASS/FAIL on the same bytes; receipts themselves are

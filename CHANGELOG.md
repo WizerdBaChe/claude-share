@@ -9,6 +9,55 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-07 (second pass) — the blind spot gets fixed instead of documented, and a stale artifact is caught
+
+The morning's entry below ended by *documenting* two things rather than fixing
+them. The owner's ruling: fix them.
+
+**`tokens.mjs` now imports the whole palette.** Its header claimed to be DERIVED
+from `emit.mjs` (M5: the palette is never listed twice). It was — for `FILL`,
+`STROKE`, `OVL`, `EDGE`. `TEXT` and `SURFACE` were a hand copy behind a
+`grep-verified 2026-09-05` receipt, so the contrast gate graded seven
+foreground and surface values against a snapshot of themselves. **At the source
+first** (`emit.mjs` exports `TEXT`/`SURFACE` and writes every emission site and
+the page background from them; `tokens.mjs` states no colour of its own),
+verified there, then collected. Three runs, not one: live 0 fail / exit 0;
+control A (`FILL.block` → dark) 2 fail / exit 2, as before; control B (node
+title colour → near-white) **7 fail / exit 2**, where it had been silent.
+`ACCEPTANCE.md` 19b is now that control with its history attached — a verifier
+who runs only A is testing the half that was never broken.
+
+This is the first time this repo has changed the source. `COLLECTION-RULES.md`
+hard rule 4 gained the boundary that makes that legible rather than a
+contradiction: the rule bans editing the source for this repo's convenience, not
+the owner fixing a real defect that collection surfaced. Source-first, verified
+there, and the source's dirty state declared in three `source_dirty_ack`s rather
+than assumed away — committing `~/.claude` is the owner's call, not this repo's.
+
+**A stale artifact, caught by rebuilding.** `capability-set.html` shipped in the
+morning commit was built by the *pre-a11y* library. The round collected the
+refreshed `emit.mjs`/`selfcheck.mjs` and never re-ran the build, so
+`ACCEPTANCE.md` item 15 — "rebuild, sha identical, `git status` clean" — would
+have **failed** on the tree that was pushed. Rebuilt (`b86bc0ae382f…`,
+61376 → 65363 bytes: the a11y `<title>`/`<desc>` pairs, the grown in-page
+script, and the one byte of this pass, `background: #fff` → `#ffffff`). Written
+into `ACCEPTANCE.md` as a note rather than quietly corrected: collecting a
+generator without re-running it is the only way the determinism premise breaks,
+and item 15 exists precisely to catch it.
+
+**Root fix for the manifest leaks.** `COLLECTION-RULES.md` gains **hard rule 9**:
+*a scrub target is still a scrub target inside a sentence about scrubbing it.*
+The manifest is a tracked, published file; an `edits` entry written as
+`` `<real path>` -> `<token>` `` publishes the value exactly as hard as the
+document it was removed from. Record class + position, never the value — the
+anchor is what makes an edit re-appliable next round, not the value. It ships
+with the enforcement fact (the leak scan already reads every tracked file, which
+is how all 38 were found) and with the instruction to put it in the brief when
+dispatching fragment-writing workers, who otherwise never meet the gate. Step A3
+carries the pointer. The rule's first draft spelled out an invented private path
+to illustrate the mistake and the gate reported *this file* on the next run;
+that is now the paragraph under the example.
+
 ## 2026-09-07 — a seven-worker refresh, and the round the manifest leaked in its own prose
 
 Source `d06708c` → `27196ab`. 104 files changed, 33 of them new; the manifest

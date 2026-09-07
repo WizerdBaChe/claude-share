@@ -80,6 +80,17 @@ looked and chose otherwise" except a written entry.
 4. **Never fix the source to make it shippable.** The source environment is
    canonical and read-only from here. Changes flow source → repo, never back.
    Confirm the source SHA is unchanged when you finish.
+
+   The rule bans editing the source for this repo's convenience — scrubbing at
+   the source, reshaping a file so collection is easier, deleting what is
+   awkward to adjudicate. It does not ban the owner fixing a real defect that
+   collection happened to surface. 2026-09-07 is the worked example: writing an
+   acceptance item for `archdiag/tokens.mjs` produced a control that should have
+   turned it red and did not, because half its palette was a transcription
+   rather than an import. That is the source's bug, not a packaging problem, and
+   the owner directed the fix. The discipline that stays: the fix landed **at the
+   source first**, was verified there, and only then was re-collected — and the
+   source SHA moving is stated in the round's record, not glossed over.
 5. **A disposition is a claim about the source, and claims expire.** Before
    relying on any `[[not_shipped]]` entry, re-verify it against the source. If
    it is wrong, correct it and say so in the entry — do not delete the history.
@@ -101,6 +112,43 @@ looked and chose otherwise" except a written entry.
    note listed `FUTURE-WORK` / `sample-run` / status files as strip-on-share,
    which settled four candidates in one line. Look for such a note before
    adjudicating a skill or a tool directory.
+9. **A scrub target is still a scrub target inside a sentence about scrubbing
+   it.** Added 2026-09-07, after the largest single batch of leaks this repo has
+   had — 38 of them, every one in `share-manifest.toml` itself, and not one in a
+   collected file. The shape is always the same: an `edits` entry written as
+   `` `<the real private path>` -> `<token>` ``, because quoting the original
+   feels like precision. It is the opposite. The manifest is a **tracked,
+   published file**; a value written there is published exactly as hard as one
+   written in the document it was removed from, and the round that removes a
+   vault root from nine skill files while printing it nine times in the record
+   has de-identified nothing.
+
+   Write the record as **class + position**, never as the value:
+
+   - ✗ `` "line 12: `<the operator's real vault root>\notes.md` -> `<vault>\notes.md`" ``
+   - ✓ `` "line 12: the vault root, an absolute path on a non-system drive, -> `<vault>` (the tail resolves and is kept)" ``
+
+   The ✗ line above is written with a stand-in where a drive-letter path would
+   go, and that is not squeamishness — the first draft of this rule spelled out
+   an invented `X:\…\…` path to illustrate the mistake, and the gate reported
+   **this file** as a finding on the next run. An invented private path still
+   matches the pattern, and a reader cannot tell an invented one from a real
+   one, which is the entire reason the pattern does not try. The rule caught
+   its own example; write the class here too.
+
+   Position, section id, line number, ruling id and date are all keepable and
+   are what make the edit re-appliable next round — a record does not need the
+   value to be checkable, it needs the anchor. The same applies to a session id,
+   a full commit sha (32+ hex reads as a hash), a scheduled-task name, and to
+   prose *about* an exclusion, not just to `edits` arrays.
+
+   This is checked, not merely stated: the leak scan reads every tracked file,
+   so the manifest is scanned like anything else, and that is how all 38 were
+   found — **after** they were merged, by the gate, which is the last place you
+   want to find them. The cost of the rule is a sentence; the cost of skipping
+   it was a full re-read of every `edits` entry written that round. If you are
+   dispatching workers who write manifest fragments, this rule goes in the
+   brief: a worker who never runs the gate has no other way to learn it.
 
 ## Decision procedure
 
@@ -172,7 +220,9 @@ none of them is one you collect, say exactly that rather than "clean".
    The diff must contain exactly the edits you intended and nothing else. An
    empty diff means `status = "verbatim"`.
 3. **Write the `[[collected]]` entry** with `source`, `status`, and one `edits`
-   line per change, each saying *what* and *why*.
+   line per change, each saying *what* and *why* — by class and position, never
+   by quoting the value you removed (hard rule 9). The entry is published; a
+   scrub restated in its own record is not a scrub.
 
 ### B — refresh of a file already here
 
