@@ -59,3 +59,38 @@ trail: <what was tried, dead ends included — the process record>
 resolution: <what worked, or the current workaround + its cost>
 links: <...>
 ```
+
+## §3 Handoff（交接單）— owner: this section (registered 2026-09-02)
+
+When: a heavy round is split across sessions by the user's own rhythm —
+evaluate/design in one session, build in a FRESH one — or a remote/peer
+session hands work back to the local machine. The handoff is the sole
+entry the next session reads first; a phase-log checkpoint records where the
+project is, the handoff says what to DO in the next hour. Precedents: one
+written remote → local, another evaluate → build, both real instances in the
+source environment's own private records (its asset library and its
+`references/` tree — neither ships here). Language: English spec body
+(commands, cards, DoD); Traditional Chinese for the sections the user rules on.
+
+```markdown
+---  (xi card: what / tags [handoff, <project>] / aliases incl. 交接單 / date / status)
+# HANDOFF — <round name>
+**一句話**: <state + what is blocked on the user, one sentence>
+## 0. Pick up in 30 seconds
+<shell block: cd, git log/status expectations, freshness commands, the one probe that proves the environment is as described>
+Reading order: <file → file → file; the newest evidence first, standing rulings after, this file last>
+Environment facts (verified <date>): <versions, paths, relaxation level, model cap>
+## 1. State of the world this round inherits   <table: item | state>
+## 2. Rulings to obtain FIRST（使用者裁決；建議值已附）   <table: id | 問題 | 建議 | 阻擋> — prefixed ids
+## 3. Boundary contract seed   <the 5 sections, ≤18 lines; tier recommendation>
+## 4. Prior art already consulted (do not redo; extend)
+## 5. Work cards   <§1 format, English body; SKELETON labelled where the bar is not met>
+## 6. Definition of done for the round   <numbered; includes the registration set and the close-out ritual>
+## 7. What this session could not do / deliberately left
+## 8. Risks the builder must carry
+```
+
+Minimum fields (registry row in `rules-usage-dict.md` §7): 一句話 / pick-up
+commands / reading order / rulings-first table / DoD / could-not-do. A handoff
+without the rulings table exports the decision cost to the next session; one
+without could-not-do reads as complete and gets built on.

@@ -3,7 +3,8 @@
 Companion to SKILL.md P2 — applies to the **discovery** and **mixed** paths only; on
 the source-provided path do not expand the literature set beyond the supplied sources
 (see SKILL.md P2 routing). Channel facts below (endpoints, auth, limits) are volatile:
-base verified **2026-07-07**, OpenAlex and Semantic Scholar re-verified **2026-08-26**.
+base verified **2026-07-07**, OpenAlex and Semantic Scholar re-verified **2026-08-26**,
+the §Source classes beyond journals and books channels verified **2026-09-03**.
 If a channel behaves differently than described (404s, auth walls, new limits),
 re-verify with a web search before concluding the channel is unusable, and update this
 file.
@@ -162,6 +163,94 @@ request volume — rate limits below matter mainly as "don't loop fetches" guida
   "recommended texts" threads, then verify the book's standing via citation counts of
   the book itself (Google Scholar/Semantic Scholar index books).
 
+## Source classes beyond journals and books
+
+Added 2026-09-03. These classes were absent from this file and from
+`../connectors/registry.json` — not declined, *never considered* — which meant a
+question whose answer lives in a handbook or an agency report could only ever come back
+"not found in searched sources". A gap report that cannot name the right *kind* of
+source is honest and useless. Credibility handling for the first two is
+`credibility-rubric.md` §5b (Tier R) and §5c (Tier M).
+
+### Reference data compilations (material constants, thermophysical data)
+
+**The default home of a "what is the literature value of X" question in physical
+science** — more often than a paper is. Channels are landing pages, not APIs; treat
+them like publisher pages and read the entry.
+
+- **NIST**: Chemistry WebBook and the Standard Reference Data collections
+  (`webbook.nist.gov`, `nist.gov/srd`).
+- **refractiveindex.info** — optical constants (n, k) by material and reference; the
+  entry names the source dataset it plots, which is what makes cite-through possible.
+- **Print handbooks**: CRC Handbook of Chemistry and Physics; Palik, *Handbook of
+  Optical Constants of Solids*. Locate the edition via ISBN resolution (§Identifier
+  resolution) — editions revise values.
+
+**Extraction rule (this is the whole point):** take the value AND the primary source the
+compilation names, then **cite the primary source, recording the compilation as the
+route** — `(Johnson & Christy 1972, Table I; via refractiveindex.info, retrieved
+<date>)`. A compilation is a high-quality index; it is not the measurement. Record the
+retrieval date (online compilations change) and whether the row is measured or
+interpolated. Full rules: `credibility-rubric.md` §5b.
+
+### Agency / government technical reports
+
+Free full text, peer-review status varies (usually internally reviewed, not journal
+peer review → Tier C unless the report itself states otherwise).
+
+- **NASA NTRS** — API root `ntrs.nasa.gov/api`, `POST /citations/search`, then
+  `/citations/{id}` and `/citations/{id}/downloads` for the PDF; `page_size` 1–100,
+  1-based `page`. No key seen. *Verified 2026-09-03 (search); NASA's own OpenAPI PDF is
+  dated 2021-04-26 — treat parameter details as first-use-verify.*
+- **DOE OSTI** — docs `www.osti.gov/api/v1/docs`, records endpoint
+  `www.osti.gov/api/v1/records`. No API key or auth mentioned for search; no rate limit
+  documented; records carry a `links` array where `"rel": "fulltext"` gives the document
+  URL. Covers reports, journal articles, data, software, patents, conference papers.
+  *Verified 2026-09-03 by fetching the docs page itself.*
+
+Both yield `[full]` when a document link resolves. Because no rate limit is documented,
+apply the standing rule anyway: do not loop fetches.
+
+### Theses and dissertations
+
+`credibility-rubric.md` Tier C already named theses; there was no channel. A thesis is
+often the only place a method is described in reproducible detail — the chapter behind a
+terse Methods section.
+
+- **Taiwan — 臺灣博碩士論文知識加值系統 (NDLTD Taiwan)**, `ndltd.ncl.edu.tw`. National
+  Central Library, Open Access basis; bibliographic + abstract search is free and needs
+  no account. **Full text only where the author authorised it**, and downloading an
+  authorised thesis requires member registration — so the honest default tag is
+  `[abstract]`, rising to `[full]` only for an actually-retrieved authorised PDF.
+  *Verified 2026-09-03.*
+- **Elsewhere**: the institutional repository is usually the free full text; find it via
+  OpenAlex/Semantic Scholar or a site-scoped WebSearch on the university domain.
+  ProQuest Dissertations is paywalled — landing-page channel like IEEE Xplore.
+
+### Datasets and research software
+
+Increasingly where the actual number lives, especially when a paper's figure has
+deposited source data.
+
+- **Zenodo** — REST API over published records. Reading works without a token, but a
+  token raises the limit from **60 to 100 requests/hour**; pass it as
+  `Authorization: Bearer <token>`, not as a URL parameter. *Verified 2026-09-03.*
+  No token is registered for this skill, so treat 60/hour as the ceiling.
+- **Figshare**, and **Software Heritage** for code that has outlived its repo.
+- A dataset has its own DOI: resolve and cite it as a source in its own right, with the
+  file and column/field as the locator. Do not cite the paper for a number you took from
+  its deposited data — cite the deposit, and note the paper it belongs to.
+
+### Supplementary material (not a channel — a rule)
+
+`extraction-playbook.md` §2 says to check Supplementary before declaring a reproduction
+gap, and never said how to get it. SI usually sits behind its own link on the article
+landing page, frequently as a separate PDF/XLSX, and is often open even when the article
+is not. Procedure: fetch the landing page, take the SI links from it, fetch those; if
+WebFetch cannot render the landing page, that is exactly ladder rung 3b (render it).
+Cite SI with its own locator (`Suppl. S1`, `Suppl. Table S3`) — never fold an SI number
+into a main-text table citation.
+
 ## Local PDF library (user-supplied corpus)
 
 When the user points to a folder of paper PDFs they already have:
@@ -181,6 +270,20 @@ When the user points to a folder of paper PDFs they already have:
 - **With a corpus tool over the same folder**: if the collection is also indexed by a
   live `local_corpus` connector, rank/relate there first, then Read the underlying PDF
   for `[full]`-level extraction — a digest alone stays `[partial]`.
+
+### "Password-protected" is usually a false refusal (SKILL.md P3 points here)
+
+The Read tool refuses some PDFs as password-protected that are not encrypted at all — a
+permissions flag alone is enough to make readers refuse, and rewriting the file via
+pypdf does not clear the refusal. Probe before believing it:
+
+- `fitz.open(path)` then check `needs_pass` / `is_encrypted`. Both false → the refusal
+  was spurious and the file is readable.
+- Working recipe (measured on SSLD, 2026-08-31): pymupdf `get_text()` per page **plus**
+  `get_pixmap(dpi≈110)` page renders read as images — recovers full text AND figure
+  dimensions, so the source is genuinely `[full]`, not `[partial]`.
+- `needs_pass` true → it really is user-password-protected. That one goes back to the
+  user; do not guess passwords and do not downgrade silently — it is a `gaps` entry.
 
 ## Degradation ladder & cost transparency
 
@@ -249,6 +352,14 @@ the caller names non-English sources (facts below verified 2026-07-10):
   Research is the discovery/linking layer over it → `[full]` often achievable.
   European-language work is usually covered by the standard channels (Crossref/OpenAlex
   index non-English venues).
+- **Taiwan** (this owner's own literature environment — added 2026-09-03):
+  **臺灣博碩士論文知識加值系統** `ndltd.ncl.edu.tw` for theses (see §Theses above);
+  **華藝 airitiLibrary** `airitilibrary.com` for Taiwanese journals and theses —
+  **institutional access only**, external users need their institution's VPN, so
+  without it this is metadata-and-abstract at best and the shortfall is a `gaps` entry
+  (*verified 2026-09-03*); **國家圖書館期刊文獻資訊網** for Chinese-language periodical
+  indexing. A Chinese-language topic searched only in English is a `gaps` entry under
+  the language-skew rule below, and these three are where that gap gets closed.
 - **Extraction**: extract in the source language, deliver in the contract `language`;
   when exact wording is load-bearing, quote the original with a translation.
 - **Credibility**: same rubric — a regional-language venue is not automatically a lower
@@ -305,3 +416,62 @@ unfilled.
 
 If stopping leaves targets unfilled, that is a `gaps` entry, not a reason to keep
 searching past the quota.
+
+## Recall check — the positive control for the search (SKILL.md P2 points here)
+
+Every other check in this skill guards **precision**: that what was said is supported.
+Nothing guarded **recall**: that what exists was found. Those are different failures and
+only one of them was instrumented — P4.5 got a two-sided calibration, the search stage
+had none at all.
+
+The gap matters because of what the skill's output claims. `gaps` says "not found in
+searched sources", and that sentence looks *identical* whether the literature is absent
+or the query was malformed. Saturation does not separate them: it proves the query
+converged, and **a query built on the wrong vocabulary converges faster than a good
+one** — it exhausts its own small neighbourhood immediately. The bubble check
+(`credibility-rubric.md` §6) does not either: it interrogates the sources that made it
+in, never the ones that never surfaced.
+
+### Where a control comes from (in preference order)
+
+1. **A `scope` seed already grep-verified** against the corpus per SKILL.md failure
+   mode #9. Best control: independently known to exist AND known to be relevant.
+2. **A local-corpus hit** — `zotero_local.py --search` / `pdf_index.py --search`. The
+   user's own library proves relevance by having been collected.
+3. **A source found by a different route this run** — e.g. a paper reached by backward
+   chasing. Weaker (it entered through a channel, so it tests the *other* channels).
+4. **A source cited by a source already found**, resolved and confirmed on-topic.
+
+### Procedure
+
+1. Pick the control BEFORE concluding, and **withhold it** — do not put its title, DOI,
+   or distinctive phrasing into any query.
+2. Run the queries as they actually stand.
+3. Ask: did those queries surface the control on their own?
+   - **Found** → the query reaches this neighbourhood. A "not found" for a *different*
+     target now means something.
+   - **Missed** → **the query is condemned, not the literature.** Repair it — usually
+     the paper's own vocabulary differs from the user's (the P2 "iterate once with the
+     terminology found in the first hits" rule exists for exactly this) — and re-run
+     before writing any absence claim.
+4. Log in `search_trail`: which control, found or missed, and what the repair was.
+
+### When no control is available
+
+Say so, in the deliverable, in these words or equivalent:
+
+> no recall control was available for this run — "not found" here means *not found by
+> the queries listed in `search_trail`*, which were not calibrated against a known item.
+
+That is an honest downgrade, not a failure. What is NOT acceptable is an unqualified
+"not found in searched sources" from an uncalibrated search: it asserts absence with
+the confidence of a measurement that was never taken.
+
+**Cost.** One extra query round per run, and only on runs that will report an absence —
+a run that fills every extraction target needs no control, because it is not claiming
+anything is missing.
+
+**Scope limit, stated deliberately.** This is a spot check with n=1, not a recall rate.
+It catches a query built on the wrong vocabulary or pointed at the wrong channel — the
+common, cheap failure. It cannot detect systematically missing coverage (a whole
+literature in a language or venue nobody queried); that remains rubric §6's job.

@@ -9,6 +9,11 @@
 // strings => identical bytes (receipt-friendly). Doc strings (title/h1/
 // legendbar/footerNote/section h2s) are trusted raw text/HTML from the
 // build script; view-model strings go through esc().
+// a11y contract (2026-09-05, B-3): each svg.dia carries role="img" and
+// aria-labelledby → <title id="t-<view>"> (first child) + <desc id="d-<view>">
+// (the view's question). Asserted on the emitted page by asserts.mjs
+// a11yAsserts; the receipts of every accepted artifact were re-issued for
+// this byte change (MAINTENANCE.md, 2026-09-05 entry).
 
 import { inPageScript } from './selfcheck.mjs';
 
@@ -112,7 +117,9 @@ export function pageHtml({ grid = 8, doc, views, sections, selfcheckNotes }) {
   const panes = views.map((v, i) => `
 <section class="pane${i === 0 ? ' on' : ''}" id="pane-${v.id}">
   <p class="note">${esc(v.subtitle)}　宣告：${v.declared.map(esc).join('；')}</p>
-  <svg class="dia" data-view="${v.id}" viewBox="0 0 ${v.vb[0]} ${v.vb[1]}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(v.title)}">
+  <svg class="dia" data-view="${v.id}" viewBox="0 0 ${v.vb[0]} ${v.vb[1]}" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-${v.id} d-${v.id}">
+    <title id="t-${v.id}">${esc(v.title)}</title>
+    <desc id="d-${v.id}">${esc(v.subtitle)}</desc>
     <g class="scene">${viewSvg(v)}</g>
   </svg>
 </section>`).join('\n');

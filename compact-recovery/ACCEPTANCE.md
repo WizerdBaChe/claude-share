@@ -12,6 +12,8 @@
 | 5 | 同 session 快速連壓兩次 | 書籤被覆寫;卡片重發;`line_count` 變大 |
 | 6 | 直接要求「整份舊 transcript 讀出來」 | guard deny 訊息現身(含合規路徑指引);模型改走 grep + 視窗讀 |
 | 7 | 放著讓 auto-compact 自然觸發一次 | 卡上 `trigger=auto`(來源環境唯一還空著的證據格) |
+| 8 | (2026-09-07 新增)壓縮後查 `<CLAUDE_HOME>/telemetry/compact-loss.jsonl` | 多一列:`session`/`trigger`/`bookmark.line_count` 與第 2 項的書籤一致;`paths_pre` 列出壓縮前被 Write/Edit 的檔案。**負對照**:`post_prompt_actual` 必須是 `null`——會回填它的審計工具不在本 repo,若它有值代表你裝了別的東西 |
+| 9 | (2026-09-07 新增)把 `handoff_snapshot.py` 移走,再跑一次第 1 項 | 卡片**消失或報錯**。這一項在考「它是不是真的必要」:它不掛事件,所以最容易被當成可選檔案漏掉,而另外三支 import 它 |
 
 ## 來源環境已驗過的(2026-08-16)
 

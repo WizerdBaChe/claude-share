@@ -3,7 +3,9 @@ name: backend-architect
 description: >
   Backend and API implementation: endpoints, data models, service logic,
   migrations. Use for 後端實作、API 實作、資料模型. Implements a decided approach;
-  it does not choose between architectures (that is software-architect).
+  it does not choose between architectures (that is software-architect). A
+  finished build-ready work card (施工卡) with its own acceptance list goes to
+  work-card-executor instead.
 tools: Read, Glob, Grep, Edit, Write, Bash, PowerShell, Skill
 model: sonnet
 effort: medium

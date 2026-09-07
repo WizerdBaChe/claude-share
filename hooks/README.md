@@ -15,6 +15,20 @@
 > 它們不是不能分享，是從來沒被撈進來。收錄程序見
 > [`../tools/COLLECTION-RULES.md`](../tools/COLLECTION-RULES.md)。
 
+> **2026-09-07 refresh：十八支 hook。** +2：`compact_loss_record.py`
+> （PostCompact，compact-recovery 第四支，記錄每次壓縮的漏失稽核用資料）與
+> `appdata_view_guard.py`（PreToolUse `Bash\|PowerShell`，assistant shell／
+> user shell 讀到不同答案的標註型 guard；收錄時把四行校準測資裡的帳號名換成
+> `<user>` 佔位符，行為不變）。`handoff_snapshot.py` 這輪也一起到，但它**不是
+> hook**——是 `compact_bookmark.py`／`compact_pointer.py`／`context_runway_shadow.py`
+> 三支共用的函式庫，沒有自己的事件掛載，跟 `tests/` 不算 hook 是同一類。另外三個
+> 候選讀完全文後排除，理由跟下面「為什麼是 hook」段落點名的漏宣告同一類，只是換了
+> 目標：`intake_guard.py`／`intake_match_shadow.py` 是 `tools/closeout-intake/`
+> 的一半（它們管的 `ops/lessons/` 存放區本 repo 也不出貨），`unattended_run.py`
+> 是 `tools/process-ledger/` 的一半（它的 Stop guard 判斷條件本身需要那支工具才能
+> 產生的報告檔）——出貨與否見 `tools/share-manifest.toml` 的 `[[not_shipped]]`
+> 條目，`settings.example.json` 的 `_README` 也各留一行。
+
 ## 為什麼是 hook 而不是規則文字
 
 規則層寫「請記得 X」，模型在自信的當下會讀過去。這幾支的共同判準（`ops/lessons.md`
@@ -28,18 +42,21 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | 檔案 | 事件 | 做什麼 |
 |---|---|---|
 | `dangerous_command_guard.py` | PreToolUse `Bash\|PowerShell` | 不可逆指令的確定性拒絕清單：遞迴強制刪除、`git push --force`／`reset --hard`／`clean -f`、registry 寫入、關機／格式化。放寬 allowlist 後的補償控制 |
-| `model_cap_guard.py` | PreToolUse `Agent\|Workflow` | subagent 模型成本上限（只准 haiku/sonnet）。已知繞過：SendMessage-resume 路徑無攔截點，docstring 有完整查證紀錄 |
+| `appdata_view_guard.py` | PreToolUse `Bash\|PowerShell` | **2026-09-07 新收**。同一台機器上，assistant shell 與使用者自己的 shell 對同一個 `%LOCALAPPDATA%` 路徑／同一個 HKCU 值可能回不同答案，且兩邊都不報錯（2026-09-05 事故，D-057：36 個看板設定被當成「重複檔」刪掉，其實是唯一一份）。只標註（`additionalContext`）不擋；`--selftest` 帶雙邊校準（六個必須觸發／六個必須沉默）。收錄時把校準測資裡的帳號名換成 `<user>` 佔位符，正則本身零機器綁定值 |
+| `model_cap_guard.py` | PreToolUse `Agent\|Workflow` | subagent 模型成本上限（只准 haiku/sonnet）。已知繞過：SendMessage-resume 路徑無攔截點，docstring 有完整查證紀錄。**2026-09-07 refresh**：新增「省略 `model` 時讀本機 `agents/*.md` frontmatter 判斷是否在上限內」的繼承缺口補丁 |
 | `ui_verify_guard.py` | PreToolUse 瀏覽器 `computer\|javascript_tool` | 擋下「沒先探 `visibilityState` 就要截圖」與「動畫未落停就讀 `getComputedStyle`」。有 per-session marker 與 `intentional-midflight` 逃生口 |
 | `browser_pane_scope_guard.py` | PreToolUse 瀏覽器 `navigate\|preview_start` | 記錄每次導覽（app 端 log 不記 URL）。**2026-08-14 起改為白名單 (allowlist)**：loopback 由 hook 自己放行，其餘一律拒絕並改走 out-of-process 路徑。只管 in-app pane，Chrome 那條路永遠不擋 |
 | `browser-pane-allowlist.json` | — | 上面那支讀的白名單，出貨時 `hosts` 是空的。手改、進版控，加一筆是刻意行為 |
 | `browser-pane-blocklist.json` | — | 保留：它記著每個 host 當初為什麼炸掉，讓拒絕訊息講得出具體理由 |
-| `ops_health_nudge.py` | SessionStart | 13 項維護門檻（檔案大小、ghost rule、skill 預載預算、字典同步、relaxation 等級未設定、advisory output 未處理…）。健康時完全安靜 |
+| `ops_health_nudge.py` | SessionStart | 17 項維護門檻（檔案大小、ghost rule、skill 預載預算、字典同步、relaxation 等級未設定、advisory output 未處理…）。健康時完全安靜。**2026-09-07 refresh**：check 1（原本數 `ops/lessons.md` 未摺疊條目數）改成呼叫 `tools/closeout-intake/intake.py report --nudge`，本 repo 不出貨那支工具，所以這一項在本 repo 是永久的靜默 no-op（fail-open 早就把「工具缺席」列為合法降級路徑，不是新洞）；同輪也把 check 15 訊息裡漏宣告的一個排程任務名（前幾輪的疏漏，跟 check 17 的 mirror 任務同類）換成能力描述 |
 | `delivery_gate_shadow.py` | SubagentStop | **影子模式，永不阻擋**。只記錄「如果會擋，會擋什麼」，讓誤判率先被量出來再談強制 |
 | `context_runway_shadow.py` | UserPromptSubmit | **影子模式**。context 已經很長**且**這個 session 還沒寫過 checkpoint——兩個條件的**合取**才是觸發點：只看長度會在 65% 的 session 誤報，加上第二個條件降到 26% |
 | `fieldwork_threshold_notice.py` | PreToolUse `Read\|Grep\|Glob` | **影子模式**。主 session 自己讀檔的量對照 `20-dispatch.md` §1 的字面門檻。**高頻 matcher**：每次呼叫多付一次 Python 啟動（約 100ms），掛載前先讀它 docstring 裡的成本說明與退場條件 |
 | `instructions_loaded_logger.py` | InstructionsLoaded | 只做觀測：哪些指令檔在什麼時候被載入。是決定「哪條規則可以搬去 path-scoped」的證據來源 |
 | `compact_bookmark.py` | PreCompact | **2026-08-16，compact-recovery 三支之一**（總覽與召回紀律：[`../compact-recovery/README.md`](../compact-recovery/README.md)）。壓縮前把 transcript 路徑／行數／大小／trigger 寫成書籤，再 best-effort 跑 preserve.py，讓活 session 的摘要卡在壓縮當下就存在 |
-| `compact_pointer.py` | SessionStart `compact` | 壓縮後注入 ~130 token 指標卡：digest 優先、原檔壓縮前區段（lines 1..N）、兩個召回觸發條件、視窗紀律。書籤缺失時出降級卡而非沉默 |
+| `compact_pointer.py` | SessionStart `compact` | 壓縮後注入 ~130 token 指標卡：digest 優先、原檔壓縮前區段（lines 1..N）、兩個召回觸發條件、視窗紀律。書籤缺失時出降級卡而非沉默。**2026-09-07 refresh**：卡片內容加了 handoff snapshot 與 process ledger 兩段（讀 `handoff_snapshot.py`／`<session>.ledger.jsonl`），兩者本 repo 皆不出貨對應工具，指標卡本身照樣運作，只是那兩段在沒有工具寫入時印出「none for this session」 |
+| `compact_loss_record.py` | PostCompact | **2026-09-07 新收，compact-recovery 第四支**。每次壓縮寫一列到 `telemetry/compact-loss.jsonl`：書籤、handoff snapshot 存在與否、壓縮前 Write/Edit 過的路徑清單——供之後 `tools/compact-loss-audit`（不隨本 repo 出貨）判讀「摘要有沒有漏、有沒有誤導」。每 5 次 auto compact 提醒跑一次稽核；來源環境收錄時仍有一段未提交的 docstring 補述，見 manifest 的 `source_dirty_ack` |
+| `handoff_snapshot.py` | — | **不是 hook**，是共用函式庫（`compact_bookmark.py`／`compact_pointer.py`／`context_runway_shadow.py` 都 import 它），管 `cache/handoff/<session>.md` 交接快照的路徑、新鮮度判斷與提醒文案。沒有自己的事件掛載，跟 `tests/` 不是 hook 屬同一類，`settings.example.json` 不掛它 |
 | `transcript_read_guard.py` | PreToolUse `Read` | 語料根目錄下 >128KB 的**會談紀錄 (session record)** 無 `limit` 或 >120 行一律 deny，訊息只講限制與重試方式。**2026-08-29 起身分改看形狀不看位置**：`.jsonl`／`digests/` 下的 `.md` 才算紀錄，同目錄的 WebFetch 快取、PDF、索引檔自由讀（誤擋 2 次後的修正，docstring 有誤報紀錄與決策表） |
 | `shell_transport_guard.py` | PreToolUse `Bash` | **2026-08-29 新收**。Bash tool 三個**靜默**傳輸缺陷：連續反斜線減半（標註不擋——4,913 次呼叫回測顯示 89/112 命中其實是作者在補償）、≥7,700 B 指令被 OS 截斷（可判定，直接擋）、MSYS 把 `/c`、`/PID` 改寫成路徑（標註）。否決前先把整條指令寫進 telemetry |
 | `ps_errorpref_guard.py` | PreToolUse `Write\|PowerShell` | **2026-08-29 新收**。`$ErrorActionPreference='Stop'` 管到原生 exe 時**兩個方向都錯**：stderr 被重導時無害警告變終止錯誤；非零 exit code 反而完全不觸發。只標註不擋。掛在 Write 而非 Edit/Bash 是回測結果：53 個真實 payload 有 47 個經 Write 進來 |
@@ -82,4 +99,11 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
   `tools/memory-pipeline/` 而非 hooks/，所以掛載範例放在那份 README 的安裝章——
   本目錄的範本維持「只掛 hooks/ 內檔案」的不變量。
 - **`environment-guide/` 裡寫「hooks/（7 個 .py + 1 資料檔）」的地方是 2026-08-14 的快照**，
-  當時確實只有七支。那些檔案作為快照保持原樣，正確數字（現為 12 支）以本目錄為準。
+  當時確實只有七支。那些檔案作為快照保持原樣，正確數字（本輪起為十八支掛載 hook +
+  一支不掛載的共用函式庫 `handoff_snapshot.py`）以本目錄為準——這行本身在 2026-08-29
+  升到十六支、2026-09-07 升到十八支時都沒跟著改過，是同一類「refresh 讓計數變假」的
+  疏漏，此輪一併修正。
+- **`ops_health_nudge.py` 假設 `tools/closeout-intake/`（check 1 用）與
+  `tools/process-ledger/`（多支 hook 的訊息文字引用）存在**，本 repo 兩者都不出貨。
+  check 1 因此永久靜默 no-op；引用 process-ledger 指令的訊息文字仍會印出，照抄指令
+  會找不到檔案——這是文件性質的能力描述，不是本 repo 出貨的可執行路徑。

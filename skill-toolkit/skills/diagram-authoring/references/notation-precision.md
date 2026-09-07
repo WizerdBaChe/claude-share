@@ -47,7 +47,24 @@ in parentheses so the source stays traceable (list verified by web search
 - Labels horizontal; never overlapping edges or other labels (asserted in
   §4); edge labels sit at the midpoint or at the owning port.
 - Minimum rendered font ≥ 11px at 100% zoom for body labels; text contrast
-  ≥ 4.5:1 against the actual fill behind it (WCAG AA).
+  ≥ 4.5:1 against the actual fill behind it (WCAG AA; the archdiag palette
+  is checked by `tools/archdiag/tokens.mjs --check`).
+- Role type ramp — one size per text ROLE, stated once per figure and
+  taken from the carrier's size preset (carrier-playbook.md §Size
+  presets): audit view 13 / 11 / 11 / 12 (title / sub-line / edge pill /
+  container title); presentational 15 / 11.5 / 11 / 12+ (name / role /
+  edge label / status marker). A size that appears once is a mistake or a
+  new role — name the role or remove the size.
+- Monospace only for LITERALS the reader would type or grep — a path, a
+  flag, a command, an id; a name is not a literal, and body text never
+  goes mono. Evidence anchors (`ev`) are literals; node titles are not.
+- CJK body floor by carrier: ≥ 11px on desktop HTML (measured: every
+  accepted audit and owner view), ≥ 12px/pt on projected or printed
+  carriers [assumed — borrowed guidance, uncalibrated until a deck render
+  passes the user's gate]. Width estimates are per code point: `cjkW`
+  (emit.mjs) counts a character above U+00FF as one em and anything else
+  as 0.55 em — confirmed 2026-09-05; the in-page bbox is the truth, the
+  estimate only places pills.
 
 ## 3. Per-notation conventions
 

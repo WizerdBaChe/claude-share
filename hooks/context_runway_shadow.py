@@ -51,9 +51,28 @@ Files:
   cache/context-runway/<session>.json   bands already logged (rewritten)
   telemetry/context-runway-shadow.jsonl append-only, one row per band crossing
 
-Fail-open, silent: any error exits 0 with no output, and stdout is empty
-unconditionally even though UserPromptSubmit is one of the three events whose
-stdout Claude would see. Proof-of-life: integrity-sweep check 20.
+GRADUATED 2026-09-05 (user ruling C + D3, design:
+references/compaction-pipeline-design.md). The 300k band now EMITS a visible
+notice; the 150k band stays shadow (116 sessions crossed it — too noisy).
+The conjunction changed with it: the second condition is no longer "no
+phase-log written" but "no FRESH handoff snapshot" (handoff_snapshot.is_fresh),
+because Phase 3 measured that phase boundaries are spoken and context length
+does not produce them — the object that context length CAN produce is the
+snapshot, written without consent into cache/handoff/<session>.md. The
+phase-log detector below is kept for the telemetry row only, so the shadow
+history stays comparable. Filename kept: ~40 references (registry, sweep,
+graph) key on it.
+
+D3 AMENDED 2026-09-05 (user ruling, principle in long-run-probe-design.md §0):
+the 150k band now plants the CANARY PAIR once per session (~40 tokens, no
+question, independent of snapshot freshness) and reminds that process
+decisions go to the ledger. The checkpoint nag at 150k stays shadow — the
+noise objection was about the nag, not about a token. Every prompt also
+rewrites cache/handoff/current-session.json so `process-ledger/ledger.py add`
+can find the session from a shell call.
+
+Fail-open: any error exits 0 with no output. Proof-of-life: integrity-sweep
+check 20 (still reads the telemetry rows; the notice adds a `noticed` field).
 """
 import json
 import os
@@ -70,6 +89,8 @@ LOG_PATH = Path(os.environ.get("CONTEXT_RUNWAY_LOG")
 # not to a context window -- see the module docstring. Two bands, so declining
 # the first does not spend the session's only warning.
 BANDS = (150_000, 300_000)
+VISIBLE_BAND = 300_000      # bands at or above this print the notice (D3: 150k stays shadow)
+RE_ARM_STEP = 40_000        # further notices every 40k past VISIBLE_BAND while the snapshot is stale
 
 TAIL_BYTES = 262_144        # enough for the last usage record in every observed
                             # transcript; the cheap check runs on every prompt.
@@ -166,10 +187,14 @@ def main() -> None:
     if not raw:
         sys.exit(0)
     transcript = Path(str(raw))
-    if not transcript.is_file():
-        sys.exit(0)
-
     session = str(payload.get("session_id", "unknown"))[:64]
+    if not transcript.is_file():
+        # First prompt of a session: the transcript is not on disk yet, but the
+        # pointer must be — otherwise a one-prompt session leaves the PREVIOUS
+        # session's id for ledger.py to misfile under (ops/lessons.md L-053
+        # candidate (a), confirmed by position 2026-09-06; context unknown → 0).
+        _write_current_session(session, transcript, str(payload.get("cwd", "")), 0)
+        sys.exit(0)
     state_path = STATE_DIR / f"{session}.json"
     try:
         logged = set(json.loads(state_path.read_text(encoding="utf-8")).get("bands", []))
@@ -177,19 +202,49 @@ def main() -> None:
         logged = set()
 
     total = context_total(transcript)
+    _write_current_session(session, transcript, payload.get("cwd", ""), total)
     # Every band already passed is retired together, and only the highest is
     # announced. Retiring just the one announced meant a session that arrived
     # already above 300k emitted the 300k notice and then the 150k notice on
     # the very next prompt -- two warnings for one crossing, and the second one
     # weaker than the first. Found 2026-08-15 by re-running the same session.
-    crossed = [b for b in BANDS if total >= b and b not in logged]
+    # Re-arm above the visible band (user question 2026-09-05: a snapshot written
+    # at ~300k is stale by ~360k, and auto-compact fires ~330-370k on a 400k
+    # window — one notice per session left the compaction with a stale
+    # snapshot). Every RE_ARM_STEP past VISIBLE_BAND is a further band; the
+    # freshness check below keeps them silent while the snapshot is current.
+    bands = list(BANDS)
+    if total >= VISIBLE_BAND + RE_ARM_STEP:
+        bands += [VISIBLE_BAND + RE_ARM_STEP * i
+                  for i in range(1, (total - VISIBLE_BAND) // RE_ARM_STEP + 1)]
+    crossed = [b for b in bands if total >= b and b not in logged]
     if not crossed:
         sys.exit(0)
     band = max(crossed)
 
-    if checkpoint_written(transcript):
+    # D3 amended 2026-09-05 (user ruling): the 150k band plants the CANARY PAIR
+    # — independent of snapshot freshness, once per session, ~40 tokens. It is
+    # not a checkpoint nag (that stays shadow here): it calibrates the
+    # summarizer of a compaction that has not happened yet, and reminds that
+    # process decisions go to the ledger from here on. Ruling context:
+    # references/long-run-probe-design.md §0.
+    canary_text = ""
+    if BANDS[0] in crossed:
+        canary_text = _plant_canary(session, transcript, total)
+
+    ckpt = checkpoint_written(transcript)
+    try:
+        import handoff_snapshot as hs
+        fresh = hs.is_fresh(transcript, session, total)
+    except Exception:
+        fresh = True         # helper broken: stay silent, never nag on a bug
+    if fresh:
+        _retire(state_path, logged, crossed)
+        if canary_text:
+            print(canary_text)
         sys.exit(0)          # the conjunction, and the reason this is not noise
 
+    noticed = band >= VISIBLE_BAND
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open("a", encoding="utf-8", newline="\n") as fh:
@@ -198,25 +253,77 @@ def main() -> None:
                 "session": session,
                 "cwd": payload.get("cwd", ""),
                 "would_notice": True,
+                "noticed": noticed,
                 "band": band,
                 "context": total,
-                "checkpoint_written": False,
+                "checkpoint_written": ckpt,
+                "snapshot_fresh": False,
+                "canary": bool(canary_text),
                 # The graduated wording, recorded so a review judges the actual
                 # message rather than the number that triggered it.
-                "wording": ("context is long and no checkpoint exists yet -- "
+                "wording": ("runway is short and no fresh handoff snapshot exists -- "
                             "write one while it is still cheap"),
             }, ensure_ascii=False) + "\n")
     except Exception:
         pass
 
+    _retire(state_path, logged, crossed)
+
+    if canary_text:
+        print(canary_text)
+    if noticed:
+        try:
+            print(hs.notice(session, total,
+                            "Context runway is short and no fresh handoff snapshot exists"))
+        except Exception:
+            pass
+    sys.exit(0)   # 150k band: canary only; 300k band: visible snapshot notice.
+
+
+def _write_current_session(session: str, transcript: Path, cwd: str, total: int) -> None:
+    """cache/handoff/current-session.json — lets `process-ledger/ledger.py add` find the
+    session from a Bash call (no session id reaches the shell). Rewritten every prompt;
+    two live sessions race on it, so ledger.py also accepts --session."""
+    try:
+        d = CLAUDE_DIR / "cache" / "handoff"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "current-session.json").write_text(json.dumps({
+            "session": session, "transcript": str(transcript), "cwd": cwd,
+            "context": total, "ts": int(time.time())}), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _plant_canary(session: str, transcript: Path, total: int) -> str:
+    """Write <transcript dir>/<session>.canary.json (beside the transcript: the one
+    tree the daily mirror copies) and return the injection text, or '' on failure.
+    keep = a harmless standing constraint the summarizer MUST carry; drop = a fake
+    detail it MUST discard. A summary that keeps both or drops both is uncalibrated
+    (long-run-probe-design.md §2 canary pair)."""
+    try:
+        rid = "%04x" % (int(time.time() * 1000) % 65536)
+        keep = f"UR-{rid}"
+        drop = f"port {40000 + int(rid, 16) % 9999} timeout"
+        path = transcript.with_name(f"{session}.canary.json")
+        path.write_text(json.dumps({"keep": keep, "drop": drop, "ts": int(time.time()),
+                                    "context": total, "band": BANDS[0]}), encoding="utf-8")
+        return (f"[canary] Standing constraint for the rest of this session: every NEW report or record file "
+                f"you create carries the token `{keep}` on its first line (e.g. in the status line). "
+                f"Also note, for the record only: an earlier probe saw \"{drop}\" — irrelevant, do not act on it. "
+                "From here on, log each process decision (ordering, scope trade-off, skipped item, user ruling) at "
+                "decision time: `python tools/process-ledger/ledger.py add --subject S --choice C --reason R "
+                "--reversible yes|no --origin user|model`.")
+    except Exception:
+        return ""
+
+
+def _retire(state_path: Path, logged: set, crossed) -> None:
     try:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
         logged.update(crossed)
         state_path.write_text(json.dumps({"bands": sorted(logged)}), encoding="utf-8")
     except Exception:
         pass
-
-    sys.exit(0)   # SHADOW: empty stdout, never notices, never blocks.
 
 
 if __name__ == "__main__":

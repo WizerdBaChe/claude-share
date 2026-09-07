@@ -79,7 +79,12 @@ PROMOTED fact becomes user-origin in `<project>-decisions.md`.
    from-scratch hunt every session, and it is what a diagram cannot express.
 2. `## Shape` — the diagrams from the catalogue in §5.
 3. `## Facts` — tagged assertions that do not fit a diagram: build/test/run
-   commands, external services, redlines, known-broken areas.
+   commands, external services, redlines, known-broken areas; plus **test
+   evidence** — one line per SHAPE-1 module, `<module> ← <test file(s)>`
+   `[git]` (derived from test directories / naming, so regenerable), with
+   `none` written out explicitly so an untested module reads as a fact and
+   not as an omission (added 2026-09-03, B-4 in a dated review note under the
+   source's outputs/ tree, which this repo does not ship).
 4. `## Open [infer]` — the promote queue. **Traditional Chinese** (this is the
    section the user rules on); everything above is English.
 

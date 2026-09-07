@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lse-runs/event@1",
+  "title": "reflux event (one JSON line of <home>/reflux.jsonl) — design §3.7.1",
+  "type": "object",
+  "required": ["event_id", "at", "kind", "actor"],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 8},
+    "at": {"type": "string", "minLength": 10},
+    "kind": {"enum": ["consumed", "correction", "retraction", "handoff", "rerun"]},
+    "actor": {"type": "string", "minLength": 1},
+    "run_id": {"type": ["string", "null"]},
+    "claim_id": {"type": ["string", "null"]},
+    "key": {"type": ["string", "null"]},
+    "artifact": {"type": ["string", "null"]},
+    "evidence": {"type": ["string", "null"]},
+    "note": {"type": ["string", "null"]},
+    "decision": {"type": "string"},
+    "affected": {"type": "array"}
+  },
+  "anyOf": [
+    {"properties": {"run_id": {"type": "string", "minLength": 1}}, "required": ["run_id"]},
+    {"properties": {"key": {"type": "string", "minLength": 1}}, "required": ["key"]}
+  ]
+}

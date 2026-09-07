@@ -64,6 +64,12 @@ The last tie-breaker is where the retired stress-path quota now lives (§6).
 | B2 | 順手 — 步驟數、預設值、記住上次的選擇、鍵盤與快捷、等待時的回饋 |
 | B3 | 觀感 — 版面、對齊、間距、動態、字級 |
 
+A B3 item names a CLASS of defect, never the last incident. Page width, for
+example, reads 「視窗最大化（1707 邏輯寬）→ 內文區右側空白 ≤ 15%，或左右留白對稱；
+交付說明在 fit 結果旁印出量到的 reach」, never 「版面正常」 — and its
+machine-checkable half is the fill-gate (`tools/page-fill-gate/`, §4 Q1), so
+the human item is only the appearance judgment the gate cannot make.
+
 B is uncapped because rank already makes it safe to truncate: the reader stops
 where they stop, and everything below the stop line was, by construction, the
 part worth less than their remaining attention.
@@ -147,4 +153,5 @@ dict-sync corollary).
 | `skills/motion-design/local/env-bridge.md` §1 | motion-specific stress paths |
 | `skills/model3d-pipeline/SKILL.md` | drawing-sheet checklist template |
 | `skills/audience-fit/SKILL.md` Mode B | where UI-copy findings land (B1, or A when a state is hidden) |
+| `skills/ux-walkthrough/references/usability-evidence.md` §2–§3 | the engineering-checkable list that never enters the checklist, and the finding → rung map (hidden state A3, core path not completable in an input mode A2, comprehension B1, steps/defaults B2, appearance B3) |
 | `references/personal-agent-playbook.md` §6 | the zh-TW template people copy |

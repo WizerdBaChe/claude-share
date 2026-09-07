@@ -108,8 +108,59 @@ def main() -> None:
         except Exception:
             region = "[line range unknown]"
 
+    snapshot_lines = []
+    try:
+        import handoff_snapshot as hs
+        sp = hs.snapshot_path(session)
+        if sp.is_file():
+            body = sp.read_text(encoding="utf-8", errors="replace").strip()
+            age_min = int((time.time() - sp.stat().st_mtime) / 60)
+            snapshot_lines = [
+                f"[handoff snapshot] {sp} (written {age_min} min ago) — the state the "
+                "model saved BEFORE this compaction; it outranks the summary where they "
+                "disagree on decisions, paths, or the consulted list:",
+                body[:6000] + ("\n  [... truncated; Read the file for the rest]" if len(body) > 6000 else ""),
+            ]
+        else:
+            snapshot_lines = ["[handoff snapshot] none on disk for this session — the summary is "
+                              "the only carrier; treat every intake gate as NOT yet run."]
+    except Exception:
+        pass
+
+    # Process ledger (principle: written at origin, read mechanically at every
+    # resumption — a ledger nobody re-reads is washed just as surely as one that
+    # was never written). Rows live beside the transcript; last 40, <=3000 chars.
+    ledger_lines = []
+    try:
+        lp = transcript.with_name(f"{session}.ledger.jsonl")
+        if lp.is_file():
+            rows = [l for l in lp.read_text(encoding="utf-8", errors="replace").splitlines() if l.strip()]
+            shown, budget = [], 3000
+            for l in reversed(rows[-40:]):
+                try:
+                    r = json.loads(l)
+                    s = (f"  - [{r.get('origin', '?')}] {r.get('subject', '')} → {r.get('choice', '')}"
+                         f" ({r.get('reason', '')}; reversible={r.get('reversible', '?')}"
+                         + (f"; ref {r['register_ref']}" if r.get("register_ref") else "") + ")")
+                except Exception:
+                    s = "  - " + l[:200]
+                if budget - len(s) < 0:
+                    break
+                budget -= len(s)
+                shown.append(s)
+            ledger_lines = [f"[process ledger] {lp} — {len(rows)} decision(s) logged at decision time this session; "
+                            "they outrank the summary on WHAT was decided and WHY (newest first"
+                            + (f", {len(rows) - len(shown)} older not shown" if len(shown) < len(rows) else "") + "):"] + shown
+        else:
+            ledger_lines = ["[process ledger] none for this session — decisions survive only in the summary/snapshot; "
+                            "start logging with `python tools/process-ledger/ledger.py add ...`."]
+    except Exception:
+        pass
+
     print("\n".join([
         head + " The full pre-compact record survives on disk; this card is the way back.",
+        *snapshot_lines,
+        *ledger_lines,
         describe_digest(transcript, session, bookmark),
         f"  full transcript:     {transcript}  {region}",
         "Recall ONLY when (a) the user explicitly asks to check the original, or "

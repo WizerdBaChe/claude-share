@@ -1,5 +1,7 @@
 // tools/archdiag/selfcheck.mjs — in-page §4 geometry self-check emitter.
-// SINGLE SOURCE of the check set (#1..#8 incl. #8 reference-resolution).
+// SINGLE SOURCE of the check set (#1..#10: #8 reference-resolution; #9
+// label-over-node and #10 shared-anchor added 2026-09-05, diagram-design
+// borrow review B-1/B-2, calibrated both ways — MAINTENANCE.md M2).
 // Invariant: a build script must never embed its own copy of this script —
 // per-file copies are the instrument-drift defect S1 exists to kill
 // (F1 v1.1 vs frozen F2 diverged within one day).
@@ -133,6 +135,58 @@ ${check8}
           const m = val && val.match(/^url\\(#([^)]+)\\)$/);
           if (m && !document.getElementById(m[1]))
             D('dangling-reference', { view, attr, id: m[1] }, { element: el.tagName }, ['define #' + m[1] + ' in a <defs> block']);
+        }
+      }
+      // 9. edge-label pill over a node (B-1, 2026-09-05): check #1 is label×label
+      // only. Rule: the pill's CENTRE (its pillAt) must not lie inside a node —
+      // the reader then attributes the label to the node, not to its edge.
+      // A pill straddling a border passes: calibration 2026-09-05 measured 70
+      // straddles across the 7 accepted artifacts (depth 3–18px, every centre
+      // outside) and 0 centres inside — each had passed the user's visual gate,
+      // and #1 already guarantees a pill never covers node text. Pill = .pillbg
+      // ∪ its label (next sibling), measured; nodes only — a pill inside a
+      // CONTAINER is the normal case.
+      for (const bg of svg.querySelectorAll('.pillbg')) {
+        const r = bg.getBBox(), t = bg.nextElementSibling;
+        const tb = t && t.classList.contains('lbl') ? t.getBBox() : r;
+        const x0 = Math.min(r.x, tb.x), y0 = Math.min(r.y, tb.y);
+        const x1 = Math.max(r.x + r.width, tb.x + tb.width), y1 = Math.max(r.y + r.height, tb.y + tb.height);
+        const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+        for (const n of nodes)
+          if (cx > n.x + EPS && cx < n.x + n.w - EPS && cy > n.y + EPS && cy < n.y + n.h - EPS)
+            D('label-over-node', { view, pill: (t ? t.textContent : '').slice(0, 14), node: n.id },
+              { pillRect: [x0, y0, x1 - x0, y1 - y0].map(Math.round), centre: [cx, cy].map(Math.round), nodeRect: [n.x, n.y, n.w, n.h] },
+              ['move the pill off ' + n.id + ' (pillAt) or reroute the edge']);
+      }
+      // 10. shared anchor (B-2, 2026-09-05): two DIFFERENT edges anchored on one
+      // border side closer than the grid unit read as one smudged line (the R10
+      // near-coincidence band). Exact coincidence (gap 0) is a deliberate bundle
+      // and passes; a corner point belongs to both of its sides.
+      const sidesOf = (p, n) => {
+        const s = [];
+        if (Math.abs(p[0] - n.x) <= EPS) s.push('left');
+        if (Math.abs(p[0] - (n.x + n.w)) <= EPS) s.push('right');
+        if (Math.abs(p[1] - n.y) <= EPS) s.push('top');
+        if (Math.abs(p[1] - (n.y + n.h)) <= EPS) s.push('bottom');
+        return s;
+      };
+      const slots = {};
+      for (const e of edges) for (const [p, id] of [[e.pts[0], e.from], [e.pts[e.pts.length - 1], e.to]]) {
+        const n = rects[id]; if (!n) continue;
+        for (const side of sidesOf(p, n)) {
+          const key = id + '|' + side;
+          (slots[key] = slots[key] || []).push({ e: e.id, p, c: side === 'left' || side === 'right' ? p[1] : p[0] });
+        }
+      }
+      for (const key in slots) {
+        const list = slots[key];
+        for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+          if (list[i].e === list[j].e) continue;
+          const gap = Math.abs(list[i].c - list[j].c);
+          if (gap > 0 && gap < GRIDU)
+            D('shared-anchor', { view, node: key.split('|')[0], side: key.split('|')[1], edges: [list[i].e, list[j].e] },
+              { points: [list[i].p, list[j].p], gap },
+              ['separate the anchors by >= ' + GRIDU + 'px, or bundle both on one point']);
         }
       }
     }

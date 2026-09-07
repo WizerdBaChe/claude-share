@@ -15,7 +15,9 @@ search on **2026-07-07**; re-verify on unexpected behavior.
 | A | Established peer-reviewed journal / top conference in the field; established textbook (see §5) | default trust; still run §3–§4 checks for load-bearing claims |
 | B | Solid peer-reviewed venue, lower profile; newer OA journal listed in DOAJ | usable; prefer an A-tier corroboration for load-bearing claims |
 | C | Preprint (arXiv, bioRxiv…), thesis, technical report, standards-body draft | usable with the §2 published-version check; label as preprint in the source list |
-| D | Non-reviewed web source (blog, vendor whitepaper, Wikipedia) | never load-bearing on its own; use only as a pointer to A–C sources, or cite explicitly as "secondary web source" when the caller asks about practice/tooling rather than science |
+| R | **Reference data compilation** — a curated collection of values drawn from primary literature (§5b) | tier of the value = tier of the PRIMARY source it names; the compilation itself is A-tier as a *pointer* only |
+| M | **Manufacturer/vendor datasheet or application note** for a device the vendor makes (§5c) | primary but unreviewed: usable, often the only source, never silently — it carries part number, revision, and stated test conditions |
+| D | Non-reviewed web source (blog, vendor whitepaper about someone else's technology, Wikipedia) | never load-bearing on its own; use only as a pointer to A–C sources, or cite explicitly as "secondary web source" when the caller asks about practice/tooling rather than science |
 | X | Suspected predatory venue (§4), retracted work (§3) | exclude; if the caller explicitly asked about it, report WITH the flag, never silently include |
 
 Venue tier is about the VENUE's process, not the paper's correctness — a Tier A paper
@@ -61,6 +63,38 @@ Run this check for: every source whose claim is load-bearing in the deliverable,
 every source that a conflict resolution hinges on. Skipping it for background-only
 sources at `quick` depth is acceptable — say so in `search_trail`.
 
+### 3b. The check is point-in-time; the corpus is not
+
+A retraction check is true on the day it runs. A source cited in a delivered evidence
+table can be retracted the week after, and nothing in this skill would ever notice —
+the deliverable is gone, and the accumulated library keeps growing. As of 2026-08-27
+that library holds **157 Zotero items, 126 with a DOI** (`zotero_local.py --stats`),
+every one of them a source some past deliverable may rest on.
+
+**Standing step — attach it to the Zotero close-out, not to memory.** The close-out
+(`connectors.md` §Zotero collection close-out) already runs on every literature wave.
+Re-check the accumulated DOIs there, in the same pass:
+
+- Batch the collection's DOIs through `api.crossref.org/works/<doi>`, inspecting
+  `update-to` / `relation` for retraction, correction, or expression-of-concern
+  notices — the same fields §3 uses, applied to the whole set instead of one source.
+- Anything that fired: record it against the deliverables that cited that source, and
+  tell the user. A retraction discovered late is still worth more than one never found.
+  The record IS a reflux event — `python loop/reflux.py retraction --actor a3-retraction-sweep
+  --key doi:… --evidence "<Crossref update-to notice>"` — and `python loop/runs.py affected
+  <key>` then names every run, claim and consumer that rests on it (`feedback-loop.md`).
+
+**Before any sweep may print "0 retractions", calibrate it two-sided.** A script that
+queries Crossref incorrectly returns a clean result for every input, and a clean result
+is exactly what the reader wants to see — this is the one-sided-calibration trap from
+`verification-gate.md`, in a place where it would be believed. It needs a known-retracted
+DOI that must FAIL and a known-good DOI that must PASS, both fixtures, before its output
+counts as evidence of anything. Until that exists, run the sweep and read the responses;
+do **not** report a rate.
+
+**review-when**: a batch sweep script is built and calibrated (then this section names
+its command instead of the raw endpoint), or Crossref changes the retraction fields.
+
 ## 4. Predatory-venue screening
 
 No single authoritative blacklist exists. Beall's List has been unmaintained since
@@ -103,6 +137,63 @@ without evidence is an unsupported claim like any other.
   exists but was not accessible — sections on <topic> may be outdated" → `gaps`.
 - Beware "international/adapted editions" with shuffled chapter numbers; identify by
   ISBN, not title alone.
+
+## 5b. Reference data compilations (Tier R)
+
+Handbooks and curated databases of measured values — NIST Chemistry WebBook, NIST
+Standard Reference Data, the CRC Handbook, Palik's *Handbook of Optical Constants*,
+refractiveindex.info and similar. They are neither papers nor textbooks and the first
+five tiers do not fit them: their content is *other people's measurements, curated*.
+
+**The rule that follows from that: cite through, do not cite the shelf.**
+
+- When the compilation names the primary source for the value you are taking (most do,
+  per entry), **the citation is the primary source**, and the compilation is recorded as
+  how you reached it: `(Johnson & Christy 1972, Table I; via refractiveindex.info,
+  retrieved 2026-09-03) [full]`. The value's credibility tier is the primary source's.
+- When it does **not** name a primary source, the value is `[secondary]` and the
+  compilation's own curation is all the warrant there is. Say that explicitly; do not
+  let a well-designed database front page substitute for provenance.
+- **Conditions travel or the number is worthless** (P4 exactness rule). A compilation
+  usually normalises units and sometimes interpolates or re-fits — take temperature,
+  wavelength, sample form, and *whether the row is measured or interpolated* from the
+  compilation, and say which. An interpolated row is `[synthesis]` by the compiler,
+  not a measurement.
+- **Edition and revision matter as much as for textbooks** (§5): compilations are
+  revised, and a value can change between releases. Record the edition/version and the
+  retrieval date (`connectors.md` §Retrieval timestamps — an online compilation is
+  exactly the "can change under the citation" case).
+
+**Why this tier is worth having at all:** without it the honest answer to "what is the
+literature value of parameter X" collapses to "not found in searched sources" whenever
+the value lives in a handbook rather than a paper — which, for material constants, is
+most of the time. A gap report that cannot name the right *kind* of source is honest
+but useless.
+
+## 5c. Vendor datasheets and application notes (Tier M)
+
+For a device the vendor manufactures, the vendor **is** the primary source: they built
+it and they measured it. That makes a datasheet categorically different from the vendor
+whitepaper-about-someone-else's-technology that sits in Tier D — and in applied fields
+(photonics packaging, power devices, displays) it is frequently the *only* source for a
+device parameter. Excluding it produces a false gap; accepting it uncritically imports
+a marketing number.
+
+Handling:
+
+- **Identify to the revision.** Part number + document revision + date. A datasheet is a
+  living document; "the datasheet says" without a revision is unciteable.
+- **Take the test conditions verbatim**, and distinguish **typical** from **guaranteed
+  min/max** — this is the characteristic datasheet trap: a typical value has no
+  distribution attached and is not a bound. Record which column the number came from.
+- **No independent review exists.** Say so in `confidence`. A datasheet number and a
+  peer-reviewed measurement of the same quantity are one line of evidence each, not two,
+  and if they disagree that is a conflict to report (§P4 rule), not an averaging job.
+- **Corroborate when the claim is load-bearing** — a qualification report, a standards
+  test method, or an independent measurement. If none is found, that is the finding.
+- Datasheets do **not** enter the project's paper bibliography (`connectors.md`
+  §Zotero collection close-out) — they are cited in the deliverable and tracked there,
+  but a paper bibliography is for papers.
 
 ## 6. Bias & coverage-balance check (set-level; run before P5 at standard/exhaustive)
 

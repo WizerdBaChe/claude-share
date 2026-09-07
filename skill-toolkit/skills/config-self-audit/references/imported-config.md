@@ -142,6 +142,33 @@ AD1 first; the rest in any order. Every finding carries a verification method,
 and fixes still require consent. AD1–AD5 are summarised in `SKILL.md`; the
 additions below are the parts that do not fit there.
 
+**The trap in each of the five** (moved out of SKILL.md on 2026-09-06, BODY_CAP
+trim; content unchanged). Each is the sentence that decides whether the check
+finds anything at all:
+
+- **AD1** — "no stamps anywhere" is not a clean result, it is the first
+  finding: reconstruct the inventory from the source and stamp it as part of
+  the fix.
+- **AD2** — the same trigger appearing twice is a finding **even with zero
+  shared vocabulary**. An adaptation pass paraphrases, so grep is structurally
+  blind here and the two bodies must be read side by side. `refinement` merges
+  into one rule in one file. This is the one check allowed to cost more than a
+  single-artifact audit, precisely because it is the one the cheap path cannot
+  perform at all.
+- **AD3** — do NOT ask "does a precedence statement exist here". `ops/OPS.md`
+  has carried one since birth, so that sub-check returns clean always and is
+  ritual (`40-maintenance.md` §4.3). It is a finding only when an imported rule
+  asserts a DIFFERENT precedence. An orphan supersession tag is decoration —
+  and the rules it claims to supersede all still fire.
+- **AD4** — the scope widens past `agents/*.md` to any imported rule claiming
+  external enforcement ("hook enforced", "mechanically flagged", "blocked at
+  startup"), and **the §2 existence gate is INVERTED here**: a dangling
+  mechanism reference is the live finding, not a reason to void one. Record as
+  `DEGRADED to prose` with its consequence; the user chooses install / reword /
+  drop.
+- **AD5** — flag, never batch-fix: each inherited value is a user-origin
+  premise, and the user of origin is not this user.
+
 **AD2 classification table**
 
 | Class | Meaning | Fix |

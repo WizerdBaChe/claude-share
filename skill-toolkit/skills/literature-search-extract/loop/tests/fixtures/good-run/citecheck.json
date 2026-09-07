@@ -1,0 +1,1 @@
+{"ran_at": "2026-09-03T10:05:00+08:00", "fail": 0, "warn": 0, "rows": [{"claim_id": "C1", "checks": [{"check": "support", "verdict": "OK", "message": "span found verbatim in park2022.txt (fixture)"}]}], "note": "fixture — produced offline; a real run stores `citecheck.py ledger.jsonl --json` output here"}

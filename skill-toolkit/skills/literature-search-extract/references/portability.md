@@ -19,6 +19,7 @@ the same pipeline with substituted bindings.
 | `local_corpus` | corpus-first routing (optional) | whatever `connectors/registry.json` lists as a live `local_corpus` — none as of 2026-08-27 (prism retired) | Zotero/reference-manager MCP; a local PDF folder the host can read; files the user uploads in a web LLM | skip the corpus rung; empty ≠ "literature not found" |
 | `pdf_read` | `[full]` extraction from PDFs (optional) | Read tool on PDF | file upload + native PDF reading (web LLMs); OCR pipeline | extract from HTML/abstract versions; tag honestly |
 | `file_write` | file deliverables (optional) | Write | canvas / downloadable file features | inline delivery — already the default; file output needs explicit request anyway |
+| `run_store` | persisting the evidence run (optional; `feedback-loop.md`) | the vault home `<vault>\literature\EvidenceRuns` via `loop/runs.py` (`LSE_RUN_HOME`) | any writable folder (`LSE_RUN_HOME`); a host with no file store keeps the ledger in the reply | run not persisted: say so in `search_trail` + `gaps` ("run not filed: home unavailable"); the LOOP degrades, the pipeline and P4.5 do not |
 | `subagent_dispatch` | evals only — never required for a run | Agent tool | none needed | ignore |
 
 ## Decision procedure (run once per session, before P1)

@@ -18,6 +18,9 @@ contract example for Mode 2 returns.
 - In both modes: every load-bearing claim carries `(Author Year, locator) [access-tag]`;
   the deliverable ends with mandatory **Gaps** and **Confidence** sections (write
   "all targets filled; no conflicts found" rather than omitting them).
+- Both modes then end with the **loop footer** (`run_id` · keys · review-when T-1..T-3,
+  `feedback-loop.md`); a Mode 2 return carries `run_id`, `sources[].key` and `review_when[]`
+  as fields, so the caller can cite and write back without re-resolving.
 - Field-level unknowns use the playbook markers: `[not stated]`, `[read from figure]`,
   `[synthesis]`, `[secondary]` — never leave a cell silently blank.
 - **Delivery is inline by default.** Any format below becomes a file artifact only when
@@ -199,10 +202,12 @@ seven formats above; the other four fields are always present.
   sources: [
     { citation: "Park, J. et al. (2022). J. Placeholder Phot. 15, 234.",
       identifier: "DOI: 10.0000/fake.2022.234",
+      key: "doi:10.0000/fake.2022.234",
       access_level: "full",
       locators_used: ["Methods §2.1", "Table 2", "Discussion §4.2"] },
     { citation: "Chen, L. (2023). Placeholder Rev. Nanophot. 8, 101.",
       identifier: "DOI: 10.0000/fake.2023.101",
+      key: "doi:10.0000/fake.2023.101",
       access_level: "full",
       locators_used: ["§1.2", "Fig. 4b", "§3.4"] }
   ],
@@ -220,10 +225,17 @@ seven formats above; the other four fields are always present.
       conflicts: "Park 2022 §4.3 vs Chen 2023 §3.4" }
   ],
   search_trail: [
-    "connectors: no live local_corpus registered — went straight to WebSearch
+    "reuse check: none (index searched: yes)",
+    "connectors: zotero_local searched (0 hits) — went to WebSearch
      (an absent channel is logged once, not as a per-run gap)",
     "WebSearch: 'template-stripped silver SPP propagation length' (3 relevant hits)",
     "backward citation chase from Chen 2023 review bibliography (2 sources added)"
+  ],
+  run_id: "20260903_ag-lspp-633nm",
+  review_when: [
+    { trigger: "T-1", text: "any cited source retracted or corrected (Crossref update-to)" },
+    { trigger: "T-2", text: "a rerun finds >= 10 % new sources or a conflicting claim" },
+    { trigger: "T-3", text: "a consumer reports a correction (reflux)" }
   ]
 }
 ```

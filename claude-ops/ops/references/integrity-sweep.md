@@ -55,32 +55,39 @@ grep -rn "Global_skill_update" --include=*.md agents/ skills/ ops/ references/ r
 grep -rnE 'Log (the|this|it) .{0,20}in `?~?/?[A-Za-z0-9_./-]+\.md' --include=*.md skills/ agents/ ops/
 # 4. agent colors outside the eight documented values
 grep -h '^color:' agents/*.md | sort -u | grep -vE 'red|blue|green|yellow|purple|orange|pink|cyan'
-# 5. lessons ledger: an entry with no hits: field is invisible to the
-#    "2nd time" rule and to §4.4 — the two counts must be equal
-grep -c '^## L-[0-9]' ops/lessons.md; grep -c '^## L-[0-9].*hits:' ops/lessons.md
-# 5b. (2026-08-21; id SETS, not counts, since 2026-08-27) the ledger is a CARD
-#     file; the full record of every entry is ops/references/lessons-detail.md
-#     under the same heading, written in the SAME COMMIT as the card. Folding
-#     an entry (the ledger's Archived section) removes its card, never its
-#     section — so a detail section may legitimately outlive its card, and
-#     equal counts were never the invariant. They already lied once: after the
-#     2026-08-27 trim both files counted 29 while six ids differed EACH WAY
-#     (folded 002/003/004/013/026/029 detail-only; 030–035 born card-only with
-#     no full record) and the count form of this check passed over it. Same
-#     proxy defect check 12 records — ENUMERATE, do not compare two counts.
-comm -23 <(grep -oE '^## L-[0-9]+' ops/lessons.md | tr -d '# ' | sort) \
-         <(grep -oE '^## L-[0-9]+' ops/references/lessons-detail.md | tr -d '# ' | sort)
-# ^ live cards whose full record was never written — must print nothing
-for id in $(comm -13 <(grep -oE '^## L-[0-9]+' ops/lessons.md | tr -d '# ' | sort) \
-                     <(grep -oE '^## L-[0-9]+' ops/references/lessons-detail.md | tr -d '# ' | sort)); do
-  grep -qE "^- \*\*$id\b" ops/lessons.md || echo "$id: full record but no live card and no Archived bullet"
-done
-# ^ records whose id left the ledger entirely (a fold keeps a bullet) — must
-#   print nothing. Calibrated two-sided 2026-08-27: pre-backfill tree fired
-#   L-030..L-035 on the first arm; synthetic L-999 fires the second; the six
-#   folded ids stay silent (their bullets exist).
-grep -c '^## L-[0-9].*hits:' ops/references/lessons-detail.md   # must be 0 — hits: is
-#     card-only; detail headings carry "(full record)" in its place, on purpose
+# 5. (2026-09-07, closeout-capture cutover) the lessons ledger is ops/lessons/
+#    — one intake record per file, born only through
+#    tools/closeout-intake/intake.py — and ops/lessons.md is GENERATED from
+#    it. One tool run replaces the four greps that used to live here: INV-1
+#    every record still parses and validates; INV-2 no record body differs
+#    from HEAD outside its ## Events tail and the status: projection line;
+#    INV-4 hits/state in every card equal what its events derive; INV-5 the
+#    index equals a fresh render (generated-from hash); INV-6 every record
+#    carries a locator. Must print nothing and exit 0.
+python tools/closeout-intake/intake.py check --against HEAD --index
+# ^ calibrated two-sided in controls.py: C-11 (a planted invalid file), C-21
+#   (a hand-edited Pitfall), C-22 (status: contradicting the events), C-23 (an
+#   Events line removed) and C-51 (a hand-edited index) each drive exit 4;
+#   C-20 (a tool-driven event) stays silent.
+# 5b. the guard's proof-of-life (INV-9): hooks/intake_guard.py DENIES direct
+#     writes to those paths, and a guard that stopped firing is one nobody
+#     notices. The harness's last line must read `ALL PASS n/n`; among its
+#     cases C-90 (Write to ops/lessons/L-999.md) and C-92 (`>>` onto a record)
+#     are denied, C-91 (a scratchpad Write) and C-93 (an intake.py command)
+#     are the negative controls. A `PASS … (skipped …)` line means the hook
+#     file is missing — read that as the guard being DOWN.
+python tools/closeout-intake/controls.py | tail -1
+# RETIRED 2026-09-07 (history only — the shapes they read no longer exist):
+#   old 5  "hits: field on every card" — hits are derived from ## Events (INV-4);
+#   old 5b "card ids == detail-section ids, enumerated both ways" — the detail
+#          file ops/references/lessons-detail.md is FROZEN and every section
+#          lives verbatim in its record's ## Narrative (`import --verify`
+#          proved 54 ids both ways, bytes equal);
+#   old 5c "no ## L-nnn heading below ## Archived" — the index has no Archived
+#          region; lifecycle state is per record;
+#   old 5d "Evidence: line on every card born after 2026-08-11" — D6: a record
+#          cannot be born without a locator.
+#   Their text and calibration notes: `git show fa08fa3:ops/references/integrity-sweep.md`.
 # 6. reverse references: an agentType the routing table names but no file defines
 grep -oE '`[a-z-]+`' ops/20-dispatch.md | tr -d '`' | sort -u > /tmp/named.txt
 grep -h '^name:' agents/*.md | sed 's/name: //' | sort -u > /tmp/defined.txt
@@ -222,6 +229,17 @@ python tools/skill-routing-audit.py --surface
 # read the FIRING ANYWAY block first: an entry with fires and 0 coverage means
 # the dict records words nobody says. A DEAD entry that never fired is only a
 # skill whose occasion has not arisen, which is not a defect.
+# Since 2026-09-04 (T-023) three readings changed and the old ones were WRONG in
+# the tool's favour, so do not read an older report by today's rules:
+#   NO VOCABULARY is not DEAD -- the entry has no 關鍵詞 line, so the tool had
+#     nothing to match and its silence says nothing about the dict (10 of 13
+#     DEAD entries were this on 2026-09-04).
+#   LATE beside a MISS means the words appeared and the entry's OWN skill fired
+#     later in the same session, past the 6-event window. Coverage EXCLUDES it
+#     by design, so `0% coverage` overstates the fiction unless LATE is quoted
+#     with it (corpus-wide LATE was 71 the day the column was added).
+#   ASCII tokens now treat CJK as a word boundary; every coverage number
+#     measured before that date is understated (HIT 21 -> 28 on one corpus).
 # --surface adds check 18b (added 2026-08-15): every zero is annotated with the
 # trigger CLASS from ops/references/skill-trigger-classes.md, so an expected
 # quiet skill stops printing like a bug, and each description's PROCEDURE share
@@ -553,6 +571,29 @@ git status --porcelain outputs/diagram-authoring/*.html   # must print nothing
 #     script rotted (API drift in the library). Full instrument ritual
 #     (selfcheck calibration, LF pins, router acceptance):
 #     tools/archdiag/MAINTENANCE.md.
+# 28. (2026-09-06) files that are TRACKED although the ignore rules say they
+#     should not be — i.e. every `git add -f` ever performed here. The force-add
+#     is the only repo operation that leaves NO record: the file survives, the
+#     reason does not, and the pattern that was wrong stays wrong for the next
+#     file. Its signature is a SPLIT directory, which is worse than either
+#     state, because the siblings nobody forced look exactly like deliberate
+#     exclusions. Rule: 40-maintenance.md §vc-boundary.
+git ls-files -ic --exclude-standard
+#     ^ must print nothing. Act on a hit by fixing the RULE, never by removing
+#     the file: anchor or narrow the pattern, or add a negation naming why (and
+#     naming the tracked files that cite it, if that is the reason).
+#     Calibrated two-sided 2026-09-06 — it was born RED, on five files with
+#     three distinct causes: `plugins/` unanchored, therefore also eating
+#     trigger-probe's roster fixture (pattern bug, fixed to `/plugins/`); an
+#     archive/ subtree six tracked files cite by path, `interop/interop.py`
+#     among them (negation, citers named); and nine archive NOTE/README files,
+#     the one part of an archived subtree the blanket ignore was guaranteed to
+#     drop while forced siblings survived. Positive control that survives the
+#     fix (the tree is now silent, so the check needs one):
+git ls-files -ic --exclude-standard -x 'projects/'
+#     ^ re-adds the pre-2026-09-06 memory-store pattern as an extra rule and
+#       must print the 79 memory files — proof the check can still see a
+#       tracked-but-ignored file rather than having gone blind.
 ```
 
 ## Check 7's rationale (added 2026-08-12)

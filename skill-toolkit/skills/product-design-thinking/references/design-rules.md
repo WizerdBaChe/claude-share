@@ -31,7 +31,10 @@ Load while shaping the architecture, before writing the PIM.
 - **UX semantics are user decisions**: interaction behaviour (click/drag/camera/
   keyboard/defaults/foolproofing) is confirmed with a question before being designed
   in. This is the #1 historical rework cause here — a unilateral pick reads as
-  finished work and gets discovered late.
+  finished work and gets discovered late. Before asking, run `ux-walkthrough`
+  on the PIM state machine (task cards + decision points): the question then
+  carries the walk's evidence and its show/disable/hide and
+  wait–cancel–recovery contracts, instead of a bare 「要不要」 (2026-09-07).
 - **Anti-slop styling**: when the product has a UI, ask for the visual direction
   before defaulting to framework-flavored generic styling. This user prefers plain,
   deliberate design over "AI 味" defaults.

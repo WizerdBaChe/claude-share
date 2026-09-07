@@ -52,35 +52,20 @@ excludes it. Adoption mode swaps artifact-scope for relation-scope over the
 imported set and its immediate neighbours.
 
 - **AD1 Provenance (GATE)** — `grep -rn "adopted-from:\|reconciled: no"`. No
-  stamps anywhere is itself the first finding: reconstruct the inventory from the
-  source and stamp as part of the fix. Everything below is scoped to the stamped
-  set plus whatever local rules it collides with.
-- **AD2 Trigger-collision table** — one row per rule: trigger condition →
-  `file:line` → operative verb. Same trigger twice is a finding **even with zero
-  shared vocabulary** — an adaptation pass paraphrases, so grep is blind here and
-  the bodies must be read side by side. Classify `exact` / `refinement` /
-  `conflict` / `layered`; `refinement` merges into one rule in one file. This is
-  the one check allowed to cost more than a single-artifact audit, because it is
-  the one the cheap path structurally cannot perform.
-- **AD3 Ordering & precedence** — do imported cross-references resolve, and did
-  supersession tags arrive with BOTH halves (an orphan tag is decoration, and the
-  tagged rules all fire). Do NOT ask "does a precedence statement exist here" —
-  `ops/OPS.md` has carried one since birth, so that sub-check returns clean
-  always and is ritual (§4.3); it is a finding only when an imported rule asserts
-  a DIFFERENT precedence.
-- **AD4 Mechanism shipped, or degraded to prose?** — this is §8's **Phantom
-  references** bullet, widened past `agents/*.md` to any imported rule claiming
-  external enforcement ("hook enforced", "mechanically flagged", "blocked at
-  startup"). Read the method there; only two things are added here: that wider
-  scope, and that **the §2 gate is INVERTED** — a dangling mechanism reference is
-  the live finding, not a reason to void one. Record as `DEGRADED to prose` with
-  its consequence; the user chooses install / reword / drop.
-- **AD5 Inherited values** — size and cost caps, reply language, standing
-  rulings, default relaxation levels, model-tier and shell assumptions. Flag,
-  never batch-fix: each is a user-origin premise, and the user of origin is not
-  this user.
+  stamps anywhere IS the first finding. Everything below is scoped to the
+  stamped set plus the local rules it collides with.
+- **AD2 Trigger-collision table** — one row per rule: trigger → `file:line` →
+  operative verb. Classify `exact` / `refinement` / `conflict` / `layered`.
+- **AD3 Ordering & precedence** — imported cross-references resolve, and
+  supersession tags arrived with BOTH halves.
+- **AD4 Mechanism shipped, or degraded to prose?** — §8's Phantom references
+  bullet, widened to any imported rule claiming external enforcement.
+- **AD5 Inherited values** — caps, reply language, standing rulings, relaxation
+  defaults, model-tier and shell assumptions. Flag, never batch-fix.
 
-Procedure, the copy-time SOP, and the stamp format: `references/imported-config.md`.
+Each of the five carries a trap that decides whether it finds anything; run
+them from `references/imported-config.md` §"Part 2 — At audit time", which also
+holds the copy-time SOP and the stamp format.
 
 ## Order of operations (non-negotiable)
 

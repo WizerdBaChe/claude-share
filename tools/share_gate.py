@@ -321,13 +321,23 @@ def check_structure(manifest, files, f):
         f.add("S", d, 0, "directory holds no tracked file — absent after clone",
               "add its content, add a .gitkeep, or delete the directory")
 
-    # S4 — the skill inventory table must match the tree.
-    inv = read("skill-toolkit/README.md") or ""
-    listed = set(re.findall(r"^\| `([a-z0-9-]+)` \|", inv, re.M))
-    if listed and listed != set(skills):
-        f.add("S", "skill-toolkit/README.md", 0,
-              f"inventory table {sorted(listed ^ set(skills))} differs from the tree",
-              "keep the table and skills/ in step")
+    # S4 — the skill inventory tables must match the tree.
+    #
+    # AGENTS.md joined skill-toolkit/README.md on 2026-09-07. There are two
+    # tables, not one, and only the first was checked: the second had been two
+    # skills behind since 2026-09-02 and was found by reading, which is the
+    # failure mode this check exists to remove. The pattern is the same one
+    # line for both files; measured against AGENTS.md before adding it, it
+    # matches exactly that file's skill table and none of its five other
+    # tables (hook, ops, agent, environment-guide, capability-set rows all
+    # carry a `.` or `/` the character class excludes).
+    for inv_path in ("skill-toolkit/README.md", "AGENTS.md"):
+        inv = read(inv_path) or ""
+        listed = set(re.findall(r"^\| `([a-z0-9-]+)` \|", inv, re.M))
+        if listed and listed != set(skills):
+            f.add("S", inv_path, 0,
+                  f"inventory table {sorted(listed ^ set(skills))} differs from the tree",
+                  "keep the table and skills/ in step")
 
     # S5 — the mounting template must mount exactly the hooks that ship.
     #
@@ -374,10 +384,39 @@ def check_structure(manifest, files, f):
         shipped = {p.split("/")[-1] for p in files
                    if p.startswith("hooks/") and p.endswith(".py")
                    and p.count("/") == 1}
-        for name in sorted(shipped - set(mounted)):
+        # A hook-layer file that is not a hook. Added 2026-09-07, when
+        # hooks/handoff_snapshot.py arrived: a plain module imported by three
+        # hooks, with no event to mount at — the same "not a hook" case as
+        # hooks/tests/, but it cannot be exempted by depth because the source
+        # keeps it beside its importers and the imports are same-directory.
+        # The remediation line has said "or say in _README why" since the check
+        # shipped, and nothing enforced that half, so the check could only ever
+        # veto. It now rules on something it can determine: a DECLARED entry
+        # naming the file and giving a reason. Two things keep the escape hatch
+        # from becoming a mute button — the reason is mandatory (an entry
+        # without one does not count), and a declaration for a file that is
+        # mounted, or absent, is itself reported below, the same discipline
+        # check D applies to a stale [[allow]].
+        exempt, dead = {}, []
+        for entry in manifest.get("unmounted_hook", []):
+            name = (entry.get("file") or "").split("/")[-1]
+            if not name or not entry.get("reason"):
+                continue
+            if name not in shipped or name in mounted:
+                dead.append(name or entry.get("file"))
+            else:
+                exempt[name] = entry
+        for name in sorted(shipped - set(mounted) - set(exempt)):
             f.add("S", "hooks/settings.example.json", 0,
                   f"{name} ships but is not mounted",
-                  "add its block, or say in _README why it is deliberately unmounted")
+                  "add its block, or declare it as an [[unmounted_hook]] with "
+                  "a reason and say the same thing in _README")
+        for name in sorted(dead):
+            f.add("S", "tools/share-manifest.toml", 0,
+                  f"[[unmounted_hook]] declares {name}, which is mounted or "
+                  f"does not ship",
+                  "remove the declaration; a standing exemption for a file that "
+                  "no longer needs one hides the next file that does")
         for name in sorted(set(mounted) - shipped):
             f.add("S", "hooks/settings.example.json", 0,
                   f"mounts {name}, which this repo does not ship",

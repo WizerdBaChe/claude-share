@@ -1,0 +1,35 @@
+{
+ "schema": "lse-runs/run@1",
+ "run": {"id": "20260903_ag-lspp-633nm-fixture", "created": "2026-09-03T10:00:00+08:00", "revision": 1, "mode": 2,
+         "depth": "quick", "state": "delivered", "filed": true, "home": "<fixture>", "wasRevisionOf": null,
+         "model": "fixture", "skill_version": "loop@1"},
+ "request": {"purpose": "fixture: verify typical L_spp values for Ag waveguide design", "question": "template-stripped Ag 薄膜在 633 nm 的 SPP 傳播長度 (propagation length)",
+             "source_types": "papers", "scope": "Park 2022 (seed)", "output_format": "parameter sheet", "depth": "quick",
+             "language": "en", "caller": "scientific-research-guide", "preset": "parameter_lookup"},
+ "reuse_check": {"ran_at": "2026-09-03T10:00:01+08:00", "terms": ["template-stripped", "ag", "薄膜在", "633", "nm", "spp", "傳播長度", "propagation", "length"],
+                 "matches": [], "trail_line": "reuse check: none (index searched: yes)"},
+ "result": {
+  "findings": "| parameter | value | unit | conditions | source |\n|---|---|---|---|---|\n| L_spp | 22 ± 3 | μm | λ = 633 nm; template-stripped Ag/air; intensity 1/e | (Park 2022, Table 2) [full] |",
+  "sources": [
+   {"citation": "Park, J. et al. (2022). Ultrasmooth silver films for plasmonics. J. Placeholder Phot. 15, 234.",
+    "identifier": "DOI: 10.0000/fake.2022.234", "key": "doi:10.0000/fake.2022.234", "aliases": [], "zotero_key": null,
+    "access_level": "full", "locators_used": ["Table 2", "Methods §2.1"], "unresolved": false, "unresolved_basis": null, "version": null},
+   {"citation": "Corning SMF-28 Ultra Optical Fiber, Product Information PI1424 (March 2013).",
+    "identifier": "Corning PI-1424-AEN (vendor datasheet)", "key": "unresolved:5b1c0a9d", "aliases": ["Corning PI-1424-AEN (vendor datasheet)"], "zotero_key": null,
+    "access_level": "partial", "locators_used": ["Dimensional Specifications"], "unresolved": true,
+    "unresolved_basis": {"title_norm": "corning smf-28 ultra optical fiber pi1424", "surname": "corning", "year": "2013", "extra": ""}, "version": "March 2013"}
+  ],
+  "gaps": ["L_spp for template-stripped films in the near-IR: not reported in any searched source."],
+  "confidence": [{"claim": "L_spp ≈ 22 μm @ 633 nm (template-stripped)", "support": "1 source, direct measurement", "conflicts": "none"}],
+  "search_trail": ["reuse check: none (index searched: yes)", "zotero_local --search template-stripped silver: 0 hits", "WebSearch: 'template-stripped silver SPP propagation length' (fixture)"]
+ },
+ "ledger": {"path": "ledger.jsonl", "rows": 1, "citecheck": {"ran_at": "2026-09-03T10:05:00+08:00", "fail": 0, "warn": 0, "path": "citecheck.json"}},
+ "deliverables": [{"kind": "inline", "path": null, "consumer": "scientific-research-guide"}],
+ "keys": ["doi:10.0000/fake.2022.234", "unresolved:5b1c0a9d"],
+ "review_when": [{"trigger": "T-1", "text": "任一引用來源被撤稿／勘誤"}, {"trigger": "T-2", "text": "同題重跑找到 ≥10% 新來源或衝突主張"}, {"trigger": "T-3", "text": "任一消費者回報 correction"}],
+ "handoff": [],
+ "related": [],
+ "domain": "plasmonic_waveguide",
+ "provenance": {"wasAttributedTo": "fixture", "wasGeneratedBy": "literature-search-extract P1–P5"},
+ "invalidation": {"wasInvalidatedBy": null, "invalidatedAtTime": null, "claims": []}
+}

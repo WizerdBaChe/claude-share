@@ -1,6 +1,13 @@
 ---
 paths:
   - "**/*.{html,htm}"
+  - "**/render_story.py"
+  - "**/render_onepager.py"
+  - "**/build_deck*.py"
+  - "**/build_dossiers.py"
+  - "**/build_pack.py"
+  - "**/build_textbook.py"
+  - "**/*shell*.html"
 ---
 
 # Coded references and symbols in human-facing deliverables
@@ -115,6 +122,30 @@ deliverable's audience version is a presentational REDRAW instead
 (audience-fit A1, `skills/audience-fit/references/presentational-view.md`)
 — this pattern never overrides that form choice (2026-08-31: a
 same-diagram + guide-layer edition was rejected as the wrong output).
+
+**Width property — the page uses the width it is given** (sunk 2026-09-04 from
+a user report spanning the SSLD textbook / dossiers / discussion pack and the
+paper-story one-pages: 60–69 % fill at 1707×830, right void 439–652 px; the
+generator scripts in this rule's `paths:` are listed because telemetry showed
+the `*.html` glob never fired while those scripts emitted the pages; diagnosis
+recorded in a dated source-only note, 2026-09-04). **A human-facing HTML
+deliverable must not carry a left-anchored cap** — a container or a painted,
+row-alone block capped in width and hugging the left edge. Each page declares
+`<html data-page-class="…">`; the class rows (document-short centred &
+symmetric · document-long / deck / tool / dashboard fill ≥ 85–90 % · diagram
+centred-or-fill) and their thresholds are DATA in a source-only config file
+(not shipped here), and the gate (a source-only build script, not shipped
+here) runs with two-sided controls at the measured reference viewports and may
+only WARN on a page whose class it had to infer. Generators run it on the
+BUILT files beside the fit-gate and print the measured reach next to the fit
+result. The reading measure (~65 ch) is achieved by column structure — a
+fluid main column plus a `data-rail` aside, grids — never by capping one
+column; width is allocated in fr / % / cqw / clamp and pixels are reserved for
+intrinsic sizes. Reference implementations: long document = the SSLD project's
+own textbook shell (fluid main + a rail-style 本節速查 aside, hidden below
+1500 px and in print; not shipped here); deck = the source environment's asset
+library reference implementation (text blocks uncapped,
+`data-page-class="deck"`).
 
 Interaction chrome standard carried by the same asset (user-accepted 2026-08-31):
 ←/→ paging, M TOC, counter + progress bar, print CSS, JS-dead degradation to a

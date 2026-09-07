@@ -1,6 +1,6 @@
 # Environment Facts — recorded per `20-dispatch.md` §0
 
-Facts about THIS environment (Claude Code on Windows, user gunda). These are
+Facts about THIS environment (Claude Code on Windows). These are
 recorded observations, not assumptions — if a dispatch behaves as if a fact
 below is stale (new model names, missing parameters), re-verify and update this
 file; never silently work around it.
@@ -34,7 +34,13 @@ may include the literal marker `[user-approved-top-tier]` in the dispatch
 prompt/script ONLY after the user approved that specific instance in
 conversation. Known gap: a Workflow launched via `scriptPath` is not scanned
 by the hook — for those, the cap is rules-enforced only (review the script's
-`model:` options before invoking).
+`model:` options before invoking). **Since 2026-09-05 the hook also denies an
+Agent call that omits `model`** unless `subagent_type` names a local
+`agents/*.md` definition whose frontmatter pins a model within the cap
+(built-in types general-purpose / Explore / Plan / claude-code-guide inherit the
+main loop's model, which here is opus/fable — measured 46 such dispatches in
+2026-08-06..09-04). Always pass `model: "sonnet"` (or `"haiku"` for read-only
+search) on built-in types.
 
 **Known gap 2 — resume bypass (as-of 2026-07-10, hooks API offers no fix)**:
 resuming a stopped background subagent via `SendMessage` restarts it on the
@@ -182,51 +188,34 @@ the pane gains an always-visible surface, or `<browser_surfaces>` wording
 changes.
 
 **Enforcement** (hooks, not recall): `hooks/ui_verify_guard.py` denies an
-unsettled `getComputedStyle`, denies a screenshot until a `visibilityState`
-probe has run, and ROUTES to the headless command when the probe said `hidden`
+unsettled `getComputedStyle` and denies a screenshot until a `visibilityState`
+probe has run, routing to the headless command when the probe said `hidden`
 (`visible` unlocks the pane screenshot, so visible+timeout stays a distinct
-fault); `hooks/browser_pane_scope_guard.py` (as-of 2026-08-14, re-verified
-2026-08-16) logs every pane navigation to `telemetry/browser-nav.jsonl` and
-enforces the pane **ALLOWLIST** (`hooks/browser-pane-allowlist.json`, user-edited;
-denials route to claude-in-chrome / WebFetch / headless Playwright). Matchers,
-marker paths, TTLs, test counts, escape hatch, standing reason (7/7) and the
-third-party rule of thumb (promote on a second independent incident):
+fault). `hooks/browser_pane_scope_guard.py` logs every pane navigation and
+enforces the pane **ALLOWLIST** (`hooks/browser-pane-allowlist.json`,
+user-edited). Matchers, marker paths, TTLs, test counts, escape hatch,
+standing reason and the promote-on-second-incident rule of thumb:
 `ops/references/browser-pane-pixel-route.md` "Enforcement", `rule-registry.md`
 "in-app Browser pane", `lessons.md` L-013.
 
-**Out-of-process pictures — the DEFAULT pixel route (as-of 2026-08-16,
-measured)**: headless Playwright in its own process (full probe 1.4 s, `npx
-playwright screenshot` 1.5 s, PNGs delivered; the hidden pane: 5 s timeout,
-none). The `playwright` package resolves ONLY from the npx cache. Recipes,
-resolution facts, representativeness limits, E-6 flag research, asset + browser
-paths: `ops/references/browser-pane-pixel-route.md`.
+**Out-of-process pictures are the DEFAULT pixel route (as-of 2026-08-16,
+measured)**: headless Playwright in its own process delivers PNGs in ~1.5 s
+where the hidden pane times out at 5 s with none. Recipes, the measured
+comparison, resolution facts, representativeness limits, E-6 flag research and
+the asset/browser paths: `ops/references/browser-pane-pixel-route.md`.
 
-**Playwright MCP — one user-scope server (as-of 2026-08-25, `playwright-chrome`
-removed)**: `playwright-headless` (`--browser chrome --headless --isolated`:
-the installed Chrome 151 in new-headless mode, no window, nothing persists,
-accessibility snapshots as the cheap read and screenshots on demand;
-`browser_navigate` 0.5 s measured). Durable install + re-register/remove
-commands + the config rationale: `tools/playwright-mcp/README.md`. Playwright-
-launched Chromium carries `--disable-backgrounding-occluded-windows` (grep'd),
-so L-009 does not apply to it. Separate process, so L-013's allowlist and the
-`hidden`-probe hook do not apply and are NOT wired to it (user upheld
-2026-08-23). review-when: `@playwright/mcp` bump (bundled playwright-core
-1.63-alpha expects chromium r1237, sidestepped only by the `chrome` channel);
-Claude Code changes the tool-search default (re-measure per-turn cost).
+**Playwright MCP — ONE user-scope server (as-of 2026-08-25)**:
+`playwright-headless` (`--browser chrome --headless --isolated`) is the
+logged-OUT browser route; for anything needing the user's real logged-in state
+use `mcp__claude-in-chrome__*`. It is a separate process, so L-009's occlusion
+fault, L-013's allowlist and the `hidden`-probe hook do NOT apply to it (user
+upheld 2026-08-23). `playwright-chrome` (`--extension`) was trialed 2026-08-23
+and REMOVED 2026-08-25 — do not re-add it without reading why. Flags,
+measurements, the removal mechanism and the review-when:
+`ops/references/browser-pane-pixel-route.md` §"Playwright MCP servers";
+`tools/playwright-mcp/README.md`.
 
-`playwright-chrome` (`--extension`: attach to the user's running Chrome via
-the Playwright Extension, real logged-in state) was trialed alongside it
-2026-08-23 and removed 2026-08-25: it failed silently (`browser_tabs list`
-returned empty, no error) because `PLAYWRIGHT_MCP_EXTENSION_TOKEN` only skips
-a manual "allow this connection?" click inside the extension's own UI — no MCP
-tool can drive that click, and even a corrected token needs a session restart
-to take effect (stdio env is read once at server spawn) that no in-session
-tool can trigger. For a logged-in task, use `mcp__claude-in-chrome__*` instead.
-Full mechanism + decision record: `tools/playwright-mcp/README.md` "Why
-`playwright-chrome` was removed", `ops/rule-registry.md` "Playwright MCP".
-
-## Instruction-loading mechanics (as-of 2026-08-18, Claude Code 2.1.233 —
-## re-verified after the 2.1.220 review trigger fired)
+## Instruction-loading mechanics (as-of 2026-08-18, Claude Code 2.1.233 — re-verified after the 2.1.220 review trigger fired)
 
 Measured, not read off the docs (how each row was verified, the observability
 hook, `load_reason` values, trim effect sizes and the startup baseline:
@@ -289,7 +278,7 @@ message that does not name the cause.
 | GPU | RTX 5070 Laptop, **8,151 MiB per `nvidia-smi`** (+ integrated Radeon 610M) | `Win32_VideoController.AdapterRAM` reports 4 GB — a 32-bit field overflow, NOT a smaller card. Do not "correct" the 8 GB figure from it |
 | CPU | Ryzen 9 8940HX, 16C/32T | |
 
-## Display & UI-build premise (as-of 2026-08-31, user-stated — not measured)
+## Display & UI-build premise (as-of 2026-09-04; screen facts user-stated 2026-08-31, not measured)
 
 Primary screens: **2560×1440 (16:9)** or **2560×1600 (16:10)**, Windows custom
 scaling **150%**. Derived (from those two facts, not probed): logical viewport
@@ -304,7 +293,30 @@ UI/viewport/canvas/layout work, assume this display + 150% scaling, and trim
 generic boundary-case lists accordingly (CLAUDE.md boundary/compatibility
 `[BC]` rule — these are now KNOWN environment facts, not guesses).
 
-review-when: the user reports a new monitor or a changed scaling factor.
+**Horizontal property (owner: user, 2026-09-04 — a dated width-void diagnosis
+note under the source's outputs/ tree, which this repo does not ship)**: a
+human-facing HTML page must USE the width these screens give it. The named
+defect is the
+**left-anchored cap** — a container or painted, row-alone block capped in width
+and hugging the left edge, leaving an asymmetric right void (one shell's
+`max-width:1060px` became 13 deliverables at 60–69 % fill). How much fill a
+page owes depends on its CLASS, declared as `<html data-page-class="…">` and
+kept as DATA in `tools/page-fill-gate/page_classes.json` (document-short =
+centred + symmetric · document-long / deck / tool / dashboard = fill ≥ 85–90 %
+· diagram = centred-or-fill). A new kind of page is a new registry row plus a
+fixture pair, never a prose exception; an undeclared page is inferred and can
+only WARN. Enforcement: `python tools/page-fill-gate/fill_gate.py <built
+html…>` — two-sided controls every run, exit 2 = instrument missing (say so,
+never claim). Width is ALLOCATED proportionally (fr / % / cqw / minmax /
+clamp); pixels are for intrinsic sizes only (hit targets, hairlines, icons,
+minimum legible type, a panel's minimum) and `clamp()` is the bridge; a cap
+above 1920 px is a clamp, not a cap. The built-in artifact-design skill's
+"~65 characters" measure is met by column structure (main + `data-rail`,
+grids), never by a left-anchored column.
+
+review-when: the user reports a new monitor or a changed scaling factor;
+`page_classes.json` gains a row (re-run `tools/page-fill-gate/tests`);
+Anthropic's artifact-design wording on reading measure changes.
 
 ## Execution surface — CLI headless vs Desktop (measured 2026-08-22 on CLI 2.1.238 / Desktop-bundled claude.exe 2.1.237)
 
@@ -350,6 +362,186 @@ Re-verify this block (move its `as-of`) when: the Desktop-bundled claude.exe or
 the CLI minor version changes; the auto-mode instruction or the Workflow tool
 schema changes; the bench is re-run, or a pending probe lands (those are
 tracked with the measurements, not here).
+
+## Computer use — desktop control (as-of 2026-09-07, FIRST record; grant PROBED)
+
+A THIRD browsing/driving surface, distinct from the Browser pane and
+Claude-in-Chrome above: `mcp__computer-use__*` drives the Windows desktop
+(screenshot / zoom / click family / type / key / scroll / drag /
+`open_application` / clipboard / `switch_display` / `computer_batch`, plus the
+`teach_step`-`teach_batch` guided-tour mode). Routing already sends it to
+Desktop (see "Execution surface"); the app's own settings page says it is
+"Not available in cloud Code sessions".
+
+**The allowlist is not configuration — it is a session artifact.** This is the
+fact that makes the surface behave unlike everything else here:
+
+| | Where it lives | Lifetime |
+|---|---|---|
+| ALLOW | built at runtime by `request_access`, one OS dialog, whole-set approve-or-deny | the session; a new session starts empty |
+| DENY | app settings page, "Denied apps" list | persistent |
+
+So there is no allow-list UI and there cannot be one: `settings.json`
+`permissions.allow` gates only the Claude Code tool-call layer, never the app
+grant. **Consequence for unattended work: `[unattended-run]` cannot use this
+surface at all** — the grant needs a human at the dialog, and the user is by
+definition away. Do not design an offline workflow around it without solving
+that first.
+
+**Measured on this machine 2026-09-07** (a local session): `allowedApps` empty,
+all three grant flags (`clipboardRead` / `clipboardWrite` / `systemKeyCombos`)
+false; zero occurrences of `computer-use` in `settings*.json`, `rules/`, or
+`rule-registry.md`; **no hook matcher covers `mcp__computer-use__*`** —
+`ui_verify_guard.py` and `browser_pane_scope_guard.py` are both keyed to
+`mcp__(Claude_Browser|claude-in-chrome)__*`, so the DOM-over-pixels discipline
+above does NOT extend here. This surface is currently ungoverned locally; its
+only gate is the platform's per-app consent.
+
+App settings page, user-observed 2026-09-07: "Enable computer use" ON,
+"Unhide apps when Claude finishes" ON ("apps hidden during a task are
+restored when Claude stops" — implies full-control mode HIDES apps rather than
+fronting them; unverified), "Denied apps" empty.
+
+**Platform limits (from the tool schemas — authoritative, not inferred):**
+- Elevated processes (Task Manager, UAC prompts, admin installers) cannot be
+  driven at all: Windows UIPI blocks input from a lower-integrity process.
+- Tiers by app category: browsers -> `read` (screenshot only); terminals and
+  IDEs (VS Code, Visual Studio, PyCharm, 終端機) -> `click` (no typing, no
+  right-click, no modifier-click, no drag); everything else -> `full`.
+- `request_access` resolves ONLY Start-menu-registered applications. A loose
+  `D:\...\*.exe` returns `notInstalled` and **the request never reaches the
+  user** (measured 2026-08-21, bench-claude-arms; the detour to a read-only
+  geometry probe produced better evidence than the GUI plan would have).
+- `screenshot` ERRORS on an empty allowlist; non-allowlisted windows are masked
+  with solid rectangles rather than shown.
+
+**Start-menu scan, 2026-09-07** (232 shortcuts): grantable targets include
+FreeCAD, COMSOL 6.2, Photoshop 2026, VS Code / Visual Studio 2022 / PyCharm
+(click-tier), OBS, CapCut, Notepad++, Obsidian, Zotero, Docker Desktop, Ollama,
+Office. **KiCad is not installed. Blender exists only as a portable tree**
+(`model3d-pipeline\tools\blender-5.2.1-windows-x64\blender.exe`), so
+it is NOT grantable as-is. Untested cheap hypothesis: adding a Start-menu
+shortcut may make a portable exe resolvable.
+
+### PROBE 2026-09-07 (a local session, user-authorised: FreeCAD + 記事本)
+
+The grant path WORKS in the Desktop Code tab. One dialog, whole set, both
+granted `tier: "full"`, `denied: []`. Measured behaviour, in order of how much
+it should change a plan:
+
+1. **A screenshot HIDES every non-allowlisted window — it does not mask them.**
+   The response named them: Radmin VPN, Samsung Notes, Everything, Brave, plus
+   `textinputhost.exe`, `msedgewebview2.exe`, `nvidia overlay.exe`,
+   `systemsettings.exe`. The desktop came back empty but for the taskbar. The
+   `request_access` response advertises `screenshotFiltering: "mask"`; the
+   observed effect is HIDE, and the settings page's "Unhide apps when Claude
+   finishes" is the restore path. **So one screenshot rearranges the user's
+   session.** This, not foreground theft, is the real collision with the
+   "foreground is not commandeerable" premise — and unlike a Browser-pane
+   screenshot it cannot be routed out-of-process.
+2. **`open_application` DOES bring the app to the front** (corrected — the
+   first probe said otherwise and was wrong). A COLD launch of 記事本 left the
+   desktop shell frontmost, which read as "no foreground steal"; calling
+   `open_application` again on the already-running app raised it over the
+   user's windows. The cold-start case is a timing artifact, not a policy. So
+   this surface **does** commandeer the foreground, and the error text of the
+   click gate says so outright: "use `open_application` to bring it forward".
+3. **A THIRD gate: the desktop shell.** A click while the desktop, taskbar,
+   Start menu, Search or File Explorer is frontmost is refused with:
+   *"call request_access with exactly \"File Explorer\" in the apps array —
+   that single grant covers all of them. That grant is click-only: typing into
+   the shell stays blocked."* This tier rule is not in the MCP server
+   instructions; it is a shell-specific click-only grant on top of the
+   documented browser=read / IDE=click tiers.
+4. **Coordinate frame 1389x868 — resolved, and the Display premise is
+   CONFIRMED, not contradicted.** Measured: single monitor, physical
+   2560x1600 (AMD 610M), logical desktop bounds 1707x1067, i.e. exactly the
+   150% scaling the Display section records. 1389x868 preserves 16:10
+   (1.6002) and is a uniform ~1.229x downscale of the logical desktop.
+   Computer use simply reports its OWN frame with every screenshot — use that
+   number, never derive coordinates from the Display section. **Single monitor
+   means the video's multi-monitor drift cannot occur here**; `switch_display`
+   is untested for want of a second display.
+5. **Portable-exe hypothesis CONFIRMED.** A `Blender.lnk` written to
+   `%APPDATA%\Microsoft\Windows\Start Menu\Programs\` made the portable
+   `blender.exe` immediately grantable (`tier: "full"`, resolved to the real
+   `model3d-pipeline\...` path). **The installed-apps list is live, not cached at
+   session start** — the shortcut was seconds old. This is the 30-second
+   workaround to the 2026-08-21 bench-claude-arms limit: the limit is real,
+   its practical bite is not.
+6. **`bundleId` shapes differ by install kind**: a filesystem path for
+   FreeCAD/Blender, an MSIX AUMID for Notepad
+   (`Microsoft.WindowsNotepad_8wekyb3d8bbwe!App`).
+7. Grant flags stay false unless requested in the SAME `request_access` call —
+   adding one later costs a second dialog.
+
+**Friction points from the other product — status after the probe.** Source: a
+2026-09-06 YouTube walkthrough of ChatGPT/Codex GPT-6 Astra computer use
+(analysis: a dated write-up in the user's private media-analysis notes).
+
+| # | Claim | Status here |
+|---|---|---|
+| 1 | Foreground request hangs | no hang, but foreground IS taken — `open_application` raises the app over the user's windows |
+| 2 | Multi-monitor drift | **cannot occur — single monitor** |
+| 3 | Human locked out of input while agent drives | unprobed; the window-hiding of probe 1 is the nearer problem |
+| 4 | Per-app dialog, conversation-scoped | CONFIRMED here, by construction |
+
+That walkthrough is a FAILURE demo, not a capability demo: it ran out of
+credits having produced nothing, and its author's own conclusion was to stop
+using computer use. Its one architectural lesson is that GUI control was used
+only to BOOTSTRAP (open apps, tick a checkbox) while the real work was routed
+through Blender MCP — the same "script/protocol channel does the work"
+conclusion `model3d-pipeline` reached independently.
+
+### Scripting channels for candidate GUI targets (inventory 2026-09-07)
+
+The routing question is never "can computer use drive app X" but "does X have a
+channel that makes GUI driving unnecessary". Measured:
+
+All three headless channels SMOKE-TESTED 2026-09-07, not merely found on disk:
+
+| App | Present | Channel | Smoke test | GUI needed? |
+|---|---|---|---|---|
+| Blender 5.2.1 LTS | portable, `model3d-pipeline\tools\blender-5.2.1-windows-x64\blender.exe` | `-b --python-expr`, wired in `m3p/render_blender.py` (`BLENDER_EXE`) | **PASS** (`bpy` 5.2.1 LTS) | no |
+| FreeCAD 1.1.3 | `FreeCAD\bin\FreeCADCmd.exe` | FreeCADCmd `-c`, wired (`FREECAD_CMD`) | **PASS** (1.1) | no |
+| COMSOL 6.2 | `COMSOL62\Multiphysics\bin\win64\` | `comsolbatch.exe` (+ `comsolclusterbatch`) | **PASS** (help) | no |
+| KiCad | **not installed** | would be `kicad-cli` | — | n/a |
+| **Keysight ADS 2016.01** | **GONE** — was residue only (13 files / 47 MB, DLLs, zero executables); user deleted `ADS2016_01` 2026-09-07. `EEsof_License_Tools` REMAINS: 899 files / 308 MB (`bin` 211 MB, `jre` 88 MB, own uninstaller, `license.lic`); no EEsof/HPEESOF env vars | see below | n/a | n/a |
+
+Supporting toolchain, smoke-tested same day: Python 3.12.7, Node 24.14.1,
+git 2.51.0, ffmpeg 8.1, yt-dlp 2026.08.18, Docker 29.7.2, pdfTeX (TeX Live
+2026). Ollama installed but **no running instance**. `klayout` is not on PATH
+but lives in the model3d-pipeline venv (0.30.12) alongside gdsfactory 9.49.0,
+build123d 0.11.1, trimesh 5.0.0, ezdxf 1.4.4, shapely 2.1.2, numpy 2.5.2.
+
+**Keysight ADS — the version gate matters more than the install.** Even a
+working ADS 2016.01 would have AEL only: the Process API for bidirectional
+external-program communication arrived in **ADS 2022 Update 2**, and the
+Python API / `run_python_ads2024beta()` in **ADS 2024** (Keysight docs, checked
+2026-09-07). So automating ADS is not a computer-use question at all — it is a
+licence-and-version question. The remaining `EEsof_License_Tools` half is
+`app-residue-sweep`'s object and the user owns that cleanup; its own
+uninstaller ships in the folder, and the licence-server service and registry
+residue were NOT surveyed.
+
+review-when: ADS is (re)installed — check the version against the 2022 U2 /
+2024 API gates before assuming any scripting surface.
+
+Full probe log, raw tool responses, the two conclusions this session
+overturned, and the refutability statement live in a dated probe write-up
+under the source's outputs/ tree, which this repo does not ship.
+
+**Blender MCP is NOT installed on this machine** — no addon matching `*mcp*` in
+the portable tree, no `blender-mcp` pip package; the user config dir
+(`%APPDATA%\Blender Foundation\Blender\5.2`) holds only an empty extensions
+cache. Configured MCP servers are `prism` (ConnectionRefused) and
+`playwright-headless` only. So the video's actual working channel does not
+exist here yet; adopting it is an unmade decision, not a gap to backfill.
+
+review-when: a click-to-front or `switch_display` probe runs (settles friction
+2-3 and the 1389x868 discrepancy); the app settings page gains an allow-list or
+persistent-grant control; a hook is written for `mcp__computer-use__*`; KiCad,
+Blender MCP, or a non-portable Blender is installed.
 
 Re-verify a block (and move its `as-of`) when: model names in the harness
 change; the Agent or Workflow tool schema changes; the user revises the cost

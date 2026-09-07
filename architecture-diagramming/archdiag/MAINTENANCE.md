@@ -48,7 +48,11 @@ is a property of these assets, event-triggered — not a schedule.
 
 - **M5 — Enums stay derived.** `NODE_KINDS`/`EDGE_TYPES` derive from
   `emit.mjs` FILL/EDGE keys (schema.mjs imports them). Never enumerate them a
-  second time anywhere — a second list is a fork that drifts.
+  second time anywhere — a second list is a fork that drifts. Same property
+  for the palette (2026-09-05): README's style-token table is the OUTPUT of
+  `node tools/archdiag/tokens.mjs` — after any FILL/STROKE/OVL/EDGE edit,
+  regenerate it and run `tokens.mjs --check` (text/fill AA 4.5:1 = FAIL;
+  edge-vs-page 3:1 = WARN) before M1.
 
 - **M6 — Font-substitution sweep after ANY `emit.mjs` layout edit or
   `selfcheck.mjs` #1 edit (born 2026-09-02, external validation intake).**
@@ -101,6 +105,67 @@ is a property of these assets, event-triggered — not a schedule.
   - *UAT debt visibility* — machine-green/human-unverified surfaces
     accumulate silently; count unrun manual gates at checkpoint time and say
     the number out loud (the F3 target had six).
+
+## Log — 2026-09-05: checks #9/#10 + a11y contract; receipts re-issued (diagram-design borrow review P-2)
+
+- **Changed**: `selfcheck.mjs` gained #9 `label-over-node` (a pill's CENTRE inside
+  a node) and #10 `shared-anchor` (two different edges' anchors on one border
+  side with 0 < gap < grid; gap 0 = deliberate bundle). `asserts.mjs` gained the
+  build-time faces of both (pill centre on `pillAt`; shared anchor on model pts)
+  and `a11yAsserts(html)` — `role="img"` + `aria-labelledby` → first-child
+  `<title id="t-<view>">` + `<desc id="d-<view>">`, ids unique, read from the
+  EMITTED page. `emit.mjs` emits the title/desc pair per `svg.dia`; `index.mjs`
+  throws `A11Y FAILED` before writing. Record + ledger: the source
+  environment's own skill-review record (outputs/, not shipped in this copy)
+  §六 B-1/B-2/B-3.
+- **M2 calibration, both ways**: build-time 20/20 controls (scratch script —
+  gap = grid → 0, gap 0 → 0, gap 4 → exactly 1 naming both edges; pill centre
+  in corridor / on the border → 0, inside → 1 naming edge + node; a11y clean
+  page → 0, and no-role / title-not-first / duplicate id / labelledby mismatch
+  / empty title / no svg each → its named problem; `data-id` is not an id).
+  In-page (headless Chromium, a same-origin harness of 1400×900 iframes): the
+  7 accepted artifacts PASS with 0 diagnostics; a synthetic positive page fires
+  exactly `label-over-node` + `shared-anchor`; its negative twin and a clean
+  `build()` page PASS.
+- **Threshold decision (ledger, model, reversible)**: the first form of #9
+  (pill bbox ∩ node rect) fired 70× across all 7 accepted artifacts — depth
+  3–18 px, every pill centre OUTSIDE the node — i.e. border straddles the
+  user's visual gates had already accepted, while #1 already forbids a pill
+  over node text. The reader-visible defect that remains is a label attributed
+  to the wrong object, so the rule is: centre inside ⇒ error. A checker that
+  fails every accepted artifact on first run is the instrument's threshold
+  being wrong, not seven accepted deliverables being wrong.
+- **M6 not triggered**: no layout edit in `emit.mjs` (title/desc do not
+  render), #1 untouched; #9's centre is font-immune by construction
+  (`text-anchor="middle"` at `pillAt`), #10 reads model pts.
+- **M1**: `archdiag-capability-set-v1.html` (not on the library) byte-identical.
+  The 7 library artifacts changed bytes by exactly the a11y pair + the in-page
+  script — pre-ruled (R-2, record §七 P-2: "a11y 屬性會改 bytes，需重發收據並
+  記錄"). Footers untouched; nothing drawn changed. Receipts re-issued:
+
+| artifact | bytes before → after |
+|---|---|
+| ccfg-retrieval-audit-f1 | 42687 → 46813 |
+| claude-home-audit-f1 | 117065 → 122096 |
+| dit-audit-f1 | 66789 → 71502 |
+| mfp-audit-f3 | 101296 → 106393 |
+| mfp-audit-f4 | 40583 → 44530 |
+| mfp-audit-f5 | 67800 → 72655 |
+| prism-audit-f2 | 76705 → 81752 |
+
+The before/after sha256 pair for each row was recorded at the source, against
+the commit the artifacts were frozen at. It is not reproduced here: these seven
+pages live in the source environment's own output tree and do not ship with
+this copy, so the receipts would be fourteen hashes a reader has nothing to
+check them against. What is portable is the ruling above them and the growth
+column — an a11y attribute pair plus the in-page script costs roughly 4–5 KB
+per artifact, which is what tells you a re-freeze is a byte change and not a
+drawing change.
+
+- **R1 addendum**: to read every artifact's report in one evaluate, serve a
+  copy dir holding the pages plus a harness page that loads them in
+  same-origin 1400×900 iframes and collects `contentWindow.__geometryReport`
+  once all are ready (the pattern used above).
 
 ## Review-when
 

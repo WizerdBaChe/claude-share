@@ -1,6 +1,6 @@
 ---
 name: audience-fit
-description: 'Post-production audience-adaptation pass (受眾調校) for anything a NON-BUILDER will read. Two jobs: (A) turn an engineering-voiced deliverable (audit/summary HTML, report, README, release notes) into a reader-facing version in a NEW file; (B) write or fix UI copy (設定頁、狀態列、錯誤訊息) from the USER''s stance instead of the engine''s. Trigger on 「使用者導向」「消費者導向」「寫給一般人/非工程師看」「白話版」「UI 文案」「設定頁文字」「這段太工程」「AI味」 "make this readable for stakeholders", "rewrite for end users" — and OFFER once, unprompted, right after any skill (diagram-authoring, code-review-deep-checklist, bench reports, …) produces a deliverable whose primary consumer is not its builder. NOT for machine-read docs (phase logs, decisions files, specs — the language policy already governs those), NOT visual layout/theming (→ artifact-design / dataviz), NOT authoring technical docs from code (→ engineering:documentation).'
+description: 'Post-production audience-adaptation pass (受眾調校) for anything a NON-BUILDER will read. Two jobs: (A) turn an engineering-voiced deliverable (audit/summary HTML, report, README, release notes) into a reader-facing version in a NEW file; (B) write or fix UI copy (設定頁、狀態列、錯誤訊息) from the USER''s stance instead of the engine''s. Trigger on 「使用者導向」「消費者導向」「寫給一般人/非工程師看」「白話版」「UI 文案」「設定頁文字」「這段太工程」「AI味」 "make this readable for stakeholders", "rewrite for end users" — and OFFER once, unprompted, right after any skill (diagram-authoring, code-review-deep-checklist, bench reports, …) produces a deliverable whose primary consumer is not its builder. NOT for machine-read docs (phase logs, decisions files, specs — the language policy already governs those), NOT visual layout/theming (→ artifact-design / dataviz), NOT authoring technical docs from code (→ engineering:documentation), NOT task/flow/interaction/state evaluation — 「走得通嗎」「停用還是隱藏」「等待/取消/失敗後」「鍵盤/窄版」 (→ ux-walkthrough; Mode B hands those findings there and takes wording findings back).'
 ---
 
 # audience-fit — adapt finished output to the human who will actually read it
@@ -33,6 +33,12 @@ Ask: **who acts on this text next?**
 - A human who did not build it (stakeholder, evaluator, end user, 未來的
   自己-as-user) → candidate for **Mode A**.
 - The text renders inside a product UI → candidate for **Mode B**.
+- The question is whether a person can FIND, COMPLETE, RECOVER, or
+  CONTINUE (a flow, a control's show/disable/hide, waiting and cancel,
+  keyboard or narrow layout) → not this skill: `ux-walkthrough`. This
+  skill is the expression layer; that one verifies the stance as a task
+  result (split 2026-09-07 after the codex Mode C review — a flow treated
+  as content to explain is not a flow that has been walked).
 - Unclear who consumes it → default by provenance and SAY SO: audit / eval /
   bench artifacts → evaluator; usage-facing artifacts (README, release
   notes, GUI copy) → end_user. Declare the choice in the companion's
@@ -139,14 +145,36 @@ aggregation mapping table plus the two renders side by side — verbatim
 excerpt pairs apply to text surfaces (A2, and A1's prose blocks).
 
 ### Mode B — UI copy stance flip
-Load `references/ui-copy-stance.md` (component/capability/inventory
-vocabulary separation, distinct-states-look-distinct, the status-card trio,
-mechanism-one-click-away). Deliver as a proposal table
-(位置 | 現行 | 建議 | 對應程式狀態 | 理由) and confirm before applying —
-UI wording is UX semantics, and 「讀不讀得懂」 items go to a UAT checklist
-because only a human can judge them — into `B. 體驗` rung B1, not into
-`A. 必驗` (`ops/references/uat.md`). The exception is wording that hides a
-distinct state (R2): that is an observability failure and ranks in A.
+Load `references/ui-copy-stance.md` (string roles first; then, for STATUS
+statements only, the component/capability/inventory vocabulary and
+distinct-states-look-distinct; the decision-point trio; mechanism detail
+placed by decision use; location-free instructions; label distinctness).
+The unit of work is the DECISION POINT, not the string: a label may stay
+two words as long as the point — title, hint, button together — answers
+what is true, what can be done, what happens next (codex review
+2026-09-07 §4.1: per-string trios turn a screen into a wall of sentences).
+
+Deliver as a proposal table
+(位置 | 現行 | 建議 | 對應程式狀態 | 理由 (Rn) | 類別), where 類別 is one of:
+- **純措辭** — same program state, same expectation of what happens next.
+  Apply directly within the task's authorization and say so; the table is
+  the record, not a gate (global Interaction-style rule: only a change of
+  interaction semantics needs the question).
+- **語意** — the wording changes what the person will expect to happen
+  (「開始示範」 vs 「閱讀示範對話」 when the code keeps the position). Wait
+  for the ruling; the row carries the evidence behind the question.
+
+「讀不讀得懂」 items go to a UAT checklist because only a human can judge
+them — into `B. 體驗` rung B1, not into `A. 必驗` (`ops/references/uat.md`).
+The exception is wording that hides a distinct state (R2): that is an
+observability failure and ranks in A.
+
+Hand-off: a row whose real layer is interaction, state model, flow,
+layout-change, or keyboard/narrow parity is not a copy finding — pass it
+to `ux-walkthrough` as its Step 3 record instead of rewording around it (a
+friendlier name cannot fix 「繼續閱讀」 resetting the position; a lossy
+boolean cannot be repaired by vaguer words). ux-walkthrough passes wording
+findings back as rows of this table. Neither re-runs the other.
 
 ### Mode C — review only
 Diagnose without editing: audience verdict (who this text currently serves

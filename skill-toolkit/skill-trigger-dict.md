@@ -11,7 +11,7 @@
 - 關鍵詞：深入review、完整審查、架構健檢 (architecture health check)、代碼異味 (code smell)、需求追溯 (requirement traceability)、選型評估 (dependency fitness)、全專案審查 (whole-project review)
 - 精準句型：
   - Mode A：「幫我**深入 review** 這個 PR/檔案」("deep review")
-  - Mode B：「幫**整個專案**做架構**健檢**」(whole-project health check)；稽核入口不帶「健檢」字的說法（外部語料 2026-09-02）：「這份架構說法跟 code 對得上嗎」/「找出文件跟實作不一致」/「重建現況，不要相信 README」/ "where has the architecture drifted?"——evidence 模式＝code、交付物＝漂移表，不是畫圖請求（→ diagram-authoring 只在其視圖稽核回呼時出場）
+  - Mode B：「幫**整個專案**做架構**健檢**」(whole-project health check)；稽核入口不帶「健檢」字的說法（外部語料 2026-09-02）：「這份架構說法跟 code 對得上嗎」/「找出文件跟實作不一致」/「重建現況，不要相信 README」/ "where has the architecture drifted?"——evidence 模式＝code、交付物＝漂移表，不是畫圖請求（→ diagram-authoring 只在其視圖稽核回呼時出場）；**覆蓋義務 (coverage obligation) 判別子（2026-09-05）**：本 skill 有——inventory-first `coverage.json`，沒審的單元進 `deferred`／`explicitExclusions`，標準層視圖集成員（C4／每個生命週期實體的 statechart／每個關鍵入口的 sequence pair／決策表）要有名字；要「整個系統沒漏看」的保證、或既有系統重構前的診斷 → 這裡（B focused），畫圖 skill 的 audit mode 只宣告不盤點
   - Mode C：「評估 X 套件**還適不適合**」("still the right fit")
 - 避免說法：「merge 前幫我看一下」（→ /code-review）、「盤點技術債列 backlog」（→ engineering:tech-debt）
 
@@ -25,8 +25,10 @@
 - 精準句型：「幫我簡化這次改動的代碼」— 只做品質，不抓 bug
 - 避免說法：「順便看有沒有 bug」（→ /code-review）
 
-### /review（GitHub PR 審查）
-- 精準句型：「review PR #123」— 給 GitHub 上的 PR；本地 diff 用 /code-review
+### /review（幻影條目 — 2026-09-04 查證：本機不存在，勿路由）
+- 事實：不在 `skills/`、無已安裝 plugin（`plugins/` 只有 marketplaces、`settings.json` 無 enabledPlugins）、catalog 的 `pr-review-toolkit` 提供的是 `/review-pr` 而非 `/review`。留 tombstone 而非刪除（比照 deep-research）。
+- 關鍵詞：review PR、審這個 PR、PR 審查
+- 「review PR #123」→ **`/code-review <PR#>`**（同一指令吃 PR 編號／branch／path）；多代理雲端深審 → `/code-review ultra <PR#>`
 
 ### /security-review（pending diff 安全快查）
 - 關鍵詞：security review、改動有沒有安全問題
@@ -62,7 +64,7 @@
 - 關鍵詞：稽核這個skill (audit this skill)、檢查這個hook、安全性遺漏 (security gap)、乾淨度、這條規則安不安全
 - 精準句型：「幫我 audit 這個 skill/hook/CLAUDE.md 規則」/「這個 skill 有沒有安全性遺漏或乾淨度問題」— 只審 Claude Code 設定物件，不審專案代碼
 - **兩個 mode**：預設審**單一物件**；**adoption mode** 審搬進來設定間的**關係**（觸發碰撞、順序、機制沒跟著到）。觸發詞：「移植過來的規則跟原本的打架」「別人的設定 repo 併進來了」、或 `reconciled: no` 戳記。**單一** skill 搬入 → `skill-share-packaging` Mode B
-- 與 `/doctor` 分工：本 skill **自足**，`/doctor` 輸出一律當未驗證宣稱（理由＋實測：SKILL.md §9、references/telemetry.md）
+- 與 `/doctor` 分工：本 skill **自足**，`/doctor` 輸出一律當未驗證宣稱（理由＋實測：SKILL.md §9、`skills/config-self-audit/references/telemetry.md`）
 
 ---
 
@@ -87,20 +89,31 @@
 - 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (FSM/statechart)、時序圖/序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、機制架構檢查・系統架構盤點・檢查項（audit mode：無「圖」字也觸發，交付＝可校驗架構圖＋缺口表＋檢查項；2026-08-31 實戰 miss 補）、圖要放進 HTML/PPTX/簡報
 - 精準句型：「把這個系統畫成方塊圖＋狀態機圖，缺的接口標出來」/「用現有資料重建 CPO 全架構圖，找出缺口」/「對整個 X 系統進行一次機制架構檢查（架構盤點），整理成未來可參照的檢查項」/「這組圖要能放進簡報（PPTX 可編輯）」
 - 不帶圖字的架構追問（外部語料 2026-09-02，判別靠「物件＋交付物＋evidence 模式」而非關鍵字）：「這東西到底怎麼串起來的」/「幫我把元件、資料流、狀態拆開讓新人看懂」/「把交接失敗路徑攤開」/ "show me how these components hang together" / "map out the runtime, handoff, and trust boundaries"（物件＝runtime/trust boundary 才是本 skill）
-- 邊界：選哪種圖（理論）→ product-design-thinking `representation-models.md`；健全性檢核 → 同目錄 `view-integrity-checks.md`；codebase 架構健檢（code smell/依賴）→ code-review-deep-checklist Mode B（其視圖稽核回呼本 skill 做呈現級繪製），「機制/系統」的架構檢查・盤點 → 本 skill audit mode；資料圖表 → dataviz；UI mockup → design；Artifact 頁面機制 → artifact-design/artifact-diagramming；PPTX 機制 → anthropic-skills:pptx
+- 邊界：選哪種圖（理論）→ product-design-thinking `representation-models.md`；健全性檢核 → 同目錄 `view-integrity-checks.md`；codebase 架構健檢（code smell/依賴）→ code-review-deep-checklist Mode B（其視圖稽核回呼本 skill 做呈現級繪製），「機制/系統」的架構檢查・盤點 → 本 skill audit mode；**覆蓋義務判別子（2026-09-05）**：audit mode 一題一主視圖、無盤點義務——交付只宣告視圖集成員「已畫／明列排除」（Step 6 coverage declaration），要「沒漏看」的保證（`deferred` 表、全 codebase 盤點）→ code-review-deep-checklist Mode B focused（AWD 2026-09-03 個案：沒畫的 lifecycle 視圖沒名字，09-05 重建才補）；資料圖表 → dataviz；UI mockup → design；Artifact 頁面機制 → artifact-design/artifact-diagramming；PPTX 機制 → anthropic-skills:pptx
 - 避免說法：「畫個長條圖/趨勢圖/dashboard」（資料視覺化 → dataviz）、「幫我設計這個頁面/mockup」（→ design）
 
 ### engineering:system-design（單一系統/服務架構設計）
+- 關鍵詞：設計一個系統、設計 API、資料模型設計 (data model design)
 - 精準句型：「幫我設計一個處理 X 的系統/API/資料模型」— 範圍窄於 product-design-thinking
 
-### product-management:write-spec（寫 PRD/spec）
-- 精準句型：「把這個功能想法寫成一份 PRD」
+### product-management:write-spec（幻影條目 — 2026-09-04 查證：本機不存在，勿路由）
+- 事實：`product-management` plugin 不在 catalog、未安裝、不在本 session 可用清單。留 tombstone 而非刪除（比照 deep-research）。
+- 關鍵詞：寫一份 PRD、寫 spec、功能規格書
+- 「把這個功能想法寫成一份 PRD／spec」→ **product-design-thinking**（本機的規格產物是 Concept Note／CIM／PIM／PSM）
 
 ### audience-fit（受眾調校）
 - 關鍵詞：使用者導向、消費者導向、寫給一般人/非工程師看、白話版、UI 文案、設定頁文字、這段太工程、AI味
 - 精準句型：「這份稽核頁改成給主管/一般人看的版本」/「設定頁的文字從使用者角度重寫」/「這段有 AI 味，去掉」
-- 邊界：「產出後」再加工——工程版原檔不動，Mode A 出新檔；從零寫技術文件 → engineering:documentation；視覺版面/主題 → artifact-design、dataviz；機器讀文件不適用（語言政策管轄）
-- 避免說法：「幫我把報告排版美化」（→ artifact-design）、「寫個 README 說明這段程式」（→ engineering:documentation）
+- 邊界：「產出後」再加工——工程版原檔不動，Mode A 出新檔；從零寫技術文件 → engineering:documentation；視覺版面/主題 → artifact-design、dataviz；機器讀文件不適用（語言政策管轄）；**任務/流程/互動/狀態層的問題（走得通嗎、停用還是隱藏、等待/取消/失敗後、鍵盤/窄版）→ ux-walkthrough**（2026-09-07 拆分：Mode B 只管措辭，非措辭的發現交過去，對方把措辭發現交回來）
+- 避免說法：「幫我把報告排版美化」（→ artifact-design）、「寫個 README 說明這段程式」（→ engineering:documentation）、「這個流程使用者走得通嗎」（→ ux-walkthrough）
+
+### ux-walkthrough（UX 走查／認知走查）
+- 關鍵詞：UX 走查、認知走查 (cognitive walkthrough)、可用性審查 (usability review)、啟發式評估 (heuristic evaluation)、走得通嗎、從入口到結果跑一遍、使用者會不會誤以為、決策位置 (decision point)、停用還是隱藏 (disable vs hide)、等待/取消/失敗後怎麼辦、空狀態 (empty state)、鍵盤/窄版走得通嗎、可用性測試怎麼設計、使用者導向有沒有真的落地
+- 精準句型：「把『載入另一份對話』這條路從入口走到結果，看使用者卡在哪」/「這顆按鈕該停用還是隱藏？」/「等待、取消、失敗後使用者知道保留了什麼嗎」/「幫我設計一個任務型可用性測試」
+- 性質：**原則層**（決策位置契約、show/disable/hide 條件表、等待–取消–復原契約、證據階梯 UE0–UE4），不是元件庫；只評估與開規格，不改產品程式
+- 比例規則：一顆按鈕＝一個決策位置（幾行發現）；一條流程＝任務卡＋決策點表；「有沒有落地」＝2–3 條最高價值任務；測試計畫只在使用者要「觀察」時才寫
+- 邊界：純措辭/語氣 → audience-fit Mode B（雙向交棒，互不重跑）；視覺 mockup/主題 → design、artifact-design；design tokens → design-system-suite；動效 → motion-design；新產品設計 → product-design-thinking（本 skill 是其 Phase 2「UX semantics are user decisions」問題背後的儀器：先走查 PIM 狀態機再問）；實作修正 → frontend-developer / testing 代理
+- 避免說法：「這段太工程，改白話」（→ audience-fit）、「幫我畫這個頁面」（→ design）、「新產品從零設計」（→ product-design-thinking）
 
 ---
 
@@ -122,10 +135,13 @@
 
 ## 執行與驗證
 
-### verify（實跑驗證改動）
-- 精準句型：「實際跑起來**驗證**這個 fix 有效」
+### verify（幻影條目 — 2026-09-04 查證：本機不存在，勿路由）
+- 事實：不在 `skills/`、不在 plugin catalog、不在本 session 可用 skill 清單；只存在於本字典。留 tombstone 而非刪除（比照 deep-research）。
+- 關鍵詞：實際跑起來驗證、跑起來看有沒有效、真實環境驗證
+- 「實際跑起來**驗證**這個 fix 有效」→ **`run`**（其職責即「confirm a change works in the real app, not just tests」）
 
 ### run（啟動專案 app）
+- 關鍵詞：把 app 跑起來、啟動專案、跑起來截圖、把它跑起來看
 - 精準句型：「把 app 跑起來 / 截圖給我看改動效果」
 
 ### engineering:debug（結構化除錯）
@@ -133,18 +149,21 @@
 - 精準句型：「這個 error 幫我 debug：<貼錯誤>」
 
 ### engineering:testing-strategy（測試策略）
+- 關鍵詞：這該怎麼測、test plan、測試策略 (testing strategy)、測試覆蓋要多少
 - 精準句型：「這個模組該怎麼測 / 幫我規劃 test plan」
 
-### deep-research（深度研究報告）
-- 精準句型：「幫我做一份有引用來源的深度研究：X」— 題目要夠具體
+### deep-research（幻影條目 — 2026-09-03 查證：本機從未安裝，勿路由）
+- 關鍵詞：深度研究報告、有引用來源的研究、deep research
+- 事實：不在 `skills/`、不在已啟用 plugin、不在 plugin 目錄；自 2026-07-06 baseline 起只存在於本字典。留作 tombstone 而非刪除，讓舊的 `search_trail` 與引用讀得懂（比照 prism connector 的 tombstone）。
+- 「有引用來源的深度研究報告」→ **literature-search-extract `depth: exhaustive`**（PRISMA 流程、逐主張 evidence ledger）；「不需引用的廣域主題掃描」→ T4 research dispatch（`ops/20-dispatch.md` §6）。
 - 避免說法：「我這個**實驗/研究**下一步該做什麼」（做自己的研究流程 → scientific-research-guide）
 
 ### scientific-research-guide（科研方法論顧問）
 - 關鍵詞：研究流程走到哪、實驗怎麼設計、該用哪個統計檢定、對照組/抽樣/樣本量、模型 V&V/不確定性、擬合好不好/殘差、多重比較、投稿前要補什麼、可重現性、PRISMA/文獻空缺
 - 精準句型：「**研究/實驗**做到 X，**下一步該做什麼、還缺什麼**」/「n=6 三組，**該用哪個統計檢定**」/「**實驗怎麼設計對照組**」/「**投稿前**方法學還要補什麼」
 - 性質：顧問型，預設只診斷/建議；**未經明確要求不寫程式、不動資料**。
-- 領域特化 (domain profiles)：來源環境另維護多支領域 profile（該領域的研究問題也直接觸發本 skill；精確數量與載入清單以 `domains/_routing.md` 為唯一真實來源）。**本分享不含任何 profile 檔** — 它們是作者自身研究領域的主題知識（見 `domains/` 資料夾的 README 與列數為零的 `_routing.md`）；請依 `domains/domain-expansion-guide.md` 自建自己的領域列。
-- 避免說法：「有來源的深度研究報告」（→ deep-research）、「純寫程式/修 bug」（→ engineering skills）、「寫 PRD」（→ product-management:write-spec）
+- 領域特化 (domain profiles)：來源環境另維護多支領域 profile（該領域的研究問題也直接觸發本 skill；精確數量、載入清單與叢集消歧規則以 `domains/_routing.md` 為唯一真實來源，計數會腐爛，別在別處硬記數字或檔名）。**本分享不含任何 profile 檔** — 它們是作者自身研究領域的主題知識（見 `domains/` 資料夾的 README 與列數為零的 `_routing.md`）；請依 `domains/domain-expansion-guide.md` 自建自己的領域列。
+- 避免說法：「有來源的深度研究報告」（→ literature-search-extract `exhaustive`）、「純寫程式/修 bug」（→ engineering skills）、「寫 PRD」（→ product-design-thinking；本機無 product-management plugin）
 
 ### literature-search-extract（文獻檢索與萃取服務）
 - 關鍵詞：找論文、這篇paper重點、教科書怎麼定義X、整理幾篇的方法比較、查參數的文獻值、evidence table、annotated bibliography、comparison matrix、引用可追溯 (citation traceability)、access tag
@@ -152,7 +171,7 @@
   - 直接：「**找 X 主題的論文**並整理**方法比較**（每格要有引用）」/「這篇 paper 的**重點/方法/限制**」/「**教科書**裡怎麼定義 X」/「**查這個參數的文獻值**」
   - 服務：其他 skill 傳入 request contract，接回 result contract
 - 性質：萃取**已發表正式來源**（期刊/預印本/教科書/標準），逐條帶 source locator + access tag，**零捏造引用**；定向萃取（知道資訊住在論文哪一節），非通用摘要。
-- 避免說法：「某主題的**深度研究報告**」（→ deep-research）、「我的**研究下一步**該做什麼」（→ scientific-research-guide，它可能**反過來調用本 skill**）、「competitor/市場情報」（→ marketing:competitive-brief）
+- 避免說法：「某主題的**深度研究報告**」（→ 本 skill 的 `depth: exhaustive`，不是別的 skill）、「我的**研究下一步**該做什麼」（→ scientific-research-guide，它可能**反過來調用本 skill**）、「competitor/市場情報」（→ marketing:competitive-brief）
 
 ---
 
@@ -183,10 +202,13 @@
 ## 環境設定
 
 ### update-config（settings.json / 權限 / hooks）
-- 關鍵詞：allow X、加權限、設環境變數、每次X之後自動Y (automation via hooks)
-- 精準句型：「以後每次 X 時自動 Y」/「把 npm 加進允許清單」
+- 關鍵詞：allow X、加權限、設環境變數、每次X之後自動Y (automation via hooks)、settings.json、權限搬到專案、移除全域那份
+- 觸發實態（量測 2026-09-04，1 fire，補詞後 0%→100%）：唯一一次是「**搬到專案的 settings.json，全域那份移除**」——舊關鍵詞（allow／加權限／環境變數）一個都沒中。
+- 精準句型：「以後每次 X 時自動 Y」/「把 npm 加進允許清單」/「把這條權限搬到專案的 settings.json」
 
 ### anthropic-skills:skill-creator（建立/優化 skill）
+- 關鍵詞：建立一個skill (建立一個 skill)、skill create、做成 skill、優化這個 skill、skill 的 description
+- 觸發實態（量測 2026-09-04，6 fires）：僅 ≤3 次可由語彙登記；**2 次是決策形觸發**（使用者只描述需求，造不造 skill 是本迴圈的決定）——與 config-self-audit 同屬字典無法登記的形狀。「跑 eval」曾登記為關鍵詞，實測 4 次命中全為專案自身的 evals、真觸發 0 次，已移除。逐句證據：`outputs/dict-review-round2-2026-09-04.md` §3
 - 精準句型：「幫我建一個新 skill / 優化這個 skill 的 description / 跑 eval」
 - 避免說法：「檢查這個 skill 安不安全」（→ config-self-audit）、「打包 skill 分享給別人」（→ skill-share-packaging）
 - 邊界（2026-09-01）：本 skill 管 SKILL.md 工件的**落地/優化**；新 skill 承載的**能力本身**複雜到過留存＋消費者判準且做法未定 → 先進 product-design-thinking Mode B 設計，再交回本 skill 落地；做法已定的例行新 skill 直接進本 skill
@@ -216,7 +238,9 @@
 - 避免說法：「稽核這個 skill 的內容」（靜態稽核 → config-self-audit，本迴圈的驗證步）、「建/改 skill」（→ skill-creator）、「清理檔案」（→ env-cleanup）
 
 ### /loop、/schedule（排程與循環）
-- 精準句型：「每 5 分鐘跑一次 /X」（loop）/「每天早上 9 點自動執行 X」（schedule）
+- 關鍵詞：每 N 分鐘跑一次、定時執行、排程 (schedule)、分鐘後繼續 (resume in N minutes)、之後繼續未完成任務
+- 觸發實態（量測 2026-09-04，schedule 2 fires，補詞後覆蓋率 0%→100%）：兩次都是**夾在長句中間**的「/schedule 240min 之後繼續未完成任務」，不是獨立 slash 指令。
+- 精準句型：「每 5 分鐘跑一次 /X」（loop）/「每天早上 9 點自動執行 X」（schedule）/「N 分鐘後繼續未完成任務」（schedule）
 
 ---
 
@@ -238,13 +262,16 @@
 | 資安健檢・找漏洞 / 部署姿態・供應鏈 / 被攻擊看得到嗎 | security-deep-checklist (A/B/C) |
 | 新系統的權限/驗證怎麼設計 | product-design-thinking (Phase 2) |
 | 深入 review 這個 PR / 全專案架構健檢 / 套件 X 還適合嗎 | code-review-deep-checklist (A/B/C) |
-| 畫成方塊圖・FSM・爆炸圖（精準可驗證）/ 重建全架構標缺口 | diagram-authoring |
+| 整個系統有沒有漏看的地方（要覆蓋保證・deferred 表）/ 既有系統重構前先診斷 | code-review-deep-checklist (B focused) |
+| 畫成方塊圖・FSM・爆炸圖（精準可驗證）/ 重建全架構標缺口（宣告哪些視圖沒畫） | diagram-authoring |
 | 哪種圖適合表達 X（選型理論） | product-design-thinking `representation-models.md` |
 | 研究下一步 / 統計檢定 / 實驗設計 / 投稿前補什麼 | scientific-research-guide |
 | 動效/轉場怎麼做・Three.js/WebGL/shader・品牌動態識別 | motion-design |
+| 這段太工程・白話版・UI 文案從使用者角度改 | audience-fit (A/B/C) |
+| 這條流程使用者走得通嗎・停用還是隱藏・等待/取消/失敗後・鍵盤/窄版・可用性測試怎麼設計 | ux-walkthrough |
 | 打包 skill 分享給別人 / 網路抓的 skill 能不能安全裝 | skill-share-packaging (A/B) |
 | 找論文 / paper 重點・方法・限制 / 教科書定義 / 查文獻參數值 | literature-search-extract |
-| 幫我做某主題的深度研究報告 | deep-research |
+| 幫我做某主題有引用來源的深度研究報告 | literature-search-extract (`depth: exhaustive`) |
 | 盤點技術債列 backlog | engineering:tech-debt |
 | 該選 A 還是 B（新決策） | engineering:architecture |
 | AI PR 審不完（流程） | ai-coding-guardrails |
@@ -252,7 +279,7 @@
 | 稽核這個 skill/hook / 搬進來的規則跟原本的打架 | config-self-audit（預設 / adoption mode） |
 | 清理 .claude / 專案的無關檔案 | env-cleanup |
 | 跑一輪 skill 升級迴圈 / 硬化這個 skill | skill-co-upgrade |
-| 新產品構想 / 既有功能換完全不同技術路線（re-architecture） | product-design-thinking |
+| 新產品構想 / 既有功能換完全不同技術路線（re-architecture） | product-design-thinking（既有系統的 Phase 0 診斷先走 code-review-deep-checklist B focused） |
 | 幫既有系統加可複用工具・檢測項・pipeline 段（增能，留存＋消費者） | product-design-thinking（Mode B） |
 | 把這套機制/運作模式打包進 share repo | mechanism-share-packaging |
 | 階段完成存檔、之後續作 | workflow-checkpoint |

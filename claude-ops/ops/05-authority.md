@@ -158,3 +158,42 @@ enumeration (→ section 2), degradation-order declaration (→ section 4),
 doubted-interpretation isolation point (→ section 1). At L0, or when no
 contract exists, those rules bind as written — they serve models and tasks
 this mechanism doesn't cover.
+
+## §4a The four `[BC]` rules in full
+
+Moved here from global CLAUDE.md 2026-09-06 (that file was 3.6K over its cap
+and these four are the one cluster with a real destination: §4 above already
+names all four and says when they bind). **The TRIGGERS stay in CLAUDE.md** —
+one bullet, so they still fire on a trigger-word match at every relaxation
+level; what moved is the mechanics, which are only needed once a trigger has
+fired. Read this section when it does, and skip it when a boundary contract is
+live.
+
+**BC-1 — a change that cannot be statically verified** (a human must run or
+see it). End with an UNASKED manual-acceptance checklist: numbered action +
+expected observation, blind-executable by a non-author, plus a non-destructive
+way to see what each item judges. Rank by CONSEQUENCE, not by technology:
+`A 必驗` (at most 7 items; anything that cannot block use → demote) then
+`B 體驗`, each ordered high→low so a reader may stop anywhere, and stress paths
+before happy ones. Axis and worked examples: `ops/references/uat.md`.
+
+**BC-2 — shipping a baseline you doubt** (the component's quality, or your
+reading of the requirement). Put it behind a swappable interface
+(provider/injection point) — but ONLY when the replacement is NAMED. A nameless
+future is not doubt, it is speculative generality: one interface, one
+implementation, until a second is real. For a doubted INTERPRETATION the
+artifact is different: name the isolation point in the delivery — which module
+or parameter flips the call if the reading turns out wrong.
+
+**BC-3 — a deliverable that may not fit the round's budget or scope.** Declare
+the degradation order UP FRONT (drop X → Y → Z, guaranteed core W) instead of
+shipping every part at 60 %. Aesthetic or tunable parameters go in one
+commented config block with an adjustment-entry table (desired change →
+parameter → sane range), so the user can move them without reading the code.
+
+**BC-4 — enumerating boundary or compatibility cases** (resize, DPI,
+reduced-motion, devices, browsers). Check the KNOWN environment facts first —
+repo config, CLAUDE.md, `ops/environment.md`, what the conversation already
+established — and trim the generic list to what actually applies; any item
+kept only because the environment is unknown is labelled as a guess. A generic
+matrix pasted into a delivery reads as coverage and is not.

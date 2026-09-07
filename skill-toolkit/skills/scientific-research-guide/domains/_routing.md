@@ -6,6 +6,40 @@
 
 ## How Gate A uses this manifest
 
+### The four rungs in full (moved from SKILL.md 2026-09-06, BODY_CAP trim)
+
+SKILL.md keeps the ladder's shape and the rule that a fuzzy question is routed
+rather than guessed; these are the matching rules each rung depends on.
+
+1. **Literal anchor hit** — the user's wording contains a row's trigger keyword
+   → load; standing triggers fire normally. Match **case-sensitively** (`TI`,
+   `RIN`, `SPP` and 35 other short acronyms hit inside ordinary words once
+   lower-cased) but **variant-insensitively**: compare in Unicode NFKC, so
+   `Bi₂Se₃` matches the manifest's `Bi2Se3`, `Z2` matches `Z₂`, `μLED` matches
+   `µLED`, and a full-width or superscript spelling matches its plain form. The
+   manifest lists ONE spelling per term and relies on this.
+2. **Scope match, no literal hit** (vague/fuzzy phrasing): match the described
+   physical system and observable against the rows' `Covers / role` column and
+   whatever cluster/disambiguation sections you add below. Exactly one candidate → load it
+   and **state the routing basis in one line** ("loading X — the question is
+   about ⟨scope⟩") so a misroute is visible and correctable; never answer
+   silently from a guessed profile.
+3. **Two-plus candidates** (typically within a cluster) → ask ONE routing
+   question taken from the relevant disambiguation table's own axis (those
+   tables are pre-written clarification scripts), instead of speculatively
+   loading several profiles. A question genuinely spanning two profiles still
+   loads both and states which owns the governing constraint. **Exception** —
+   on a pure retrieval turn (Step 0.5) do NOT block the handoff with a routing
+   question: pick the best-scope candidate as search context and state the basis.
+4. **No candidate** → proceed with the generic framework and say so; do not
+   improvise domain-expert claims without Gate B verification.
+
+Never compensate for a missed fuzzy match by adding broad manifest keywords —
+keywords are precision anchors (a false load is worse than prose routing, see
+§ Maintenance); recall for fuzzy phrasing is owned by this ladder.
+
+### The load sequence
+
 1. **Identify domain** — match the user's field against the `base` rows' triggers.
 2. **Load the base profile** — always load the matched domain's base profile alongside
    the tier framework. Its standing triggers — Node 6's `Trigger condition` rows (primary),

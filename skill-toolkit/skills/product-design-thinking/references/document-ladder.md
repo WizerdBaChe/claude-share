@@ -30,7 +30,12 @@ Domain concepts, relations, invariants, plus a semantic-contract section:
   entries instead of silently redefining.
 - **Invariants**: numbered (INV-1, INV-2, …) statements that must hold in any
   implementation. The IDs are quoted by the PSM and by code comments, so they stay
-  English even in Chinese prose.
+  English even in Chinese prose. Each carries a `verified-by:` field naming the
+  verification rung and its artifact (rung 1 exhaustive test id / rung 2–3 property
+  or counterexample search / rung 4 theorem name + differential fixture); a finite
+  domain stops at rung 1. Ladder + triggers: ai-coding-guardrails §2 (the rung-4
+  theorem-proving option's applicability analysis stays in the source
+  environment's own records).
 - **State machines** for anything with a lifecycle: states, transitions, and which
   invariants guard each transition. View selection and blind-spot pairing (when a
   statechart, decision table, sequence pair, or Petri slice):

@@ -49,3 +49,20 @@ usually means someone maintained them carefully). Only after that glob comes
 back empty, fall back to conversation + git history and say so in the coverage
 header. **If the conversation has been compacted**, say so in the coverage
 header and treat 1–4 as authoritative for everything before the current window.
+
+## Habits
+
+Moved out of SKILL.md's `## Notes` on 2026-09-06 (BODY_CAP trim; content
+unchanged) because all three are about how the reading and extraction pass is
+run, which is this file's subject.
+
+- For long conversations, do a keyword scan first (errors, decisions,
+  preferences) before reading fully.
+- Don't stuff in everything — only extract turning points, corrections, and
+  explicit choices.
+- If the project has no clear name, ask the user or default to
+  "this-project".
+
+(The fourth bullet, a note saying that Document 2's format mandate and Step 6's
+close-out are "stated in full at Steps 5–6; not repeated here", was dropped in
+the same pass: it asserted nothing and described the absence of a repetition.)
