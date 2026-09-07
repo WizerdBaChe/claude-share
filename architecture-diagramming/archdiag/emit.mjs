@@ -32,6 +32,21 @@ const STROKE = { block: '#2563eb', ext: '#64748b', store: '#b45309', state: '#16
 // See MAINTENANCE.md M6.
 const NODE_TEXT = { titleDy: 20, subDy: 41, subLh: 15 };
 const OVL = { fill: '#ffedd5', stroke: '#ea580c' }; // branch-only overlay (un-accepted)
+// Diagram text + surface colours — SINGLE SOURCE, exported for the same reason
+// NODE_TEXT is: tokens.mjs grades the contrast of what is ACTUALLY emitted.
+// Until 2026-09-07 tokens.mjs carried its own transcription of these seven
+// values behind a dated `grep-verified` receipt, so `--check` imported FILL and
+// EDGE but graded a COPY of the foregrounds — change a text colour here and the
+// contrast check stayed silent at 0 fail. Measured, not assumed: the control
+// that mutated FILL.block turned it red, the one that mutated the title colour
+// did not. A palette gate reading half its own palette from a transcription is
+// the "gate reads the producer's intermediate state" defect in miniature.
+const TEXT = { title: '#0f172a', sub: '#334155', container: '#475569', badge: '#c2410c' };
+const SURFACE = {
+  pill: '#ffffff', pillStroke: '#cbd5e1',
+  container: '#f8fafc', containerStroke: '#94a3b8',
+  page: '#ffffff',   // the body background every edge stroke is graded against
+};
 const EDGE = {
   call:  { stroke: '#64748b', dash: '', marker: 'mOpen' },   // synchronous call / import
   data:  { stroke: '#0f172a', dash: '', marker: 'mFill' },   // data flow
@@ -59,11 +74,11 @@ function nodeSvg(n) {
   if (n.kind === 'stateT') s += `<rect x="${n.x + 4}" y="${n.y + 4}" width="${n.w - 8}" height="${n.h - 8}" rx="12" fill="none" stroke="${STROKE.state}" stroke-width="1.2"/>`;
   const cx = n.kind === 'ext' ? n.x + n.w / 2 : n.x + 12;
   const anchor = n.kind === 'ext' ? 'middle' : 'start';
-  s += `<text class="lbl" x="${cx}" y="${n.y + NODE_TEXT.titleDy}" font-size="13" font-weight="700" fill="#0f172a" text-anchor="${anchor}">${esc(n.t)}</text>`;
-  if (n.ov) s += `<text class="lbl" x="${n.x + n.w - 8}" y="${n.y + n.h - 8}" font-size="11" font-weight="700" fill="#c2410c" text-anchor="end">未驗收</text>`;
+  s += `<text class="lbl" x="${cx}" y="${n.y + NODE_TEXT.titleDy}" font-size="13" font-weight="700" fill="${TEXT.title}" text-anchor="${anchor}">${esc(n.t)}</text>`;
+  if (n.ov) s += `<text class="lbl" x="${n.x + n.w - 8}" y="${n.y + n.h - 8}" font-size="11" font-weight="700" fill="${TEXT.badge}" text-anchor="end">未驗收</text>`;
   if (n.l?.length) {
     const tspans = n.l.map((ln, i) => `<tspan x="${cx}" y="${n.y + NODE_TEXT.subDy + i * NODE_TEXT.subLh}">${esc(ln)}</tspan>`).join('');
-    s += `<text class="lbl" font-size="11" fill="#334155" text-anchor="${anchor}">${tspans}</text>`;
+    s += `<text class="lbl" font-size="11" fill="${TEXT.sub}" text-anchor="${anchor}">${tspans}</text>`;
   }
   return s + '</g>';
 }
@@ -71,8 +86,8 @@ function nodeSvg(n) {
 function viewSvg(v) {
   let s = [];
   for (const c of v.containers || []) {
-    s.push(`<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 5" class="comp" data-id="${c.id}" data-x="${c.x}" data-y="${c.y}" data-w="${c.w}" data-h="${c.h}"/>`);
-    if (c.title) s.push(`<text class="lbl" x="${c.x + 14}" y="${c.y + 22}" font-size="12" font-weight="600" fill="#475569">${esc(c.title)}</text>`);
+    s.push(`<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="12" fill="${SURFACE.container}" stroke="${SURFACE.containerStroke}" stroke-width="1.5" stroke-dasharray="8 5" class="comp" data-id="${c.id}" data-x="${c.x}" data-y="${c.y}" data-w="${c.w}" data-h="${c.h}"/>`);
+    if (c.title) s.push(`<text class="lbl" x="${c.x + 14}" y="${c.y + 22}" font-size="12" font-weight="600" fill="${TEXT.container}">${esc(c.title)}</text>`);
   }
   for (const e of v.edges) {
     const st = EDGE[e.type];
@@ -93,13 +108,13 @@ function viewSvg(v) {
     if (!e.pill) continue;
     const w = Math.ceil(cjkW(e.pill, 11)) + 12;
     const [px, py] = e.pillAt;
-    s.push(`<rect class="pillbg" x="${px - w / 2}" y="${py - 9}" width="${w}" height="18" rx="9" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8"/>`);
-    s.push(`<text class="lbl" x="${px}" y="${py + 4}" font-size="11" fill="#334155" text-anchor="middle">${esc(e.pill)}</text>`);
+    s.push(`<rect class="pillbg" x="${px - w / 2}" y="${py - 9}" width="${w}" height="18" rx="9" fill="${SURFACE.pill}" stroke="${SURFACE.pillStroke}" stroke-width="0.8"/>`);
+    s.push(`<text class="lbl" x="${px}" y="${py + 4}" font-size="11" fill="${TEXT.sub}" text-anchor="middle">${esc(e.pill)}</text>`);
   }
   return s.join('\n');
 }
 
-export { FILL, STROKE, OVL, EDGE, NODE_TEXT, esc, cjkW, nodeSvg, viewSvg };
+export { FILL, STROKE, OVL, EDGE, NODE_TEXT, TEXT, SURFACE, esc, cjkW, nodeSvg, viewSvg };
 
 // ---------- marker defs (single source; build-time closure in index.mjs:
 // every EDGE marker must resolve here — determinable face of check #8) ----------
@@ -133,7 +148,7 @@ export function pageHtml({ grid = 8, doc, views, sections, selfcheckNotes }) {
 <title>${doc.title}</title>
 <style>
   :root { color-scheme: light; }
-  body { margin: 0; background: #fff; color: #0f172a; font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif; }
+  body { margin: 0; background: ${SURFACE.page}; color: ${TEXT.title}; font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif; }
   header { display: flex; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
   header .sp { flex: 1; }
   .tab { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; }

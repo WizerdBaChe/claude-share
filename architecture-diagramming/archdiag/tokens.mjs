@@ -22,13 +22,16 @@
 // declare `color-scheme: light` (emit.mjs CSS); build it only when a dark
 // deliverable is requested (review-when).
 
-import { FILL, STROKE, OVL, EDGE } from './emit.mjs';
+// 2026-09-07: TEXT and SURFACE joined this import. They used to be a
+// transcription right here, carrying a `grep-verified 2026-09-05` receipt —
+// which meant `--check` imported the fills and edges but graded a COPY of the
+// foregrounds. Proved by control rather than argued: mutating `FILL.block` in
+// emit.mjs turned this red, mutating the node TITLE colour left it silent at
+// 0 fail. Nothing here restates a colour any more; a dated receipt over a
+// hand-copied table is the failure mode M5 exists to prevent, and it had
+// grown back inside the file that enforces M5.
+import { FILL, STROKE, OVL, EDGE, TEXT, SURFACE } from './emit.mjs';
 
-// Text and surface colours as emit.mjs writes them (grep-verified 2026-09-05:
-// title #0f172a, sub-line/pill #334155, container title #475569, 未驗收 badge
-// #c2410c, pill bg #ffffff, container fill #f8fafc, page #fff).
-const TEXT = { title: '#0f172a', sub: '#334155', container: '#475569', badge: '#c2410c' };
-const SURFACE = { pill: '#ffffff', container: '#f8fafc', page: '#ffffff' };
 const ROLE = {
   block: 'module / component (block)', proc: 'process (same colour as block: it IS a block in a DFD)',
   ext: 'external actor / system (capsule)', store: 'data store', state: 'state (statechart)',
@@ -55,8 +58,8 @@ export function nodeRows() {
     title: contrast(TEXT.title, FILL[k]), sub: contrast(TEXT.sub, FILL[k]) }));
   rows.push({ role: 'ov (overlay)', meaning: 'branch-only / 未驗收 (dashed border + badge)', fill: OVL.fill, stroke: OVL.stroke,
     title: contrast(TEXT.title, OVL.fill), sub: contrast(TEXT.badge, OVL.fill) });
-  rows.push({ role: 'pill', meaning: 'edge label', fill: SURFACE.pill, stroke: '#cbd5e1', title: contrast(TEXT.sub, SURFACE.pill), sub: null });
-  rows.push({ role: 'container', meaning: 'composite boundary / lifeline', fill: SURFACE.container, stroke: '#94a3b8', title: contrast(TEXT.container, SURFACE.container), sub: null });
+  rows.push({ role: 'pill', meaning: 'edge label', fill: SURFACE.pill, stroke: SURFACE.pillStroke, title: contrast(TEXT.sub, SURFACE.pill), sub: null });
+  rows.push({ role: 'container', meaning: 'composite boundary / lifeline', fill: SURFACE.container, stroke: SURFACE.containerStroke, title: contrast(TEXT.container, SURFACE.container), sub: null });
   return rows;
 }
 export function edgeRows() {

@@ -6,7 +6,7 @@
 <title>architecture-diagramming — 能力集合自繪架構視圖組</title>
 <style>
   :root { color-scheme: light; }
-  body { margin: 0; background: #fff; color: #0f172a; font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif; }
+  body { margin: 0; background: #ffffff; color: #0f172a; font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif; }
   header { display: flex; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
   header .sp { flex: 1; }
   .tab { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; cursor: pointer; }
@@ -42,7 +42,9 @@
 
 <section class="pane on" id="pane-set">
   <p class="note">問題：裝了這一組之後，哪個檔案決定哪件事？　宣告：四層＝理論／生產／稽核／執行，不是四顆 skill：生產與稽核共用同一份理論；虛線 = 「引用、不複寫」——理論只有一份，第二份就是會漂移的分叉；節點位置帶語意（同一層同一列）；邊為機器走線</p>
-  <svg class="dia" data-view="set" viewBox="0 0 1280 664" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="1 能力集合結構">
+  <svg class="dia" data-view="set" viewBox="0 0 1280 664" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-set d-set">
+    <title id="t-set">1 能力集合結構</title>
+    <desc id="d-set">問題：裝了這一組之後，哪個檔案決定哪件事？</desc>
     <g class="scene"><rect x="40" y="72" width="400" height="240" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 5" class="comp" data-id="cTheory" data-x="40" data-y="72" data-w="400" data-h="240"/>
 <text class="lbl" x="54" y="94" font-size="12" font-weight="600" fill="#475569">理論層 · product-design-thinking/references/</text>
 <rect x="480" y="72" width="400" height="336" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 5" class="comp" data-id="cProd" data-x="480" data-y="72" data-w="400" data-h="336"/>
@@ -89,7 +91,9 @@
 
 <section class="pane" id="pane-design">
   <p class="note">問題：要一張新圖，資料依序經過什麼，哪一關會擋下來？　宣告：兩個 gate 是硬關卡：資料閘門擋「編造」，健全性檢查擋「不完整」；缺口不是繞過，是產物：缺口表與圖一起交付；交付＝圖＋圖例＋缺口表＋再生源，四件缺一不成立</p>
-  <svg class="dia" data-view="design" viewBox="0 0 1280 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2 設計入口（資料流）">
+  <svg class="dia" data-view="design" viewBox="0 0 1280 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-design d-design">
+    <title id="t-design">2 設計入口（資料流）</title>
+    <desc id="d-design">問題：要一張新圖，資料依序經過什麼，哪一關會擋下來？</desc>
     <g class="scene"><path d="M208 168 L256 168" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="d1" data-from="q" data-to="pick" data-pts="208,168,256,168"  />
 <path d="M432 168 L480 168" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="d2" data-from="pick" data-to="fw" data-pts="432,168,480,168"  />
 <path d="M664 168 L712 168" fill="none" stroke="#b91c1c" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#mEgr)" class="edge" data-edge="d3" data-from="fw" data-to="model" data-pts="664,168,712,168"  />
@@ -120,7 +124,9 @@
 
 <section class="pane" id="pane-audit">
   <p class="note">問題：體檢一個既有系統時，圖是從哪裡來的、留下什麼？　宣告：重建視圖的來源是 code，不是既有文件——這是這條路的全部價值；用的是設計入口的同一支儀器，不是第二套檢查；留檔是為了下一輪 diff：一次體檢的產物是下一次的基準線</p>
-  <svg class="dia" data-view="audit" viewBox="0 0 1280 456" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3 稽核入口（資料流）">
+  <svg class="dia" data-view="audit" viewBox="0 0 1280 456" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-audit d-audit">
+    <title id="t-audit">3 稽核入口（資料流）</title>
+    <desc id="d-audit">問題：體檢一個既有系統時，圖是從哪裡來的、留下什麼？</desc>
     <g class="scene"><path d="M208 192 L256 192" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="a1" data-from="cb" data-to="rb" data-pts="208,192,256,192"  />
 <path d="M448 192 L496 192" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="a2" data-from="rb" data-to="rv" data-pts="448,192,496,192"  />
 <path d="M672 192 L720 192" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="a3" data-from="rv" data-to="inst" data-pts="672,192,720,192"  />
@@ -145,7 +151,9 @@
 
 <section class="pane" id="pane-gate">
   <p class="note">問題：一張圖要通過什麼才算「驗收過」？每一關失敗會退回哪裡？　宣告：三段驗證＝兩段機器＋一段人；人的那段不可由機器代簽；凍結後任何改動都重開 Step 5，收據重發（驗收過的位元組變了就不是那一份）；完整性由狀態機承擔：每個狀態的失敗邊都畫出來，不是只畫快樂路徑</p>
-  <svg class="dia" data-view="gate" viewBox="0 0 1280 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="4 驗證階梯（狀態機）">
+  <svg class="dia" data-view="gate" viewBox="0 0 1280 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-gate d-gate">
+    <title id="t-gate">4 驗證階梯（狀態機）</title>
+    <desc id="d-gate">問題：一張圖要通過什麼才算「驗收過」？每一關失敗會退回哪裡？</desc>
     <g class="scene"><path d="M304 120 L344 120 L344 128 L376 128" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="g1" data-from="s0" data-to="s1" data-pts="304,120,344,120,344,128,376,128"  />
 <path d="M568 128 L640 128" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="g2" data-from="s1" data-to="s2" data-pts="568,128,640,128"  />
 <path d="M832 128 L904 128" fill="none" stroke="#0f172a" stroke-width="1.6"  marker-end="url(#mFill)" class="edge" data-edge="g3" data-from="s2" data-to="s3" data-pts="832,128,904,128"  />
@@ -196,7 +204,9 @@
 
 <section class="pane" id="pane-lib">
   <p class="note">問題：這 11 個檔案彼此怎麼依賴？「檢查器只有一份」長什麼樣子？　宣告：依賴讀自 import 敘述本身（node -e 逐檔掃過），不是讀 README 的描述；selfcheck.mjs 沒有任何人 import 它兩次——單一來源在圖上就是「只有一個箭頭進去」；vendor/ 只被 route.mjs 用；上游 rect 形狀在呼叫邊界轉接</p>
-  <svg class="dia" data-view="lib" viewBox="0 0 1280 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="5 archdiag 模組圖">
+  <svg class="dia" data-view="lib" viewBox="0 0 1280 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t-lib d-lib">
+    <title id="t-lib">5 archdiag 模組圖</title>
+    <desc id="d-lib">問題：這 11 個檔案彼此怎麼依賴？「檢查器只有一份」長什麼樣子？</desc>
     <g class="scene"><path d="M208 248 L264 248" fill="none" stroke="#64748b" stroke-width="1.6"  marker-end="url(#mOpen)" class="edge" data-edge="l1" data-from="bs" data-to="idx" data-pts="208,248,264,248"  />
 <path d="M424 208 L424 120 L512 120" fill="none" stroke="#64748b" stroke-width="1.6"  marker-end="url(#mOpen)" class="edge" data-edge="l2" data-from="idx" data-to="sch" data-pts="424,208,424,120,512,120"  />
 <path d="M440 240 L480 240 L480 224 L512 224" fill="none" stroke="#64748b" stroke-width="1.6"  marker-end="url(#mOpen)" class="edge" data-edge="l3" data-from="idx" data-to="ast" data-pts="440,240,480,240,480,224,512,224"  />
@@ -360,6 +370,58 @@
           const m = val && val.match(/^url\(#([^)]+)\)$/);
           if (m && !document.getElementById(m[1]))
             D('dangling-reference', { view, attr, id: m[1] }, { element: el.tagName }, ['define #' + m[1] + ' in a <defs> block']);
+        }
+      }
+      // 9. edge-label pill over a node (B-1, 2026-09-05): check #1 is label×label
+      // only. Rule: the pill's CENTRE (its pillAt) must not lie inside a node —
+      // the reader then attributes the label to the node, not to its edge.
+      // A pill straddling a border passes: calibration 2026-09-05 measured 70
+      // straddles across the 7 accepted artifacts (depth 3–18px, every centre
+      // outside) and 0 centres inside — each had passed the user's visual gate,
+      // and #1 already guarantees a pill never covers node text. Pill = .pillbg
+      // ∪ its label (next sibling), measured; nodes only — a pill inside a
+      // CONTAINER is the normal case.
+      for (const bg of svg.querySelectorAll('.pillbg')) {
+        const r = bg.getBBox(), t = bg.nextElementSibling;
+        const tb = t && t.classList.contains('lbl') ? t.getBBox() : r;
+        const x0 = Math.min(r.x, tb.x), y0 = Math.min(r.y, tb.y);
+        const x1 = Math.max(r.x + r.width, tb.x + tb.width), y1 = Math.max(r.y + r.height, tb.y + tb.height);
+        const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+        for (const n of nodes)
+          if (cx > n.x + EPS && cx < n.x + n.w - EPS && cy > n.y + EPS && cy < n.y + n.h - EPS)
+            D('label-over-node', { view, pill: (t ? t.textContent : '').slice(0, 14), node: n.id },
+              { pillRect: [x0, y0, x1 - x0, y1 - y0].map(Math.round), centre: [cx, cy].map(Math.round), nodeRect: [n.x, n.y, n.w, n.h] },
+              ['move the pill off ' + n.id + ' (pillAt) or reroute the edge']);
+      }
+      // 10. shared anchor (B-2, 2026-09-05): two DIFFERENT edges anchored on one
+      // border side closer than the grid unit read as one smudged line (the R10
+      // near-coincidence band). Exact coincidence (gap 0) is a deliberate bundle
+      // and passes; a corner point belongs to both of its sides.
+      const sidesOf = (p, n) => {
+        const s = [];
+        if (Math.abs(p[0] - n.x) <= EPS) s.push('left');
+        if (Math.abs(p[0] - (n.x + n.w)) <= EPS) s.push('right');
+        if (Math.abs(p[1] - n.y) <= EPS) s.push('top');
+        if (Math.abs(p[1] - (n.y + n.h)) <= EPS) s.push('bottom');
+        return s;
+      };
+      const slots = {};
+      for (const e of edges) for (const [p, id] of [[e.pts[0], e.from], [e.pts[e.pts.length - 1], e.to]]) {
+        const n = rects[id]; if (!n) continue;
+        for (const side of sidesOf(p, n)) {
+          const key = id + '|' + side;
+          (slots[key] = slots[key] || []).push({ e: e.id, p, c: side === 'left' || side === 'right' ? p[1] : p[0] });
+        }
+      }
+      for (const key in slots) {
+        const list = slots[key];
+        for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+          if (list[i].e === list[j].e) continue;
+          const gap = Math.abs(list[i].c - list[j].c);
+          if (gap > 0 && gap < GRIDU)
+            D('shared-anchor', { view, node: key.split('|')[0], side: key.split('|')[1], edges: [list[i].e, list[j].e] },
+              { points: [list[i].p, list[j].p], gap },
+              ['separate the anchors by >= ' + GRIDU + 'px, or bundle both on one point']);
         }
       }
     }
