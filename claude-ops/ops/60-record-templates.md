@@ -94,3 +94,49 @@ Minimum fields (registry row in `rules-usage-dict.md` §7): 一句話 / pick-up
 commands / reading order / rulings-first table / DoD / could-not-do. A handoff
 without the rulings table exports the decision cost to the next session; one
 without could-not-do reads as complete and gets built on.
+
+## §4 Self-declaration（自我宣告塊）— owner: this section (registered 2026-09-10)
+
+Extracted 2026-09-10 from a real per-project implementation (SSLD's own
+record-registry script, inside that project's own tree — not shipped here),
+where every human-facing product of the project opens with a machine-assembled
+block and nobody hand-types one. It is the ARTIFACT-level companion of the claim-level
+refutability statement (`30-judgment.md` R2): refutability says how the
+conclusion could be wrong, this says what the artifact is made of and how far it
+got. Both, never one restated as the other — R2's four fields are referenced
+here, not copied.
+
+**Trigger** (deliberately narrow — this must not grow a block on every task): a
+DURABLE artifact a human will act on without re-deriving it — a report, a deck,
+an audience page, a design document, a case dossier, an evaluation. NOT for a
+chat answer, NOT for machine-read records that already carry their own meta
+(phase logs, verify JSON, ledgers), NOT for a code change. One artifact, one
+block, at the top.
+
+```
+## 這份文件是什麼做出來的
+- 成熟度: <ruler A: value (origin)> · <ruler B: value (origin)>   ← two rulers side
+  by side, each naming who assigned it; an unassigned ruler is "未定", never a guess
+- 保真度: <instrument → level> for every instrument whose output is quoted here
+- 算過的: <what was actually computed or measured>
+- 只畫過的: <what exists only as a drawing, sketch, mock or illustration>
+- 沒做的: <what a reader could reasonably assume was done and was not>
+- 最弱的一環: <ONE sentence, plain language, naming the weakest credibility factor —
+  not the longest list of caveats, the single thing most likely to be wrong>
+- 來源: <path + sha256 prefix of every fact source the numbers came from>
+- 界線: → the refutability statement (holds-when / overturned-by / evidence tier /
+  not-covered); do not restate it here
+```
+
+Two rules the block itself must satisfy:
+
+- **A PASS count is not a credibility signal.** "64 controls PASS" says the
+  instrument ran, not that the claim is true; SSLD enforces this as INV-17 by
+  scanning the assembled block and refusing when a bare `<n> PASS` appears. The
+  same sentence belongs in the reader's text (`skills/audience-fit`, gate
+  `afgate.py voice`).
+- **算過／只畫過／沒做 is the load-bearing line.** It is the field the evidence
+  tier does not carry: a figure can be rendered, audited and still show a
+  quantity nobody computed (`rules/figure-self-read.md`; global CLAUDE.md —
+  green tests prove the data path, not the picture). A block whose three lines
+  are all "算過的" is either a fully computed artifact or an unread template.

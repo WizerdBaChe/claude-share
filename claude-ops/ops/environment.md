@@ -69,8 +69,9 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
   as of 2.1.239: `ListAgents` to discover sessions on this machine, then
   `SendMessage`. Unlike a subagent it talks to a session that already has its
   own context; unlike external dispatch it stays inside Claude Code.
-  Versions, citations and the reconciliation that produced this block:
-  `ops/references/harness-measurements.md` §Dispatch semantics.
+  Versions, citations and the reconciliation that produced this block are
+  recorded in the source's own dispatch-semantics measurement notes (not
+  shipped here).
 - **Capability is set in the definition, not at dispatch** (verified
   2026-08-12): a definition that omits `tools:` inherits every tool a subagent
   may hold — including `Edit`/`Write` — so "read-only" written in a prompt
@@ -84,7 +85,8 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
   2026-08-26 against a live 2.1.246 session). Dynamic workflows and ultracode
   go with it. Kept on record because the choice is a live setting, not a fact
   about the product — flipping that key restores it. What it offers when
-  enabled: `harness-measurements.md` §Dispatch semantics.
+  enabled is recorded in the source's own dispatch-semantics measurement notes
+  (not shipped here).
 - **Effort is NOT settable per Agent-tool call** (verified 2026-08-12 against
   the live tool schema + `code.claude.com/docs/en/sub-agents`). Two setpoints
   only: the `effort:` frontmatter field in an `agents/*.md` file (overrides the
@@ -99,7 +101,8 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
 
 A cross-family reviewer NOW EXISTS (the 2026-07-07 entry said the opposite —
 true then, false now; why it is corrected rather than deleted, and the
-measurement: `ops/references/harness-measurements.md`). Two options, in order:
+measurement, are recorded in the source's own harness measurement notes, not
+shipped here). Two options, in order:
 
 1. **External dispatch** (`## External dispatch tier` below) — genuinely a
    different model family, free, no credential. Route red-team here first.
@@ -133,6 +136,12 @@ be pointed at private material.
   real currency here, not money.
 - **Redlines and disclosure**: `20-dispatch.md` §4b. The asymmetry is the point
   — the subagent path may see anything, this path may not.
+
+> **Share note.** `tools/extdispatch/` ships `partial` (`tools/share-manifest.toml`):
+> only its `red-team/` acceptance scripts ship. The dispatcher above
+> (`extdispatch.py`, its gates, its audit log) is source-only — there is no
+> entry point to run here; the path is described as design, and the subagent
+> path (Agent tool) is what this copy actually has.
 
 ## Main-loop model — READ IT, never infer it (as-of 2026-08-07)
 
@@ -213,13 +222,14 @@ upheld 2026-08-23). `playwright-chrome` (`--extension`) was trialed 2026-08-23
 and REMOVED 2026-08-25 — do not re-add it without reading why. Flags,
 measurements, the removal mechanism and the review-when:
 `ops/references/browser-pane-pixel-route.md` §"Playwright MCP servers";
-`tools/playwright-mcp/README.md`.
+`tools/playwright-mcp/README.md` (source-only, `tools/share-manifest.toml`;
+reproduce with `npm install @playwright/mcp@0.0.79` at user scope).
 
 ## Instruction-loading mechanics (as-of 2026-08-18, Claude Code 2.1.233 — re-verified after the 2.1.220 review trigger fired)
 
 Measured, not read off the docs (how each row was verified, the observability
-hook, `load_reason` values, trim effect sizes and the startup baseline:
-`ops/references/harness-measurements.md`).
+hook, `load_reason` values, trim effect sizes and the startup baseline —
+recorded in the source's own harness measurement notes, not shipped here).
 
 | Carrier | Charged at session start? |
 |---|---|
@@ -253,8 +263,8 @@ CONCATENATE, and the block is spliced into the classifier prompt on every
 auto-mode decision. Consequence: project-specific facts written there leak into
 every other project's auto-mode decisions — keep the block org/user-generic; a
 project-bound profile has no home other than per-invocation `--settings`.
-Evidence (docs + binary string probe) and the 2026-08-16 incident:
-`ops/references/harness-measurements.md`.
+Evidence (docs + binary string probe) and the 2026-08-16 incident are
+recorded in the source's own harness measurement notes (not shipped here).
 
 ## Local toolchain — measured, not assumed (as-of 2026-08-18)
 
@@ -295,8 +305,8 @@ generic boundary-case lists accordingly (CLAUDE.md boundary/compatibility
 
 **Horizontal property (owner: user, 2026-09-04 — a dated width-void diagnosis
 note under the source's outputs/ tree, which this repo does not ship)**: a
-human-facing HTML page must USE the width these screens give it. The named
-defect is the
+human-facing HTML page
+must USE the width these screens give it. The named defect is the
 **left-anchored cap** — a container or painted, row-alone block capped in width
 and hugging the left edge, leaving an asymmetric right void (one shell's
 `max-width:1060px` became 13 deliverables at 60–69 % fill). How much fill a
@@ -322,8 +332,9 @@ Anthropic's artifact-design wording on reading measure changes.
 
 **CLI is now 2.1.246 (2026-08-26); this block's re-verify trigger has fired.**
 The ROUTING below still holds; every measured NUMBER is eight builds old and
-unre-verified — re-probe registered as E10 in
-`reports/2026-08-26-cc-version-reconcile-2.1.200-2.1.246.md`.
+unre-verified — re-probe registered as E10 in a dated CC-version
+reconciliation report under the source's `reports/` tree, which this repo
+does not ship.
 
 Same engine, different host: Desktop is the same Claude Code engine (its own
 bundled `%APPDATA%\Claude\claude-code\<ver>\claude.exe`) behind a larger
@@ -341,9 +352,9 @@ The standing consequences:
   live view ends with the process; it is not a local record.
 
 **Every number behind those four — arm sizes, ratios, p-values, T0 counts, the
-E3 C2B cell, the exact record paths — is in `references/harness-measurements.md`
-§Execution surface (extracted 2026-08-27, `40-maintenance.md` §3). Quote from
-there with its staleness caveat, never from memory.**
+E3 C2B cell, the exact record paths — is recorded in the source's own harness
+measurement notes (extracted 2026-08-27, `40-maintenance.md` §3; not shipped
+here). Quote from there with its staleness caveat, never from memory.**
 
 **Routing (user ruling 2026-08-22):** unattended / batch / long / subagent
 fan-out / needs `--max-budget-usd`, `--output-format json` (note: `--max-turns`
@@ -353,8 +364,9 @@ line-comments / Browser-pane preview / parallel sidebar / Dispatch / computer
 use → Desktop · GUI view or approval of a RUNNING CLI session → Remote Control
 (`claude --remote-control`, in-session `/rc`) on claude.ai/code, mobile,
 Desktop; whole-session move → `/desktop` (one-way) · after-the-fact disclosure
-of any session → the JSONL via
-`tools/session-find.py` (live tail: claude-code-trace) · Desktop session into
+of any session → the JSONL directly under `projects/<slug>/<session>.jsonl`
+(`tools/session-find.py` is a source-only convenience wrapper over the same
+path, not shipped here; live tail: claude-code-trace) · Desktop session into
 the CLI → `claude --resume <cliSessionId>` (undocumented direction; try
 `--fork-session` first).
 
@@ -420,128 +432,44 @@ FreeCAD, COMSOL 6.2, Photoshop 2026, VS Code / Visual Studio 2022 / PyCharm
 (click-tier), OBS, CapCut, Notepad++, Obsidian, Zotero, Docker Desktop, Ollama,
 Office. **KiCad is not installed. Blender exists only as a portable tree**
 (`model3d-pipeline\tools\blender-5.2.1-windows-x64\blender.exe`), so
-it is NOT grantable as-is. Untested cheap hypothesis: adding a Start-menu
-shortcut may make a portable exe resolvable.
+it is NOT grantable as-is. **Workaround CONFIRMED and it costs 30 seconds:** a
+`.lnk` written into `%APPDATA%\Microsoft\Windows\Start Menu\Programs\` made the
+portable `blender.exe` grantable seconds later — the installed-apps list is
+live, not cached at session start.
 
-### PROBE 2026-09-07 (a local session, user-authorised: FreeCAD + 記事本)
+**PROBED 2026-09-07** (a local session, FreeCAD + 記事本, both `tier: "full"`).
+Evidence, raw observations and the app-by-app channel inventory:
+`ops/references/computer-use-probe-2026-09-07.md`; raw tool responses and the
+refutability statement live in a dated probe write-up under the source's
+outputs/ tree, which this repo does not ship.
+The four findings that change a PLAN, kept here because a pointer cannot be
+consulted by someone who does not know there is anything to consult:
 
-The grant path WORKS in the Desktop Code tab. One dialog, whole set, both
-granted `tier: "full"`, `denied: []`. Measured behaviour, in order of how much
-it should change a plan:
+- **One screenshot rearranges the user's session.** Non-allowlisted windows are
+  HIDDEN, not masked as the API advertises; "Unhide apps when Claude finishes"
+  is the restore path. Unlike a Browser-pane screenshot this cannot be routed
+  out-of-process — it is the real collision with the foreground premise.
+- **`open_application` DOES take the foreground.** (An earlier probe said
+  otherwise and was wrong: a cold launch left the shell frontmost, which is a
+  timing artifact, not a policy.)
+- **A third tier beyond the documented browser=read / IDE=click:** the desktop
+  shell (desktop, taskbar, Start, Search, File Explorer) needs a grant for
+  exactly `"File Explorer"`, and that grant is click-only.
+- **Coordinates come from the screenshot's own reported frame** (measured
+  1389x868), never derived from the Display section. Single monitor here, so
+  multi-monitor drift cannot occur; `switch_display` is untested.
 
-1. **A screenshot HIDES every non-allowlisted window — it does not mask them.**
-   The response named them: Radmin VPN, Samsung Notes, Everything, Brave, plus
-   `textinputhost.exe`, `msedgewebview2.exe`, `nvidia overlay.exe`,
-   `systemsettings.exe`. The desktop came back empty but for the taskbar. The
-   `request_access` response advertises `screenshotFiltering: "mask"`; the
-   observed effect is HIDE, and the settings page's "Unhide apps when Claude
-   finishes" is the restore path. **So one screenshot rearranges the user's
-   session.** This, not foreground theft, is the real collision with the
-   "foreground is not commandeerable" premise — and unlike a Browser-pane
-   screenshot it cannot be routed out-of-process.
-2. **`open_application` DOES bring the app to the front** (corrected — the
-   first probe said otherwise and was wrong). A COLD launch of 記事本 left the
-   desktop shell frontmost, which read as "no foreground steal"; calling
-   `open_application` again on the already-running app raised it over the
-   user's windows. The cold-start case is a timing artifact, not a policy. So
-   this surface **does** commandeer the foreground, and the error text of the
-   click gate says so outright: "use `open_application` to bring it forward".
-3. **A THIRD gate: the desktop shell.** A click while the desktop, taskbar,
-   Start menu, Search or File Explorer is frontmost is refused with:
-   *"call request_access with exactly \"File Explorer\" in the apps array —
-   that single grant covers all of them. That grant is click-only: typing into
-   the shell stays blocked."* This tier rule is not in the MCP server
-   instructions; it is a shell-specific click-only grant on top of the
-   documented browser=read / IDE=click tiers.
-4. **Coordinate frame 1389x868 — resolved, and the Display premise is
-   CONFIRMED, not contradicted.** Measured: single monitor, physical
-   2560x1600 (AMD 610M), logical desktop bounds 1707x1067, i.e. exactly the
-   150% scaling the Display section records. 1389x868 preserves 16:10
-   (1.6002) and is a uniform ~1.229x downscale of the logical desktop.
-   Computer use simply reports its OWN frame with every screenshot — use that
-   number, never derive coordinates from the Display section. **Single monitor
-   means the video's multi-monitor drift cannot occur here**; `switch_display`
-   is untested for want of a second display.
-5. **Portable-exe hypothesis CONFIRMED.** A `Blender.lnk` written to
-   `%APPDATA%\Microsoft\Windows\Start Menu\Programs\` made the portable
-   `blender.exe` immediately grantable (`tier: "full"`, resolved to the real
-   `model3d-pipeline\...` path). **The installed-apps list is live, not cached at
-   session start** — the shortcut was seconds old. This is the 30-second
-   workaround to the 2026-08-21 bench-claude-arms limit: the limit is real,
-   its practical bite is not.
-6. **`bundleId` shapes differ by install kind**: a filesystem path for
-   FreeCAD/Blender, an MSIX AUMID for Notepad
-   (`Microsoft.WindowsNotepad_8wekyb3d8bbwe!App`).
-7. Grant flags stay false unless requested in the SAME `request_access` call —
-   adding one later costs a second dialog.
+**Routing rule for this whole surface:** the question is never "can computer use
+drive app X" but "does X have a channel that makes GUI driving unnecessary".
+Measured and smoke-tested 2026-09-07: Blender, FreeCAD and COMSOL all have
+working headless channels, so none of them needs the GUI. KiCad is not
+installed; Keysight ADS is a licence-and-version question (the Process API
+arrived in ADS 2022 U2, the Python API in ADS 2024), not a computer-use one.
 
-**Friction points from the other product — status after the probe.** Source: a
-2026-09-06 YouTube walkthrough of ChatGPT/Codex GPT-6 Astra computer use
-(analysis: a dated write-up in the user's private media-analysis notes).
-
-| # | Claim | Status here |
-|---|---|---|
-| 1 | Foreground request hangs | no hang, but foreground IS taken — `open_application` raises the app over the user's windows |
-| 2 | Multi-monitor drift | **cannot occur — single monitor** |
-| 3 | Human locked out of input while agent drives | unprobed; the window-hiding of probe 1 is the nearer problem |
-| 4 | Per-app dialog, conversation-scoped | CONFIRMED here, by construction |
-
-That walkthrough is a FAILURE demo, not a capability demo: it ran out of
-credits having produced nothing, and its author's own conclusion was to stop
-using computer use. Its one architectural lesson is that GUI control was used
-only to BOOTSTRAP (open apps, tick a checkbox) while the real work was routed
-through Blender MCP — the same "script/protocol channel does the work"
-conclusion `model3d-pipeline` reached independently.
-
-### Scripting channels for candidate GUI targets (inventory 2026-09-07)
-
-The routing question is never "can computer use drive app X" but "does X have a
-channel that makes GUI driving unnecessary". Measured:
-
-All three headless channels SMOKE-TESTED 2026-09-07, not merely found on disk:
-
-| App | Present | Channel | Smoke test | GUI needed? |
-|---|---|---|---|---|
-| Blender 5.2.1 LTS | portable, `model3d-pipeline\tools\blender-5.2.1-windows-x64\blender.exe` | `-b --python-expr`, wired in `m3p/render_blender.py` (`BLENDER_EXE`) | **PASS** (`bpy` 5.2.1 LTS) | no |
-| FreeCAD 1.1.3 | `FreeCAD\bin\FreeCADCmd.exe` | FreeCADCmd `-c`, wired (`FREECAD_CMD`) | **PASS** (1.1) | no |
-| COMSOL 6.2 | `COMSOL62\Multiphysics\bin\win64\` | `comsolbatch.exe` (+ `comsolclusterbatch`) | **PASS** (help) | no |
-| KiCad | **not installed** | would be `kicad-cli` | — | n/a |
-| **Keysight ADS 2016.01** | **GONE** — was residue only (13 files / 47 MB, DLLs, zero executables); user deleted `ADS2016_01` 2026-09-07. `EEsof_License_Tools` REMAINS: 899 files / 308 MB (`bin` 211 MB, `jre` 88 MB, own uninstaller, `license.lic`); no EEsof/HPEESOF env vars | see below | n/a | n/a |
-
-Supporting toolchain, smoke-tested same day: Python 3.12.7, Node 24.14.1,
-git 2.51.0, ffmpeg 8.1, yt-dlp 2026.08.18, Docker 29.7.2, pdfTeX (TeX Live
-2026). Ollama installed but **no running instance**. `klayout` is not on PATH
-but lives in the model3d-pipeline venv (0.30.12) alongside gdsfactory 9.49.0,
-build123d 0.11.1, trimesh 5.0.0, ezdxf 1.4.4, shapely 2.1.2, numpy 2.5.2.
-
-**Keysight ADS — the version gate matters more than the install.** Even a
-working ADS 2016.01 would have AEL only: the Process API for bidirectional
-external-program communication arrived in **ADS 2022 Update 2**, and the
-Python API / `run_python_ads2024beta()` in **ADS 2024** (Keysight docs, checked
-2026-09-07). So automating ADS is not a computer-use question at all — it is a
-licence-and-version question. The remaining `EEsof_License_Tools` half is
-`app-residue-sweep`'s object and the user owns that cleanup; its own
-uninstaller ships in the folder, and the licence-server service and registry
-residue were NOT surveyed.
-
-review-when: ADS is (re)installed — check the version against the 2022 U2 /
-2024 API gates before assuming any scripting surface.
-
-Full probe log, raw tool responses, the two conclusions this session
-overturned, and the refutability statement live in a dated probe write-up
-under the source's outputs/ tree, which this repo does not ship.
-
-**Blender MCP is NOT installed on this machine** — no addon matching `*mcp*` in
-the portable tree, no `blender-mcp` pip package; the user config dir
-(`%APPDATA%\Blender Foundation\Blender\5.2`) holds only an empty extensions
-cache. Configured MCP servers are `prism` (ConnectionRefused) and
-`playwright-headless` only. So the video's actual working channel does not
-exist here yet; adopting it is an unmade decision, not a gap to backfill.
-
-review-when: a click-to-front or `switch_display` probe runs (settles friction
-2-3 and the 1389x868 discrepancy); the app settings page gains an allow-list or
+review-when: a click-to-front or `switch_display` probe runs (settles the
+foreground and 1389x868 questions); the app settings page gains an allow-list or
 persistent-grant control; a hook is written for `mcp__computer-use__*`; KiCad,
-Blender MCP, or a non-portable Blender is installed.
+Blender MCP, or a non-portable Blender is installed; ADS is (re)installed.
 
 Re-verify a block (and move its `as-of`) when: model names in the harness
 change; the Agent or Workflow tool schema changes; the user revises the cost
@@ -550,3 +478,45 @@ cap; a hook test (`hooks/model_cap_guard.py`, `hooks/ui_verify_guard.py`,
 starts failing; `settings.json` `model:` is edited; the Browser-pane MCP tool
 names change (the UI guard's matcher is keyed to them). Whole-file sweep: any
 block older than ~90 days.
+
+## Institutional literature access (as-of 2026-09-10, FIRST record; measured this session)
+
+Governing rule: `rules/literature-access.md` — the routing ladder and the
+redlines live there. This block holds only the perishable facts. Since 2026-09-11 the
+per-host table below is ALSO machine-readable at `hooks/literature-host-policy.json`
+(read by `hooks/literature_host_guard.py` and the literature-search-extract skill) —
+a host that changes side is edited THERE; this block is the measurement record.
+
+- **VPN detection, one command**: `curl -s https://ipinfo.io/json`. Measured
+  today: `140.112.73.61`, hostname `ip73-61.vpnip.cc.ntu.edu.tw`, org
+  `AS17716 National Taiwan University`. NTU is the ONLY institution whose
+  entitlement this machine has been observed to carry; any other org string
+  voids the table below and the rule's allowlist premise.
+- **Entitlement confirmed on-page**: IEEE Xplore renders
+  `Access provided by: National Taiwan University` in the page chrome. Confirm
+  entitlement from the page, never from the IP alone.
+- **Per-host retrieval, measured (status codes from curl with a Chrome UA)**:
+  reachable — `arxiv.org`, `osti.gov`, `patents.google.com`, `link.springer.com`,
+  `www.nature.com`, `www.spiedigitallibrary.org`, `pmc.ncbi.nlm.nih.gov`, plain
+  vendor sites (`finetechusa.com`, `mycronic.com`). Blocked by bot management,
+  NOT by paywall — `ieeexplore.ieee.org` (202 challenge; WebFetch and
+  playwright-headless both got 418), `www.sciencedirect.com` (403),
+  `onlinelibrary.wiley.com` (403), `www.mdpi.com` (403),
+  `eprints.soton.ac.uk` (BotStopper/Anubis proof-of-work).
+- **Two hosts disagreed between probes the same day**: `opg.optica.org` and
+  `iopscience.iop.org` answered 200 to a single article-URL probe from the main
+  loop, then served a Radware CAPTCHA to a subagent doing repeated retrievals.
+  Read that as rate/behaviour-triggered, and treat a first 200 from either as no
+  evidence that a wave will get through.
+- **Thorlabs product pages are a client-rendered SPA**: curl returns an empty
+  shell. Not a block; just nothing to parse.
+- **Discrepancy to re-check before relying on either reading**: the main loop
+  drove `mcp__Claude_Browser__` to `ieeexplore.ieee.org` successfully in this
+  session, while a subagent reported `browser_pane_scope_guard` denying the same
+  host (`browser-pane-allowlist.json` `hosts` is empty, which should deny both).
+  Both observations are recorded; neither is explained. Do not cite the pane's
+  behaviour on third-party hosts as settled until this is reproduced.
+
+Review-when: the VPN resolves to a different institution; a listed host changes
+side; `browser-pane-allowlist.json` gains entries; the pane-guard discrepancy
+above is reproduced or explained.

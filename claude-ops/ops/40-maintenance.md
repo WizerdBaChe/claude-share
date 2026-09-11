@@ -106,10 +106,21 @@ directory — a rule-tier write from a sandbox, unreviewed.
 
 ## §2 One lesson, one destination (this is the anti-bloat mechanism)
 
-| Lesson type | Destination |
+**Capture and enforcement are two different questions, and only the second is a
+routing choice.** Since the 2026-09-07 intake cutover EVERY lesson is captured
+the same way — one record born through a guarded intake process (source-only
+tooling, not shipped here) that also handles recurrence and supersession
+events; the index `ops/lessons.md` is generated — never hand-edit either path,
+the guard denies it. The table below routes the
+RULE: the durable text a future session must obey. A type whose rule lives
+outside `ops/lessons/` still gets its record; the record's `## Fix` NAMES the
+rule's home instead of restating it, which is how "one rule, one file" and
+"lossless capture" stop pulling against each other.
+
+| Lesson type | Where the RULE goes |
 |---|---|
-| One-off technical gotcha (command, API quirk, environment fact) | the lessons ledger, added through a guarded intake process (source-only tooling, not shipped here) that also handles recurrence and supersession events — never hand-edit the generated index `ops/lessons.md` directly |
-| Dispatch/scheduling lesson | one line in the matching section of `20-dispatch.md` |
+| One-off technical gotcha (command, API quirk, environment fact) | nowhere else — the record IS the rule, found by the pre-task grep (the source's tag-overlap match tool is source-only and not shipped here) |
+| Dispatch/scheduling lesson | one line in the matching section of `20-dispatch.md` (worked case: `ops/lessons.md` L-057 → §2's governed-record clause) |
 | Judgment lesson | a new ✅/❌ example under the matching R-rubric in `30-judgment.md` — NOT a new numbered rule (a genuinely new rule is a 🔴/🟡-tier change) |
 | Requester preference / ruling | global CLAUDE.md (🔴 — via confirmation; end-of-project batches go through the `project-retrospective` skill) |
 
@@ -155,8 +166,14 @@ cites, and both name the lessons entry so they cannot drift; (2) an omission
 gate NARROWS WITHIN the harness's injected instructions, never contradicts them
 (user ruling 2026-08-14) — where the harness withholds an action, the gate
 surfaces the decision to the user instead of taking it; (3) a hook that does
-not run is itself silent, so every P1/P3 hook ships with a proof-of-life line
-in `ops/references/integrity-sweep.md` in the SAME commit. **LAYER ≠ SURFACE**:
+not run is itself silent, so every P1/P3 hook ships, in the SAME commit, with a
+``Proof-of-life: `python <suite>` `` line in its OWN module docstring — sweep check
+31 executes whatever that line names, so coverage grows by editing the hook and
+never by editing a list (rewritten 2026-09-08: the old wording said "a line in
+`ops/references/integrity-sweep.md`", which made the rule a POSITION in a file
+that grows, AP-45; ES-2 read it literally and flagged 11 hooks the sweep already
+runs while missing all 5 that declared nothing). Being NAMED in the sweep is not
+being RUN by it. **LAYER ≠ SURFACE**:
 before shipping any trigger, find the last recorded instance of the failure AS
 A TOOL CALL in the transcript corpus and confirm the trigger sees that shape —
 two traps in the same language measured opposite surfaces in the same week
@@ -164,6 +181,15 @@ two traps in the same language measured opposite surfaces in the same week
 all of them. And the table does not apply itself: a lessons card whose `hits:`
 reaches 2 is routed through this table before it is considered finished — that
 is the reading of §4.4 it was missing.
+
+Detail files (loaded on demand, never at session start): what each global
+principle requires of a SMALL artifact — hook, skill, `rules/*.md`, project
+CLAUDE.md, routing entry, registry row, page builder — written as asset
+properties with a `detect:` line: `ops/references/principle-design-guide.md`;
+the field set every classification/routing entry carries and the 14-surface
+adapter table: `ops/references/entry-schema.md`. Enforced subset: a
+source-only lint tool (not shipped here; integrity-sweep check 29;
+`config-self-audit` §4 `--path` mode). Registry key `ENTRY_SCHEMA`.
 
 ## §3 Trim discipline (keeping this from becoming an unread constitution)
 
@@ -188,8 +214,8 @@ is the reading of §4.4 it was missing.
   per read first, and treat the number as the signal to look, not the goal.**
   | trigger | value | unit as measured |
   |---|---|---|
-  | any `ops/*.md` — except `lessons.md` and `rule-registry.md` | ~26K | **bytes** (`getsize`) |
-  | `skill-trigger-dict.md` | 42K | **bytes** (`getsize`) |
+  | any `ops/*.md` — except `lessons.md`, `rule-registry.md`, `environment.md` | ~26K | **bytes** (`getsize`) |
+  | `skill-trigger-dict.md` | 49K | **bytes** (`getsize`) |
   | any `SKILL.md` body | ~300 | lines |
   | entry file `OPS.md` | ~60 | lines (not hook-enforced) |
 
@@ -226,6 +252,15 @@ is the reading of §4.4 it was missing.
   distinct rule, that IS the signal to raise the cap (with the failed pass
   recorded as the evidence), the same way CLAUDE.md went 12K→15K→19.5K and ops
   files 10K→12K→15K→18K→22K→26K. Never trade completeness for the number.
+  **And when TWO such passes in a row each move real content and still leave
+  the file over, the answer stops being a raise: the file's size is tracking a
+  CORPUS (one block per lesson, per rule, per surface), so it is exempted
+  instead — a cap that can only nag forever is a cap nobody reads.** The
+  exemption is not a free pass: the file must carry a review trigger that is a
+  property of its CONTENT (`environment.md`'s per-block ~90-day re-verify,
+  `lessons.md`'s `intake.py report`), never of its size. Live set:
+  `SIZE_CAP_EXEMPT` in `hooks/ops_health_nudge.py`; each member's ground is in
+  `rule-registry.md` key `ops file cap`.
 - **Birth budgets** (prevention beats trimming — a new artifact must be born
   within budget, not grow into a trim candidate): skill description ≤700
   chars stating purpose + trigger phrases + top 1–2 NOT-cases, detailed

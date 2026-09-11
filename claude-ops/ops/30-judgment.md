@@ -128,6 +128,18 @@ Tier-1 may compress to one line ("Holds when X; overturned by Y; tier Z");
 Tier-0 exempt. Subagents and cheap/mid main-loop models always write the full
 block — they misjudge the tiering.
 
+**Self-declaration** (the artifact-level companion, `60-record-templates.md`
+§4): when the Tier-2 deliverable is a DURABLE artifact a human will act on
+without re-deriving it — a report, a deck, an audience page, a design document,
+a case dossier — it opens with a block declaring what it is made of: maturity on
+two rulers with their origin, per-instrument fidelity, **算過的／只畫過的／沒做的**,
+one sentence naming the weakest credibility factor, and the source shas. This
+statement says how the conclusion could be wrong; that one says how far the
+artifact got — a rendered, audited figure can still show a quantity nobody
+computed. Neither restates the other, and the block's 界線 line points here.
+Not owed by a chat answer, a machine-read record that carries its own meta, or
+a code change.
+
 **Overturn hierarchy** (who may be refuted, by what): any MODEL-derived
 conclusion, premise, or plan is overturned freely by actual data + sound
 reasoning — no permission needed; log the reversal in one line. USER-ORIGIN

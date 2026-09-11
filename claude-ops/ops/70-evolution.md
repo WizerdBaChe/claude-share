@@ -56,6 +56,9 @@ ready-to-apply artifacts. `APPLY.md` states, per change:
   pointer. Same schema as `lessons.md`'s Evidence line; required from
   2026-08-11 on, no backfill.
 - **Change**: exact file/rule/hook/skill added or modified (artifact included).
+  A new hook's module docstring carries `STATUS: LIVE|SHADOW|RETIRED since
+  <date>` and its proof-of-life line in `ops/references/integrity-sweep.md`
+  lands in the same commit (birth procedure: `ops/references/entry-schema.md` §5).
 - **Benefit**: what improves (reliability, cost, speed, clarity).
 - **Risks**: what might get worse; known residual gaps stated honestly.
 - **Rollout & verification**: how to apply, how to test, what regression looks
