@@ -2141,8 +2141,9 @@ path = "skill-toolkit/skills/audience-fit/SKILL.md"
 source = "~/.claude/skills/audience-fit/SKILL.md"
 status = "edited"
 edits = [
-  "2026-09-07: re-applied — the round-2 field-proof pointer `ccfg-retrieval-audit-f1-owner-view.html` v2 (a named artifact inside a non-shipping tree) replaced by a generic description: 'an owner-view render that passed user gate 2026-08-31'. Nothing else changed since the last refresh.",
+  "2026-09-07: re-applied — the round-2 field-proof pointer, v2 (a named artifact inside a non-shipping tree; its filename is not recorded here, hard rule 9, corrected 2026-09-12) replaced by a generic description: 'an owner-view render that passed user gate 2026-08-31'. Nothing else changed since the last refresh.",
   "2026-09-12 (lane W4): re-applied unchanged onto fresh source — same anchor, same replacement, diff confirmed to touch exactly this one span and nothing else.",
+  "2026-09-12 (merge step): '## Gate' section, a four-line 'Share edition' blockquote added directly after the afgate.py command block, saying the tool is source-only (`tools/audience-fit-gate/`, [[not_shipped]]) and that the two checks are described well enough to reproduce. Addition only; the command itself is kept as the source wrote it. Decision-table row 2 inverse: a non-shipping tool that a shipped file routes to gets an edit at the router.",
 ]
 # 2026-09-12 (lane W4): source grew a new '## Gate (Mode A...)' section
 # (2026-09-10) describing a determinable check for two of the skill's prose

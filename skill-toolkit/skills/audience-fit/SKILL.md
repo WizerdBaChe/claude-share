@@ -207,6 +207,11 @@ reader's patience:
 python ~\.claude\tools\audience-fit-gate\afgate.py all <original> <companion>
 ```
 
+> **Share edition:** `tools/audience-fit-gate/` is source-only and does not ship
+> in this repo (`tools/share-manifest.toml`, `[[not_shipped]]`). The command
+> above is the source environment's; the two checks below are described fully
+> enough to reproduce.
+
 - `voice` — a bare `<n> PASS`, a file path, a sha, a run id or a gate id in the
   reader's MAIN text is a FAIL ("add zero facts" has a twin: add no builder
   addresses). The provenance block and the 對照 table are the delivery
