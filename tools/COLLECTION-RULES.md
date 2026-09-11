@@ -194,6 +194,9 @@ Two procedures, and picking the wrong one is failure 4. **A → the file is not
 here yet. B → it is.** At any scale above a handful of files you will be doing
 both at once; sort the candidate list by which procedure it needs *before* you
 copy anything, because a bulk sweep silently runs A over B's files.
+`python tools/triage.py --source ~/.claude` does that sort from the manifest
+(since 2026-09-12); a round that splits the work across several workers
+follows `SYNC-RUNBOOK.md` for the orchestration. Both defer to this file.
 
 ### Step 0, for both — record the source state
 

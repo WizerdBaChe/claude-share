@@ -23,7 +23,9 @@
 python tools/share_gate.py                        # repo 內六道全跑，有發現就 exit 1
 python tools/share_gate.py --check P              # 只跑一道（L / P / R / S / C / D 任選）
 python tools/share_gate.py --source ~/.claude     # 再加上 V：逐檔比對來源樹
-python tools/test_share_gate.py                   # 驗收閘門本身：10 個案例
+python tools/test_share_gate.py                   # 驗收閘門本身：14 個案例
+python tools/triage.py --source ~/.claude         # 同步前先分類：來源每個變動該走哪個程序
+python tools/test_triage.py                       # 分類器自身的驗收：17 個案例
 ```
 
 **推送前一定要跑一次 `share_gate.py`，exit 0 才推。** 它不會自動修任何東西——
@@ -60,6 +62,23 @@ P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類
 第三種失敗就是這樣來的：2026-08-14 的來源稽核發現，三支 hook 被寫成
 `referenced-only`「綁機器」整整一個月，實際上它們**完全可攜、只是從來沒被撈進來**。
 判定一旦寫成散文、沒有東西會重測，它就會爛掉。C 檢查與那份規則就是為此存在。
+
+## 跑一整輪同步（2026-09-12 起有操作手冊）
+
+一輪同步 (refresh round) 以前每次都靠記憶重建：怎麼把來源的變動分類、怎麼切給
+多個平行的子代理 (subagent)、每個人的指示要寫什麼、怎麼合併、收尾要做哪些事。
+現在兩樣東西把它固定下來：
+
+- **`triage.py`** — 分類器 (triage)。讀來源的 `git diff`（自上一輪對齊的 commit，
+  存在 manifest 的 `source_aligned`）加上來源尚未提交的狀態，只依 manifest
+  **已經宣告**的內容，把每個路徑分進七個桶：`refresh`（走程序 B）、`candidate`
+  （走決策表與程序 A）、`recheck`（重驗 disposition）、`never`、`uncommitted`、
+  `source-gone`、`deleted`。它**不做判定**，只告訴你每個路徑該問哪個問題。
+  `cited` 欄是「repo 裡有幾個檔提到這個路徑」，是決策表第 2 列的線索，不是證明。
+- **[`SYNC-RUNBOOK.md`](SYNC-RUNBOOK.md)** — 給執行下一輪的 agent 讀的流程（英文）：
+  Step 0 → 分類 → 按耦合切 lane（跨目錄的機制算同一個 lane）→ 用同一份模板給每個
+  lane 下指示（附錄 A）→ 合併（lane 之間的競態只有合併時看得到）→ 收尾。
+  判定規則仍以 `COLLECTION-RULES.md` 為準，這份只管編排。
 
 ## manifest 怎麼寫
 

@@ -16,6 +16,15 @@
 # read them as keys of that table.
 
 # ---------------------------------------------------------------------------
+# source_aligned — the source commit the last completed round aligned to
+# (short sha: seven hex is a pointer, 32+ would be a leak-pattern hit). The
+# default baseline of tools/triage.py. It is a summary of the newest
+# CHANGELOG.md entry, so it changes in the SAME commit as that entry and never
+# on its own — a baseline edited separately is a second copy that rots.
+# ---------------------------------------------------------------------------
+source_aligned = "27196ab"
+
+# ---------------------------------------------------------------------------
 # source_env_roots — bare prefixes that mean "an asset of the SOURCE
 # environment", even without the ~/.claude/ prefix. Rule files write
 # `hooks/ops_health_nudge.py`, not the full path; without this list the biggest
