@@ -6,9 +6,10 @@ description: >-
   executor had to BYPASS the skill", then verify, adopt, and hand off via
   disposition files so the loop continues across sessions. Trigger on
   「跑一輪迴圈」「交互升級」「co-upgrade」「硬化這個 skill」
-  「這個 skill 實測有缺口/繞過了才做對」. OFFER once — never run unprompted —
-  when a skill visibly misfired or had to be bypassed during real work, or when
-  a substantially rewritten skill is about to take its first real run. NOT a
+  「這個 skill 實測有缺口/繞過了才做對」「拿這份指南/規範對照升級這個 skill」.
+  OFFER once — never run unprompted — when a skill visibly misfired or had to
+  be bypassed during real work, when a substantially rewritten skill is about
+  to take its first real run, or when an external standard arrives. NOT a
   static content audit of one artifact (→ config-self-audit; it runs INSIDE
   this loop as the upgrader's verification step), not skill authoring
   (→ skill-creator), not file cleanup (→ env-cleanup).
@@ -39,6 +40,19 @@ rationale), never weaken — consent-gate wording keeps full strength.
   the report's credibility bounds; expect execution-level gaps only —
   structural blind spots still need a second body in a later round. Report
   and disposition may merge into one file when fixes land the same turn.
+- **Standard-comparison round** (the carrier is an external standard, not a
+  task — a library guide, a policy, a checklist the user hands over). The
+  bypass standard cannot fire (nobody executed anything), so this shape has
+  its own, equally strict one: **a gap exists iff the standard names a
+  concrete failure scenario that the skill can neither DETECT nor PREVENT by
+  a mechanism** — a prose warning the executor may skip is not a mechanism.
+  Protocol: inventory the skill's existing measures per theme → a 裁定 table
+  (item · locator in the standard · current state · 採納/採納-適配/不變/
+  不採納 · reason) where the 不採納 rows are mandatory and reasoned → design
+  → user rulings on the values forks (ask, recommended value first) → work
+  cards → the upgrader leg below. Measured 2026-09-11 (literature-search-
+  extract round 2, NTU library AI-literacy guide, 29 slides): 25 items → 15
+  adopted / 3 adapted / 4 unchanged / 3 not adopted, six mechanisms built.
 
 ## Round protocol
 
@@ -71,10 +85,33 @@ rationale), never weaken — consent-gate wording keeps full strength.
    the name is load-bearing: step 0's lookup depends on it (per-gap verdict |
    where it landed | adjustments and why), ending with the **sharpest next
    test** for the following round.
+   **Code-bearing rounds** (the fix is a gate, hook, or instrument): the
+   shipped selftest going green is a claim about the selftest. Two more legs,
+   author ≠ verifier, both dispatched: a **design review BEFORE build** when
+   the round adds a mechanism (measured 2026-09-11: it caught the wrong
+   Crossref key, `update-to` on the notice vs `updated-by` on the cited work,
+   before a line was written), and an **adversarial QA AFTER build** that
+   must probe beyond the suites with a fixed boundary list — trailing-dot
+   host, path traversal in every name argument, a redirect that changes the
+   host, the fixture's own inputs through every regex, a JSON line that parses
+   but is not an object, a numeric argument passed as a string. Measured the
+   same day: every suite 100% green, QA found 4 BLOCKERs, 0 covered by any
+   suite. Every finding is reproduced by a command; the disposition table
+   keeps the no-change rows with their reason.
+   **A new gate on a skill with history** is born with a dated cutoff
+   (`LEGACY_CUTOFF`, one constant shared by every reader): runs before it WARN,
+   runs after it FAIL. Without the date the gate is either softened on the
+   first old artifact it breaks or stays WARN forever (the inert-promotion
+   shape of `entry-schema-lint`, 2026-09-09).
 4. **Cross-skill sweep before closing.** A gap fixed here often has a twin in
    a sibling skill (the same ask-consolidation shape appeared in three
-   skills). And if any ruling this round REPLACED mechanism A with B, grep
-   same-day artifacts for stale references to A — a rejected-then-referenced
+   skills), and in a **rule-tier file the skill executes**: a rule written on
+   day N leaves the skill's playbook saying the pre-rule thing on day N+1
+   (measured: `rules/literature-access.md` 2026-09-10 forbade circumvention;
+   `search-sources.md` rung 3b still told the executor to render anti-bot
+   pages headless — grep the skill for the OLD instruction, not the new rule).
+   And if any ruling this round REPLACED mechanism A with B, grep same-day
+   artifacts for stale references to A — a rejected-then-referenced
    mechanism reads as correct forever.
 
 ## Engine-skill techniques (skills that act on the environment)
@@ -83,7 +120,13 @@ rationale), never weaken — consent-gate wording keeps full strength.
   different targets and diff which checks each run actually executed —
   silent skips surface immediately.
 - **Reflexive scope**: the skill itself is a valid target of its own scan
-  (env-cleanup found its own stale desktop-cache duplicate).
+  (env-cleanup found its own stale desktop-cache duplicate). Its **worked
+  examples and fixtures are inputs to its own gate**: every identifier or
+  number a skill's manual cites as an example is a claim — resolve each one
+  live once and keep it as a calibration fixture (measured 2026-09-11: the
+  citation gate's own docstring attached "Nagpal 2009" to a DOI that resolves
+  to another paper; it sat there 15 days and surfaced only when the example
+  became a must-pass case of the gate it illustrated).
 - **Desk dry-run rule**: a code path no natural task exercises within ~2
   rounds gets a desk walkthrough or sandbox instead of waiting — waiting a
   third round is not testing, it is luck. Keep the untested flag until a real
@@ -112,8 +155,9 @@ field test, not a formal loop round; user-directed adoption).
 
 Findings should converge (measured: 14 → 7 → 4 → 4, structural → seam-level).
 When a round yields no P0/P1, recommend CLOSING the loop for that skill —
-core need met → stop; further rounds are on-demand (next natural misfire or
-rewrite), never scheduled. Never run a round just to have run one.
+core need met → stop; further rounds are on-demand (next natural misfire,
+rewrite, or an external standard arriving), never scheduled. Never run a
+round just to have run one.
 
 ## Reflexivity
 

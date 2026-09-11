@@ -198,6 +198,32 @@ rewrite.
   addition; when output smells AI-written or the user says 「AI味」, load
   `references/de-ai-flavor.md` and run its checks one at a time.
 
+## Gate (Mode A, run before delivery — 2026-09-10)
+
+Two of the guardrails above are determinable and are no longer left to the
+reader's patience:
+
+```powershell
+python ~\.claude\tools\audience-fit-gate\afgate.py all <original> <companion>
+```
+
+- `voice` — a bare `<n> PASS`, a file path, a sha, a run id or a gate id in the
+  reader's MAIN text is a FAIL ("add zero facts" has a twin: add no builder
+  addresses). The provenance block and the 對照 table are the delivery
+  apparatus, not the reader's text: the gate splits there, closes only over the
+  main text, and prints both zone sizes. Baseline: the three accepted owner
+  views return 0 FAIL.
+- `values` — a number the canonical original does not explain, by identity or a
+  named transform, is invented. Legitimate reformatting (`1.336×` →
+  `比基準高 33.6%`) is a named transform and passes; the check certifies only
+  3+ significant digits and prints what it left uncertified.
+- `limits` — reports the original's limitation lines with no counterpart and
+  RULES ON NOTHING; whether a reworded limitation still says it is the pass's
+  own judgment, not the gate's.
+
+Quote the gate line in the delivery beside the 前後對照 pair. It replaces no
+guardrail — three of the five above stay unmeasurable and stay yours.
+
 ## References
 
 - `references/project-info-for-general-readers.md` — user-supplied guide

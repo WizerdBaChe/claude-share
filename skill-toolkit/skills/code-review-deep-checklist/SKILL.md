@@ -114,8 +114,8 @@ and keep this skill consistent with the user's global preferences:
   covered / needs a new item / this item's expected observation is now wrong — and
   deliver that delta, naming the file. Only when no such artifact exists do you end
   with your own numbered checklist (steps + expected result each), ranked per
-  `ops/references/uat.md`: `A. 必驗` (≤7, consequence-ordered) then `B. 體驗`, never
-  grouped by surface. A delta onto an existing card inherits THAT card's order —
+  `ops/references/uat.md`: `A. 必驗` then `B. 體驗`, shaped and capped as that file
+  states. A delta onto an existing card inherits THAT card's order —
   don't re-rank someone else's artifact from a review.
 - **Report artifact.** When the user wants the review as a document: NEW file,
   never overwrite an existing report; human-readable body in Traditional Chinese
