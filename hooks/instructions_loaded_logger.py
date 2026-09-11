@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 r"""InstructionsLoaded logger -- rule-load observability (E1 instrument).
 
+STATUS: LIVE since 2026-08-11 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 WHY THIS EXISTS
 ---------------
 `~/.claude/CLAUDE.md` is loaded in full into every session (official docs:
@@ -27,11 +29,15 @@ CONTRACT
 - output: %USERPROFILE%\.claude\telemetry\rule-loads.jsonl (gitignored),
           size-capped with one rotation so it cannot grow without bound.
 
-PROOF OF LIFE (ops/40-maintenance.md section 4.2)
--------------------------------------------------
-    python -c "import json;print(sum(1 for _ in open(r'~/.claude/telemetry/rule-loads.jsonl'.replace('~',__import__('os').path.expanduser('~')),encoding='utf-8')))"
-An empty or missing file after a fresh session means the event does not fire
-in this Claude Code version -- that is a real finding, not a hook bug: record
+Proof-of-life: `python hooks/tests/test_instructions_loaded_logger.py`
+--------------------------------------------------------------------
+Executed by integrity-sweep check 31. Counting rows in the live log is NOT a
+proof of life for the writer: a logger that stopped writing and a week with no
+sessions leave the same file, so that number can only be read once the writer
+is known good. The suite pins the writer (redaction, truncation, rotation,
+fail-open) and REPORTS the live row count without scoring it -- an empty or
+missing file after a fresh session means the event does not fire in this Claude
+Code version, which is a real finding about Claude Code, not a hook bug: record
 it and fall back to reading `/context` by hand.
 
 Related: ops/lessons.md L-011 (enforcement layer chosen by trigger shape);
@@ -44,7 +50,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-LOG_PATH = Path.home() / ".claude" / "telemetry" / "rule-loads.jsonl"
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp dir;
+# production never sets it).
+LOG_PATH = Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (Path.home() / ".claude" / "telemetry")) / "rule-loads.jsonl"
 MAX_BYTES = 5 * 1024 * 1024  # rotate once past this; bounded disk use
 MAX_PAYLOAD_CHARS = 4000  # truncate pathological payloads, keep the shape
 
@@ -80,6 +88,23 @@ def main():
     # Drop the two fields that are large and already known, keep everything
     # else verbatim -- the point of this logger is schema discovery.
     body = {k: v for k, v in payload.items() if k not in ("transcript_path",)}
+    # Loader classification (added 2026-09-10, O-1 of the rules-debt audit):
+    # 2,726 of 4,204 CLAUDE.md session_start loads in one month matched no
+    # archived transcript. The full transcript_path stays redacted (W-3);
+    # what classification needs is only its parent dir name, whether it
+    # exists at load time, the CLI entrypoint and the parent pid. Keys never
+    # start with "_" (that prefix is reserved for undetermined markers, U-2),
+    # and an undetermined payload stays the bare marker (U-1b): nothing is
+    # merged beside it that could read as a real event.
+    if not any(k.startswith("_") for k in body):
+        tp = payload.get("transcript_path")
+        try:
+            body["transcript_dir"] = Path(str(tp)).parent.name if tp else None
+            body["transcript_exists"] = os.path.exists(str(tp)) if tp else None
+        except Exception:
+            body["transcript_dir"] = body["transcript_exists"] = None
+        body["entrypoint"] = os.environ.get("CLAUDE_CODE_ENTRYPOINT")
+        body["ppid"] = os.getppid()
     encoded = json.dumps(body, ensure_ascii=False, default=str)
     if len(encoded) > MAX_PAYLOAD_CHARS:
         encoded = encoded[:MAX_PAYLOAD_CHARS] + "...<truncated>"

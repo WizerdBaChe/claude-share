@@ -1,4 +1,6 @@
 r"""PreToolUse guard: an early-closing pipeline consumer downstream of a native
+
+STATUS: LIVE since 2026-08-21 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
 or interpreter command.
 
 Scope: PowerShell-language text, wherever it is written. The DETECTOR reads four
@@ -111,6 +113,7 @@ payload, for a truncation whose author has verified the upstream is safe to kill
 Fail-open by design: any parse error exits 0, so a guard bug never blocks work.
 Telemetry: every notice appends one row to `telemetry/ps-pipeline-close.jsonl`
 (excerpt only, never the whole file). Proof-of-life check:
+`python tools/ps-pipeline-close-test/test_ps_pipeline_close_guard.py`, and
 `ops/references/integrity-sweep.md` check 23 - a hook that does not run is
 itself silent (L-011, COST OF P1/P3).
 """
@@ -120,14 +123,22 @@ import re
 import sys
 import time
 
+try:                        # notice receipt (rules/hook-deny-message.md R3n)
+    from deny_receipt import notice_clause
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def notice_clause(hook, log=""): return ""
+
 MARKER = "[pipeline-checked]"
 
 # Overridable so the test suite and the integrity sweep can DRIVE this hook
 # without writing into the real log (integrity-sweep check 20, P-005: a probe
 # run bare once leaked a synthetic row into production telemetry, and a rate you
 # have to subtract from is a rate nobody re-checks).
+# Precedence: PS_PIPECLOSE_LOG (per-hook override) > CLAUDE_TELEMETRY_DIR
+# (suite redirect; production never sets it) > default.
 LOG_PATH = os.environ.get("PS_PIPECLOSE_LOG") or os.path.join(
-    os.path.expanduser("~"), ".claude", "telemetry", "ps-pipeline-close.jsonl")
+    os.environ.get("CLAUDE_TELEMETRY_DIR") or os.path.join(os.path.expanduser("~"), ".claude", "telemetry"),
+    "ps-pipeline-close.jsonl")
 
 # --------------------------------------------------------------------------
 # Classification tables.
@@ -502,7 +513,14 @@ def notice(text):
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "additionalContext": text,
+            # Identity on the transport, not in compose(), so a branch added to
+            # the annotation cannot ship unnamed (R1). The log stem differs from
+            # the hook name and is named explicitly: a receipt sentence pointing
+            # at a file with no row in it is worse than no receipt.
+            "additionalContext": ("ps-pipeline-close guard, a local PreToolUse hook "
+                                  "(not file or page content): " + text
+                                  + notice_clause("ps_pipeline_close_guard",
+                                                  "ps-pipeline-close")),
         }
     }))
     sys.exit(0)
@@ -512,7 +530,7 @@ def compose(finding, label):
     """The annotation. It names the actual pair, because 'beware of pipelines'
     is what the prose layer already said and it did not fire twice."""
     h = finding["first"]
-    parts = ["ps-pipeline-close guard: %s pipes `%s` into `%s`%s. In PowerShell "
+    parts = ["%s pipes `%s` into `%s`%s. In PowerShell "
              "an early-closing consumer stops the pipeline as soon as N objects "
              "arrive, and closing it TERMINATES the upstream process."
              % (label, h["upstream"], h["consumer"],
@@ -543,7 +561,7 @@ def compose(finding, label):
         % (h["upstream"], h["consumer"]))
     parts.append(
         "If the truncation is deliberate and the upstream is safe to kill, "
-        "re-run with %s. Detail: ops/lessons.md L-027." % MARKER)
+        "re-run with %s." % MARKER)
     return " ".join(parts)
 
 

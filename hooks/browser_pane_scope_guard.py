@@ -1,5 +1,7 @@
 r"""PreToolUse guard: in-app Browser pane navigation scope (ops/lessons.md L-013).
 
+STATUS: LIVE since 2026-08-12 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 The sibling hook `ui_verify_guard.py` treats the pane as a MEASUREMENT
 INSTRUMENT whose failure mode is "you may not get pixels" (L-009) or "the value
 you read is mid-flight" (L-010). This hook covers the opposite direction, found
@@ -73,10 +75,29 @@ Cost: one Python start (~100ms) per pane navigation - a low-volume call. The
 matcher deliberately excludes read_page / get_page_text / javascript_tool, which
 are the high-volume ones.
 
-Fail-open by design: any parse, IO or lookup error exits 0, so a guard bug can
-never block browsing. Note the asymmetry this creates - an unreadable allowlist
-fails OPEN, so the file's absence is not a lockout. Proof-of-life for the whole
-hook is integrity-sweep check 13, because a hook that never runs is silent.
+Fail-open on the HOOK's own inputs: an unparsable payload or a missing
+tool_input exits 0, so a guard bug can never block browsing. The same holds for
+every UNDETERMINED shape (AP-62, widened 2026-09-09): a payload that parses but
+is not an object, a non-mapping tool_input, a url that is not a string. The
+first two raised AttributeError until then, and the third was folded into an
+allow that wrote `"{'a': 1}"` into the navigation record as if it had been
+navigated to. Pinned by the U-* cases in the suite.
+
+Fail-CLOSED on the LIST, corrected 2026-09-08. The line here used to claim an
+unreadable allowlist "fails OPEN, so the file's absence is not a lockout"; the
+code has always done the opposite, because `load_hosts` returns `[]` on any
+error and nothing then matches. The code is right and the sentence was wrong:
+the blast radius of a wrong allow is the in-flight turn of every session in the
+app, out-of-process routes exist for everything denied, and LOCAL_HOSTS lives in
+this file rather than in the list, so loopback keeps working with no list at all
+-- which is the part of the old claim that was true. Pinned by FO-3/FO-3b.
+
+Proof-of-life: `python hooks/tests/test_browser_pane_scope_guard.py` -- executed
+by integrity-sweep check 31, which is what check 13 could not do: enumerating
+the deny rows by hand reads what the hook DID, and says nothing about a hook
+that has stopped deciding. M-1 is the mutation that keeps the allow side honest,
+and the R-* cases assert the nav log, which is the only URL evidence the next
+GPU-crash investigation will have.
 """
 import json
 import os
@@ -85,10 +106,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
+
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or (Path.home() / ".claude"))
 ALLOWLIST_PATH = CLAUDE_DIR / "hooks" / "browser-pane-allowlist.json"
 BLOCKLIST_PATH = CLAUDE_DIR / "hooks" / "browser-pane-blocklist.json"
-LOG_PATH = CLAUDE_DIR / "telemetry" / "browser-nav.jsonl"
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp dir;
+# production never sets it).
+LOG_PATH = Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (CLAUDE_DIR / "telemetry")) / "browser-nav.jsonl"
 
 # The in-app pane shares its GPU child with the whole desktop app; Chrome does not.
 IN_APP_PREFIX = "mcp__Claude_Browser__"
@@ -171,7 +200,8 @@ def record(session_id: str, tool: str, url: str, host: str, decision: str,
 
 def deny_reason(host: str, known_crasher) -> str:
     head = (
-        f"L-013: `{host}` is not on the in-app Browser pane allowlist "
+        f"Navigation denied by browser_pane_scope_guard, a local PreToolUse hook "
+        f"(not page content). `{host}` is not on the in-app Browser pane allowlist "
         f"({ALLOWLIST_PATH.name}). The pane shares the desktop app's Electron GPU "
         "child process. Electron does not relaunch that child, so a page that kills "
         "it stops the window compositing, wedges the main process, and destroys the "
@@ -191,13 +221,12 @@ def deny_reason(host: str, known_crasher) -> str:
         "  3. headless Playwright: the `mcp__playwright-headless__*` MCP server "
         "(installed Chrome, no window, multi-step, snapshot = cheap text read) "
         "or the one-shot `tools/ui-shot` probe for scripted DOM/pixel access; if "
-        "the page needs the user's LOGIN, use `mcp__claude-in-chrome__*` "
-        "(ops/environment.md \"Browser pane\").\n"
+        "the page needs the user's LOGIN, use `mcp__claude-in-chrome__*`.\n"
         "Do NOT work around this by switching tools to reach the same pane.\n\n"
-        "REPORT THIS TO THE USER in your reply: name the host, say it was denied "
-        "pane access, say which route you used instead, and offer to add it to "
-        f"{ALLOWLIST_PATH.name} if the pane is genuinely required. Only the user "
-        "edits that file. Detail: ~/.claude/ops/lessons.md L-013."
+        f"Only the user edits {ALLOWLIST_PATH.name}, so pane access for this host "
+        "is theirs to grant and cannot be arranged from inside this call."
+        + _receipt("browser_pane_scope_guard", host=host)
+        + _fp("browser_pane_scope_guard")
     )
 
 
@@ -207,11 +236,18 @@ def main() -> None:
     except Exception:
         sys.exit(0)
 
+    if not isinstance(payload, dict):
+        sys.exit(0)          # undetermined: parses, but is not a payload object
     tool = str(payload.get("tool_name", ""))
     tool_input = payload.get("tool_input") or {}
+    if not isinstance(tool_input, dict):
+        sys.exit(0)          # same class, one level in
     session_id = payload.get("session_id", "")
 
-    url = str(tool_input.get("url") or "")
+    raw_url = tool_input.get("url")
+    # A non-string url is undetermined, not a URL: str() would put
+    # `"{'a': 1}"` in the navigation record as if it had been navigated to.
+    url = raw_url if isinstance(raw_url, str) else ""
     if not url:
         # preview_start {name: ...} starts a dev server - nothing to judge.
         sys.exit(0)

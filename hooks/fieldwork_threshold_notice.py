@@ -1,5 +1,7 @@
 r"""PreToolUse SHADOW probe: main-session fieldwork vs 20-dispatch.md §1.
 
+STATUS: RETIRED since 2026-09-11 — unregistered from settings.json by user ruling R-3 (rules-debt audit): 293 shadow rows, >=52% quantifiably false (141 single-file >200-line reads that can never be a >3-files/repo-wide shape, 12 re-reads of the session's own tool-results, one .png counted as 874 lines), and the registry's own 30-day clause had 27 days elapsed. The entry's stated alternative applied: §1's thresholds describe delegation ADVICE and cannot serve as a gate. File and telemetry kept; rollback = re-register (ops/rule-registry.md "dispatch"). Was: LIVE since 2026-08-14 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 THE OMISSION THIS EXISTS FOR (ops/lessons.md L-011, fourth trigger shape).
 `OPS.md` hard rule 1 says the dispatcher does no fieldwork: repo-wide scans,
 large reads and batch edits go to subagents. Its violation is "the dispatch
@@ -41,7 +43,25 @@ Files:
   telemetry/fieldwork-shadow.jsonl        append-only, one row per trip
 
 Fail-open, silent: any error exits 0 with no output. A probe must never be able
-to block or annotate real work. Proof-of-life: integrity-sweep check 14.
+to block or annotate real work.
+
+UNDETERMINED (AP-62, added 2026-09-09): an input this probe cannot classify --
+a non-dict `tool_input`, a `file_path` that is not a string -- is charged
+NOTHING and leaves the counters untouched, the same rule the unreadable path
+already followed. Until 2026-09-09 the first crashed (AttributeError, against
+the fail-open claim above) and the second was folded into the counted file
+list as `"{'a': 1}"`, walking a session toward files>3 on reads that never
+happened -- a fourth false-positive shape in a probe whose whole output is a
+measurement. Pinned by the U-* cases in the suite.
+
+Proof-of-life: `python hooks/tests/test_fieldwork_threshold_notice.py` --
+executed by integrity-sweep check 31, which is what check 14 could not do: being
+NAMED in the sweep is not being RUN by it, and a shadow probe that stopped
+counting leaves the same empty log as a quiet week. Both sides are pinned, and
+the QUIET block carries the three false positives this probe actually shipped
+(the 2000-line charge for an unlimited Read, the same charge for an unreadable
+path, and a session reading back its own scratchpad output) so that a future
+loosening ships with the case it used to catch.
 """
 import json
 import os
@@ -51,7 +71,9 @@ from pathlib import Path
 
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or (Path.home() / ".claude"))
 STATE_DIR = CLAUDE_DIR / "cache" / "fieldwork-shadow"
-LOG_PATH = CLAUDE_DIR / "telemetry" / "fieldwork-shadow.jsonl"
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp dir;
+# production never sets it).
+LOG_PATH = Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (CLAUDE_DIR / "telemetry")) / "fieldwork-shadow.jsonl"
 
 # 20-dispatch.md §1 defaults, verbatim. Do not tune here - see module docstring.
 FILE_THRESHOLD = 3          # "touches >3 files"
@@ -136,17 +158,26 @@ def main() -> None:
     except Exception:
         sys.exit(0)
 
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object
     tool = str(payload.get("tool_name", ""))
     if tool not in ("Read", "Grep", "Glob"):
         sys.exit(0)
 
     ti = payload.get("tool_input") or {}
+    if not isinstance(ti, dict):
+        sys.exit(0)      # undetermined: no input to classify, so nothing to charge
     session = str(payload.get("session_id", "unknown"))[:64]
     state_path = STATE_DIR / f"{session}.json"
     st = load_state(state_path)
 
     if tool == "Read":
-        fp = str(ti.get("file_path") or "")
+        raw_fp = ti.get("file_path")
+        # A non-string path is undetermined, not a file: charging it would put
+        # `"{'a': 1}"` in the counted file list and walk the session toward
+        # files>3 on reads that never happened. Same rule as an unreadable path
+        # (lines_of -> 0): what cannot be classified is not counted.
+        fp = raw_fp if isinstance(raw_fp, str) else ""
         if is_own_output(fp, session):
             sys.exit(0)
         if fp and fp not in st["files"]:

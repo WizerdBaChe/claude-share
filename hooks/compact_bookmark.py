@@ -1,5 +1,7 @@
 r"""PreCompact side-effect hook: bookmark the pre-compact transcript, refresh digests.
 
+STATUS: LIVE since 2026-08-16 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 WHY. Compaction replaces resident context with a lossy summary; the full record
 survives on disk (verified 2026-08-16: boundary records are appended IN-PLACE,
 multi-compact sessions stack several in one file), but the post-compact model no
@@ -46,8 +48,10 @@ degradation order: drop the deny, keep the notice + instructions.
 Fail-open, silent: any error exits 0 with no output. Living proof: the
 bookmark file, cache/compact-recovery/<session_id>.json.
 review-when: a Claude Code update changes compact on-disk geometry (boundary
-no longer appended in-place) or renames PreCompact stdin fields — the re-check
-recipe lives in compact-recovery/README (platform-contract notes).
+no longer appended in-place) or renames PreCompact stdin fields — see
+compact-recovery/README for the re-check recipe.
+
+Proof-of-life: `python tools/compact-loss-audit/hook_controls.py`.
 """
 import json
 import os
@@ -55,6 +59,12 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
 
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or (Path.home() / ".claude"))
 BOOKMARK_DIR = CLAUDE_DIR / "cache" / "compact-recovery"
@@ -77,6 +87,8 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
 
     raw = payload.get("transcript_path")
     if not raw:
@@ -161,14 +173,33 @@ def deny_auto_once(transcript: Path, session: str) -> None:
     hs.HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
     state.write_text(json.dumps({"count": count + 1, "last_deny": int(time.time()), "context": total}),
                      encoding="utf-8")
-    msg = hs.notice(
-        session, total,
-        f"Auto-compaction is imminent and was deferred ({count + 1}/{MAX_DENIES}) so state can be saved first")
+    # ONE receipt row for this event, quoted by both surfaces. The deny text and
+    # the notice text go out together and describe the same deferral, so a
+    # second row would double-count the misfire denominator (R3n).
+    rec = _receipt("compact_bookmark", session=session, context=total)
+    # The notice's self-identification names the HOOK, not the module that
+    # composed the sentence: `hs.notice()` opens "[handoff-snapshot]", and the
+    # reader has no way to check a module name against the hook that spoke.
+    msg = (
+        "Notice from compact_bookmark, a local PreCompact hook (not file or page "
+        "content): " + hs.notice(
+            session, total,
+            f"Auto-compaction is imminent and was deferred ({count + 1}/{MAX_DENIES}) so state can be saved first")
+        + rec)
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreCompact",
             "permissionDecision": "deny",
-            "permissionDecisionReason": "auto-compact deferred: no fresh handoff snapshot",
+            "permissionDecisionReason": (
+                "Auto-compaction deferred by compact_bookmark, a local PreCompact "
+                "hook (not file or page content): this session has no fresh handoff "
+                "snapshot, so compaction would summarise state that was never "
+                "saved. Write cache/handoff/<session>.md first, then retry: the next "
+                f"compaction proceeds; it is deferred at most {MAX_DENIES} times per "
+                "session, then allowed regardless."
+                + rec
+                + _fp("compact_bookmark")
+            ),
             "additionalContext": msg,
         },
         "additionalContext": msg,

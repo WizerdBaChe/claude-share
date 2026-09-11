@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """SessionStart hook: ops-layer health nudge.
 
+STATUS: LIVE since 2026-07-06 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 Prints ONE short reminder line only when a maintenance threshold trips;
 completely silent when everything is healthy. Never blocks, never denies,
 stdlib only, pinned to ~/.claude. Designed to close the gap where
@@ -17,7 +19,7 @@ read):
      hold / a status projection drifted (replaced the LESSON_CAP entry count
      on 2026-09-07; ONE extra subprocess, 1.5 s budget, every cwd)
   2. any ops/*.md over SIZE_CAP                 -> extract pass due
-     (excl. lessons.md and rule-registry.md -- see SIZE_CAP_EXEMPT)
+     (excl. lessons.md, rule-registry.md, environment.md -- SIZE_CAP_EXEMPT)
   3. rule registry idle over TRAIL_IDLE_DAYS    -> degradation check due
   4. OPS.md routing targets missing on disk     -> ghost-rule alarm
   5. skill description over DESC_CAP            -> preload-budget breach
@@ -30,7 +32,9 @@ read):
      (a DECLARATION -- `ops-relaxation: L1` -- not a prose mention; see below)
  12. interop target undeployed/foreign/behind   -> run interop.py status
  13. advisory output OPEN / born unstamped      -> read the named file
-     (rules-usage-dict.md S7 "advisory-output status line")
+     (rules-usage-dict.md S7 "advisory-output status line"; two scopes --
+     any self-stamped outputs/**.md may be polled, only the candidates and
+     experiment-metrics classes OWE a stamp)
  14. stale uncommitted work in ~/.claude        -> commit it by what it touches
      (cwd == ~/.claude only; `git status --porcelain -uall`, paths whose
      mtime exceeds STALE_WORK_DAYS; report-only, never attributes)
@@ -65,11 +69,17 @@ Message wording is load-bearing: the nudge is what reaches session context,
 while S3 is two routing hops away. So each message must carry the REMEDY, not
 just the number -- a bare "trim" invites the compression S3 forbids.
 
-The printed line is CAPPED at NUDGE_CAP findings and ordered by SEVERITY --
-see the band comments below. Truncation is never silent: a hidden-count tail is
-appended whenever anything is dropped, and `--all` prints every finding, one
-per line. Before 2026-08-27 the print was a bare `msgs[:4]` and the dict cap
-breach had been crowded out for an unknown number of sessions.
+The printed line renders every finding that fits NUDGE_BYTE_CEILING, and when it
+does not fit it collapses the lowest SEVERITY BAND whole -- a property of the
+finding, never its position in a list. See the band comments below. Collapsing
+is never silent: a tail names every hidden finding, and `--all` prints all of
+them one per line. Before
+2026-08-27 the print was a bare `msgs[:4]`; the named tail arrived then, and the
+rank cutoff itself survived until 2026-09-08, by which time it had kept the same
+three findings off the screen (two cap breaches and an 18-card queue) for long
+enough that they were the repo's three oldest debts.
+
+Proof-of-life: `python tools/ops-health-test/test_ops_health_nudge.py` (52/52).
 """
 import json
 import os
@@ -106,6 +116,11 @@ SIZE_CAP = 26 * 1024   # BYTES per ops/*.md (getsize). REVIEW TRIGGER, not a
                        # If environment.md fires AGAIN after a pass that moved
                        # real content, the honest answer is not a fourth raise
                        # but SIZE_CAP_EXEMPT -- see the registry entry.
+                       # That is what happened: it fired 2026-09-08 after a
+                       # second real extraction, and the file was EXEMPTED
+                       # rather than the cap raised a fourth time. So 26K is
+                       # still the trigger for every other ops file, and this
+                       # comment is the record that the armed answer was taken.
                        # why/history: ops/rule-registry.md, key `ops file cap`;
                        # unit: key `cap measurement unit`. CLAUDE_MD_CAP below
                        # is deliberately NOT raised with it -- different class.
@@ -115,7 +130,18 @@ SIZE_CAP = 26 * 1024   # BYTES per ops/*.md (getsize). REVIEW TRIGGER, not a
 # whose signal is `intake.py report` (check 1); rule-registry.md is bounded by
 # the rule count and checked by 40-maintenance.md S4.1 (an entry for a rule
 # nobody uses). why/history: ops/rule-registry.md, key `ops file cap`.
-SIZE_CAP_EXEMPT = {"lessons.md", "rule-registry.md"}
+# environment.md joined 2026-09-08 on the condition ARMED on 2026-09-06 ("if it
+# fires again after a pass that moved real content, the answer is not a fourth
+# raise but SIZE_CAP_EXEMPT"), which fired the same week: two lossless passes
+# moved -1,243 B and -5,572 B and left the file 3,514 B over, because what it
+# holds is one fact table per SURFACE and the surface count is what grows. Its
+# review trigger is not lost -- the file's own closing line re-verifies any
+# block older than ~90 days, which is a property of the BLOCK where a byte
+# count was a position (L-047). User authorization 2026-09-08 (named, as
+# 70-evolution.md S1 invariant 1 requires); proposal + rollout + positive
+# control: drafts/2026-09-08-environment-md-exempt/APPLY.md. Rollback: drop the
+# name from this set (one token) -- the check then fires again, unchanged.
+SIZE_CAP_EXEMPT = {"lessons.md", "rule-registry.md", "environment.md"}
 TRAIL_IDLE_DAYS = 45
 DESC_CAP = 800          # chars, skill frontmatter description — this is the
                         # one that costs EVERY session; keep it tight.
@@ -124,7 +150,7 @@ BODY_CAP = 300          # lines, whole SKILL.md. Charged only on invoke, not at
                         # never compress in place. why/history:
                         # ops/rule-registry.md
 CLAUDE_MD_CAP = 23040      # BYTES (22.5 KB). why/history: ops/rule-registry.md
-DICT_CAP = 42 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
+DICT_CAP = 49 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # reasoning as SIZE_CAP: the dict is charged only on a
                        # routing miss. Raised 20K->24K on 2026-08-15 after
                        # tools/skill-routing-audit.py showed the file's problem
@@ -152,6 +178,38 @@ DICT_CAP = 42 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # the tool fix. File 40,222 B = 93.5% of the new cap:
                        # headroom is ~2 skill sections ON PURPOSE, so the next
                        # expansion re-runs this decision.
+                       # Raised 42K->49K on 2026-09-08 after dict-review round
+                       # 3. This round found a defect in the VOCABULARY ITSELF,
+                       # not in any one entry: 31 keyword tokens across 14
+                       # entries were written as slash alternations
+                       # (`把影片/圖片存下來`, `GLSL/shader`), which the matcher
+                       # reads as ONE literal token, so they fired only on a
+                       # turn that typed the slash too. Every MISS and coverage
+                       # figure printed before this was therefore a FLOOR. The
+                       # audit now DETECTS the shape (a property of the token,
+                       # so a new entry written that way is caught the day it
+                       # lands) and the 31 were spelled out: occurrences rose
+                       # ~130, media-fetch-pipeline stopped being DEAD, and one
+                       # naive expansion had to be walked back the same hour --
+                       # a bare `STEP` token matched "multi-step" and added 107
+                       # phantom occurrences, so the tokens are now `.step` /
+                       # `STEP 檔`. Tombstones are also reported separately now:
+                       # 4 of the 8 DEAD entries were deliberate, and making the
+                       # reader re-adjudicate them every sweep is how a report
+                       # stops being read.
+                       # File 46,334 B = 92.3% of the new cap: headroom is ~2
+                       # skill sections ON PURPOSE, so the next expansion
+                       # re-runs this decision.
+                       # AUTHORIZATION NOTE: that raise was applied BEFORE the
+                       # named authorization 70-evolution.md S1 invariant 1
+                       # requires for an edit to this file -- the model read
+                       # "finish fixing these debts" as covering the remedy the
+                       # rule itself prescribes, which it does not. Disclosed
+                       # the same session and RATIFIED by the user 2026-09-08
+                       # ("DICT_CAP 那筆也一併追認"), so the value stands. The
+                       # sequence, not the value, was the defect: a guardrail
+                       # edit is proposed in drafts/ and applied after the
+                       # word, the way environment.md's exemption above was.
                        # Provisional. why/history: ops/rule-registry.md, key
                        # `routing dict cap`.
 # RETIRED 2026-08-11: `Global_skill_update.md` is frozen as the historical
@@ -189,6 +247,31 @@ STALE_WORK_GIT_TIMEOUT = 2.0   # seconds; settings.json allows 3 s for the whole
 WATCHDOG_STALE_DAYS = 3
 WATCHDOG_STATUS = os.path.join(HOME, "tools", "graph-snapshot", "out",
                                "watchdog-status.json")
+# Check 15, second arm (born 2026-09-09, from a measured miss). The status file
+# above is a COPY of "what the last run found", written after the work; when a
+# run dies the copy keeps its last plausible value and the two states "ran and
+# was fine" and "did not finish" become indistinguishable. Measured: the daily
+# task ran 14:49:58, was killed (0xC000013A) after gsnap.py baseline, wrote no
+# log line, and this check reported the previous day's all-clear. gs_watchdog.py
+# now writes watchdog-run.json BEFORE it measures; a record still reading
+# `state: "started"` is a run that never came back.
+# The PRIMARY test is not a threshold at all: the record carries the pid, so
+# "is that process still running" is DETERMINABLE, and a dead pid under a
+# `started` record is an unfinished run with no waiting period. That direction
+# is the safe one -- a live process's pid cannot have been reused, so this can
+# never accuse a run that is genuinely in flight; the failure it can have is
+# staying quiet when a recycled pid makes a dead run look alive.
+# The minutes below are the BACKSTOP for exactly that, and for any host where
+# liveness cannot be read. Derived, not guessed: the task's own
+# ExecutionTimeLimit is PT30M (verified on the registered task 2026-09-09, owed
+# by D-27), so past 30 minutes the scheduler has already terminated it and no
+# legitimate run can still be running. Under both tests the check stays silent,
+# which is what keeps a run in progress (measured 25-41 s) quiet.
+# review-when: your graph-watchdog task's ExecutionTimeLimit changes.
+# why/history: ops/rule-registry.md, key `graph rot watchdog`.
+WATCHDOG_RUN_LIMIT_MIN = 30
+WATCHDOG_RUN = os.path.join(HOME, "tools", "graph-snapshot", "out",
+                            "watchdog-run.json")
 
 # Check 16. The build ops/ was last reconciled against, vs the one installed.
 # The stamp also carries a stat() fingerprint of the binary, so the steady
@@ -202,7 +285,7 @@ CC_STAMP = os.path.join(HOME, "ops", "cc-reconciled.json")
 CC_BIN = os.path.expanduser("~/.local/bin/claude.exe")
 
 # Check 17. Days the session-transcript mirror's marker may age before its
-# daily task (decisions D-033) is
+# daily task (your session-transcript-mirror scheduled task, decisions D-033) is
 # presumed dead. PROVISIONAL by the check-15 argument: daily carrier, 3
 # tolerates two off days. The FAIL state fires regardless of age -- the
 # mirror is the only thing between cleanupPeriodDays deletion and the
@@ -221,6 +304,23 @@ MIRROR_STALE_DAYS = 3
 # absence-is-normal rule as CC_BIN.
 MIRROR_MARKER = os.environ.get("OPS_NUDGE_MIRROR_MARKER") or ""
 
+# Check 18. copy-census (tools/copy-census, design references/copy-census-
+# design.md). Its carrier is your copy-census scheduled task, so the same
+# silent-when-dead argument as checks 15 and 17 applies -- and this one has a
+# measured precedent: on 2026-09-09 the graph watchdog's task was killed
+# mid-run, wrote no log line, and left a status file still reporting all-clear.
+# 3 days tolerates two off days, by the check-15 argument. The env var is the
+# TEST SEAM. why/history/review-when: ops/rule-registry.md, key `copy census`.
+COPY_CENSUS_STALE_DAYS = 3
+COPY_CENSUS_STATUS = (os.environ.get("OPS_NUDGE_COPY_CENSUS_STATUS")
+                      or os.path.join(HOME, "tools", "copy-census", "out",
+                                      "run-status.json"))
+
+
+class _CopyCensusHandled(Exception):
+    """Check 18 already reported this state; leave the block without falling
+    through to the branches below. The outer fail-open handler absorbs it."""
+
 # ---- output budget and severity ------------------------------------------
 # The line is injected into EVERY session's context, so the number of findings
 # printed is capped. The cap itself is fine; what was not is that it used to
@@ -237,7 +337,29 @@ MIRROR_MARKER = os.environ.get("OPS_NUDGE_MIRROR_MARKER") or ""
 # Evidence that (1) alone is not enough: the acceptance for this change is that
 # an over-cap file SURFACES when five or more checks fire, and a count cannot
 # surface a message.
-NUDGE_CAP = 4
+# What renders is a PROPERTY OF THE FINDING (its severity band), never its
+# POSITION in the list. Until 2026-09-08 this was `found[:NUDGE_CAP]` with
+# NUDGE_CAP = 4, and the defect is the one CLAUDE.md names as L-047: a predicate
+# that is a position in an artifact that grows. Because the order is severity
+# then arrival, the cutoff is DETERMINISTIC -- the same classes fall off every
+# session, forever. Measured 2026-09-08 with 7 findings live: ranks 5-7 were
+# `environment.md` 134% of cap, `skill-trigger-dict.md` 106% of cap, and 18
+# unfolded intake cards -- which were also, independently, the three oldest
+# debts in the repo. The count-and-name tail was working exactly as designed and
+# still did not surface them, because a label in a tail is not a remedy.
+#
+# The replacement: every band renders, and collapsing is a BUDGET event, not a
+# policy -- only when the rendered text exceeds NUDGE_BYTE_CEILING does the
+# lowest band still shown collapse WHOLE into the named tail. So with room to
+# spare nothing is hidden at all, and when there is not, what disappears is a
+# CLASS the tail names rather than whoever happened to sit in fifth place. The
+# printed set then shrinks as debt is paid instead of staying at four forever.
+#
+# Why a byte ceiling is not the same defect in another unit: it is a property of
+# the rendered TEXT, and it never selects WHICH finding goes -- the band does,
+# and a band is a property of the finding. Measured 2026-09-08: all seven live
+# findings render in 2,073 bytes, so today the ceiling collapses nothing.
+NUDGE_BYTE_CEILING = 2400
 # Bands, most severe first. The axis is "if only ONE line survives, which one
 # does the reader most need?" -- not the class-(a)/(b) budget distinction from
 # 40-maintenance.md S3, which governs the REMEDY (already carried in each
@@ -255,6 +377,42 @@ SEV_QUEUE = 3   # recurring counters and process reminders. They re-fire every
                 # makes them the right thing to drop when the line is full.
 SEV_NAME = {SEV_ALARM: "alarm", SEV_LOSS: "loss",
             SEV_BREACH: "breach", SEV_QUEUE: "queue"}
+
+def split_by_band(found, ceiling=None):
+    """-> (shown, hidden). What collapses is a BAND, never a rank.
+
+    `found` is `Nudges.ordered()`. Every band renders; collapsing happens only
+    when the rendered text exceeds `ceiling` BYTES, and then the lowest band
+    still shown collapses WHOLE and the test repeats. Two properties follow, and
+    both are what the rank cutoff lacked:
+
+      * a finding is never hidden for its POSITION -- only its class can be
+        collapsed, and the tail names the class either way;
+      * with room to spare NOTHING is hidden, so a lone queue finding still
+        prints in full (the rank cutoff's replacement must not become a
+        severity filter -- check 11 alone on the screen is the case that
+        catches that).
+
+    The most severe band never collapses: below one band there is nothing left
+    to say.
+    """
+    if ceiling is None:
+        # Control seam, same shape as OPS_NUDGE_MIRROR_MARKER: the collapse
+        # branch is unreachable from a fixture otherwise, since the message
+        # lengths belong to the checks and not to the test. Ignored unless it
+        # parses as a positive int.
+        try:
+            ceiling = max(1, int(os.environ["OPS_NUDGE_BYTE_CEILING"]))
+        except (KeyError, ValueError):
+            ceiling = NUDGE_BYTE_CEILING
+    bands = sorted({s for s, _, _ in found})
+    while True:
+        shown = [f for f in found if f[0] in bands]
+        hidden = [f for f in found if f[0] not in bands]
+        size = sum(len(t.encode("utf-8")) for _, t, _ in shown)
+        if size <= ceiling or len(bands) <= 1:
+            return shown, hidden
+        bands = bands[:-1]
 
 
 class Nudges(object):
@@ -286,6 +444,46 @@ class Nudges(object):
     def ordered(self):
         """[(sev, text, label)], most severe first, ties broken by arrival."""
         return [(s, t, n) for s, _, t, n in sorted(self._items)]
+
+
+def _pid_alive(pid):
+    """True / False / None (undeterminable) — check 15's run-record arm.
+
+    No subprocess: this file's budget is 3 s for every check together, and a
+    `Get-Process` would spend most of it. ctypes on Windows, signal 0
+    elsewhere, and any surprise answers None so the caller falls back to the
+    ExecutionTimeLimit backstop rather than inventing a verdict.
+
+    OpenProcess alone is not enough: a handle can still be opened to a process
+    that has exited, so the exit code is what actually answers the question
+    (STILL_ACTIVE == 259).
+    """
+    if not isinstance(pid, int) or pid <= 0:
+        return None
+    try:
+        if sys.platform != "win32":
+            try:
+                os.kill(pid, 0)
+                return True
+            except ProcessLookupError:
+                return False
+            except PermissionError:
+                return True          # exists, owned by someone else
+        import ctypes
+        from ctypes import wintypes
+        k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        handle = k32.OpenProcess(0x1000, False, pid)   # QUERY_LIMITED_INFO
+        if not handle:
+            return False
+        try:
+            code = wintypes.DWORD()
+            if not k32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return None
+            return code.value == 259                   # STILL_ACTIVE
+        finally:
+            k32.CloseHandle(handle)
+    except Exception:
+        return None
 
 
 def interop_targets():
@@ -501,9 +699,69 @@ def main():
     #     14: the remedy is ~/.claude maintenance and would be noise anywhere
     #     else. Fail-open. why/thresholds/review-when: ops/rule-registry.md,
     #     key `graph rot watchdog`.
+    #     Second arm (2026-09-09): before trusting the status file at all, ask
+    #     whether the run that should have written it came back. A run record
+    #     left in `started` outranks everything below it -- not because an
+    #     unfinished run is worse than rot, but because while it stands the
+    #     status file describes an EARLIER run, so both its all-clear and its
+    #     finding are answers to a question nobody asked today. A missing run
+    #     record is silent by design: it means a carrier older than this arm,
+    #     which the staleness arm already covers and the next run repairs.
     if is_home:
+        unfinished = None
         try:
-            if not os.path.isfile(WATCHDOG_STATUS):
+            with open(WATCHDOG_RUN, encoding="utf-8-sig") as f:
+                _run = json.load(f)
+            if _run.get("state") == "crashed":
+                unfinished = _run
+            elif _run.get("state") == "started":
+                alive = _pid_alive(_run.get("pid"))
+                if alive is False:
+                    # Re-read before accusing. The one race this arm has is
+                    # sampling the record microseconds before a healthy run
+                    # closes it; a record that still says `started` after the
+                    # process is gone is not that race.
+                    with open(WATCHDOG_RUN, encoding="utf-8-sig") as f:
+                        if json.load(f).get("state") == "started":
+                            unfinished = _run
+                elif alive is None:
+                    # Liveness undeterminable (no pid in the record, or a host
+                    # this cannot ask). Fall back to the time backstop. NOT
+                    # applied when the pid is known alive: a manual run may
+                    # legitimately outlast the scheduler's limit, and a run
+                    # whose pid was recycled is caught by the staleness arm
+                    # below once the status file stops being refreshed.
+                    try:
+                        began = time.mktime(time.strptime(_run["started_at"],
+                                                          "%Y-%m-%dT%H:%M:%S"))
+                    except (KeyError, ValueError, OverflowError):
+                        began = os.path.getmtime(WATCHDOG_RUN)
+                    if (time.time() - began) / 60 > WATCHDOG_RUN_LIMIT_MIN:
+                        unfinished = _run
+        except Exception:
+            pass
+        try:
+            if unfinished is not None:
+                why = (f"crashed ({unfinished.get('error')})"
+                       if unfinished.get("state") == "crashed" else
+                       "never came back — killed, or the machine went down")
+                since = ""
+                try:
+                    with open(WATCHDOG_STATUS, encoding="utf-8-sig") as f:
+                        since = " (last finished run: %s)" % json.load(f).get(
+                            "ran_at", "unknown")
+                except Exception:
+                    pass
+                msgs.add(
+                    "graph rot watchdog: the run started "
+                    f"{unfinished.get('started_at')} did not finish — {why}, "
+                    "so watchdog-status.json is from an EARLIER run and says "
+                    f"nothing about today{since}. Check "
+                    "your graph-watchdog task's scheduler entry (LastTaskResult) and "
+                    "run `python tools/graph-snapshot/gs_watchdog.py`",
+                    SEV_ALARM, "graph watchdog run unfinished"
+                )
+            elif not os.path.isfile(WATCHDOG_STATUS):
                 msgs.add(
                     "graph rot watchdog has never run — "
                     "`python tools/graph-snapshot/gs_watchdog.py`, and check "
@@ -535,18 +793,58 @@ def main():
                     # have silently picked the wrong remedy. The substring
                     # arm stays as the fallback for a status file written by
                     # an older watchdog.
+                    # 2026-09-09: the `build` kind had no branch here, so a
+                    # failed build -- the one finding that says nothing else
+                    # in the file was measured today -- fell through to
+                    # "harvest due: read the integrity report", a file the
+                    # failed build did not regenerate. The measured line sent
+                    # the reader to the LAST GOOD build's output while telling
+                    # them the graph needed attention first. Every kind
+                    # gs_watchdog.evaluate() can set now has a branch; the
+                    # fallback maps the same three, so an old status file
+                    # written before `remedy_kind` existed cannot reach the
+                    # wrong one either. The three are a TABLE and the default is
+                    # reserved for a kind this surface does not know (L-068):
+                    # `harvest` used to be the else, which is how `build` was
+                    # served a plausible wrong sentence instead of an error.
+                    # The FALLBACK below keeps a default on purpose -- it maps
+                    # free TEXT, an open set, where a default is the only
+                    # terminating branch. A closed set of values is different:
+                    # every member is named, and the unnamed case says so.
                     kind = wd.get("remedy_kind")
                     if kind is None:
-                        kind = ("regenerate" if "MOC lags" in finding and not any(
-                                k in finding for k in ("broken link", "premise", "FAILED"))
-                                else "harvest")
-                    if kind == "regenerate":
-                        remedy = (" — regenerate: gsnap.py baseline / build / verify, "
-                                  "then `python -X utf8 tools/graph-snapshot/gsnap.py "
-                                  "emit-moc`, and commit references/_moc")
-                    else:
-                        remedy = (" — harvest due: read tools/graph-snapshot/out/"
-                                  "integrity-report.md (graph-query skill, J3)")
+                        if "FAILED" in finding:
+                            kind = "build"
+                        elif "MOC lags" in finding and not any(
+                                k in finding for k in ("broken link", "premise")):
+                            kind = "regenerate"
+                        else:
+                            kind = "harvest"
+                    remedy = {
+                        "build":
+                            " — rebuild first: `python -X utf8 tools/"
+                            "graph-snapshot/gsnap.py baseline` / `build` / "
+                            "`verify`, and see which step exits nonzero — "
+                            "every other number in this status file is the "
+                            "LAST GOOD build's. A common cause is not a "
+                            "graph defect: the corpus changed under the "
+                            "build, which verify reports as an INV-2 "
+                            "zero-touch violation — another session editing "
+                            "~/.claude while it ran",
+                        "regenerate":
+                            " — regenerate: gsnap.py baseline / build / verify, "
+                            "then `python -X utf8 tools/graph-snapshot/gsnap.py "
+                            "emit-moc`, and commit references/_moc",
+                        "harvest":
+                            " — harvest due: read tools/graph-snapshot/out/"
+                            "integrity-report.md (graph-query skill, J3)",
+                    }.get(kind)
+                    if remedy is None:
+                        remedy = (f" — this surface has no remedy for remedy_kind"
+                                  f" {kind!r}: gs_watchdog.evaluate() gained a "
+                                  "kind check 15 was never extended for, so act "
+                                  "on the finding above and add the branch "
+                                  "(hooks/ops_health_nudge.py check 15)")
                     msgs.add("graph rot watchdog: " + finding + remedy,
                              SEV_ALARM, "graph rot reported")
         except Exception:
@@ -628,8 +926,8 @@ def main():
                     msgs.add(
                         "session-transcript mirror FAILED its last run ("
                         + first + ") — transcripts are unprotected against "
-                        "cleanupPeriodDays deletion: see your mirror log "
-                        "directory",
+                        "cleanupPeriodDays deletion: see "
+                        "your mirror log directory",
                         SEV_ALARM, "session mirror failed"
                     )
                 elif age > MIRROR_STALE_DAYS:
@@ -639,6 +937,76 @@ def main():
                         "dead: check your mirror task's scheduler entry, "
                         "then run tools/claude-session-transcript-mirror.ps1",
                         SEV_ALARM, "session mirror silent"
+                    )
+        except Exception:
+            pass
+
+    # 18. unguarded copies (tools/copy-census, born 2026-09-09). Reads ONE
+    #     small JSON its carrier writes; never scans anything itself -- the
+    #     scan costs ~1 s over two roots and this hook has a 3 s budget for
+    #     every check together. Three states, and the missing/stale ones matter
+    #     as much as the findings: a copy guard nobody runs is worse than none,
+    #     because the clean line it printed last week is still believed.
+    #     is_home-scoped like 15 and 17: the remedy is machine maintenance.
+    if is_home:
+        try:
+            # A host without the tool is silent by design -- the same
+            # absence-is-normal call check 17 makes for the archive root. Only
+            # an INSTALLED tool with no run record is an alarm.
+            cc_root = os.path.dirname(os.path.dirname(COPY_CENSUS_STATUS))
+            if not os.path.isdir(cc_root):
+                pass
+            elif not os.path.isfile(COPY_CENSUS_STATUS):
+                msgs.add(
+                    "copy-census has never recorded a run — the guard over "
+                    "this machine's unguarded copies may not be running: "
+                    "check your copy-census task's scheduler entry, then "
+                    "run tools/copy-census/run-daily.ps1",
+                    SEV_ALARM, "copy-census never ran"
+                )
+            else:
+                age = (time.time()
+                       - os.path.getmtime(COPY_CENSUS_STATUS)) / 86400
+                try:
+                    with open(COPY_CENSUS_STATUS, encoding="utf-8") as f:
+                        status = json.load(f)
+                except (ValueError, UnicodeDecodeError):
+                    # An unreadable record is the WORST state, not a neutral
+                    # one: it is recent enough to escape the staleness branch
+                    # and unparseable enough to say nothing. Without this the
+                    # outer except-pass turned a half-written file into
+                    # silence -- which is exactly the failure this check
+                    # exists to catch. Found by review 2026-09-09.
+                    msgs.add(
+                        "copy-census run record is unreadable — the last run "
+                        "may have been killed mid-write: run "
+                        "tools/copy-census/copies.py --check --record",
+                        SEV_ALARM, "copy-census record unreadable"
+                    )
+                    raise _CopyCensusHandled
+                findings = status.get("findings") or []
+                if age > COPY_CENSUS_STALE_DAYS:
+                    msgs.add(
+                        f"copy-census silent {age:.1f}d "
+                        f"(>{COPY_CENSUS_STALE_DAYS}d) — its daily task may "
+                        "be dead: check your copy-census task's scheduler entry, then run "
+                        "tools/copy-census/run-daily.ps1",
+                        SEV_ALARM, "copy-census silent"
+                    )
+                elif findings:
+                    worst = "FAIL" if any(
+                        f.get("severity") == "FAIL" for f in findings) else "WARN"
+                    msgs.add(
+                        f"copy-census {worst}: "
+                        + "; ".join(
+                            "%s %s" % (f.get("kind"), f.get("row"))
+                            for f in findings[:3])
+                        + (f" (+{len(findings) - 3} more)"
+                           if len(findings) > 3 else "")
+                        + " — run tools/copy-census/copies.py --check for the "
+                          "detail; a new pair needs a row in rows.toml",
+                        SEV_ALARM if worst == "FAIL" else SEV_QUEUE,
+                        "copy-census " + worst
                     )
         except Exception:
             pass
@@ -841,44 +1209,92 @@ def main():
     #     Advisory artifacts under outputs/ declare handling status in a
     #     greppable line within their first 10 lines; this screen surfaces the
     #     ones still awaiting action and flags NEW ones born without the line.
-    #     Scope is deliberately narrow -- candidates files and experiment
-    #     metrics only; outputs/skill-reviews/ keeps its own disposition
-    #     convention (D-032) and is not double-governed. A file with no date
-    #     in its name, or dated on/before the convention's birth, is exempt
-    #     from the missing-line flag (no backfill -- evidence-block precedent;
-    #     a permanently-on alarm about old files is the alarm nobody reads).
-    #     The status parse rules only on what it can determine: clearly-spent
-    #     keywords silence, anything else present surfaces and routes to
-    #     reading ONE named file.
+    #     The two checks have DIFFERENT scopes, and that asymmetry is the
+    #     design (widened 2026-09-10, after a deferred-extraction record filed
+    #     under outputs/ proved invisible here):
+    #       - OWES a stamp: candidates files and experiment metrics only. That
+    #         list stays narrow because it says who is OBLIGED; widening it
+    #         would nag every file under outputs/.
+    #       - MAY be polled: any outputs/**/*.md that stamps ITSELF, minus
+    #         outputs/skill-reviews/ (D-032 disposition convention, not
+    #         double-governed). A file opts in by carrying the line.
+    #     Measured before shipping, because the naive widening is the alarm
+    #     nobody reads: 40 stamped files, of which "not SPENT" alone yields 35
+    #     findings. So the ruler is the convention's own vocabulary
+    #     (SPENT / OPEN / PARTIAL, plus deferred / pending / await / 待裁 /
+    #     待決 / 尚未) and identical status text inside one directory collapses
+    #     to ONE row with a count -- 23 trigger-probe reports are two standing
+    #     residuals, not 23 offers. Result: 6 rows for 26 waiting files.
+    #     A stamp matching NEITHER family cannot be ruled on (CLOSED, CONSUMED,
+    #     LIVE, 量測紀錄 -- words the convention never defined): it is counted
+    #     into the same message, never silenced and never expanded per file.
+    #     A file with no date in its name, or dated on/before the convention's
+    #     birth, is exempt from the missing-line flag (no backfill --
+    #     evidence-block precedent).
     try:
         import glob as _glob
         spent_rx = re.compile(r"SPENT|已執行|否決|已裁")
+        waiting_rx = re.compile(r"\bOPEN\b|\bPARTIAL\b|\bdeferred\b|\bpending\b"
+                                r"|\bawait|待裁|待決|待確認|尚未", re.I)
         status_rx = re.compile(r"^(?:> status:|\*\*狀態)")
         date_rx = re.compile(r"(\d{4}-\d{2}-\d{2})")
-        open_arts, unstamped = [], []
+        stamps = {}
+        for p in _glob.glob(os.path.join(HOME, "outputs", "**", "*.md"),
+                            recursive=True):
+            rel = os.path.relpath(p, HOME).replace(os.sep, "/")
+            if rel.startswith("outputs/skill-reviews/"):
+                continue          # D-032 disposition convention; not double-governed
+            with open(p, encoding="utf-8", errors="replace") as f:
+                head = [next(f, "") for _ in range(10)]
+            stamps[rel] = next((l for l in head if status_rx.match(l)), None)
+
+        waiting, undetermined = {}, 0
+        for rel, line in stamps.items():
+            if line is None or spent_rx.search(line):
+                continue
+            body = re.sub(r"\s+", " ", status_rx.sub("", line).strip())
+            if not waiting_rx.search(body):
+                undetermined += 1     # a word the convention does not define
+                continue
+            waiting.setdefault((os.path.dirname(rel), body[:40]), []).append(rel)
+
+        unstamped = []
         for pat in ("outputs/retrospectives/global-rule-candidates-*.md",
                     "outputs/experiments/*/metrics.md"):
             for p in _glob.glob(os.path.join(HOME, pat)):
-                with open(p, encoding="utf-8", errors="replace") as f:
-                    head = [next(f, "") for _ in range(10)]
-                line = next((l for l in head if status_rx.match(l)), None)
+                rel = os.path.relpath(p, HOME).replace(os.sep, "/")
                 base = (os.path.basename(os.path.dirname(p))
                         if os.path.basename(p) == "metrics.md"
                         else os.path.basename(p))
-                if line is None:
+                if stamps.get(rel, "sentinel") is None:
                     m = date_rx.search(base)
                     if m and m.group(1) > "2026-08-16":
                         unstamped.append(base)
-                elif not spent_rx.search(line):
-                    open_arts.append(base)
-        if open_arts:
+        if waiting or undetermined:
+            items = []
+            for (d, _k), files in sorted(waiting.items()):
+                items.append(os.path.basename(files[0]) if len(files) == 1
+                             else f"{d}/ x{len(files)}")
+            # The undetermined count rides in the same message but never
+            # DEPENDS on it: a run with only unruleable stamps must still say
+            # so, or the class the parse cannot close disappears from the
+            # screen entirely.
+            tail = ""
+            if undetermined:
+                tail = (f"{undetermined} stamped file(s) use a word the "
+                        f"convention does not define (SPENT/OPEN/PARTIAL) and "
+                        f"could not be ruled on")
+            head = ("advisory output(s) still OPEN: " + ", ".join(items)
+                    + " — carries offers a session may need to act on; read its "
+                    "status line (rules-usage-dict.md S7)") if items else ""
             msgs.add(
-                "advisory output(s) still OPEN: "
-                + ", ".join(sorted(open_arts))
-                + " — carries offers a session may need to act on; read its "
-                "status line (rules-usage-dict.md S7)",
+                (head + (". " if head and tail else "") + tail)
+                if head else
+                (tail + " — advisory status lines, "
+                 "rules-usage-dict.md S7 defines the three words"),
                 SEV_LOSS,
-                f"{len(open_arts)} advisory output(s) OPEN"
+                f"{len(items)} advisory output(s) OPEN"
+                if items else f"{undetermined} advisory stamp(s) unruleable"
             )
         if unstamped:
             msgs.add(
@@ -895,23 +1311,25 @@ def main():
     found = msgs.ordered()
     if show_all:
         if found:
+            shown_n = len(split_by_band(found)[0])
             print(f"[ops-health] {len(found)} finding(s), most severe first "
-                  f"(a session start shows the first {NUDGE_CAP}):")
+                  f"(a session start shows {shown_n}):")
             for sev, text, _label in found:
                 print(f"  [{SEV_NAME[sev]}] {text}")
         else:
             print("[ops-health] no findings")
     elif found:
-        shown = [t for _, t, _ in found[:NUDGE_CAP]]
-        rest = found[NUDGE_CAP:]
+        shown_items, rest = split_by_band(found)
+        shown = [t for _, t, _ in shown_items]
         if rest:
             # Defect 1's actual fix. A COUNT is not enough: it lets a reader
             # tell that something was dropped, but not WHAT -- and the finding
             # this was found by (skill-trigger-dict.md over DICT_CAP) would
             # still not have surfaced. So the tail carries each hidden
             # finding's label, which is short by construction; the full remedy
-            # text is what --all is for. The cap stays a FINDING cap, not a
-            # character one, so this tail is the only thing that grows.
+            # text is what --all is for. Since 2026-09-08 the tail holds whole
+            # BANDS rather than whatever fell past rank 4, so a label appearing
+            # here says "this class is collapsed", not "this one was unlucky".
             shown.append(
                 f"(+{len(rest)} more, not shown in full: "
                 + "; ".join(label for _, _, label in rest)

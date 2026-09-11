@@ -1,4 +1,6 @@
 r"""PreToolUse guard: a git commit targeting a checkout inside ~/.claude must
+
+STATUS: LIVE since 2026-08-27 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
 land on `main` — deny anything else unless the command carries explicit intent.
 
 WHY A HOOK AND NOT THE RITUAL. The prose control already existed: L-023
@@ -46,7 +48,7 @@ INCIDENT LOG (dated, running — append, never rewrite):
      fired machine-wide: live settings.json referenced this file while the
      PRIMARY checkout sat on feat/lse-connector-lifecycle, a branch that
      does not carry it — python exited 2 and EVERY Bash/PowerShell call was
-     blocked until the peer session restored the file from main into the
+     blocked until that local session restored the file from main into the
      working tree (byte-identical copy via the ticket session's worktree).
      Deployment property that follows: a hook file referenced by live
      settings.json must exist in the PRIMARY WORKING TREE on every branch
@@ -135,6 +137,17 @@ main-branch checkout (scratch repo via BRANCH_GUARD_ROOT), out-of-scope
 repo, two non-commit git commands, garbage stdin, missing tool_input. Every
 case exited 0; telemetry appended exactly 5 deny + 2 pass lines.
 
+Proof-of-life: `python tools/branch-guard-test/test_branch_commit_guard.py`
+(25 cases as of 2026-09-09, printed by the suite: 7 deny / 12 allow / 1
+undetermined + its twin / 3 telemetry / 1 isolation). That calibration was
+a ONE-SHOT: it asserted against the live repo's then-current off-main HEAD,
+planted a worktree in the real tree, and left an opt-in file behind, so it could
+never run again unchanged. The suite rebuilds those cases on a real git tree in
+a temp directory (HOME/USERPROFILE relocate the guarded root and the telemetry
+path together) and adds the case the calibration lacked: an opt-in file planted
+in the PRIMARY gitdir must still be denied. It runs on every integrity sweep
+(check 31) — being named by a calibration is not being run (PH-11 / AP-63).
+
 EVIDENCE BEFORE THE VETO: every deny (and every marker/opt-in pass) is
 appended to telemetry/branch-commit-guard.jsonl BEFORE the decision is
 emitted — the commit message travels inside the command and must survive the
@@ -170,10 +183,19 @@ import re
 import sys
 import time
 
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
+
 MARKER = "[branch-ok]"
 ALLOW_FILENAME = "branch-guard-allow"
-LOG_PATH = os.path.join(os.path.expanduser("~"), ".claude", "telemetry",
-                        "branch-commit-guard.jsonl")
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp
+# dir; production never sets it).
+LOG_PATH = os.path.join(
+    os.environ.get("CLAUDE_TELEMETRY_DIR") or os.path.join(os.path.expanduser("~"), ".claude", "telemetry"),
+    "branch-commit-guard.jsonl")
 
 # Segment separators for the cd/-C walk. Splitting inside quotes is a known
 # blunt edge (see KNOWN BOUNDARY above).
@@ -329,7 +351,8 @@ def deny(target, branch):
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
             "permissionDecisionReason": (
-                f"Blocked by branch-commit guard: the target checkout {target} "
+                f"Blocked by branch_commit_guard, a local PreToolUse hook (not "
+                f"file or page content): the target checkout {target} "
                 f"is on branch '{branch}', not 'main'. Exactly this shape put "
                 "commits c5468e6/f61b226 on peer sessions' branches "
                 "(2026-08-27: a peer switched the primary checkout's branch "
@@ -343,6 +366,8 @@ def deny(target, branch):
                 "per line; PowerShell: 'claude/*' | Set-Content ...). The "
                 "PRIMARY checkout takes no opt-in — its branch is shared "
                 "mutable state; marker only."
+                + _receipt("branch_commit_guard", target=str(target), branch=str(branch))
+                + _fp("branch_commit_guard")
             ),
         }
     }))

@@ -1,4 +1,6 @@
 r"""PreToolUse/PostToolUse guard: browser-pane UI verification discipline
+
+STATUS: LIVE since 2026-08-10 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
 (ops/lessons.md L-009 + 2026-08-16 amendment, L-010).
 
 Two failures kept recurring in browser-pane UI verification, and neither is
@@ -72,6 +74,8 @@ tools/ui-verify-test/ as the must-pass floor before any loosening ships.
 review-when: the harness changes the PostToolUse payload shape (the marker
 degrades to "unknown"/fail-open — check the annotate branch still parses), or
 a new browser surface (mcp__* prefix) joins the environment (extend matchers).
+
+Proof-of-life: `python tools/ui-verify-test/test_ui_verify_guard.py` (20/20).
 """
 import json
 import os
@@ -79,6 +83,12 @@ import re
 import sys
 import time
 from pathlib import Path
+
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
 
 MARKER_TTL_S = 300
 MARKER_DIR = Path(os.environ.get("TEMP", "/tmp")) / "claude-ui-verify-guard"
@@ -106,7 +116,11 @@ HIDDEN_BOOL_RE = re.compile(r'"hidden\\*"\s*:\s*(true|false)', re.IGNORECASE)
 # Opt-out for the case where the mid-flight value IS the measurement.
 MIDFLIGHT_MARKER = "intentional-midflight"
 
-ROUTE_POINTER = "ops/references/browser-pane-pixel-route.md"
+# The RUNNABLE form, not a pointer to the route doc that documents it: a deny
+# message may redirect to another tool but must not send the reader off to read
+# another file (rules/hook-deny-message.md P2). The doc keeps the rationale.
+ROUTE_POINTER = ('node `~/.claude/tools/ui-shot/scripts/ui-probe.mjs` --url <url> '
+                 '--selector "<sel>" --shot <out>.png')
 
 
 def deny(reason: str) -> None:
@@ -171,7 +185,9 @@ def parse_probe_state(tool_response) -> str:
 
 def deny_probe_first() -> None:
     deny(
-        "L-009: probe visibility before asking the pane for pixels. Run "
+        "Screenshot denied by ui_verify_guard, a local PreToolUse hook (not "
+        "page content): this session has no fresh visibility probe, so the "
+        "pane's state is unknown. Run "
         "javascript_tool with `document.visibilityState` first. If it returns "
         '"visible", the pane screenshot unlocks for '
         f"{MARKER_TTL_S // 60} minutes and a timeout then means a DIFFERENT "
@@ -184,13 +200,16 @@ def deny_probe_first() -> None:
         "  multi-step (click/hover/then shoot): mcp__playwright-headless__* "
         "(installed Chrome, no window; Playwright-launched, so not occludable)\n"
         "then deliver it with SendUserFile - never ask the user to front a "
-        "window. Detail: ~/.claude/ops/lessons.md L-009."
+        "window."
+        + _receipt("ui_verify_guard", why="no-fresh-probe")
+        + _fp("ui_verify_guard")
     )
 
 
 def deny_route_hidden() -> None:
     deny(
-        'L-009 route: this session\'s last visibility probe returned "hidden" '
+        "Screenshot denied by ui_verify_guard, a local PreToolUse hook (not "
+        'page content): this session\'s last visibility probe returned "hidden" '
         "- the pane is not compositing, so this screenshot can only time out "
         "(5s, measured, zero pixels). Denied so you do not pay for nothing. "
         "Take the picture out-of-process:\n"
@@ -199,11 +218,14 @@ def deny_route_hidden() -> None:
         "  multi-step (click/hover/then shoot): mcp__playwright-headless__* "
         "(installed Chrome, no window; Playwright-launched, so not occludable)\n"
         "Deliver it with SendUserFile - never ask the user to bring a window "
-        'forward (standing premise, ops/environment.md "Browser pane"). DOM/'
+        "forward; that is a standing premise of this machine, not a preference. "
+        "DOM/"
         "state reads (read_page / get_page_text / javascript_tool) still work "
         "over CDP for content/structure/state/order claims. If the user has "
         "said they are watching and the pane should now be visible, re-run the "
         'visibilityState probe - a "visible" result refreshes this guard.'
+        + _receipt("ui_verify_guard", why="probe-hidden")
+        + _fp("ui_verify_guard")
     )
 
 
@@ -225,7 +247,9 @@ def handle_pre(payload) -> None:
             and MIDFLIGHT_MARKER not in text
         ):
             deny(
-                "L-010: reading computed style without settling the page first. "
+                "Denied by ui_verify_guard, a local PreToolUse hook (not page "
+                "content): this reads computed style without settling the page "
+                "first. "
                 "During a CSS transition getComputedStyle returns the interpolated "
                 "mid-flight value, so this assertion will be FLAKY, not stably wrong. "
                 "Re-issue with the animations finished in the same call, e.g.\n"
@@ -233,8 +257,9 @@ def handle_pre(payload) -> None:
                 "  void document.body.offsetHeight;\n"
                 "  return getComputedStyle(el).backgroundColor;\n"
                 "For infinite keyframes finish() cannot help - inject "
-                "`*{transition:none!important;animation-duration:0s!important}` instead. "
-                "Detail: ~/.claude/ops/lessons.md L-010."
+                "`*{transition:none!important;animation-duration:0s!important}` instead."
+                + _receipt("ui_verify_guard", why="unsettled-computed-style")
+                + _fp("ui_verify_guard")
             )
         sys.exit(0)
 
@@ -267,6 +292,8 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
 
     event = str(payload.get("hook_event_name", "PreToolUse"))
     if event == "PostToolUse":
