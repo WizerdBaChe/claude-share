@@ -210,3 +210,126 @@ source:     utterance
 on-fire:    ask-first
 zero-means: no skill accumulated field-test debt in the window (no misfire or bypass was reported, no fresh rewrite took a first real run) and the user did not ask for a round; the loop is deliberately on-demand after convergence
 proc:       then verify, adopt, and hand off via disposition files so the loop continues across sessions
+
+<!-- Batch added 2026-09-08 (debt sweep): the registry covered 15 of 29 skills.
+     The audit's `quiet` population is built from the DICT, so an unregistered
+     skill was not printed as a bad verdict -- it was printed as nothing at all,
+     and the report's silence about it read exactly like a clean bill. Coverage
+     is now printed by the tool itself (skill-routing-audit.py --classes-coverage
+     line) so a partial registry cannot be mistaken for a complete one again. -->
+
+## app-residue-sweep
+class:      conditional
+source:     utterance
+on-fire:    ask-first    # it ARCHIVES a file class and emits an admin script; both are the user's call
+zero-means: no application was uninstalled in the window, which is the normal
+  state -- the skill's occasion is an uninstall, not a schedule. v1 shipped
+  2026-09-05 with one profile (codex-chatgpt); a zero until the next real
+  uninstall is the skill working correctly.
+
+## audience-fit
+class:      conditional
+source:     artifact-context
+on-fire:    execute
+zero-means: no deliverable aimed at a NON-BUILDER reader was produced in the
+  window. Its occasion is an artifact's audience, not an utterance, so an
+  utterance-based audit is partially blind to it (blind spot 1 above): a zero
+  here is weaker evidence than a zero for an utterance-triggered skill.
+
+## diagram-authoring
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no diagram was asked for and no existing system needed
+  reconstructing in the window.
+
+## graph-query
+class:      conditional
+source:     utterance
+on-fire:    execute      # read-only queries over a derived graph
+zero-means: nobody asked what must be read with X, or what is broken/orphaned.
+  Note its second entry point is not an utterance at all: the ops-health graph
+  alarm's `harvest due` line routes here, so a zero alongside a live alarm is a
+  finding about the ROUTE, not about occasions.
+
+## knowledge-vault
+class:      conditional
+source:     utterance
+on-fire:    ask-first    # Mode A writes into a governed vault with its own AGENTS.md
+zero-means: nothing was filed into or looked up from the user's local Obsidian
+  knowledge vault. Its first real run is also its calibration (offer
+  skill-co-upgrade then), so an early zero carries no verdict about the skill.
+
+## mechanism-share-packaging
+class:      conditional
+source:     utterance
+on-fire:    ask-first    # it writes into a share repo -- outward-facing, the user transmits
+zero-means: no mechanism was exported in the window. Occasions are rare by
+  construction (one packaged mechanism is months of work), so a zero is the
+  expected steady state and says nothing.
+
+## media-fetch-pipeline
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no post link was pasted with intent to save. MEASURED 2026-09-08:
+  it fired 1x while the dict explains 0 -- the dict records the wrong words for
+  it, which is a defect in `skill-trigger-dict.md`, not in this class.
+
+## model3d-pipeline
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no 3D/CAD/model/drawing-sheet request arose. The capability lives
+  outside this repo (`model3d-pipeline`, a separate local project tree) and its
+  venv can be stale, so before reading a zero as a routing defect, check the
+  pipeline still runs.
+
+## paper-distill
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no paper/preprint/patent was handed over for an evidence audit.
+  Paired with paper-story since the 2026-09-03 split (distill = evidence audit,
+  story = narrative); a zero for one while the other fires is a ROUTING finding
+  between the two, not an occasion finding.
+
+## paper-story
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no paper needed turning into a talk or deck. See paper-distill: the
+  pair must be read together, and the lab's weekly cycle is the occasion
+  generator for both.
+
+## post-brief
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: nobody asked what a pasted post says. Stage 1 of 2 by design; the
+  GUI stage is a separate product and its absence is not this skill's zero.
+
+## render-perf
+class:      conditional
+source:     utterance
+on-fire:    execute      # a knowledge pack: it loads references, it does not act
+zero-means: no rendering-performance symptom was reported (jank, dropped
+  frames, DOM blowup). A knowledge pack's occasion is a SYMPTOM, so a zero
+  during a period with no frontend work is expected.
+
+## system-design
+class:      conditional
+source:     utterance
+on-fire:    ask-first    # user ruling: collection-first, ASK-GATE on ambiguity -- never guess
+zero-means: expected and RULED so. The pack is early-stage (2 files) and
+  registered primarily to COLLECT, not to answer; answering priority is
+  deliberately low. A zero is not a defect until the pack is declared
+  answer-ready.
+
+## ux-walkthrough
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no interactive surface was walked. Its occasion is an existing or
+  designed UI plus a named person and situation; with no UI phase in the
+  window, a zero is the skill working correctly.

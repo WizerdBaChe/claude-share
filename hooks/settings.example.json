@@ -53,16 +53,25 @@
     "    compact-recovery/preserve.py, but the mount still points outside",
     "    hooks/ and this template mounts hooks/ and nothing else; the optional",
     "    SessionEnd block lives in compact-recovery/README.md.",
-    "Every hook in hooks/ IS mounted here — if you find one that is not, that is",
-    "a defect in this template, not a recommendation. Two .py files under hooks/",
-    "are deliberately NOT mounted, neither is a defect: hooks/tests/",
-    "test_transcript_read_guard.py is that guard's regression matrix, run by",
-    "hand (`python hooks/tests/test_transcript_read_guard.py`), not a hook —",
-    "mounting a test as a hook would put a test harness on every matched tool",
-    "call; hooks/handoff_snapshot.py is a plain shared library (snapshot_path,",
-    "is_fresh, notice) imported by compact_bookmark.py, compact_pointer.py and",
-    "context_runway_shadow.py — it has no event to mount at, the same way a",
-    "Python module you import is not itself wired into an event.",
+    "  · hooks/fieldwork_threshold_notice.py — RETIRED at the source 2026-09-11",
+    "    (user ruling R-3, rules-debt audit): unregistered from settings.json",
+    "    after 293 shadow rows measured >=52% quantifiably false. The file and",
+    "    its telemetry shape are kept here for provenance/rollback (the source",
+    "    kept them too), but no mount exists to carry over — this template",
+    "    mirrors that.",
+    "Every hook in hooks/ that is MOUNTED AT THE SOURCE is mounted here — if you",
+    "find one that is not, that is a defect in this template, not a",
+    "recommendation. Three .py files directly under hooks/ are deliberately NOT",
+    "mounted, none is a defect: hooks/deny_receipt.py and hooks/handoff_snapshot.py",
+    "are plain shared libraries (deny/notice receipt clauses; snapshot_path,",
+    "is_fresh, notice) imported by other hooks — each has no event to mount at,",
+    "the same way a Python module you import is not itself wired into an event;",
+    "hooks/fieldwork_threshold_notice.py is the retired probe named above. The",
+    "four files under hooks/tests/ (test_browser_pane_scope_guard.py,",
+    "test_fieldwork_threshold_notice.py, test_instructions_loaded_logger.py,",
+    "test_transcript_read_guard.py) are regression matrices, run by hand",
+    "(`python hooks/tests/<name>.py`), not hooks — mounting a test as a hook",
+    "would put a test harness on every matched tool call.",
     "",
     "Verify after wiring: run each hook by hand with empty stdin and check it",
     "exits 0 (they are all fail-open), then confirm the matcher fires on a real",
@@ -122,6 +131,11 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/appdata_view_guard.py\""
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
+            "timeout": 5
           }
         ]
       },
@@ -131,6 +145,11 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/model_cap_guard.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
             "timeout": 5
           }
         ]
@@ -156,11 +175,11 @@
         ]
       },
       {
-        "matcher": "Read|Grep|Glob",
+        "matcher": "WebFetch|Bash|PowerShell|mcp__(Claude_Browser|claude-in-chrome)__(navigate|preview_start|browser_batch)|mcp__playwright-headless__browser_navigate",
         "hooks": [
           {
             "type": "command",
-            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/fieldwork_threshold_notice.py\"",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/literature_host_guard.py\"",
             "timeout": 5
           }
         ]
@@ -192,6 +211,26 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/transcript_read_guard.py\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/published_record_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|NotebookEdit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/worktree_scope_guard.py\"",
+            "timeout": 6
           }
         ]
       }
@@ -240,6 +279,11 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ops_health_nudge.py\"",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/worktree_scope_guard.py\"",
+            "timeout": 8
           }
         ]
       },
@@ -262,6 +306,11 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/delivery_gate_shadow.py\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
+            "timeout": 5
           }
         ]
       }

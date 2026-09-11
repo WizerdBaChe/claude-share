@@ -20,6 +20,11 @@ Report one line "skipped as protected" per entry. Rationale in parentheses.
 - `hooks/` (🔴 tier — broken mounts are route-outs; unregistered dead scripts
   MAY move, but only via §4 orphan detection with per-item confirmation)
 - `plugins/`, `ide/`, `mcp-needs-auth-cache.json`, `.last-cleanup` (machine-managed)
+- `.claude.json` (the CLI's second config inside this dir — machineID,
+  migration flags), `.last-update-result.json`, `chrome/` (Claude-in-Chrome
+  native host), `daemon/`, `daemon.log`, `jobs/` (Claude Code 2.1.x daemon and
+  background jobs) — machine-managed, added 2026-09-09 after they surfaced as
+  UNKNOWN ORIGIN
 - `projects/` (session transcripts + harness MEMORY — CLI manages its own pruning)
 - `sessions/`, `session-env/`, `tasks/`, `data/` (live runtime state)
 - `.git/` (history IS the safety net)
@@ -34,6 +39,7 @@ ask step (default action is still archive).
 |---|---|---|
 | `shell-snapshots/` | files > threshold | yes |
 | `debug/` | files > threshold | yes |
+| `.pytest_cache/`, `.hypothesis/`, `.playwright-mcp/` | whole dir when every file > threshold (test / MCP caches; added 2026-09-09) | yes |
 | `cache/` | entries > threshold | yes |
 | `file-history/` | entries > threshold (breaks file-restore for those old sessions — say so in the report) | yes |
 | `telemetry/` | files > threshold | **no — snapshot series**: past states cannot be regenerated, and trend readers (`skill-routing-audit.py --snapshot`, T-020) consume the history. Archive only, and say the trend breaks |
@@ -75,7 +81,9 @@ Known root files: `CLAUDE.md`, `settings.json`, `settings.local.json`,
 `mcp-needs-auth-cache.json`, `audit-archive/`, `skill-trigger-dict.md`,
 `keybindings.json`, `history.jsonl`, `AGENTS.md` (interop profile),
 `COMMIT-TEMPLATES.md`, `LABEL-REGISTRY.md`, `OPERATOR-GUIDE.md`,
-`PHILOSOPHY.md` (all five confirmed live 2026-08-16). Any other root-level
+`PHILOSOPHY.md` (all five confirmed live 2026-08-16), `.gitattributes` (line
+endings pinned per repo), `skill-trigger-dict.md.xi.md` (cross-index D-13
+sidecar, read by `xi.py`) — the last two added 2026-09-09. Any other root-level
 file → UNKNOWN ORIGIN.
 
 Known root DIRECTORIES (added 2026-08-16 — before this list, whole trees were
@@ -84,9 +92,10 @@ every §1/§2/§3 directory above, plus `agents/`, `ops/`, `skills/`, `rules/`,
 `references/`, `reports/`, `tools/` (project workspaces incl. their
 node_modules — size outliers are report-only), `interop/`, `thinking-notes/`,
 `memory-archive/` (memory-pipeline project assets: model caches + raw
-transcripts; report-only outliers), `audit-archive/` (frozen), and the nested
+transcripts; report-only outliers), `audit-archive/` (frozen), the nested
 `.claude/` (harness worktree bookkeeping + scheduler lock — machine-managed,
-protect like §1). Any other root-level DIRECTORY → UNKNOWN ORIGIN, same
+protect like §1), and `.obsidian/` (this dir is the read-only Obsidian vault
+`claude-home`; cross-indexed in the source's own notes, added 2026-09-09). Any other root-level DIRECTORY → UNKNOWN ORIGIN, same
 handling as unknown files.
 
 Orphan checks (bidirectional; every finding is a REPORT line — route-outs or
@@ -95,7 +104,9 @@ confirmed-per-item moves, never silent):
 1. Hook commands in `settings.json` ↔ files under `hooks/`
    (missing file = broken hook → route to update-config;
    unregistered SCRIPT (`.py`/`.ps1`/`.cmd`/`.js`) = dead script → CANDIDATE,
-   per-item confirm. Non-script files (`.json`, `.txt`) are hook DATA, not
+   per-item confirm — EXCEPT a module another hook imports (`grep -l "import
+   <stem>" hooks/*.py` non-empty): that is a library, KEEP (measured 2026-09-09:
+   `deny_receipt.py` imported by 13 hooks, `handoff_snapshot.py` by 4). Non-script files (`.json`, `.txt`) are hook DATA, not
    orphans: grep the hook scripts for the filename — referenced = KEEP,
    unreferenced = CANDIDATE. Measured false positive 2026-08-16:
    `browser-pane-allowlist.json` flagged as dead script).

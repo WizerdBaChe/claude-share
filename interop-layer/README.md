@@ -53,7 +53,7 @@
 ——`MIGRATION-MAP.md` 當初就記下的降級(機械觸發 → 指示閱讀)其實是致命的:
 目標平台根本沒有機制能在對的時機叫出那段文字,結果只有「每次都讀」或
 「永遠不讀」兩種。約 20K 的 playbook 已移至
-`archive/interop-refs-2026-08-11/`(原始正典未動)。
+git 歷史（`git show 483435f:archive/interop-refs-2026-08-11/`；原始正典未動）。
 
 現在改成 `interop.py` 的 `delegation_block()`:告訴目標 agent
 上面那些是使用者的常規偏好、原樣適用;需要更深的方法時,**去讀它自己平台

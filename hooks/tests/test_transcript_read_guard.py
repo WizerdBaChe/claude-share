@@ -18,6 +18,7 @@ import ctypes
 import importlib.util
 import io
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -56,6 +57,28 @@ def run_case(file_path, limit=None, offset=None):
     return ("deny" if '"deny"' in out else "pass"), out
 
 
+def run_raw(payload_text):
+    """Feed RAW stdin text (not necessarily a well-formed payload) through main()."""
+    stdout = io.StringIO()
+    old_stdin = sys.stdin
+    sys.stdin = io.StringIO(payload_text)
+    crashed = None
+    try:
+        with contextlib.redirect_stdout(stdout):
+            try:
+                guard.main()
+            except SystemExit:
+                pass
+            except Exception as exc:          # the pre-2026-09-09 shape: AttributeError
+                crashed = f"{type(exc).__name__}: {exc}"
+    finally:
+        sys.stdin = old_stdin
+    out = stdout.getvalue()
+    if crashed:
+        return "error", crashed
+    return ("deny" if '"deny"' in out else "pass"), out
+
+
 def short_name(p: Path):
     buf = ctypes.create_unicode_buffer(1024)
     n = ctypes.windll.kernel32.GetShortPathNameW(str(p), buf, 1024)
@@ -68,6 +91,11 @@ def main() -> int:
         corpus = Path(td) / "corpus"
         outside = Path(td) / "outside"
         guard.CORPUS_ROOTS = (corpus,)
+        # In-process deny() calls reach deny_receipt.clause(); redirect its
+        # TELEMETRY dir here (not just CLAUDE_CONFIG_DIR) so a "deny" case
+        # above never appends to production telemetry/transcript-read-guard.jsonl.
+        _prev_telemetry_dir = os.environ.get("CLAUDE_TELEMETRY_DIR")
+        os.environ["CLAUDE_TELEMETRY_DIR"] = str(Path(td) / "telemetry")
 
         def mk(rel: str, size: int) -> Path:
             p = (corpus / rel) if not rel.startswith("!") else (outside / rel[1:])
@@ -160,6 +188,32 @@ def main() -> int:
                 deny_text = out
             print(f"{status} {verdict:4} (want {expected:4}) | {name}")
 
+        # -- AP-62 unclassifiable input: payloads that match NO row of the
+        # decision table, because there is nothing to classify — identity,
+        # scope, size and window are all undecidable. The hook's declared
+        # degradation is the silent pass ("Fail-open on malformed input"), so
+        # `undetermined` must surface as a pass and must NEVER be folded into
+        # a deny: a fold is invisible here, since the deny count stays
+        # plausible while the reason names a file nobody asked to read.
+        # The middle two crashed with AttributeError until 2026-09-09 — the
+        # class existed in the corpus and was never enumerated.
+        undetermined = [
+            ("undetermined: stdin is not JSON at all", "not json {"),
+            ("undetermined: JSON array, not a payload object",
+             json.dumps([{"tool_name": "Read"}])),
+            ("undetermined: tool_input is a list, not an object",
+             json.dumps({"tool_name": "Read", "tool_input": ["file_path"]})),
+            ("undetermined: file_path is an object, not a path",
+             json.dumps({"tool_name": "Read",
+                         "tool_input": {"file_path": {"unexpected": "shape"}}})),
+        ]
+        for name, raw_payload in undetermined:
+            verdict, detail = run_raw(raw_payload)
+            status = "ok " if verdict == "pass" else "FAIL"
+            if verdict != "pass":
+                failures.append(f"{name} -> {verdict} ({detail})")
+            print(f"{status} {verdict:4} (want pass) | {name}")
+
         # Deny-message contract (see hook docstring): constraint + retry only.
         reason = json.loads(deny_text)["hookSpecificOutput"][
             "permissionDecisionReason"]
@@ -175,9 +229,15 @@ def main() -> int:
             print("ok   deny-message contract (no authority claim, no "
                   "read-elsewhere imperative, retry mechanics present)")
 
+        if _prev_telemetry_dir is None:
+            os.environ.pop("CLAUDE_TELEMETRY_DIR", None)
+        else:
+            os.environ["CLAUDE_TELEMETRY_DIR"] = _prev_telemetry_dir
+
     for s in skipped:
         print(f"skip {s}")
-    print(f"\n{len(cases)} cases, {len(failures)} failures, "
+    print(f"\n{len(cases) + len(undetermined)} cases "
+          f"({len(undetermined)} unclassifiable-input), {len(failures)} failures, "
           f"{len(skipped)} skipped")
     return 1 if failures else 0
 

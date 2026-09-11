@@ -219,7 +219,10 @@ classes do not change — they are properties of "arrival", not of any repo.
   The class is "any record OF a removal", not "the changelog": describe the
   removed value by class, write the allow match name-only (the target's
   email-allow carried this fix as a comment all along), and never quote the
-  value in the record of removing it.
+  value in the record of removing it. **This file is the orchestrator's, and a
+  dispatched fragment-writer never loads it** — that gap cost 38 findings on
+  2026-09-07; the brief-side half lives in `ops/20-dispatch.md` §2
+  (`ops/lessons.md` L-057).
 - **Counts item, one refinement.** "Report, do not fix" (second run) applies
   to sentences the round never touches. When the SAME sentence carries both a
   count your arrival falsifies and one that was already stale, fixing half a

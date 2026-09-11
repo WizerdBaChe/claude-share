@@ -16,8 +16,8 @@ the picture.* Everything this skill covers renders something a human looks at.
 - Because motion cannot be statically verified, every delivery here ends with a
   **manual-acceptance checklist** (`[BC]` rule): numbered steps, concrete action
   + expected observation per step, executable blind by a non-author, ranked by
-  consequence into `A. 必驗` (≤7) then `B. 體驗` — never grouped by component or
-  technique (`ops/references/uat.md`).
+  consequence into `A. 必驗` then `B. 體驗` per `ops/references/uat.md` (cap and
+  rungs live there) — never grouped by component or technique.
 - For motion the stress paths are: rapid re-trigger / spam-clicking, interrupting
   an animation mid-flight, tab-switch and return (rAF throttling), window resize
   during animation, and `prefers-reduced-motion: reduce` enabled. These outrank

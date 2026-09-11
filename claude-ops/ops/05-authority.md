@@ -137,7 +137,8 @@ seconds becomes a fake gate the user skims past.
        isolation point: <module/param that flips the call if wrong>
     2. Boundary inputs: <inputs/states that break it, trimmed to known env>
     3. Acceptance: <machine-checkable checks first; then human-eye items
-       ranked `A 必驗` (≤7) → `B 體驗` per `references/uat.md`>
+       ranked `A 必驗` → `B 體驗` per `references/uat.md` (cap, rungs and
+       admission gate live there; absolute paths + visible pass, P8/P9)>
     4. Non-goals & degradation: <explicitly out>; drop <X→Y→Z>, core <W>
 
 **Carrier**: inline in the response for single-session tasks; AS the plan
@@ -173,9 +174,13 @@ live.
 see it). End with an UNASKED manual-acceptance checklist: numbered action +
 expected observation, blind-executable by a non-author, plus a non-destructive
 way to see what each item judges. Rank by CONSEQUENCE, not by technology:
-`A 必驗` (at most 7 items; anything that cannot block use → demote) then
-`B 體驗`, each ordered high→low so a reader may stop anywhere, and stress paths
-before happy ones. Axis and worked examples: `ops/references/uat.md`.
+`A 必驗` (capped; anything that cannot block use → demote) then `B 體驗`, each
+ordered high→low so a reader may stop anywhere, and stress paths before happy
+ones. The cap's VALUE, the four A rungs, the three B rungs and the admission
+gate are stated once, in `ops/references/uat.md` — never restated here. **Absolute paths and copy-runnable commands throughout**
+(uat.md P8, user ruling 2026-09-09): the author reads the list from inside the
+tree, the user reads it at a fresh prompt, and a repo-relative path silently
+serves only the first. Axis and worked examples: `ops/references/uat.md`.
 
 **BC-2 — shipping a baseline you doubt** (the component's quality, or your
 reading of the requirement). Put it behind a swappable interface

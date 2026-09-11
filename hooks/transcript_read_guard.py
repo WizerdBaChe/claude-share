@@ -1,5 +1,7 @@
 r"""PreToolUse(Read) guard: transcript corpus is grep-first, reads are windowed.
 
+STATUS: LIVE since 2026-08-16 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 WHY A HOOK AND NOT A POLICY LINE. The moment this rule matters most — right
 after a compaction, when a fact is missing and the full original is one Read
 away — is exactly the pressure moment where a recalled rule loses (same
@@ -89,15 +91,26 @@ BOUNDARIES AND UNKNOWNS (honest ledger; probe-dated 2026-08-29):
   generation stays enabled on C: (if disabled for new files, that DENY row
   degrades to n/a, not to a bypass).
 
+UNDETERMINED (AP-62, added 2026-09-09): a payload that matches no row of the
+table because there is nothing to classify — stdin that is not JSON, JSON that
+parses but is not an object, a non-object `tool_input`, a `file_path` that is
+not a path-like value — is `undetermined`, and the declared degradation is the
+silent pass below, never a fold into deny. Until 2026-09-09 the second and
+third of those raised AttributeError (exit 1) instead: the class existed, was
+never enumerated, and the docstring's fail-open claim was false for it. Pinned
+by the three `undetermined:` cases in the regression matrix.
+
 Fail-open on malformed input; deny is the only non-silent path.
 review-when: Claude Code changes compact on-disk geometry or moves the
-transcript/archive roots; a mirror root changes with the scheduled copy job
-that feeds it — the CONFIG block below is the single
+transcript/archive roots; mirror root changes with the scheduled task that
+feeds it — the CONFIG block below is the single
 edit point (same INV-8 philosophy as compact-recovery/preserve.py).
 Also: a new tenant class appears under a corpus root that IS .jsonl-shaped
 but not a session record (shape identity would then over-match), or session
 records start being written in a non-.jsonl format (it would under-match).
 Regression matrix: hooks/tests/test_transcript_read_guard.py.
+
+Proof-of-life: `python hooks/tests/test_transcript_read_guard.py` (26 cases).
 """
 import json
 import os
@@ -106,11 +119,17 @@ from pathlib import Path
 
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or (Path.home() / ".claude"))
 
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
+
 # --- CONFIG: single edit point ---------------------------------------------
 CORPUS_ROOTS = (
     CLAUDE_DIR / "projects",              # live transcripts (+ subagents/)
     CLAUDE_DIR / "memory-archive",        # preserve.py raw copies + digests
-    # add any transcript mirror/backup roots of your own here (absolute Paths)
+    # add your own daily-mirror root here, if you keep one
 )
 SIZE_GATE = 128 * 1024      # PROVISIONAL — below this, any Read passes
 LINE_WINDOW = 120           # PROVISIONAL — max `limit` for a windowed Read
@@ -165,10 +184,14 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)          # parses, but matches no row of the table: undetermined
     if payload.get("tool_name") != "Read":
         sys.exit(0)
 
     tool_input = payload.get("tool_input") or {}
+    if not isinstance(tool_input, dict):
+        sys.exit(0)          # same class, one level in
     raw = tool_input.get("file_path")
     if not raw:
         sys.exit(0)
@@ -193,11 +216,14 @@ def main() -> None:
         sys.exit(0)
 
     deny(
-        f"Read denied by transcript_read_guard (a local PreToolUse hook, not "
-        f"page or file content): this {size / 1048576:.1f} MB session-record "
-        f"file exceeds the {SIZE_GATE // 1024} KB gate for unbounded Reads. "
-        f"Retry the same Read with offset and limit<={LINE_WINDOW}; to locate "
-        f"the window first, Grep this same file (Grep is not gated)."
+        f"Read denied by transcript_read_guard, a local PreToolUse hook (not "
+        f"page or file content). This {size / 1048576:.1f} MB file matches the "
+        f"session-record shape this guard gates for unbounded Reads; the gate "
+        f"is {SIZE_GATE // 1024} KB. Retry the same Read with offset and "
+        f"limit<={LINE_WINDOW} — Grep is not gated, so the window can be "
+        f"located in this same file first."
+        + _receipt("transcript_read_guard", target=str(target), size=size)
+        + _fp("transcript_read_guard")
     )
 
 

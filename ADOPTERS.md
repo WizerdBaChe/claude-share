@@ -81,6 +81,18 @@ that leaves open in your environment. This is the same failure class as the
 2026-08-14 correction above, one level down: **a disposition written for a root
 keeps applying itself to files it never examined.**
 
+**Corrected 2026-09-12 — the two tools the rules name as enforcement ARE here
+now.** The source's `tools/` tree was excluded whole on 2026-08-16, on the
+premise that no shipped file cited any of it. A per-file audit found that
+false twice: `claude-ops/ops/environment.md` names `page-fill-gate` as the
+enforcement of its display rule, and `claude-ops/ops/references/integrity-sweep.md`
+imports `check_cap_binding`. Both now ship under `instruments/`, with sub-paths
+matching the source, so copying `instruments/<x>/` to `~/.claude/tools/<x>/`
+makes those citations resolve. The rest of `tools/` stays out, and where a
+shipped doc still names one of those tools as runnable, it says so at the
+citation. Same failure class a third time, which is why the audit now runs per
+file rather than per root.
+
 What genuinely stays out: your own `settings.json` values, the operator's project
 index rows, dated internal reports, runtime telemetry, the external dispatcher
 and its allowlist, and five skills — `asset-vault`, which operates a private

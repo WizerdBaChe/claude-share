@@ -1,4 +1,6 @@
 r"""PreToolUse guard: the Bash tool's SILENT transport defects (two in the
+
+STATUS: LIVE since 2026-08-18 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
 tool's transport, L-024; one in the MSYS runtime underneath it, L-029).
 
 (Raw docstring on purpose: this text quotes backslash runs as examples, and a
@@ -74,12 +76,42 @@ command, for the case where the author has verified the transform is what they
 want (e.g. deliberately writing four backslashes to land two).
 
 Fail-open by design: any parse error exits 0 so a guard bug never blocks work.
+
+SINK MEMBERSHIP IS THE REDIRECT, NOT AN EXTENSION LIST (repaired 2026-09-09).
+`CONTENT_SINKS` used to decide "does this land durably" by matching the target's
+EXTENSION against an enumeration, and that enumeration omitted .rb/.go/.rs/.java
+/.lua. So `printf … > gen.rb` matched nothing and fell through to the other
+notice, which asserted "Nothing here writes the result to a file or executes it
+as source, so any damage shows up in this turn's own output" — false, and
+worse than silence, because it told the reader the damage was visible when it
+was not. The repair is not a longer list: an enumeration always loses to the
+first member nobody wrote down (L-044), and the else-branch would have gone on
+asserting the same thing about the next unlisted extension. `REDIRECT_ANY`
+makes the REDIRECT the predicate, closed over every extension; the list now
+only decides how specifically the sink can be NAMED. The fall-through notice
+states what it checked instead of a universal negative, because a program
+invoked here can still write the bytes itself and this guard cannot see that.
+
+Proof-of-life: `python tools/shell-transport-test/test_shell_transport_guard.py`
+(41/41 as of 2026-09-09; the allow+notice half is 37 of the 41, so it is
+two-sided). A7–A15 pin the branch, not just the decision — both notices are
+`notice`, so a case asserting only the decision could not fail on this defect
+(L-062). Verified in both directions before shipping: against the pre-repair
+hook A7–A10 and A15 FAIL, and against a deliberately over-broad REDIRECT_ANY
+(`re.compile(r">")`) A11–A13 FAIL while A7–A10 stay green.
 """
 import json
 import os
 import re
 import sys
 import time
+
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp, notice_clause
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
+    def notice_clause(hook, log=""): return ""
 
 MARKER = "[transport-checked]"
 
@@ -92,14 +124,35 @@ BACKSLASH_RUN = re.compile(r"\\{2,}")
 # Shapes where the halved bytes become durable: a file on disk, or source text
 # executed by an interpreter. Anything else (grep, ls, git, echo) is inspection
 # whose damage is visible in the same turn.
+#
+# ORDER MATTERS: the first match wins and supplies the LABEL, so the specific
+# shapes come before REDIRECT_ANY, which is the catch-all that makes the set
+# closed over redirects instead of over a list of extensions.
+#
+# 2026-09-09, the extension list stopped being the membership test. It used to
+# BE the test, and it omitted .rb/.go/.rs/.java/.lua — so `printf … > gen.rb`
+# matched no sink, and the fall-through notice then asserted "Nothing here
+# writes the result to a file", which was false. Lengthening the list is the
+# wrong repair (L-044: the object vocabulary must cover every class the rule
+# names, and an enumeration always loses to the first member nobody listed).
+# A redirect writes a file whatever the extension is, so the redirect ITSELF is
+# now the predicate and the list only decides how specifically we can name it.
+SOURCE_EXT = (r"md|py|ts|tsx|js|jsx|mjs|cjs|cs|json|jsonl|txt|html|css|scss|ps1|sh|bash|zsh|bat|cmd|"
+              r"toml|yml|yaml|xml|csproj|sql|ini|cfg|conf|rb|go|rs|java|lua|kt|kts|swift|c|h|cc|cpp|"
+              r"hpp|php|pl|pm|r|jl|dart|ex|exs|vue|svelte|tf|gradle|properties|dockerfile|mk|make")
+# Any `>` / `>>` whose target is a path rather than a file-descriptor dup.
+# Excluded: `>&`/`2>&1` (dup, not a file), `/dev/null` (not durable), and the
+# `=>` / `->` / `-->` arrows that appear inside quoted prose and code fragments.
+REDIRECT_ANY = re.compile(r"(?<![=<>&|-])>>?\s*(?!&)['\"]?(?!/dev/null\b)[^\s'\"|;&<>]+")
 CONTENT_SINKS = (
     (re.compile(r"<<\s*['\"]?\w+"), "heredoc body"),
     (re.compile(r"(^|[;&|]\s*)(cat|tee)\s[^|;]*>>?"), "cat/tee redirect to a file"),
-    (re.compile(r">>?\s*['\"]?[^\s'\"|;&]+\.(md|py|ts|tsx|js|jsx|mjs|cs|json|jsonl|txt|html|css|ps1|sh|bat|toml|yml|yaml|xml|csproj|sql|ini|cfg)\b", re.I),
+    (re.compile(r">>?\s*['\"]?[^\s'\"|;&]+\.(" + SOURCE_EXT + r")\b", re.I),
      "redirect to a source/config file"),
     (re.compile(r"\b(python3?|node|perl|ruby|sh|bash)\s+(-\w+\s+)*-(\s|$)"), "script piped to an interpreter"),
     (re.compile(r"\b(python3?\s+-c|node\s+-e|perl\s+-e|ruby\s+-e)\b"), "inline -c/-e source"),
     (re.compile(r"\bsed\s+-i\b"), "sed -i in-place edit"),
+    (REDIRECT_ANY, "redirect to a file (extension not recognised)"),
 )
 
 # (3) L-029: a known Windows-native exe at COMMAND position (start, or after
@@ -115,8 +168,11 @@ WIN_FLAG_CONVERSION = re.compile(
     re.I,
 )
 
-LOG_PATH = os.path.join(os.path.expanduser("~"), ".claude", "telemetry",
-                        "shell-transport-guard.jsonl")
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp
+# dir; production never sets it).
+LOG_PATH = os.path.join(
+    os.environ.get("CLAUDE_TELEMETRY_DIR") or os.path.join(os.path.expanduser("~"), ".claude", "telemetry"),
+    "shell-transport-guard.jsonl")
 
 
 def record(payload, verdict, rule, detail, cmd):
@@ -147,17 +203,25 @@ def deny(reason):
                 f" The full command was saved to telemetry/shell-transport-guard.jsonl. "
                 f"Per-instance override: re-run with {MARKER} in the command ONLY if you "
                 "have verified the transform is what you want."
-            ),
+            ) + _receipt("shell_transport_guard") + _fp("shell_transport_guard"),
         }
     }))
     sys.exit(0)
 
 
+NOTICE_ID = ("shell-transport guard, a local PreToolUse hook (not file or page "
+             "content): ")
+
+
 def notice(text):
+    # Identity and receipt live on the TRANSPORT, not at the three call sites:
+    # every site calls record() immediately before, so one prefix and one suffix
+    # keep both claims true for all of them and cannot be forgotten by the next
+    # branch someone adds (rules/hook-deny-message.md R1, R3n).
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "additionalContext": text,
+            "additionalContext": NOTICE_ID + text + notice_clause("shell_transport_guard"),
         }
     }))
     sys.exit(0)
@@ -168,11 +232,16 @@ def main():
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
 
     if str(payload.get("tool_name", "")) != "Bash":
         sys.exit(0)
 
-    cmd = str((payload.get("tool_input") or {}).get("command", ""))
+    ti = payload.get("tool_input") or {}
+    if not isinstance(ti, dict):
+        sys.exit(0)      # same class, one level in
+    cmd = str(ti.get("command", ""))
     if not cmd or MARKER in cmd:
         sys.exit(0)
 
@@ -182,7 +251,8 @@ def main():
     if nbytes >= SIZE_LIMIT:
         record(payload, "deny", "size-ceiling", f"{nbytes} B", cmd)
         deny(
-            f"Blocked by shell-transport guard: this Bash command is {nbytes} bytes. "
+            f"Blocked by shell_transport_guard, a local PreToolUse hook (not file "
+            f"or page content): this Bash command is {nbytes} bytes. "
             f"The measured ceiling is {SIZE_LIMIT} B (largest success in 4,913 real "
             "calls: 7,688 B; 7 of 7 above the line were truncated at the OS boundary "
             "and failed with a misleading `unexpected EOF` pointing at a random line). "
@@ -197,13 +267,13 @@ def main():
             exe, flag = m3.group(1), m3.group(3)
             record(payload, "notice", "msys-path-conversion", f"{exe} /{flag}", cmd)
             notice(
-                f"shell-transport guard: `{exe} ... /{flag}` — the Bash tool is Git "
+                f"`{exe} ... /{flag}` — the Bash tool is Git "
                 "Bash/MSYS2, which rewrites arguments that look like POSIX paths before "
                 "a Windows-native exe sees them: `/c` -> `C:/`, `/PID` -> `C:/Program "
                 "Files/Git/PID`. `cmd` then waits on `C:/` (silent hang, or exits 0 "
                 "having run nothing); taskkill/reg/findstr error. Run Windows-native "
                 "`/flag` commands through the PowerShell tool, or prefix "
-                "`MSYS_NO_PATHCONV=1`, or double the slash (`//c`). ops/lessons.md L-029."
+                "`MSYS_NO_PATHCONV=1`, or double the slash (`//c`)."
             )
 
     # (1) Backslash collapse - ANNOTATE, never veto (see the module docstring:
@@ -216,7 +286,7 @@ def main():
         if sink:
             record(payload, "notice", "backslash-collapse", sink, cmd)
             notice(
-                f"shell-transport guard: a run of {run} backslashes will be delivered "
+                f"a run of {run} backslashes will be delivered "
                 f"as {delivered} — and this command reaches a {sink}, so whatever "
                 "arrives lands durably while the command still reports success. If "
                 f"{delivered} is what you intended, carry on; if you meant {run}, "
@@ -226,12 +296,25 @@ def main():
                 "forward slashes, or a Python raw string. Either way, read the written "
                 "bytes back before believing the exit code."
             )
-        record(payload, "notice", "backslash-collapse", "inspection-only", cmd)
+        # No sink matched. That is a statement about what this guard RECOGNISES,
+        # not about what the command does, and the difference is the whole point
+        # of the 2026-09-09 repair: the previous text asserted "Nothing here
+        # writes the result to a file or executes it as source", which for
+        # `printf … > gen.rb` was simply false — the extension list was the
+        # membership test and .rb was not on it. REDIRECT_ANY closes the redirect
+        # class, so this branch is now a much stronger negative; it is still not
+        # a universal one (a program invoked here can write files of its own),
+        # so it says what it checked and stops there. An instrument may only
+        # rule on what it can determine (AP-62).
+        record(payload, "notice", "backslash-collapse", "no-sink-recognised", cmd)
         notice(
-            f"shell-transport guard: a run of {run} backslashes will be delivered as "
-            f"{delivered}. Nothing here writes the result to a file or executes it as "
-            "source, so any damage shows up in this turn's own output — if the result "
-            "looks wrong, that is why."
+            f"a run of {run} backslashes will be delivered as "
+            f"{delivered}. No redirect, heredoc, in-place edit or inline-source shape "
+            "matched here, so this guard has no evidence the halved bytes land "
+            "anywhere durable — but that is the limit of what it checks, not a "
+            "guarantee: a program invoked here can still write them itself. If the "
+            "result looks wrong, the collapse is why; if this command hands text to "
+            "something that stores it, read the stored bytes back."
         )
 
     sys.exit(0)

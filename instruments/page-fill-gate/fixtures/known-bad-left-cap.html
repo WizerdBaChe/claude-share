@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant" data-page-class="document-long">
+<head>
+<meta charset="utf-8">
+<title>fill-gate known-bad: left-anchored cap</title>
+<style>
+  body{margin:0;font-family:system-ui,sans-serif;line-height:1.6}
+  #side{position:fixed;left:0;top:0;bottom:0;width:280px;background:#eee;border-right:1px solid #ccc}
+  main{margin-left:280px;padding:36px 72px;max-width:800px}
+  p{margin:8px 0}
+  .box{border-left:4px solid #888;background:#f4f4f4;padding:10px 16px;max-width:36em}
+</style>
+</head>
+<body>
+<nav id="side">TOC</nav>
+<main>
+  <h1>Known-bad control</h1>
+  <p>This page container is capped at 800px and hugs the left sidebar. At 1707px the right two-fifths of the content area is empty. The gate must FAIL this file at every gating viewport.</p>
+  <div class="box">A painted box narrower than its parent, alone in its row, left-anchored.</div>
+  <p>More running text so the measured area has several blocks. More running text so the measured area has several blocks.</p>
+</main>
+</body>
+</html>

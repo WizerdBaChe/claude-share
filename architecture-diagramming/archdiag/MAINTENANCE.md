@@ -191,9 +191,16 @@ surface values against a snapshot of themselves.
   against, and a gate may not read a copy of its own subject). Same class as
   the 2026-09-05 a11y change and the same R-2 ruling applies — **the source
   environment's 7 library artifacts' receipts are due for re-issue**; nothing
-  drawn changed. In THIS copy the one shipped artifact,
+  drawn changed. **DONE at the source, 2026-09-08** (commit 53e8e38): all nine
+  of the source's build scripts re-ran clean and the diff was exactly seven
+  files × one line, every one of them the predicted `background: #fff` →
+  `background: #ffffff`. The prediction landing byte-exact a day later is the
+  evidence that nothing else drifted in between — which is the only reason a
+  receipt is worth carrying. In THIS copy the one shipped artifact,
   `architecture-diagramming/capability-set.html`, was rebuilt in the same
-  commit; its sha256 starts `b86bc0ae382f`.
+  commit as the original fix; its sha256 still starts `b86bc0ae382f` — this
+  round (2026-09-12) re-ran the build against the unchanged library and
+  reproduced the identical bytes.
 - **Generalised**: a file whose header says "derived from X" is making a claim,
   and the only thing that tests it is a control that changes X. This one was
   half-true for two days inside the file that exists to enforce M5.

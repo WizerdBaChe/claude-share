@@ -83,18 +83,10 @@ run_id:         the persisted evidence run behind this return (references/feedba
 
 ### P1 — Parse the need into extraction targets
 Before searching, translate `purpose` + `question` into *what kind of information* is
-sought, because each kind lives in a different place and needs a different output shape:
-
-| Information need | Typical home in a paper | Typical home in a textbook |
-|---|---|---|
-| Definition / concept / taxonomy | Introduction, review articles | Chapter openings, glossary |
-| How a method/protocol works | Methods (+ supplementary) | Worked-example sections |
-| Quantitative values, parameters | Results tables, figures, abstract headline numbers | Data tables, appendices |
-| Validity limits, assumptions | Discussion, Limitations | Derivation preconditions |
-| State of the art / who did what | Related Work, recent reviews | Latest-edition survey chapters |
-| Canonical equations / derivations | Theory section, appendix | Core chapters (most reliable) |
-| Contradictions / open questions | Discussion, review "future work" | Rarely — use reviews instead |
-
+sought — each kind lives in a different section of a paper or textbook and needs its own
+output shape; the need → home map is `references/extraction-playbook.md` §0.
+**Premise check first:** a question can presuppose a fact the source never states — name
+the presupposition as its own target, so a false one ships as a gap, never as a number.
 Write down (internally) the target list: fields to fill, per source. This becomes the
 extraction checklist for P4 — extraction without a target list degenerates into
 abstract-summarizing, which is the anti-pattern this skill exists to prevent.
@@ -110,21 +102,24 @@ abstract-summarizing, which is the anti-pattern this skill exists to prevent.
 - **Mixed** — supplied sources as the core plus targeted supplemental search;
   `search_trail` must distinguish supplied vs discovered sources.
 
-Tool priority: **registered connectors whose declared source class matches the need**
-(`connectors/registry.json` — local systems holding primary documents: patents, a keyed
-publisher API, a rendering browser; **probe before routing**, a stale process returns 404
-and a 404 reads as "no results") → **a local corpus / reference-manager MCP if available**
-(`zotero_local` + `local_pdf_library` today — they rank/relate sources the user already
-collected, never search the web; which is live is a registry question) → **WebSearch/WebFetch** against scholarly
-indexes for discovery. The skill must remain fully functional with web search alone.
-Connector routing, the secret boundary, and per-connector field maps:
-`references/connectors.md`. Per-channel strategies, identifier resolution, local-corpus
-usage, textbook/canonical-text discovery, and citation chasing:
-`references/search-sources.md` — read it before any `standard`/`exhaustive` search.
+Tool priority: **registered connectors whose source class matches the need** (probe
+before routing — a stale process returns 404, and a 404 reads as "no results") → **the
+local corpus** (`zotero_local` + `local_pdf_library`: they rank what the user already
+collected, never search the web) → **WebSearch/WebFetch** for discovery; the skill stays
+fully functional with web search alone. Ladder, secret boundary, per-connector field maps:
+`references/connectors.md`; per-channel strategies, identifier resolution, citation
+chasing: `references/search-sources.md` — read it before any `standard`/`exhaustive` search.
+**Host access policy before any fetch.** `connectors/access_policy.py --url <u> --check`
+says which surface may touch which host (`~/.claude/hooks/literature-host-policy.json`); a
+refused or challenged host is handed to the user as a named DOI/URL + query pack, never
+retried through another User-Agent, browser or profile. Text that will be cited is retrieved
+with `verify/fetchsrc.py`, which records route, status and sha256 per source.
 Core principles:
-- Build queries from: core terms + synonyms/aliases + field-specific vocabulary; iterate
-  once with the terminology *found in the first hits* (papers name things differently
-  than users do).
+- Build queries from a **vocabulary ledger**: core terms + synonyms + the three keyword
+  layers a database exposes (author keywords, controlled vocabulary, index terms); iterate
+  batch n → keyword set n+1 with the terms the first hits actually use, and run one
+  **anchor round** (a review + the most-cited paper's co-citations) before saturation
+  counts — `references/search-sources.md` §Query building.
 - Prefer identifiers when known: DOI, arXiv ID, ISBN — resolve directly.
 - When a channel fails (key wall, rate limit, outage), the literature is partly
   non-English, or the user has a local PDF collection, apply the matching strategy in
@@ -161,8 +156,8 @@ Tag each source before extraction — this tag follows the source into the deliv
 - `[secondary]` — known only through another source citing it. Attribute as
   "B, as cited in A"; never present as directly read.
 
-Paywall handling: report it, extract what is legally visible, suggest institutional
-access if the source is load-bearing. Never circumvent access controls.
+Paywall or access-controlled host: extract what the policy row permits, then hand the named
+document to the user (`gaps`: "not retrieved, hand-to-user" + query pack). Never circumvent.
 
 A locally-supplied PDF the Read tool refuses as "password-protected" is usually NOT
 encrypted: probe and recover it per `references/search-sources.md` §Local PDF library
@@ -197,6 +192,8 @@ support span** it rests on, and the path to the retrieved text — then run
 `verify/citecheck.py` on it. Naming the span makes support falsifiable: a script cannot
 judge support, but it can prove the quoted words are in the retrieved text. Persist
 ledger and retrieved text in the run folder BEFORE the gate runs (`references/feedback-loop.md`).
+Per row it also checks title/authors/venue against the resolved record, every number in the
+claim against the span, the text's provenance manifest + access route, and retraction notices.
 **Scope is by claim kind first, depth second.** Every **numeric or disputed** claim gets
 a row at EVERY depth, `quick` included. Depth widens the net: `standard` adds all
 load-bearing claims, `exhaustive` everything.
@@ -209,28 +206,27 @@ Assemble extracted items into the `output_format`, in the requested `language`:
   and a full result-contract example live in `references/output-templates.md` — use its
   field/column sets verbatim for Mode 2 returns (callers parse by field name).
 - End with the **gaps** and **confidence** sections — mandatory, even when empty
-  ("all targets filled; no conflicts found") — then the loop footer: `run_id`, keys, review-when.
+  ("all targets filled; no conflicts found") — then the loop footer: `run_id`, keys, review-when,
+  and one **AI-use disclosure** line (which steps a model ran, what a human verified).
 - Deliver inline by default. Create a file only when the user (Mode 1) or the caller
   contract (Mode 2) explicitly requests one — never because the content is long; and
   always a NEW file, never overwriting an existing report. Language rules per Mode:
   `references/output-templates.md`.
-- **Zotero collection close-out (standing step for project literature waves).** Every
-  wave close-out appends the wave's newly **READ** papers (papers only — never vendor
-  datasheets, patents, or press; a `[secondary]`-only citation stays out, it was never
-  read) to the project's bib JSON (`references/<collection>-bib.json`; item schema
-  documented in `scripts/zotero_ris_export.py`), then regenerates the RIS:
+- **Zotero collection close-out** — standing step whenever the project keeps a Zotero
+  collection: append the wave's newly READ papers (papers only — never a datasheet,
+  patent, or `[secondary]`-only citation) to the project's bib JSON, then regenerate
+  the RIS:
   ```
   python scripts/zotero_ris_export.py <bib.json> \
       --collection-name "<Zotero collection>" --out-dir <project>/references
   python scripts/zotero_ris_export.py <bib.json> ... --check     # same command, verify
   ```
-  The `--collection-name` **is** the project's Zotero collection name. The user
-  refreshes Zotero via File → Import of the RIS (re-import duplicates existing items —
-  merge via Duplicate Items, or hand the user a delta RIS of only the new wave). Never
-  push via `localhost:23119` — `/api/` is read-only and `/connector/saveItems` cannot
-  target a named collection (verified 2026-08-31; review-when: Zotero ships a writable
-  local API). This copy inlines the full procedure because `references/connectors.md`
-  does not ship here — `scripts/zotero_ris_export.py` does.
+  `--collection-name` is the project's Zotero collection name. The user refreshes
+  Zotero via File → Import of the RIS; re-import duplicates existing items, so merge
+  via Duplicate Items or hand the user a delta RIS of only the new wave. Never push via
+  `localhost:23119` — `/api/` is read-only and `/connector/saveItems` cannot target a
+  named collection. This copy inlines the full procedure because
+  `references/connectors.md` does not ship here — `scripts/zotero_ris_export.py` does.
 
 ## Resilience & session economy
 
@@ -287,29 +283,38 @@ other check on this list and is invisible in the finished document.
 10. **An unexamined "not found"** — the deliverable's most dangerous sentence, because
     it looks identical whether the literature is absent or the query was wrong. Never
     ship one that has not survived the P2 recall check.
+11. **Machine retrieval from an access-controlled host** — a 403/CAPTCHA answered with another
+    User-Agent, headless browser or logged-in profile; the publisher then blocks the whole IP range.
 
 ## Reference map
 
 Seven of these nine reference files ship with this copy of the skill; load each on
 demand at the point the pipeline names it. P1→P5 is self-sufficient at
-`quick`/`standard` depth without them. **Not shipped in this repo:**
+`quick`/`standard` depth without them. Not shipped in this repo:
 `references/connectors.md` and `references/verification-gate.md`, together with the
 `connectors/` and `verify/` tool lanes they document — machine-bound to this owner's
 local Zotero HTTP connector, local PDF index, and local registry, none of which
-travel. P5's Zotero close-out above is inlined so it does not depend on
-`connectors.md`; P4.5's ledger procedure is likewise self-contained in this file (the
-gate script automates a check a reader can still do by hand: confirm the quoted span is
-actually in the retrieved text).
+travel. Two files from those same directories ship despite that:
+`connectors/access_policy.py` and `verify/fetchsrc.py` are the skill-side half of
+`rules/literature-access.md`'s host access policy — a separate, portable mechanism
+from the routing/registry content those two reference files document, with no
+local-service dependency, and already named directly at P2 above. P5's Zotero
+close-out above is inlined so it does not depend on connectors.md; P4.5's ledger
+procedure is likewise self-contained in this file (the gate script automates a check
+a reader can still do by hand: confirm the quoted span is actually in the retrieved
+text).
 - `references/feedback-loop.md` — the evidence feedback loop (persisted runs in the vault,
   identity key, reflux entry point, consumer registry, forcing functions). Tools:
   `loop/runs.py` (open/register/find/check/affected/bridge), `loop/reflux.py`, `loop/idkey.py`.
 - `references/connectors.md` — **not shipped in this repo.** P2 routing for registered
-  data systems, access-ceiling and cost rules, per-connector field maps, Zotero
-  close-out. Contract and secret boundary: `connectors/README.md`; probe:
-  `connectors/probe.py` — neither shipped either.
+  data systems, the host access policy, access-ceiling and cost rules, per-connector
+  field maps, Zotero close-out. Contract and secret boundary: `connectors/README.md`
+  (not shipped); probe: `connectors/probe.py` (not shipped). The separate host
+  ACCESS-CONTROL policy named at P2 above (`connectors/access_policy.py`,
+  `hooks/literature-host-policy.json`) is a different mechanism and does ship.
 - `references/verification-gate.md` — **not shipped in this repo.** P4.5 protocol:
-  evidence ledger, what the gate may and may not rule on, repair order. Tool:
-  `verify/citecheck.py` (`--selftest`) — not shipped either.
+  evidence ledger, what the gate may and may not rule on, repair order. Tools:
+  `verify/citecheck.py` (not shipped), `verify/fetchsrc.py` (ships).
 - `references/portability.md` — READ FIRST when running outside Claude Code (other
   agents / web LLMs): capability slots, substitutes, degradation honesty. Else skip.
 - `references/search-sources.md` — per-channel strategies (each channel carries its own

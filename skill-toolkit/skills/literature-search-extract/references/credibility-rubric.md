@@ -48,10 +48,16 @@ Apply to the base tier:
 The Retraction Watch database is free via Crossref (acquired 2023; >63k entries,
 updated daily as of verification).
 
-Procedure per DOI: fetch `api.crossref.org/works/<doi>` and inspect `update-to` /
-`relation` fields for retraction, correction, or expression-of-concern notices; or
-search the Retraction Watch database directly (no registration needed). No DOI (old
-book chapters, reports): WebSearch `"<title>" retraction` as a best-effort check.
+Procedure per DOI: `python verify/citecheck.py <ledger>` runs it on every row (v2,
+2026-09-11), or fetch `api.crossref.org/works/<doi>` yourself and inspect the cited
+work's **`updated-by[]`** array — each element carries `type` (`retraction`,
+`correction`, `expression_of_concern`…), the notice `DOI` and `updated.date-parts`.
+**Corrected 2026-09-11:** earlier text here said `update-to`; that field sits on the
+NOTICE record and points back at the work, so reading it on the cited work finds nothing
+and reports "clean" (verified live on 10.1016/S0140-6736(97)11096-0: the work carries
+`updated-by` = correction 2004 + retraction 2010). Retraction Watch data is folded into
+the same field. No DOI (old book chapters, reports): WebSearch `"<title>" retraction`
+as a best-effort check.
 
 - Retracted → Tier X. If it must be mentioned (caller asked about it, or it's the
   origin of a still-circulating claim), state the retraction with its notice locator.
@@ -75,25 +81,28 @@ every one of them a source some past deliverable may rest on.
 (`connectors.md` §Zotero collection close-out) already runs on every literature wave.
 Re-check the accumulated DOIs there, in the same pass:
 
-- Batch the collection's DOIs through `api.crossref.org/works/<doi>`, inspecting
-  `update-to` / `relation` for retraction, correction, or expression-of-concern
-  notices — the same fields §3 uses, applied to the whole set instead of one source.
+- **The command (built and calibrated 2026-09-11):**
+  `python verify/citecheck.py --retraction-sweep <file>` — takes any file carrying DOIs
+  (a ledger, a `.bib`, the project bib JSON, a RIS export), queries Crossref at 1 request
+  per second, honours `Retry-After` / `x-rate-limit-*` with one back-off, and prints one
+  line per DOI: `ok` / `note` (correction, concern) / `RETRACTED` with the notice DOI /
+  `?` (not resolvable here). Exit 1 when anything is retracted.
 - Anything that fired: record it against the deliverables that cited that source, and
   tell the user. A retraction discovered late is still worth more than one never found.
   The record IS a reflux event — `python loop/reflux.py retraction --actor a3-retraction-sweep
-  --key doi:… --evidence "<Crossref update-to notice>"` — and `python loop/runs.py affected
+  --key doi:… --evidence "<Crossref updated-by notice DOI>"` — and `python loop/runs.py affected
   <key>` then names every run, claim and consumer that rests on it (`feedback-loop.md`).
 
-**Before any sweep may print "0 retractions", calibrate it two-sided.** A script that
-queries Crossref incorrectly returns a clean result for every input, and a clean result
-is exactly what the reader wants to see — this is the one-sided-calibration trap from
-`verification-gate.md`, in a place where it would be believed. It needs a known-retracted
-DOI that must FAIL and a known-good DOI that must PASS, both fixtures, before its output
-counts as evidence of anything. Until that exists, run the sweep and read the responses;
-do **not** report a rate.
+**Its calibration is two-sided and shipped** — `citecheck.py --selftest` carries a
+known-retracted DOI that must FAIL (Wakefield 1998, notice 10.1016/s0140-6736(10)60175-4)
+and known-good DOIs that must PASS, in both the offline (stub) and live modes; the live
+mode additionally probes that Crossref still returns `updated-by` on that work. A sweep
+whose selftest is red reports nothing: a clean result from a mis-read field is exactly
+what the reader wants to see, which is the one-sided-calibration trap from
+`verification-gate.md` in the place it would be believed.
 
-**review-when**: a batch sweep script is built and calibrated (then this section names
-its command instead of the raw endpoint), or Crossref changes the retraction fields.
+**review-when**: Crossref changes the retraction fields (the live probe in `--selftest`
+is the tripwire); a second retraction source (Retraction Watch API direct) is registered.
 
 ## 4. Predatory-venue screening
 
@@ -221,7 +230,7 @@ counter-search before synthesis:
 > - Venue: established journal → Tier A.
 > - Citations: 40 citations; spot-checked 3 via citation contexts — one is a
 >   correction-style comment (Kim 2022) disputing the calibration → modifier: negative.
-> - Retraction check: Crossref `update-to` shows an erratum (2022) revising Table 1
+> - Retraction check: Crossref `updated-by` shows an erratum (2022) revising Table 1
 >   values → extract from the erratum, not the original table.
 > - Net: include at Tier A with notes; the Kim 2022 dispute goes to `confidence` as a
 >   conflict; the extracted value cites "(Lee 2021, Table 1 as corrected by 2022

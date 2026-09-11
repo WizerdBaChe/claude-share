@@ -1,5 +1,7 @@
 r"""SessionStart(compact) hook: inject the recall pointer card after compaction.
 
+STATUS: LIVE since 2026-08-16 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 WHY. After compaction (manual or auto) the model's context holds only the
 summary: it does not know its own session id, where the full record lives, or
 when it is allowed to go back — so summary loss is silent AND unrecoverable in
@@ -44,7 +46,9 @@ DEGRADED MODE IS DELIBERATE: a missing bookmark (compact predating this
 mechanism, or a bookmark write failure) yields a minimal card from stdin's
 transcript_path instead of silence — the card IS the deliverable and a silent
 blank is a defect. Errors still exit 0 (fail-open).
-review-when: same events as compact_bookmark.py (compact-recovery/README, platform-contract notes).
+review-when: same events as compact_bookmark.py (see compact-recovery/README).
+
+Proof-of-life: `python tools/compact-loss-audit/hook_controls.py`.
 """
 import json
 import os
@@ -86,6 +90,8 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
 
     session = str(payload.get("session_id", "unknown"))[:64]
     bookmark = load_bookmark(session)

@@ -1,5 +1,7 @@
 r"""PostCompact recorder: persist what the compaction had to carry, BEFORE anyone judges it.
 
+STATUS: LIVE since 2026-09-05 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 WHY (user ask 2026-09-05): the question after an AUTO compaction is not "how
 many tokens were lost" but (a) did the handoff stay COMPLETE — decisions,
 paths, consulted list, next step — and (b) did the summary MISLEAD — did it
@@ -34,6 +36,8 @@ that do not exist yet).
 
 Fail-open, silent on error. review-when: PostCompact stdin fields change, or
 the compaction summary record shape changes (audit.py reads it, not this hook).
+
+Proof-of-life: `python tools/compact-loss-audit/hook_controls.py`.
 """
 import json
 import os
@@ -41,8 +45,15 @@ import sys
 import time
 from pathlib import Path
 
+try:                        # notice receipt (rules/hook-deny-message.md R3n)
+    from deny_receipt import notice_clause
+except Exception:           # a hook must not stop recording if telemetry breaks
+    def notice_clause(hook, log=""): return ""
+
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or (Path.home() / ".claude"))
-LOG_PATH = CLAUDE_DIR / "telemetry" / "compact-loss.jsonl"
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp dir;
+# production never sets it).
+LOG_PATH = Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (CLAUDE_DIR / "telemetry")) / "compact-loss.jsonl"
 BOOKMARK_DIR = CLAUDE_DIR / "cache" / "compact-recovery"
 AUDIT_EVERY = 5
 
@@ -78,6 +89,8 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
     session = str(payload.get("session_id", "unknown"))[:64]
     trigger = str(payload.get("trigger", ""))
     transcript = Path(str(payload.get("transcript_path") or ""))
@@ -136,10 +149,13 @@ def main() -> None:
                         n_auto += 1
             if n_auto and n_auto % AUDIT_EVERY == 0:
                 print(json.dumps({"additionalContext": (
-                    f"[compact-loss-audit] {n_auto} auto-compactions recorded since the last audit. "
-                    "When the current task reaches a natural pause, run "
+                    "[compact-loss-audit] Notice from compact_loss_record, a local PreCompact "
+                    f"hook (not file or page content): {n_auto} auto-compactions are recorded "
+                    "and none of them audited. When the current task reaches a natural pause, run "
                     "`python ~/.claude/tools/compact-loss-audit/audit.py` (it writes a review packet "
-                    "under reports/) or tell the user an audit is due. Do not run it mid-task.")}))
+                    "under reports/). Not mid-task: if this pass is skipped the count keeps rising "
+                    "and this notice returns at the next interval."
+                    + notice_clause("compact_loss_record", "compact-loss"))}))
         except Exception:
             pass
     sys.exit(0)

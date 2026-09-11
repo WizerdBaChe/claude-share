@@ -60,15 +60,12 @@ view at the Step 1 hierarchy rule), never its type size.
   `scrollHeight <= window.innerHeight` — no horizontal page scroll, first
   screen holds the diagram. Repair by redistributing authored layout;
   never by `overflow:hidden`, clipping, an inner diagram scroller, or text
-  below the notation-precision §2 minimum. **Lower bound (2026-09-04)**:
-  the same delivery is also checked against a page-fill gate that declares
-  `<html data-page-class="diagram">` and flags a left-anchored width cap
-  (`max-width` without `margin:auto` — a defect class caught in this
-  environment's own delivered views) as distinct from over-width
-  containment: containment says "not too wide", the fill-gate says "not
-  left-hugging". The gate script lives in the source environment's tooling
-  and does not ship here — reproduce the pass/fail criterion, not the
-  script.
+  below the notation-precision §2 minimum. **Lower bound (2026-09-04)**: the
+  same delivery runs `~/.claude/tools/page-fill-gate/fill_gate.py` on the
+  file with `<html data-page-class="diagram">` declared — a centred container
+  with symmetric margins passes, a left-anchored cap (`max-width` without
+  `margin:auto`, as in one of this environment's own delivered views) fails;
+  containment says "not too wide", the fill-gate says "not left-hugging".
 - **PPTX**: native shapes + **connectors bound to shape anchors** (they
   survive the user moving boxes — the point of an editable deck). One
   diagram per slide + legend; overflow → a hierarchy of slides with a

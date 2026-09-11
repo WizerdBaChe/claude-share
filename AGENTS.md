@@ -50,7 +50,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | File | What it is |
 |---|---|
 | `CLAUDE.md` | The global preferences the ops layer hangs off. Machine-specific values are `<PLACEHOLDER>`s — substitute your own. Opens with a "Path-scoped rules" index pointing at `rules/`. |
-| `rules/frontend-layering.md`, `rules/shader-failure-modes.md` | **New 2026-08-11.** Two rules sunk out of CLAUDE.md's body into path-scoped files (only load when a matching file is read) — FSD module layering and GLSL silent-failure modes. |
+| `rules/` (eleven files) | Path-scoped rules: each loads only when a matching file is read, and `CLAUDE.md`'s opening index names all eleven. `frontend-layering.md` and `shader-failure-modes.md` were the first two sunk out of CLAUDE.md's body (2026-08-11): FSD module layering, GLSL silent-failure modes. `deliverable-doc-refs.md` (human-facing HTML: define before use, hover cards, the page-class width registry), `office-deck-deliverables.md` (programmatic PPTX), `visual-gate-scope.md` (measure the glyph, gate the class), `verification-ladder.md` (evidence rungs 0–5, plus the verification record a durable claim ships with). **New 2026-09-12:** `web-navigation-state.md`, `hook-deny-message.md`, `naming-and-placement.md`, `figure-self-read.md`, and `literature-access.md`, which ships with its enforcing hook `hooks/literature_host_guard.py`. (This row named two files until 2026-09-12; four had arrived since without it changing.) |
 | `README.md` | Cross-reference map back into `claude-ops/`. |
 
 ## `skill-toolkit/` — installable skills
@@ -81,18 +81,19 @@ self-contained, with detail in its own `references/` loaded on demand.
 
 ## `hooks/` — the mechanical enforcement layer
 
-Collected 2026-08-14, extended on 2026-08-16, 2026-08-29 and 2026-09-07.
-**Eighteen hooks** across PreToolUse / UserPromptSubmit / SessionStart /
+Collected 2026-08-14, extended on 2026-08-16, 2026-08-29, 2026-09-07 and
+2026-09-12. **Twenty-one mounted hooks** across PreToolUse / UserPromptSubmit / SessionStart /
 PreCompact / PostCompact / SubagentStop / InstructionsLoaded — the enforcement
 layer the ops rules had been citing without ever shipping it; all fail-open,
 none machine-bound. Install steps and the per-hook table are in
 `hooks/README.md`; `settings.example.json` is the mounting template with
 `<PYTHON_EXE>` / `<CLAUDE_HOME>` to substitute, and it mounts every hook that
-ships. Two `.py` files are deliberately outside that rule and neither is a
-defect: `tests/` is a regression matrix run by hand, and
-`handoff_snapshot.py` is a shared library the compact-recovery hooks import —
-it has no event to mount at. Both exemptions are declared in
-`tools/share-manifest.toml` and checked, so neither can quietly become a hook
+ships. Some `.py` files are deliberately outside that rule and none is a
+defect: `tests/` holds regression matrices run by hand; `handoff_snapshot.py`
+and `deny_receipt.py` are shared libraries with no event to mount at; and
+`fieldwork_threshold_notice.py` was retired at the source on 2026-09-12 and
+ships unmounted, as the source runs it. Every exemption is declared in
+`tools/share-manifest.toml` and checked, so none can quietly become a hook
 nobody wired up.
 
 | File | Enforces |
@@ -104,7 +105,7 @@ nobody wired up.
 | `ops_health_nudge.py` | Thirteen maintenance thresholds at session start; silent when healthy. |
 | `delivery_gate_shadow.py` | Shadow mode only — measures what a delivery gate WOULD block before anything is blocked. |
 | `context_runway_shadow.py` | **New 2026-08-16.** Shadow: long context *and* no checkpoint written yet. The conjunction is the trigger — context alone fires in 65% of sessions at 150k, the pair in 26%. |
-| `fieldwork_threshold_notice.py` | **New 2026-08-16.** Shadow: main-session Read/Grep/Glob measured against `20-dispatch.md` §1's literal thresholds. High-volume matcher — read its cost note before mounting it. |
+| `fieldwork_threshold_notice.py` | **New 2026-08-16, retired 2026-09-12.** Shadow: main-session Read/Grep/Glob measured against `20-dispatch.md` §1's literal thresholds. Retired at the source (ruling R-3: at least 52% of 293 shadow rows were false positives); ships unmounted with its test suite, as the source runs it. |
 | `instructions_loaded_logger.py` | Observation only: which instruction files load, when. |
 | `compact_bookmark.py` | **New 2026-08-16.** PreCompact half of the compact-recovery bridge: bookmarks the pre-compact transcript (path, line count, trigger), then best-effort refreshes digest cards. |
 | `compact_pointer.py` | SessionStart("compact") half: injects a ~130-token pointer card — digest-first recall ladder, exact pre-compact region, the two recall triggers. |
@@ -116,8 +117,15 @@ nobody wired up.
 | `ps_errorpref_guard.py` | **New 2026-08-29.** `$ErrorActionPreference='Stop'` governing a native exe — wrong in both directions at once (fires on a harmless stderr line, misses a non-zero exit). Annotates, never denies. Mounted on `Write` because that is where 47 of 53 real payloads arrived, not on the tool the ticket asked for. |
 | `ps_pipeline_close_guard.py` | **New 2026-08-29.** `\| Select-Object -First N` closes the pipeline and KILLS the upstream process; the output looks truncated for its own reasons and the exit code says failure, so both halves point away from the cause. Its backtest put the surface on `PowerShell` — the opposite of its sibling's, which is why each was measured rather than copied. |
 | `branch_commit_guard.py` | **New 2026-08-29.** A `git commit` into a checkout inside `~/.claude` must land on `main` unless the command carries `[branch-ok]` or the worktree has opted in. The compensating control for two same-day incidents where the prose ritual RAN and did not gate — it was a non-gating spectator in a `&&` chain. Carries its own incident log and false-positive count. |
+| `dispatch_commit_notice.py` | **New 2026-09-12.** Three mounts, one tracker: a subagent dispatch is recorded, and a bare `git commit` by that agent with no matching process-ledger call is annotated at the next related event. Never denies. |
+| `published_record_guard.py` | **New 2026-09-12.** Denies a Write/Edit into any tree whose root carries `tools/COLLECTION-RULES.md` (this repo included) when the payload matches a private-value shape: a drive-rooted or POSIX home path, the account name read at run time, a 32+ hex run, a UUID. It gated this round's own collection work. |
+| `worktree_scope_guard.py` | **New 2026-09-12.** A session inside a git worktree is told so at start, and a command that would mutate the canonical checkout is denied unless it carries the opt-in or runs from the canonical cwd. |
+| `literature_host_guard.py` + `literature-host-policy.json` | **New 2026-09-12.** Enforces `global-claude-md/rules/literature-access.md` at the tool-call boundary: the policy table puts each scholarly host on a tier (open, API, human-paced, no proxied access), and the guard denies the last. One mechanism with the skill-side `connectors/access_policy.py` and `verify/fetchsrc.py`. |
+| `deny_receipt.py` | **New 2026-09-12. Not a hook** — the receipt helpers `rules/hook-deny-message.md` requires, so an agent reading a deny text can check sideways that a local hook wrote it. Imported by fifteen of the shipped hooks — every guard whose text reaches the agent. |
+| `tests/` (four more suites) | **New 2026-09-12.** Regression matrices for `browser_pane_scope_guard.py`, `instructions_loaded_logger.py`, `fieldwork_threshold_notice.py` and `literature_host_guard.py`, beside the 2026-08-29 one. Run by hand. |
 
-Ten of the source's twenty-nine hook-layer files are deliberately **not** here,
+Twelve of the source's forty-four hook-layer files are deliberately **not** here
+(nine hooks and three of their tests),
 and `tools/share-manifest.toml` carries a disposition for every one. Two gate an
 external-dispatch entry point this repo does not ship; `session_board_register.py`
 and `project_registry_gist.py` are each one half of a source-environment tool
@@ -130,8 +138,10 @@ the deny guard and shadow probe for the lesson-intake store — shipping the gua
 without the CLI it points at would block writes to a path this repo does not even
 have; and `unattended_run.py` mounts three times for the `[unattended-run]`
 carrier, whose Stop guard blocks on a report only a tool outside this repo can
-generate. `settings.example.json` mounts every hook that ships and nothing else,
-with the two not-a-hook exemptions named above; that is the invariant to re-check
+generate. **New 2026-09-12:** the tests for `extdispatch_entrypoint_guard.py` and
+`project_registry_gist.py` stay out with the hooks they test.
+`settings.example.json` mounts every hook that ships and nothing else, with the
+exemptions named above; that is the invariant to re-check
 whenever this table changes, and check S5 of the gate is what re-checks it.
 
 ## `compact-recovery/` — post-compact recall as an operating mode
@@ -189,6 +199,24 @@ rather than three skills separately.
 | `README.md` | The capability set (中文): three independent failure shapes of architecture diagrams, the two-entry loop (design entry / audit entry), file-and-ownership table, install set with its side-by-side requirement, notation coverage grid (incl. Petri-slice ownership), failure modes when a part is missing, de-identification notes. |
 | `ACCEPTANCE.md` | Fourteen-item blind-runnable external checklist (中文): trigger/routing probes incl. a negative one, theory/production/audit items, stress items on the fabrication firewall — plus what the source environment verified 2026-08-27 and which evidence cells stay open (PPTX carrier, BPMN branch, two never-live-fired probes). |
 | `archdiag/` | **New 2026-08-29 — the set's executable half.** Twelve files: the audit-drawing library the `diagram-authoring` skill routes to for precision view sets. `index.mjs` is the pipeline (schema → build-time geometry asserts → marker closure → deterministic emission → sha256 receipt); `selfcheck.mjs` is the SINGLE source of the in-page check script, which is the whole point — per-file copies of it drifted within one day, and that drift is what the library exists to kill. `route.mjs` is an orthogonal edge router behind a provider seam (field-accepted at 89/89 edges, 0 hand-fixes, against a 4–5 baseline); `delta.mjs` automates the model diff that used to be a ~12-minute hand procedure. **New 2026-09-07:** `tokens.mjs` is the style-token table plus a WCAG contrast check over the palette — run `node tokens.mjs --check` and it grades the colours it actually emits rather than the ones the docs claim. `vendor/archify-geometry.mjs` is third-party (tt-a1i/archify, MIT), verbatim. The reference BUILD scripts stay in the source's deliverable tree; what ships is the library plus the `build()` contract in its README. Pinned to LF by this repo's `.gitattributes`: the emitted html's sha256 IS the freeze receipt, so a CRLF checkout would silently invalidate every one. |
+
+## `instruments/` — verification tools the shipped rules name as their enforcement
+
+New 2026-09-12. The source environment's `tools/` tree stays excluded, but two
+of its tools are what shipped rule files literally invoke: `claude-ops/ops/environment.md`
+names `page-fill-gate` as the "Enforcement:" of its display rule, and
+`claude-ops/ops/references/integrity-sweep.md` check 7b imports
+`check_cap_binding`. Excluding them left both citations pointing at nothing,
+so this folder ships exactly those two, verbatim except one README. The
+sub-paths match the source's, so an adopter copies `instruments/<x>/` to
+`~/.claude/tools/<x>/` and every citation resolves unedited. Nothing else from
+`tools/` qualifies; the manifest's `tools/` entry records why.
+
+| File | What it is |
+|---|---|
+| `README.md` | Admission criterion (中文): shipped file runs, imports or names it as enforcement; stdlib-only; self-calibrating; reads no private tree. Per-tool table, install, measured known limits. |
+| `page-fill-gate/` | Six files. `fill_gate.py` measures whether a human-read HTML page uses the width it is given; the named defect is the left-anchored cap. How full a page must be is a row of `page_classes.json`, not a code branch. Every run first checks a known-bad and a known-good fixture and refuses a verdict if either control fails. Needs Playwright + Chromium; exit 2 means the instrument is absent, never a pass. |
+| `ops-health-test/check_cap_binding.py` | Sweep check 7b: each cap constant in `hooks/ops_health_nudge.py` must match the value the rule text states; reports drift or a lost anchor. `--selftest` runs one known-true and four known-false cases. Resolves paths relative to the INSTALLED `~/.claude` layout, so it does not run in place against this repo's renamed `claude-ops/ops/` tree — measured, and stated in the folder README. The rest of that source directory (the hook's own test suite) does not ship. |
 
 ## `agents/` — subagent definitions
 
@@ -254,8 +282,11 @@ exit 0 is the release condition.
 | `COLLECTION-RULES.md` | The decision procedure the gate enforces: what may be collected from the source environment, in which of five verdicts, and the mandatory copy → diff → declare → verify steps. Read it before adding or refreshing anything collected. |
 | `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart — a claim that was false from 2026-08-11 to 2026-08-16 and is recorded as such in the manifest. Now also catches absolute paths on a non-system drive, the class that let nine private pointers through a single refresh. |
 | `share-manifest.toml` | The only way past a finding: `[[allow]]` leak exceptions, `[[not_shipped]]` dependency dispositions + fallbacks, the `[placeholders]` position vocabulary, and the source-environment → repo path map. |
-| `test_share_gate.py` | Ten cases, every one a real incident: the `<URL>` over-scrub, an undeclared hook, planted personal data, an unrecorded edit, a second-drive private path, an unmounted hook, a dead permission, and a declared edit reverted by a refresh. **Two of the ten assert the gate stays quiet** — a gate calibrated only on what it should catch scores 100% by rejecting everything. |
-| `README.md` | Operator manual (中文): why the layer exists, how to write a manifest entry, how to add a check. |
+| `test_share_gate.py` | Sixteen cases, every one a real incident: the `<URL>` over-scrub, an undeclared hook, planted personal data, an unrecorded edit, a second-drive private path, an unmounted hook, a dead permission, a declared edit reverted by a refresh, a hooks/tests matrix that is not a hook, an expired unmounted-hook declaration, an inventory table behind the tree, and — new 2026-09-12 — the two private-id shapes the leak scan could not see: this machine's account name outside a home path (SKIP, not PASS, where the account name is stock or short) and a session-id UUID. **Three of the sixteen assert the gate stays quiet** — a gate calibrated only on what it should catch scores 100% by rejecting everything. (This row said "ten" until 2026-09-12; the suite had grown to fourteen on 2026-09-07.) |
+| `triage.py` | **New 2026-09-12.** Sorts a source delta (`source_aligned`..HEAD, plus uncommitted state) into the procedure each path needs — `refresh`, `candidate`, `recheck`, `never`, `uncommitted`, `source-gone`, `deleted` — using only what the manifest already declares. A sort, not a verdict: it never decides whether anything ships. A `[[collected]]` entry beats a `[[not_shipped]]` directory, which is how the archdiag files under the excluded `tools/` tree stay on procedure B. |
+| `test_triage.py` | **New 2026-09-12.** Seventeen cases: one per bucket and per precedence edge (collected-beats-directory, segment boundary, `archive` as a directory not a filename, a rename whose old path an entry still names), plus a positive control that removes a branch and must be noticed. |
+| `SYNC-RUNBOOK.md` | **New 2026-09-12.** The orchestration around `COLLECTION-RULES.md` for a multi-worker round: Step 0 and triage, splitting lanes by coupling, one brief template for every lane (Appendix A), the manifest-editing protocol that makes lanes merge mechanically, the merge-time cross-lane race check, and close-out. |
+| `README.md` | Operator manual (中文): why the layer exists, how to write a manifest entry, how to add a check, and how a whole round runs. |
 
 ## `thinking-notes/` — essays, not rules
 

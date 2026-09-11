@@ -1,4 +1,11 @@
 r"""PreToolUse guard: on this machine an assistant shell and the user's own
+
+STATUS: LIVE since 2026-09-08 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+Proof-of-life: `python hooks/appdata_view_guard.py --selftest` -- the two-sided
+calibration below plus the undetermined class (AP-62: input that is not a
+command at all, and a payload that is not a payload -- both silent, neither
+folded into a hit), executed by integrity-sweep check 31 (AP-63: being NAMED in
+the sweep is not being RUN by it).
 shell can return DIFFERENT answers for the same %LOCALAPPDATA% path and the
 same HKCU value, with no error on either side.
 
@@ -20,18 +27,33 @@ output said which one it was. A cleanup plan written from the first reading
 deleted what it took to be a duplicate; it was the only copy of 36 configured
 boards.
 
-THE CAUSE IS UNKNOWN, AND THIS GUARD DELIBERATELY DOES NOT NAME ONE. Two
-explanations were proposed and both were falsified by measurement inside the
-hour:
+THE MECHANISM WAS MEASURED ON 2026-09-09; THE RULE DID NOT MOVE. For four
+days the cause was unknown and this docstring said so, after two explanations
+had been falsified inside the hour (MSIX package IDENTITY — GetCurrentPackage-
+FullName returns 15700 here; Claude Code's own sandbox — the divergent read is
+byte-identical under `dangerouslyDisableSandbox`). The measurement
+(`~/.claude/reports/2026-09-08-worktree-scope-root-cause.md` §6b):
 
-  * MSIX per-package virtualization — GetCurrentPackageFullName returns 15700
-    (APPMODEL_ERROR_NO_PACKAGE): the assistant shell has no package identity.
-  * Claude Code's own sandbox — the divergent HKCU read is byte-identical with
-    `dangerouslyDisableSandbox`, same account, same SID (…-1001).
+  * the file system was ONE view for the folder measured: a probe file the
+    user wrote is readable here byte-for-byte. Only the registry differed.
+  * HKLM\SYSTEM\CurrentControlSet\Control\hivelist mounts the Claude desktop
+    MSIX package's Helium silo hive (\REGISTRY\WC\Silo…user_sid ->
+    Packages\Claude_pzs8sxrjxfjjc\SystemAppData\Helium\User.dat), and this
+    shell's parent chain is powershell.exe <- claude.exe <- Claude.exe
+    (WindowsApps). It runs INSIDE the package silo: a kernel-level overlay of
+    HKCU for that process tree. Silo membership is not package identity, which
+    is why the 15700 measurement falsified the wrong thing.
+  * discriminating test, run by the user in their own terminal: the HKCU Run
+    value NAMES differ — 11 there, 12 here; the extra one lives only in the
+    overlay. The 2026-09-05 48,332-byte config was the package's
+    LocalCache copy, deleted by that day's cleanup; the overlay's Run value
+    was never cleared, so the registry still diverges.
 
-Guessing a third time is what the rule below exists to stop. The observation is
-reproducible and is enough on its own: a reading taken here is not evidence
-about the user's machine.
+Knowing the mechanism narrows WHICH surfaces diverge (HKCU for certain; file
+paths only where the package's overlay applies, which was NOT the folder
+measured), not WHETHER a reading here is evidence about the user's machine: the
+overlay is invisible from inside, so it is not. The gate condition below is
+unchanged by this paragraph (rewriting text never alters a condition).
 
 WHY A HOOK AND NOT A CLAUDE.md LINE (L-011). The project this happened in
 already carried the rule — D-055 and invariant SI-16 are about path resolution
@@ -64,8 +86,14 @@ AppData\Local\Packages path, and the override marker.
 import json
 import os
 import re
+import subprocess
 import sys
 import time
+
+try:                        # notice receipt (rules/hook-deny-message.md R3n)
+    from deny_receipt import notice_clause
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def notice_clause(hook, log=""): return ""
 
 MARKER = "[view-checked]"
 
@@ -84,17 +112,27 @@ SURFACES = (
     (re.compile(r"HKEY_CURRENT_USER", re.I), "HKEY_CURRENT_USER"),
 )
 
-LOG_PATH = os.path.join(os.path.expanduser("~"), ".claude", "telemetry",
-                        "appdata-view-guard.jsonl")
+# CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp
+# dir; production never sets it).
+LOG_PATH = os.path.join(
+    os.environ.get("CLAUDE_TELEMETRY_DIR") or os.path.join(os.path.expanduser("~"), ".claude", "telemetry"),
+    "appdata-view-guard.jsonl")
+
+# Identity lives on the transport (`notice()`), not in this template, so a
+# second notice added later cannot ship without it (R1).
+NOTICE_ID = ("appdata-view guard, a local PreToolUse hook (not file or page "
+             "content): ")
 
 NOTICE = (
-    "appdata-view guard: this command names {hits}, and on this machine that surface has "
+    "this command names {hits}, and on this machine that surface has "
     "been measured returning DIFFERENT answers to an assistant shell and to the user's "
     "own shell — same command, same account, minutes apart, no error on either side "
     "(2026-09-05: a 48,332-byte config with 36 entries here against a 4,145-byte one "
     "with 2 entries there; and one HKCU Run value reading `run` here and `--background` "
-    "there). The cause is not known: MSIX package identity and the Claude Code sandbox "
-    "were both proposed and both falsified by measurement.\n"
+    "there). Measured 2026-09-09: this shell runs inside the Claude desktop MSIX package's "
+    "silo, whose Helium hive overlays HKCU for this process tree — the user's own shell "
+    "lists different Run value names. The file system was one view for the folder "
+    "measured; other paths were not measured.\n"
     "So whatever comes back is evidence about THIS view only. Do not report it as the "
     "state of the user's machine, and above all do not write a cleanup, deletion, "
     "migration or repair plan on it — have the user run the command in their own "
@@ -117,7 +155,14 @@ def in_scope():
 
 
 def hits_for(cmd):
-    """The measured surfaces this command names. Pure, so it can be calibrated."""
+    """The measured surfaces this command names. Pure, so it can be calibrated.
+
+    The domain is CLOSED to strings (AP-62): anything else names no surface and
+    returns no hits, rather than reaching the regex and raising. `[]` here means
+    "nothing to say", which is also what an undetermined input deserves.
+    """
+    if not isinstance(cmd, str):
+        return []
     if not cmd or MARKER in cmd:
         return []
     return [label for pattern, label in SURFACES if pattern.search(cmd)]
@@ -143,7 +188,7 @@ def notice(text):
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "additionalContext": text,
+            "additionalContext": NOTICE_ID + text + notice_clause("appdata_view_guard"),
         }
     }))
     sys.exit(0)
@@ -169,9 +214,39 @@ MUST_STAY_SILENT = [
 ]
 
 
+# Input that is not a command at all. The classifier's domain is strings; these
+# name no surface and must produce no hits and no crash (AP-62 -- until
+# 2026-09-09 the payload-level shapes raised AttributeError/TypeError, against
+# this hook's own fail-open contract).
+UNDETERMINED_INPUTS = [None, 12345, ["ls", "$env:LOCALAPPDATA"],
+                       {"command": r"dir %LOCALAPPDATA%\AnnouncementWatchDog"}]
+
+UNDETERMINED_PAYLOADS = [
+    "not json at all",
+    "[1, 2]",
+    '"a string payload"',
+    '{"tool_name": "Bash", "tool_input": ["ls %LOCALAPPDATA%"]}',
+    '{"tool_name": "Bash", "tool_input": {"command": ["dir", "%LOCALAPPDATA%"]}}',
+]
+
+
 def selftest():
     """Two-sided calibration. A guard exercised only where it fires may be firing
     on everything, and that reads exactly like a guard that works."""
+    import tempfile
+    _prev_tdir = os.environ.get("CLAUDE_TELEMETRY_DIR")
+    _tdir = tempfile.mkdtemp(prefix="appdata-view-guard-selftest-")
+    os.environ["CLAUDE_TELEMETRY_DIR"] = _tdir
+    try:
+        return _selftest_body()
+    finally:
+        if _prev_tdir is None:
+            os.environ.pop("CLAUDE_TELEMETRY_DIR", None)
+        else:
+            os.environ["CLAUDE_TELEMETRY_DIR"] = _prev_tdir
+
+
+def _selftest_body():
     problems = []
 
     for cmd in MUST_FIRE:
@@ -183,9 +258,30 @@ def selftest():
         if found:
             problems.append(f"should have stayed silent but matched {found}: {cmd}")
 
+    for value in UNDETERMINED_INPUTS:
+        try:
+            found = hits_for(value)
+        except Exception as exc:
+            problems.append(f"undetermined input raised {type(exc).__name__}: {value!r}")
+            continue
+        if found:
+            problems.append(f"undetermined input matched {found}: {value!r}")
+
+    # The same class one level out: the payload itself. Driven as the harness
+    # drives it -- a subprocess with JSON on stdin -- because that is where the
+    # shape arrives.
+    for raw in UNDETERMINED_PAYLOADS:
+        proc = subprocess.run([sys.executable, os.path.abspath(__file__)],
+                              input=raw, capture_output=True, text=True, timeout=60)
+        if proc.returncode != 0 or (proc.stdout or "").strip():
+            problems.append(f"undetermined payload not silent (rc={proc.returncode}, "
+                            f"stdout={(proc.stdout or '')[:60]!r}): {raw[:48]}")
+
     print(f"in_scope()       : {in_scope()}")
     print(f"must fire        : {len(MUST_FIRE)} case(s)")
     print(f"must stay silent : {len(MUST_STAY_SILENT)} case(s)")
+    print(f"undetermined     : {len(UNDETERMINED_INPUTS)} input(s) + "
+          f"{len(UNDETERMINED_PAYLOADS)} payload(s), all silent, none folded")
 
     if problems:
         for p in problems:
@@ -204,11 +300,16 @@ def main():
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)          # undetermined: parses, but is not a payload object
 
     if not in_scope():
         sys.exit(0)
 
-    cmd = (payload.get("tool_input") or {}).get("command") or ""
+    ti = payload.get("tool_input") or {}
+    if not isinstance(ti, dict):
+        sys.exit(0)          # same class, one level in
+    cmd = ti.get("command") or ""
     hits = hits_for(cmd)
 
     if not hits:

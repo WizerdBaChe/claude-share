@@ -15,7 +15,7 @@
 - `skill-trigger-dict.md`：雙語觸發字典；用於在相近技能間消歧，並提供較能命中技能的提問句型。
 - 更新紀錄已於 2026-08-07 上移至 repo 根目錄的 `Global_skill_update.md`：它記錄的是整個來源環境的變更（`ops/`、全域 `CLAUDE.md`、hooks 都包含在內），不只此技能組，放在這一層屬於歸錯檔。
 - `skills/`：18 個可獨立閱讀及匯入的技能資料夾，以及它們所需的參考文件與評估資料。
-  來源環境共有 29 顆；未收錄的是十一顆——`asset-vault`，它操作一個寫死在本機磁碟路徑的
+  來源環境共有 30 顆；未收錄的是十二顆——`asset-vault`，它操作一個寫死在本機磁碟路徑的
   私有素材庫，並把權威委派給該素材庫自己的（非公開）`AGENTS.md`，拆掉耦合之後只會剩下
   一份在描述你沒有的東西的說明；兩個知識包 `render-perf`、`system-design`，2026-08-17
   因來源端尚未成型而暫緩（半成品的知識包只會輸出一個沒有內容支撐的觸發字）；兩個
@@ -24,13 +24,15 @@
   （2026-09-02 新增：它是 `mfp` CLI 與本機 `tools/post-brief` 的迴圈，兩者都不隨此包
   出貨，殼一樣無從運作）；`model3d-pipeline`（2026-09-02 owner 裁定暫緩出貨——
   它路由的整條 CAD 管線活在來源環境之外的另一個磁碟根目錄，晚一輪待管線調整完成後
-  再透過 mechanism-share-packaging 路徑收錄）；以及 2026-09-07 新增的四顆——
+  再透過 mechanism-share-packaging 路徑收錄）；2026-09-07 新增的四顆——
   `knowledge-vault`（與 `asset-vault` 同類：操作使用者本機的 Obsidian 知識庫，權威
   委派給該庫自己的非公開契約檔）、`app-residue-sweep`（殼在此、本體在來源環境的
   `tools/` 樹，與 `post-brief` 同型）、以及 `paper-distill`／`paper-story` 這對
   （2026-09-03 於來源端分家；其交付物與 `evals/` 是某個實驗室的模板、口吻與實際
   演講紀錄，屬於特定群體的內容而非可移植的方法，比照 `model3d-pipeline` 的
-  「明講暫緩並寫下重看時機」處理）。理由記在
+  「明講暫緩並寫下重看時機」處理）；以及 2026-09-12 新增的 `patents-grabber`
+  （來源端 2026-09-11 新增：與 `media-fetch-pipeline`／`post-brief` 同型的薄殼，
+  每個操作都呼叫另一顆磁碟根目錄上的獨立程式，憑證檔與圖檔快取也都在殼外）。理由記在
   [`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的 `[[not_shipped]]`，
   寫在這裡是為了讓「少十一顆」是講明的，不是被發現的。
 

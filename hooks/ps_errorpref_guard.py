@@ -1,5 +1,7 @@
 r"""PreToolUse guard: `$ErrorActionPreference='Stop'` governing a native exe.
 
+STATUS: LIVE since 2026-08-21 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 Scope: PowerShell-language text, wherever it is written. The DETECTOR reads four
 surfaces - the PowerShell tool's `command`, and `.ps1` content arriving through
 Write, Edit or a Bash heredoc. The REGISTRATION in `settings.json` is narrower
@@ -118,6 +120,7 @@ payload, for a script whose author has verified the interaction.
 Fail-open by design: any parse error exits 0, so a guard bug never blocks work.
 Telemetry: every notice appends one row to `telemetry/ps-errorpref-guard.jsonl`
 (excerpt only, never the whole file). Proof-of-life check:
+`python tools/ps-errorpref-test/test_ps_errorpref_guard.py`, and
 `ops/references/integrity-sweep.md` check 21 - a hook that does not run is
 itself silent (L-011, COST OF P1/P3).
 """
@@ -127,6 +130,11 @@ import re
 import sys
 import time
 
+try:                        # notice receipt (rules/hook-deny-message.md R3n)
+    from deny_receipt import notice_clause
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def notice_clause(hook, log=""): return ""
+
 MARKER = "[eap-checked]"
 
 # Overridable so the test suite and the integrity sweep can DRIVE this hook
@@ -135,8 +143,11 @@ MARKER = "[eap-checked]"
 # telemetry (P-005, 2026-08-15), and `shell_transport_guard`'s registry entry
 # still has to say "discount the first ~90 rows -- the test suite writes real
 # entries". A rate you have to subtract from is a rate nobody re-checks.
+# Precedence: PS_ERRORPREF_LOG (per-hook override) > CLAUDE_TELEMETRY_DIR
+# (suite redirect; production never sets it) > default.
 LOG_PATH = os.environ.get("PS_ERRORPREF_LOG") or os.path.join(
-    os.path.expanduser("~"), ".claude", "telemetry", "ps-errorpref-guard.jsonl")
+    os.environ.get("CLAUDE_TELEMETRY_DIR") or os.path.join(os.path.expanduser("~"), ".claude", "telemetry"),
+    "ps-errorpref-guard.jsonl")
 
 # Assignment to the preference variable. The right-hand side is captured
 # permissively and classified afterwards, so that a RESTORE (`= $prevEap`) is
@@ -408,7 +419,11 @@ def notice(text):
     print(json.dumps({
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "additionalContext": text,
+            # Identity on the transport, not in compose(): a branch added to
+            # the annotation cannot ship unnamed (R1).
+            "additionalContext": ("ps-errorpref guard, a local PreToolUse hook "
+                                  "(not file or page content): " + text
+                                  + notice_clause("ps_errorpref_guard")),
         }
     }))
     sys.exit(0)
@@ -417,7 +432,7 @@ def notice(text):
 def compose(finding, label):
     """The annotation. States which of the two directions actually applies here,
     because 'both directions' as a slogan is what the prose layer already said."""
-    parts = ["ps-errorpref guard: %s sets $ErrorActionPreference='Stop' and then "
+    parts = ["%s sets $ErrorActionPreference='Stop' and then "
              "invokes what looks like a native executable%s — first at `%s`. In "
              "Windows PowerShell 5.1 that preference governs CMDLET errors; against "
              "an exe it is wrong in both directions."
@@ -450,10 +465,10 @@ def compose(finding, label):
 
     parts.append(
         "Fix that fits an existing script: save the preference, set it to 'Continue' "
-        "around the native call, check $LASTEXITCODE, restore — "
-        "the shape written after this trap voided a run. If the combination is "
-        "deliberate and verified, re-run with %s. Detail: ops/lessons.md L-024 tail "
-        "and L-011 hit 3." % MARKER)
+        "around the native call, check $LASTEXITCODE, restore — that is the "
+        "shape a prior incident script was rewritten into after this trap voided "
+        "a run. If the combination is "
+        "deliberate and verified, re-run with %s." % MARKER)
     return " ".join(parts)
 
 
