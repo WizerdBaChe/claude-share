@@ -190,6 +190,24 @@ rather than three skills separately.
 | `ACCEPTANCE.md` | Fourteen-item blind-runnable external checklist (中文): trigger/routing probes incl. a negative one, theory/production/audit items, stress items on the fabrication firewall — plus what the source environment verified 2026-08-27 and which evidence cells stay open (PPTX carrier, BPMN branch, two never-live-fired probes). |
 | `archdiag/` | **New 2026-08-29 — the set's executable half.** Twelve files: the audit-drawing library the `diagram-authoring` skill routes to for precision view sets. `index.mjs` is the pipeline (schema → build-time geometry asserts → marker closure → deterministic emission → sha256 receipt); `selfcheck.mjs` is the SINGLE source of the in-page check script, which is the whole point — per-file copies of it drifted within one day, and that drift is what the library exists to kill. `route.mjs` is an orthogonal edge router behind a provider seam (field-accepted at 89/89 edges, 0 hand-fixes, against a 4–5 baseline); `delta.mjs` automates the model diff that used to be a ~12-minute hand procedure. **New 2026-09-07:** `tokens.mjs` is the style-token table plus a WCAG contrast check over the palette — run `node tokens.mjs --check` and it grades the colours it actually emits rather than the ones the docs claim. `vendor/archify-geometry.mjs` is third-party (tt-a1i/archify, MIT), verbatim. The reference BUILD scripts stay in the source's deliverable tree; what ships is the library plus the `build()` contract in its README. Pinned to LF by this repo's `.gitattributes`: the emitted html's sha256 IS the freeze receipt, so a CRLF checkout would silently invalidate every one. |
 
+## `instruments/` — verification tools the shipped rules name as their enforcement
+
+New 2026-09-12. The source environment's `tools/` tree stays excluded, but two
+of its tools are what shipped rule files literally invoke: `claude-ops/ops/environment.md`
+names `page-fill-gate` as the "Enforcement:" of its display rule, and
+`claude-ops/ops/references/integrity-sweep.md` check 7b imports
+`check_cap_binding`. Excluding them left both citations pointing at nothing,
+so this folder ships exactly those two, verbatim except one README. The
+sub-paths match the source's, so an adopter copies `instruments/<x>/` to
+`~/.claude/tools/<x>/` and every citation resolves unedited. Nothing else from
+`tools/` qualifies; the manifest's `tools/` entry records why.
+
+| File | What it is |
+|---|---|
+| `README.md` | Admission criterion (中文): shipped file runs, imports or names it as enforcement; stdlib-only; self-calibrating; reads no private tree. Per-tool table, install, measured known limits. |
+| `page-fill-gate/` | Six files. `fill_gate.py` measures whether a human-read HTML page uses the width it is given; the named defect is the left-anchored cap. How full a page must be is a row of `page_classes.json`, not a code branch. Every run first checks a known-bad and a known-good fixture and refuses a verdict if either control fails. Needs Playwright + Chromium; exit 2 means the instrument is absent, never a pass. |
+| `ops-health-test/check_cap_binding.py` | Sweep check 7b: each cap constant in `hooks/ops_health_nudge.py` must match the value the rule text states; reports drift or a lost anchor. `--selftest` runs one known-true and four known-false cases. Resolves paths relative to the INSTALLED `~/.claude` layout, so it does not run in place against this repo's renamed `claude-ops/ops/` tree — measured, and stated in the folder README. The rest of that source directory (the hook's own test suite) does not ship. |
+
 ## `agents/` — subagent definitions
 
 Collected 2026-08-14, byte-verbatim. The nine agent types `claude-ops/ops/20-dispatch.md`
