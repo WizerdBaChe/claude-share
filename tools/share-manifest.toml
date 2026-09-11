@@ -63,6 +63,15 @@ collected_roots = [
     # to excuse everything authored here. Declared on arrival, which is the
     # whole difference between this list's first three entries and its last.
     "architecture-diagramming/archdiag/",
+    # 2026-09-12 (lane W8, instruments round): declared on creation day, same
+    # discipline as compact-recovery/ and red-team/ above. Holds two portable
+    # verification instruments (page-fill-gate/, six files; ops-health-test/
+    # check_cap_binding.py, one file) that a shipped ops doc cites as its
+    # literal enforcement mechanism — see the [[not_shipped]] `tools/` entry's
+    # USER RULING 2026-09-12 note for why these two, and no other tool. The
+    # folder's own README.md is repo-authored and name-exempt, same as this
+    # list's other roots.
+    "instruments/",
 ]
 
 # ---------------------------------------------------------------------------
@@ -100,6 +109,16 @@ foreign_roots = [
 # exclusion below and declared first, so check R resolves the citation instead
 # of reading it as an undeclared dependency.
 "tools/archdiag/" = "architecture-diagramming/archdiag/"
+# 2026-09-12 (lane W8): same pattern for the two instruments/ tools. Citing
+# files keep their SOURCE-path spelling (`tools/page-fill-gate/...`,
+# `tools/ops-health-test/check_cap_binding.py`) and are not edited by this
+# lane; these two entries let check R resolve those citations through the map
+# instead of requiring an edit to every citing file. The second entry is a
+# FILE key, not a directory — only check_cap_binding.py ships from
+# ops-health-test/, so the rest of that source directory stays declared
+# not_shipped under the `tools/` entry below and must not resolve here.
+"tools/page-fill-gate/" = "instruments/page-fill-gate/"
+"tools/ops-health-test/check_cap_binding.py" = "instruments/ops-health-test/check_cap_binding.py"
 
 # ---------------------------------------------------------------------------
 # not_shipped — assets this repo NAMES but does not contain.
@@ -387,14 +406,84 @@ list happened to name specific files under each):
     reached the same way: not collected, and this file is not a live
     deferral — the harness itself has not been proposed for collection at all
     this round.
+PER-FILE RE-CHECK 2026-09-12 (lane W8, read-only adjudication of all 33 paths
+under this root the 2026-08-16 split's third bucket named plus everything
+found since): disposition confirmed for all — verdict unchanged from
+2026-08-16's class ruling; none of the 33 ship as a whole directory.
+CORRECTION to that ruling's reasoning, which claimed the hook-test class is
+"none cited by any shipped file": that premise was already false for
+`tools/ops-health-test/` at the time it was written, and stays false today —
+a file this repo ships (`claude-ops/ops/references/integrity-sweep.md`)
+`import`s one file from that directory directly, as a Python module, and
+invokes a second file from it as a bare command in the same doc. A second,
+general-purpose instrument (`tools/page-fill-gate/`) is cited as
+"Enforcement:" by another shipped ops doc with no caveat at all — a live dead
+pointer, independent of this round. The "test of the source machine's
+layout" characterization this entry's 2026-08-16 text relies on does not
+hold for either of these two — neither re-points USERPROFILE or
+CLAUDE_CONFIG_DIR at a synthetic tree; both are small, stdlib-only,
+self-calibrating checkers a shipped rule cites as its literal mechanism.
+Two more directories under this root (a lint pair) are cited only by rule
+files that do not ship at all yet — ahead-of-the-rule, not yet a gap; left
+excluded-by-decision, unchanged. A private absolute path (a second-drive
+session-archive root) was found in one OTHER tool's own docstring under this
+root (class: absolute path on a non-system drive, position: that tool's own
+docstring, item naming the two instruments it reads) and is not reproduced
+here; that tool is not one of the two named in the ruling below and stays
+excluded. `tools/proc-picker/` is untracked at the source
+(`git -C ~/.claude status --porcelain` reports it, prefix `??`) and was not
+adjudicated on content, per BRIEF D6 — an uncommitted file is not collected
+regardless of merit. `tools/memory-pipeline/` tracked-file count CORRECTED:
+181 git-tracked files as of 2026-09-12 (`git -C ~/.claude ls-files
+tools/memory-pipeline | wc -l`), not the 279 stated above — a re-measurement
+only, not a re-adjudication; the ~278-file remainder (everything but the
+already-collected `preserve.py`, still a vendored npm plugin with its own
+LICENSE/CHANGELOG/test suite) stays not shipped for the reason already
+given. Full per-tool table and evidence: this round's W7 report (adjudication
+only, made no repo edits).
+
+USER RULING 2026-09-12 (lane W8): partially reverses the 2026-08-16 ruling
+above ("not collected", for the whole `tools/ops-health-test/` directory) for
+EXACTLY ONE file in it — `check_cap_binding.py` — because that ruling's own
+stated premise ("none is cited by any shipped file") was already false for
+this specific file when it was written: `check_cap_binding.py` is imported by
+name from `claude-ops/ops/references/integrity-sweep.md` (sweep check 7b),
+which ships in this repo today, so the citation was a live dead pointer
+before this round touched anything. `tools/page-fill-gate/` (all six of its
+tracked files) ships for the matching reason: `claude-ops/ops/environment.md`
+names it, uncaveated, as "Enforcement:". Both now ship verbatim as
+`instruments/ops-health-test/check_cap_binding.py` and
+`instruments/page-fill-gate/` — see the `collected_roots` and `[source_map]`
+entries above and the `[[collected]]` entries in this manifest's lane W8
+block. Nothing else under this root is affected: the rest of
+`tools/ops-health-test/` (its own hermetic test suite — a synthetic-tree test
+of the source machine's layout, a different thing from the drift checker
+that now ships) stays excluded-by-decision under this entry, unchanged, and
+so does every other path this entry names.
 Note: this repo's own `tools/` is a different thing, built here, not
 collected."""
 fallback = """None needed for the record-serving tools; the rules they support
 are described in `claude-ops/ops/60-bootstrap.md`, so build your own if you want
-the automation. For the three hook/measurement tests the adopter gets nothing,
-and the honest consequence is that `hooks/ops_health_nudge.py` and
-`hooks/delivery_gate_shadow.py` ship with their behaviour asserted only in this
-repo's prose. `tools/test_share_gate.py` and `interop-layer/test_interop.py` are
+the automation. For the hook/measurement TEST suites (`test_ops_health_nudge.py`
+and the rest of `tools/e2-gate-test/`, `tools/context-budget/`) the adopter
+still gets nothing, and the honest consequence is that `hooks/ops_health_nudge.py`
+and `hooks/delivery_gate_shadow.py` ship with parts of their behaviour asserted
+only in this repo's prose.
+UPDATED 2026-09-12: that is no longer the whole story for the two mechanisms
+named in the USER RULING above. `tools/ops-health-test/check_cap_binding.py`
+(sweep check 7b's cap-VALUE-drift checker — a different thing from that
+directory's hermetic hook test, which is still not shipped) and all of
+`tools/page-fill-gate/` (the width-fill gate `claude-ops/ops/environment.md`
+names as "Enforcement:") now ship as `instruments/ops-health-test/
+check_cap_binding.py` and `instruments/page-fill-gate/` respectively — an
+adopter gets the real mechanism there, not prose about one. Both are
+read-only and stdlib-only; page-fill-gate additionally needs `playwright` +
+a Chromium install, named in its own README. `instruments/README.md`
+documents install (copy to `~/.claude/tools/<x>/`) and known limits,
+including that `check_cap_binding.py` resolves its own paths relative to the
+INSTALLED `~/.claude` layout and does not work unmodified inside this repo's
+own renamed `claude-ops/ops/` tree.
+`tools/test_share_gate.py` and `interop-layer/test_interop.py` are
 both here as patterns to copy — the second one is worth reading first, because
 running it against this repo's own gate is what exposed two missing leak
 patterns on 2026-08-16."""
@@ -3041,6 +3130,12 @@ command_position_ok = [
     "<bib.json>",                     # the reader's own bib JSON, named in the
                                       # prose one line above as
                                       # `references/<collection>-bib.json`
+    # instruments/page-fill-gate/README.md (2026-09-12, lane W8, first
+    # collection): the tool's own usage synopsis, `python
+    # tools/page-fill-gate/fill_gate.py <built.html> [...]` — the reader's own
+    # built HTML file(s), no real filename was ever here to scrub. Same class
+    # as <dir>/<path> above: a CLI argument slot, read at its one site.
+    "<built.html>",
 ]
 
 # ---------------------------------------------------------------------------
@@ -4259,3 +4354,83 @@ fallback = '''None. For turning source material into a deliverable a non-builder
 reads, `skill-toolkit/skills/audience-fit` ships; for the diagrams inside such a
 deliverable, `skill-toolkit/skills/diagram-authoring` and the
 `architecture-diagramming/` capability set do.'''
+
+# === lane W8 2026-09-12 BEGIN ===
+# New collections only (per BRIEF-common's manifest editing protocol). The
+# collected_roots / [source_map] / [[not_shipped]] path = "tools/" edits for
+# this lane are made IN PLACE above, at their existing locations, per the
+# lane W8 task brief's explicit instruction (an owner-ruling override of the
+# general "append new entries at the end" rule for those three structures
+# specifically, since a TOML array/table cannot be split across two
+# locations). This block holds only the seven new [[collected]] entries for
+# `instruments/`, a new share root shipping two portable verification
+# instruments two already-shipped ops docs cite as their enforcement
+# mechanism (see the `tools/` not_shipped entry's USER RULING 2026-09-12).
+
+[[collected]]
+path = "instruments/page-fill-gate/README.md"
+source = "~/.claude/tools/page-fill-gate/README.md"
+status = "edited"
+edits = [
+  "line 3 (status/owner line): a pointer to a dated diagnosis note inside the source's outputs/ tree (a non-shipping tree per this manifest's scrub rules) -> generalized to 'a dated diagnosis note under the source environment's outputs/ tree, not shipped here' — the capability description (a user-ruled width-void diagnosis motivated this tool) is kept, the unresolvable pointer is dropped.",
+  "usage block (2 command lines): both examples were written with the tool's absolute install path on the source machine (an absolute home path carrying the account name) -> replaced with the repo-relative invocation form (`tools/page-fill-gate/fill_gate.py`, `tools/page-fill-gate/tests/test_fill_gate.py`) already used, unedited, by every other citation of this tool in this repo (e.g. `claude-ops/ops/environment.md`) — same tail, same precedent already established for this exact tool in this manifest (see `claude-ops/ops/references/uat.md` entry's note).",
+  "no other change: the 2026-09-04 measurement tables, the class table, the wiring table and the review-when line are all kept verbatim — they are the evidentiary content this instrument's README depends on.",
+]
+
+[[collected]]
+path = "instruments/page-fill-gate/fill_gate.py"
+source = "~/.claude/tools/page-fill-gate/fill_gate.py"
+status = "verbatim"
+# First collection, 2026-09-12 (lane W8). Read whole (349 lines). Stdlib plus
+# `urllib.parse`; no machine-bound value, no account name, no absolute path.
+# Diff against source empty (`diff <(tr -d '\r' < source) <(tr -d '\r' <
+# repo)`, normalising line endings).
+
+[[collected]]
+path = "instruments/page-fill-gate/page_classes.json"
+source = "~/.claude/tools/page-fill-gate/page_classes.json"
+status = "verbatim"
+# First collection, 2026-09-12 (lane W8). Data file, one repo-relative
+# pointer (`ops/environment.md`, resolves via [source_map]'s `ops/` ->
+# `claude-ops/ops/` mapping to a reader here) which is not a scrub target
+# (COLLECTION-RULES rule 2). Diff against source empty.
+
+[[collected]]
+path = "instruments/page-fill-gate/fixtures/known-bad-left-cap.html"
+source = "~/.claude/tools/page-fill-gate/fixtures/known-bad-left-cap.html"
+status = "verbatim"
+# First collection, 2026-09-12 (lane W8). Synthetic calibration fixture, no
+# real content. Diff against source empty.
+
+[[collected]]
+path = "instruments/page-fill-gate/fixtures/known-good-fill.html"
+source = "~/.claude/tools/page-fill-gate/fixtures/known-good-fill.html"
+status = "verbatim"
+# First collection, 2026-09-12 (lane W8). Synthetic calibration fixture, no
+# real content. Diff against source empty.
+
+[[collected]]
+path = "instruments/page-fill-gate/tests/test_fill_gate.py"
+source = "~/.claude/tools/page-fill-gate/tests/test_fill_gate.py"
+status = "verbatim"
+# First collection, 2026-09-12 (lane W8). Two-sided calibration suite (every
+# class row gets a PASS and a FAIL/WARN fixture); stdlib only. Diff against
+# source empty.
+
+[[collected]]
+path = "instruments/ops-health-test/check_cap_binding.py"
+source = "~/.claude/tools/ops-health-test/check_cap_binding.py"
+status = "verbatim"
+# First collection, 2026-09-12 (lane W8). Read whole (363 lines). Stdlib only
+# (ast/os/re/sys); resolves its own repo root from `os.path.dirname(__file__)`
+# two levels up, so no machine-bound path. Diff against source empty.
+# KNOWN LIMIT (not an edit — stated here and in instruments/README.md): that
+# same path-derivation is why this file works unmodified only when installed
+# at `<CLAUDE_HOME>/tools/ops-health-test/check_cap_binding.py` with `ops/`
+# and `hooks/` as its repo-root siblings — the ADOPTER's own `~/.claude`
+# layout, which this manifest's install note tells the adopter to copy into.
+# It does NOT resolve correctly run in place inside THIS repo's own tree,
+# where the equivalent files live under `claude-ops/ops/` rather than
+# `ops/`. See the report's verification section for both runs (source
+# baseline; a scratch directory mimicking the installed layout).
+# === lane W8 2026-09-12 END ===

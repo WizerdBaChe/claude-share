@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-Hant" data-page-class="document-long">
+<head>
+<meta charset="utf-8">
+<title>fill-gate known-good: fluid fill</title>
+<style>
+  body{margin:0;font-family:system-ui,sans-serif;line-height:1.6}
+  #side{position:fixed;left:0;top:0;bottom:0;width:280px;background:#eee;border-right:1px solid #ccc}
+  main{margin-left:280px;padding:36px clamp(20px,4vw,64px)}
+  p{margin:8px 0}
+  .box{border-left:4px solid #888;background:#f4f4f4;padding:10px 16px}
+  table{width:100%;border-collapse:collapse} td{border:1px solid #ccc;padding:4px}
+</style>
+</head>
+<body>
+<nav id="side">TOC</nav>
+<main>
+  <h1>Known-good control</h1>
+  <p>This page container is fluid: it fills the content area to the right of the sidebar with only proportional padding. The gate must PASS this file at every gating viewport.</p>
+  <div class="box">A painted box that spans its parent.</div>
+  <table><tr><td>a</td><td>b</td><td>c</td></tr></table>
+  <p>More running text so the measured area has several blocks. More running text so the measured area has several blocks.</p>
+</main>
+</body>
+</html>
