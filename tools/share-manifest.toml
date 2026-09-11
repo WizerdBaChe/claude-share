@@ -3547,7 +3547,7 @@ path_position_ok = [
     # parameter, and the file would be unusable with a real one substituted in,
     # since the whole point is that the reader has a different source.
     "<source path>",
-    "<archive-batch-dir>", "<local-papers>", "<skill-name>", "<skill>",
+    "<archive-batch-dir>", "<skill-name>", "<skill>",
     "<publisher-or-lib>",  # vendor/<publisher-or-lib>/ — the upstream's name
     # research-domain profiles
     "<domain>", "<domain_name>", "<that_field>", "<adjacent_field>",
@@ -3575,11 +3575,6 @@ path_position_ok = [
     "<p>",      # rule-registry.md: `references/<p>-decisions.md` — the PROJECT's name
     "<layer>",  # project-retrospective: `<layer>/from-retrospective.md` — the adopter's rules-layer dir
     "<home>",   # workflow-checkpoint: `<home>/<project>-phase-log.md` — the record home resolved one line above
-    # literature-search-extract/SKILL.md (2026-09-02 refresh arrival, Zotero
-    # collection close-out step): `references/<collection>-bib.json` — the
-    # reader's own Zotero collection name, stated one clause later as "the
-    # collection name IS the project's Zotero collection name".
-    "<collection>",
     # --- 2026-09-07 arrivals. Each was read at its site, and each names a value
     # the RUNTIME or the reader's own tree supplies; none is a real path a
     # scrubber ate. Three are new SPELLINGS of ids already declared above

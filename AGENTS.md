@@ -50,7 +50,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | File | What it is |
 |---|---|
 | `CLAUDE.md` | The global preferences the ops layer hangs off. Machine-specific values are `<PLACEHOLDER>`s — substitute your own. Opens with a "Path-scoped rules" index pointing at `rules/`. |
-| `rules/frontend-layering.md`, `rules/shader-failure-modes.md` | **New 2026-08-11.** Two rules sunk out of CLAUDE.md's body into path-scoped files (only load when a matching file is read) — FSD module layering and GLSL silent-failure modes. |
+| `rules/` (eleven files) | Path-scoped rules: each loads only when a matching file is read, and `CLAUDE.md`'s opening index names all eleven. `frontend-layering.md` and `shader-failure-modes.md` were the first two sunk out of CLAUDE.md's body (2026-08-11): FSD module layering, GLSL silent-failure modes. `deliverable-doc-refs.md` (human-facing HTML: define before use, hover cards, the page-class width registry), `office-deck-deliverables.md` (programmatic PPTX), `visual-gate-scope.md` (measure the glyph, gate the class), `verification-ladder.md` (evidence rungs 0–5, plus the verification record a durable claim ships with). **New 2026-09-12:** `web-navigation-state.md`, `hook-deny-message.md`, `naming-and-placement.md`, `figure-self-read.md`, and `literature-access.md`, which ships with its enforcing hook `hooks/literature_host_guard.py`. (This row named two files until 2026-09-12; four had arrived since without it changing.) |
 | `README.md` | Cross-reference map back into `claude-ops/`. |
 
 ## `skill-toolkit/` — installable skills
