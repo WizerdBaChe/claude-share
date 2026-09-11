@@ -34,6 +34,25 @@ by risk / verdict: PASS/FAIL first line + WARNING list (HIGH/MED/LOW, each
 with `file:line` + failure scenario) / adversarial stance: raise at least 3
 specific challenges.
 
+**Fragment-writing briefs** (an addendum to ANY template above; the property
+itself is owned by `20-dispatch.md` §2): when the worker writes into a governed
+record — a manifest, ledger or audit file that is itself published, reviewed or
+gated — the brief carries that record's own record-writing rule in its body,
+the operative line quoted, or a read-first path when the rule is long. Why it
+is the brief's job and not the worker's: `20-dispatch.md` §2, which owns the
+rationale. Measured 2026-09-07 (a de-identification
+round, seven parallel workers over disjoint path sets, each writing one
+manifest fragment): the gate reported 38 leaks, every one of them in the merged
+manifest and none in the collected files, because each fragment had recorded
+its edits by quoting the value it removed. The class had been written down 11
+days earlier — in the ORCHESTRATOR's skill, a layer no worker loads
+(`ops/lessons.md` L-057).
+✅ as an acceptance line in the brief: "each `edits` entry names the CLASS
+replaced and the replacement, never the replaced value — this record ships with
+the files it describes."
+❌ "record each edit as `line N: <old> -> <new>`" — the record now carries what
+the edit removed, published as widely as the file it was removed from.
+
 Rules of thumb: long spec → file first, then dispatch; acceptance is written
 for the worker but the dispatcher still spot-checks (never a substitute); on
 re-dispatch, put the previous failure output in "read first". Which agentType
