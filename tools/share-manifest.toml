@@ -1875,10 +1875,27 @@ path = "skill-toolkit/skills/env-cleanup/references/project-heuristics.md"
 source = "~/.claude/skills/env-cleanup/references/project-heuristics.md"
 status = "verbatim"
 
-[[collected]]
-path = "skill-toolkit/skills/literature-search-extract/PDF-GUIDE.md"
-source = "~/.claude/skills/literature-search-extract/PDF-GUIDE.md"
-status = "verbatim"
+[[not_shipped]]
+path = "skills/literature-search-extract/PDF-GUIDE.md"
+disposition = "excluded-by-decision"
+reason = """DECIDED 2026-09-12 (merge step of the refresh round), reversing a
+collection nobody had examined: the file shipped verbatim from the first
+snapshot (2026-07-11) with no reason recorded, and no round since weighed it.
+COLLECTION-RULES hard rule 8 settles it — two first-hand statements at the
+source classify it as a personal file for sharing purposes: the skill's own
+FUTURE-WORK note (section A1, the strip list for a share package) and
+`skill-share-packaging`'s evals (the Mode A drop list names it). Its content
+reads as portable (a user-facing guide to the local-PDF channel, no private
+path in it); rule 8 exists precisely because the owner's classification
+outranks that reading. No shipped file routes to it, so no router edit was
+owed. Not applied from the same A1 note, on purpose: generalising the `prism`
+name and dropping the trigger-dict reference from the frontmatter. Those steps
+describe a STANDALONE skill export, where the dictionary does not travel; this
+repo ships the dictionary, and rule 2 keeps project names. The repo copy was
+moved to the gitignored archive with a note, not deleted."""
+fallback = """`references/search-sources.md`, section "Local PDF library" —
+the machine-read body of the same integration, which ships, and which the
+guide itself names as authoritative when the two disagree."""
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/SKILL.md"
@@ -4598,7 +4615,12 @@ not on whether the intent was carried out; FUTURE-WORK.md, unlike PDF-GUIDE.md
 and evals.json, IS itself the personal-planning artifact the TODO describes,
 so the self-naming is direct, not by association. Flagged for a future round
 to reconcile the other three named items rather than resolved unilaterally
-here — out of this lane's declared scope."""
+here — out of this lane's declared scope.
+RECONCILED 2026-09-12 (merge step, same round): all four named items now have
+a verdict. PDF-GUIDE.md stopped shipping (its own [[not_shipped]] entry); the
+worked sample run left in the 2026-08-16 round (CHANGELOG, "personal
+working-state files removed"); evals.json carries no personal notes on this
+round's full read, so it keeps shipping; this file is excluded above."""
 fallback = """None named. SKILL.md and the reference files under
 `references/` are the current, shipped statement of the pipeline; a reader
 wanting the roadmap/TODO view has none in this repo, matching the STATUS.md
