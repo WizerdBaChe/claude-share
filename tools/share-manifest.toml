@@ -1456,7 +1456,7 @@ status = "edited"
 # these 9 hunks. Supersedes any prior `_superseded_edits` comment history —
 # see git blame on this entry for the pre-2026-09-07 wording if needed.
 edits = [
-  "2026-09-07: line 3, account-name leak found this round — 'Facts about THIS environment (Claude Code on Windows, user gunda).' -> 'Facts about THIS environment (Claude Code on Windows).'. This is a genuine multi-round-old leak (the account name has been shipping unnoticed since at least the previous refresh); flagged and fixed, not something the task explicitly asked to look for but squarely inside the declared SCRUB TARGETS list.",
+  "2026-09-07: line 3, account-name leak found this round — the account name, which followed 'user' at the end of the environment-facts sentence, -> dropped, so the sentence now ends at 'Claude Code on Windows' (value not recorded here, hard rule 9, corrected 2026-09-12). This is a genuine multi-round-old leak (the account name has been shipping unnoticed since at least the previous refresh); flagged and fixed, not something the task explicitly asked to look for but squarely inside the declared SCRUB TARGETS list.",
   "2026-09-07: Horizontal property intro — 'Horizontal property (owner: user, 2026-09-04 — width-void diagnosis, `outputs/html-width-void-diagnosis-2026-09-04.md`):' -> 'Horizontal property (owner: user, 2026-09-04 — a dated width-void diagnosis note under the source's outputs/ tree, which this repo does not ship):'. Same file also cited in rule-registry.md's PAGE_FILL entry this round, given the identical generalized wording for consistency.",
   "2026-09-07: 'Measured on this machine 2026-09-07 (session <id>):' -> 'Measured on this machine 2026-09-07 (a local session):' — the session id points at a transcript no reader can open.",
   "2026-09-07: two places — the Blender executable was named by absolute path on a non-system drive; stripped to its project-relative tail `model3d-pipeline\\tools\\blender-5.2.1-windows-x64\\blender.exe` (drive and root gone, project tree name kept because it resolves through the shipped project registry). And '### PROBE 2026-09-07 (session <id>, user-authorised: FreeCAD + 記事本)' -> '### PROBE 2026-09-07 (a local session, user-authorised: FreeCAD + 記事本)'.",
@@ -1745,7 +1745,7 @@ status = "edited"
 # memory section refreshed verbatim (matching PHILOSOPHY.md's 2026-09-06
 # update; count now 9 檔 per the new work-card-executor.md addition below).
 edits = [
-  "NEW 2026-09-07 (gap from a prior round — this string was already present, unscrubbed, in the previously-shipped 'verbatim' copy): `projects/C--Users-gunda--claude/memory/` -> `projects/C--Users-<user>--claude/memory/` — the account name embedded in a mangled directory-slug inside a memory-path example, missed by every prior round's scrub pass because 'verbatim' status meant no diff was ever taken against the scrub checklist.",
+  "NEW 2026-09-07 (gap from a prior round — this string was already present, unscrubbed, in the previously-shipped 'verbatim' copy): a `projects/<slug>/memory/` example whose mangled home-directory slug embedded the account name -> the same slug with `<user>` in the account-name position (value not recorded here, hard rule 9, corrected 2026-09-12) — the account name embedded in a mangled directory-slug inside a memory-path example, missed by every prior round's scrub pass because 'verbatim' status meant no diff was ever taken against the scrub checklist.",
   "NEW 2026-09-07: a dated 2026-09-05 codex/chatgpt archive folder, written as an absolute path on a non-system drive (hard rule 2), generalized to a Traditional-Chinese descriptive clause naming the capability (archived to the source environment's own archive area, a non-system-drive path, not listed here) without the literal path.",
   "agents count refreshed 8->9 to match this round's work-card-executor.md addition (see agents/README.md's own edit, same round).",
 ]
@@ -1791,7 +1791,10 @@ edits = [
   "Environment bullet: OS, default/secondary shell -> <OS_NAME> / <DEFAULT_SHELL_NAME> / <SECONDARY_SHELL_NAME>, with a placeholder note naming the original values. Re-anchored 2026-09-12 on the source's current phrasing (Git Bash takes a manual second launch); no placeholder-set change from the 2026-09-07 round.",
   "relaxation-gate bullet: placeholder note retained verbatim.",
   "Language section: placeholder note retained verbatim — it encodes one author's reply-language preference.",
-  "'When authoring or generating an HTML page a human will read on this machine' bullet: `tools/page-fill-gate/fill_gate.py` (source-only, tools/ tree excluded) generalized to 'a page-fill gate (a build-time check for a left-anchored width cap; the tool that implements it is source-only and does not ship in this repo)' — capability description kept, literal unshippable path dropped.",
+  # 2026-09-12 merge step: the HTML-page bullet's page-fill-gate edit (made
+  # because tools/ did not ship) is RETIRED — instruments/ now ships the tool
+  # and [source_map] resolves `tools/page-fill-gate/`, so the source's own
+  # command is restored verbatim.
   "'Browser-pane UI verification' bullet: `ops/references/browser-pane-pixel-route.md` (excluded ops/references file) generalized to \"the source environment's own browser-pane pixel-routing writeup (source-only, does not ship here)\".",
   "NEW 2026-09-12: Prior-art check bullet, vault-index clause — an account-holder's given name embedded in a local Obsidian notes vault's folder-naming convention, generalized to \"the local Obsidian notes vault\" (class: account-bound label naming a private local asset path; position: the second of two vault labels in the parenthetical list). `AssetVault` (the sibling label, a project/asset name, not account-bound) kept as-is per hard rule 2. This is a genuine, previously-unnoticed privacy leak in the currently-shipped copy — the prior rounds' edit lists never declared a scrub for this clause, so it shipped unfixed until this round re-touched the exact line. The identical leak also exists in `claude-ops/ops/rule-registry.md`, out of this lane's scope — flagged cross-lane.",
   "'Decision charter' bullet: `tools/process-ledger/ledger.py add`, flags in its README (source-only, tools/ tree excluded) generalized to \"a source-only mechanism — command and flags documented in its own README, not shipped here\"; the new 'TEMPORARY limit' clause the source added this round (a scope-narrowing logs the event that lifts it) is kept verbatim — it names no source-only path.",
@@ -1813,11 +1816,13 @@ status = "edited"
 # no count change from the 2026-09-07 round's 8-edit set below.
 edits = [
   "frontmatter `paths:` (8 globs, all relative patterns, no scrub target); taken verbatim.",
-  "review-when clause: `tools/page-fill-gate/fill_gate.py` and its page-class registry file (source-only, tools/ tree excluded) generalized to a capability description (a page class is added to the source-only page-class registry, not shipped here).",
+  # 2026-09-12 merge step: the review-when clause's page-fill-gate edit is
+  # RETIRED — instruments/ ships the tool, [source_map] resolves the citation,
+  # source text restored.
   "'Do not reinvent' paragraph: the AssetVault reference-implementation pointer generalized to 'a reference implementation lives in the source environment's asset library' — a private asset library that does not ship. The five measured pitfalls that follow are the transferable content and stay whole.",
   "'one slide is one screen' block, closing sentence: the AssetVault reference-implementation pointer generalized to 'the source environment's asset library (README §版面吻合)' — same class, same asset.",
   "'Hard gates beat proof-reading' paragraph: the vault-asset README pointer generalized to 'summarized in that implementation's README' — same class.",
-  "'Width property' section: an `outputs/` diagnosis-note pointer rewritten to describe what the note found rather than cite it; `tools/page-fill-gate/page_classes.json` and `tools/page-fill-gate/fill_gate.py` (tools/ tree excluded) both generalized to capability descriptions.",
+  "'Width property' section: an `outputs/` diagnosis-note pointer rewritten to describe what the note found rather than cite it. (The section's two page-fill-gate citations were generalized under this edit until 2026-09-12; restored verbatim at that round's merge step, since instruments/ now ships the tool.)",
   "'Width property' section: an SSLD-project internal private shell.html path generalized (SSLD the project name kept per hard rule 2; only the internal path segment dropped) — reference implementation pointer generalized to \"the SSLD project's own textbook shell ... (not shipped here)\".",
   "'Width property' section: a second AssetVault reference-implementation pointer (the deck reference implementation) generalized the same way as the earlier AssetVault edits.",
 ]
@@ -2171,7 +2176,7 @@ edits = [
   "Provenance section (2026-08-28 refresh): the archify borrow-ledger pointer (a second dated analysis file under the same non-shipping outputs/ tree) replaced with the same prose note. B-3/B-5 ids kept for the same reason.",
   "Audit view-set toolchain section (2026-08-29 sync, third of the same class): the `Reference builds:` line named three `outputs/diagram-authoring/*.build.mjs` scripts that do not ship -> prose saying they stay in the source environment, plus the shipped location of the library itself (`architecture-diagramming/archdiag/`) and the pointer to its README's build() contract. Relocating an asset is a two-part act: the collection, and the edit to whatever routed at it.",
   "2026-09-07: new Size-presets table (added this round) has an 'audit view (archdiag)' row whose calibration-source cell cited `tools/archdiag/emit.mjs` (source-tree path, does not ship as such) -> translated to the archdiag library's emit.mjs at its shipped location `architecture-diagramming/archdiag/emit.mjs`, matching the mapping already established by the pre-existing edit above.",
-  "2026-09-07: new 'Lower bound (2026-09-04)' HTML-carrier note (added this round) instructed running `~/.claude/tools/page-fill-gate/fill_gate.py` (source-tree tool, not shipped anywhere in this repo — confirmed by search) and named `cpo-architecture-v1` as a worked example, which is a private artifact filename under the non-shipping outputs/ tree -> rewritten to keep the pass/fail criterion (centred container passes, left-anchored `max-width` cap fails) as a capability description, dropped the tool pointer and the named artifact, and said plainly the gate script does not ship here.",
+  "2026-09-07: new 'Lower bound (2026-09-04)' HTML-carrier note (added this round) named a worked example by a private artifact's filename under the non-shipping outputs/ tree -> 'one of this environment's own delivered views' (value not recorded here, hard rule 9, corrected 2026-09-12). The same 2026-09-07 edit also dropped the note's `~/.claude/tools/page-fill-gate/fill_gate.py` command because tools/ did not ship; RESTORED verbatim at the 2026-09-12 merge step, since instruments/ ships the tool and [source_map] resolves the citation.",
   "2026-09-07 (completes the 2026-08-29 edit above, which fixed only the 'Reference builds:' line and left three sibling mentions untranslated — pre-existing gap, not new source content): the 'Audit view-set toolchain' section header, the 'Build through ...' line, and the README/MAINTENANCE maintenance pointers all still read `tools/archdiag` / `~/.claude/tools/archdiag/` -> translated to the archdiag library's shipped location `architecture-diagramming/archdiag/`, same asset-relocation class and same resolution as the existing edit, so the section is now internally consistent about where the library lives in this share.",
 ]
 
@@ -3151,7 +3156,7 @@ status = "verbatim"
 # `diff -u <(tr -d '\r' < source) <(tr -d '\r' < repo)`, exit 0. Grown from
 # 134 to 194 lines picking up the 2026-09-05 a11y/checks-#9-#10/style-tokens
 # content (see the section note above). No scrub target found (grepped for
-# gunda/C:\Users/D:\ — clean).
+# the account name, home-directory paths and drive-rooted paths — clean).
 
 [[collected]]
 path = "architecture-diagramming/archdiag/MAINTENANCE.md"

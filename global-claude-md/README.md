@@ -23,9 +23,10 @@
   instruction 區分開，無法驗證來源的 agent 讀到它時才不會誤信）、`naming-and-placement.md`
   （任何輸出項目誕生前先分類 LEVEL 與 CONSUMER 兩軸，決定它住哪裡、誰能寫、閘門讀哪個
   artifact）、`figure-self-read.md`（產生器輸出的圖檔宣稱「pass」時要附一份模型看過該
-  點陣圖的紀錄，不只是量測工具的判定）。來源端的 path-scoped 索引另外還列了第十一條
-  `literature-access.md`（文獻取用權限規則）；是否隨本包出貨屬於另一個收錄批次的範圍，
-  本 README 不代為斷言。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是
+  點陣圖的紀錄，不只是量測工具的判定）。同一輪另一個收錄批次收進了第十一條
+  `literature-access.md`（文獻取用權限規則：帶引用的證據要寫明取得途徑與授權，絕不繞過
+  存取控制），它和執行它的 hook `hooks/literature_host_guard.py` 及其政策表一起出貨，見
+  `hooks/README.md`。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是
   `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這些規則的內容併回
   `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
 
@@ -56,13 +57,13 @@
 3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符換成該機器實際的 OS/shell；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 把 `rules/` 下十份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
+6. 把 `rules/` 下十一份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
    `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`、
    `verification-ladder.md`、`web-navigation-state.md`、`hook-deny-message.md`、
-   `naming-and-placement.md`、`figure-self-read.md`）複製到目標機器的 `~/.claude/rules/`。
-   這是 path-scoped 規則機制實際運作所需的檔案；`CLAUDE.md` 開頭的 path-scoped 索引行
-   列出十一條，第十一條 `literature-access.md` 是否隨本包出貨由另一個收錄批次決定，見該
-   批次自己的紀錄。若目標環境沒有等效機制，直接把這些檔案的規則內容併回 `CLAUDE.md` 也可以。
+   `naming-and-placement.md`、`figure-self-read.md`、`literature-access.md`）複製到目標機器的
+   `~/.claude/rules/`。這是 path-scoped 規則機制實際運作所需的檔案，與 `CLAUDE.md` 開頭的
+   path-scoped 索引行列出的十一條一一對應。`literature-access.md` 的強制那一半在
+   `hooks/literature_host_guard.py`，要一併掛上才有效。若目標環境沒有等效機制，直接把這些檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
 ## 快照細節

@@ -18,8 +18,8 @@ whose slide 1 said "P1 設計點 FAIL" before the reader ever met P1, and threw
 defects, not one-off typos. Index line lives in `CLAUDE.md`; review-when: the
 delivery machine's display or its scaling changes (the measured 2560×1440 @
 AppliedDPI 144 → ~1707×830 below becomes wrong, and the page-class widths with
-it — re-measure, never re-infer), or a page class is added to the source-only
-page-class registry (not shipped here) without a width allocation here. The
+it — re-measure, never re-infer), or a page class is added to
+`tools/page-fill-gate/`'s registry without a width allocation here. The
 define-before-use and hover-card properties rest on nothing outside the repo and
 do not expire. A date is not a trigger: this line replaced "review 2027-02" on
 2026-09-08 (ES-3).
@@ -155,9 +155,10 @@ deliverable must not carry a left-anchored cap** — a container or a painted,
 row-alone block capped in width and hugging the left edge. Each page declares
 `<html data-page-class="…">`; the class rows (document-short centred &
 symmetric · document-long / deck / tool / dashboard fill ≥ 85–90 % · diagram
-centred-or-fill) and their thresholds are DATA in a source-only config file
-(not shipped here), and the gate (a source-only build script, not shipped
-here) runs with two-sided controls at the measured reference viewports and may only WARN on a page whose
+centred-or-fill) and their thresholds are DATA in
+`tools/page-fill-gate/page_classes.json`, and the gate
+(`python tools/page-fill-gate/fill_gate.py <built html…>`) runs with two-sided
+controls at the measured reference viewports and may only WARN on a page whose
 class it had to infer. Generators run it on the BUILT files beside the
 fit-gate and print the measured reach next to the fit result. The reading
 measure (~65 ch) is achieved by column structure — a fluid main column plus a
