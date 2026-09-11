@@ -612,7 +612,14 @@ path = "ops/environment.md"
 disposition = "partial"
 reason = """Ships, but as a point-in-time record of ONE machine — model tiers,
 cost caps, browser-pane facts. `claude-ops/ops/OPS.md` already states that any
-mechanism name inside it is an example to be re-verified, never assumed."""
+mechanism name inside it is an example to be re-verified, never assumed.
+PER-FILE RE-CHECK 2026-09-12: still holds against fresh source (`git diff
+--numstat 27196ab..7c9867b` = 78/121, net shrink from 552 to 508 lines — the
+computer-use probe section was condensed, and a new 'Institutional literature
+access' block was added). Both changes are more point-in-time machine facts of
+the same shape this disposition already covers; `claude-ops/ops/OPS.md`
+(confirmed no drift this round, still ships) still carries the re-verify
+caveat this disposition's reason relies on."""
 fallback = """Read it as a worked example of the format. Re-establish every
 fact in your own environment before relying on it; OPS.md's standing rule is
 'write "couldn't determine" rather than guess'."""
@@ -1326,7 +1333,14 @@ status = "verbatim"
 # against the current working tree and between ebfcb08 and 27196ab — the
 # uncommitted edit it described has landed in a commit since. No source_dirty_ack
 # needed this round.
-
+# REFRESHED 2026-09-12 (procedure B, align to 7c9867b; source `git diff
+# --numstat 27196ab..7c9867b` = 9 insertions, 4 deletions). Both hunks reword
+# BC-1's acceptance-ranking sentences to point cap/rung/gate detail at
+# `references/uat.md` (which ships) instead of restating it inline, plus one
+# new clause on absolute paths + copy-runnable commands citing the same file
+# and a 2026-09-09 user ruling by date only. No private paths, no new dead
+# pointers. Copied over verbatim; byte-for-byte diff against fresh source is
+# empty.
 [[collected]]
 path = "claude-ops/ops/10-command-loop.md"
 source = "~/.claude/ops/10-command-loop.md"
@@ -1353,6 +1367,9 @@ edits = [
   "§7a (2026-08-29 arrival): a share note added under its 'registration is mechanised' claim, saying the registering hook and the ticket board behind it do not ship (both declared under [[not_shipped]]) and that steps 1-3 are done by hand here. The section is kept whole: what it asks for is right either way, and only the question of who writes the row changes.",
   "2026-09-07 refresh (procedure B): re-applied both edits above onto fresh source bytes (source grew substantially since d06708c — see below); both anchors still matched verbatim, re-applied unchanged.",
   "2026-09-07 NEW: the newly-arrived (2026-09-06) paragraph on two currently-unused loading surfaces (`skills:` preload, sibling roster) ends by pointing at `references/harness-measurements.md` §Dispatch semantics for conditions/limits. That file is `excluded-by-decision` in this repo (dated internal measurement ledger; see its [[not_shipped]] entry). Generalised the closing sentence to 'conditions, limits, and go/no-go criteria are recorded in the source's own dispatch-semantics measurement notes (not shipped here)' — same row-2-inverse treatment already applied to this file's other dead pointers. Everything else in that paragraph (the two loading surfaces' own description) is capability content and ships unchanged.",
+  "2026-09-12 refresh (procedure B, align to 7c9867b): re-applied all three edits above onto fresh source bytes; every anchor still matched verbatim, re-applied unchanged.",
+  "2026-09-12 NEW: §2's new 'N workers get slices of ONE class of work' paragraph (2026-09-09 arrival) names its live instance by a dated report under the source's `reports/` tree (a never-collect class, per COLLECTION-RULES.md) -> generalised the pointer to 'per a dated class-closure-drain report under the source's `reports/` tree, which this repo does not ship', keeping the count facts (17 control suites, four dispatched sessions) and the whole three-branch decision procedure (S1/S2/S3), which is the actual content.",
+  "2026-09-12 NEW (coordinator ruling, tools/ citations): §4a's routing checklist cites `tools/extdispatch/allowlist.txt` as a criterion to consult -> a share note added just above the checklist stating the whole external-dispatch path (`tools/extdispatch/`) is source-only except its red-team/ scripts, so every task in this copy goes to a subagent regardless of the checklist's other four criteria.",
 ]
 # NOT edited (verified, ships as pure content growth, no scrub needed):
 # - New §0 paragraph on agents/*.md dispatch-snapshot lag (cites `lessons.md`
@@ -1360,6 +1377,14 @@ edits = [
 # - New Agent-roster-table row for `work-card-executor` — explicitly cleared:
 #   agents/work-card-executor.md is being collected this round by another
 #   worker, so the citation is fine per this round's cross-worker note.
+# - 2026-09-12 NEW: §2's other new paragraph (record-writing-rule-on-dispatch)
+#   cites `ops/references/dispatch-templates.md` only — already a `[[collected]]`
+#   entry in this manifest, ships. §4a's new paragraph cites `ops/lessons.md`
+#   L-075 (bare lesson id, resolves) and `rules/literature-access.md` — a NEW
+#   rule file this lane does not own; not yet in the manifest under either
+#   status. Left as a repo-relative path per rule 2 (never scrub a path that
+#   resolves) — flagged under Cross-lane in the report for the rules/ lane to
+#   give it a verdict.
 
 [[collected]]
 path = "claude-ops/ops/30-judgment.md"
@@ -1368,6 +1393,7 @@ status = "edited"
 edits = [
   "2026-08-27 refresh (procedure B): the R2 absence-claims example arrived citing its incident by a session id; the id is a pointer into the source's private session store (an explicit COLLECTION-RULES scrub class) and is removed, here as well as there — the date + incident name ('2026-08-27 CPO incident') stay, which is how the claim remains checkable by the person who has the source.",
   "2026-09-07 refresh (procedure B): re-applied the above onto fresh source bytes — anchor still matched ('session 37168244…' still the live source text at that line), re-applied unchanged.",
+  "2026-09-12 refresh (procedure B, align to 7c9867b): re-applied the same edit onto fresh source bytes — anchor still matched, re-applied unchanged.",
 ]
 # NOT edited (verified, ships as pure content growth, no scrub needed): new
 # R2 'Corpus boundary' paragraph (L-050), new R4 example (L-044), R7 header
@@ -1377,6 +1403,11 @@ edits = [
 # says never existed on that machine). literature-search-extract is a
 # collected skill in this repo; all other citations resolve or are bare
 # lesson ids. No private paths in any of these.
+# 2026-09-12 NEW (source diff 27196ab..7c9867b, 12 insertions/0 deletions): a
+# new 'Self-declaration' paragraph after the refutability-statement block,
+# citing `60-record-templates.md §4` only (this lane's own file; §4 confirmed
+# present after this round's refresh of that file below). No private paths,
+# no scrub needed.
 
 [[collected]]
 path = "claude-ops/ops/40-maintenance.md"
@@ -1385,6 +1416,10 @@ status = "edited"
 # STATUS CHANGED 2026-09-07 (procedure B refresh) from "verbatim" to "edited".
 edits = [
   "2026-09-07: §2 lesson-destination table, 'One-off technical gotcha' row — source now routes this to `ops/lessons/` via `python tools/closeout-intake/intake.py add --from <draft>` (+ recurrence/supersede sub-commands + `tools/closeout-intake/README.md` as format owner). Same dead-pointer class as `10-command-loop.md` (tools/ and ops/lessons/ both excluded this round). Generalised to 'the lessons ledger, added through a guarded intake process (source-only tooling, not shipped here) that also handles recurrence and supersession events — never hand-edit the generated index `ops/lessons.md` directly', keeping the one shippable, actionable instruction (don't hand-edit the index) and dropping the tool-specific commands.",
+  "2026-09-12 refresh (align to 7c9867b): the source RESTRUCTURED §2 around the same content (2026-09-08 arrival) — the intake mechanics moved out of the table row into a new preceding paragraph ('Capture and enforcement are two different questions...'), and the table row itself was rewritten to 'nowhere else — the record IS the rule, found by the pre-task grep and `intake.py match`'. The 2026-09-07 edit's anchor no longer exists verbatim; superseded by the three new edits below rather than re-applied unchanged.",
+  "2026-09-12 NEW: the new preceding paragraph names the same intake mechanics the 2026-09-07 edit already generalised (`python tools/closeout-intake/intake.py add --from <draft>`, `intake.py event L-nnn --kind recurrence/supersede`, `tools/closeout-intake/README.md`) -> same treatment, same wording: 'one record born through a guarded intake process (source-only tooling, not shipped here) that also handles recurrence and supersession events; the index `ops/lessons.md` is generated — never hand-edit either path, the guard denies it.'",
+  "2026-09-12 NEW: the rewritten table row still names the source-only match tool by command (`intake.py match`) -> 'the record IS the rule, found by the pre-task grep (the source's tag-overlap match tool is source-only and not shipped here)' — same class and near-identical wording to the existing `10-command-loop.md` edit for the same tool.",
+  "2026-09-12 NEW: §2a's new 'Detail files' paragraph (2026-09-08 arrival) names `tools/entry-schema-lint/` as the enforced-subset tool -> 'a source-only lint tool (not shipped here)', dead-pointer class (tools/ excluded wholesale — see [[not_shipped]] path = \"tools/\"). The paragraph's other two citations, `ops/references/principle-design-guide.md` and `ops/references/entry-schema.md`, are repo-relative paths (rule 2, not scrub targets) but are NOT yet in this manifest under either status — both are under `ops/references/`, owned by lane W1b; flagged under Cross-lane.",
 ]
 # NOT edited (verified, ships as pure content growth, no scrub needed):
 # - New 'Every path and count in `change`...' paragraph under the commit-message
@@ -1398,6 +1433,15 @@ edits = [
 #   `ops/lessons.md` ~30-unfolded-entries row, since the source's own lessons
 #   system restructured; cap-history sentence extended ...22K->26K). All pure
 #   numeric facts read straight from the source, no scrub applicable.
+# - 2026-09-12 NEW (source diff 27196ab..7c9867b, additional to the above):
+#   the hook-proof-of-life rewrite (module-docstring `Proof-of-life:` line
+#   replacing the old "`ops/references/integrity-sweep.md`" position-based
+#   wording, citing AP-45) — cites only this repo's own files and lesson/AP
+#   ids, no scrub needed. Cap table: the on-demand row now also excludes
+#   `environment.md` and skill-trigger-dict.md's cap moved 42K->49K; pure
+#   numeric facts, no scrub. New SIZE_CAP_EXEMPT paragraph cites
+#   `hooks/ops_health_nudge.py` (ships) and `rule-registry.md` key
+#   'ops file cap' (ships, this lane) only.
 
 [[collected]]
 path = "claude-ops/ops/50-coach.md"
@@ -1430,6 +1474,8 @@ status = "edited"
 # to "edited".
 edits = [
   "2026-09-07: new §3 precedents sentence names two specific source-side private records by path — AssetVault `handoff20260902.md` (remote -> local) and `references/obsidian_Nathan-handoff-claude-home.md` (evaluate -> build), both inside trees this repo does not ship (the asset library and the source's own references/ tree) -> generalized to 'one written remote -> local, another evaluate -> build, both real instances in the source environment's own private records (its asset library and its references/ tree — neither ships here)'. The record-shape lesson (two real precedents exist) is kept; the private filenames are not.",
+  "2026-09-12 refresh (align to 7c9867b; source `git diff --numstat` = 45 insertions, 0 deletions): re-applied the above onto fresh source bytes — anchor still matched verbatim, re-applied unchanged.",
+  "2026-09-12 NEW: source grew a new §4 'Self-declaration' (registered 2026-09-10, 45 lines). Its provenance sentence names a specific source-side project script by path — SSLD `07_案卷/_registry/selfdecl.py`, inside that project's own tree under `projects/` (never-collect) -> generalized to 'a real per-project implementation (SSLD's own record-registry script, inside that project's own tree — not shipped here)'. The project name SSLD stays (ruling ids and project names are not scrub targets, rule 2); only the specific in-project file path is dropped. Rest of §4 (trigger, the full 自我宣告塊 block template, the two closing rules) cites only this repo's own files (`30-judgment.md` R2, `rules/figure-self-read.md`, `skills/audience-fit` gate `afgate.py voice`) and global CLAUDE.md — no further scrub found.",
 ]
 
 [[collected]]
@@ -1440,6 +1486,15 @@ status = "verbatim"
 # ('Never leave a window where a REGISTERED guardrail file is absent',
 # citing `lessons.md` L-034) since the last collection. No private paths.
 # Copied over verbatim; byte-for-byte diff against source is now empty.
+# REFRESHED 2026-09-12 (procedure B, align to 7c9867b; source `git diff
+# --numstat 27196ab..7c9867b` = 3 insertions, 0 deletions). New sentence under
+# the APPLY.md 'Change' bullet: a new hook's module docstring must carry a
+# STATUS line and its proof-of-life entry lands in
+# `ops/references/integrity-sweep.md` (ships, this lane) in the same commit,
+# citing `ops/references/entry-schema.md` §5 for the birth procedure. That
+# file is NOT currently in this manifest under either status — flagged under
+# Cross-lane (owned by W1b, ops/references/). No private paths either way.
+# Copied over verbatim; byte-for-byte diff against fresh source is empty.
 
 [[collected]]
 path = "claude-ops/ops/OPS.md"
@@ -1455,16 +1510,54 @@ status = "edited"
 # individually and then all together via a final diff that shows EXACTLY
 # these 9 hunks. Supersedes any prior `_superseded_edits` comment history —
 # see git blame on this entry for the pre-2026-09-07 wording if needed.
+# REFRESHED 2026-09-12 (procedure B, align to 7c9867b; source `git diff
+# --numstat 27196ab..7c9867b` = 78 insertions, 121 deletions — source SHRANK,
+# from 552 to 508 lines: the 2026-09-07 computer-use probe section was
+# condensed and most of its detail moved to a NEW `ops/references/
+# computer-use-probe-2026-09-07.md`). Of the 9 previously-declared edits, #1
+# #2 #3 #4 #8 re-applied on matching (sometimes slightly reworded) fresh
+# anchors; #5 #6 #7 are MOOT — the text they targeted no longer exists at the
+# source, condensed away in the same rewrite. CORRECTED this round: edit #1's
+# own description below quoted the account name it was removing, a hard-rule-9
+# violation in the manifest itself (caught by `published_record_guard`, a
+# local pre-write hook, before this line reached disk) — rewritten as
+# class+position, value never restated. Full edits list below.
 edits = [
-  "2026-09-07: line 3, account-name leak found this round — the account name, which followed 'user' at the end of the environment-facts sentence, -> dropped, so the sentence now ends at 'Claude Code on Windows' (value not recorded here, hard rule 9, corrected 2026-09-12). This is a genuine multi-round-old leak (the account name has been shipping unnoticed since at least the previous refresh); flagged and fixed, not something the task explicitly asked to look for but squarely inside the declared SCRUB TARGETS list.",
-  "2026-09-07: Horizontal property intro — 'Horizontal property (owner: user, 2026-09-04 — width-void diagnosis, `outputs/html-width-void-diagnosis-2026-09-04.md`):' -> 'Horizontal property (owner: user, 2026-09-04 — a dated width-void diagnosis note under the source's outputs/ tree, which this repo does not ship):'. Same file also cited in rule-registry.md's PAGE_FILL entry this round, given the identical generalized wording for consistency.",
-  "2026-09-07: 'Measured on this machine 2026-09-07 (session <id>):' -> 'Measured on this machine 2026-09-07 (a local session):' — the session id points at a transcript no reader can open.",
-  "2026-09-07: two places — the Blender executable was named by absolute path on a non-system drive; stripped to its project-relative tail `model3d-pipeline\\tools\\blender-5.2.1-windows-x64\\blender.exe` (drive and root gone, project tree name kept because it resolves through the shipped project registry). And '### PROBE 2026-09-07 (session <id>, user-authorised: FreeCAD + 記事本)' -> '### PROBE 2026-09-07 (a local session, user-authorised: FreeCAD + 記事本)'.",
-  "2026-09-07: the same paragraph's lower-cased echo of that absolute path — 'resolved to the real `…` path)' — given the same drive+root strip, leaving `model3d-pipeline\\...`; the tail is kept since it still resolves within the project tree.",
-  "2026-09-07: '(analysis: `…\\分析\\WeeklyHow_2026-09-07_0934\\_analysis.content.md`)' — an absolute path on a non-system drive naming one dated artifact in the operator's private media-analysis tree -> '(analysis: a dated write-up in the user's private media-analysis notes).' The date and the fact of the analysis stay; the locator goes.",
-  "2026-09-07: table, three absolute non-system-drive paths stripped to their tails — the Blender one to `model3d-pipeline\\...`, and two application-install paths to `FreeCAD\\bin\\FreeCADCmd.exe` and `COMSOL62\\Multiphysics\\bin\\win64\\`. Confirmed these ARE scrub targets despite being inside a table (COLLECTION-RULES rule 2 covers absolute paths on a non-system drive regardless of surrounding markup) — self-corrected an initial lean toward treating them as 'informational, keep'.",
-  "2026-09-07: 'overturned, and the refutability statement: `outputs/computer-use-capability-probe-2026-09-07.md`.' -> 'overturned, and the refutability statement live in a dated probe write-up under the source's outputs/ tree, which this repo does not ship.'",
+  "2026-09-07 (description corrected 2026-09-12 per hard rule 9 — the original description quoted the removed value; rewritten to class+position without touching the file change itself, already applied and unchanged): line 3, the account name (the source owner's Windows user name) removed from the environment-description sentence. A genuine multi-round-old leak (shipping unnoticed since at least the previous refresh); flagged and fixed, squarely inside the declared SCRUB TARGETS list.",
+  "2026-09-07: Horizontal property intro, an absolute path on the source's outputs/ tree naming a dated width-void diagnosis note -> generalized to 'a dated width-void diagnosis note under the source's outputs/ tree, which this repo does not ship'. Same file also cited in rule-registry.md's PAGE_FILL entry this round, given the identical generalized wording for consistency.",
+  "2026-09-07 (re-applied 2026-09-12 on fresh anchor 'Measured on this machine 2026-09-07 (session <id>): `allowedApps` empty,' — the same session id as edit below): session id -> '(a local session)' — the session id points at a transcript no reader can open.",
+  "2026-09-07 (re-applied 2026-09-12): the Blender executable's absolute path on a non-system drive -> stripped to its project-relative tail `model3d-pipeline\\tools\\blender-5.2.1-windows-x64\\blender.exe` (drive and root gone, project tree name kept because it resolves through the shipped project registry).",
+  "2026-09-07 (re-applied 2026-09-12 on fresh anchor — the source rewrote the old '### PROBE 2026-09-07 (session <id>, user-authorised: FreeCAD + 記事本)' heading into inline bold text '**PROBED 2026-09-07** (session <id>, FreeCAD + 記事本, both `tier: \"full\"`)', same session id as the edit above): session id -> '(a local session, FreeCAD + 記事本, both `tier: \"full\"`)'.",
+  "2026-09-07 (re-applied 2026-09-12 on fresh anchor, wording shifted from 'overturned, and the refutability statement:' to 'raw tool responses and the refutability statement:'): the outputs/ pointer to the probe's refutability write-up -> 'live in a dated probe write-up under the source's outputs/ tree, which this repo does not ship.'",
+  "2026-09-12 DROPPED (moot, text no longer at source): the 2026-09-07 edit for the lower-cased echo of the Blender path — that whole sentence was removed in the source's own condensation.",
+  "2026-09-12 DROPPED (moot, text no longer at source): the 2026-09-07 edit for the media-analysis-note paragraph (an absolute non-system-drive path naming one dated analysis artifact) — the entire 'Friction points from the other product' section it lived in was removed.",
+  "2026-09-12 DROPPED (moot, text no longer at source): the 2026-09-07 edit for the 3-row absolute-path table (Blender/FreeCAD/COMSOL install paths) — the 'Scripting channels for candidate GUI targets' table was condensed into a path-free sentence ('Blender, FreeCAD and COMSOL all have working headless channels').",
+  "2026-09-12 NEW (found, pre-existing, NOT part of this round's source diff — missed by every round back to whenever each citation arrived): six live citations of `ops/references/harness-measurements.md` (`excluded-by-decision`, [[not_shipped]] entry above — its own reason field says 'cited four times', already stale; it is six) at the 'Cross-session messaging', 'Workflow tool', 'Red-team / reviewer separation', 'Instruction-loading mechanics', 'Auto-mode environment scoping' and 'Execution surface' blocks -> each generalized in place to 'recorded in the source's own {dispatch-semantics|harness} measurement notes (not shipped here)', keeping every surrounding capability fact (versions, what a feature offers, why a claim was corrected, what was measured, the evidence class) and dropping only the dead file pointer. Row-2-inverse violation (COLLECTION-RULES.md): the file was excluded without amending what routed to it.",
+  "2026-09-12 NEW (found, pre-existing): 'Execution surface' block cites a dated report under the source's reports/ tree (never-collect class) for a CC-version reconciliation -> 'a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship'; the E10 registration fact and the staleness claim stay.",
+  "2026-09-12 NEW (found, pre-existing): 'Local toolchain' table cites a dated script-encoding audit under the source's outputs/ tree for the ACP/OutputEncoding row -> 'a dated script-encoding audit under the source's outputs/ tree, which this repo does not ship', matching the wording already established for this file's other outputs/ pointers.",
+  "2026-09-12 NEW (coordinator ruling, tools/ citations): 'External dispatch path' section — `tools/extdispatch/extdispatch.py` named as 'Entry point, and the only one' -> share note added after the bullet list stating the dispatcher is source-only (`tools/extdispatch/` ships `partial`, red-team/ only) and there is no entry point to run here. `tools/page-fill-gate/` and `tools/ops-health-test/check_cap_binding.py` citations elsewhere in this file needed no such note — both now resolve per the same ruling (lane W8's new `instruments/` category).",
+  "2026-09-12 NEW (coordinator ruling): 'Playwright MCP' block's `tools/playwright-mcp/README.md` citation -> appended '(source-only, `tools/share-manifest.toml`; reproduce with `npm install @playwright/mcp@0.0.79` at user scope)' inline rather than a separate blockquote, since the citation was already a single trailing pointer.",
+  "2026-09-12 NEW (coordinator ruling): routing table's `tools/session-find.py` citation for session-JSONL disclosure -> the underlying repo-relative path (`projects/<encoded-cwd>/<session>.jsonl`, which the reader can always reach directly) stated first, with the tool named as a source-only convenience wrapper over the same path rather than the only route.",
 ]
+# NOT edited (reviewed, no scrub applicable):
+# - New (2026-09-10) 'Institutional literature access' section. Cites
+#   `rules/literature-access.md`, `hooks/literature-host-policy.json` and
+#   `hooks/literature_host_guard.py` — all repo-relative paths (rule 2, not
+#   scrub targets); none are yet in this manifest under either status, all
+#   three owned by other lanes (rules/, hooks/) — flagged under Cross-lane.
+#   The section's measured VPN/entitlement facts (a specific IP, a VPN-pool
+#   hostname under a university domain, an institution org string) were
+#   WEIGHED against the scrub-target list and kept: they match none of the
+#   seven enumerated classes (not an account name, not an absolute
+#   home/non-system-drive path, not a credential; an institution name is the
+#   same class as a project name — rule 2 explicitly protects "dated evidence
+#   lines"). This is evidentiary content behind a shipped rule
+#   (`rules/literature-access.md`), not an infrastructure endpoint the reader
+#   could reach — removing it would be the over-scrub COLLECTION-RULES.md
+#   calls failure 1, not caution.
+# - New citation `ops/references/computer-use-probe-2026-09-07.md` (confirmed
+#   present at source) — repo-relative, not in this manifest yet, owned by
+#   lane W1b (ops/references/); flagged under Cross-lane.
 
 [[collected]]
 path = "claude-ops/ops/lessons.md"
@@ -1491,6 +1584,28 @@ status = "edited"
 # per-record files. Exactly ONE new scrub target found in the index itself
 # (L-053, below). Wrote verbatim copy first (confirmed byte-identical), then
 # applied the 2 edits below; final diff matches exactly these two regions.
+# 2026-09-12 (W1a) — BLOCKED, NOT REFRESHED THIS ROUND. Attempted the planned
+# D6 refresh (align to disk, dated ack) with `cp <source> claude-ops/ops/
+# lessons.md`; denied by `hooks/intake_guard.py`, a global PreToolUse hook
+# (matcher Write|Edit|Bash|PowerShell) that DENIES any write whose path ends
+# in `ops/lessons.md` or falls under `ops/lessons/`, with no carve-out for a
+# share repo's static mirror copy of that filename. This is NOT a misfire:
+# `claude-ops/ops/rule-registry.md`'s own INTAKE entry documents the same
+# guard as INV-2, a deliberate hard invariant born 2026-09-07, and this
+# manifest's own `hooks/intake_guard.py` not_shipped entry confirms the guard
+# is correctly excluded from SHIPPING while still being live in the editing
+# session, because it is a source-machine-global hook, not a repo-scoped one.
+# Did not bypass it (prohibited) and did not run the guard's suggested
+# false-positive report, since that writes a telemetry row under the source
+# root's own tree, which this round's brief explicitly forbids touching. Left
+# `claude-ops/ops/lessons.md` at its pre-round (2026-09-07, 56-record) content
+# rather than a half-applied edit. This is a genuine gap: the shipped index is
+# now stale against source (81 records committed, 87 with the source's own
+# uncommitted regeneration — see the updated source_dirty_ack below for
+# numbers). Escalated to main/cross-lane; resolving it needs either a
+# narrower guard pattern (repo-scoped, not filename-suffix-scoped) or a
+# different write path for this specific share-repo maintenance case — not a
+# decision this lane can make unilaterally.
 edits = [
   "2026-09-07: header rewrite (original lines 1-17: title + 2 body paragraphs + metadata line), REPLACING the entire prior edits-list history for this entry (all of which targeted full-narrative content that no longer exists at the source). Kept the title concept, reworded '(do not edit; the guard denies direct writes)' -> '(at the source; a guard there blocks hand-edits — this shipped copy carries no such enforcement)'. Kept the 'projection of one intake record' sentence verbatim. Replaced the 'Write a new lesson: ... `python tools/closeout-intake/intake.py add --from <draft.md>`' block with a generalized description that keeps the card-shape fields (front matter what/tags, ## Record block, ## Context/## Pitfall/## Fix + optional ## Detection/## Narrative) but notes that the intake tool and the per-lesson record tree are source-side and do not ship. Replaced the 'Recurrence... `intake.py event L-nnn --kind recurrence...`' line with a generalized version that keeps the grep-first + hits-reaches-2 fold rule and its citation to ops/40-maintenance.md §2a (verified shipped). DROPPED entirely the line 'Rules and semantics: references/closeout-capture-r3-design-2026-09-07.md §4.' — a new dead pointer into the excluded references/ tree, with no established-precedent reason to keep it (unlike a repo-relative tool path, this names a document this repo will never ship). Kept the metadata line's `generated-at:` and `records:` count — not private, still accurate — but DROPPED its `generated-from:` sha256: that receipt is taken over the `ops/lessons/` record tree, which this entry's own ruling excludes, so it would publish a 64-hex value with nothing in this copy to check it against. Same call, same round, as the archdiag MAINTENANCE.md receipts table; the difference from references/bridge.md's kept receipt is that bridge.md's input ships and a shipped command re-verifies it.",
   "2026-09-07: L-053 Context line — 'All six landed in the PREVIOUS session's ledger file (`<id>`), not this one (`<id>`).' -> 'All six landed in the PREVIOUS session's ledger file (a different local session), not this one (this session).' — two session ids scrubbed, each pointing at a transcript no reader can open; the two-ledger narrative (which session did what) is kept whole.",
@@ -1504,7 +1619,16 @@ written but the index not yet committed — the normal state, not an in-flight
 hand edit. The copy here is aligned to what is on disk per this round's ruling
 for dirty source files, and the two declared edits were re-applied on that
 fresh text with the diff re-verified. review-when: drop this ack once the
-source commits the regenerated index."""
+source commits the regenerated index.
+2026-09-12 (W1a): STALE, NOT UPDATED THIS ROUND — see the BLOCKED note in the
+comment above. The numbers below are recorded for the next round, not acted
+on: committed range 27196ab..7c9867b shows 227 insertions / 19 deletions on
+this file (records 55 -> 81 by the source's own generated-at/records line);
+the source working tree is additionally dirty +52/-4 (records 81 -> 87,
+matching this round's brief), still the normal 'index not yet committed'
+state described above. The copy shipped here still reflects the 2026-09-07
+state (56 records) and needs a full D6 refresh once the write path below is
+resolved."""
 
 [[collected]]
 path = "claude-ops/ops/references/external-dispatch.md"
@@ -1630,7 +1754,31 @@ status = "edited"
 # ops/rule-registry.md`) and `git status --porcelain -- ops/rule-registry.md`
 # is clean. The ack's own review-when condition ("re-collect and drop this ack
 # once these two entries land in a source commit") is satisfied.
+# 2026-09-12 refresh (W1a, procedure B, align to 7c9867b; source `git diff
+# --numstat` = 1166 insertions / 39 deletions, clean working tree). Wrote
+# verbatim copy first, then re-applied all 16 edits above onto fresh source
+# bytes (every anchor still matched verbatim, re-applied unchanged, both of
+# edit #3's '2 places' confirmed still exactly 2). Scanned the ~1,166 new lines for B4 scrub targets: found and fixed 7 NEW
+# session-id citations (none declared before this round — the file's own new
+# `PUBLISHED_RECORD`/`AGENT_FACING_TEXT`/`WORKTREE_SCOPE`/`DISPATCH_COMMIT_
+# PATHSPEC` entries, all landed since 2026-09-07, cite the sessions that
+# motivated them). Also actioned the coordinator's 2026-09-12 owner ruling on
+# tools/ citations (see Cross-lane in this round's report): `tools/page-fill-
+# gate/` and `tools/ops-health-test/check_cap_binding.py` now resolve (ship
+# via lane W8's new `instruments/` category) and needed no caveat, confirmed
+# clean; every OTHER place in this file where a `tools/…` path is cited as
+# something the reader would RUN — not a mere evidence/suite-pass mention —
+# got one short in-file "> **Share note.**" blockquote per section, naming the
+# tool source-only and, where one exists, a manual substitute. 22 sections
+# touched; not exhaustive line-by-line (`tools/ops-health-test/` suite-pass
+# citations and shadow-hook telemetry-log mentions were treated as evidence,
+# not enforcement, and left alone, consistent with the existing `tools/`
+# not_shipped entry's own fallback stance).
 edits = [
+  "2026-09-12 NEW: 6 distinct session ids across 9 citation instances added to the file since 2026-09-07, none previously declared -> 'a local session' (or 'that local session' where the sentence already names the session once) throughout: compact-recovery entry why-block, 1 place (a short-form id); ENTRY_SCHEMA entry evidence, 1 place (a UUID-form id), and history, 1 place (a different short-form id); WORKTREE_SCOPE entry evidence, 1 place, and history, 2 places (3 more short-form ids, one repeated from ENTRY_SCHEMA's history id is NOT among them — all 3 here are distinct from it); DISPATCH_COMMIT_PATHSPEC entry why + evidence, 2 places (the same short-form id as ENTRY_SCHEMA's history line, repeated — that id appears 3 times total across the file) and history, 1 place (the same id as one of WORKTREE_SCOPE's three). Every commit hash, date, ledger-row range and lesson id (L-061 etc.) stays; only the session id is generalized, matching this file's own established convention for this class.",
+  "2026-09-12 NEW (main ruling): a scheduled-task name (the daily graph-watchdog task, COLLECTION-RULES scrub class 'pointer to a private asset: scheduled-task name') appears verbatim at 3 places in graph rot watchdog entry — 'Carrier' line, review-when line, rollback line — generalized to 'the daily graph-watchdog scheduled task' (or, in the rollback's `schtasks /Delete /TN` line, prose pointing at the reader's own Task Scheduler rather than a literal `/TN` value, since no `<graph-watchdog-task>` placeholder is declared in `[placeholders]` `command_position_ok`). PRE-EXISTING leak from before this round (not introduced by the 2026-09-12 source diff) — precedent: `hooks/ops_health_nudge.py`'s 2026-09-07 edit replaced the same task's name with 'your graph-watchdog task's scheduler entry'.",
+  "2026-09-12 NEW (coordinator ruling, tools/ citations): 22 short '> **Share note.**' blockquotes added, one per section, wherever a `tools/…` path not covered by the `page-fill-gate`/`check_cap_binding.py` resolution is cited as something the reader would run or rely on — shell tool routing, shell_transport_guard, ps_errorpref_guard, ps_pipeline_close_guard, line endings (all citing tools/shell-audit/*), routing dict cap (skill-routing-audit.py), INTAKE (closeout-intake/), External dispatch path (extdispatch/, partial disposition detail), telemetry writers (telemetry-framing/), process ledger (process-ledger/ + compact-loss-audit/), subagent instruction surface (context-budget/ + glob-fitness.py), graph rot watchdog (graph-snapshot/), copy census (copy-census/), session mirror heartbeat (claude-session-transcript-mirror.ps1), cc version reconcile (cc-delta/), ENTRY_SCHEMA (entry-schema-lint/), NO_SILENT_FAIL (hook-proof-of-life/ + class-closure/), AGENT_FACING_TEXT (hook-deny-lint/), browser-pane pixel route (ui-shot/ + ui-verify-test/), Playwright MCP (playwright-mcp/), top-level references/ (project-dashboard.py). Each note states the tool is source-only per this manifest's `tools/` entry and, where a shipped hook still runs against its absence, what that means for the reader; none rewrites the surrounding rule text.",
+
   "compact-recovery entry, current: a second-drive mirror root path -> 'any configured mirror root', matching the shipped transcript_read_guard.py whose CONFIG carries the same edit",
   "compact-recovery entry, evidence: a session id beside a project name ('Prism 94a45532') -> 'one real session' — the id points at a transcript no reader can open; every measurement and date stays",
   "compact-recovery entry, review-when, 2 places (its own line plus the session-mirror-heartbeat entry's `current` line): the scheduled-task name feeding the mirror -> 'the scheduled copy job that feeds it'",
@@ -1647,6 +1795,7 @@ edits = [
   "2026-09-07: graph-rot-watchdog history block: an illustrative `locator:` line quoting a live absolute private root on a non-system drive -> 'a `locator:` line built from an absolute private path' — the shape of the defect class (an evidence line that declares its own root) stays; the root does not.",
   "2026-09-07: routing-dict-cap firing log: `outputs/dict-review-round2-2026-09-04.md` -> 'a dated review note under the source's outputs/ tree, which this repo does not ship'",
   "2026-09-07: PAGE_FILL entry, evidence: `outputs/html-width-void-diagnosis-2026-09-04.md` -> 'a dated width-void diagnosis note under the source's outputs/ tree, which this repo does not ship' (same file, same wording as the parallel edit declared for environment.md this round)",
+  "2026-09-12 (merge step, missed by the lane's own scrub pass): four session-id pointers in new source text — the NAMING_PLACEMENT evidence line's full session UUID and the same entry's history line's 8-hex ledger prefix of it; ops-relaxation's backfilled origin note's full session UUID; the compact-notice entry's 8-hex short session id. Each -> 'a local session' / 'that session's ledger' / 'in one local session'. The leak scan had no pattern for a UUID; sharelib gained one the same day.",
 ]
 
 [[collected]]
@@ -1668,6 +1817,9 @@ edits = [
   "2026-09-07 NEW: §7 registry, new 'handoff（交接單）' row — owner-column precedent parenthetical named two artifacts inside non-shipping trees: 'AssetVault `handoff20260902.md`' (asset-vault skill, excluded) and 'references/obsidian_Nathan-handoff-claude-home.md' (top-level references/, excluded except PROJECTS.md — both explicit SCRUB/dead-pointer classes: a named artifact inside a tree that does not ship). Generalised '先例：AssetVault `handoff20260902.md`、`references/obsidian_Nathan-handoff-claude-home.md`' -> '先例見 source 端既有交接單'. The row's actual schema and owner (`60-record-templates.md` §3, which ships) are unchanged.",
   "2026-09-07 NEW: \u00a77 registry, new 'evidence run record（證據查證紀錄）' row. Its home path was written as an absolute path on a non-system drive into the operator's Obsidian vault (`…\\literature\\EvidenceRuns\\<run_id>\\`) — an explicit scrub target — replaced with the `<vault>` token this round's literature-search-extract worker introduced for exactly this class. Its design-document pointer (under the source `references/` tree, excluded) became a prose note that the design stays source-only. Everything else in the row is KEPT and now resolves: `skills/literature-search-extract/loop/schemas/run.schema.json` and `skills/literature-search-extract/references/feedback-loop.md` both ship as of this round. HISTORY, because the reversal matters more than the result: this row was first DROPPED ENTIRELY, on the correct-at-the-time ground that the whole `loop/` subtree was absent from this repo. The worker adjudicating that skill then shipped the subtree (27 collected files), so the ground vanished and the row was restored and scrubbed instead. A parallel round can make one worker's honest verdict false by the time it is merged; the merge step is where that has to be caught, and dropping a row is the failure mode this repo calls over-scrub.",
   "2026-09-07 NEW: the paired 'reflux event（回流事件）' row — same story as the row above, same reversal. Restored with two scrubs: the owner column's design-section pointer generalised (source-only design document), and the handoff clause naming the deep-reading skill that consumes these events generalised, since that skill is excluded-by-decision this round. `loop/reflux.py`, `loop/schemas/event.schema.json` and the append-only/fail-closed semantics are kept verbatim — all of them ship, and they are what makes the row checkable.",
+  "2026-09-12 refresh (procedure B, align to 7c9867b; source `git diff --numstat` = 6 insertions, 2 deletions): re-applied all six edits above onto fresh source bytes — every anchor still matched verbatim, re-applied unchanged. None of the six rows/bullets they target were touched by this round's source diff.",
+  "2026-09-12 NEW: §一 判別法-adjacent new dict row (new §7 registry key, not §一) 'ops/references/principle-design-guide.md' + 'ops/references/entry-schema.md §3–§5 (14 面適配表；lint `tools/entry-schema-lint/`)' — the lint tool path is a dead pointer (tools/ excluded wholesale, [[not_shipped]] path = \"tools/\") -> generalised to 'lint 為 source-only 工具，未隨此 repo 收錄'. Both `.md` reference citations are repo-relative (rule 2, not scrub targets) but neither is in this manifest yet — both owned by lane W1b (ops/references/); flagged under Cross-lane.",
+  "2026-09-12 NEW: §7 registry, new 'routing/definition entry（分類／路由條目）' row — same `tools/entry-schema-lint/lint.py` dead pointer, same treatment: -> 'lint 為 source-only 工具，未隨此 repo 收錄'. `ops/references/entry-schema.md` citation flagged under Cross-lane as above; integrity-sweep check 29 citation resolves (ships, mine).",
 ]
 # NOT edited (verified, ships as pure content growth, no scrub needed):
 # - New §六 quick-table row for the four `[BC]` rules -> `ops/05-authority.md`
@@ -1675,17 +1827,13 @@ edits = [
 # - New §7 'UX finding（走查發現）' row -> `skills/ux-walkthrough/SKILL.md`
 #   Step 3. `skills/ux-walkthrough` is explicitly cleared this round (being
 #   collected by another worker per this round's cross-worker note) — citation
-#   is fine as-is, no edit. `share_gate.py --source` currently flags this one
-#   line as [R] (ux-walkthrough not yet present in THIS gate run's tree), which
-#   is expected mid-round and should clear once that worker's files land.
+#   is fine as-is, no edit.
 #
-# KNOWN OPEN GATE FINDING (not something I can resolve from this file alone):
-# `share_gate.py --source` still reports [R] claude-ops/ops/rules-usage-dict.md:161
-# citing `skills/ux-walkthrough/SKILL.md` as unshipped — this is the ux-walkthrough
-# cross-worker dependency above, expected to self-resolve once that worker's
-# collection lands in the same commit/round. Re-run the gate after the round
-# assembles to confirm it actually clears; if it doesn't, this row needs
-# revisiting.
+# 2026-09-12: the prior round's "KNOWN OPEN GATE FINDING" about
+# `skills/ux-walkthrough/SKILL.md` being unshipped is now STALE and REMOVED —
+# confirmed `skill-toolkit/skills/ux-walkthrough/SKILL.md` is a `[[collected]]`
+# entry in this manifest and the file is present in this worktree. The
+# citation at §7's UX finding row resolves cleanly; no open gate finding here.
 
 [[collected]]
 path = "claude-ops/references/PROJECTS.md"
@@ -2923,7 +3071,14 @@ reason = """NEW 2026-08-29. A machine-written reconciliation stamp cited twice b
 `claude-ops/ops/rule-registry.md`: which harness build this environment's rules
 were last curated against. Its content is one machine's build ids and dates —
 a runtime record, not a rule, and wrong for any other install the moment it is
-copied."""
+copied.
+D2 RE-CHECKED 2026-09-12 (W1a, align to 7c9867b): source `git diff --numstat`
+shows 6/6 (reconciled_version 2.1.257->2.1.266, reconciled_date, binary_size,
+binary_mtime, report filename all moved). Content class unchanged — still
+purely a version/date/binary-fingerprint stamp plus a `reports/` pointer this
+share does not ship, no rule content. Verdict holds; still cited exactly twice
+by `claude-ops/ops/rule-registry.md`'s 'cc version reconcile' entry, both
+citations now carrying a share note (this round) rather than a bare pointer."""
 fallback = """The rule-registry entries themselves state what reconciliation is
 FOR and when it is due; the stamp is the source's own bookkeeping of when it
 last ran. An adopter's equivalent is whatever their own curation step writes."""
@@ -3471,6 +3626,17 @@ path_position_ok = [
     "<worktree-slug>",   # "16 `projects/<worktree-slug>/` transcript dirs" —
                    # the pool's own naming scheme for a leased worktree,
                    # stated as a count/shape observation, not a real slug
+    # --- 2026-09-12 arrivals, rule-registry.md WORKTREE_SCOPE + literature
+    # host guard entries (both new since 2026-08-29). Each names the SHAPE of
+    # a value the reader's own git/runtime supplies, not a real path a
+    # scrubber ate — read at its one site and confirmed.
+    "<gitdir>",         # WORKTREE_SCOPE: `<gitdir>/worktree-scope-allow` —
+                        # git's own term for a repo's `.git` dir; genuinely
+                        # theirs, whether a plain folder or a worktree pointer file
+    "<host>",           # literature host guard: `https?://<host>` — the
+                        # matcher's own pattern variable, any URL's host
+                        # (`<worktree-slug>` and `<repo>` are used by
+                        # WORKTREE_SCOPE too; declared once, above.)
 ]
 
 # Tokens allowed on a runnable line — the reader is expected to fill them in.
@@ -4454,7 +4620,16 @@ asset in a form this repo ships: it is a generated-from source (the index is
 the derived, stable artifact; the record tree is the mutable ledger a source-
 side guard hook actively protects from direct edits), analogous to how this
 repo ships built outputs rather than the private working state that produced
-them."""
+them.
+D2 RE-CHECKED 2026-09-12 (W1a, align to 7c9867b): ~45 records changed or were
+added between the two source commits (committed diff), plus 6 more untracked
+at the source (L-082..L-087, part of the same uncommitted regeneration that
+lessons.md itself is dirty for). Sampled 3 of the untracked records (L-082,
+L-085, L-087): all three carry a `session:` UUID in front matter and a
+`locator:` line naming that session id again; L-082's body additionally names
+an absolute path on a non-system drive in prose. Grounds (1)-(3) above still
+hold unchanged against this batch; disposition unchanged. Did not collect
+records, per instruction."""
 fallback = """`claude-ops/ops/lessons.md` — the generated index this same
 round refreshed. Each card is self-contained (front matter what/tags, ##
 Context, ## Pitfall, ## Fix, optional ## Detection) and readable without the

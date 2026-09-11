@@ -92,6 +92,39 @@ becomes "no mechanism used" (`lessons.md` L-011 P2; sweep check 12).
    able to reach into a path the worker CAN read. A worker that can't read what
    it needs tends to fabricate a plausible answer rather than report the gap.
 
+**A brief that dispatches a worker into a governed record — a manifest, ledger
+or audit file that is itself published, reviewed or gated — carries that
+record's own record-writing rule.** Conditional, so not a sixth contract part:
+it fires only when the worker WRITES into something shared. The worker holds
+one shard and never runs the merge-time gate, so a rule enforced there is
+unreachable from where it stands, and nothing in the fragment's own acceptance
+fails without it — everything it would have caught surfaces after the merge, in
+the merged file, at the dispatcher's cost. Shape, the ✅/❌ pair and the
+measured case: `ops/references/dispatch-templates.md` (fragment-writing
+briefs).
+
+**When N workers get slices of ONE class of work, part 2 is a DECISION
+PROCEDURE, not a task list — and it is exhaustive down to the "this is not
+mine" branch.** Conditional, like the clause above: it fires only on a fan-out
+where the slices share a kind. The reason is not tidiness. Four workers meeting
+the same ambiguous shape each invent a different resolution, and the dispatcher
+cannot align them afterwards — the outputs are no longer comparable, and the
+one thing a fan-out was supposed to buy (uniform treatment of a class) is
+exactly what is lost. A task list says WHAT to produce; a decision procedure
+says HOW TO DECIDE, so only the decisions differ per slice, never the method.
+Live instance, 2026-09-09 (17 control suites across four dispatched sessions,
+per a dated class-closure-drain report under the source's `reports/` tree,
+which this repo does not ship): every brief carried the same
+three branches — **S1** the instrument already has a named outcome for the
+input → feed it and assert by name; **S3** the fold IS the instrument's
+declared degradation → assert the declared outcome and name the class in the
+case text; **S2** a silent fold into a substantive class → a real defect: fix
+it if the instrument is `tools/`-owned, REPORT it if it is rule-tier. S2's
+report-don't-fix half is the branch that makes the procedure exhaustive; drop
+it and a worker meeting a redline finding will act on it instead of handing it
+back. Pair this with §7's report contract: a worker that reports a finding must
+be told what a report LOOKS like, or it fixes.
+
 Worked ✅/❌ pair for this contract: `ops/references/dispatch-templates.md`.
 
 ## §3 Gotchas when dispatching to an external CLI agent (verify in your env)
@@ -133,6 +166,12 @@ Two dispatch paths exist. §4 above sizes work WITHIN the subagent path; this
 picks the path. Facts, entry point and gates: `environment.md` "External
 dispatch tier".
 
+> **Share note.** `tools/extdispatch/` (the dispatcher, `allowlist.txt`, and
+> every gate below) is source-only (excluded-by-decision except its
+> `red-team/` acceptance scripts, `tools/share-manifest.toml`). This whole
+> external path is design here, not something this copy can run; every task
+> goes to a subagent instead.
+
 **Send it externally when ALL of these hold** — one NO sends it to a subagent:
 
 - the target project is in `tools/extdispatch/allowlist.txt`;
@@ -152,6 +191,14 @@ Profile → task shape, prompt shape (format first line, evidence anchor, explic
 file scope, licensed empty answer), acceptance and failure signatures:
 `ops/references/external-dispatch.md`. Chains and live health:
 `extdispatch.py status` — that output beats any table.
+
+**A prompt names the ROUTING TABLE, never a tool surface.** Naming a browser, a
+fetch command or a specific client hands the worker a path whose legality the
+dispatcher has not checked — and if that path is barred, the violation is the
+dispatcher's, already committed at dispatch time, with the worker merely
+executing it. Keep the licensed empty answer reachable: a worker that stops at
+a barred route and reports the gap has succeeded (`ops/lessons.md` L-075;
+literature case and the 5-step ladder: `rules/literature-access.md`).
 
 ## §4b Redlines and disclosure for external dispatch
 
