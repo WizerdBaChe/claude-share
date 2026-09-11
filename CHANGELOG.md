@@ -9,6 +9,109 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-12 — nine lanes, a new `instruments/` folder, and a premise that turned out false
+
+Source `27196ab` → `7c9867b`: 192 commits, 538 paths counting the source's
+uncommitted ones, sorted into buckets by the new `tools/triage.py` (refresh /
+candidate / recheck / never / uncommitted / source-gone / deleted, read off the
+manifest's own declarations; 17-case suite). 119 files changed here, 30 of them
+new; the manifest goes 225 → 256 `[[collected]]` (170 verbatim, 76 edited,
+10 template), 46 → 54 `[[not_shipped]]`, 23 → 29 `[[allow]]`, 1 → 3
+`[[unmounted_hook]]`. Nine lanes, each in its own git worktree — W1a ops top
+level, W1b ops references, W2 CLAUDE.md template + rules, W3 hooks, W4 agents +
+skills, W5 the literature-access mechanism, W6 archdiag, W7 a read-only per-file
+adjudication of the source's `tools/`, W8 the new folder below — merged
+`--no-ff` with the gate run at the merge. `tools/SYNC-RUNBOOK.md` writes that
+orchestration down, lane brief template included; its §4 says a round is not
+synced until it is pushed (owner ruling).
+
+**New folder: `instruments/`.** The 2026-08-16 ruling kept all of the source's
+`tools/` out on the premise that no shipped file routes to one as runnable. W7
+checked that premise tool by tool and found it false for two:
+`integrity-sweep.md` check 7b imports `ops-health-test/check_cap_binding.py`, and
+`environment.md` names `page-fill-gate/` as the Enforcement of a rule that ships
+(the CLAUDE.md template tells its reader to run it, too). Owner ruling: exactly
+those two ship, verbatim, under a new top-level `instruments/`, mapped by
+`[source_map]` so the source-path citations resolve (check V follows the map).
+The other 31 tools stay out, and a shipped file that cites one as runnable now
+carries a source-only note — `audience-fit/SKILL.md` for
+`tools/audience-fit-gate/` is one. Three page-fill citations that two lanes had
+rewritten to "does not ship here" before the ruling landed were restored at the
+merge. A partial reversal of 2026-08-16, recorded as one: `ADOPTERS.md` carries
+the correction.
+
+**Came in.** The literature-access mechanism as one unit —
+`global-claude-md/rules/literature-access.md`, the hook
+`literature_host_guard.py` with `literature-host-policy.json`, and in the skill
+`connectors/access_policy.py` (a read-only view of the same table) and
+`verify/fetchsrc.py` (fetches, and records route, status and sha256). Those two
+are the only files of the halves excluded on 2026-09-07 as machine-bound;
+`fetchsrc.py` carries a `<contact-email>` placeholder an adopter must fill before
+running it. Hooks: `published_record_guard.py`, `worktree_scope_guard.py`,
+`dispatch_commit_notice.py`, plus the literature guard, four test matrices, and
+`deny_receipt.py`, the receipt library fifteen hooks now import — **21 mounted
+hooks**. `fieldwork_threshold_notice.py` was retired at the source (ruling R-3)
+and ships unmounted with its tests; `[[unmounted_hook]]` now declares two
+libraries and that one retired hook. Five rules (`figure-self-read`,
+`hook-deny-message`, `literature-access`, `naming-and-placement`,
+`web-navigation-state`), eleven in all. Three ops references (`entry-schema.md`,
+`principle-design-guide.md`, `computer-use-probe-2026-09-07.md`).
+`ux-walkthrough/references/navigation-ia-contract.md`. W6 re-aligned archdiag's
+`MAINTENANCE.md`; the rebuilt `capability-set.html` sha is unchanged and three
+stale dirty-source acks were retired. Everything else already shipped that had
+drifted was re-aligned by procedure B.
+
+**Excluded, with a disposition each.** `literature-search-extract/PDF-GUIDE.md`,
+shipped since the first snapshot, stops under hard rule 8: two first-hand source
+statements classify it personal and no shipped router points at it (fallback:
+`references/search-sources.md`). `tools/audience-fit-gate/` (its README cites
+private-tree pointers; the skill section that runs it is kept, with the note
+above). `skills/patents-grabber` (born 2026-09-11, a wrapper around a local tool
+that does not ship). `interop/curation.stamp` (a machine-written stamp).
+
+**Pre-existing leaks, found because a lane re-read the file.** Three files had
+been published carrying a pointer to a private asset: `integrity-sweep.md`
+check 26 a scheduled-task name (now `<graph-watchdog-task>`; `rule-registry.md`
+carried the same name), `shared-tree-git.md` §6 a session-board ticket id, and
+`rule-registry.md` four session ids in lines the lane had otherwise refreshed.
+Each is scrubbed as a declared edit whose manifest entry records class and
+position, not value — hard rule 9, which two lane-written manifest entries broke
+by spelling the filename they had scrubbed; both rewritten.
+
+**The gate gained two patterns, each with its positive control.** A bare
+account-name pattern, active only when the account name is at least four
+characters and not a generic one (`user`, `admin`, …): case 15 plants it in a
+slug-shaped path, the shape the home-path pattern cannot see, and prints SKIP on
+a machine where the pattern must stay off. A session-id-shaped UUID pattern:
+case 16. The UUID pattern's first run over the tree hit exactly two synthetic
+self-test ids, each given a reasoned `[[allow]]`. Suite 14 → 16.
+
+**Cross-lane races, caught at the merge.** Every race had one shape, an honest
+verdict made false by a lane landing alongside it. Two lanes marked the
+page-fill citations "not shipped" while W8 shipped them; W3 left placeholder
+literature `[[not_shipped]]` entries while W5 shipped the mechanism; W5 noted
+`deny_receipt.py` missing while W3 shipped it; `global-claude-md/README.md` and
+`hooks/README.md` counted rules and hooks (20 → 21) against a tree the other
+lanes were still growing. All resolved at the merge step; `SYNC-RUNBOOK.md` §3
+makes the check a named step.
+
+**Known open.**
+- `claude-ops/ops/lessons.md` is **held at its 2026-09-07 content** (56 records;
+  the source has 81 committed, more uncommitted). The source's own
+  `intake_guard.py` (INV-2) denies any write to a path ending `ops/lessons.md`,
+  this mirror included. The deny was respected, not routed around; the file is
+  declared stale in its manifest entry. It moves when the owner either carves
+  this repo out of the guard or copies the file by hand.
+- One lane hit two `published_record_guard.py` denies and applied the same edits
+  through a script. Its content was re-checked at the merge — no private value,
+  gate clean — but the route was wrong: a deny is the answer, not an obstacle,
+  whether or not the content turns out clean.
+- About eight older manifest entries still name `outputs/` artifacts by
+  filename — pointers into a tree that does not ship. Debt for the next round;
+  this round rewrote only the entries it touched.
+- The source had 35 uncommitted paths at collection; the collected ones are
+  declared in `source_dirty_ack`s.
+
 ## 2026-09-07 (second pass) — the blind spot gets fixed instead of documented, and a stale artifact is caught
 
 The morning's entry below ended by *documenting* two things rather than fixing

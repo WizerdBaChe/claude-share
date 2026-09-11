@@ -22,7 +22,7 @@
 # CHANGELOG.md entry, so it changes in the SAME commit as that entry and never
 # on its own — a baseline edited separately is a second copy that rots.
 # ---------------------------------------------------------------------------
-source_aligned = "27196ab"
+source_aligned = "7c9867b"
 
 # ---------------------------------------------------------------------------
 # source_env_roots — bare prefixes that mean "an asset of the SOURCE
@@ -3874,6 +3874,28 @@ kind = "email address"
 match = "example.com"
 reason = """KNOWN_TRUE calibration sample. RFC 2606 reserves example.com so it
 can be written down; same reasoning as the tools/test_share_gate.py entry."""
+
+# --- 2026-09-12: the UUID pattern's first run meets two synthetic fixtures ----
+# The gate gained a session-id-shaped UUID pattern this round. Its first run over
+# the tree found exactly two hits, both invented ids in hook self-tests — which is
+# the pattern working, not a leak. `match` is a prefix too short to be a UUID, so
+# this entry is not a finding in its own right.
+
+[[allow]]
+file = "hooks/published_record_guard.py"
+kind = "UUID (session-id shape)"
+match = "11111111-2222-3333"
+reason = """KNOWN_TRUE fixture in the guard's own --selftest (case P-4): a
+repeated-digit invented id that the guard must DENY. Not a session id; removing it
+removes the guard's positive control for its UUID branch."""
+
+[[allow]]
+file = "hooks/tests/test_fieldwork_threshold_notice.py"
+kind = "UUID (session-id shape)"
+match = "aaaabbbb-1111-2222"
+reason = """Invented SESSION constant the test matrix feeds the hook as a session
+id. Patterned digits, never issued by any session; the test needs a value of the
+real shape to exercise the hook's per-session keying."""
 
 # --- 2026-08-16: exceptions to the new absolute-local-path pattern -----------
 # Three sites, all of them the pattern's own subject matter written as an

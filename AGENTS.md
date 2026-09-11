@@ -81,18 +81,19 @@ self-contained, with detail in its own `references/` loaded on demand.
 
 ## `hooks/` — the mechanical enforcement layer
 
-Collected 2026-08-14, extended on 2026-08-16, 2026-08-29 and 2026-09-07.
-**Eighteen hooks** across PreToolUse / UserPromptSubmit / SessionStart /
+Collected 2026-08-14, extended on 2026-08-16, 2026-08-29, 2026-09-07 and
+2026-09-12. **Twenty-one mounted hooks** across PreToolUse / UserPromptSubmit / SessionStart /
 PreCompact / PostCompact / SubagentStop / InstructionsLoaded — the enforcement
 layer the ops rules had been citing without ever shipping it; all fail-open,
 none machine-bound. Install steps and the per-hook table are in
 `hooks/README.md`; `settings.example.json` is the mounting template with
 `<PYTHON_EXE>` / `<CLAUDE_HOME>` to substitute, and it mounts every hook that
-ships. Two `.py` files are deliberately outside that rule and neither is a
-defect: `tests/` is a regression matrix run by hand, and
-`handoff_snapshot.py` is a shared library the compact-recovery hooks import —
-it has no event to mount at. Both exemptions are declared in
-`tools/share-manifest.toml` and checked, so neither can quietly become a hook
+ships. Some `.py` files are deliberately outside that rule and none is a
+defect: `tests/` holds regression matrices run by hand; `handoff_snapshot.py`
+and `deny_receipt.py` are shared libraries with no event to mount at; and
+`fieldwork_threshold_notice.py` was retired at the source on 2026-09-12 and
+ships unmounted, as the source runs it. Every exemption is declared in
+`tools/share-manifest.toml` and checked, so none can quietly become a hook
 nobody wired up.
 
 | File | Enforces |
@@ -104,7 +105,7 @@ nobody wired up.
 | `ops_health_nudge.py` | Thirteen maintenance thresholds at session start; silent when healthy. |
 | `delivery_gate_shadow.py` | Shadow mode only — measures what a delivery gate WOULD block before anything is blocked. |
 | `context_runway_shadow.py` | **New 2026-08-16.** Shadow: long context *and* no checkpoint written yet. The conjunction is the trigger — context alone fires in 65% of sessions at 150k, the pair in 26%. |
-| `fieldwork_threshold_notice.py` | **New 2026-08-16.** Shadow: main-session Read/Grep/Glob measured against `20-dispatch.md` §1's literal thresholds. High-volume matcher — read its cost note before mounting it. |
+| `fieldwork_threshold_notice.py` | **New 2026-08-16, retired 2026-09-12.** Shadow: main-session Read/Grep/Glob measured against `20-dispatch.md` §1's literal thresholds. Retired at the source (ruling R-3: at least 52% of 293 shadow rows were false positives); ships unmounted with its test suite, as the source runs it. |
 | `instructions_loaded_logger.py` | Observation only: which instruction files load, when. |
 | `compact_bookmark.py` | **New 2026-08-16.** PreCompact half of the compact-recovery bridge: bookmarks the pre-compact transcript (path, line count, trigger), then best-effort refreshes digest cards. |
 | `compact_pointer.py` | SessionStart("compact") half: injects a ~130-token pointer card — digest-first recall ladder, exact pre-compact region, the two recall triggers. |
@@ -116,8 +117,15 @@ nobody wired up.
 | `ps_errorpref_guard.py` | **New 2026-08-29.** `$ErrorActionPreference='Stop'` governing a native exe — wrong in both directions at once (fires on a harmless stderr line, misses a non-zero exit). Annotates, never denies. Mounted on `Write` because that is where 47 of 53 real payloads arrived, not on the tool the ticket asked for. |
 | `ps_pipeline_close_guard.py` | **New 2026-08-29.** `\| Select-Object -First N` closes the pipeline and KILLS the upstream process; the output looks truncated for its own reasons and the exit code says failure, so both halves point away from the cause. Its backtest put the surface on `PowerShell` — the opposite of its sibling's, which is why each was measured rather than copied. |
 | `branch_commit_guard.py` | **New 2026-08-29.** A `git commit` into a checkout inside `~/.claude` must land on `main` unless the command carries `[branch-ok]` or the worktree has opted in. The compensating control for two same-day incidents where the prose ritual RAN and did not gate — it was a non-gating spectator in a `&&` chain. Carries its own incident log and false-positive count. |
+| `dispatch_commit_notice.py` | **New 2026-09-12.** Three mounts, one tracker: a subagent dispatch is recorded, and a bare `git commit` by that agent with no matching process-ledger call is annotated at the next related event. Never denies. |
+| `published_record_guard.py` | **New 2026-09-12.** Denies a Write/Edit into any tree whose root carries `tools/COLLECTION-RULES.md` (this repo included) when the payload matches a private-value shape: a drive-rooted or POSIX home path, the account name read at run time, a 32+ hex run, a UUID. It gated this round's own collection work. |
+| `worktree_scope_guard.py` | **New 2026-09-12.** A session inside a git worktree is told so at start, and a command that would mutate the canonical checkout is denied unless it carries the opt-in or runs from the canonical cwd. |
+| `literature_host_guard.py` + `literature-host-policy.json` | **New 2026-09-12.** Enforces `global-claude-md/rules/literature-access.md` at the tool-call boundary: the policy table puts each scholarly host on a tier (open, API, human-paced, no proxied access), and the guard denies the last. One mechanism with the skill-side `connectors/access_policy.py` and `verify/fetchsrc.py`. |
+| `deny_receipt.py` | **New 2026-09-12. Not a hook** — the receipt helpers `rules/hook-deny-message.md` requires, so an agent reading a deny text can check sideways that a local hook wrote it. Imported by fifteen of the shipped hooks — every guard whose text reaches the agent. |
+| `tests/` (four more suites) | **New 2026-09-12.** Regression matrices for `browser_pane_scope_guard.py`, `instructions_loaded_logger.py`, `fieldwork_threshold_notice.py` and `literature_host_guard.py`, beside the 2026-08-29 one. Run by hand. |
 
-Ten of the source's twenty-nine hook-layer files are deliberately **not** here,
+Twelve of the source's forty-four hook-layer files are deliberately **not** here
+(nine hooks and three of their tests),
 and `tools/share-manifest.toml` carries a disposition for every one. Two gate an
 external-dispatch entry point this repo does not ship; `session_board_register.py`
 and `project_registry_gist.py` are each one half of a source-environment tool
@@ -130,8 +138,10 @@ the deny guard and shadow probe for the lesson-intake store — shipping the gua
 without the CLI it points at would block writes to a path this repo does not even
 have; and `unattended_run.py` mounts three times for the `[unattended-run]`
 carrier, whose Stop guard blocks on a report only a tool outside this repo can
-generate. `settings.example.json` mounts every hook that ships and nothing else,
-with the two not-a-hook exemptions named above; that is the invariant to re-check
+generate. **New 2026-09-12:** the tests for `extdispatch_entrypoint_guard.py` and
+`project_registry_gist.py` stay out with the hooks they test.
+`settings.example.json` mounts every hook that ships and nothing else, with the
+exemptions named above; that is the invariant to re-check
 whenever this table changes, and check S5 of the gate is what re-checks it.
 
 ## `compact-recovery/` — post-compact recall as an operating mode
