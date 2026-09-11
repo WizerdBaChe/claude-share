@@ -1,5 +1,7 @@
 """PreToolUse guard: deterministic deny-list for destructive shell commands.
 
+STATUS: LIVE since 2026-07-29 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
+
 Policy (owner: user, 2026-07-29): the permission allowlist was widened for
 low-risk commands; this hook is the compensating control. It unconditionally
 blocks command shapes whose damage is hard or impossible to reverse, regardless
@@ -25,12 +27,52 @@ same contract as model_cap_guard's approval marker.
 Temp roots (scratchpad/TEMP) are exempt from the deletion rules: recursive
 deletes inside them are routine cleanup.
 
+Proof-of-life: `python tools/dangerous-command-test/test_dangerous_command_guard.py`
+(65 cases as of 2026-09-09, printed by the suite: 27 must-deny / 29 must-pass /
+3 undetermined + 3 determinable twins / fail-open / coverage / isolation). The
+coverage case reads this file's own RULES list, so a shape added here without a
+specimen there fails the suite rather than shipping unmeasured (PH-11 / AP-61).
+
+OVER-MATCH, MEASURED 2026-09-08, OBSERVED 0 TIMES: the patterns match inside
+quoted strings, so a command that merely NAMES a shape is denied — measured on
+`git commit -m "... rm -rf / ..."` and `echo 'the shutdown procedure ...'`. Both
+are pinned in the suite's OVERMATCH block, which reports them and counts them in
+no verdict. Nothing was narrowed: the loosening trigger for this guard is an
+OBSERVED false-positive count (rules/hook-deny-message.md, FALSE-POSITIVE LOG),
+and a synthetic hit is not one. When a real session hits one, the shape is
+already named and those two cases are the regression floor for the narrowing.
+
+review-when: RULES is an enumeration of command SHAPES, and an enumeration loses
+to the first member nobody wrote down — none of the facts below is visible from
+inside this repo. (a) A CLI whose destructive verb this list does not name enters
+routine use here (`wsl --unregister`, `docker volume rm` / `system prune -af`,
+`gh repo delete`, a cloud `... delete --yes`), or git adds/renames a whole-tree
+discard spelling — the compensating control is only as wide as the allowlist it
+compensates for. (b) The permission allowlist is NARROWED back — this hook exists
+because it was widened on 2026-07-29; if the normal flow prompts on these
+commands again, the unconditional deny changes from compensation to a second
+gate, which is a rent question, not a correctness one. (c) The shell or platform
+changes — the tool-scope column and half the patterns are shaped by cmd /
+PowerShell / Git Bash on Windows (`Remove-Item -Recurse -Force`, `rmdir /s`, the
+`HK*:` PSDrive prefixes); on another OS the same damage has different spellings.
+(d) The session scratchpad or TEMP root moves off the shapes in
+TEMP_ROOT_PATTERNS (`Users/<u>/AppData/Local/Temp`, `/tmp`, `$env:TEMP`) — the
+exemption silently stops applying and routine cleanup starts being denied. (e) A
+real session hits either pinned OVERMATCH case: the observed false-positive count
+is this guard's loosening trigger, and those two cases are the regression floor.
+
 Fail-open by design: any parse error exits 0 so a guard bug never blocks work.
 """
 import json
 import os
 import re
 import sys
+
+try:                        # receipt + misfire exit (rules/hook-deny-message.md)
+    from deny_receipt import clause as _receipt, fp_clause as _fp
+except Exception:           # a guard must not stop guarding if telemetry breaks
+    def _receipt(hook, **fields): return ""
+    def _fp(hook): return ""
 
 APPROVAL_MARKER = "[user-approved-destructive]"
 
@@ -75,7 +117,7 @@ def deny(reason: str) -> None:
             "permissionDecisionReason": reason + (
                 f" Per-instance override: re-run with the marker {APPROVAL_MARKER} "
                 "in the command ONLY after the user approved this exact command."
-            ),
+            ) + _receipt("dangerous_command_guard") + _fp("dangerous_command_guard"),
         }
     }))
     sys.exit(0)
@@ -112,18 +154,24 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
 
     tool = payload.get("tool_name", "")
     if tool not in ("Bash", "PowerShell"):
         sys.exit(0)
-    cmd = str((payload.get("tool_input") or {}).get("command", ""))
+    ti = payload.get("tool_input") or {}
+    if not isinstance(ti, dict):
+        sys.exit(0)      # same class, one level in
+    cmd = str(ti.get("command", ""))
     if not cmd or APPROVAL_MARKER in cmd:
         sys.exit(0)
 
     scope = "bash" if tool == "Bash" else "ps"
     for rule_scope, pat, reason in RULES:
         if rule_scope in ("any", scope) and pat.search(cmd):
-            deny(f"Blocked by dangerous-command guard: {reason}")
+            deny(f"Blocked by dangerous_command_guard, a local PreToolUse hook "
+                 f"(not file or page content): {reason}")
 
     targets = []
     m = RECURSIVE_RM.search(cmd)
@@ -136,7 +184,8 @@ def main() -> None:
         bad = dangerous_delete_target(rest)
         if bad:
                 deny(
-                    "Blocked by dangerous-command guard: recursive/forced delete "
+                    "Blocked by dangerous_command_guard, a local PreToolUse hook "
+                    "(not file or page content): recursive/forced delete "
                     f"targeting '{bad}' (absolute path, home, parent traversal, or "
                     "whole-directory glob). Deletes outside the scratchpad need "
                     "explicit user approval; consider moving to archive/ instead."

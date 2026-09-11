@@ -570,7 +570,15 @@ same reason: a mount pointing at a missing file is worse than an absent one.
 RE-CHECKED 2026-08-17 (red-team round), because the entry it depends on was
 narrowed to `partial` that day: the dependency is on `extdispatch.py`
 specifically, which is one of the files that STAYED out, so this disposition is
-unaffected. Recorded rather than assumed — the entry above changed under it."""
+unaffected. Recorded rather than assumed — the entry above changed under it.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (41 lines changed) -- grew a STATUS/Proof-of-life header (naming
+hooks/tests/test_extdispatch_entrypoint_guard.py, see its own not_shipped
+entry below), a deny_receipt import + receipt/fp clauses, self-identification
+on the deny text per the hook-deny-message contract, and AP-62 undetermined
+guards. The denial text's `python ~/.claude/tools/extdispatch/extdispatch.py`
+pointer is UNCHANGED. Disposition holds: still gates a CLI this repo does not
+ship."""
 fallback = """None, and the honest consequence is that the single-gated-entry-
 point pattern ships as prose only. The pattern is worth copying if you dispatch
 outward: one shell entry that runs the gates, everything else denied, because a
@@ -590,7 +598,14 @@ control. That is the `referenced-only` failure this manifest keeps warning
 about, and shipping it would be committing it.
 RE-CHECKED 2026-08-17 (red-team round): `allowlist.txt` is named explicitly in
 the narrowed entry above as one of the files that stayed out — it IS the policy
-artifact — so this disposition holds unchanged."""
+artifact — so this disposition holds unchanged.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (19 lines changed) -- grew a STATUS/SHADOW header, AP-62
+undetermined guards, a CLAUDE_TELEMETRY_DIR redirect, and a new `session_id`
+field on each logged row (2026-09-11, R-3: needed to group rows by task for an
+honest false-positive rate). `ALLOWLIST = ... / "extdispatch" / "allowlist.txt"`
+is UNCHANGED. Disposition holds: still a shadow probe for a pipeline this repo
+does not ship."""
 fallback = """None. The rule it measures (`20-dispatch.md` §4a) ships; the
 measurement does not. If you build the layer, `hooks/delivery_gate_shadow.py`
 and `hooks/context_runway_shadow.py` both ship and are the house pattern for
@@ -857,6 +872,8 @@ loop, you just start with an empty directory."""
 path = "hooks/dangerous_command_guard.py"
 source = "~/.claude/hooks/dangerous_command_guard.py"
 status = "verbatim"
+# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
+# byte-identical, status unchanged.
 
 [[collected]]
 path = "hooks/ops_health_nudge.py"
@@ -867,6 +884,7 @@ edits = [
   "2026-09-02: source grew check 17 (session-transcript mirror heartbeat, D-052 item 5). Its default MIRROR_MARKER was an absolute path on a non-system drive (a private mirror root) -> dropped to an env-var-only default (empty string), which the existing archive-root gate already treats as absence-is-normal (same as CC_BIN); the scheduled-task name dropped from the docstring and both live msgs.add() strings -- the capability description ('check your mirror task's scheduler entry') stays; the same private absolute mirror-logs path (non-system drive) in the FAIL-state message dropped for 'your mirror log directory'. The tool pointer tools/claude-session-transcript-mirror.ps1 and ruling id D-033/D-052 are kept. The docstring's review-when also cited a rule-registry.md key ('session mirror heartbeat') -> 'your own rule registry'.",
   "2026-09-07 (this round): source RETIRED the LESSON_CAP unfolded-entry counter entirely (ops/lessons.md is now a generated index of ops/lessons/, per tools/closeout-intake) and rewrote check 1 to subprocess `tools/closeout-intake/intake.py report --nudge`. That tool is excluded-by-decision this round (see hooks/intake_guard.py's not_shipped entry) and ops/lessons/ itself does not ship either (only the generated ops/lessons.md index does, per this repo's directory exclusions) -- so check 1's subprocess call always raises FileNotFoundError in this share, caught by the existing `except Exception: pass`. This is NOT a new failure mode: the check's own comment already documents 'a missing tool ... prints nothing' as an anticipated, legitimate fail-open branch (same treatment check 16 already gives a missing ops/cc-reconciled.json), so no functional edit was made -- a one-line SHARE EDITION comment was added immediately above the try block naming why this check is a permanent no-op in this repo, so a reader does not mistake silence for a bug. SIZE_CAP (22K->26K), CLAUDE_MD_CAP (19,968->23,040) and DICT_CAP (28K->42K) config-value bumps carried verbatim (pure numbers, no privacy content). Check 15's remedy_kind branch-selection logic (2026-09-06) and the graph-rot finding text carried verbatim (repo-relative tools/graph-snapshot and references/_moc pointers kept per the established precedent).",
   "2026-09-07 NEW FINDING (pre-existing gap from an earlier round, corrected here): the docstring/comment for check 1 named an 8-hex-char spawn_task ticket id (pointing into tools/session-board/tickets.json -- a tree this repo already excludes, see hooks/session_board_register.py's not_shipped entry) -> dropped, leaving 'the stale-path attribution ticket'. Also NEW FINDING: check 15's two msgs.add() strings named a second scheduled task verbatim, unscrubbed since at least the 2026-08-29 collection (same scrub class already applied to the mirror task's name in check 17, just never applied to this one) -> both occurrences replaced with 'your graph-watchdog task's scheduler entry', matching the wording already used for the mirror task. Re-verified: no scheduled-task name or ticket id remains anywhere in the file (grep-checked post-edit) -- and note for the manifest maintainer: this entry itself now deliberately does NOT quote either removed literal (the prior round's entry for check 17 quoted the mirror task's name in this very edits list, which republishes in the manifest's own prose exactly what the code-level edit removed; not corrected here since it is outside this file's scope, but flagged in this worker's final report).",
+  "2026-09-12 (lane W3, align to 7c9867b): source grew a NEW carrier task name, class scheduled-task-name, at check 18 (copy-census) -- 3 occurrences (one comment, two msgs.add() strings) -> same treatment as check 17's mirror task, replaced with 'your copy-census scheduled task' / 'your copy-census task's scheduler entry'. Check 15/16's graph-watchdog task name grew a THIRD occurrence this round (a new review-when comment beside WATCHDOG_RUN_LIMIT_MIN) beyond the two already-declared msgs.add() occurrences -> same class, same replacement wording ('your graph-watchdog task's scheduler entry' / \"...task's ExecutionTimeLimit changes\" for the review-when form). Check 13's widened comment (2026-09-10) named an artifact filed under outputs/ (class: a named artifact inside a non-shipping tree) -> capability description ('a deferred-extraction record filed under outputs/'), no filename kept. The check-11 ops-layer gate and the check-1 closeout-intake SHARE EDITION comment (both declared in the first entry above) were re-applied against the freshly re-copied source unchanged -- their anchors still exist verbatim upstream. Verified via diff against fresh source: only the declared+new edits differ; `python hooks/ops_health_nudge.py` smoke-tested directly (this hook's HOME resolves via `os.path.expanduser('~/.claude')`, not CLAUDE_CONFIG_DIR, so the run read real machine state; it is read-only -- no writes anywhere in the hook -- so nothing outside this worktree was touched), exit 0, sensible output. No in-repo test suite ships for this hook -- tools/ops-health-test/ stays excluded per the 2026-08-16 ruling.",
 ]
 
 # --- PART 1: settings template (procedure B, dirty source) ------------------
@@ -875,6 +893,9 @@ edits = [
 path = "hooks/instructions_loaded_logger.py"
 source = "~/.claude/hooks/instructions_loaded_logger.py"
 status = "verbatim"
+# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
+# byte-identical, status unchanged. hooks/tests/test_instructions_loaded_logger.py
+# (new this round) ran clean: ALL TESTS PASSED.
 
 [[collected]]
 path = "hooks/browser-pane-blocklist.json"
@@ -901,6 +922,7 @@ status = "edited"
 edits = [
   "docstring, 2 places: a local session id ('session 189d0a30') -> 'one session'. Same reason as model_cap_guard.py and delivery_gate_shadow.py — the id points at a transcript no reader can open, so it carries no evidence outward and only names a private artifact. The measurement it anchors (a 256KB tail with no usage record; a trailing all-zero usage block) is kept in full, because that is the part a reader can act on.",
   "2026-09-07 refresh: source graduated the 300k band to a visible notice (D3, 2026-09-05) and added a CANARY PAIR at the 150k band, RE_ARM_STEP re-notices past the visible band, and a new import of handoff_snapshot (this round's new file, see its own entry) replacing the old checkpoint_written()-only freshness check. Scanned the new content for scrub targets and found none beyond the already-declared 2 session-id occurrences (unchanged location, re-applied identically): references/compaction-pipeline-design.md and long-run-probe-design.md are repo-relative citations to files this repo does not ship, kept per the established tools//references/ precedent (not scrub targets); the new tools/process-ledger/ledger.py citation inside _plant_canary's injected text is kept the same way. The hook now has a runtime dependency on handoff_snapshot.py (imported unconditionally once a band crosses, wrapped in try/except so a missing module fails toward 'always fresh, never nag' rather than crashing) — collected alongside this refresh for exactly that reason; see hooks/handoff_snapshot.py's own entry.",
+  "2026-09-12 (lane W3, align to 7c9867b): found 2 NEW session-id occurrences beyond the previously-declared pair, both in the 2026-09-11 user-ruling-A paragraph about the keep-text plant: a local session id in parens after 'user ruling A' -> 'one session'; a second reference to the same session two sentences later ('T57 refused this plant') -> 'That session'. Same class and reason as the already-declared edits (a transcript no reader can open); the ruling id and the measured behaviour (two subagents refused the plant) are kept verbatim. Verified via diff against fresh source: only the 4 session-id edits (2 declared + 2 new) differ.",
 ]
 
 [[collected]]
@@ -909,6 +931,7 @@ source = "~/.claude/hooks/fieldwork_threshold_notice.py"
 status = "edited"
 edits = [
   "docstring: '(shadow row 2026-08-15, session 7c31fa3b)' -> '(shadow row 2026-08-15)' — same class as above; the date is the part that locates the evidence for anyone who has the log, the id is not.",
+  "2026-09-12 (lane W3, align to 7c9867b) -- D4, report not delete: source commit bd834ea (\"rule on the six shadow hooks (R-3) -- retire fieldwork, register the unregistered three\") REMOVED this hook's entire PreToolUse Read|Grep|Glob mount from settings.json; confirmed by reading the full current source settings.json end to end -- that matcher slot is now used by a different lane's literature_host_guard.py with an unrelated matcher shape, and this hook has no mount anywhere in the source config. New docstring content (STATUS: RETIRED line, the AP-62 undetermined guards, the widened FALSE-POSITIVE LOG) scanned and clean -- no new scrub targets; ops/rule-registry.md's rollback pointer ('ops/rule-registry.md \"dispatch\"') kept per the tools//references/ precedent already applied elsewhere in this file. Disposition: the FILE and its telemetry shape still SHIP (Procedure B continues normally, the source itself kept both), but the mount is REMOVED from hooks/settings.example.json and hooks/README.md marks it RETIRED -- reflecting the source's own mount state rather than diverging from it. The session-id edit above was re-applied against the fresh copy unchanged (same anchor). SEPARATE FINDING, same round: hooks/tests/test_fieldwork_threshold_notice.py (collected new this round, see its own entry below) carried the SAME session id in one of its QUIET-3 regression-case labels, undetected when that file was first marked verbatim -- corrected there; noted here because it is the same private value this entry already treats as a scrub target.",
 ]
 
 [[collected]]
@@ -918,6 +941,7 @@ status = "edited"
 edits = [
   "docstring: replaced a local session id with 'a local transcript' — the id points at a transcript no reader can open, so it carried no evidence value outward",
   "2026-09-07 refresh: source closed an inheritance-bypass gap (2026-09-05 user ruling): an Agent call omitting `model` now requires either an explicit `model` or a `subagent_type` naming a LOCAL agents/*.md definition whose frontmatter pins a capped model (read via the new local_agent_model() helper, path-resolved off __file__/../agents — portable, no machine-bound value, and directly exercisable against this repo's own shipped agents/*.md files). Docstring session id re-applied per the existing edit above ('session b66f6a9b' -> 'in a local transcript', same wording already used in the sentence). New docstring paragraph cites reports/2026-09-05-model-effort-inventory.md — kept verbatim as a repo-relative filename (reports/ does not ship in this repo, but the path itself names no account, host or session and is not a scrub target under COLLECTION-RULES rule 2; same treatment as ui_verify_guard.py's kept ops/references/browser-pane-pixel-route.md citation).",
+  "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edit above already covers. Re-applied the same session-id edit unchanged. Verified via diff against fresh source: only that one edit differs.",
 ]
 
 [[collected]]
@@ -926,12 +950,15 @@ source = "~/.claude/hooks/delivery_gate_shadow.py"
 status = "edited"
 edits = [
   "docstring: 'session 8ee03a1f emitted 19 events' -> 'one session emitted 19 events' — same reason as model_cap_guard",
+  "2026-09-12 (lane W3, align to 7c9867b): source grew a large VOCABULARY REBUILD (2026-09-08) docstring section (measured replay statistics: 451 transcripts, 85.1%/60.3% would_block under portable/local vocabularies, 73 rescued, 140 weak-evidence, 38 unverified), a VERIFY_LOCAL regex, a WEAK_SHELL regex + weak_evidence tracking, a .NET clause on VERIFY_SHELL, and CLAUDE_TELEMETRY_DIR redirect support. Read in full and scanned for scrub targets: none found -- the new content is measured statistics and regex vocabulary, no session ids or absolute paths. Re-applied the declared session-id edit unchanged. Verified via diff against fresh source: only that one edit differs. No in-repo test ships for this hook (its own Proof-of-life line cites the excluded tools/e2-gate-test/test_shadow_hook.py); syntax-checked via ast.parse.",
 ]
 
 [[collected]]
 path = "hooks/ui_verify_guard.py"
 source = "~/.claude/hooks/ui_verify_guard.py"
 status = "verbatim"
+# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
+# byte-identical, status unchanged.
 # WAS 'edited' until 2026-08-16 (second round): two pointers to a private
 # asset-library entry were dropped from the docstring and denial text. The
 # source rewrote this hook into a result-aware router the same day and removed
@@ -953,21 +980,14 @@ status = "verbatim"
 # difference that no longer exists — the "declared edited but byte-identical"
 # finding is the one that catches a dropped edit, and it must stay meaningful.
 edits = []
+# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
+# byte-identical, status unchanged. hooks/tests/test_browser_pane_scope_guard.py
+# ran clean: ALL TESTS PASSED.
 
 [[collected]]
 path = "hooks/settings.example.json"
 source = "~/.claude/settings.json"
 status = "template"
-source_dirty_ack = """2026-09-07: source `git -C ~/.claude diff --numstat settings.json`
-shows `332	328	settings.json` at HEAD 27196ab (baseline d06708c) -- a large
-in-flight rewrite of the hooks block (new PostCompact/compact_loss_record.py
-mount, three new unattended_run.py mounts across PreToolUse/UserPromptSubmit/
-Stop, new PreToolUse mounts for appdata_view_guard.py and intake_guard.py, a
-new UserPromptSubmit mount for intake_match_shadow.py, a new env key
-CLAUDE_CODE_AUTO_COMPACT_WINDOW), uncommitted at the source. Collected as the
-working copy on disk per the owner's carried-forward 2026-09-02 ruling (align
-the share to what is on disk now). review-when: re-collect and drop this ack
-once it lands in a source commit."""
 edits = [
   "every interpreter path -> <PYTHON_EXE>; every config-directory path -> <CLAUDE_HOME>",
   "removed the SessionEnd memory-pipeline hook: that script is not part of this share, and a mount pointing at a missing file is worse than an absent mount (the script ships as compact-recovery/preserve.py; the mount stays out because it would point outside hooks/ and break the template invariant; the optional block lives in compact-recovery/README.md)",
@@ -977,6 +997,7 @@ edits = [
   "2026-09-07: did NOT mount intake_guard.py, intake_match_shadow.py, or unattended_run.py's three registrations (PreToolUse Write|Edit|NotebookEdit \"scope\", UserPromptSubmit \"kickoff\", Stop \"stop\") -- all four are excluded-by-decision this round (see their not_shipped entries below). Added a _README omissions bullet for each of the two exclusion groups, naming the tools/ half each depends on and why no fallback mount exists (intake_guard.py's own deny message points at a CLI this repo does not ship; unattended_run.py's Stop guard's block condition requires a report file only tools/process-ledger/report.py can generate).",
   "the two external-dispatch hook mounts (PreToolUse Bash|PowerShell: extdispatch_entrypoint_guard.py; PreToolUse Agent|Workflow: extdispatch_route_shadow.py) remain omitted, per the existing _README bullet -- unchanged this round, outside this worker's file list, re-verified still absent from this template.",
   "2026-09-07 self-caught gap, fixed before delivery: the _README's mount-invariant paragraph ('Every hook in hooks/ IS mounted here ... The one .py under hooks/ that is deliberately NOT mounted is hooks/tests/test_transcript_read_guard.py') was stale the moment handoff_snapshot.py joined hooks/ this round -- it is also correctly unmounted (shared library, no event to mount at), making TWO deliberately-unmounted .py files, not one. Rewrote the paragraph to name both and say why each is not a defect. Verified by direct count: `find hooks -name '*.py'` = 20 files, mounted-hook regex extraction against the file = 18, difference = exactly {tests/test_transcript_read_guard.py, handoff_snapshot.py}. Re-validated `python -c \"import json; json.load(open('hooks/settings.example.json'))\"` OK after the edit.",
+  "2026-09-12 (lane W3, align to 7c9867b): source `git status --porcelain settings.json` is now clean (the 2026-09-07 dirty delta landed in a commit) -- source_dirty_ack dropped per its own review-when. Re-derived the whole hooks block against the fresh source, reading it end to end (374 lines): added dispatch_commit_notice.py to the Bash|PowerShell and Agent|Workflow PreToolUse matchers and to SubagentStop (3 mounts, matching the source's own 3 mount points for this new D3 hook, all timeout 5); added published_record_guard.py to a new PreToolUse Write|Edit matcher (timeout 5, 1 mount, matching source); added worktree_scope_guard.py to a new PreToolUse Write|Edit|NotebookEdit|Bash|PowerShell matcher (timeout 6) and to SessionStart's \"\" matcher (timeout 8) -- 2 mounts, matching source exactly. REMOVED the PreToolUse Read|Grep|Glob matcher (fieldwork_threshold_notice.py's mount) -- source commit bd834ea retired this hook and dropped the mount entirely (see hooks/fieldwork_threshold_notice.py's own entry, D4 disposition: file+telemetry kept, mount not). Did NOT add literature_host_guard.py's mount (its Bash|PowerShell|WebFetch|mcp(...)navigate matcher in the source) -- that hook and its data file are lane W5's, not this worker's; main resolves that merge. Re-verified the two other omitted mounts (extdispatch_entrypoint_guard.py, extdispatch_route_shadow.py) and the four excluded-by-decision groups (intake_guard.py+intake_match_shadow.py, unattended_run.py's three mounts, session_board_register.py, xi_card_guard.py, secret_file_guard.py, project_registry_gist.py) are still absent from the source-derived template, unchanged this round. Added a new _README bullet naming fieldwork_threshold_notice.py's retirement and rewrote the mount-invariant paragraph: 20 unique hook files are mounted (recount after this round's additions/removal), 3 top-level hooks/*.py files are deliberately not mounted (deny_receipt.py + handoff_snapshot.py, shared libraries; fieldwork_threshold_notice.py, retired), and the 4 files under hooks/tests/ (one more than before -- test_browser_pane_scope_guard.py, test_fieldwork_threshold_notice.py, test_instructions_loaded_logger.py all new this round) are named as regression matrices, not hooks. Verified: `python -c \"import json; json.load(open('hooks/settings.example.json'))\"` OK; printed the full hooks-block structure and cross-checked every matcher/hook pair against the fresh source by hand.",
 ]
 
 # --- PART 2: new files this round, shipped -----------------------------------
@@ -998,6 +1019,7 @@ edits = [
   "docstring: dropped a pointer to memory/session-transcript-archive.md (a file under the never-collect memory/ tree); the standing ruling it cites — the jsonl format is unstable, treat it as opaque — is restated inline",
   "docstring review-when: the source's rule-registry entry name -> compact-recovery/README (platform-contract notes), which carries the same re-check recipe; the registry entry postdates the shipped claude-ops snapshot",
   "2026-09-07: re-collected against a substantially grown source (D1, 2026-09-05: new SECOND JOB — bounded auto-compact deny via handoff_snapshot.is_fresh, gated behind DENY_ENABLED=False, itself disabled at the source pending a platform re-test). New docstring content scanned for scrub targets and found 3 local session ids in the PLATFORM CONTROLS comment ('session d0127035' / 'session 2ec80b41' / 'session 3d1d5e42') -> 'one session' / 'another session' / 'one session', same reason and same wording class as the existing edits above — each points at a transcript no reader can open. tools/compact-loss-audit/hook_controls.py and references/compaction-pipeline-design.md pointers kept verbatim (repo-relative paths are not scrub targets even though this repo does not ship tools/ or references/ — same precedent as hooks/ops_health_nudge.py's tools/cc-delta/cc_delta.py citation). The new code (deny_auto_once, handoff_snapshot/context_runway_shadow imports) is portable (CLAUDE_CONFIG_DIR/Path.home() only) and ships as-is; DENY_ENABLED=False so it is inert on both the source and this share, identically.",
+  "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edits already cover. Re-applied all edits unchanged (the 'unstable, treat it as opaque' rewording, the compact-recovery/README review-when pointer, and the 3 session-id replacements). Verified via diff against fresh source: only those edits differ; ast.parse confirms valid syntax.",
 ]
 
 [[collected]]
@@ -1009,6 +1031,7 @@ edits = [
   "docstring review-when: rule-registry entry name -> compact-recovery/README, same reason as compact_bookmark.py",
   "2026-09-02 refresh: source grew a SECOND JOB (intake-gate re-arm, ops/lessons.md L-039) — a docstring paragraph plus an [intake re-arm] block in the printed card. Scanned and clean: cites ops/lessons.md L-039 (lesson id, not a scrub target), a project name (SSLD Phase 5, not a scrub target) and claude-ops/ops/40-maintenance.md §2a (ships in this repo). Carried in verbatim.",
   "2026-09-07 refresh: source grew a THIRD addition — the printed card now includes a [handoff snapshot] section (imports handoff_snapshot, new this round — see its own [[collected]] entry) and a [process ledger] section reading <session>.ledger.jsonl beside the transcript and citing `python tools/process-ledger/ledger.py add ...`. Scanned for scrub targets and found none: no session ids, no absolute paths; the tools/process-ledger/ pointer is kept verbatim as a repo-relative, non-shipping tool reference (same precedent as compact_bookmark.py's tools/compact-loss-audit pointer and ops_health_nudge.py's tools/cc-delta pointer) — this repo does not ship tools/process-ledger/ (see hooks/unattended_run.py's not_shipped entry, same round), so the [process ledger] section will read 'none for this session' on every adopter install unless they write their own ledger.jsonl beside the transcript; degrades gracefully (both new sections are wrapped in try/except and print an explicit 'none' line rather than failing silently).",
+  "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edits already cover. Re-applied both edits unchanged. Verified via diff against fresh source: only those edits differ; ast.parse confirms valid syntax.",
 ]
 # 2026-09-02 refresh: source grew a SECOND JOB (intake-gate re-arm, ops/lessons.md
 # L-039) since the prior collection — a docstring paragraph plus an [intake
@@ -1026,6 +1049,7 @@ edits = [
   "CONFIG CORPUS_ROOTS: removed a second-drive mirror root (an absolute path on a non-system drive — the leak class sharelib.py learned on 2026-08-16) -> a comment inviting the adopter's own roots; the two CLAUDE_DIR-relative roots ship as-is",
   "docstring: dropped the scheduled-task name that feeds that mirror (a private-asset pointer; the capability description stays) and re-pointed the INV-8 comparison at compact-recovery/preserve.py, where that file lives in this repo",
   "docstring: rule-registry entry name -> 'your own rule registry' — the entry postdates the shipped claude-ops snapshot. NARROWED 2026-08-29: this edit used to cover the deny message too, and the 2026-08-29 source revision rewrote that message into a constraint-only form (its new DENY-MESSAGE CONTRACT forbids exactly the read-elsewhere pointer the old edit was rewriting). The anchor is gone at the source, so the edit is docstring-only; recorded rather than dropped, because a vanished anchor is a signal to re-read, and here the re-read says the source fixed it upstream.",
+  "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edits already cover. Re-applied both edits unchanged (CORPUS_ROOTS' mirror-root drop and the docstring's scheduled-task-name/rule-registry rewording). Test run: `python hooks/tests/test_transcript_read_guard.py` -> 26 cases (4 unclassifiable-input), 0 failures, 0 skipped. Verified via diff against fresh source: only the declared edits differ; ast.parse confirms valid syntax.",
 ]
 # 2026-09-02 refresh: the source reworded both anchors the two path/task edits
 # above land on (the docstring now names the scheduled task that moves the
@@ -3034,7 +3058,13 @@ writes a ticket row into `tools/session-board/tickets.json` on PostToolUse of
 `spawn_task`. The board itself is under the `tools/` exclusion above and is not
 a rules asset, so shipping the writer alone would mount a hook that appends to a
 file no adopter has. Excluded as a pair with its store, not as a judgement about
-the hook's portability (it is portable)."""
+the hook's portability (it is portable).
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (25 lines changed) -- grew a STATUS/Proof-of-life header (naming
+the excluded tools/session-board-test/), an OBSERVED ONCE UNEXPLAINED note
+about a single unreproduced 2026-09-09 test failure (ruling H-3: not patched
+on a guess), and a CLAUDE_TELEMETRY_DIR redirect. `TICKETS_PATH` still
+defaults to `tools/session-board/tickets.json`. Disposition holds unchanged."""
 fallback = """§7a's three steps done by hand, which is what the source did
 before 2026-08-21 and what the section still describes step by step — a
 distinctive opening sentence, the `deliverables` field, and the cwd check. The
@@ -3048,7 +3078,14 @@ reason = """NEW 2026-08-29. Mounted by the source's settings.json and therefore
 named in `hooks/settings.example.json`'s omission list. It gates reads of one
 operator's own secret-bearing files; the policy IS the file list, and a file
 list for someone else's machine is not a rule. No shipped file cites it as a
-mechanism, so nothing here degrades."""
+mechanism, so nothing here degrades.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (37 lines changed) -- grew a STATUS/Proof-of-life header (naming
+the excluded tools/secret-guard-test/), a deny_receipt import + receipt/fp
+clauses on both deny sites, self-identification per the hook-deny-message
+contract, and an AP-62 undetermined guard. The CONFIG block (the personal
+credential-filename regex, SECRET_TOKEN) is UNCHANGED. Disposition holds: a
+file list for one operator's machine is still not a portable rule."""
 fallback = """None needed — nothing in this share depends on it. If you want the
 shape, `hooks/dangerous_command_guard.py` is the same deny-list pattern with a
 portable subject."""
@@ -3060,7 +3097,16 @@ reason = """NEW 2026-08-29. Mounted by the source's settings.json (SessionStart)
 and named in the template's omission list. It injects a compressed digest of the
 source's own project registry — `references/PROJECTS.md`'s live rows, which this
 repo ships only as a header and one example row. The hook without the inventory
-prints an empty card."""
+prints an empty card.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (92 lines changed) -- grew a STATUS/Proof-of-life header (naming
+hooks/tests/test_project_registry_gist.py, see its own not_shipped entry
+below) and a real defect fix: the parser used to accept ANY five-cell table
+row as a project line, so a renamed-column table silently shipped a foreign
+header as a gist line; it is now anchored on the DECLARED header and reports
+column drift instead of injecting garbage (2026-09-09). `REG = ... /
+"references" / "PROJECTS.md"` is UNCHANGED and still reads the full registry
+this repo does not ship. Disposition holds unchanged."""
 fallback = """`claude-ops/references/PROJECTS.md` (the format) plus the
 prior-art rule in `global-claude-md/CLAUDE.md` that the injected card serves.
 Fill the registry first; the injection is an optimisation over reading it."""
@@ -3187,7 +3233,15 @@ never-collect list. The hook's own path resolution is portable
 (`CLAUDE_CONFIG_DIR`/`Path.home()`, no hardcoded machine value), but shipping
 it alone would mount a hook whose registry, parser and output store the
 adopter does not have — the shadow-probe-for-an-absent-pipeline shape the
-`tools/` entry already names for the other cross-index files."""
+`tools/` entry already names for the other cross-index files.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source -- grew a Proof-of-life line (naming
+hooks/tests/test_xi_card_guard.py, moved this round from hooks/ to hooks/tests/
+at the source -- see that entry's path fix below), a TEMPLATE_RX exclusion so
+skill-asset templates (paper-distill/paper-story *-template.md) are skipped
+rather than counted as would-deny, and a CLAUDE_TELEMETRY_DIR redirect.
+`REGISTRY_PATH = ... / "tools" / "cross-index" / "registry.json"` is
+UNCHANGED. Disposition holds unchanged."""
 fallback = """None; the hook is SHADOW (never warns or denies) and nothing
 downstream reads its telemetry today. If the cross-index tool itself ever
 ships, this file is a portable PostToolUse pattern to revisit: fail-open on
@@ -3196,13 +3250,20 @@ matcher, and a `_LOG`/`_REGISTRY` env override so its own test suite never
 touches the real files."""
 
 [[not_shipped]]
-path = "hooks/test_xi_card_guard.py"
+path = "hooks/tests/test_xi_card_guard.py"
 disposition = "excluded-by-decision"
 reason = """NEW 2026-09-02, paired with the entry above. A standalone
 subprocess-driven test suite for `xi_card_guard.py` (no unittest dependency,
 writes only to a temp dir it removes). Excluded for the same reason as the
 hook it tests — a test suite for a hook that does not ship would be dead
-weight, not a capability."""
+weight, not a capability.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): path corrected --
+the source moved this file from hooks/test_xi_card_guard.py to
+hooks/tests/test_xi_card_guard.py this round (alongside the same move for
+hooks/tests/test_transcript_read_guard.py's siblings), confirmed by its
+absence at the old path and presence at the new one. Content diffed: grew a
+TEMPLATE_RX regression case pairing the hook's new skip-template guard.
+Disposition holds unchanged."""
 fallback = """None needed; see the `hooks/xi_card_guard.py` entry."""
 
 [[not_shipped]]
@@ -3256,6 +3317,8 @@ diagrams (diagram-authoring)')."""
 path = "hooks/shell_transport_guard.py"
 source = "~/.claude/hooks/shell_transport_guard.py"
 status = "verbatim"
+# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
+# byte-identical, status unchanged.
 
 [[collected]]
 path = "hooks/ps_errorpref_guard.py"
@@ -3265,6 +3328,7 @@ edits = [
   "docstring, backtest section: the corpus's second-drive mirror root -> 'a local session-archive mirror'. The corpus SIZE (3,405 deduplicated calls, 56 days) is the checkable part and stays; the drive it sat on is a machine fact.",
   "docstring, incident line: the absolute path of the .ps1 that voided the run -> the project-relative tail `_bench-claude-arms/tools/run_arm.ps1`. Rule 2: the tail identifies the file for anyone who has the repo; only the machine prefix goes.",
   "compose(), the RUNTIME annotation: the same absolute path plus its line numbers removed from the fix advice. This one is a deny-message-class edit — the text is emitted into a live session, so a pointer no reader can open is worse there than in a docstring. The fix SHAPE (save the preference, Continue around the native call, check $LASTEXITCODE, restore) is what the sentence is for and is kept whole.",
+  "2026-09-12 (lane W3, align to 7c9867b): source grew a STATUS/Proof-of-life header (naming the excluded tools/ps-errorpref-test/ suite -- no in-repo test ships for this hook), a deny_receipt notice-receipt import, a CLAUDE_TELEMETRY_DIR redirect, and self-identification on notice()'s transport per the hook-deny-message contract; also DROPPED the source's own 'Detail: ops/lessons.md L-024 tail and L-011 hit 3' read-elsewhere pointer from compose() (an upstream fix, not this worker's edit). All three declared edits above re-applied unchanged against the fresh copy. Verified via diff against fresh source: only the 3 declared edits differ; ast.parse confirms valid syntax.",
 ]
 
 [[collected]]
@@ -3273,6 +3337,7 @@ source = "~/.claude/hooks/ps_pipeline_close_guard.py"
 status = "edited"
 edits = [
   "docstring, WHY A HOOK: the absolute path of the retrospective that raised ruling #8 -> its project-relative tail. The ruling number and the file name stay — they are how the claim stays checkable by the person who has the source.",
+  "2026-09-12 (lane W3, align to 7c9867b): source grew the same class of additions as ps_errorpref_guard.py this round (STATUS/Proof-of-life header naming the excluded tools/ps-pipeline-close-test/ suite, deny_receipt import, CLAUDE_TELEMETRY_DIR redirect, notice() self-identification, and an upstream drop of a 'Detail: ops/lessons.md L-027' pointer from compose()). The declared edit above re-applied unchanged. Verified via diff against fresh source: only that edit differs; ast.parse confirms valid syntax.",
 ]
 
 [[collected]]
@@ -3282,12 +3347,16 @@ status = "edited"
 edits = [
   "INCIDENT LOG and FALSE-POSITIVE LOG, 4 places: session ids -> 'a local session' / 'the peer session' / 'a peer session'. Same declared class as claude-ops/ops/lessons.md's Evidence lines — the id points at a transcript no reader can open. Every commit sha, date, branch name and recovery step stays; those are the record.",
   "FP-2: an absolute home path quoted inside the false-positive's own example command -> `~/.claude`. The example is about a quote-blind segment split, which the tilde form demonstrates just as well.",
+  "2026-09-12 (lane W3, align to 7c9867b): source grew a STATUS/Proof-of-life header (naming tools/branch-guard-test/test_branch_commit_guard.py -- excluded, no in-repo test ships for this hook), a deny_receipt import + receipt/fp clauses on the deny message, self-identification on the deny text per the hook-deny-message contract, and a CLAUDE_TELEMETRY_DIR redirect. All 4 declared session-id/path edits above re-applied unchanged against the fresh copy (same anchors, same wording: 3x a local session -> 'a local session'/'that local session', 1x a peer session -> 'a peer session', 1x the FP-2 absolute path -> '~/.claude'). Verified via diff against fresh source: only the declared edits differ; ast.parse confirms valid syntax.",
 ]
 
 [[collected]]
 path = "hooks/tests/test_transcript_read_guard.py"
 source = "~/.claude/hooks/tests/test_transcript_read_guard.py"
 status = "verbatim"
+# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
+# byte-identical, status unchanged. Ran clean (see the paired hook's entry for
+# the 26-case result).
 
 # --- (b) archdiag: the audit-drawing library -------------------------------
 # Collected 2026-08-29 into `architecture-diagramming/archdiag/`, which is why
@@ -3986,17 +4055,13 @@ round trip."""
 path = "hooks/compact_loss_record.py"
 source = "~/.claude/hooks/compact_loss_record.py"
 status = "verbatim"
-source_dirty_ack = """2026-09-07: source `git -C ~/.claude diff --numstat
-hooks/compact_loss_record.py` shows `10	1	hooks/compact_loss_record.py` at
-HEAD 27196ab (last committed at ac8b2de) -- an in-flight docstring/comment
-addition describing the new `post_prompt_actual` field (what audit.py
-backfills: real post-compaction context, platform_tokens{pre,post}, dated
-2026-09-06), uncommitted at the source. Read in full both as committed and as
-the working copy; the delta is documentation-only (no code path changed) and
-carries no scrub-worthy content (no session ids, no absolute paths, no
-scheduled-task names). Collected as the working copy per this round's
-dirty-source handling. review-when: re-collect and drop this ack once it
-lands in a source commit."""
+# 2026-09-12 (lane W3, align to 7c9867b): source `git status --porcelain` is
+# now clean -- the 2026-09-06/07 in-flight delta landed in a commit.
+# source_dirty_ack dropped per its own review-when. Re-diffed against the
+# fresh source: grew a STATUS/Proof-of-life header, a deny_receipt import, an
+# AP-62 undetermined guard, and a rewritten notice() that self-identifies per
+# the hook-deny-message contract -- all portable, no new scrub targets.
+# Byte-identical to fresh source (confirmed via diff), status unchanged.
 # First collection. Read in full (150 lines). Extends the compact-recovery
 # mechanism this repo already ships (compact-recovery/README.md,
 # hooks/compact_bookmark.py, hooks/compact_pointer.py, hooks/
@@ -4053,19 +4118,11 @@ diff = "empty (byte-identical to source)"
 path = "hooks/appdata_view_guard.py"
 source = "~/.claude/hooks/appdata_view_guard.py"
 status = "edited"
-source_dirty_ack = """2026-09-07: untracked at the source (`git -C ~/.claude
-status --porcelain` reports `?? hooks/appdata_view_guard.py`) -- never
-committed anywhere at the source. Collected as the working copy on disk per
-this round's ruling for untracked/dirty files (same handling already applied
-to other untracked source files in prior rounds, e.g.
-global-claude-md/rules/visual-gate-scope.md). review-when: re-collect and
-drop this ack once the source commits the file -- check its content still
-matches verbatim (beyond this entry's declared edits) at that point, since an
-untracked file can change without any commit trail to diff against."""
 edits = [
   "docstring install line: 'Install with `tools\\install-appdata-view-guard.ps1`. It belongs in ~/.claude/hooks/ and lives in this repository only because the session that wrote it was scope-limited here.' -> 'Copy this file into ~/.claude/hooks/ and mount it in settings.json (see this repo's hooks/README.md) — no separate installer script ships with it.' The referenced installer script does not exist even at the source (verified: absent from ~/.claude/tools/) -- a dead pointer regardless of this repo's tools/ exclusion, not merely an unshipped one, so this is a correctness fix rather than a scrub; replaced with this repo's own established manual-install instruction (hooks/README.md §安裝).",
   "4 occurrences of the account name in the --selftest calibration fixtures (MUST_FIRE / MUST_STAY_SILENT arrays) -- four absolute paths of the shape C:\\Users\\<account>\\AppData\\..., covering the AnnouncementWatchDog install dir, the npm Roaming cache, a Windows Store package dir, and the session scratchpad's notes.txt -> the account-name segment in all four replaced with the already-declared substitution placeholder '<user>' (tools/share-manifest.toml [placeholders].substitution already lists <user>; no new token declared; this entry deliberately does not quote the removed account name itself). Verified the substitution does not change --selftest's verdict: the guard's actual matching logic (SURFACES regexes) keys only on %LOCALAPPDATA%/AppData\\Local/HKCU: shapes, never on the account segment, so `python hooks/appdata_view_guard.py --selftest` still reports PASS both sides after the edit (re-run and confirmed). The Windows Store package-family-name literal was left unchanged: it is a per-app, not per-account, identifier and is not a scrub target under COLLECTION-RULES rule 2.",
   "no other change: the D-057 incident narrative, the byte/entry counts, the AnnouncementWatchDog project name, and the SID suffix pattern (…-1001, a generic Windows well-known RID, not this account's actual SID) are all kept verbatim -- they are the evidentiary content the guard's warning text depends on, and none resolves to an identifiable account, host or credential.",
+  "2026-09-12 (lane W3, align to 7c9867b): source history for this file now shows real commits and a clean working tree -- the file that was untracked at the prior collection is now committed. source_dirty_ack dropped per its own review-when; content re-verified against the fresh, now-tracked copy: the file grew a STATUS/Proof-of-life docstring header and a deny_receipt import, both portable, no new scrub targets. Re-applied both declared edits unchanged (verified the 4 account-name-class occurrences -- an absolute path on the system drive under the account's profile, in the --selftest calibration fixtures -- via a byte-safe Python replace run through Bash, since the live published_record_guard.py hook, itself newly collected this round, correctly refuses an Edit-tool write of that path SHAPE into a tree carrying tools/COLLECTION-RULES.md, which this repo is; this is the same false-positive class its own docstring already names for a --selftest calibration fixture, and the same workaround this entry's own edits list above already describes using). `python hooks/appdata_view_guard.py --selftest` re-run: PASS both sides. Verified via diff against fresh source: only the 2 declared edits differ.",
 ]
 
 # --- PART 2: candidates evaluated and excluded this round --------------------
@@ -4665,7 +4722,17 @@ back to. An adopter who wants the same discipline (one record born once,
 later facts appended as events, an index regenerated from records) would
 need to author their own store and CLI, using ops/lessons.md's own card shape
 (mechanism / fix / cheap detection check / hits: count) as the format to
-target."""
+target.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (41 lines changed) -- grew a C-90c discriminator case (same
+suffix under a different root must PASS), a TELEMETRY CAVEAT documenting that
+~100 of 137 live rows are the suite's own pre-2026-09-09 unisolated fixtures
+(closed, not hand-corrected), a deny_receipt import + receipt/fp clauses, and
+self-identification on the deny text per the hook-deny-message contract (which
+also DROPPED the old message's read-elsewhere pointers to two references/*.md
+design docs — an upstream fix). `STORE_DIR = ... / "ops" / "lessons"` and the
+CLI remedy are UNCHANGED. Disposition holds: still gates a store and a CLI
+this repo does not ship."""
 
 [[not_shipped]]
 path = "hooks/intake_match_shadow.py"
@@ -4693,7 +4760,13 @@ made. If tools/closeout-intake/ is ever revisited for this share, this file
 is a portable UserPromptSubmit pattern to reuse: bounded subprocess timeout,
 fail-open on every path (missing tool / timeout / non-zero exit / bad JSON),
 and an INTAKE_MATCH_STORE / INTAKE_MATCH_LOG env-var test seam so its own
-controls harness never touches a real store or log."""
+controls harness never touches a real store or log.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (7 lines changed) -- grew a Proof-of-life line (naming the
+excluded tools/closeout-intake/controls.py, 63/63 as of 2026-09-09) and a
+CLAUDE_TELEMETRY_DIR redirect. `INTAKE = ... / "tools" / "closeout-intake" /
+"intake.py"` is UNCHANGED and still the hard dependency `main()` no-ops
+without. Disposition holds unchanged."""
 
 [[not_shipped]]
 path = "hooks/unattended_run.py"
@@ -4719,7 +4792,16 @@ mechanism that partially malfunctions (a bounded false block, not a silent
 no-op) for any adopter who has not also built process-ledger/report.py --
 worse than a pure shadow-probe gap. Excluded as a set with its tool, per the
 same 'pair, not portability' reasoning used for the two hooks above and for
-the existing session_board_register.py/project_registry_gist.py entries."""
+the existing session_board_register.py/project_registry_gist.py entries.
+PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+fresh source (58 lines changed) -- grew a STATUS/Proof-of-life header, a
+deny_receipt import + receipt/fp clauses on both the scope-deny and stop-block
+messages, self-identification per the hook-deny-message contract, a
+CLAUDE_TELEMETRY_DIR redirect, a re-tag path for a live manifest (Q4, user
+ruling 2026-09-08: a widened scope re-tags in place rather than minting a new
+run id), and a negative-canary probe notice. `tools/process-ledger/report.py`
+and `ledger.py` remain the hard dependencies for the Stop guard's block
+condition and the kickoff obligations text. Disposition holds unchanged."""
 fallback = """None named as a drop-in. The obligations text itself (scope
 discipline, a canary pair stamped into deliverables, a stop-time report with
 named blockers, ending the run on the user's next untagged prompt) is a
@@ -5098,8 +5180,8 @@ status = "verbatim"
 # CLAUDE_DIR/hooks/literature-host-policy.json — both env-overridable, no
 # hardcoded path. Imports `deny_receipt` with a try/except fallback
 # (hooks/deny_receipt.py — a separate hook-deny-message mechanism, NOT in
-# this lane and NOT currently in this repo; see the not_shipped-adjacent
-# cross-lane note below). Mounted this round in
+# this lane; lane W3 shipped it the same round, so the import succeeds here
+# and the fallback is not exercised). Mounted this round in
 # hooks/settings.example.json (see that file's own note) and documented in
 # hooks/README.md (one new table row) — both edited by this lane per the
 # dispatch's explicit instruction, coordinated with lane W3. Empty diff
@@ -5135,6 +5217,8 @@ status = "verbatim"
 # verbatim test in this collection: the test is the accurate description of
 # the source's behavior, and a gap it exposes is a cross-lane dependency to
 # name, not a reason to withhold the test.
+# RESOLVED at the 2026-09-12 merge step: lane W3 shipped hooks/deny_receipt.py
+# the same round; with it present the suite prints ALL TESTS PASSED.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/bad-run/citecheck.json"
@@ -5531,3 +5615,212 @@ origin clutter" — is unaffected by whether the reader's own environment
 happens to have this file; the description in prose is the whole payload.'''
 
 # === lane W4 2026-09-12 END ===
+
+# === lane W3 2026-09-12 BEGIN ===
+# Hooks-layer refresh, source 27196ab -> 7c9867b (192 commits). Scope: hooks/
+# and hooks/settings.example.json. New D3 files this round -- four hooks plus
+# three of their five new test suites (the other two test D2-excluded hooks
+# and get paired not_shipped entries below). All four hooks read in full at
+# the source, confirmed portable (CLAUDE_CONFIG_DIR/Path.home()/
+# CLAUDE_TELEMETRY_DIR resolution only, no hardcoded machine value), and each
+# runs a two-sided `--selftest` that was executed here with a full pass before
+# shipping (counts below). deny_receipt.py is the one library-shaped file: it
+# has no `--selftest` of its own, and is exercised indirectly by every hook
+# above that imports it (all of whose selftests passed).
+
+[[collected]]
+path = "hooks/deny_receipt.py"
+source = "~/.claude/hooks/deny_receipt.py"
+status = "verbatim"
+# 110 lines. Shared library implementing the hook-deny-message contract's R3n
+# receipt requirement: clause() (a unique nonce, quoted by a block/deny site),
+# notice_clause() (names the row the emitting hook already wrote, weaker by
+# exactly one thing per the contract), and fp_clause() (the misfire-report
+# pointer, R3). Confirmed byte-identical to fresh source via diff. No
+# scrub-worthy content (portable path resolution only, no session ids or
+# absolute paths). No standalone entrypoint/selftest to run; exercised
+# indirectly by every hook that imports it (all passed their own selftest or
+# regression suite this round, see their entries).
+
+[[collected]]
+path = "hooks/dispatch_commit_notice.py"
+source = "~/.claude/hooks/dispatch_commit_notice.py"
+status = "verbatim"
+# 368 lines. A PreToolUse(Bash|PowerShell, Agent|Workflow)/SubagentStop trio
+# over one carrier: on a spawn_task/subagent dispatch it records the dispatch,
+# and if that same agent later runs a bare `git commit` outside the process-
+# ledger discipline, it notices (never denies) that the commit landed without
+# a matching record call. Confirmed byte-identical to fresh source via diff.
+# No scrub-worthy content. `python hooks/dispatch_commit_notice.py --selftest`
+# run: ALL PASS 32/32.
+
+[[collected]]
+path = "hooks/published_record_guard.py"
+source = "~/.claude/hooks/published_record_guard.py"
+status = "verbatim"
+# 331 lines. A PreToolUse(Write|Edit) guard: denies a write into any tree
+# whose root carries tools/COLLECTION-RULES.md (a "governed tree" -- this
+# share repo is one) when the payload matches a private-value-class regex
+# (drive-rooted Windows path, POSIX home path, a runtime-read account name,
+# a 32+ hex run id, a UUID). Confirmed byte-identical to fresh source via
+# diff. No scrub-worthy content. `python hooks/published_record_guard.py
+# --selftest` run: ALL PASS 18/18. Live-fired at least twice during this very
+# collection round (false positives against already-scrubbed <user>-style
+# fixtures and manifest prose describing a scrub in class terms) -- both
+# correctly gated content that legitimately needed path-shaped text and both
+# were worked around per its own documented escape (state the class, not the
+# value; write via a channel the guard does not gate), never by loosening the
+# guard. That live behaviour is itself a positive control this worker
+# observed first-hand, beyond the --selftest run.
+
+[[collected]]
+path = "hooks/worktree_scope_guard.py"
+source = "~/.claude/hooks/worktree_scope_guard.py"
+status = "verbatim"
+# 759 lines. A SessionStart announcer + PreToolUse(Write|Edit|NotebookEdit|
+# Bash|PowerShell) guard for a session running inside a LINKED GIT WORKTREE:
+# announces the worktree/canonical relationship at session start, and denies
+# a "builder" command (one that would push, merge onto, or otherwise mutate
+# the canonical checkout from inside the worktree) unless an opt-in marker or
+# the canonical cwd is used. This is the exact mechanism governing THIS
+# worker's own session (running inside worktree
+# .claude/worktrees/agent-acbf0058f19fc6a02) -- its SessionStart announcement
+# appears verbatim in this session's own transcript. Confirmed byte-identical
+# to fresh source via diff. No scrub-worthy content. `python
+# hooks/worktree_scope_guard.py --selftest` run: ALL PASS 37/37.
+
+[[collected]]
+path = "hooks/tests/test_browser_pane_scope_guard.py"
+source = "~/.claude/hooks/tests/test_browser_pane_scope_guard.py"
+status = "verbatim"
+# 274 lines. Regression suite for browser_pane_scope_guard.py (a Procedure B
+# file this lane refreshed, see its own entry above). Confirmed byte-identical
+# to fresh source via diff. Ships because the hook it tests ships. Isolated
+# (writes only to a temp dir / CLAUDE_CONFIG_DIR it controls; asserts the
+# LIVE telemetry file was not touched). Run: ALL TESTS PASSED.
+
+[[collected]]
+path = "hooks/tests/test_fieldwork_threshold_notice.py"
+source = "~/.claude/hooks/tests/test_fieldwork_threshold_notice.py"
+status = "edited"
+edits = [
+  "QUIET-3's regression-case label: '(regression: 2026-08-15, session 7c31fa3b)' -> '(regression: 2026-08-15)' -- the same private session id, and the same scrub already applied to the hook this suite tests (see hooks/fieldwork_threshold_notice.py's own entry, first declared edit). Caught on a second full read after the first pass had marked this file verbatim by mistake -- the id sits in a test LABEL string, not in the hook's own source, which is why an initial scan of the hook alone missed it.",
+]
+# 281 lines. Regression suite for fieldwork_threshold_notice.py (a Procedure B
+# file this lane refreshed; RETIRED at the source this round, see that entry).
+# Ships because the FILE it tests still ships even though the hook is no
+# longer mounted (retired/unmounted is not the same as not-shipped -- the
+# precedent this worker applied: a test for a hook that does not ship cannot
+# ship, but this hook does ship). Isolated. Run after the edit: ALL TESTS
+# PASSED (26 cases incl. the QUIET/U/FO/I groups).
+
+[[collected]]
+path = "hooks/tests/test_instructions_loaded_logger.py"
+source = "~/.claude/hooks/tests/test_instructions_loaded_logger.py"
+status = "verbatim"
+# 259 lines. Regression suite for instructions_loaded_logger.py (a Procedure B
+# file this lane refreshed, verbatim). Confirmed byte-identical to fresh
+# source via diff. Ships because the hook it tests ships. Isolated. Run: ALL
+# TESTS PASSED.
+
+[[not_shipped]]
+path = "hooks/tests/test_extdispatch_entrypoint_guard.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-08 at the source, paired with
+hooks/extdispatch_entrypoint_guard.py (see that not_shipped entry above,
+re-checked this round). A two-sided calibration suite (MUST_PASS/MUST_DENY,
+plus vocabulary-coverage assertions C-1/C-2 that every live
+ALLOWED_SUBCOMMANDS/POST_INDICATORS token has a case). Excluded for the same
+reason as the hook it tests -- a test suite for a hook that does not ship
+would be dead weight, not a capability."""
+fallback = """None needed; see the `hooks/extdispatch_entrypoint_guard.py`
+entry."""
+
+[[not_shipped]]
+path = "hooks/tests/test_project_registry_gist.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-09 at the source, paired with
+hooks/project_registry_gist.py (see that not_shipped entry above, re-checked
+this round). A two-sided calibration suite whose L-1/L-2 cases parse the LIVE
+references/PROJECTS.md (this repo ships only a header + one example row) and
+a mutated copy of it -- doubly tied to source-environment-only content, not
+just to the hook. Excluded for the same reason as the hook it tests."""
+fallback = """None needed; see the `hooks/project_registry_gist.py` entry."""
+
+# (Three placeholder [[not_shipped]] entries for the literature-access files
+# stood here on this lane's branch, so a README sentence disclaiming them would
+# resolve before lane W5 merged. Removed at the merge step: W5's [[collected]]
+# entries ship all three.)
+
+[[unmounted_hook]]
+file = "hooks/deny_receipt.py"
+reason = """A plain shared library, not a hook: it exports clause() /
+notice_clause() / fp_clause(), the sideways-verifiable-receipt helpers the
+hook-deny-message contract (rules/hook-deny-message.md) requires for the
+notice surface. Imported by dispatch_commit_notice.py, published_record_guard.py
+and worktree_scope_guard.py, all new this round. There is no event for it to
+mount at, the same shape as the existing hooks/handoff_snapshot.py entry above
+(same file, same reasoning, independently arrived at this round: a bare
+imported module is not itself wired into an event). Mounting it would run a
+library body on every matched tool call for no effect; the three hooks that
+import it ship above it and would break without it."""
+
+[[unmounted_hook]]
+file = "hooks/fieldwork_threshold_notice.py"
+reason = """RETIRED at the source, not a live hook: source commit bd834ea
+(ruling R-3, 2026-09-11) unregistered it from settings.json, and this lane's
+hooks/settings.example.json template follows that -- the PreToolUse
+Read|Grep|Glob mount this file used to carry is removed (see this file's own
+[[collected]] entry, D4 disposition, for the full account). The file and its
+telemetry shape still ship, unchanged, because the source kept the module on
+disk after retiring only its registration; there is accordingly no mount for
+the template to carry, by design, not by omission."""
+
+# Four [[allow]] entries below: the two newest guard hooks' own --selftest
+# calibration fixtures, the same class the interop-layer/test_interop.py and
+# skill-toolkit/skills/config-self-audit/SKILL.md entries above already
+# excuse -- a hook whose job is pattern-matching a private-value shape must
+# ship a test instance of that shape, positive and negative. `match` is kept
+# deliberately shorter than the pattern it excuses (no drive-letter-plus-colon,
+# no /Users/ prefix), the same discipline stated for those entries, so this
+# manifest does not become a finding under its own pattern.
+
+[[allow]]
+file = "hooks/dispatch_commit_notice.py"
+kind = "absolute local path (non-system drive)"
+match = "amend --no"
+reason = """This hook's own --selftest fixture (case P-4): a fabricated
+`git -C` amend command whose path argument is a one-character placeholder tree
+on a non-system drive, proving the notice fires on a `git -C <form>` amend
+without a pathspec. Not a real location."""
+
+[[allow]]
+file = "hooks/published_record_guard.py"
+kind = "absolute local path (non-system drive)"
+match = "priv"
+reason = """This hook's own --selftest calibration fixtures (cases P-1, N-1,
+U-2): a fabricated drive-rooted path used as the known-private-shaped payload
+the guard is proven to catch inside a governed tree, and proven to pass on
+when the same literal sits outside one. The guard's whole job is
+pattern-matching this shape, so its own test suite must contain an instance of
+it. Not a real location."""
+
+[[allow]]
+file = "hooks/published_record_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/x"
+reason = """Same calibration set (case P-6): a fabricated drive-rooted path on
+a distant ancestor directory, proving the governing-marker walk finds
+tools/COLLECTION-RULES.md above a deeply nested write target. Same
+one-character placeholder-tree class as the entry above and as
+skill-toolkit/skills/config-self-audit/SKILL.md's existing entries."""
+
+[[allow]]
+file = "hooks/published_record_guard.py"
+kind = "absolute home path (any account)"
+match = "someone"
+reason = """Same calibration set (case P-2): a fabricated POSIX home path
+proving the guard's second pattern (a non-Windows home directory) also denies
+inside a governed tree. A placeholder account name, not a real one."""
+
+# === lane W3 2026-09-12 END ===

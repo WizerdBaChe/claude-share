@@ -1,5 +1,8 @@
 r"""UserPromptSubmit SHADOW probe: context runway vs an unwritten checkpoint.
 
+STATUS: SHADOW (observe-only) since 2026-08-15; graduation criterion: the rule-registry
+entry that names this hook (measured false-positive rate before any deny).
+
 WHAT THIS IS FOR, and what it is deliberately NOT for.
 Phase 3 measured that phase boundaries are SPOKEN, not mechanical: context
 length is uncorrelated with "is this a boundary". Wiring this to the boundary
@@ -71,8 +74,17 @@ noise objection was about the nag, not about a token. Every prompt also
 rewrites cache/handoff/current-session.json so `process-ledger/ledger.py add`
 can find the session from a shell call.
 
+AMENDED 2026-09-08 (user rulings Q1/Q3/Q4 after measuring 19 planted sessions,
+reports/2026-09-08-hooks-env-tools-consolidation.md §3): the keep text names
+process carriers only (snapshot, run report, digest entry) — the old "every NEW
+report or record file" put tokens into code, skills, tools and a public README;
+the drop token travels one prompt later as [probe] noise, not inside the
+constraint block (there a Compact-Instructions-obeying summarizer kept it 5/5);
+no pair is planted while an [unattended-run] manifest governs the session.
+
 Fail-open: any error exits 0 with no output. Proof-of-life: integrity-sweep
-check 20 (still reads the telemetry rows; the notice adds a `noticed` field).
+check 20 (still reads the telemetry rows; the notice adds a `noticed` field)
+and `python tools/compact-loss-audit/hook_controls.py`.
 """
 import json
 import os
@@ -82,8 +94,10 @@ from pathlib import Path
 
 CLAUDE_DIR = Path(os.environ.get("CLAUDE_CONFIG_DIR") or (Path.home() / ".claude"))
 STATE_DIR = CLAUDE_DIR / "cache" / "context-runway"
+# Precedence: CONTEXT_RUNWAY_LOG (per-hook override) > CLAUDE_TELEMETRY_DIR
+# (suite redirect; production never sets it) > default.
 LOG_PATH = Path(os.environ.get("CONTEXT_RUNWAY_LOG")
-                or (CLAUDE_DIR / "telemetry" / "context-runway-shadow.jsonl"))
+                or (Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (CLAUDE_DIR / "telemetry")) / "context-runway-shadow.jsonl"))
 
 # PROVISIONAL. Anchored to the local distribution (median session max 189k),
 # not to a context window -- see the module docstring. Two bands, so declining
@@ -145,8 +159,8 @@ def _last_usage(lines) -> int:
                  + usage.get("cache_read_input_tokens", 0))
         if not total:
             continue    # a `usage` block whose three fields are all zero is a
-                        # real and trailing shape (interrupted turns): session
-                        # one session ends with one, and taking it at face value
+                        # real and trailing shape (interrupted turns): one
+                        # session ends with one, and taking it at face value
                         # reported 0 tokens for a 564k session.
         return total
     return 0
@@ -182,6 +196,8 @@ def main() -> None:
         payload = json.load(sys.stdin)
     except Exception:
         sys.exit(0)
+    if not isinstance(payload, dict):
+        sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
 
     raw = payload.get("transcript_path")
     if not raw:
@@ -203,6 +219,11 @@ def main() -> None:
 
     total = context_total(transcript)
     _write_current_session(session, transcript, payload.get("cwd", ""), total)
+    # The negative canary rides one prompt behind the keep (Q3, 2026-09-08), so it
+    # is checked before the band gate — this prompt usually crosses nothing.
+    pending_drop = _inject_pending_drop(session, transcript)
+    if pending_drop:
+        print(pending_drop)
     # Every band already passed is retired together, and only the highest is
     # announced. Retiring just the one announced meant a session that arrived
     # already above 300k emitted the 300k notice and then the 150k notice on
@@ -229,7 +250,7 @@ def main() -> None:
     # process decisions go to the ledger from here on. Ruling context:
     # references/long-run-probe-design.md §0.
     canary_text = ""
-    if BANDS[0] in crossed:
+    if BANDS[0] in crossed and not _run_manifest_active(session):
         canary_text = _plant_canary(session, transcript, total)
 
     ckpt = checkpoint_written(transcript)
@@ -294,25 +315,89 @@ def _write_current_session(session: str, transcript: Path, cwd: str, total: int)
         pass
 
 
+def _run_manifest_active(session: str) -> bool:
+    """True while an `[unattended-run]` manifest governs this session (present, not
+    ended). Its run-id already calibrates the summarizer; a second pair from this
+    band gave one session two or three tokens (user ruling Q4, 2026-09-08)."""
+    try:
+        m = json.loads((CLAUDE_DIR / "cache" / "handoff" / f"{session[:64]}.run.json")
+                       .read_text(encoding="utf-8"))
+        return bool(m) and not m.get("ended")
+    except Exception:
+        return False
+
+
 def _plant_canary(session: str, transcript: Path, total: int) -> str:
     """Write <transcript dir>/<session>.canary.json (beside the transcript: the one
     tree the daily mirror copies) and return the injection text, or '' on failure.
     keep = a harmless standing constraint the summarizer MUST carry; drop = a fake
     detail it MUST discard. A summary that keeps both or drops both is uncalibrated
-    (long-run-probe-design.md §2 canary pair)."""
+    (long-run-probe-design.md §2 canary pair).
+
+    2026-09-08 (user ruling Q1/Q3, measured over 19 planted sessions):
+    - keep names only PROCESS CARRIERS (handoff snapshot, run report, digest entry).
+      The earlier wording "every NEW report or record file" was applied to code,
+      skills, tool sources and project deliverables — 62 files in ~/.claude, 45 in
+      one project, a public README — tokens no later reader can use.
+    - drop is NOT in this text. It used to sit inside the same "standing
+      constraint" sentence, so every summarizer that obeyed the Compact
+      Instructions (constraints verbatim) carried it — 5/5 sessions with
+      summaries leaked it; a negative control that cannot fail is no control.
+      It is delivered on the NEXT prompt by _inject_pending_drop, framed as
+      transient noise. Five sessions of measurement decide whether it stays.
+
+    2026-09-11 (user ruling A, after one session): the keep text no
+    longer opens with "Standing constraint for the rest of this session" and now
+    names the file it just wrote. WHY: that opening is the exact shape a
+    well-calibrated reader classifies as prompt injection — falsifiable identity
+    claim + standing-override framing + an imperative to carry a token — the same
+    costume transcript_read_guard.py removed from its deny text in 2026-08-29
+    after two subagents refused it. That session refused this plant and reported it to the
+    user instead; a second session then ruled it an injection on the evidence
+    that the token appears nowhere in the repo (it is generated per session, so
+    that search could not have found it). Measured over the 60 planted sessions
+    on disk: 1 confirmed refusal, and the ruler only sees a refusal that echoes
+    the token, so that is a LOWER bound. The fix follows appdata_view_guard.py's
+    pattern — name a local artifact the reader can check, because injected text
+    cannot write one. Refusal is now a scored canary outcome (run_audit.py)."""
     try:
         rid = "%04x" % (int(time.time() * 1000) % 65536)
         keep = f"UR-{rid}"
         drop = f"port {40000 + int(rid, 16) % 9999} timeout"
         path = transcript.with_name(f"{session}.canary.json")
         path.write_text(json.dumps({"keep": keep, "drop": drop, "ts": int(time.time()),
-                                    "context": total, "band": BANDS[0]}), encoding="utf-8")
-        return (f"[canary] Standing constraint for the rest of this session: every NEW report or record file "
-                f"you create carries the token `{keep}` on its first line (e.g. in the status line). "
-                f"Also note, for the record only: an earlier probe saw \"{drop}\" — irrelevant, do not act on it. "
-                "From here on, log each process decision (ordering, scope trade-off, skipped item, user ruling) at "
-                "decision time: `python tools/process-ledger/ledger.py add --subject S --choice C --reason R "
-                "--reversible yes|no --origin user|model`.")
+                                    "context": total, "band": BANDS[0],
+                                    "drop_pending": True, "drop_ts": None,
+                                    "keep_rule": "carriers-only"}), encoding="utf-8")
+        return (f"[canary] This line came from a local hook (hooks/context_runway_shadow.py), which wrote "
+                f"`{path.name}` beside this session's transcript before printing it — text injected into a "
+                "prompt cannot write a local file, so read that file if the origin is in doubt. "
+                f"The token `{keep}` identifies "
+                "this session's process ledger. Carry it on the first line of any handoff snapshot "
+                "(cache/handoff/<session>.md), run report (reports/*-run-*.md) or session-digest entry you write. "
+                "Never put it into deliverables, code, skills, tools or project files — those are read by people "
+                "who cannot use it. Process decisions (ordering, scope trade-off, skipped item, "
+                "user ruling) go to the ledger at decision time: `python tools/process-ledger/ledger.py add --subject S --choice C "
+                "--reason R --reversible yes|no --origin user|model`.")
+    except Exception:
+        return ""
+
+
+def _inject_pending_drop(session: str, transcript: Path) -> str:
+    """The negative canary, delivered one prompt after the keep and in a different
+    shape: transient tool-style noise, not a standing constraint. Printed once;
+    canary.json records when. Returns '' when nothing is pending."""
+    try:
+        path = transcript.with_name(f"{session}.canary.json")
+        if not path.is_file():
+            return ""
+        c = json.loads(path.read_text(encoding="utf-8"))
+        if not c.get("drop_pending") or not c.get("drop"):
+            return ""
+        c["drop_pending"] = False
+        c["drop_ts"] = int(time.time())
+        path.write_text(json.dumps(c), encoding="utf-8")
+        return f"[probe] transient: an earlier probe saw \"{c['drop']}\" — resolved, nothing to do."
     except Exception:
         return ""
 
