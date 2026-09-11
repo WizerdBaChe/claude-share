@@ -113,8 +113,13 @@ python tools/test_triage.py
   the audit disproved, what was deferred (COLLECTION-RULES step 9). In the
   same commit, set `source_aligned` to the sha the round aligned to — the
   baseline is a summary of that entry and must not move on its own.
-- **Push only on an explicit yes from the owner.** The repo is public; a
-  round that is green is ready to publish, not published.
+- **Push. A round is not synced until it is on `origin/main`** (owner ruling,
+  2026-09-12: the replica exists to be current, and a merged-but-unpushed
+  round leaves it stale). Merge the refresh branch into `main` and
+  `git push origin main` once the gate exits 0 with the source mounted and
+  both test suites pass — no separate confirmation round. A red gate still
+  stops the round: the ruling authorises publishing a green tree, never a
+  red one. Then delete the refresh branch and say so in the round's report.
 
 ## Appendix A — the lane brief template
 
