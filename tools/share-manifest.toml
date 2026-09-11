@@ -2762,12 +2762,18 @@ edits = [
   "NEW 2026-09-07: new '## Log — 2026-09-05: checks #9/#10 + a11y contract' section (source addition) contains one dead pointer, 'Record + ledger: `outputs/skill-reviews/diagram-design-borrow-review-2026-09-05.md` §六 B-1/B-2/B-3.' -> 'Record + ledger: the source environment's own skill-review record (outputs/, not shipped in this copy) §六 B-1/B-2/B-3.' — outputs/ tree excluded; capability description (a dated record with those section ids exists) kept, literal path dropped.",
   "2026-09-07, second pass: the source gained a '## Log — 2026-09-07' section and a new review-when bullet, both recording the tokens.mjs transcription defect and its fix. Collected verbatim except for one added sentence, which is a share-copy fact rather than a source fact: this copy's own shipped artifact was rebuilt in the same commit and its sha256 prefix is named. The source's parallel line says its seven library artifacts' receipts are due for re-issue and that this session did not do it — kept as written, because a maintenance log that hides its own outstanding item is worth less than none.",
   "NEW 2026-09-07: the same section's re-issued-receipts table lost its two sha256 columns and its source-commit stamp, keeping the artifact names and the byte before→after column, with a paragraph underneath saying where the receipts were recorded and why they are not reproduced. The seven artifacts live in the source's outputs/ tree and do not ship, so fourteen 64-hex receipts would be values a reader has nothing to check against — the same dead-pointer class as the record citation above, one level more opaque. The portable half is what stays: the R-2 ruling that an a11y attribute change re-issues receipts, and the ~4-5 KB per-artifact growth that shows the change was bytes and not drawing. The gate's leak scanner reads any 32+ hex run as a hash, so it flagged all fourteen; that reading was right for the wrong reason, and the fix is removal rather than an [[allow]].",
+  "REFRESH 2026-09-12 (lane W6, align to 7c9867b): the source's '## Log — 2026-09-07' section grew a resolution for the item the second-pass edit above had kept open — the outstanding receipt re-issue is now marked done, dated, and pinned to a short (7-hex) source-repo commit id, which is kept as-is (not a scrub target: it is far shorter than the 32+ hex hash class hard rule 9 names, resolves nothing outside the source's own private history the way a session id or scheduled-task name would, and functions the same as the dated evidence lines and ruling ids the rules already carve out — it is how the DONE claim stays checkable by someone who does have the source). Folded into the existing share-copy sentence rather than replacing it: the source's new 'all nine build scripts re-ran clean, predicted one-line diff landed byte-exact' fact is prepended, and this copy's own already-declared rebuilt-artifact fact (sha256 prefix `b86bc0ae382f`) is kept and extended with one more share-copy fact — this round re-ran the build against the unchanged library and reproduced identical bytes (see the [[collected]] entries for emit.mjs/tokens.mjs below: both diff empty against fresh source this round, so nothing upstream of the build changed). No new scrub target in the new source hunk: no outputs/ path, no account name, no absolute non-system-drive path.",
 ]
-source_dirty_ack = """2026-09-07: same cause and same standing as the emit.mjs
-and tokens.mjs acks below — the source's 2026-09-07 maintenance-log entry was
-written there by this session before collection. The diff against the source
-working tree is exactly this entry's declared edits and nothing else.
-review-when: drop once ~/.claude commits the archdiag change."""
+# source_dirty_ack retired 2026-09-12 (review-when fired): the prior three acks
+# on this entry and the emit.mjs/tokens.mjs entries below all named the same
+# trigger — "drop once ~/.claude commits the archdiag change." `git -C
+# ~/.claude status --porcelain -- tools/archdiag/` is now empty, and
+# `git -C ~/.claude log --oneline -- tools/archdiag/emit.mjs tools/archdiag/tokens.mjs`
+# shows the TEXT/SURFACE change landed in a source commit dated 2026-09-08
+# (short id 767144d, a five-batch stale-work sweep naming this path by role,
+# not by content). The dirty state this ack tracked no longer exists; nothing
+# to re-verify beyond the diff above, which is already empty of anything but
+# the declared edits.
 
 [[collected]]
 path = "architecture-diagramming/archdiag/index.mjs"
@@ -2819,13 +2825,16 @@ status = "verbatim"
 # collected. One emitted byte changed as a consequence — `background: #fff` ->
 # `#ffffff` — which re-froze this repo's one shipped artifact; rebuilt in the
 # same commit, sha256 starts b86bc0ae382f. Still verbatim, still no scrub target.
-source_dirty_ack = """2026-09-07: the source is dirty for this file because THIS
-SESSION made it dirty — the owner-directed TEXT/SURFACE export, landed at the
-source and verified there before collection. It is not another session's
-in-flight edit, and the copy here is byte-identical to the source working tree
-(diff exit 0). Committing the source is the owner's call and was not part of the
-instruction, so the state is declared rather than assumed away. review-when: drop
-this ack once ~/.claude commits the archdiag change."""
+#
+# RE-VERIFIED 2026-09-12 (lane W6, align to 7c9867b): fresh diff against source
+# is still empty (diff exit 0) — no further source change since the 2026-09-07
+# TEXT/SURFACE export. `capability-set.build.mjs` re-run this round against
+# this unchanged file reproduced sha256 b86bc0ae382f... byte-for-byte (twice).
+# source_dirty_ack retired: `git -C ~/.claude status --porcelain -- tools/archdiag/`
+# is now empty and `git -C ~/.claude log -- tools/archdiag/emit.mjs` shows the
+# TEXT/SURFACE export landed in a source commit dated 2026-09-08 (short id
+# 767144d). The ack's review-when trigger — "drop once ~/.claude commits the
+# archdiag change" — has fired.
 
 # =============================================================================
 # PART 2 — first collections (procedure A)
@@ -3896,10 +3905,17 @@ status = "verbatim"
 # review-when: a new text or surface colour is added to emit.mjs as a literal
 # instead of joining TEXT/SURFACE — coverage would shrink with nothing saying so.
 # LF-only, as `.gitattributes` pins for `architecture-diagramming/archdiag/**`.
-source_dirty_ack = """2026-09-07: same cause and same standing as the emit.mjs
-ack above — the source is dirty because this session's owner-directed fix landed
-there first. Copy is byte-identical to the source working tree (diff exit 0).
-review-when: drop once ~/.claude commits the archdiag change."""
+#
+# RE-VERIFIED 2026-09-12 (lane W6, align to 7c9867b): fresh diff against source
+# is still empty (diff exit 0) — no further source change. Both positive
+# controls re-run this round on a SCRATCH copy (never the committed file):
+# control A (FILL.block -> dark) 2 fail / exit 2; control B (TEXT.title ->
+# near-white) 7 fail / exit 2; revert between and after -> 0 fail / 1 warn /
+# exit 0 each time. Live `--check` on the committed file: 0 fail, 1 warn, exit
+# 0. source_dirty_ack retired: same cause and standing as the emit.mjs entry
+# above — `git -C ~/.claude status --porcelain -- tools/archdiag/` is empty and
+# the TEXT/SURFACE export landed in source commit 767144d (2026-09-08). The
+# ack's review-when trigger has fired.
 
 # ---------------------------------------------------------------------------
 # 2026-09-07 round — dispositions for what did not ship. Narrative: CHANGELOG.md.
