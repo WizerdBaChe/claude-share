@@ -1025,15 +1025,10 @@ edits = [
 path = "agents/engineering-backend-architect.md"
 source = "~/.claude/agents/engineering-backend-architect.md"
 status = "verbatim"
-source_dirty_ack = """2026-09-07: source `git diff --numstat` shows `3\t1
-agents/engineering-backend-architect.md` — another session's uncommitted
-addition to the description field: a cross-reference sentence, "A finished
-build-ready work card (施工卡) with its own acceptance list goes to
-work-card-executor instead." (routing traffic to this round's new
-work-card-executor.md agent, added below). Collected as the working copy on
-disk per this round's ruling (DIRTY-SOURCE RULING, carried forward from the
-2026-09-02 round, not relitigated). review-when: re-collect and drop this ack
-once it lands in a source commit."""
+# 2026-09-12: the 2026-09-07 source_dirty_ack's own review-when fired — the
+# routing sentence it tracked landed in a source commit since. Re-collected;
+# byte-identical to the now-committed source, so the ack is dropped rather
+# than carried forward stale.
 
 [[collected]]
 path = "agents/engineering-code-reviewer.md"
@@ -1044,13 +1039,13 @@ status = "verbatim"
 path = "agents/engineering-frontend-developer.md"
 source = "~/.claude/agents/engineering-frontend-developer.md"
 status = "verbatim"
-source_dirty_ack = """2026-09-02: source `git diff --numstat` shows 11 insertions,
-2 deletions for this file at d06708c — the manual-acceptance checklist section
-of its Output contract rewritten to the two-section rank form (`A. 必驗` /
-`B. 體驗`, consequence-ordered, ≤7-item A cap) in place of the older prose
-stress-path instruction, another session's uncommitted edit at the source.
-Collected as the working copy on disk per this round's ruling.
-review-when: re-collect and drop this ack once it lands in a source commit."""
+# 2026-09-12: the 2026-09-02 dirty-copy this ack tracked is superseded — the
+# source has since moved past it in a committed change (`refactor(uat): one
+# owner for the acceptance rule, and a grep that can prove it`), rewriting the
+# manual-acceptance section again to point at the shared acceptance-ladder
+# rule file instead of restating its rung table inline. Re-collected against
+# the current committed source; byte-identical, so the stale ack is dropped
+# rather than carried forward describing a version two revisions back.
 
 [[collected]]
 path = "agents/engineering-security-engineer.md"
@@ -1071,15 +1066,11 @@ status = "verbatim"
 path = "agents/testing-bug-fixer.md"
 source = "~/.claude/agents/testing-bug-fixer.md"
 status = "verbatim"
-source_dirty_ack = """2026-09-07: source `git diff --numstat` shows `2\t1
-agents/testing-bug-fixer.md` — another session's uncommitted addition to the
-description field: "Executing a build-ready work card (施工卡) is not a bug
-fix — that goes to work-card-executor." (same routing-traffic addition as
-engineering-backend-architect.md above, both pointing at this round's new
-work-card-executor.md agent). Collected as the working copy on disk per this
-round's ruling (DIRTY-SOURCE RULING, carried forward from the 2026-09-02
-round, not relitigated). review-when: re-collect and drop this ack once it
-lands in a source commit."""
+# 2026-09-12: the 2026-09-07 source_dirty_ack's own review-when fired, same as
+# engineering-backend-architect.md above — the routing sentence it tracked
+# landed in a source commit since. Re-collected; byte-identical to the
+# now-committed source, so the ack is dropped rather than carried forward
+# stale.
 
 # --- architecture-diagramming/archdiag/ -------------------------------------
 # 2026-09-07 refresh. IMPORTANT CORRECTION: this round's mid-task diff (taken
@@ -1625,7 +1616,40 @@ edits = [
   "2026-09-07: scientific-research-guide's 領域特化 paragraph re-condensed, dropping real domain-keyword/cluster/CPO content that the source had re-expanded since the last refresh (must re-condense every round; ships FORMAT only, matching the skill's own domains/_routing.md disposition).",
   "2026-09-07: added new `ux-walkthrough` section + quick-table row, verbatim from source (first collection — a shipped file already routes to it; see Part 2).",
   "2026-09-07: V-groove domain-specific quick-table row removed (excluded domain content, same reasoning as the scientific-research-guide condensation).",
+  "2026-09-12 (procedure B refresh, lane W4): re-applied ALL SIX edits above onto fresh source bytes — every one recurred (the source had re-added the same excluded-skill sections/rows, the same dangling diagram-authoring avoid-notes, the same drive-path header, the same expanded domain paragraph and V-groove row since 2026-09-07). Re-verified each excluded skill's disposition still holds this round (D2 re-check: app-residue-sweep, asset-vault, media-fetch-pipeline, model3d-pipeline, paper-distill, paper-story, render-perf all unchanged) before re-removing its section; none of their review-when triggers fired.",
+  "2026-09-12 NEW: source gained a `patents-grabber` section plus two quick-table rows since 2026-09-07 (a thin wrapper skill around a local `pgb` CLI at an absolute path on a non-system drive, with a local credential file and a local drawing cache — same class as media-fetch-pipeline/post-brief/model3d-pipeline, adjudicated `excluded-by-decision`, own [[not_shipped]] entry added this round). Section (between `run` and `engineering:debug`) and both quick-table rows removed, same row-2-inverse treatment as the six skills above.",
+  "2026-09-12 NEW: audience-fit's 邊界 line gained a new '必跑而非可選（2026-09-08）' bullet citing an absolute path on a non-system drive naming one of the source's own research projects -> generalized to '來源環境自己的研究專案'. The policy itself (pages whose CONSUMER is the audience must pass through Mode A before delivery; researcher/developer voice, filenames, PASS counts, run-ids and gate codes on such a page are defects) is kept whole — only the private project pointer is dropped.",
 ]
+# Cross-lane note (2026-09-12, lane W4): design-system-suite's 邊界 bullet and
+# ux-walkthrough's 邊界 line both grew a citation to
+# `global-claude-md/rules/web-navigation-state.md` this round (alongside
+# `skill-toolkit/skills/ux-walkthrough/references/navigation-ia-contract.md`,
+# which this lane ships new this round — see that file's own entry). Separately,
+# audience-fit's 必跑而非可選 bullet (line 109 of the current file) cites
+# `rules/naming-and-placement.md` §1 CONSUMER. Kept both as-is, unedited: all
+# are repo-relative paths that resolve once collected. Neither
+# `web-navigation-state.md` nor `naming-and-placement.md` is in lane W4's file
+# list, and neither currently ships under `global-claude-md/rules/` in this
+# worktree as of this lane's start — same open-dependency shape as the
+# existing `rules-usage-dict.md` / `skills/ux-walkthrough/SKILL.md`
+# cross-worker note elsewhere in this file; per the 2026-09-12 round's own
+# handoff snapshot, `rules/` is lane W2's file list.
+#
+# KNOWN OPEN GATE FINDING (not something this lane can resolve from its own
+# file list alone): `share_gate.py --source` reports [R] on
+# `skill-toolkit/skill-trigger-dict.md:87` and `:117` (web-navigation-state.md)
+# and `:109` (naming-and-placement.md) as of this lane's close-out. Expected to
+# self-resolve once lane W2's `rules/` collection lands in the same round; if
+# it does not, these three citations need revisiting (drop or generalize).
+# NOT edited (content growth, verified clean, no scrub needed): security-deep-
+# checklist's new 註 line (dict-authoring note about how the file's own parser
+# reads a `關鍵詞：` line); product-design-thinking's 語義契約/DSL 契約 rewording;
+# ux-walkthrough's expanded 關鍵詞 list and its `references/navigation-ia-
+# contract.md` boundary clause (see cross-lane note above); workflow-
+# checkpoint's 驗收/UAT rewording; skill-co-upgrade's new "拿這份指南/規範對照升級"
+# standard-comparison-round content (dated 2026-09-11, no private paths);
+# motion-design's 關鍵詞 rewording. None of these cite anything outside this
+# repo's own shipped or about-to-ship paths.
 # REFRESHED 2026-08-17, procedure B, and worth recording why it was even
 # opened: the shipped copy was stale by three skill sections and check V could
 # not say so. V can only assert that an `edited` file DIFFERS from its source —
@@ -1691,7 +1715,23 @@ source = "~/.claude/skills/audience-fit/SKILL.md"
 status = "edited"
 edits = [
   "2026-09-07: re-applied — the round-2 field-proof pointer `ccfg-retrieval-audit-f1-owner-view.html` v2 (a named artifact inside a non-shipping tree) replaced by a generic description: 'an owner-view render that passed user gate 2026-08-31'. Nothing else changed since the last refresh.",
+  "2026-09-12 (lane W4): re-applied unchanged onto fresh source — same anchor, same replacement, diff confirmed to touch exactly this one span and nothing else.",
 ]
+# 2026-09-12 (lane W4): source grew a new '## Gate (Mode A...)' section
+# (2026-09-10) describing a determinable check for two of the skill's prose
+# rules, run via a `~/`-relative command against `tools/audience-fit-gate/
+# afgate.py`. Kept verbatim, unedited — a `~/`-prefixed path is not a scrub
+# target (COLLECTION-RULES rule 2) and the section carries no other private
+# content. The tool itself does NOT ship this round (see the new
+# `tools/audience-fit-gate/` [[not_shipped]] entry in lane W4's block below —
+# its own README cites private-project file paths and an already-excluded
+# `outputs/` artifact, which is why it stays out even though `afgate.py`
+# itself looks portable by inspection). This is the established "cites a
+# source-only tool, prose describes the capability, the runnable gate does
+# not ship" pattern already used elsewhere in this file (e.g. `tools/lean-
+# verify/`). The CLI synopsis's `<original>`/`<companion>` tokens are declared
+# under `[placeholders] command_position_ok` (see that table) — no real value
+# could be printed for them.
 
 [[collected]]
 path = "skill-toolkit/skills/audience-fit/references/de-ai-flavor.md"
@@ -1739,13 +1779,13 @@ edits = [
 path = "skill-toolkit/skills/code-review-deep-checklist/SKILL.md"
 source = "~/.claude/skills/code-review-deep-checklist/SKILL.md"
 status = "verbatim"
-source_dirty_ack = """2026-09-02: source working-copy delta at collection time was
-`+4 -1` (git diff --numstat against HEAD d06708c) — another session's
-uncommitted in-flight edit (added the FLOOR/extra-dimension sentence to the
-six-smells step and the UAT-checklist ranking sentence to the manual-acceptance
-step), carried here as-is per this round's ruling ("align the share to what is
-here now"). Re-collect and drop this ack once that edit lands as a commit at
-the source."""
+# 2026-09-12 (lane W4): the 2026-09-02 source_dirty_ack's review-when fired —
+# `git status --porcelain` is clean for this file, so the ack is dropped
+# rather than carried forward stale. Re-collected against current source: the
+# manual-acceptance step's cap/rung detail was further refactored to point at
+# `ops/references/uat.md` as the single owner (same round as the agents/
+# refresh elsewhere in this file) instead of restating it inline — pure
+# content change, no private paths. Byte-identical to source after copy.
 
 [[collected]]
 path = "skill-toolkit/skills/code-review-deep-checklist/references/dependency-fitness.md"
@@ -1778,6 +1818,25 @@ status = "verbatim"
 # trim that moved the detail out. An earlier draft of this refresh mistakenly
 # merged the two files' content into one; caught by re-diffing against the
 # source before hand-off and corrected — final diff is empty as declared.)
+# 2026-09-12 (lane W4): re-collected against current source. One clause grew,
+# tightening the "criteria named in text but not machine-checked" bullet with
+# a citation to `ops/references/entry-schema.md`, `tools/entry-schema-lint/
+# lint.py` and `ops/references/principle-design-guide.md` (§4 in the LABEL-
+# REGISTRY pointer changed too, pure renumbering). Scanned for scrub targets —
+# clean (no account name, no absolute non-system-drive path). NOT edited:
+# `ops/`- and `tools/`-relative citations are repo-relative paths that are not
+# scrub targets under COLLECTION-RULES rule 2. Cross-lane note: all three new
+# citations are new source files born 2026-09-08, outside lane W4's file list
+# (`ops/references/` is another lane's territory; `tools/entry-schema-lint/`
+# is not named in this repo's `tools/` not_shipped entry's per-file carve-out
+# list). Byte-identical to source after copy.
+# KNOWN OPEN GATE FINDING: `share_gate.py --source` reports [R] on this file's
+# lines 178 (`ops/references/entry-schema.md`) and 180
+# (`ops/references/principle-design-guide.md`) as of this lane's close-out —
+# `tools/entry-schema-lint/lint.py` is not flagged (not a `.md` citation the
+# check scans). Expected to self-resolve once the `ops/references/`-owning
+# lane's collection lands in the same round; if it does not, these two
+# citations need revisiting.
 
 [[collected]]
 path = "skill-toolkit/skills/config-self-audit/evals/evals.json"
@@ -1859,7 +1918,11 @@ status = "verbatim"
 [[collected]]
 path = "skill-toolkit/skills/env-cleanup/references/manifest-claude.md"
 source = "~/.claude/skills/env-cleanup/references/manifest-claude.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-09-12: source grew several new-content spots (added 2026-09-09): machine-managed root-file descriptions (.claude.json, .last-update-result.json, chrome/, daemon/, daemon.log, jobs/), a new cache-dir row (.pytest_cache/, .hypothesis/, .playwright-mcp/), two new root-file mentions (.gitattributes, skill-trigger-dict.md.xi.md), a minor wording tweak, and a new hook-library-exception rule — all kept verbatim, no scrub target in any of them.",
+  "2026-09-12: the new .obsidian/ directory bullet named a private-tree pointer (a filename inside the non-shipping references/ tree) alongside the vault name — dropped the pointer, kept the vault name and the rest of the sentence, replaced with a generic 'cross-indexed in the source's own notes' phrase. Nothing else in this spot changed.",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/env-cleanup/references/project-heuristics.md"
@@ -1986,6 +2049,10 @@ status = "verbatim"
 path = "skill-toolkit/skills/mechanism-share-packaging/SKILL.md"
 source = "~/.claude/skills/mechanism-share-packaging/SKILL.md"
 status = "verbatim"
+# 2026-09-12: re-collected — source grew a new sentence citing
+# claude-ops/ops/20-dispatch.md §2 and claude-ops/ops/lessons.md L-057 (a
+# 2026-09-07 finding about the orchestrator/fragment-writer gap). Both cited
+# files already ship in this repo, no scrub target, still byte-identical.
 
 [[collected]]
 path = "skill-toolkit/skills/mechanism-share-packaging/references/governance-starter.md"
@@ -2029,19 +2096,16 @@ edits = [
 path = "skill-toolkit/skills/motion-design/local/env-bridge.md"
 source = "~/.claude/skills/motion-design/local/env-bridge.md"
 status = "edited"
-source_dirty_ack = """2026-09-02: source working-copy delta at collection time was
-`+10 -5` (git diff --numstat against HEAD d06708c) — another session's
-uncommitted in-flight edit to §1 (the manual-acceptance-checklist wording, now
-citing `ops/references/uat.md` and a consequence-ranked A/B stress-path split),
-carried here as-is per this round's ruling ("align the share to what is here
-now"). Note: `ops/references/uat.md` is a new source file not in this share's
-file list and not shipped — the pointer routes to something the adopter cannot
-open; flagged for the dispatcher, not resolved here (outside this worker's file
-list). Re-collect and drop this ack once the source edit lands as a commit."""
+# 2026-09-12: dropped the 2026-09-02 source_dirty_ack — the §1 manual-
+# acceptance wording it described has since landed at source as a real commit
+# (the ae05887-family refactor citing claude-ops/ops/references/uat.md as
+# single owner, same one seen in engineering-frontend-developer.md and
+# code-review-deep-checklist/SKILL.md). That file now ships in this repo, so
+# the citation resolves; kept §1 verbatim, no scrub needed there.
 edits = [
-  "shader section: the two vendor/threejs/ file pointers replaced by 'see a Three.js reference for API specifics — this package does not ship one'.",
-  "asset-vault section: an absolute path to a private registry.json replaced by 'check its registry, see that skill's own docs for where yours lives'.",
-  "trust boundary: rewritten for the same reason as currency.md — the ~25-release drift is reported as the source environment's finding about its excluded copy, not as a fact about anything shipped here.",
+  "2026-09-12: re-applied — shader section: the two vendor/threejs/ file pointers replaced by 'see a Three.js reference for API specifics — this package does not ship one'.",
+  "2026-09-12: re-applied — asset-vault section: an absolute path to a private registry.json replaced by 'check its registry, see that skill's own docs for where yours lives'.",
+  "2026-09-12: re-applied — trust boundary: rewritten for the same reason as currency.md — the ~25-release drift is reported as the source environment's finding about its excluded copy, not as a fact about anything shipped here.",
 ]
 
 [[collected]]
@@ -2154,36 +2218,23 @@ status = "verbatim"
 path = "skill-toolkit/skills/product-design-thinking/references/design-rules.md"
 source = "~/.claude/skills/product-design-thinking/references/design-rules.md"
 status = "verbatim"
-# 2026-09-07: the 2026-09-02 source_dirty_ack on this entry is DROPPED —
-# `git -C ~/.claude diff --numstat -- skills/product-design-thinking/references/design-rules.md`
-# is now empty (working tree matches HEAD 27196ab); the previously-uncommitted
-# UAT-ranking clause has landed as a normal commit. New content this round
-# (UX-semantics bullet gained: "Before asking, run `ux-walkthrough` on the PIM
-# state machine ... (2026-09-07)") cites ux-walkthrough, which ships this same
-# round via another worker per the task brief — no edit needed. Empty diff
-# confirmed after copy.
+# 2026-09-12: re-collected. Source further refined the manual-acceptance
+# wording (same ae05887-family refactor citing claude-ops/ops/references/uat.md
+# as single owner, seen elsewhere this round) — pure content, no scrub target,
+# uat.md already ships. Empty diff confirmed after copy.
 
 [[collected]]
 path = "skill-toolkit/skills/product-design-thinking/references/document-ladder.md"
 source = "~/.claude/skills/product-design-thinking/references/document-ladder.md"
 status = "edited"
-source_dirty_ack = """2026-09-07 (re-acked; numbers unchanged from the
-2026-09-02 ack): source `git diff --numstat` still shows `3\t1
-skills/product-design-thinking/references/document-ladder.md` — the SAME
-uncommitted delta as 2026-09-02 (§7 Handoff manual-acceptance-checklist line
-gains the `A. 必驗` / `B. 體驗` consequence-ranking clause citing
-`ops/references/uat.md`), still another session's in-flight edit, still not
-committed at the source five days later. Carried as-is again per the standing
-ruling (align the share to what is on disk now) — not a decision made here.
-`ops/references/uat.md` continues to ship as `claude-ops/ops/references/uat.md`
-via the ops-layer worker (source_map already maps `ops/` there); check R
-should resolve at merge as before. Separately, HEAD itself advanced from
-d06708c to 27196ab since the 2026-09-02 round and committed new §2 content
-(the verified-by field, see the edits entry below) that this file's dirty
-working tree now sits on top of. Re-collect and drop this ack once the
-source commits the §7 delta."""
+# 2026-09-12: dropped the 2026-09-07 source_dirty_ack — source is clean at
+# this path now (the §7 Handoff manual-acceptance clause it described has
+# since landed as a normal commit, same ae05887-family uat.md-owner refactor
+# seen elsewhere this round; that citation ships, no scrub needed, passed
+# through unedited).
 edits = [
-  "2026-09-07: new §2 committed content (Invariants bullet gained a `verified-by:` field spec) cited `outputs/lean4-verifier-applicability-2026-09-06.md` §7 — a dated analysis file under the source's non-shipping outputs/ tree -> replaced with a prose note that the rung-4 theorem-proving option's applicability analysis stays in the source environment's own records. The other citation in the same sentence, `ai-coding-guardrails §2`, ships in this same round and needed no change.",
+  "2026-09-07: §2 content (Invariants bullet's `verified-by:` field spec) cited `outputs/lean4-verifier-applicability-2026-09-06.md` §7 — a dated analysis file under the source's non-shipping outputs/ tree -> replaced with a prose note that the rung-4 theorem-proving option's applicability analysis stays in the source environment's own records. The other citation in the same sentence, `ai-coding-guardrails §2`, ships and needed no change.",
+  "2026-09-12: re-applied — same citation, same replacement; nothing else in this span changed at source.",
 ]
 
 [[collected]]
@@ -2350,7 +2401,16 @@ source = "~/.claude/skills/skill-co-upgrade/SKILL.md"
 status = "verbatim"
 edits = [
   "2026-09-07: re-verified byte-identical to source. Source's new 'round-1 ux-walkthrough field data 2026-09-07' clause carries no private pointer — kept as-is.",
+  "2026-09-12: re-verified byte-identical to source. Source grew substantially (new Standard-comparison-round shape, code-bearing-round two-leg detail, worked-examples-as-calibration-fixture point, several dated measured-evidence lines) — all dated evidence / repo-relative citations, no scrub target in any of it.",
 ]
+# Cross-lane note (2026-09-12): the code-bearing-round paragraph cites
+# `rules/literature-access.md`, which does not ship yet in this repo as of
+# this lane's work — it is lane W5's file per the round's task split. Kept
+# the citation verbatim (may resolve once W5's work merges); not this lane's
+# citation to fix.
+# KNOWN OPEN GATE FINDING: `share_gate.py --source` reports [R] on this file's
+# line 110 for the same citation, as of this lane's close-out. Expected to
+# self-resolve once lane W5's collection lands in the same round.
 
 [[collected]]
 path = "skill-toolkit/skills/skill-share-packaging/SKILL.md"
@@ -3041,6 +3101,17 @@ command_position_ok = [
     "<bib.json>",                     # the reader's own bib JSON, named in the
                                       # prose one line above as
                                       # `references/<collection>-bib.json`
+    # 2026-09-12: audience-fit/SKILL.md's new "## Gate" section (source
+    # 2026-09-10 arrival) shows the afgate.py CLI synopsis: `afgate.py all
+    # <original> <companion>`. The tool itself (`tools/audience-fit-gate/`)
+    # does not ship this round (see [[not_shipped]], excluded-by-decision —
+    # its README cites private-tree pointers this repo cannot open); the
+    # section is kept for its prose description of the two determinable
+    # checks. `<original>`/`<companion>` name whichever two documents the
+    # reader is comparing on their own machine — no real value could be
+    # printed that would work generally, same rationale as <path>/<sha>
+    # above.
+    "<original>", "<companion>",
 ]
 
 # ---------------------------------------------------------------------------
@@ -3435,6 +3506,7 @@ edits = [
   "2026-09-07: AWD file:line pointer '`WatchdogApp.cs:75-79`' (Step 2) dropped — a locator into a private, unshipped codebase; the surrounding finding description is kept.",
   "2026-09-07: Guardrails' AssetVault ruling-id pointers '(AssetVault G-20; R-10 ...)' replaced by '(AssetVault-GUI's own ruling: ...)', keeping the quoted rule text and dropping both IDs.",
   "2026-09-07: the References-list bullet for `calibration-2026-09-07.md` rewritten to state plainly that this share does not include that file (see its own not_shipped entry below) and to give the reader a working fallback (build your own known-true-positive record) instead of a dangling pointer.",
+  "2026-09-12: all six edits above re-applied at their (slightly shifted) anchors — source re-expanded the same six spots verbatim (the intro pointer sentence grew a 'kept verbatim at ... under ~/.claude' clause around the same references/ pointer; the other five recurred unchanged). Source also grew substantial new content citing `references/navigation-ia-contract.md` (a Step-2 load instruction, a new IA/navigation layer-table row + row entry with NAV-6/NAV-8, and a new References-list bullet with the NAV-O1..O3 / NAV-1..12 discriminator list) — that file is this same lane's new D3 collection (see its own [[collected]] entry below), so these citations resolve within this share and were kept verbatim, no scrub.",
 ]
 
 [[collected]]
@@ -3468,6 +3540,7 @@ edits = [
   "2026-09-07: AnnouncementWatchDog private ruling-id pointer '(D-025, D-061)' dropped (§1); 'codex review §6' and 'codex review §9.3' pointers dropped (§1, §2) with the quoted rule text kept in the latter case.",
   "2026-09-07: PatentsGrabber private finding-id 'P-002' dropped (§1). AWD private gate-id pointers 'SHELL-3' and 'HOST-4' (§2) replaced by generic descriptions of the same capability ('its own thread-affinity check', dropped the second entirely since the surrounding sentence already names the capability).",
   "2026-09-07: closing Sources bullet's pointer to `calibration-2026-09-07.md` (excluded, see not_shipped below) replaced by the same honest note used in decision-point-contract.md.",
+  "2026-09-12: all four edits above re-applied at their (slightly shifted) anchors — source re-expanded the same spots verbatim. Source also grew a new §2b 'Six more when the surface has more than one destination' section citing `navigation-ia-contract.md` NAV-O1/NAV-5(d)/NAV-8 — that file is this same lane's new D3 collection (see its own [[collected]] entry below), citation resolves within this share, kept verbatim. The section's 'mfp ... --task X' example names the excluded media-fetch-pipeline's CLI by project/tool name only (no path, no id) — not a scrub target per policy (project/tool names are never scrubbed), kept as-is.",
 ]
 
 [[collected]]
@@ -3749,24 +3822,15 @@ edits = [
 path = "agents/work-card-executor.md"
 source = "~/.claude/agents/work-card-executor.md"
 status = "verbatim"
-source_dirty_ack = """2026-09-07: source is UNTRACKED (`git status --porcelain`
-reports `?? agents/work-card-executor.md`) — not committed anywhere yet at
-source. Collected because it is this round's ninth agent and both agents/
-README.md and the two sibling agent files (engineering-backend-architect.md,
-testing-bug-fixer.md, both dirty this round — see their entries above) now
-route to it by name from their own description fields; leaving it uncollected
-would make those two descriptions dangling references to an agent nobody can
-open. Treated the on-disk working copy as this round's source of truth, the
-same way the DIRTY-SOURCE RULING treats the two modified-but-tracked agent
-files. review-when: re-collect and drop this ack once the file is committed
-at the source (first commit, not a diff — it has none yet)."""
-# Confirmed byte-for-byte identical to source via
-# `diff -u <(tr -d '\r' < source) <(tr -d '\r' < repo)`, exit 0. No scrub
-# target found (grepped for gunda/C:\Users — clean). One project name kept
-# per hard rule 2: "SSLD remediation round" in the provenance HTML comment.
-# agents/README.md updated (name registry table, count 8->9, provenance
-# section split to note this file's different lineage — not a [[collected]]
-# entry, repo-authored).
+# 2026-09-12: the 2026-09-07 source_dirty_ack's own review-when fired — the
+# file now has its first source commit (`docs(skills): commit peer edits to
+# six skills, four agents, and one live archive`), so the ack is dropped
+# rather than carried forward describing an untracked state that no longer
+# holds. Re-collected; still byte-for-byte identical to source (diff exit 0).
+# Scanned for scrub targets (account name, absolute home path, an absolute
+# path on a non-system drive) — clean, none introduced. The one project name
+# from the 2026-09-07 pass — "SSLD remediation round" in the provenance HTML
+# comment — is still present and still kept per hard rule 2.
 
 # =============================================================================
 # [placeholders] table — retirement
@@ -4259,3 +4323,121 @@ fallback = '''None. For turning source material into a deliverable a non-builder
 reads, `skill-toolkit/skills/audience-fit` ships; for the diagrams inside such a
 deliverable, `skill-toolkit/skills/diagram-authoring` and the
 `architecture-diagramming/` capability set do.'''
+
+# === lane W4 2026-09-12 BEGIN ===
+
+[[not_shipped]]
+path = "skills/patents-grabber"
+disposition = "excluded-by-decision"
+reason = '''NEW at the source since the 2026-09-07 alignment (born 2026-09-11,
+per the source's own git history). A thin wrapper skill around a local `pgb`
+CLI that already holds a patent library and an EPO drawing cache — the same
+shape as `skills/media-fetch-pipeline` (a wrapper around the `mfp` CLI) and
+`skills/post-brief` (a wrapper around `pb.py`), both excluded-by-decision
+above, and the same shape `skills/model3d-pipeline` is excluded for (a
+capability that lives entirely outside `~/.claude`). Every operative command
+in SKILL.md invokes `pgb.py` by an absolute path on a non-system drive; the
+program's own credential file sits in cleartext at a path SKILL.md itself
+names (a local checkout path, or a packaged install path under the user's
+local app-data root); and every read returns absolute local filesystem paths
+to cached PNGs the reader would need the program itself to have produced.
+Unlike `skills/media-fetch-pipeline`, this tool is not even inside the
+source's own `tools/` tree — it is a fully separate project on a second
+drive, so there is no partial "the design ships, the transport does not"
+split available the way `red-team/` split off `tools/extdispatch/`: the
+entire capability (auth, cache, quota accounting, the four calls) is that
+external program. Decision-procedure row 6 — the whole artifact is only
+meaningful inside that private context.
+Its `skill-trigger-dict.md` section (between `run` and `engineering:debug`)
+and its two quick-table rows were removed in the same round (two-part act,
+row-2 inverse) — see that file's own edits list.
+REVIEW-WHEN: the `pgb` CLI is published somewhere a reader can install from,
+matching the review-when already carried for `skills/media-fetch-pipeline`.'''
+fallback = '''None; nothing else shipped cites it. For scholarly literature (as
+opposed to patents), `skill-toolkit/skills/literature-search-extract` ships
+the adjacent capability, and its own SKILL.md already states patents are
+outside its remit. The transferable shape, if useful as a pattern: a reader
+skill built entirely as a thin, quota-aware contract around one external
+program it does not implement — lean-by-default payloads with a named
+`text_withheld` reason, an explicit per-call cost/quota envelope on every
+response (including failures), and a hard boundary between what the code
+enforces (no arbitrary output path, no search-URL construction) and what only
+the caller's discipline enforces (never publish what comes back, never read
+the credential file, never hand-roll a fetch around the tool) — spelled out
+as two separate lists so a rule that is only a convention is never mistaken
+for one the program itself blocks.'''
+
+[[not_shipped]]
+path = "tools/audience-fit-gate/"
+disposition = "excluded-by-decision"
+reason = '''NEW at the source (2026-09-10). Not in lane W4's file list — found
+only because `skill-toolkit/skills/audience-fit/SKILL.md` (which IS in this
+lane) grew a new section citing it this round, and COLLECTION-RULES row 2
+means a shipped citation cannot be left with no verdict. `afgate.py` itself
+looks portable by inspection (grepped for the account name and absolute
+non-system-drive paths — clean), but its `README.md` is not shippable as-is:
+it cites a named artifact inside the excluded `outputs/` tree twice (a dated
+deferral note, and a directory of accepted-run evidence), and its
+Calibration section names the internal file paths of a private, unrelated
+project on the same machine that the pattern was borrowed from — a private-
+tree pointer this repo cannot open, the same class already scrubbed once
+inside `skill-toolkit/skills/audience-fit/SKILL.md`'s own edits list (the
+`ccfg-retrieval-audit-f1-owner-view.html` artifact name, which recurs in this
+README too). Templating the README down to structure would leave a doc with
+half its citations removed; the two-file tool is small enough that shipping
+`afgate.py` alone without its own README would strip the tool of its usage
+docs. Deferred rather than adjudicated further — this lane owns the citing
+skill, not this repo's `tools/` collection scope or placement (no
+`collected_roots` entry exists for a source-tools import of this shape).
+REVIEW-WHEN: a lane or round that does own `tools/` placement decisions picks
+this up, or the README's private-tree citations are cleaned at the source.'''
+fallback = '''None yet. The capability is still legible in prose: `skill-
+toolkit/skills/audience-fit/SKILL.md`'s own "## Gate" section states the
+three checks (`voice`/`values`/`limits`), their severities and exit codes
+directly, so the reader loses the runnable instrument but not the contract it
+enforces.'''
+
+[[collected]]
+path = "skill-toolkit/skills/ux-walkthrough/references/navigation-ia-contract.md"
+source = "~/.claude/skills/ux-walkthrough/references/navigation-ia-contract.md"
+status = "edited"
+edits = [
+  "2026-09-12 (first collection, D3 new file — born 2026-09-09, cited by this same lane's already-shipped SKILL.md and usability-evidence.md, so it ships per decision-table row 2): §NAV-6 evidence line's file-path pointers into HTMLToolsLobby's private codebase (`index.html`, `assets/js/lobby.js`) replaced by 'anywhere in its markup or client script' — same class as the MFP/DIT file-path scrubs already established in decision-point-contract.md/usability-evidence.md (a pointer into a separate, unshipped private project the reader cannot open); the substantive finding (zero URL-state API occurrences) is kept.",
+  "2026-09-12: §6 Calibration's two `outputs/skill-reviews/...-2026-09-09.md` pointers (named artifacts inside the non-shipping outputs/ tree) replaced both times by 'recorded in the source environment's own skill-review records' — the borrow-ledger IDs and what-was/was-not-observed description are kept.",
+]
+# Cross-lane note (2026-09-12): NAV-6's `detect` line cites
+# `rules/web-navigation-state.md`, which does not ship yet in this repo as of
+# this lane's work (not in global-claude-md/rules/ — confirmed via ls). Kept
+# the citation verbatim (repo-relative, may resolve once another lane
+# collects it); not this lane's file to add. Everything else in the file
+# (23 NAV discriminators, the two-sided calibration table, growth contract,
+# sources list) is general methodology with no account name, absolute path,
+# private host, or credential found — scanned in full.
+# KNOWN OPEN GATE FINDING: `share_gate.py --source` reports [R] on this
+# file's line 157 for the same citation, as of this lane's close-out.
+# Expected to self-resolve once lane W2's `rules/` collection lands in the
+# same round (see the same note on skill-trigger-dict.md's entry above).
+
+[[not_shipped]]
+path = "skill-trigger-dict.md.xi.md"
+disposition = "excluded-by-decision"
+reason = '''Cited by `skill-toolkit/skills/env-cleanup/references/manifest-
+claude.md`'s known-root-files list (source addition, 2026-09-09) as "cross-
+index D-13 sidecar, read by `xi.py`" — a machine-generated companion index
+for `skill-trigger-dict.md`, produced by the source's own `tools/cross-index`
+project. That tool is not part of this repo (cross-index is a separate,
+maintenance-status local project per the source's own project registry, not
+one of lane W4's or any other lane's file list this round) — there is nothing
+in this share that would generate or consume this sidecar, so shipping a
+static copy of it would be a stale, unreadable artifact rather than portable
+content. Found only because a shipped lane-W4 file names it in a root-file
+inventory (hard rule 6: a citation must reach a verdict); not a decision
+about `tools/cross-index` itself, which is outside this lane's scope.
+REVIEW-WHEN: `tools/cross-index` ships in some future round, at which point
+this sidecar's mention resolves on its own.'''
+fallback = '''None needed. The citing bullet's function — telling an env-
+cleanup reader "this filename in your root is a known sidecar, not unknown-
+origin clutter" — is unaffected by whether the reader's own environment
+happens to have this file; the description in prose is the whole payload.'''
+
+# === lane W4 2026-09-12 END ===

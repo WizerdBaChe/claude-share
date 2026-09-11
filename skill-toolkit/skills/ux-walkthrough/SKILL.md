@@ -97,7 +97,12 @@ alternative input (keyboard / narrow / assistive tech). Include the
 
 ## Step 2 — walk the path, one decision point at a time
 
-Load `references/decision-point-contract.md`. Enumerate the decision points
+Load `references/decision-point-contract.md`. **When the surface has more than
+one destination** (a rail, a router, tabs, a mode switcher, a multi-view
+shell), also load `references/navigation-ia-contract.md` and answer its three
+orientation questions — how many destinations, whose world the division comes
+from, where 「我在哪一個」 actually lives — BEFORE any pattern is named. A
+one-destination surface says so and skips it. Enumerate the decision points
 along the card's path (entry → choose → act → wait → result → return /
 redo / exit). Blocking surfaces on the way — onboarding dialog, consent,
 error banner, modal — are decision points on EVERY path: record who
@@ -128,7 +133,7 @@ Task and context:            <card id + variant>
 Evidence:                    已確認 <path:line / DOM read / the user's own report or ruling + where it is recorded> | 推論 <from what> | 待測 <observation + the environment or fixture it needs>
 Current UI and copy:         <verbatim>
 User consequence:            <what they do wrong / cannot do / lose>
-Layer:                       wording | layout | interaction | state model | service | research
+Layer:                       wording | layout | interaction | IA/navigation | routing | state model | service | research
 Proposed change:             <and the accepted behaviour it must preserve>
 Verification:                <engineering check, or task + success condition>
 Owner / unresolved decision: <engineering | audience-fit | user ruling: question + evidence>
@@ -147,7 +152,8 @@ aria-expanded」 is.
 | interaction, keyboard, focus, race, parse | engineering (frontend-developer / testing-bug-fixer / testing-qa-engineer) | the work item, with its engineering check |
 | state model (lossy field, two-path read) | engineering, via the state-model finding | model change + the copy that becomes possible after it |
 | service / API contract (error taxonomy, message shape, missing cancel endpoint) | engineering (backend-architect / api-tester), then the front-end row above | the contract change first, then the copy or control it makes possible — never the copy alone (round-3: MFP mapped a user's mistyped path to `usage_error` → 「請求格式錯誤」; no wording fix reaches that) |
-| navigation, default behaviour, data retention, entry order | **user ruling** (global Interaction-style rule) | a question that carries the finding as evidence — never a unilateral pick, never a bare question |
+| IA — how the world is divided, the entry gate and its default, what an identity is allowed to see, data retention, entry order | **user ruling** (global Interaction-style rule) | a question that carries the finding as evidence — never a unilateral pick, never a bare question; the finding names its `NAV-n` (`navigation-ia-contract.md` §3) |
+| routing and addressability — view state in the URL, Back, a shared link opening in a clean session, destinations that are not operable controls | engineering (frontend-developer / testing-qa-engineer) | the work item plus its check; **determinable, so it never goes to 「只有人能判斷」** — the two axes are independent, and a surface can route perfectly while none of its destinations can be reached by keyboard (`navigation-ia-contract.md` NAV-6 / NAV-8) |
 | real needs unknown | task research (`usability-evidence.md` §plan) | a test plan, not a guess from code |
 
 Wording findings are handed to audience-fit; audience-fit hands non-wording
@@ -221,6 +227,15 @@ the project's asset, not this skill's — never file it only here.
   decision use, wait–cancel–recovery, destructive & discard, empty states,
   single source of truth, affordance claims, layout-change semantics,
   core-path equivalence, label distinctness. Load in Step 2.
+- `references/navigation-ia-contract.md` — orientation questions `NAV-O1`–`NAV-O3` and the
+  twelve discriminators `NAV-1`–`NAV-12` for any surface with more than one
+  destination: whose world the division comes from, entry gates, funnel cost,
+  contextual trimming, master–detail, addressability, operable destinations,
+  persistence scope, progress honesty, legends. **Questions, not a pattern
+  catalogue** — its founding measurement is a surface that passes the whole
+  pattern checklist with 0 of 23 destinations reachable by keyboard. Load in
+  Step 2 when `NAV-O1` > 1. It carries its own growth contract (§5) and is the model
+  if another reference here starts to grow.
 - `references/usability-evidence.md` — evidence ladder UE0–UE4 and the claim
   each rung permits, engineering-checkable list, uat.md mapping, task-based
   test plan, metric definitions, severity, small-sample caveats. Load in

@@ -81,6 +81,33 @@ passed it.
 - DOM order equals visual order after grid/flex reordering
 - target size ≥ 24 CSS px on core-path controls
 
+Six more when the surface has more than one destination
+(`navigation-ia-contract.md`; each is determinable, and the count is always
+against NAV-O1's denominator — 「23 個中 0 個」, never 「導覽有問題」):
+
+- **URL round-trip**: drive the surface to a view, read the address, reload, and
+  assert the same view. Off the web the translation is a re-entry parameter —
+  the command or argument that reproduces the state (`mfp ... --task X`)
+- **Back** returns to the previous view rather than leaving the surface; and the
+  view a person lands on from a link has a defined Back (NAV-5(d))
+- **clean-session share**: open the link a person would send in a fresh context
+  (new browser profile / cleared storage) and assert the same view AND the same
+  identity — measured failure mode: the view is in the URL and the role is in
+  `localStorage`, so the recipient gets the right page in the wrong world
+- **destinations are operable controls**: count the navigation items reachable by
+  Tab and openable in a new tab against NAV-O1. `data-*` + a click handler routes but
+  affords nothing; the measured founding case is 0 of 23 (NAV-8)
+- **selected state in the DOM**, not only in pixels: `aria-current` /
+  `aria-selected` on the current destination (`ops/lessons` L-010 — assert the
+  state, not the paint)
+- **persistence scope is declared and true**: the copy that says how long a
+  remembered thing lasts exists in the view that owns it, and matches the storage
+  call (grep the sentence against the write site). Known-good, verbatim:
+  「勾選進度僅儲存於本裝置，更換裝置或瀏覽器後將不會保留」
+- **legend travels with the code**: a one-glyph encoding (必/選, ●/○, colour) has
+  its legend in the same view as the encoded items, and colour is not the only
+  carrier (WCAG 1.4.1)
+
 A finding in this list that is sent to 「人工驗收」 instead is a deferral
 the delivery must name (「不能用『只有人能判斷』把明確技術缺陷延後」).
 

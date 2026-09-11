@@ -173,7 +173,11 @@ commands in `references/telemetry.md` §2:
   rule being ADDED; for near-duplicates already installed across two files — the
   standing failure — use AD2, which reads bodies instead of grepping them.
 - New enumerable labels (`Mode X`, `L2`, `Tier-3`, a checklist's numbering) must
-  clear `~/.claude/LABEL-REGISTRY.md` §4 (`40-maintenance.md` §3 Label birth).
+  clear `~/.claude/LABEL-REGISTRY.md` §5 (`40-maintenance.md` §3 Label birth); any
+  artifact that classifies or routes (hook, `rules/*.md`, trigger-class block, registry
+  row) carries the core fields of `ops/references/entry-schema.md` — `python -X utf8
+  tools/entry-schema-lint/lint.py --path <artifact>` shows no FAIL, and its class
+  section in `ops/references/principle-design-guide.md` has been walked.
 - **Hardcoded-enumeration classification (added 2026-08-31).** Every list the
   artifact instructs an executor to APPLY (questions to ask, items to cover,
   checks to run) is one of: (a) a **determinate gate/contract** — machine-checked,

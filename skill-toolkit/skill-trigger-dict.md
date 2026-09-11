@@ -36,7 +36,8 @@
 - 避免說法：「資安健檢」「整個專案找漏洞」（→ security-deep-checklist）
 
 ### security-deep-checklist（深度資安稽核）
-- 關鍵詞：資安檢核、資安健檢 (security health check)、找漏洞 (vulnerability sweep)、部署安全 (deployment posture)、供應鏈 (supply chain)、內網/不聯網風險 (air-gapped risk)、偵測與應變 (detection & response)、OWASP（XSS/SQLi/CSRF 單詞已移除 2026-08-17——僅引用語境出現；當「審查目標」講出來仍會路由）
+- 關鍵詞：資安檢核、資安健檢 (security health check)、找漏洞 (vulnerability sweep)、部署安全 (deployment posture)、供應鏈 (supply chain)、內網風險、不聯網風險 (air-gapped risk)、偵測與應變 (detection & response)、OWASP
+- 註：XSS/SQLi/CSRF 單詞已於 2026-08-17 移除（僅在引用語境出現）；當「審查目標」講出來時仍會路由。此行是註記不是關鍵詞——寫在 `關鍵詞：` 行內時整段會被當成一個無法命中的字彙 token（2026-09-08 audit）
 - 精準句型：
   - Mode A：「幫這個模組/專案做**程式碼資安稽核**」("security audit")
   - Mode B：「檢查**部署與設定**的安全姿態」(posture review)
@@ -71,7 +72,7 @@
 ## 設計與規劃
 
 ### product-design-thinking（高強度產品/功能設計）
-- 關鍵詞：新產品構想、新工具設計 (new tool design)、可行性評估 (feasibility)、Concept Note、CIM、PIM、PSM、語義契約 (semantic contract / DSL)、語義鴻溝驗證 (semantic gap)、RPD、複雜新功能規劃
+- 關鍵詞：新產品構想、新工具設計 (new tool design)、可行性評估 (feasibility)、Concept Note、CIM、PIM、PSM、語義契約 (semantic contract)、DSL 契約、語義鴻溝驗證 (semantic gap)、RPD、複雜新功能規劃
 - 精準句型：「我有一個新產品想法，幫我做第一性原理拆解與設計」/「我需要設計一個新工具，進入設計模式」
 - 適用時機：對話中途也觸發，不限開場；沒中時明講 skill 名 100% 命中
 - 也觸發：「給我 **PSM 等級**的修正案/重規劃」— 既有產品的修正**規劃**仍屬本 skill；只有「按既有 PSM 施工」不觸發（2026-07-12，lessons L-002）
@@ -83,10 +84,11 @@
 ### design-system-suite（多產品共用設計系統）
 - 關鍵詞：design tokens、theme packs、產品套件 (product suite)、跨產品導航 (cross-app nav)
 - 精準句型：「把幾個 app 統一到共用 design tokens + 主題包」
-- 避免說法：單一 app 的樣式調整（不觸發）
+- 邊界：本 skill 的第 3 contract 管**跨產品**的導覽（suite nav manifest、產品之間怎麼互通）；**單一產品內部**的資訊架構、側邊導覽、URL 狀態與深層連結 → ux-walkthrough `references/navigation-ia-contract.md` ＋ `rules/web-navigation-state.md`（2026-09-09 劃界：把單一產品的 IA 規則放進本 skill 會讓它永遠選不到——本 skill 只在多產品套件時觸發）
+- 避免說法：單一 app 的樣式調整（不觸發）、單一 app 的選單怎麼排／網址要不要記狀態（→ ux-walkthrough）
 
 ### diagram-authoring（精準圖示繪製與缺口檢測）
-- 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (FSM/statechart)、時序圖/序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、機制架構檢查・系統架構盤點・檢查項（audit mode：無「圖」字也觸發，交付＝可校驗架構圖＋缺口表＋檢查項；2026-08-31 實戰 miss 補）、圖要放進 HTML/PPTX/簡報
+- 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (statechart)、FSM 圖、時序圖、序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、機制架構檢查・系統架構盤點・檢查項（audit mode：無「圖」字也觸發，交付＝可校驗架構圖＋缺口表＋檢查項；2026-08-31 實戰 miss 補）、圖要放進簡報、圖要放進 HTML、圖要放進 PPTX
 - 精準句型：「把這個系統畫成方塊圖＋狀態機圖，缺的接口標出來」/「用現有資料重建 CPO 全架構圖，找出缺口」/「對整個 X 系統進行一次機制架構檢查（架構盤點），整理成未來可參照的檢查項」/「這組圖要能放進簡報（PPTX 可編輯）」
 - 不帶圖字的架構追問（外部語料 2026-09-02，判別靠「物件＋交付物＋evidence 模式」而非關鍵字）：「這東西到底怎麼串起來的」/「幫我把元件、資料流、狀態拆開讓新人看懂」/「把交接失敗路徑攤開」/ "show me how these components hang together" / "map out the runtime, handoff, and trust boundaries"（物件＝runtime/trust boundary 才是本 skill）
 - 邊界：選哪種圖（理論）→ product-design-thinking `representation-models.md`；健全性檢核 → 同目錄 `view-integrity-checks.md`；codebase 架構健檢（code smell/依賴）→ code-review-deep-checklist Mode B（其視圖稽核回呼本 skill 做呈現級繪製），「機制/系統」的架構檢查・盤點 → 本 skill audit mode；**覆蓋義務判別子（2026-09-05）**：audit mode 一題一主視圖、無盤點義務——交付只宣告視圖集成員「已畫／明列排除」（Step 6 coverage declaration），要「沒漏看」的保證（`deferred` 表、全 codebase 盤點）→ code-review-deep-checklist Mode B focused（AWD 2026-09-03 個案：沒畫的 lifecycle 視圖沒名字，09-05 重建才補）；資料圖表 → dataviz；UI mockup → design；Artifact 頁面機制 → artifact-design/artifact-diagramming；PPTX 機制 → anthropic-skills:pptx
@@ -102,17 +104,17 @@
 - 「把這個功能想法寫成一份 PRD／spec」→ **product-design-thinking**（本機的規格產物是 Concept Note／CIM／PIM／PSM）
 
 ### audience-fit（受眾調校）
-- 關鍵詞：使用者導向、消費者導向、寫給一般人/非工程師看、白話版、UI 文案、設定頁文字、這段太工程、AI味
+- 關鍵詞：使用者導向、消費者導向、寫給一般人看、寫給非工程師看、白話版、UI 文案、設定頁文字、這段太工程、AI味
 - 精準句型：「這份稽核頁改成給主管/一般人看的版本」/「設定頁的文字從使用者角度重寫」/「這段有 AI 味，去掉」
-- 邊界：「產出後」再加工——工程版原檔不動，Mode A 出新檔；從零寫技術文件 → engineering:documentation；視覺版面/主題 → artifact-design、dataviz；機器讀文件不適用（語言政策管轄）；**任務/流程/互動/狀態層的問題（走得通嗎、停用還是隱藏、等待/取消/失敗後、鍵盤/窄版）→ ux-walkthrough**（2026-09-07 拆分：Mode B 只管措辭，非措辭的發現交過去，對方把措辭發現交回來）
+- 邊界：「產出後」再加工——工程版原檔不動，Mode A 出新檔；從零寫技術文件 → engineering:documentation；視覺版面/主題 → artifact-design、dataviz；機器讀文件不適用（語言政策管轄）；**任務/流程/互動/狀態層的問題（走得通嗎、停用還是隱藏、等待/取消/失敗後、鍵盤/窄版）→ ux-walkthrough**（2026-09-07 拆分：Mode B 只管措辭，非措辭的發現交過去，對方把措辭發現交回來）；**必跑而非可選**（2026-09-08）：來源環境自己的研究專案裡 CONSUMER＝audience 的頁面（討論包、展示頁、說明頁）在建置後、交付前一律走 Mode A 受眾稿——研究者／開發者口吻、檔名、PASS 數、run-id、gate 代號出現在受眾頁即為缺陷（`rules/naming-and-placement.md` §1 CONSUMER 列）
 - 避免說法：「幫我把報告排版美化」（→ artifact-design）、「寫個 README 說明這段程式」（→ engineering:documentation）、「這個流程使用者走得通嗎」（→ ux-walkthrough）
 
 ### ux-walkthrough（UX 走查／認知走查）
-- 關鍵詞：UX 走查、認知走查 (cognitive walkthrough)、可用性審查 (usability review)、啟發式評估 (heuristic evaluation)、走得通嗎、從入口到結果跑一遍、使用者會不會誤以為、決策位置 (decision point)、停用還是隱藏 (disable vs hide)、等待/取消/失敗後怎麼辦、空狀態 (empty state)、鍵盤/窄版走得通嗎、可用性測試怎麼設計、使用者導向有沒有真的落地
+- 關鍵詞：UX 走查、認知走查 (cognitive walkthrough)、可用性審查 (usability review)、啟發式評估 (heuristic evaluation)、走得通嗎、從入口到結果跑一遍、使用者會不會誤以為、決策位置 (decision point)、停用還是隱藏 (disable vs hide)、等待後怎麼辦、取消後怎麼辦、失敗後怎麼辦、空狀態 (empty state)、鍵盤走得通嗎、窄版走得通嗎、可用性測試怎麼設計、使用者導向有沒有真的落地、導覽怎麼分、選單怎麼排、資訊架構 (information architecture)、任務導向、要不要先問身分、身分分流 (segmentation)、網址要不要記住狀態、可以分享連結嗎、深層連結 (deep link)、重整後會不會跑掉、返回鍵回到哪、主從式版面 (master–detail)、檢核表進度存哪
 - 精準句型：「把『載入另一份對話』這條路從入口走到結果，看使用者卡在哪」/「這顆按鈕該停用還是隱藏？」/「等待、取消、失敗後使用者知道保留了什麼嗎」/「幫我設計一個任務型可用性測試」
 - 性質：**原則層**（決策位置契約、show/disable/hide 條件表、等待–取消–復原契約、證據階梯 UE0–UE4），不是元件庫；只評估與開規格，不改產品程式
 - 比例規則：一顆按鈕＝一個決策位置（幾行發現）；一條流程＝任務卡＋決策點表；「有沒有落地」＝2–3 條最高價值任務；測試計畫只在使用者要「觀察」時才寫
-- 邊界：純措辭/語氣 → audience-fit Mode B（雙向交棒，互不重跑）；視覺 mockup/主題 → design、artifact-design；design tokens → design-system-suite；動效 → motion-design；新產品設計 → product-design-thinking（本 skill 是其 Phase 2「UX semantics are user decisions」問題背後的儀器：先走查 PIM 狀態機再問）；實作修正 → frontend-developer / testing 代理
+- 邊界：純措辭/語氣 → audience-fit Mode B（雙向交棒，互不重跑）；視覺 mockup/主題 → design、artifact-design；design tokens → design-system-suite；動效 → motion-design；新產品設計 → product-design-thinking（本 skill 是其 Phase 2「UX semantics are user decisions」問題背後的儀器：先走查 PIM 狀態機再問）；實作修正 → frontend-developer / testing 代理；**跨產品**的導覽 manifest／suite nav → design-system-suite（其第 3 contract），**單一產品內部**的資訊架構與路由 → 本 skill `references/navigation-ia-contract.md`（≥2 個目的地才載入；建置時的資產屬性另由 `rules/web-navigation-state.md` 以 path-read 觸發，兩者同源不重述）
 - 避免說法：「這段太工程，改白話」（→ audience-fit）、「幫我畫這個頁面」（→ design）、「新產品從零設計」（→ product-design-thinking）
 
 ---
@@ -120,7 +122,7 @@
 ## 流程與階段管理
 
 ### workflow-checkpoint（階段封存 + 續作回溯）
-- 關鍵詞：階段完成 (phase done)、存檔 (checkpoint)、寫 phase log、回顧專案繼續做 (recap and continue)、收尾、本輪的終止、先到這邊、驗收/UAT 全數通過、我會再新開 session
+- 關鍵詞：階段完成 (phase done)、存檔 (checkpoint)、寫 phase log、回顧專案繼續做 (recap and continue)、收尾、本輪的終止、先到這邊、驗收全數通過、UAT 全數通過、我會再新開 session
 - 精準句型：邊界多半「講出來」而非 commit 出來（實測 2026-06~08）：「先到這邊，我會再新開 session」/「驗收已全數通過」/「先設計(留文件)再動手」；續作：「接續之前的 X 專案」/「recap」
 - 避免說法：「專案結束了幫我總結」（→ project-retrospective）
 - **收尾 vs 結案**：判準是「後面還有沒有事」，不是聽起來多終局。收尾+會繼續 → 本 skill；結案+萃取經驗 → project-retrospective
@@ -159,7 +161,7 @@
 - 避免說法：「我這個**實驗/研究**下一步該做什麼」（做自己的研究流程 → scientific-research-guide）
 
 ### scientific-research-guide（科研方法論顧問）
-- 關鍵詞：研究流程走到哪、實驗怎麼設計、該用哪個統計檢定、對照組/抽樣/樣本量、模型 V&V/不確定性、擬合好不好/殘差、多重比較、投稿前要補什麼、可重現性、PRISMA/文獻空缺
+- 關鍵詞：研究流程走到哪、實驗怎麼設計、該用哪個統計檢定、對照組、抽樣、樣本量、模型 V&V、不確定性、擬合好不好、殘差、多重比較、投稿前要補什麼、可重現性、PRISMA、文獻空缺
 - 精準句型：「**研究/實驗**做到 X，**下一步該做什麼、還缺什麼**」/「n=6 三組，**該用哪個統計檢定**」/「**實驗怎麼設計對照組**」/「**投稿前**方法學還要補什麼」
 - 性質：顧問型，預設只診斷/建議；**未經明確要求不寫程式、不動資料**。
 - 領域特化 (domain profiles)：來源環境另維護多支領域 profile（該領域的研究問題也直接觸發本 skill；精確數量、載入清單與叢集消歧規則以 `domains/_routing.md` 為唯一真實來源，計數會腐爛，別在別處硬記數字或檔名）。**本分享不含任何 profile 檔** — 它們是作者自身研究領域的主題知識（見 `domains/` 資料夾的 README 與列數為零的 `_routing.md`）；請依 `domains/domain-expansion-guide.md` 自建自己的領域列。
@@ -188,7 +190,7 @@
 ## 動效與 3D
 
 ### motion-design（動效與 3D 總控 hub）
-- 關鍵詞：動畫 (animation)、動效、轉場 (transition)、微互動 (micro-interaction)、緩動 (easing)、時長 (duration)、編舞/交錯 (choreography / stagger)、載入/成功/錯誤狀態、捲動觸發 (scroll-triggered)、品牌動態識別 (brand motion identity)、粒子 (particles)、Three.js、WebGL、GLSL/shader、GLTF、後製特效 (post-processing)、raycasting、OrbitControls
+- 關鍵詞：動畫 (animation)、動效、轉場 (transition)、微互動 (micro-interaction)、緩動 (easing)、時長 (duration)、編舞、交錯 (choreography)、stagger、載入狀態、成功狀態、錯誤狀態、捲動觸發 (scroll-triggered)、品牌動態識別 (brand motion identity)、粒子 (particles)、Three.js、WebGL、GLSL、shader、GLTF、後製特效 (post-processing)、raycasting、OrbitControls
 - 精準句型：
   - 方法論：「這個按鈕的**動效**怎麼做（時長、緩動、人格）」/「定**品牌動態識別**」；3D：「用 **Three.js** 做 X」/「寫 **shader/GLSL** 效果」/「載入 **GLTF** 播動畫」
 - 性質：**hub（總控）**——SKILL.md 只有路由表；內容在 `vendor/`（LottieFiles 16 檔＋Three.js 10 檔）與 `local/`，用到才讀
@@ -214,7 +216,7 @@
 - 邊界（2026-09-01）：本 skill 管 SKILL.md 工件的**落地/優化**；新 skill 承載的**能力本身**複雜到過留存＋消費者判準且做法未定 → 先進 product-design-thinking Mode B 設計，再交回本 skill 落地；做法已定的例行新 skill 直接進本 skill
 
 ### env-cleanup（環境自清潔）
-- 關鍵詞：清理環境 (clean up environment)、無關檔案 (leftover/stray files)、環境整理、掃描垃圾檔、封存舊檔 (archive stale files)
+- 關鍵詞：清理環境 (clean up environment)、無關檔案 (leftover files)、stray files、環境整理、掃描垃圾檔、封存舊檔 (archive stale files)
 - 精準句型：Mode A「幫我**清理 .claude 環境**，列出不再使用的檔案」；Mode B「**掃描這個專案的無關檔案**並整理封存」
 - 避免說法：「稽核/檢查這個 skill 安不安全」（審內容 → config-self-audit）、「規則檔太肥幫我修剪」（修內容 → ops/40-maintenance §3）、「盤點技術債」（→ engineering:tech-debt）
 - 邊界：只判斷「檔案還該不該存在」並封存，**永不編輯內容、永不刪除**；先列表徵詢
@@ -232,9 +234,9 @@
 - 邊界：只做程序骨架與漣漪清單；目的 repo 的 COLLECTION-RULES 永遠權威，**絕不**複寫進來（雙源漂移）；來源唯讀（SHA 驗證）；zip 不進版控；push 等使用者（首跑 2026-08-16）
 
 ### skill-co-upgrade（skill 實測共升級迴圈）
-- 關鍵詞：跑一輪迴圈 (run a co-upgrade round)、交互升級 (co-upgrade)、硬化這個 skill (harden this skill)、實測缺口、繞過了才做對 (had to bypass the skill to do it right)
-- 精準句型：「跑一輪 co-upgrade 迴圈」/「這個 skill 實測有缺口，硬化它」
-- 主動提議（僅一次，never unprompted）：skill 明顯誤觸發/被繞過、或大改寫後首戰前
+- 關鍵詞：跑一輪迴圈 (run a co-upgrade round)、交互升級 (co-upgrade)、硬化這個 skill (harden this skill)、實測缺口、繞過了才做對 (had to bypass the skill to do it right)、拿這份指南/規範對照升級 (upgrade against an external standard；2026-09-11 起的 standard-comparison round)
+- 精準句型：「跑一輪 co-upgrade 迴圈」/「這個 skill 實測有缺口，硬化它」/「分析這份 PDF，盤點現況、對比、升級這個 skill」
+- 主動提議（僅一次，never unprompted）：skill 明顯誤觸發/被繞過、大改寫後首戰前、或使用者交來一份外部規範
 - 避免說法：「稽核這個 skill 的內容」（靜態稽核 → config-self-audit，本迴圈的驗證步）、「建/改 skill」（→ skill-creator）、「清理檔案」（→ env-cleanup）
 
 ### /loop、/schedule（排程與循環）
@@ -268,7 +270,7 @@
 | 研究下一步 / 統計檢定 / 實驗設計 / 投稿前補什麼 | scientific-research-guide |
 | 動效/轉場怎麼做・Three.js/WebGL/shader・品牌動態識別 | motion-design |
 | 這段太工程・白話版・UI 文案從使用者角度改 | audience-fit (A/B/C) |
-| 這條流程使用者走得通嗎・停用還是隱藏・等待/取消/失敗後・鍵盤/窄版・可用性測試怎麼設計 | ux-walkthrough |
+| 這條流程使用者走得通嗎・停用還是隱藏・等待/取消/失敗後・鍵盤/窄版・可用性測試怎麼設計・導覽怎麼分・要不要先問身分・網址要不要記住狀態・可以分享連結嗎 | ux-walkthrough |
 | 打包 skill 分享給別人 / 網路抓的 skill 能不能安全裝 | skill-share-packaging (A/B) |
 | 找論文 / paper 重點・方法・限制 / 教科書定義 / 查文獻參數值 | literature-search-extract |
 | 幫我做某主題有引用來源的深度研究報告 | literature-search-extract (`depth: exhaustive`) |

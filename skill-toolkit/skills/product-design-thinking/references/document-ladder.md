@@ -172,8 +172,8 @@ with `workflow-checkpoint` — don't create a fourth system.
 ## 7. Handoff
 
 End with (a) open questions the user must answer, (b) a manual acceptance checklist
-for the first milestone — two consequence-ranked sections, `A. 必驗` (≤7) then
-`B. 體驗`, never grouped by module or technology (`ops/references/uat.md`) — and
+for the first milestone — two consequence-ranked sections, `A. 必驗` then
+`B. 體驗`, shaped by `ops/references/uat.md` (cap and rungs live there) — and
 (c) an offer to checkpoint (`workflow-checkpoint`)
 before implementation starts. When implementation begins as multi-step/multi-agent
 work, dispatch per `ops/OPS.md` routing — this skill does not define its own dispatch
