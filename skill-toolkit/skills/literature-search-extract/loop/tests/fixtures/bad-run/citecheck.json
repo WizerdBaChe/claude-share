@@ -1,0 +1,6 @@
+[
+  {"claim_id": "C1", "claim": "Template-stripped Ag films support L_spp = 22 ± 3 μm at 633 nm.",
+   "checks": [["identifier", "WARN", "--offline: resolution skipped (fixture)"],
+              ["support", "FAIL", "support_span is NOT in park2022.txt (fixture: the run was delivered over this verdict — V8)"],
+              ["provenance", "FAIL", "park2022.txt: licensed text still pending-excerpt (fixture — V9)"]]}
+]

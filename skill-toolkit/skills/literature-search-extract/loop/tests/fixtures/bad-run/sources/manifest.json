@@ -1,0 +1,12 @@
+{
+ "schema": "lse-sources-manifest@1",
+ "tool": "fetchsrc/1",
+ "note": "fixture — a manifest whose entry was never excerpted (V9 must FAIL) and a hand_to_user entry with a text under its name (V9 must FAIL)",
+ "entries": {
+  "park2022": {"name": "park2022", "file": "sources/park2022.txt", "route": "script", "host": "landing.example",
+               "http_status": 200, "retention_policy": "excerpt", "retention_state": "pending-excerpt",
+               "scratch_path": "<fixture>"},
+  "refused": {"name": "refused", "file": "sources/refused.txt", "route": "hand_to_user", "host": "banned.example",
+              "status": "refused", "reason": "agent_banned (fixture)"}
+ }
+}

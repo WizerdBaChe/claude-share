@@ -19,9 +19,18 @@ below); everything else is a consequence.
   run.json                  contracts, findings verbatim, sources with keys, reuse_check, ledger stats, review_when
   ledger.jsonl              the P4.5 evidence ledger (unchanged citecheck row schema)
   citecheck.json            `verify/citecheck.py ledger.jsonl --json` output, stored, never rewritten
-  sources/<name>.txt        retrieved texts — never leave the machine (INV-10)
+  sources/<name>.txt        retrieved texts — never leave the machine (INV-10); written ONLY by
+                            verify/fetchsrc.py; licensed text is ±400-char excerpt windows, never full
+  sources/manifest.json     fetchsrc's provenance: url/path, host, route, status, sha256, retention state
   record.md                 human-read 【證據查證紀錄】 with the vault card (written by register)
 ```
+
+Licensed full text (a `landing_page` host, a local PDF of a subscription article) never
+enters the vault: fetchsrc keeps it in `%LOCALAPPDATA%\Temp\lse-fetch\<run_id>\` and
+`fetchsrc.py excerpt` derives `sources/<name>.txt` from the ledger's support spans once
+the ledger exists (user ruling R3, 2026-09-11), and re-derives it when a later ledger row
+cites a new span in the same source (`--redo` forces it; the scratch copy must still
+exist). `sha256_full` in the manifest is what proves the excerpt came from that text.
 
 The deliverable's CONTENT does not change because of persistence (INV-2): the ledger
 stays behind the deliverable, never inside it.
@@ -33,7 +42,7 @@ stays behind the deliverable, never inside it.
 | P1 | `python ../loop/runs.py open --question "<question>" --depth <d> --mode <1\|2> [--caller <consumer id> --preset <name> --domain <profile>]` → prints `run_id`, the folder, and the reuse-check line. It performs the reuse check ITSELF and writes `reuse_check` into `run.json`. | **F-1/F-2**: `register` refuses a run without `reuse_check`; `check` V7 fails it. No `open` → no folder → the gate has nowhere to read from |
 | P2 | Copy the printed `reuse check: …` line into `search_trail` (it is pre-seeded in `run.json`). On a match, offer the UPDATE run (seed P2 with the prior run's `sources` + `search_trail`; search only unfilled gaps and the period since). | INV-4 |
 | P3/P4 | Derive each source's key as you triage: `python ../loop/idkey.py key "<identifier>"` (or `normalize --doi … --arxiv … --title … --author … --year …` when no identifier resolves). Fill `result.sources[]` with `key`, `aliases`, `unresolved`, `unresolved_basis`, `zotero_key` (from `connectors/zotero_local.py`). | INV-3: an unverifiable identifier is NOT minted into a key — the row becomes `unresolved:` and `gaps` says so |
-| P4.5 | Write `ledger.jsonl` and `sources/*.txt` INTO the run folder, then `python verify/citecheck.py <run>/ledger.jsonl --json > <run>/citecheck.json`. | **F-3**: the gate reads from the folder; a floating ledger has no home |
+| P4.5 | Retrieve each cited text with `python verify/fetchsrc.py fetch\|local\|paste --run <run> …` (it consults the host policy, writes `sources/manifest.json`, and hands a refused host to the user with exit 3), write `ledger.jsonl`, run `fetchsrc.py excerpt --run <run>` for licensed texts, then `python verify/citecheck.py <run>/ledger.jsonl --json > <run>/citecheck.json`. | **F-3**: the gate reads from the folder; a floating ledger has no home; a text with no manifest entry FAILs provenance |
 | P5 | Put the deliverable text verbatim into `result.findings` (inline deliveries have no file — this IS the durable copy), fill `gaps`/`confidence`/`search_trail`, then `python ../loop/runs.py register <run>` → `record.md`, index, README. End the deliverable with the loop footer (below). | **F-4**: the mandatory Gaps/Confidence trailer carries the footer; `register` refuses an empty `findings` |
 | Mode 2 return | Add `run_id` and `sources[].key` (+ `review_when[]`) to the result contract — callers cite without re-resolving. | **F-5** |
 | Zotero close-out | The retraction re-sweep (rubric §3b) reports through `reflux.py retraction` — same path as a person. | **F-6** |
@@ -45,7 +54,7 @@ folder like every other depth (a `quick` run with one numeric claim = one ledger
 
 ```
 —— 閉路 (loop) ——  run: <run_id> · keys: doi:… , arxiv:… · 推翻條件 (review-when):
-T-1 任一引用來源被撤稿／勘誤（Crossref update-to；Zotero 收尾重掃會回報）
+T-1 任一引用來源被撤稿／勘誤（Crossref updated-by；`citecheck.py --retraction-sweep` 於 Zotero 收尾回報）
 T-2 同題重跑找到 ≥10% 新來源，或出現與本表衝突的主張
 T-3 任一消費者回報 correction（reflux）
 ```
@@ -98,8 +107,13 @@ refuses to create the home when the vault itself is missing (never recreate a va
 
 `python ../loop/runs.py check <run>` — V1 schema · V2 ledger + citecheck present when
 claims are numeric · V3 record.md card · V4 keys well-formed (V4b > 30 % unresolved) ·
-V5 footer · V6 related wikilinks · V7 reuse_check precedes the gate and is logged. FAIL
-where a tool parses (V1/V2/V3/V4/V7), WARN where a human reads (V4b/V5/V6).
+V5 footer · V6 related wikilinks · V7 reuse_check precedes the gate and is logged ·
+**V8** (2026-09-11) the emitted `citecheck.json` carries no FAIL once the run is past
+`open` — a rejected claim delivered as cited is failure mode #8 · **V9** every
+text-bearing source names its `access_route`, `sources/manifest.json` exists, no entry is
+left `pending-excerpt`, and no text exists under a `hand_to_user` entry. FAIL where a
+tool parses (V1/V2/V3/V4/V7/V8), WARN where a human reads (V4b/V5/V6); V9 is WARN for
+runs created before 2026-09-12 (the instrument did not exist) and FAIL after.
 V2's numeric detector is a unit LIST (`runs.py NUM_UNIT_RE`), deliberately not a grammar:
 it catches the executor who forgot a row; a number in a unit the list lacks is still a
 numeric claim that needs its row (P4.5) — extend the list when a real run shows a miss.

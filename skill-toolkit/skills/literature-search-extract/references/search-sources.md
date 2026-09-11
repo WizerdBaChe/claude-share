@@ -132,16 +132,27 @@ request volume — rate limits below matter mainly as "don't loop fetches" guida
   (`"term"[MeSH]`), else `[tiab]` field tags. PubMed Central (PMC) subset = free full
   text → those sources can be `[full]`.
 
-### IEEE Xplore (EE/CS/photonics)
-- API exists but requires a registered developer account + manually issued key —
-  assume UNAVAILABLE **unless `ieee_xplore` is `live` in `../connectors/registry.json`**;
-  a key would arrive through that connector, never through the conversation. Note the
-  two-stage trap recorded there: a key alone buys metadata + abstracts, and `[full]`
-  additionally needs the subscription behind it — the probe must report which of the two
-  is actually live, because the failure is otherwise silent. Use instead: WebSearch scoped
-  `site:ieeexplore.ieee.org`, and extract from the public landing page (abstract,
-  figures list, references are visible) → typically `[abstract]` or `[partial]`;
-  full text is usually paywalled → paywall handling per P3.
+### IEEE Xplore (EE/CS/photonics) — `agent_banned`, hand-to-user
+- **No program touches `ieeexplore.ieee.org`.** The Xplore Terms of Use (read 2026-09-10
+  through an entitled session) list "use robots or intelligent agents to access, search
+  and/or systematically download any portion of IEEE Xplore" as prohibited — a person
+  reading is licensed, a script fetching the landing page is not, and the host answers
+  automation with a 202/418 challenge anyway. The policy row (`hooks/literature-host-policy.json`)
+  has an empty surface list, `fetchsrc.py` refuses before it connects, and the
+  machine-wide hook denies WebFetch / browser navigation to the host.
+- API: requires a registered developer account + manually issued key — assume UNAVAILABLE
+  **unless `ieee_xplore` is `live` in `../connectors/registry.json`**; a key would arrive
+  through that connector, never through the conversation. Two-stage trap recorded there:
+  a key buys metadata + abstracts, `[full]` additionally needs the subscription behind it.
+- What the agent does instead: (1) find the item elsewhere — Semantic Scholar / Crossref
+  carry IEEE metadata and abstracts (`[abstract]`), an author preprint often sits on
+  arXiv (`[full]`, then run the preprint→published check), and IEEE OA articles resolve
+  via doi.org to a public copy; (2) for anything more, ship a **hand-to-user query pack**
+  (`output-templates.md` §Query pack): the exact Xplore query string with field tags,
+  the named DOIs to open, and what to copy back (locator + verbatim span). The user's
+  reading is the licensed act; the ledger row then carries `access_route: user_provided`.
+- Never `site:ieeexplore.ieee.org` + WebFetch of the hit: the search is fine (WebSearch is
+  the harness's engine, not Xplore's), the fetch is the banned act.
 
 ### Publisher previews (Springer / Elsevier-ScienceDirect / Wiley)
 - Treat as landing-page channels, not APIs (their APIs require institutional keys).
@@ -247,7 +258,8 @@ deposited source data.
 gap, and never said how to get it. SI usually sits behind its own link on the article
 landing page, frequently as a separate PDF/XLSX, and is often open even when the article
 is not. Procedure: fetch the landing page, take the SI links from it, fetch those; if
-WebFetch cannot render the landing page, that is exactly ladder rung 3b (render it).
+WebFetch cannot render the landing page, ladder rung 3b decides — the policy row, not
+the failure, says whether a render is permitted (a challenge means hand-to-user).
 Cite SI with its own locator (`Suppl. S1`, `Suppl. Table S3`) — never fold an SI number
 into a main-text table citation.
 
@@ -298,14 +310,21 @@ ladder instead of aborting P2, and record every substitution in `search_trail`:
 2. Free unkeyed APIs (Semantic Scholar shared tier, Crossref polite pool, arXiv export,
    PubMed E-utilities) →
 3. WebSearch site-scoped queries + landing-page WebFetch (always available) →
-3b. **Extraction fallback** — when WebFetch cannot render a needed page (JS-heavy,
-   anti-bot, blocked publisher page, or a plain **403** — measured 2026-08-26 on
-   perplexity.ai), render it before downgrading the access tag. In Claude Code the
-   binding is a browser MCP: `playwright-headless` first, `claude-in-chrome` only when
-   the page genuinely needs the user's logged-in session (say so in `search_trail` —
-   it spends their authenticated identity). Elsewhere: Tavily extract, Exa contents, or
-   a self-hosted Firecrawl instance. If none is available, keep the item at
-   `[abstract]`/`[partial]` honestly — never reconstruct content. →
+3b. **Render fallback — policy-gated, never challenge-driven** (rewritten 2026-09-11;
+   the earlier text told the executor to render "anti-bot" and "403" pages with a
+   headless or logged-in browser, which is the one move `rules/literature-access.md`
+   forbids). First ask the host policy: `python ../connectors/access_policy.py --url <u>
+   --surface browser_headless --check`. A row that lists `browser_headless` (an OA or
+   public host whose page is JS-heavy) may be rendered with `playwright-headless` for a
+   NAMED document; the render is logged in `search_trail`. Everything else is not a
+   render case: a **202 / 403 / 418 / CAPTCHA / proof-of-work** answer is the host's
+   bot management speaking, and the routing outcome is `HAND-TO-USER` (fetchsrc prints
+   it) — never a second attempt with another User-Agent, a headless profile, or the
+   user's logged-in Chrome. `claude-in-chrome` is `browser_user` in the policy and no
+   scholarly row grants it; it is reserved for a page the user has explicitly asked to
+   be driven in their own session. If the policy refuses, keep the item at
+   `[abstract]`/`[partial]` honestly and put the URL in `gaps` as "not retrieved,
+   hand-to-user" — never "not found", never reconstructed content. →
 4. A live `local_corpus` connector alone (coverage limited to what was ingested — flag
    in `gaps`). **As of 2026-08-27 there is none**, so the ladder currently bottoms out
    at rung 3: if web search and rendering both fail, the honest output is "not found in
@@ -385,6 +404,54 @@ deliverable (failure mode #1).
 - **Citation string only** (no identifier) → Crossref
   `query.bibliographic=<string>` → take the top hit ONLY if title+authors+year all
   match; otherwise treat the work as unresolved and say so.
+
+## Query building — vocabulary ledger, keyword triad, anchor round (SKILL.md P2 points here)
+
+Added 2026-09-11 from the NTU Library guide (研究生防雷指南, slides 3–10). The old rule
+was one sentence ("iterate once with the terminology found in the first hits"); it
+converged too early because it never said WHERE the better terms come from, and a
+badly-built query saturates faster than a good one (P2 recall check).
+
+**1. The vocabulary ledger.** Before the first query, write three columns and keep
+adding to them through the run: the user's terms · the field's terms (how the
+literature names the same thing — often not what the user typed) · the database's own
+layers. Every database exposes up to three keyword layers, and each has a blind spot:
+
+| layer | who wrote it | good for | blind spot |
+|---|---|---|---|
+| author keywords | the authors | the paper's own framing, new coinages | inconsistent across papers; a niche term you did not guess is invisible |
+| controlled vocabulary (IEEE Terms, MeSH, INSPEC, Emtree) | the indexer | recall across spellings and synonyms in one hit | lags new topics by 1–3 years; the term may not exist yet |
+| index terms / auto-extracted (Semantic Scholar fields, OpenAlex concepts, "Index Terms") | a machine | breadth, cross-field hits | noisy; a frequent word is not a topic |
+
+Query from at least two layers. A term that appears in only one column is a candidate,
+not a keyword, until a second hit uses it.
+
+**2. Iterate batch n → keyword set n+1.** Read the first 5–10 relevant hits' keywords and
+titles, add the terms they use to the ledger, and re-run. Stop iterating when a round adds
+no new column entries — that is vocabulary saturation, and it precedes result saturation.
+Log the ledger's final state in `search_trail` (one line: `vocabulary: <terms added by
+round 2>`), because that line is what the next run seeds from.
+
+**3. The anchor round (before any saturation claim).** Two anchors, one round:
+- a **review article** on the topic — its reference list is a curated backward set and its
+  vocabulary is the field's; at `standard` depth one review read at `[partial]` (intro +
+  references) is cheaper than three more queries;
+- the **most-cited "pearl"** among the hits — its forward citations (Semantic Scholar
+  `/citations`), its **co-citations** (papers cited together with it, S2 `/references` of
+  its citers) and **bibliographic coupling** (papers that share its references) surface the
+  cluster a keyword query cannot name. This is the citation-index snowball the guide
+  recommends over more keyword rounds.
+
+**4. Hygiene.** Field tags (`[tiab]`, `"Author Keywords":`, `site:`) narrow; quotation
+marks fix phrases; wildcards (`wave*`) recover plurals and inflections; Boolean groups
+are written out in `search_trail` verbatim so the query can be re-run. A query that cannot
+be re-run from the trail is a memory, not a search.
+
+**Query pack.** When a database is `institutional_only` or `agent_banned` in the host
+policy (Scopus, Web of Science, IEEE Xplore, airiti), the run's output for that channel
+is the pack in `output-templates.md` §Query pack — the ledger's terms, written as that
+database's syntax, with the named DOIs to open and the copy-back instructions. The user's
+run of it is the licensed act; whatever they hand back enters as `user_provided`.
 
 ## Citation chasing (backward / forward)
 

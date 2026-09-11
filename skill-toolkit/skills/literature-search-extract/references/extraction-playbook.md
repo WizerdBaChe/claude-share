@@ -16,6 +16,30 @@ Conventions used throughout:
 
 ---
 
+## 0. Where each information need lives (SKILL.md P1 points here)
+
+Moved from SKILL.md on 2026-09-11 (line-neutral extraction). Translate `purpose` +
+`question` into a kind of information first — each kind lives in a different place and
+needs a different output shape:
+
+| Information need | Typical home in a paper | Typical home in a textbook |
+|---|---|---|
+| Definition / concept / taxonomy | Introduction, review articles | Chapter openings, glossary |
+| How a method/protocol works | Methods (+ supplementary) | Worked-example sections |
+| Quantitative values, parameters | Results tables, figures, abstract headline numbers | Data tables, appendices |
+| Validity limits, assumptions | Discussion, Limitations | Derivation preconditions |
+| State of the art / who did what | Related Work, recent reviews | Latest-edition survey chapters |
+| Canonical equations / derivations | Theory section, appendix | Core chapters (most reliable) |
+| Contradictions / open questions | Discussion, review "future work" | Rarely — use reviews instead |
+
+The premise check that P1 now requires belongs here too: a question can presuppose a fact
+the source never states ("the thermal conductivity Johnson & Christy measured" — they
+measured optical constants). Write the presupposition down as its own target; if the
+source does not carry it, the deliverable says so as a gap instead of supplying a number
+from somewhere else (eval 3 is the standing instance).
+
+---
+
 ## 1. Definition / concept / taxonomy
 
 **Where it lives.** Review-article Introductions (they define terms to frame the field)

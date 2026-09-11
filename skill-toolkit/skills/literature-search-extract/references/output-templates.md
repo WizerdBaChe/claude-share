@@ -26,6 +26,17 @@ contract example for Mode 2 returns.
 - **Delivery is inline by default.** Any format below becomes a file artifact only when
   the user (Mode 1) or the caller contract (Mode 2) explicitly requests a file — content
   length alone never justifies writing one.
+- **AI-use disclosure line** (added 2026-09-11; NTU Library principle 2 "透明與揭露" and
+  Elsevier's author policy both require it, and a deliverable that will be pasted into a
+  thesis or paper inherits the requirement). One line after the loop footer, both modes:
+  `AI use: search + extraction by literature-search-extract (Claude); identifiers, spans
+  and numbers machine-checked (citecheck v2, N rows, F FAIL); human verification: <what
+  the user confirmed, or "none yet">`. A human-facing document states it in Traditional
+  Chinese with the English tool names kept.
+- **Source list marks the route.** Every source line ends with its access route when it
+  is not `script`/`webfetch`: `[local PDF]`, `[user-provided passage]`, `[handed to user
+  — not retrieved]`. A `[user-provided passage]` is the one row the reader must be able
+  to refute, so it is never folded into a plain citation.
 
 ---
 
@@ -182,6 +193,40 @@ copyright boundary), full locator (page/section/clause), access tag, and a one-l
 
 ---
 
+## Query pack — hand-to-user retrieval (P2/P3 point here)
+
+**Use when:** a channel the question needs is `institutional_only` or `agent_banned` in
+`~/.claude/hooks/literature-host-policy.json` (Scopus, Web of Science, IEEE Xplore,
+airiti, the library discovery layer), or a named document sits behind a host the policy
+refuses. The pack turns "not retrieved" into a task the user can run in five minutes as
+a Licensed User; the agent never touches the host.
+
+**Structure (Traditional Chinese for the user, syntax verbatim):**
+
+```
+### 請您代查（query pack）— <database>
+- 為什麼由您執行：<host> 在存取政策中為 <class>（<one-line licence basis>）；程式不得存取。
+- 檢索式（直接貼入）：
+    <database syntax, e.g. TITLE-ABS-KEY("template-stripped" AND silver AND "propagation length")>
+    — 詞彙帳（vocabulary ledger）：<terms by column>
+- 指定開啟：<DOI / URL 1> ；<DOI / URL 2>   （每筆註明要看的段落：Table 2、Methods §2.1…）
+- 請回傳：每筆 (1) 定位 locator，(2) 逐字片段 support span（含數值與單位），(3) 存取層級。
+- 回傳後的處理：片段以 fetchsrc.py paste 登錄為 user_provided；交付物來源表標示 [user-provided passage]。
+```
+
+**Filled example:**
+
+> ### 請您代查（query pack）— IEEE Xplore
+> - 為什麼由您執行：`ieeexplore.ieee.org` 為 `agent_banned`（Xplore Terms of Use 禁止 robots or
+>   intelligent agents 存取；2026-09-10 讀取）；程式不得存取。
+> - 檢索式：`("Document Title":plasmonic waveguide) AND ("Author Keywords":silver OR "Index Terms":Ag film) AND ("propagation length")`
+>   — 詞彙帳：使用者詞 SPP waveguide ／ 文獻詞 long-range SPP, LRSPP ／ 索引詞 Plasmons, Optical waveguides
+> - 指定開啟：DOI 10.1109/JLT.2011.xxxxxxx（Table I 的 L_spp @ 1550 nm）
+> - 請回傳：locator、逐字片段、存取層級。
+
+Every pack line also goes into `gaps` as `not retrieved, hand-to-user: <host> (<n> items,
+query pack §)` — never as "not found".
+
 ## Result contract — complete Mode 2 example
 
 Returned to a calling skill (English, structure-stable). `findings` embeds one of the
@@ -204,11 +249,15 @@ seven formats above; the other four fields are always present.
       identifier: "DOI: 10.0000/fake.2022.234",
       key: "doi:10.0000/fake.2022.234",
       access_level: "full",
+      access_route: "script",
+      licence_basis: "CC BY 4.0 (OA article; policy row arxiv.org)",
       locators_used: ["Methods §2.1", "Table 2", "Discussion §4.2"] },
     { citation: "Chen, L. (2023). Placeholder Rev. Nanophot. 8, 101.",
       identifier: "DOI: 10.0000/fake.2023.101",
       key: "doi:10.0000/fake.2023.101",
       access_level: "full",
+      access_route: "local_pdf",
+      licence_basis: "user's own copy (Zotero storage)",
       locators_used: ["§1.2", "Fig. 4b", "§3.4"] }
   ],
   gaps: [
@@ -233,7 +282,7 @@ seven formats above; the other four fields are always present.
   ],
   run_id: "20260903_ag-lspp-633nm",
   review_when: [
-    { trigger: "T-1", text: "any cited source retracted or corrected (Crossref update-to)" },
+    { trigger: "T-1", text: "any cited source retracted or corrected (Crossref updated-by on the cited work)" },
     { trigger: "T-2", text: "a rerun finds >= 10 % new sources or a conflicting claim" },
     { trigger: "T-3", text: "a consumer reports a correction (reflux)" }
   ]
