@@ -17,7 +17,11 @@ paths:
 Sunk from global `CLAUDE.md` on 2026-08-11 (T-007). The general rule it was
 attached to — "a deliverable that can fail at runtime must announce its
 failures" — stays in `CLAUDE.md`; only this file-type-specific case moved.
-Index line lives in `CLAUDE.md`; review 2026-11.
+Index line lives in `CLAUDE.md`; review-when: a project targets GLSL ES 3.00 /
+WebGL2 or moves to WGSL / WebGPU — the sampler-indexing restriction below and the
+shape of its failure (silent blank vs. a validation error the API reports) are
+both properties of the ES 1.00 compiler, so re-probe before trusting either. A
+date is not a trigger: this line replaced "review 2026-11" on 2026-09-08 (ES-3).
 
 - **GLSL ES, multi-texture sampling:** unroll into named uniforms.
   Variable-indexed sampler arrays and dynamic loop bounds **compile-fail as a

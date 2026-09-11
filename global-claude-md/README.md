@@ -5,7 +5,7 @@
 ## 內容
 
 - `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。開頭有一段「Path-scoped rules」索引，指到下面 `rules/` 資料夾。
-- `rules/`：現有六個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
+- `rules/`：本分享收錄十個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
   新增其中兩條——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`
   （GLSL 靜默失敗模式）——是把原本內嵌在 `CLAUDE.md` 裡的規則搬出來：這兩條規則的觸發
   條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後
@@ -16,10 +16,18 @@
   `visual-gate-scope.md`（CSS/瀏覽器驅動測試的視覺閘門範圍：量測墨水而非量測框、閘門要
   普查整個類別而非只補上一次事故的洞）。2026-09-06 再新增第六條——`verification-ladder.md`
   （一項不變量/閘門/測試主張要標明自己站在證據第幾階（0–5）；第 2 階以上都要附一個
-  已知為真的正控制）——同樣直接以 scoped 規則檔形式加入。要在自己的環境生效,必須放在
-  對應機制存在的位置(Claude Code 是 `~/.claude/rules/`);若目標環境沒有等效的
-  path-scoped 規則機制,把這六條規則的內容併回 `CLAUDE.md` 本體即可,只是會变回
-  「每 session 都付費」。
+  已知為真的正控制；2026-09-12 refresh 又補上「第二個屬性」：一項會活過本次對話、後人
+  又不會重算的主張，要在旁邊放一份驗證紀錄）。2026-09-12 refresh 再新增四條——
+  `web-navigation-state.md`（≥2 個目的地的網頁介面：目前位置要進 URL、每個導覽目的地要是
+  可操作控制項）、`hook-deny-message.md`（hook 塞進工具結果的拒絕/通知文字要跟 injected
+  instruction 區分開，無法驗證來源的 agent 讀到它時才不會誤信）、`naming-and-placement.md`
+  （任何輸出項目誕生前先分類 LEVEL 與 CONSUMER 兩軸，決定它住哪裡、誰能寫、閘門讀哪個
+  artifact）、`figure-self-read.md`（產生器輸出的圖檔宣稱「pass」時要附一份模型看過該
+  點陣圖的紀錄，不只是量測工具的判定）。來源端的 path-scoped 索引另外還列了第十一條
+  `literature-access.md`（文獻取用權限規則）；是否隨本包出貨屬於另一個收錄批次的範圍，
+  本 README 不代為斷言。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是
+  `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這些規則的內容併回
+  `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
 
 ## 去識別化 — 以及為什麼大部分路徑「原樣保留」
 
@@ -48,13 +56,13 @@
 3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符換成該機器實際的 OS/shell；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 把 `rules/` 下六份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
+6. 把 `rules/` 下十份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
    `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`、
-   `verification-ladder.md`）複製到目標機器的 `~/.claude/rules/`。這是 path-scoped
-   規則機制實際運作所需的檔案；`CLAUDE.md` 開頭的 path-scoped 索引行現已列出全部六條
-   （2026-09-07 補齊——先前索引只列出前兩條，後四條曾一度落後於實際檔案；索引落後於
-   實際檔案不影響規則檔本身的內容，只影響「session 啟動時要不要主動提示這條規則存
-   在」）。若目標環境沒有等效機制，直接把這六份檔案的規則內容併回 `CLAUDE.md` 也可以。
+   `verification-ladder.md`、`web-navigation-state.md`、`hook-deny-message.md`、
+   `naming-and-placement.md`、`figure-self-read.md`）複製到目標機器的 `~/.claude/rules/`。
+   這是 path-scoped 規則機制實際運作所需的檔案；`CLAUDE.md` 開頭的 path-scoped 索引行
+   列出十一條，第十一條 `literature-access.md` 是否隨本包出貨由另一個收錄批次決定，見該
+   批次自己的紀錄。若目標環境沒有等效機制，直接把這些檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
 ## 快照細節
@@ -82,6 +90,21 @@
   提交，內容與先前收錄的工作副本一致，故其 `source_dirty_ack` 撤回。「Environment」
   小節撤回 `<LINE_ENDING_CONVENTION>` 佔位符（見「去識別化」一節）；`<OS_NAME>` /
   `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符仍在。無新增個資。
+- 2026-09-12 refresh（對齊來源 `7c9867b`）：`CLAUDE.md` 加入「Readers」宣告與六處
+  `[main]` 標籤、Prior-art check、`[unattended-run]`、Decision charter、Compact
+  Instructions 等小節重新措辭；path-scoped 索引行改為十一條（見「內容」一節）。
+  `rules/` 新增四份：`web-navigation-state.md`、`hook-deny-message.md`、
+  `naming-and-placement.md`（皆逐字收錄，來源本身未含機器綁定個資）、
+  `figure-self-read.md`（逐字收錄）。`office-deck-deliverables.md` 收錄當下來源端有
+  9 行未提交的新增內容（`git diff --numstat` = 9 insertions, 0 deletions），已依現況
+  收錄，見 `tools/share-manifest.toml` 該條目的 `source_dirty_ack`。**新發現一處先前
+  輪次未捕捉的個資**：`CLAUDE.md` 的 Prior-art check 那條規則裡，「筆記庫」那個索引名稱
+  原文嵌有操作者本名（一個以 Obsidian 命名慣例組成的資料夾名），已泛化為「本機的
+  Obsidian 筆記庫」；相鄰的 `AssetVault` 標籤本身不含識別資訊，原樣保留。
+  `naming-and-placement.md` 與 `verification-ladder.md`（第二個屬性小節）內各有一處指向
+  SSLD 專案自己內部路徑的引用（分別是一支遷移腳本的完整路徑、以及來源筆記檔名），比照
+  既有「Phase Z11」前例的作法：專案名與回合代號（SSLD、T46、T47、T48）保留，內部路徑本
+  身泛化。無其餘新增個資。
 - 這是時間點快照，不是自動同步目標。
 
 ## 授權

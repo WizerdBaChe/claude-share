@@ -86,6 +86,30 @@ per-project journal，新 session 從最新條目恢復進度並**重新確認�
 （機制：`ops/60-bootstrap.md` §G、`ops/rules-usage-dict.md` §7 登記表、
 `ops/40-maintenance.md` §3 birth schema；同日源起）。
 
+### 11. 機制要能被擴充而不靜默失效 (extensible without silent failure)
+信念 2 的活的執行證明 (living proof) 證明的是「出生那天它對」。之後語料會長出
+新類別、規則會長出新條目、產物會長出新格式，而**沒有任何事件會自動重跑那次
+校準**——於是機制不是壞掉，是安靜地變得不再適用，而它仍然被信任。這比沒有機制
+更糟（信念 4 的反面：機械強制一旦失準，它擋掉的是錯的東西）。
+
+因此每個機制自帶四件事，缺一即為出生缺陷：
+
+- **明示的擴充條款**：新成員要帶什麼，寫在機制自己的文字裡，不靠作者記得。
+- **封閉的概念集**：它認得的類別是列舉出來的；遇到列舉外的東西必須報
+  `undetermined`，**不得併入既有類別**——併進去就是靜默壞。
+- **復發的存活證明**：出生的 living proof 之外，要有一個會**再次執行**它的事件。
+  只被「具名」不算，要被「執行」。
+- **指向修復點的失敗**：判為不合格時印出可修的位置（`file:line` 或可跑的指令），
+  不只印症狀——好維修是機制的屬性，不是讀者的本事。
+
+反例都出自這個環境自己（2026-09-08 實測）：圖譜的斷鏈解析器沒有「佔位符」這個
+類別，把個別教訓卡的路徑（source-only 記錄樹，未隨此 repo 收錄）併進
+broken-link，9/9 假陽性佔住告警首位；
+`shell-audit` 的換行檢查沒有「二進位」這個類別，31/31 假陽性；29 個註冊 hook 有
+17 個只被具名、沒有被執行過的存活證明，其中 `hooks/unattended_run.py` 已經因為
+少一行 import 而每次觸發都崩潰放行（機制：`ops/references/principle-design-guide.md`
+PH-11 的 AP-61…AP-64）。
+
 ---
 
 ## 二、系統地圖（各部件是什麼、為什麼存在）
@@ -141,6 +165,9 @@ ops/ > skill 內文。字典與索引永遠只是索引，本體以各自的檔�
 
 **Tier 2 —— 有價值但在版控之外，遷移要另外搬**：
 - `backups/`、`archive/`：git 已涵蓋大部分歷史，通常可不搬。
+- `projects/<slug>/` 的其餘內容（transcript、ledger、canary、subagent 目錄）：
+  執行期狀態，仍在版控外；要保留請自行歸檔（source 環境用一個 source-only 的
+  session 存檔工具，未隨此 repo 收錄），不要放寬 `.gitignore`。
 
 **不是資產，不要搬**：`plugins/`（marketplace 快取，可再生）、
 sessions/telemetry/cache 等執行期狀態、任何 credentials。
@@ -159,9 +186,9 @@ sessions/telemetry/cache 等執行期狀態、任何 credentials。
    （例如 `C:/Users/<user>/.../Python312/python.exe`）——新機器必改。
    這是已知的第一大遷移坑。
 3. **改記憶的 slug**：記憶自 2026-09-06 起隨 clone 一起到位，不必手搬；但
-   slug 由工作目錄路徑派生（例如 `C--Users-<user>--claude`），換機器或換
-   使用者名稱就會變——把 clone 下來的 `projects/<舊slug>/memory/` 移到新機器
-   實際產生的 `projects/<新slug>/memory/`，否則 Claude Code 讀不到。
+   slug 由工作目錄路徑派生（`C--Users-<user>--claude`），換機器或換使用者名稱
+   就會變——把 clone 下來的 `projects/<舊slug>/memory/` 移到新機器實際產生的
+   `projects/<新slug>/memory/`，否則 Claude Code 讀不到。
 4. **重建 `ops/environment.md`**：模型層級對映、可用派工機制、成本上限
    政策都是環境事實，不能從記憶假設——照 `ops/20-dispatch.md` §0 重新確認。
 5. **活體驗證**：手動跑一次兩支 hook（healthy 應靜默；用壓低門檻確認會觸發）、

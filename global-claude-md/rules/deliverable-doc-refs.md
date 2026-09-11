@@ -15,7 +15,14 @@ paths:
 Sunk from a user-named failure class (2026-08-31, SSLD deck UAT): a deliverable
 whose slide 1 said "P1 設計點 FAIL" before the reader ever met P1, and threw
 θ_c / g2 / α around undefined. The user flagged both as recurring deliverable-level
-defects, not one-off typos. Index line lives in `CLAUDE.md`; review 2027-02.
+defects, not one-off typos. Index line lives in `CLAUDE.md`; review-when: the
+delivery machine's display or its scaling changes (the measured 2560×1440 @
+AppliedDPI 144 → ~1707×830 below becomes wrong, and the page-class widths with
+it — re-measure, never re-infer), or a page class is added to the source-only
+page-class registry (not shipped here) without a width allocation here. The
+define-before-use and hover-card properties rest on nothing outside the repo and
+do not expire. A date is not a trigger: this line replaced "review 2027-02" on
+2026-09-08 (ES-3).
 
 **Asset property — a human-facing HTML deliverable (deck, report, dashboard-doc)
 must not contain a coded ID or symbol whose definition the reader has not been
@@ -38,13 +45,13 @@ other two whenever the document has ≥ ~5 coded IDs or any symbol vocabulary:
    entries, rows jumpable.
 
 **Do not reinvent:** a reference implementation lives in the source
-environment's asset library — CSS + chrome + mechanism JS verbatim from the
-UAT'd SSLD deck, sample slides + fill-point comments, README with the five
-measured pitfalls (uppercase turns µm into ΜM; hardcoded page numbers rot on
-slide insertion — name pages, renumber via JS; SVG label spacing budget;
-abbreviation-decoration noise; focusin doesn't fire in background tabs — test
-artifact, not a bug). Native alternative when single-file compat is not
-required: Popover API (Baseline 2025) + CSS anchor positioning (Baseline 2026).
+environment's asset library — CSS + chrome + mechanism JS verbatim from the UAT'd SSLD deck,
+sample slides + fill-point comments, README with the five measured pitfalls
+(uppercase turns µm into ΜM; hardcoded page numbers rot on slide insertion —
+name pages, renumber via JS; SVG label spacing budget; abbreviation-decoration
+noise; focusin doesn't fire in background tabs — test artifact, not a bug).
+Native alternative when single-file compat is not required: Popover API
+(Baseline 2025) + CSS anchor positioning (Baseline 2026).
 
 **Asset property — one slide is one screen** (sunk 2026-08-31 from a user
 report: "尺寸不對，預設反而超出版面，每一個 page 都要滑一下才能看完整"; measured
@@ -104,6 +111,21 @@ an extracted vault asset, assert the shared block is **byte-identical** across
 all of them, with a one-character-mutated copy as the positive control —
 hand-porting is the drift source.
 
+**No gate reads a SENTENCE, so the delivery carries a reader pass** (2026-09-10,
+SSLD T56): the gates above bind numbers to sources, terms to a canon, blocks to
+byte-equality — none of them has an object for whether a claim built out of
+those pieces holds together. A page whose every number was registered shipped
+reading 「最大的相對差是 6.489 %，遠小於 0.5 % 的判定門檻」 with 18 page gates and
+52 figure gates green. So: **a human-facing deliverable claimed "gates pass"
+ships with a model read of the RENDERED reader text** — strip the markup, read
+what the reader reads, and check the claims against each other and against the
+instrument's own record; state in the delivery that the pass was done and what
+it named. This is the prose twin of `rules/figure-self-read.md` and neither
+replaces the user's own confirmation. Two recurring shapes to look for: a
+comparison whose two halves come from different classes (a max over a union
+scored against one member's threshold), and a number the instrument reports as
+NOT agreeing that the prose summarises inside a clean sweep.
+
 **Controls belong on the load-bearing path.** Same round, a sibling calculator
 shipped a physically impossible number with every control green, because no
 control exercised the code path that produced the headline value. When adding a
@@ -135,18 +157,40 @@ row-alone block capped in width and hugging the left edge. Each page declares
 symmetric · document-long / deck / tool / dashboard fill ≥ 85–90 % · diagram
 centred-or-fill) and their thresholds are DATA in a source-only config file
 (not shipped here), and the gate (a source-only build script, not shipped
-here) runs with two-sided controls at the measured reference viewports and may
-only WARN on a page whose class it had to infer. Generators run it on the
-BUILT files beside the fit-gate and print the measured reach next to the fit
-result. The reading measure (~65 ch) is achieved by column structure — a
-fluid main column plus a `data-rail` aside, grids — never by capping one
-column; width is allocated in fr / % / cqw / clamp and pixels are reserved for
-intrinsic sizes. Reference implementations: long document = the SSLD project's
-own textbook shell (fluid main + a rail-style 本節速查 aside, hidden below
-1500 px and in print; not shipped here); deck = the source environment's asset
-library reference implementation (text blocks uncapped,
-`data-page-class="deck"`).
+here) runs with two-sided controls at the measured reference viewports and may only WARN on a page whose
+class it had to infer. Generators run it on the BUILT files beside the
+fit-gate and print the measured reach next to the fit result. The reading
+measure (~65 ch) is achieved by column structure — a fluid main column plus a
+`data-rail` aside, grids — never by capping one column; width is allocated in
+fr / % / cqw / clamp and pixels are reserved for intrinsic sizes. Reference
+implementations: long document = the SSLD project's own textbook shell
+(fluid main + a rail-style 本節速查 aside, hidden below 1500 px and in print;
+not shipped here); deck = the source environment's asset library reference
+implementation (text blocks uncapped, `data-page-class="deck"`).
 
 Interaction chrome standard carried by the same asset (user-accepted 2026-08-31):
 ←/→ paging, M TOC, counter + progress bar, print CSS, JS-dead degradation to a
 scrollable document, phone-width single column, offline single file.
+
+**Asset property — a SHARED shell's text is an interface, and its consumers are
+not visible from inside it** (L-049, folded here 2026-09-08; measured on the
+SSLD `shell.html` fix for L-048: three refusals in one round, ~40 minutes of
+rebuild cycles, each from a consumer the edit never mentioned). The three
+consumer classes, none of which reads the DOM:
+
+- **adapters that patch the shell by exact string.** `build_dossiers.py`'s
+  `_build_shell_from` anchors on literal lines with a count assertion; appending
+  one line to that tail made the anchor 0-count and the build refused.
+- **gates that scan the emitted bytes with no parser.** `link_gate` reads
+  `href="…"` out of the text, so a link built as a JS string
+  (`'<a href="#' + id + '">'`) is read as a dangling anchor. Emit links to
+  gate-scanned documents with `createElement` + `setAttribute`, never
+  string-concatenated markup.
+- **the user's own open files.** A builder that rewrites every product
+  unconditionally aborts the whole pack with `PermissionError` when a PPTX is
+  open in PowerPoint — write only what changed, and say which file is locked.
+
+So before editing a file matched by this rule's `**/*shell*.html`: grep the repo
+for its path and run EVERY builder that names it, not only the one being fixed.
+The shell renders correctly in the browser either way; that is precisely why
+this failure is silent until a downstream build refuses.

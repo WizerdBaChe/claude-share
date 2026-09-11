@@ -8,7 +8,13 @@ paths:
 
 Sunk from global `CLAUDE.md` on 2026-08-11 (T-007): the trigger is "a file of
 this kind is in play", which `paths:` observes directly, so this rule costs
-nothing until it is relevant. Index line lives in `CLAUDE.md`; review 2026-11.
+nothing until it is relevant. Index line lives in `CLAUDE.md`; review-when: FSD
+publishes a version that renames or renumbers the six layers (the names below go
+stale, the "no same-tier lateral imports" property does not), or a project adopts
+a framework whose own routing conventions own the top layers (Next.js app router,
+Nuxt layers) — then the layer names are the framework's and only the
+import-direction constraint carries over. A date is not a trigger: this line
+replaced "review 2026-11" on 2026-09-08 (ES-3).
 
 - **When laying out a frontend's module structure:** anchor on Feature-Sliced
   Design (FSD) v2.1+'s 6 layers — `app / pages / widgets / features / entities /

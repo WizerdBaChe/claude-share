@@ -608,7 +608,13 @@ reason = """Registry of the label vocabulary used across records and audits.
 Cited by `claude-ops/ops/rules-usage-dict.md` and
 `skill-toolkit/skills/config-self-audit/SKILL.md`. Its content is this
 environment's accumulated label set — porting it would impose vocabulary an
-adopter has no reason to share."""
+adopter has no reason to share.
+PER-FILE RE-CHECK 2026-09-12 (lane W2, align to source 7c9867b): source grew
+to 219 lines (from a smaller count at the last re-check) and the citing-file
+count expanded from 2 to roughly 13 across the repo (grepped this round).
+Re-read the first ~40 lines of current source — content is still genuinely
+this-environment-specific label vocabulary (accumulated labels, not a
+portable schema). Disposition confirmed unchanged: referenced-only stands."""
 fallback = """The citing rules work without it; they degrade from 'use the
 registered label' to 'use a consistent label'. If you keep records at scale,
 build your own registry — the rule's value is the single vocabulary, not this
@@ -971,6 +977,11 @@ status = "verbatim"
 # entirely new blocks (`block:verification-ladder`, `block:depth-tier`) that
 # the stale repo copy was missing before this refresh; no de-identification
 # action needed on any of it (checked for private-tree pointers: none).
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): repo had drifted 67
+# lines from source — all of it CLAUDE.md's own content evolution mirrored
+# into this file's blocks (this file distills CLAUDE.md, so it tracks that
+# file's growth), no privacy content in the drift. Re-copied in full via `cp`;
+# confirmed byte-for-byte identical via CRLF-normalized diff.
 
 [[collected]]
 path = "interop-layer/acceptance-evals.md"
@@ -989,6 +1000,12 @@ status = "verbatim"
 edits = [
   "none. Recorded because the previous copy carried four undeclared ones, all now reverted to source: a deleted OPERATOR-GUIDE.md pointer (the citation resolves here via source_map -> environment-guide/OPERATOR-GUIDE.md, so removing it was the over-scrub class this gate exists to catch); 'Claude 專屬' generalised to '平台專屬' (the specificity was the point — portable-core.md excludes Claude-Code-specific mechanism, and this repo ships global-claude-md/ anyway); the archive/interop-refs-2026-08-11/ path replaced by a vague phrase (CHANGELOG.md already names that path openly, so the scrub protected nothing and cost the reader a locator); and a reordered preference list carrying no information either way",
 ]
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): found one more small
+# undeclared drift — a "git 歷史（`git show 483435f:...`」wording fragment that
+# a prior round had apparently dropped without declaring it as an edit. A
+# 7-char git SHA is not a scrub target (hard rule 9's threshold is 32+ hex
+# chars), so this is drift-correction, not a new privacy edit: restored via
+# full `cp`, confirmed byte-for-byte identical to source.
 
 [[collected]]
 path = "interop-layer/MIGRATION-MAP.md"
@@ -996,6 +1013,7 @@ source = "~/.claude/interop/MIGRATION-MAP.md"
 status = "edited"
 edits = [
   "ADDED a share-repo-only section, 'Disposition classes — why something is absent' (~35 lines before ## Profiles). It documents tools/share-manifest.toml, tools/share_gate.py check R and tools/COLLECTION-RULES.md — machinery that exists only here. Exempt from backflow BY CONSTRUCTION: the source environment has no publication layer, so the section would land there as four dangling citations. The section now carries that exemption in its own text, so the next person to diff the two copies does not have to re-derive it.",
+  "the same 'git show 483435f:...' wording fragment found drifted in interop-layer/README.md (see that entry) was also missing here, at the archive/interop-refs-2026-08-11/ mention — restored to name the git-history route explicitly (7-char SHA, not a scrub target). 2026-09-12 drift-correction, not new de-identification.",
 ]
 
 [[collected]]
@@ -1005,6 +1023,8 @@ status = "edited"
 edits = [
   "leak gate: the inline LEAK_PATTERNS list plus scan_text() and report_leaks() (40 lines) replaced by an import from tools/sharelib.py, with a hard exit if that file is absent. Exempt from backflow: sharelib.py exists only in this repo, where the same patterns must serve both this compiler and the repo-wide tools/share_gate.py; the source has exactly one caller and no second gate to keep in step, so importing there would add a dependency to buy nothing.",
   "the same import re-exports `_USER` (2026-08-16). test_interop.py builds its known-TRUE home-path samples from it, and the source defines it beside the patterns it moved out of. CORRECTION to the previous wording of the edit above, which claimed 'behaviour is identical — same patterns': it was not. The source list carried `sk_(live|test)_` and `AIza` key shapes that tools/sharelib.py did not, so for the life of this gate those two would have published cleanly. sharelib.py has been widened to match; see its own comment. The claim was written once, in prose, and nothing re-checked it — the failure mode tools/COLLECTION-RULES.md is entirely about.",
+  "2026-09-12: restored a 'playbooks survive in git history only (`git show 483435f:...`)' wording fragment that had drifted out (same class as the README.md/MIGRATION-MAP.md drift found this round, not a new privacy edit — 7-char SHA, not a scrub target); also restored the 'or `git show 596cfc0:interop/interop.py`' half of the same comment block, which had drifted to a stale `archive/2026-08-15-interop-targets-removed/` path form.",
+  "NEW 2026-09-12: CURATION_SOURCES list — source added 'ops/references/uat.md' this round ('Re-widened by exactly one path on 2026-09-09' comment block, ~9 lines, taken verbatim — it names no source-only path itself). Confirmed this path actually resolves in this repo: `ops/references/uat.md` ships via source_map -> `claude-ops/ops/references/uat.md` (not this lane's file; confirmed resolvable, not re-collected here).",
 ]
 
 # The compiler's own two-sided calibration, and the reason the previous entry
@@ -1018,6 +1038,10 @@ status = "edited"
 edits = [
   "t_truncation_boundary rewritten. It asserts against the gate's return shape, and the two gates differ: the source's inline scan_text returns 3-tuples truncated past 12 chars, tools/sharelib.py returns 4-tuples (label, kind, line_no, sample) truncated past 25. The PROPERTY under test is unchanged — a match at the boundary must not be printed whole — and is now checked on both sides of this gate's boundary (25 whole, 26 truncated). Exempt from backflow: the source has no sharelib.py. Every other test, including both calibration sets, is byte-identical.",
 ]
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): re-diffed against
+# fresh source — zero drift, matches the declared edit exactly. Ran
+# `python interop-layer/test_interop.py`: 14 passed, 0 failed (includes
+# t_leak_known_true, t_leak_known_false, t_truncation_boundary).
 
 # --- agents/ --------------------------------------------------------------
 
@@ -1520,54 +1544,72 @@ edits = [
 path = "environment-guide/PHILOSOPHY.md"
 source = "~/.claude/PHILOSOPHY.md"
 status = "edited"
-# 2026-09-07 refresh: no source_dirty_ack was recorded for this file before
-# (it was clean last round too); re-verified `git diff --numstat` at current
-# source HEAD still CLEAN. Full fresh-source re-read; memory-tiering section
-# rewritten at source (Tier1/Tier2 restructuring reflecting a 2026-09-06
-# git-tracking change there) taken verbatim; the 3 pre-existing edits below
-# re-anchored on the new text at their (moved) locations. ONE NEW scrub found
-# this round, genuinely new content: a `C--Users-gunda--claude` slug example
-# in the migration-step-3 illustration — same account-name class as the
-# already-declared interpreter-path edit, fixed the same way.
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): source grew from 188
+# to 211 lines — an entirely new belief section 11 ("機制要能被擴充而不靜默失效")
+# and a second Tier-2 bullet, both missing from the pre-refresh repo copy.
+# Full fresh-source re-read via `cp`, then the 3 pre-existing edits re-applied
+# at their current locations plus 2 new edits for the new section's own
+# source-only pointers. No new account-name/path scrub found this round.
+# CORRECTION (same round): the first edit pass reapplied only the new §11/
+# Tier-2 edits and missed re-applying the 2 PRE-EXISTING scrubs (interpreter-
+# path example, migration-step-3 slug) on the freshly-`cp`'d text — caught by
+# `tools/share_gate.py --source` check L (2 findings, account name + absolute
+# home path at the interpreter-path line) before this round's report was
+# written, not after. Both reapplied; gate re-run clean on this file.
 edits = [
   "the interpreter path example: the account name replaced by <user>, and '目前是' softened to '例如' since a path with a placeholder in it is no longer a statement about this machine.",
-  "3 places: `audit-archive/` annotated with where it lives in this share (the repo root's Global_skill_update.md). The source split that narrative into a frozen directory; this repo hoisted it to a single root file, and without the note the file tree in this document points at nothing.",
-  "NEW 2026-09-07: migration-step-3 slug example `C--Users-gunda--claude` -> `C--Users-<user>--claude` — the account name embedded inside a directory-name-mangled slug, same scrub target as the interpreter-path edit above, missed by that edit because it is a different string shape (slug vs path) and arrived with fresh content this round.",
+  "4 places (was 3; +1 this round inside the new belief section 11): `audit-archive/` annotated with where it lives in this share (the repo root's Global_skill_update.md). The source split that narrative into a frozen directory; this repo hoisted it to a single root file, and without the note the file tree in this document points at nothing. Locations: the ASCII system-map diagram, the Tier-1 bullet list, the new §11 belief text, and the §五 closing paragraph.",
+  "migration-step-3 slug example: the account name embedded inside a directory-name-mangled slug (class: account name; position: the 3rd path segment of a `C--Users-<account>--claude`-shaped slug in the step-3 illustration) replaced with a generic `<user>` placeholder — same scrub target and same fix as the interpreter-path edit above.",
+  "NEW 2026-09-12, new belief section 11: `ops/lessons/L-nnn.md` (source-only per-lesson-card path, ops/lessons/ per-file tree excluded) generalized to a Traditional-Chinese descriptive clause naming the capability (a per-lesson-card path in the source's own record tree, not shipped here) without the literal path pattern.",
+  "NEW 2026-09-12, new Tier-2 second bullet: `tools/session-find.py` (source-only, tools/ tree excluded) generalized to a Traditional-Chinese descriptive clause (the source environment uses a source-only session-archiving tool, not shipped here).",
 ]
 
 [[collected]]
 path = "global-claude-md/CLAUDE.md"
 source = "~/.claude/CLAUDE.md"
 status = "template"
-# 2026-09-07 refresh (align-2026-09-07-w6 round): the 2026-09-02 source_dirty_ack
-# is DROPPED — re-verified `git diff --numstat` at current source HEAD
-# (27196ab) shows CLEAN, the path-scoped-rules index gain and the [BC]
-# rewording it tracked both landed in a commit. Full byte-for-byte re-read
-# against fresh source; every edit below re-anchored on the current text.
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): full byte-for-byte
+# re-read against fresh source (`cp` seed, then edits re-applied on the fresh
+# text). Source gained a "Readers" declaration + six `[main]` tags (came free
+# via the `cp` — no edit needed, source commit 2c5ad98 already carries them),
+# a rewritten Prior-art check bullet, and a rewritten Decision charter /
+# [unattended-run] / Compact Instructions section. Every edit below is
+# re-anchored on the current text; wording changed from the 2026-09-07 round
+# where the underlying source sentence changed shape, even when the
+# generalization target (same source-only tool/path) is unchanged.
 edits = [
-  "Environment bullet: OS, default/secondary shell -> <OS_NAME> / <DEFAULT_SHELL_NAME> / <SECONDARY_SHELL_NAME>, with a placeholder note naming the original values. UPDATED 2026-09-07: the source dropped its standalone line-ending-convention declaration from this bullet entirely (superseded, not merely reworded — the bullet now only names OS/shell) and the fence-label examples were generalized (the source's own git-bash/powershell fence labels are machine-specific instances of a fence-labeling PRINCIPLE that stays, so the placeholder note explains the fence-label choice is the adopter's own rather than naming the two source labels). The 4th placeholder token <LINE_ENDING_CONVENTION> is therefore RETIRED this round (see [placeholders] deletions below) — the surviving portable 'Line endings — only Edit preserves them' bullet is a generic Write/Edit/cat behaviour note, not a per-machine fact, so it needs no placeholder.",
-  "relaxation-gate bullet: placeholder note retained verbatim (no source wording change this round beyond the pluralisation already captured by the prior edit).",
-  "Language section: placeholder note retained verbatim (no text changed) — it encodes one author's reply-language preference.",
+  "Environment bullet: OS, default/secondary shell -> <OS_NAME> / <DEFAULT_SHELL_NAME> / <SECONDARY_SHELL_NAME>, with a placeholder note naming the original values. Re-anchored 2026-09-12 on the source's current phrasing (Git Bash takes a manual second launch); no placeholder-set change from the 2026-09-07 round.",
+  "relaxation-gate bullet: placeholder note retained verbatim.",
+  "Language section: placeholder note retained verbatim — it encodes one author's reply-language preference.",
   "'When authoring or generating an HTML page a human will read on this machine' bullet: `tools/page-fill-gate/fill_gate.py` (source-only, tools/ tree excluded) generalized to 'a page-fill gate (a build-time check for a left-anchored width cap; the tool that implements it is source-only and does not ship in this repo)' — capability description kept, literal unshippable path dropped.",
   "'Browser-pane UI verification' bullet: `ops/references/browser-pane-pixel-route.md` (excluded ops/references file) generalized to \"the source environment's own browser-pane pixel-routing writeup (source-only, does not ship here)\".",
-  "'Decision charter' bullet: `tools/process-ledger/ledger.py add` (source-only, tools/ tree excluded) generalized to \"a source-only mechanism (command and flags documented in its own README, not shipped here)\".",
-  "'[unattended-run]' bullet (NEW at source this round): `tools/process-ledger/README.md` and `reports/*-run-<slug>.md` (both excluded — tools/ tree and reports/) generalized: \"the kickoff hook\" -> \"a kickoff mechanism (source-only, does not ship here)\"; \"reports/*-run-<slug>.md\" -> \"a run report\"/\"omitting a run report\"; \"Spec + audit: tools/process-ledger/README.md\" -> \"Spec + audit: the source environment's own process-ledger tooling (source-only, does not ship here)\".",
-  "'Compact Instructions' section (NEW at source this round): `references/compaction-pipeline-design.md` generalized to \"the source environment's own compaction-pipeline design note, not shipped here\"; `cache/handoff/<session_id>.md` (cache/ excluded) generalized to \"a per-session handoff file (a source-only mechanism keyed by session id)\".",
-  "Path-scoped rules index line: taken verbatim from fresh source, which now lists all six rules files including the new `verification-ladder` entry — no edit needed here, the index itself caught up (see global-claude-md/README.md's 2026-09-07 entry, which the index-lag claim it used to carry no longer applies to).",
+  "NEW 2026-09-12: Prior-art check bullet, vault-index clause — an account-holder's given name embedded in a local Obsidian notes vault's folder-naming convention, generalized to \"the local Obsidian notes vault\" (class: account-bound label naming a private local asset path; position: the second of two vault labels in the parenthetical list). `AssetVault` (the sibling label, a project/asset name, not account-bound) kept as-is per hard rule 2. This is a genuine, previously-unnoticed privacy leak in the currently-shipped copy — the prior rounds' edit lists never declared a scrub for this clause, so it shipped unfixed until this round re-touched the exact line. The identical leak also exists in `claude-ops/ops/rule-registry.md`, out of this lane's scope — flagged cross-lane.",
+  "'Decision charter' bullet: `tools/process-ledger/ledger.py add`, flags in its README (source-only, tools/ tree excluded) generalized to \"a source-only mechanism — command and flags documented in its own README, not shipped here\"; the new 'TEMPORARY limit' clause the source added this round (a scope-narrowing logs the event that lifts it) is kept verbatim — it names no source-only path.",
+  "'[unattended-run]' bullet: `tools/process-ledger/README.md` (source-only, tools/ tree excluded) generalized to \"a kickoff mechanism (source-only, does not ship here)\" and \"Spec + audit: the source environment's own process-ledger tooling (source-only, does not ship here)\"; `reports/*-run-<slug>.md` generalized to \"omitting a run report\". JUDGMENT CALL (not drift-restoration): \"Two are hook-enforced\" -> \"Two are enforced where the environment provides the matching hooks\" — kept the softened wording from a prior round rather than restoring the source's plain claim, because the actual enforcing hook (`hooks/unattended_run.py`) is `excluded-by-decision` in this manifest (see hooks lane), so the bare claim would be false for this repo specifically. This is a substantive de-identification-adjacent decision, recorded here rather than dismissed as drift.",
+  "'Compact Instructions' section: `references/compaction-pipeline-design.md` generalized to \"the source environment's own compaction-pipeline design note, not shipped here\"; `cache/handoff/<session_id>.md` (cache/ excluded) generalized to \"a per-session handoff file (a source-only mechanism keyed by session id)\".",
+  "Path-scoped rules index line: taken verbatim from fresh source, which now lists all eleven rules files including the four new 2026-09-12 entries (see global-claude-md/rules/ NEW entries below) and `literature-access.md` (a different lane's collection batch — this share's shipping status for that one file is not asserted here). One new citation appears in the same index line, `ops/references/principle-design-guide.md` — not this lane's file, left as-is pending the owning lane's disposition (cross-lane flag).",
 ]
 
 [[collected]]
 path = "global-claude-md/rules/deliverable-doc-refs.md"
 source = "~/.claude/rules/deliverable-doc-refs.md"
 status = "edited"
-# 2026-09-07 refresh: the 2026-09-02 source_dirty_ack is DROPPED — re-verified
-# `git diff --numstat` at current source HEAD shows CLEAN.
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): source grew two
+# entirely new sections since the 2026-09-07 round — "No gate reads a
+# SENTENCE..." (SSLD T56, no scrub target: round-id + lesson-id text, kept
+# bare per established SSLD-T-id precedent) and "Asset property — a SHARED
+# shell's text is an interface..." (L-049/L-048, no scrub target). Full
+# fresh-source re-read via `cp`; 8 substitutions total re-applied/re-anchored,
+# no count change from the 2026-09-07 round's 8-edit set below.
 edits = [
-  "frontmatter `paths:` expanded to 8 globs at source (unchanged from a de-identification standpoint — all relative patterns); taken verbatim.",
-  "'Do not reinvent' paragraph: 'AssetVault item `briefing-deck-shell` (`assets/pattern-template/html-css/briefing-deck-shell/`) is the reference implementation' -> 'a reference implementation lives in the source environment's asset library' — a private asset library that does not ship (same class as carrier-playbook.md's edits). The five measured pitfalls that follow are the transferable content and stay whole.",
-  "'one slide is one screen' block, closing sentence: 'AssetVault `briefing-deck-shell` (README §版面吻合)' -> 'the source environment's asset library (README §版面吻合)' — same class, same asset.",
-  "'Hard gates beat proof-reading' paragraph: 'summarized in the vault asset's README' -> 'summarized in that implementation's README' — same class; reworded to read against the earlier edit's phrasing rather than re-naming the vault.",
-  "NEW 2026-09-07, 'Width property' section (source addition this round) carries 5 more dead/private pointers, generalized the same way: an `outputs/` diagnosis-note pointer rewritten to describe what the note found rather than cite it; `tools/page-fill-gate/page_classes.json` and `tools/page-fill-gate/fill_gate.py` (tools/ tree excluded) both generalized to capability descriptions; an SSLD-project internal private path generalized (SSLD the PROJECT NAME is kept per hard rule 2 — only the private internal path segment was dropped); a second AssetVault `briefing-deck-shell` pointer generalized the same way as the 3 pre-existing edits above.",
+  "frontmatter `paths:` (8 globs, all relative patterns, no scrub target); taken verbatim.",
+  "review-when clause: `tools/page-fill-gate/fill_gate.py` and its page-class registry file (source-only, tools/ tree excluded) generalized to a capability description (a page class is added to the source-only page-class registry, not shipped here).",
+  "'Do not reinvent' paragraph: the AssetVault reference-implementation pointer generalized to 'a reference implementation lives in the source environment's asset library' — a private asset library that does not ship. The five measured pitfalls that follow are the transferable content and stay whole.",
+  "'one slide is one screen' block, closing sentence: the AssetVault reference-implementation pointer generalized to 'the source environment's asset library (README §版面吻合)' — same class, same asset.",
+  "'Hard gates beat proof-reading' paragraph: the vault-asset README pointer generalized to 'summarized in that implementation's README' — same class.",
+  "'Width property' section: an `outputs/` diagnosis-note pointer rewritten to describe what the note found rather than cite it; `tools/page-fill-gate/page_classes.json` and `tools/page-fill-gate/fill_gate.py` (tools/ tree excluded) both generalized to capability descriptions.",
+  "'Width property' section: an SSLD-project internal private shell.html path generalized (SSLD the project name kept per hard rule 2; only the internal path segment dropped) — reference implementation pointer generalized to \"the SSLD project's own textbook shell ... (not shipped here)\".",
+  "'Width property' section: a second AssetVault reference-implementation pointer (the deck reference implementation) generalized the same way as the earlier AssetVault edits.",
 ]
 
 [[collected]]
@@ -1579,14 +1621,27 @@ status = "verbatim"
 path = "global-claude-md/rules/office-deck-deliverables.md"
 source = "~/.claude/rules/office-deck-deliverables.md"
 status = "edited"
+source_dirty_ack = "2026-09-12: source had 9 lines of uncommitted, unstaged addition at collection time (`git -C ~/.claude diff --numstat` = 9 insertions, 0 deletions on this file) — the new 'Height, not only width' bullet (SSLD proposal deck 2026-09-10, ops/lessons.md L-078). Collected as-is per the standing dirty-source-at-collection ruling (align to disk with a dated ack carrying the numstat). review-when: re-verify at the next refresh that this content has since landed in a commit; if so, drop this ack (same pattern as the 2026-09-02/2026-09-07 visual-gate-scope.md ack cycle)."
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): full fresh-source
+# re-read via `cp` (dirty working tree, see source_dirty_ack above), 3
+# substitutions re-applied/re-anchored on the current text.
 edits = [
-  "Opening paragraph: 'Reference implementation with these fixes verbatim: AssetVault `assets/pattern-template/python/pptx-deck-builder/`' -> 'Reference implementation with these fixes verbatim: a reference implementation lives in the source environment's asset library' — a private asset library that does not ship, same class and same edit shape as this round's deliverable-doc-refs.md refresh.",
+  "Opening paragraph: the AssetVault reference-implementation pointer generalized to 'a reference implementation lives in the source environment's asset library' — a private asset library that does not ship, same class as deliverable-doc-refs.md's own AssetVault edits.",
+  "'Height, not only width' bullet (NEW this round, part of the dirty-source addition above): its citation `ops/lessons/L-078.md` (a per-file path into the excluded ops/lessons/ tree) rewritten to `ops/lessons.md` L-078 — this share ships lessons as one consolidated file (see claude-ops lane), not the source's per-file tree, so the pointer is rewritten to where the content actually resolves in this repo rather than generalized away.",
+  "'A deck delivered as EDITABLE...' bullet, Gate clause: a source-only headroom-measurement tool's literal invocation path (`~/.claude/tools/pptx-edit-headroom/headroom.py`, tools/ tree excluded) generalized to 'a source-only headroom-measurement tool (does not ship here), run as `<deck> --content <shape-name regex>`' — the command-line CONTRACT (flags/args) is kept since it documents the tool's calling convention, only the unshippable literal path is dropped.",
 ]
 
 [[collected]]
 path = "global-claude-md/rules/shader-failure-modes.md"
 source = "~/.claude/rules/shader-failure-modes.md"
 status = "edited"
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): the repo copy had
+# fallen behind source by one expansion — the bare "review 2026-11" review-when
+# line was replaced at source (2026-09-08, ES-3) with a fuller clause
+# explaining WHY the ES 1.00-vs-ES-3/WGSL trigger matters and stating "a date
+# is not a trigger", but the repo still carried the old bare line. Restored to
+# match fresh source verbatim (no scrub target in the new clause — it names no
+# path, account, or credential).
 edits = [
   "2026-08-27 refresh (procedure B): the re-glob measurement sentence arrived naming the source's second-drive work root as the corpus location -> 'the local work root'. The corpus size (1,361 files) and every recall number stay — they are the evidence; the path is not.",
 ]
@@ -3730,19 +3785,24 @@ status = "verbatim"
 path = "global-claude-md/rules/verification-ladder.md"
 source = "~/.claude/rules/verification-ladder.md"
 status = "edited"
-# NEW 2026-09-07. Ships because global-claude-md/CLAUDE.md's refreshed
-# path-scoped-rules index now cites it (see that entry's edits list, last
-# item) — an unshipped-but-cited rule would be a dangling index reference.
-# global-claude-md/README.md updated to add it as the repo's 6th rules file
-# and to correct its now-complete path-scoped index claim (see that file's
-# own edit, not a [[collected]] entry — it is repo-authored, not source-
-# mirrored). Source is TRACKED and CLEAN (`git log --oneline -1` shows commit
-# 6c5d982 "feat(rules): verification ladder as a path-scoped rule; guardrails
-# keeps a pointer"; `git diff --numstat` clean) — no source_dirty_ack needed.
+# 2026-09-12 refresh (lane W2, align to source 7c9867b): source gained an
+# entirely new "## The second property" section (2026-09-10) — a claim that
+# outlives one conversation and nobody re-checks later needs a verification
+# record sitting beside it, not just a rung number — plus 4 new frontmatter
+# `paths:` globs (`**/verify/**`, `**/*_audit.json`, `**/*_results.json`,
+# `**/*_run.txt`), both entirely missing from the pre-refresh repo copy. Full
+# fresh-source re-write; the 3 pre-existing edits re-anchored plus 1 new edit
+# for the new section's own source-only tool pair. SSLD T47/T48 round-id
+# citations in the new section kept bare (project name + round id, not a
+# scrub target, per the established SSLD-T-id precedent already shipped
+# elsewhere: `claude-ops/ops/20-dispatch.md`, `claude-ops/ops/lessons.md`,
+# `environment-guide/OPERATOR-GUIDE.md` all carry bare "SSLD T41").
 edits = [
+  "frontmatter `paths:` — 4 new globs taken verbatim (relative patterns, no scrub target).",
   "opening paragraph: three `outputs/lean4-*-2026-09-06.md` citations (outputs/ tree excluded) generalized to 'dated records in the source environment's own `outputs/` tree — source-only, does not ship here' — capability description (what the rule was derived from, and when) kept, literal paths dropped.",
   "rung-4 table cell: `tools/lean-verify/` (tools/ tree excluded) generalized to 'a source-only verifier tool — does not ship here'.",
-  "closing 'Live instances' line: `tools/cross-index/tests/test_glob_properties.py` and `tools/lean-verify/verify.py` (both tools/ tree excluded) generalized to 'the source environment's `cross-index` tool test suite' and 'its `lean-verify` tool', both flagged source-only/does-not-ship-here; the rung-4 status-line detail ('LEAN-VERIFY … severity=WARN') is transferable content and stays.",
+  "closing 'Live instances' line (rung table section): `tools/cross-index/tests/test_glob_properties.py` and `tools/lean-verify/verify.py` (both tools/ tree excluded) generalized to 'the source environment's `cross-index` tool test suite' and 'its `lean-verify` tool', both flagged source-only/does-not-ship-here; the rung-4 status-line detail ('LEAN-VERIFY … severity=WARN') is transferable content and stays.",
+  "NEW 2026-09-12, 'The second property' section, its own 'Live instances of this property' line: `tools/pptx-edit-headroom` and `tools/audience-fit-gate` (both tools/ tree excluded, both 2026-09-10) generalized to 'two source-only tools (both 2026-09-10, each shipping its calibration in `--selftest`; do not ship here)' — the calibration-discipline detail (that each ships a `--selftest`) is the transferable content and stays; the literal tool paths are dropped.",
 ]
 
 [[collected]]
@@ -4259,3 +4319,81 @@ fallback = '''None. For turning source material into a deliverable a non-builder
 reads, `skill-toolkit/skills/audience-fit` ships; for the diagrams inside such a
 deliverable, `skill-toolkit/skills/diagram-authoring` and the
 `architecture-diagramming/` capability set do.'''
+
+# === lane W2 2026-09-12 BEGIN ===
+# Lane W2: global-claude-md/CLAUDE.md + rules/ (frontend-layering.md,
+# shader-failure-modes.md, deliverable-doc-refs.md, office-deck-deliverables.md,
+# verification-ladder.md, plus 4 new files below), environment-guide/PHILOSOPHY.md,
+# LABEL-REGISTRY.md, interop-layer/ (entire directory). Align to source 7c9867b.
+# All entries above this block for lane-W2 files were edited IN PLACE (existing
+# entries); the 5 entries below are NEW this round (4 new rules files + 1 new
+# not_shipped disposition for a previously-undispositioned source file).
+
+[[collected]]
+path = "global-claude-md/rules/web-navigation-state.md"
+source = "~/.claude/rules/web-navigation-state.md"
+status = "verbatim"
+# NEW 2026-09-12 first collection (D3: cited by global-claude-md/CLAUDE.md's
+# refreshed path-scoped-rules index, not previously shipped). Full source read
+# (54 lines); no scrub target found — `HTMLToolsLobby` is a project name (kept
+# per hard rule 2), every other citation (skills/ux-walkthrough/references/...)
+# is a repo-relative path into a skill this share's skill-toolkit/ lane ships.
+# Copied verbatim; confirmed byte-for-byte identical via CRLF-normalized diff.
+
+[[collected]]
+path = "global-claude-md/rules/figure-self-read.md"
+source = "~/.claude/rules/figure-self-read.md"
+status = "verbatim"
+# NEW 2026-09-12 first collection (D3: cited by global-claude-md/CLAUDE.md's
+# refreshed path-scoped-rules index, not previously shipped). Full source read
+# (71 lines); no scrub target found — SSLD (project name), model3d-pipeline
+# (project name), and `ops/lessons.md L-044` (a lesson id, not a per-file path
+# into the excluded ops/lessons/ tree) are all kept per hard rule 2 and this
+# repo's own established precedent for bare SSLD/lesson-id citations. Copied
+# verbatim; confirmed byte-for-byte identical via CRLF-normalized diff.
+
+[[collected]]
+path = "global-claude-md/rules/hook-deny-message.md"
+source = "~/.claude/rules/hook-deny-message.md"
+status = "edited"
+# NEW 2026-09-12 first collection (D3: cited by global-claude-md/CLAUDE.md's
+# refreshed path-scoped-rules index, not previously shipped). Full source read
+# (164 lines); 2 source-only pointers generalized, everything else (hook names,
+# lint rule ids P1-P4/R1-R3/R2n/R3n, F-8/F-9/H-1 fixture ids) kept — these are
+# in-file structural ids, not scrub targets.
+edits = [
+  "opening paragraph: `tools/hook-deny-lint/` (source-only, tools/ tree excluded) generalized to 'a source-only lint tool (does not ship in this repo)'.",
+  "review-when section, message-rewrite bullet: a dated probe-run pointer under the source's own `outputs/` tree (outputs/ tree excluded) generalized to 'a dated probe run under the source's `outputs/` tree (does not ship here)'.",
+]
+
+[[collected]]
+path = "global-claude-md/rules/naming-and-placement.md"
+source = "~/.claude/rules/naming-and-placement.md"
+status = "edited"
+# NEW 2026-09-12 first collection (D3: cited by global-claude-md/CLAUDE.md's
+# refreshed path-scoped-rules index, not previously shipped). Full source read
+# (110 lines); 2 source-only/private-project pointers generalized. SSLD (project
+# name) and its round ids (T46) kept per hard rule 2 and established precedent;
+# only the private internal file path following the round id was scrubbed.
+edits = [
+  "opening paragraph: a dated global-rule-candidate note's path in the source's own top-level `references/` tree (references/ excluded) generalized to 'a global-rule-candidate note in the source environment's own `references/` tree (dated 2026-09-04, not shipped here)'.",
+  "§6 Migration discipline, reference-implementations sentence: an SSLD-project internal migration-script path (project name kept per hard rule 2; the internal round-folder + filename dropped, class: private-project internal file path; position: second reference implementation named, after the PaperSurvey one which is kept as-is — PaperSurvey's cited command is a shipped-skill CLI contract, not a private path) generalized to \"SSLD's own T46-round migration script (internal path, not shared)\".",
+]
+
+[[not_shipped]]
+path = "interop/curation.stamp"
+disposition = "excluded-by-decision"
+reason = """A machine-written 9-byte stamp file (one line: a short commit SHA)
+that `interop-layer/interop.py` reads/writes via its `curated`/`status`
+commands to record which source commit CURATION_SOURCES was last reconciled
+against. Same class and same reasoning as this manifest's existing
+`ops/cc-reconciled.json` disposition: a runtime record of one environment's
+own last-run state, not a rule — wrong for any other install the moment it is
+copied, since a fresh clone has never run its own curation pass and the stamp
+would claim a false one. No prior disposition existed for this file (checked
+this round — genuinely undispositioned, not merely stale)."""
+fallback = """Run `python interop-layer/interop.py curated` after your own
+curation pass — that is what writes this file. A fresh clone with no stamp is
+the correct starting state, not a defect."""
+
+# === lane W2 2026-09-12 END ===
