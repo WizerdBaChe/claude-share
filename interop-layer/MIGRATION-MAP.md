@@ -38,7 +38,7 @@ mechanism-layer translation. Human operating manual: README.md (中文).
   turned out to be fatal rather than acceptable: mechanical trigger →
   instructed read means no target platform can fire the text at the right
   moment, so it is read either always or never. Playbooks archived to
-  `archive/interop-refs-2026-08-11/` (their SOURCES are untouched and still
+  git history (`git show 483435f:archive/interop-refs-2026-08-11/`; their SOURCES are untouched and still
   canonical). Replaced by delegation — see the class below. The governing
   principle is now: **preference ports, method does not.**
 - **Delegate to the target** (→ `delegation_block()` in the generated

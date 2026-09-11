@@ -54,7 +54,7 @@ OPEN_MARKER_RE = re.compile(r"<!--\s*block:([\w-]+)")
 # index, on the theory that content ports even when the trigger does not. In
 # practice "instructed read" is not a trigger: no target platform can fire it
 # at the right moment, so the text was read either always or never. The
-# playbooks moved to `archive/interop-refs-2026-08-11/`; targets now get
+# playbooks survive in git history only (`git show 483435f:archive/interop-refs-2026-08-11/`); targets now get
 # `delegation_block()` instead. What ports is preference, not method.
 
 # Canonical sources portable-core.md is distilled from. Changes to these paths
@@ -64,8 +64,18 @@ OPEN_MARKER_RE = re.compile(r"<!--\s*block:([\w-]+)")
 # than shipped, a change in a skill body no longer implies anything to curate —
 # keeping them would flag drift against material that is deliberately no longer
 # transplanted.
+# Re-widened by exactly one path on 2026-09-09. The narrowing above is still
+# right -- a source belongs here iff portable-core.md TRANSPLANTS it -- and by
+# that test `uat.md` qualified all along: portable-core's `visual-acceptance`
+# section carries the rank axis and the admission gate verbatim. It was covered
+# only incidentally, because those rules lived in CLAUDE.md until 2026-09-06,
+# when the `[BC]` mechanics moved to ops/ and nobody re-checked this list. The
+# transplant then had no detector for three days and nothing said so: the
+# stamp kept reporting "up to date" against a file the rule had left. A source
+# list narrowed by WHERE a rule currently lives inherits every later move of it.
 CURATION_SOURCES = [
     "CLAUDE.md",
+    "ops/references/uat.md",
 ]
 
 TARGETS = {
@@ -90,7 +100,7 @@ TARGETS = {
     # Re-adding either one goes through README.md's "新增一個目標 agent 的
     # checklist" step 1 (look the paths and extension points up in the
     # platform's current docs), which is faster than trusting a stale value.
-    # Full text of both entries: archive/2026-08-15-interop-targets-removed/,
+    # Full text of both entries: `git show 483435f:archive/2026-08-15-interop-targets-removed/README.md`,
     # or `git show 596cfc0:interop/interop.py`.
     #
     # The `disabled` key below is still honoured by cmd_build/cmd_status (the

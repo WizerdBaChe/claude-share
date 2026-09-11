@@ -26,4 +26,12 @@ rather than stripped.
   and one username in a Python interpreter path example (`PHILOSOPHY.md`)
   were replaced with generic `<user>` placeholders. No other identifiers
   found.
+- 2026-09-12 refresh (align to source `7c9867b`): `PHILOSOPHY.md` gained an
+  entirely new belief section ("機制要能被擴充而不靜默失效") and a second
+  Tier-2 bullet, plus a re-added annotation pointing an ASCII-diagram node and
+  a §五 closing-paragraph mention at this repo's `Global_skill_update.md`.
+  Two source-only tool/path citations inside the new material were
+  generalized (a per-lesson-card path under the source's own record tree; a
+  source-only session-archiving tool) rather than shipped literally. No
+  identifiers found beyond the pattern already covered above.
 - This is a point-in-time snapshot, not a synchronization target.

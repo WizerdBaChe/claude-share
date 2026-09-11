@@ -11,7 +11,12 @@ every rule below paid for by a real UAT failure or a COM-render catch. Sibling
 rule for HTML decks: `deliverable-doc-refs.md` (define-before-use + hover cards
 + build gates). Reference implementation with these fixes verbatim: a reference
 implementation lives in the source environment's asset library (helpers
-script-derived from the working builder; run its sample to see every rule fire).
+script-derived from the working builder; run its sample to see every rule fire). Index line lives
+in `CLAUDE.md`; review-when: python-pptx changes how it stores hyperlink targets
+(or gains an API that emits PowerPoint's canonical `file:///` form itself), or a
+PowerPoint build starts accepting the percent-encoded form — either event turns
+the first rule below from a fix into a workaround, and the verdict is a COM probe
+(`ops/lessons.md` L-041), never a changelog.
 
 **Asset properties — a generated .pptx must satisfy all of these, and the
 build script is where they are enforced:**
@@ -37,6 +42,15 @@ build script is where they are enforced:**
   The estimator's fullwidth-extra set must include them; the robust fix for
   TITLES is rewording to comfortably one line — COM-render and eyeball stays
   the only authority.
+- **Height, not only width** (SSLD proposal deck 2026-09-10, `ops/lessons.md` L-078):
+  a block-height estimator for Microsoft JhengHei must use a line pitch of
+  ≥1.5 × font size (1.55 for body); 1.35–1.4 under-counts and the last
+  block lands on the template footer band while python-pptx, PowerPoint and
+  validate.py all stay silent. Any layout helper that distributes blocks over
+  a box shrinks the font (0.5 pt steps) until estimated heights + gaps fit,
+  and the COM render is checked for ink inside the footer band — a pixel gate
+  with a deliberately over-filled page as the positive control is the target
+  shape; until it exists, the eyeball pass covers every page, not a sample.
 - **Text gates are per deliverable FAMILY, not per project**: a deck about a
   different mechanism gets its OWN canonical-term set and load-bearing-value
   list (reuse the gate machinery + injected-violation controls, never another
@@ -65,6 +79,31 @@ build script is where they are enforced:**
   table cells + speaker notes): canonical-vocabulary lint and verbatim
   load-bearing-value check, shared across ALL editions of the deliverable
   family, each with an injected-violation positive control every build.
+- **A deck delivered as EDITABLE survives one more line of its own kind in
+  every content frame.** Every other check here measures the deck standing
+  still; this one measures the reader's first edit, which is why the file was
+  shipped editable at all. Gate: a source-only headroom-measurement tool (does
+  not ship here), run as `<deck> --content <shape-name regex>` — it duplicates each frame's own last
+  paragraph (self-similar, so the probe scales with the frame), re-measures with
+  PowerPoint's layout engine, restores, and rules on three breaks: CLIP
+  (an `autosize=none` frame now taller than its inner height), ESCAPE (a growing
+  frame leaves the slide), COLLIDE (a growing frame — or a table, whose row
+  heights recompute — enters a shape it did not touch before; the auto-grow
+  hazard named two bullets down, now measurable instead of eyeballed).
+  **Which frames are content is not determinable** — a page number and a
+  paragraph are both text frames — so the BUILD declares them; an undeclared run
+  closes nothing (WARN, exit 1) and says so. `autosize=2` is UNDET and
+  forwarded, with its promotion trigger in the tool's README. Two-sided
+  calibration ships with it (`--selftest`: 3 known-true, one per mode, 2
+  known-false, plus an undeclared-closes-nothing check). Field baseline: SSLD
+  報告版, 248 frames — 15 FAIL, every one of them the page title colliding with
+  the block below; the other 57 findings were chrome. Read that rate beside its
+  ruler: undeclared it reads as 29 % broken, which is the instrument's scope
+  and not the deck's condition. Review-when: PowerPoint's autofit behaviour
+  changes, or python-pptx starts reconciling autofit height at write time —
+  today the height python-pptx WRITES is not the height PowerPoint uses (a
+  stored 374.4 pt textbox collapsed to ~93 pt on first text touch, measured
+  2026-09-10), and a gate reading stored geometry rules on a discarded number.
 - **Visual acceptance is a render loop, not a claim**: export slides to PNG
   via PowerPoint COM (`SaveAs(dir, 18)`; filenames are locale-dependent —
   投影片N.PNG on zh-TW systems) and eyeball for orphan wraps, overlaps

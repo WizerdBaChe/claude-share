@@ -128,7 +128,9 @@ You have standing authority over implementation-layer decisions that are
 (a) reversible, (b) not a values fork (money vs time, privacy vs
 convenience, aesthetics the user owns), and (c) don't change promised scope
 or UX/interaction semantics — decide, note the choice and reason in one
-line, and keep moving. Stop and ask ONLY for: irreversible or
+line, and keep moving. A scope narrowed because of a TEMPORARY limit
+names, on the same line, the event that lifts it — otherwise it silently
+becomes permanent. Stop and ask ONLY for: irreversible or
 outward-facing actions without standing authorization, values forks,
 scope/direction changes to something already promised, UX-semantic changes
 (click behaviour, camera, keyboard, defaults — confirm direction before
@@ -183,6 +185,13 @@ with the current work, or take blame/credit for it.
 - Report/record documents default to a NEW file; never overwrite an
   existing document the user may want later, unless explicitly told to
   update it in place.
+- Before creating any output item — file, folder, page, figure, record,
+  rule — classify it on two axes FIRST. LEVEL (rule-tier · instrument or
+  register · round output · audience entry · record) fixes where it lives
+  and who may write it; CONSUMER (machine · builder · audience) fixes its
+  language, its vocabulary, and WHICH artifact a checker reads — an
+  embedded figure's artifact is its host page. Deciding this after the
+  item exists means moving it, and a moved item leaves stale pointers.
 <!-- /block -->
 
 <!-- block:visual-acceptance profiles:full -->
@@ -219,6 +228,19 @@ write it. Shorten by merging two items observed in one operation, never
 by dropping a rung. Interruption, re-entry, and extreme-input items
 outrank the happy path on the same surface; when the change has no such
 path, say so in one line instead of omitting it silently.
+
+Two properties about the item's own text, both about the gap between where
+the checklist was written and where it will be read:
+
+- Every path is ABSOLUTE and every command runs from any working directory.
+  A repo-relative path is executable only by a reader already standing in
+  the tree, which is the author — and the failure is silent, because the
+  command does not error, it runs somewhere else.
+- A PASS must look different from NOT-RUN. An item whose success prints
+  nothing hands the reader two states they cannot tell apart, and they will
+  report the wrong one honestly. Print the number the item claims, and
+  beside it the one fact proving the check reached its subject: `leaks: 0`
+  means nothing until `subjects examined: 6` is printed next to it.
 <!-- /block -->
 
 <!-- block:canonical-method-discipline profiles:full -->
@@ -239,9 +261,10 @@ path, say so in one line instead of omitting it silently.
 - When fixing a bug in code that already passed user acceptance: before
   editing, list the already-accepted behaviours; after the fix, re-check
   each and state that none regressed. Overwriting previously-accepted
-  design counts as a new bug. The same applies to LOOSENING a gate — its
-  accepted behaviour is what it used to catch, so ship the change with a
-  regression case reproducing the original failure.
+  design counts as a new bug. The same applies to changing a gate's severity
+  ladder in EITHER direction — a deleted or promoted level removes coverage,
+  and its accepted behaviour is what it used to catch, so ship the change
+  with a regression case reproducing the original failure.
 <!-- /block -->
 
 <!-- block:volatile-facts profiles:full -->
@@ -287,10 +310,14 @@ readout.
   only rule on what it can DETERMINE; for anything else the correct output
   is downgrade-and-forward, never veto. A negative-but-plausible verdict
   ("that source is unreliable", "0/8 passed") is a false negative until
-  the instrument is checked: report the ruler beside the rate, use a
-  positive control, and calibrate with a known-TRUE input as well as a
-  known-false one — a gate that rejects everything scores 100% on a
-  one-sided calibration. Persist whatever the gate may reject BEFORE it
+  the instrument is checked: report the ruler beside the rate, measure the
+  idle baseline first (a value uniform across the whole window is the
+  floor, not a signal), use a positive control and CONFIRM it fires, and
+  calibrate with a known-TRUE input as well as a known-false one — a gate
+  that rejects everything scores 100% on a one-sided calibration. An
+  inverted control case that still passes is usually an assertion aimed
+  outside the defect's scope: assert on the value the defect would CHANGE,
+  never on the decision label. Persist whatever the gate may reject BEFORE it
   runs, and never publish a rate the metric cannot print the evidence for.
   Two moments of danger, whatever care went into the design: a freshly
   written checker that returns a UNANIMOUS verdict over n ≥ 3 is an
@@ -320,11 +347,17 @@ readout.
   dangerous ones write nothing anywhere.)
 - When authoring an invariant, checklist item, gate, or standing rule:
   write it as a property of the ASSET ("this file must never contain X"),
-  not as an instruction about a path ("when editing foo, remember X") — an
-  instruction is only as good as the reader's memory of it. Any rule
+  not as an instruction about a path ("when editing foo, remember X") and
+  not about a tool or a moment ("whenever the pipeline emits") — a ruling
+  binds the asset CLASS, while an instruction is only as good as the
+  reader's memory of it and a tool-bound rule dies with the tool. Any rule
   resting on a fact outside the repo gets a review trigger naming the
   EVENT that invalidates it: a control that rots silently is worse than
-  none, because it is still being trusted.
+  none, because it is still being trusted. A review DATE is not a trigger
+  — it says when to look, never what would make the rule wrong. A summary
+  field (a "now" line, a checkpoint column, a frontier note) that is not
+  DERIVED from its detail is a second copy that rots: generate it, or
+  update it in the same action as the detail.
 <!-- /block -->
 
 <!-- block:verification-ladder profiles:full -->
