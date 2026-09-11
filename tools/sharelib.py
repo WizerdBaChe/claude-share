@@ -57,6 +57,13 @@ LEAK_PATTERNS = [
         r"\s*[:=]\s*['\"]?[A-Za-z0-9_\-/+]{16,}")),
     # >=32 hex avoids matching git short hashes, which the source stamp needs.
     ("hash / long hex", re.compile(r"\b[0-9a-fA-F]{32,}\b")),
+    # 2026-09-12. A session id is a UUID, and the dashes put every run of it
+    # under 32 hex, so the pattern above never saw one. COLLECTION-RULES names
+    # session ids as a scrub target; a refresh that round carried two into a
+    # shipped file and the scan stayed clean.
+    ("UUID (session-id shape)", re.compile(
+        r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}"
+        r"-[0-9a-fA-F]{12}\b")),
     ("account name in a path", re.compile(
         r"(?i)(?:[A-Z]:[\\/]+Users[\\/]+|/home/|/c/Users/)" + re.escape(_USER)
         + r"\b")),
@@ -86,6 +93,24 @@ LEAK_PATTERNS = [
         r"Temp|tmp|Python[0-9]*)\b)"
         r"(?!<)[A-Za-z0-9_][A-Za-z0-9 _.+-]*")),
 ]
+
+# 2026-09-12. The account name OUTSIDE a home path. "account name in a path"
+# above only fires right after `Users\`, so the same name inside a mangled
+# directory slug (the source's `projects/` folders are named from the home
+# path with the separators folded into dashes) or in a plain sentence scanned
+# clean — and by 2026-09-12 three such values sat in this repo's own manifest
+# prose, each written while recording the scrub that removed it from a
+# shipped file. Read at run time like _USER, so the value is never written
+# here. Off for short or stock account names (a CI runner's home, a default
+# account), where it would fire on ordinary words; test_share_gate.py reports
+# its case as SKIP rather than PASS on such a machine.
+_GENERIC_ACCOUNTS = {"user", "users", "admin", "administrator", "runner",
+                     "root", "home", "ubuntu", "vagrant", "guest", "default",
+                     "public", "owner"}
+ACCOUNT_NAME_ACTIVE = len(_USER) >= 4 and _USER.lower() not in _GENERIC_ACCOUNTS
+if ACCOUNT_NAME_ACTIVE:
+    LEAK_PATTERNS.append(("account name (bare)", re.compile(
+        r"(?i)(?<![A-Za-z0-9])" + re.escape(_USER) + r"(?![A-Za-z0-9])")))
 
 
 def scan_text(text, label):

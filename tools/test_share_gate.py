@@ -37,8 +37,18 @@ Every case is a real incident, not a hypothetical:
  14  inventory drift AGENTS.md's skill table missing a shipped skill — the
                      positive control for the same-day widening of check S4
                      from one inventory table to two.
+ 15  leak            this machine's account name outside a home path — inside
+                     a mangled directory slug (2026-09-12: three such values
+                     had been published in the manifest's own prose). SKIP,
+                     not PASS, where the pattern is off (a stock or short
+                     account name). Its quiet half is case 9: the live tree
+                     carries no bare account name, so a pattern that fired on
+                     ordinary words would fail the current-tree control.
+ 16  leak            a session id (a UUID). Its dashes keep every hex run
+                     under 32, so the long-hex pattern never saw one; the
+                     same 2026-09-12 round carried two into a shipped file.
 
-Three of the fourteen assert that the gate stays QUIET. That ratio is deliberate: a
+Three of the sixteen assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -360,6 +370,43 @@ def main():
         expect_in_output=["AGENTS.md", "ux-walkthrough", "differs from the tree"],
         mutate=lambda: agents_path.write_bytes(agents_cut),
         restore=lambda: agents_path.write_bytes(agents_saved),
+    ))
+
+    # 15 — the account name OUTSIDE a home path. "account name in a path" only
+    #      fires right after `Users\`; the source names its per-project folders
+    #      from the home path with the separators folded into dashes, and a
+    #      slug like that (or a plain "user <name>" sentence) scanned clean.
+    #      The name is read at run time, as sharelib reads it, so this file
+    #      never contains it.
+    sys.path.insert(0, str(ROOT / "tools"))
+    from sharelib import ACCOUNT_NAME_ACTIVE, _USER
+    if ACCOUNT_NAME_ACTIVE:
+        slug_plant = saved + (
+            "\n\n<!-- planted by test_share_gate.py -->\n"
+            f"memory: projects/C--Users-{_USER}--claude/memory/\n")
+        results.append(case(
+            "leak: this machine's account name inside a directory slug",
+            expect_fail=True,
+            expect_in_output=["account name (bare)", OVER_SCRUB_FILE],
+            mutate=lambda: target.write_text(slug_plant, encoding="utf-8", newline=""),
+            restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+        ))
+    else:
+        print("[SKIP] account name outside a home path: the pattern is off on "
+              "this machine (a stock or short account name) — not exercised")
+
+    # 16 — a session id. Assembled at run time: a UUID literal in this file
+    #      would make the test itself a finding under the pattern it proves.
+    fake_sid = "-".join(["0f3c9a12", "4b7e", "4d21", "9c3a", "5e6f7a8b9c0d"])
+    sid_plant = saved + (
+        "\n\n<!-- planted by test_share_gate.py -->\n"
+        f"evidence: session {fake_sid} ledger rows 6-7\n")
+    results.append(case(
+        "leak: a session id (UUID shape)",
+        expect_fail=True,
+        expect_in_output=["UUID (session-id shape)", OVER_SCRUB_FILE],
+        mutate=lambda: target.write_text(sid_plant, encoding="utf-8", newline=""),
+        restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
     ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")

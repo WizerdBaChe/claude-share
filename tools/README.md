@@ -23,7 +23,7 @@
 python tools/share_gate.py                        # repo 內六道全跑，有發現就 exit 1
 python tools/share_gate.py --check P              # 只跑一道（L / P / R / S / C / D 任選）
 python tools/share_gate.py --source ~/.claude     # 再加上 V：逐檔比對來源樹
-python tools/test_share_gate.py                   # 驗收閘門本身：14 個案例
+python tools/test_share_gate.py                   # 驗收閘門本身：16 個案例
 python tools/triage.py --source ~/.claude         # 同步前先分類：來源每個變動該走哪個程序
 python tools/test_triage.py                       # 分類器自身的驗收：17 個案例
 ```
