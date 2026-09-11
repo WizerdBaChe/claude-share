@@ -157,8 +157,40 @@ class TestCheck(TempHome):
         self.assertEqual([f for f in good if f[0] == "FAIL"], [], good)
         bad = runs.check_run(BAD)
         rules = {r for s, r, _ in bad if s == "FAIL"}
-        self.assertTrue({"V1", "V2", "V3", "V4", "V7"} <= rules, bad)
-        self.assertGreaterEqual(len([f for f in bad if f[0] == "FAIL"]), 4)
+        self.assertTrue({"V1", "V2", "V3", "V4", "V7", "V8", "V9"} <= rules, bad)
+        self.assertGreaterEqual(len([f for f in bad if f[0] == "FAIL"]), 6)
+        # the good fixture predates the fetch instrument: V9 must WARN there, never FAIL
+        self.assertTrue(any(s == "WARN" and r == "V9" for s, r, _ in good), good)
+
+    def test_v9_promotes_to_fail_after_the_cutoff(self):
+        d = self.place_good("20260903_post-cutoff")
+        run = runs.load_run(d)
+        run["run"]["created"] = "2026-10-01T10:00:00+08:00"
+        runs.save_run(d, run)
+        f = runs.check_run(d)
+        self.assertTrue(any(s == "FAIL" and r == "V9" and "access_route" in m for s, r, m in f), f)
+        self.assertTrue(any(s == "FAIL" and r == "V9" and "manifest.json is absent" in m for s, r, m in f), f)
+
+    def test_v9_unparseable_created_is_unknown_and_stays_warn(self):
+        # QA 2026-09-11 F-14: "not-a-date" sorts after the cutoff lexicographically; it must NOT promote to FAIL
+        d = self.place_good("20260903_bad-date")
+        run = runs.load_run(d)
+        run["run"]["created"] = "not-a-date-at-all"
+        runs.save_run(d, run)
+        f = runs.check_run(d)
+        self.assertFalse(any(s == "FAIL" and r == "V9" for s, r, m in f), f)
+        self.assertTrue(any(s == "WARN" and r == "V9" for s, r, m in f), f)
+
+    def test_v9_pending_excerpt_and_v8_gate_fail(self):
+        d = self.place_good("20260903_pending")
+        (d / "sources" / "manifest.json").write_text(json.dumps({"schema": "lse-sources-manifest@1", "entries": {
+            "park2022": {"file": "sources/park2022.txt", "route": "script", "retention_policy": "excerpt",
+                         "retention_state": "pending-excerpt"}}}), encoding="utf-8")
+        (d / "citecheck.json").write_text(json.dumps([{"claim_id": "C1", "claim": "x", "checks": [
+            ["support", "FAIL", "support_span is NOT in park2022.txt"]]}]), encoding="utf-8")
+        f = runs.check_run(d)
+        self.assertTrue(any(s == "FAIL" and r == "V9" and "pending-excerpt" in m for s, r, m in f), f)
+        self.assertTrue(any(s == "FAIL" and r == "V8" and "C1:support" in m for s, r, m in f), f)
 
     def test_selftest_calibrated(self):
         import io

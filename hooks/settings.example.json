@@ -156,6 +156,16 @@
         ]
       },
       {
+        "matcher": "WebFetch|Bash|PowerShell|mcp__(Claude_Browser|claude-in-chrome)__(navigate|preview_start|browser_batch)|mcp__playwright-headless__browser_navigate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/literature_host_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Read|Grep|Glob",
         "hooks": [
           {

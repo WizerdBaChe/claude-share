@@ -1,0 +1,1 @@
+fixture: a text that exists although the manifest says the host refused the fetch — typed, not retrieved.

@@ -1876,27 +1876,34 @@ path = "skill-toolkit/skills/literature-search-extract/SKILL.md"
 source = "~/.claude/skills/literature-search-extract/SKILL.md"
 status = "edited"
 edits = [
-  "PRE-EXISTING BUG FOUND AND FIXED, not new source content: the shipped copy's status flips from verbatim to edited this round. Reference map opening line 'All nine reference files ship with the skill' (source's own current wording; the previously-shipped 'verbatim' copy already said 'All eight' under an older source revision) was FALSE in both revisions -- only 6 of 8, now 7 of 9, reference files listed there actually ship in this repo. Rewritten to 'Seven of these nine reference files ship with this copy of the skill... Not shipped in this repo: references/connectors.md and references/verification-gate.md, together with the connectors/ and verify/ tool lanes they document -- machine-bound to this owner's local Zotero HTTP connector, local PDF index, and local registry, none of which travel. P5's Zotero close-out above is inlined so it does not depend on connectors.md; P4.5's ledger procedure is likewise self-contained in this file (the gate script automates a check a reader can still do by hand: confirm the quoted span is actually in the retrieved text).' The two now-dead bullets (`references/connectors.md`, `references/verification-gate.md`) are kept in the list (silence is not available) but each gets a leading '**not shipped in this repo.**' flag plus a note that connectors/README.md, connectors/probe.py and verify/citecheck.py named in their own bullets are not shipped either.",
-  "P5's 'Zotero collection close-out' bullet: the NEW source's condensed form ('standing step whenever the project keeps a Zotero collection: append the wave's newly READ papers to the project bib and regenerate the RIS, per references/connectors.md §Zotero collection close-out') is a dead pointer in this repo -- connectors.md does not ship, and the condensed form carries none of the actual procedure. Restored the fuller inline procedure (command syntax, --collection-name convention, File -> Import re-import/merge guidance, the localhost:23119 read-only warning) -- re-verified this round against the CURRENT source connectors.md (`~/.claude/skills/literature-search-extract/references/connectors.md` §Zotero collection close-out, read directly, not inherited from an old repo copy) to confirm the procedure is unchanged and accurate, then closed with an explicit line: 'This copy inlines the full procedure because references/connectors.md does not ship here -- scripts/zotero_ris_export.py does.' scripts/zotero_ris_export.py already ships (existing verbatim entry above), so the step stays fully self-sufficient without any unshipped file.",
+  "2026-09-12 refresh (lane W5): the source grew a new P2 paragraph ('Host access policy before any fetch' -- `connectors/access_policy.py`, `~/.claude/hooks/literature-host-policy.json`, `verify/fetchsrc.py`) as part of this round's literature-access mechanism (rule + hook + hook-policy table + skill-side loader/fetcher, decided as one unit). All three files that paragraph names now ship in this repo (access_policy.py and fetchsrc.py are new per-file carve-outs out of the otherwise-excluded connectors/ and verify/ lanes -- see their own not_shipped entries below), so that paragraph needed NO edit -- left verbatim, and it is now an accurate, resolving pointer rather than a dead one.",
+  "Reference map opening line + the two dead-tool bullets: re-applied the standing edit (previously reasoned 'seven of nine reference files ship, connectors.md and verification-gate.md do not') and updated it for this round's carve-outs. Rewritten to: 'Seven of these nine reference files ship with this copy of the skill... Not shipped in this repo: references/connectors.md and references/verification-gate.md, together with the connectors/ and verify/ tool lanes they document -- machine-bound to this owner's local Zotero HTTP connector, local PDF index, and local registry, none of which travel. Two files from those same directories ship despite that: connectors/access_policy.py and verify/fetchsrc.py are the skill-side half of rules/literature-access.md's host access policy -- a separate, portable mechanism from the routing/registry content those two reference files document, with no local-service dependency, and already named directly at P2 above. P5's Zotero close-out above is inlined so it does not depend on connectors.md; P4.5's ledger procedure is likewise self-contained in this file...' Both dead bullets keep their '**not shipped in this repo.**' flag; the connectors.md bullet gains one sentence naming access_policy.py + the hook policy file as the separate mechanism that does ship; the verification-gate.md bullet's 'Tools:' line now reads `verify/citecheck.py` (not shipped), `verify/fetchsrc.py` (ships) instead of listing both undifferentiated.",
+  "P5's 'Zotero collection close-out' bullet: the source's condensed form (same wording as the prior round: 'append the wave's newly READ papers to the project bib and regenerate the RIS, per references/connectors.md §Zotero collection close-out') is still a dead pointer -- connectors.md still does not ship. Re-applied the standing edit: restored the fuller inline procedure (command syntax, --collection-name convention, File -> Import re-import/merge guidance, the localhost:23119 read-only warning) -- re-verified this round against the CURRENT source connectors.md (`~/.claude/skills/literature-search-extract/references/connectors.md` §Zotero collection close-out, read directly) to confirm the procedure text is byte-for-byte unchanged since the last round, then closed with the same explicit line: 'This copy inlines the full procedure because references/connectors.md does not ship here -- scripts/zotero_ris_export.py does.'",
 ]
-# Diff against source after both edits applied is exactly these two hunks
-# (Zotero close-out bullet body, Reference map opening paragraph + two
-# bullet annotations) and nothing else -- the rest of the file (which had
-# drifted substantially from a much older source revision: request/result
-# contracts, P2 tool-priority wording, P4.5 protocol wording, P5 formatting,
-# Resilience section, failure-mode #8/#9 text) is now a straight refresh to
-# the current source, since none of that drift itself needed scrubbing
-# (checked: no account name, no non-system-drive absolute path, no private
-# host/credential in any of it -- `ops/20-dispatch.md` and
-# `~/.claude/skill-trigger-dict.md`, both cited in the frontmatter
-# description, resolve in this repo at claude-ops/ops/20-dispatch.md and
-# skill-toolkit/skill-trigger-dict.md respectively, so left untouched per
-# "never scrub a path that resolves").
+# Diff against source after all three edits applied is exactly those three
+# hunks (P5 Zotero close-out bullet body, Reference map opening paragraph,
+# the two bullet annotations) and nothing else -- the rest of the file's
+# growth this round (the new P2 host-access-policy paragraph, minor wording
+# elsewhere) needed no scrubbing (checked: no account name, no non-system-
+# drive absolute path, no private host/credential; `~/.claude/hooks/
+# literature-host-policy.json` in the new P2 paragraph is a `~/`-relative
+# path that resolves in this repo at `hooks/literature-host-policy.json`,
+# left untouched per "never scrub a path that resolves"; `ops/20-dispatch.md`
+# and `~/.claude/skill-trigger-dict.md` in the frontmatter, same as before).
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/evals/evals.json"
 source = "~/.claude/skills/literature-search-extract/evals/evals.json"
 status = "verbatim"
+# 2026-09-12 refresh (lane W5): copied source over repo, empty diff. New
+# content is evals 8-10 (NTU library guide upgrade: host access policy,
+# half-real citation, numeric transcription), added 2026-09-11, results not
+# yet run (their `passed` fields are null with a "not yet run" evidence
+# note naming the machine-checkable halves -- citecheck.py --selftest,
+# fetchsrc.py --selftest, access_policy.py --selftest,
+# hooks/tests/test_literature_host_guard.py -- all reported green 2026-09-11
+# at the source). No private paths in the new content; all example DOIs and
+# hosts are real, resolvable, non-private identifiers used for illustration.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/credibility-rubric.md"
@@ -1915,6 +1922,13 @@ status = "verbatim"
 # the standing references/ not_shipped entry's own stated rationale: "treat
 # the citation as a claim made by the source environment, not as a receipt
 # you can pull").
+# 2026-09-12 refresh (lane W5): copied source over repo again, empty diff.
+# §3 gained a corrected retraction-field explanation and a `citecheck.py
+# --retraction-sweep` command example (v2, machine half of P4.5); citecheck.py
+# still does not ship (entry below), so this is the same "descriptive
+# citation into fuller unshipped tooling" treatment already applied above to
+# `connectors.md`/`verification-gate.md` -- not new scope. No new private
+# paths (grepped for account name / non-system-drive absolute path: none).
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/exhaustive-prisma.md"
@@ -1925,6 +1939,10 @@ status = "verbatim"
 path = "skill-toolkit/skills/literature-search-extract/references/extraction-playbook.md"
 source = "~/.claude/skills/literature-search-extract/references/extraction-playbook.md"
 status = "verbatim"
+# 2026-09-12 refresh (lane W5): copied source over repo, empty diff. New
+# content is §0 "Where each information need lives", moved here from SKILL.md
+# P1 2026-09-11 (line-neutral extraction on the source side) -- generic
+# table + prose, no private paths.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/output-templates.md"
@@ -1933,6 +1951,14 @@ status = "verbatim"
 # 2026-09-07 refresh: copied source over repo, empty diff. All examples use
 # the fictional "Park 2022" / "Chen 2023" placeholder sources (explicitly
 # flagged as such in the file's own header); no private paths.
+# 2026-09-12 refresh (lane W5): copied source over repo again, empty diff.
+# New content: an AI-use-disclosure line convention, a source-list access-
+# route marker convention, a "Query pack" section (hand-to-user retrieval,
+# naming `~/.claude/hooks/literature-host-policy.json` -- resolves in this
+# repo at `hooks/literature-host-policy.json`, which ships this round, so
+# left untouched per "never scrub a path that resolves"), and
+# `access_route`/`licence_basis` fields in the Mode-2 result-contract
+# example. No private paths.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/portability.md"
@@ -1952,6 +1978,20 @@ status = "verbatim"
 # `prism` (retired MCP server name) and the Taiwan-specific channel names are
 # real, resolvable identifiers/URLs, not private assets -- left as-is per
 # "never scrub ... a project name" and "never scrub a path that resolves".
+# 2026-09-12 refresh (lane W5): copied source over repo again, empty diff.
+# Substantial new content this round: an IEEE Xplore `agent_banned` section
+# naming `hooks/literature-host-policy.json` and `fetchsrc.py`, rung 3b of
+# the degradation ladder rewritten around `connectors/access_policy.py`
+# (replacing the earlier "render anti-bot pages with a headless browser"
+# advice that `rules/literature-access.md` forbids), and a new §Query
+# building section. Every tool/file this new content names --
+# `connectors/access_policy.py`, `hooks/literature-host-policy.json`,
+# `verify/fetchsrc.py`, `rules/literature-access.md` -- ships in this repo
+# this round (see their own [[collected]] entries below), so none of it is a
+# dead pointer. No private paths (grepped for account name / non-system-drive
+# absolute path: none); the institution name ("this owner's own literature
+# environment", NTU-specific channels) is kept per the existing precedent two
+# lines up -- a project/context description, not an enumerated scrub target.
 
 # =============================================================================
 # PART 2 — disposition of the new feedback-loop subsystem (all shipped)
@@ -3008,6 +3048,14 @@ path_position_ok = [
     "<zotero-library>",  # consumers/registry.json's zotero-local row: the
                    # reader's own Zotero sqlite, which must be theirs or the
                    # copy-then-read connector reads someone else's library
+    "<contact-email>",  # NEW 2026-09-12 (lane W5). verify/fetchsrc.py's
+                   # `CONTACT_BY_HOST` dict identifies the caller to
+                   # arxiv.org/export.arxiv.org per that project's API
+                   # politeness convention (a contact address in the request,
+                   # not a login) -- the source's own address was there by
+                   # 2026-08-27 consent-dated comment; edited this round to
+                   # this token so an adopter supplies their own before
+                   # fetchsrc.py talks to arXiv on their behalf.
 ]
 
 # Tokens allowed on a runnable line — the reader is expected to fill them in.
@@ -3548,6 +3596,15 @@ edits = [
 # fragment (design doc is under the standing top-level references/
 # not_shipped entry, which explicitly permits citations to survive; the
 # connector script has its own not_shipped entry below).
+# 2026-09-12 refresh (lane W5): re-recovered these three edits per Procedure
+# B step 1, copied the new source over the repo copy, re-applied all three at
+# their (unchanged) anchors, re-diffed -- exactly these three hunks, nothing
+# else. New content this round: the V8/V9 rule summary in §Checks (2026-09-11,
+# access-route/retention checks that mirror loop/runs.py's new check_run()
+# rules below) -- no private paths, portable. `verify/fetchsrc.py`, now named
+# several times in the per-step table (P4.5 row) and §Checks, ships this
+# round (its own new [[collected]] entry below), so those mentions are no
+# longer bare tool citations into an unshipped lane -- they resolve.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/loop/idkey.py"
@@ -3594,12 +3651,32 @@ edits = [
 # edits would not have caught on its own (the diff tool doesn't know the
 # source's own escape-vs-glyph distinction) -- caught instead by grepping
 # both sides for the same literal substring before trusting the diff.
+# 2026-09-12 refresh (lane W5): re-recovered all four edits per Procedure B
+# step 1, copied the new source over the repo copy, re-applied each at its
+# (unchanged) anchor, re-diffed against source -- exactly these four hunks,
+# nothing else (confirmed via `diff <(tr -d '\r' < source) <(tr -d '\r' <
+# repo)`). New content this round (V8/V9 check rules -- `citecheck.json`
+# gate-verdict enforcement and `sources/manifest.json`/access_route
+# enforcement, ~90 new lines -- plus a `route` column in `cmd_bridge()`'s
+# rendered table and a bumped `check` usage line V1-V7 -> V1-V9) is portable:
+# grepped for the account name and both drive-letter forms, none found
+# outside the three already-declared anchors. `LEGACY_CUTOFF`,
+# `verify/fetchsrc.py excerpt` and `rules/literature-access.md` are new
+# mentions in this block; fetchsrc.py ships this round (own entry below) and
+# rules/literature-access.md ships this round (own entry below), so neither
+# is a dead pointer.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/loop/schemas/run.schema.json"
 source = "~/.claude/skills/literature-search-extract/loop/schemas/run.schema.json"
 status = "verbatim"
 # NEW 2026-09-07 first collection. Generic JSON Schema, empty diff.
+# 2026-09-12 refresh (lane W5): copied source over repo again, empty diff.
+# New content: `sources[].access_route` and `sources[].licence_basis`
+# properties, added to support the V9 checks in loop/runs.py above -- generic
+# JSON Schema, cites `rules/literature-access.md` in a `description` field
+# (ships this round, own entry below). No private content in a JSON Schema
+# file by construction (property names and types only).
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/loop/schemas/consumer.schema.json"
@@ -3646,6 +3723,19 @@ status = "verbatim"
 # dir at test time but asserts only on generic schema-level fields (no
 # hardcoded dependency on the three rows dropped from the shipped
 # registry.json template, confirmed by grep) -- ships unmodified, empty diff.
+# 2026-09-12 refresh (lane W5): copied source over repo again, empty diff.
+# `test_fixtures_two_sided` now asserts `check_run(BAD)` FAILs V8/V9 among
+# the rest, which requires four fixture files under fixtures/bad-run/ that
+# did not exist before this round: citecheck.json, ledger.jsonl,
+# sources/manifest.json, sources/refused.txt (confirmed by actually running
+# the source `check_run` logic against the fixture directory and by reading
+# runs.py's V8/V9 code -- both read those files directly). All four are new
+# [[collected]] entries in the lane W5 block at the end of this file; without
+# them this test fails on a repo checkout even though it is declared
+# verbatim, so shipping the test and shipping its fixtures is one decision,
+# not two. `run.json` and `record.md` under the same fixture directory were
+# already shipped and are unchanged at the source this round (diff empty) --
+# out of this lane's file list, correctly so.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/good-run/run.json"
@@ -4091,9 +4181,24 @@ key) against `probe.py`'s live local process, which has nothing to probe
 outside this machine. `zotero_local.py` and `pdf_index.py` read local
 services the same way; `.env.example` is the credential template and
 `pdf-index.json` is the live index for the PDF-folder connector. Same lane,
-same verdict as `verify/staleclaim.py` below -- this directory is its
-counterpart on the connector side, and both are excluded together rather than
-piecemeal."""
+same verdict as `verify/staleclaim.py` below.
+
+PER-FILE RE-CHECK 2026-09-12 (lane W5): the source added one new file to this
+directory this cycle, `connectors/access_policy.py` -- read in full and found
+fully portable (`Path.home()`/`CLAUDE_CONFIG_DIR`, no local service, no
+hardcoded path). It is the skill-side read-only view of
+`hooks/literature-host-policy.json`, the SAME policy table
+`hooks/literature_host_guard.py` enforces at the tool-call boundary and
+`rules/literature-access.md` documents -- a separate, portable mechanism from
+the local-connector routing this directory otherwise holds, so it is carved
+out and shipped this round as its own `[[collected]]` entry below (new lane
+W5 block) rather than staying bundled under this directory's exclusion. The
+rest of this directory (`registry.json`, `README.md`, `probe.py`,
+`zotero_local.py`, `pdf_index.py`, `.env.example`, `pdf-index.json`) is still
+machine-bound as re-verified above and stays excluded; "both are excluded
+together rather than piecemeal" (the original 2026-09-07 wording) no longer
+describes this directory now that one file inside it ships -- the directory
+entry now means "excluded except access_policy.py", not "excluded whole"."""
 fallback = """`references/search-sources.md` and `references/portability.md`
 document the same source classes and channels without the local-connector
 shortcut: WebSearch/WebFetch against the public APIs (Crossref, OpenAlex,
@@ -4116,7 +4221,19 @@ edited this round (see that entry above) to inline the one procedure from
 this file a shipped, standing step depends on, using
 `scripts/zotero_ris_export.py`, which does ship -- re-verified against this
 file's current §Zotero collection close-out text directly, not against an
-older repo copy, to confirm the restored procedure is accurate."""
+older repo copy, to confirm the restored procedure is accurate.
+
+PER-FILE RE-CHECK 2026-09-12 (lane W5): re-read this round; §Zotero field maps
+still embeds an absolute local-drive path to the owner's Zotero storage
+folder (same class flagged 2026-08-29/2026-09-07), so the reasoning above
+still holds and the file stays excluded. Separately this round, the source
+added a NEW P2 paragraph to SKILL.md naming a host access policy
+(`connectors/access_policy.py` + `hooks/literature-host-policy.json`) --
+that policy is a different mechanism from this file's routing/registry/
+secret-boundary content (it governs WHICH HOST a fetch may touch, not which
+local connector to call), ships this round as its own carve-out (see the
+`connectors` directory entry above), and is already named directly at
+SKILL.md P2 rather than depending on this file."""
 fallback = """`references/search-sources.md` §Degradation ladder and
 `references/portability.md` cover the same P2 routing decision (registered
 connector -> local corpus -> WebSearch/WebFetch) generically, without the
@@ -4134,7 +4251,20 @@ Search Arena arXiv:2506.05334). SKILL.md's own P4.5 section states the ledger
 procedure and the falsifiability argument (name the support span, prove it is
 in the retrieved text) without depending on this file for the procedure
 itself -- this file is the deeper protocol and calibration detail behind the
-tool, not the sole copy of the step."""
+tool, not the sole copy of the step.
+
+PER-FILE RE-CHECK 2026-09-12 (lane W5): re-read this round; no private-path
+or machine-bound content in this file, and none was the reason it was
+excluded (it never held any -- the exclusion follows its paired tool,
+`verify/citecheck.py` below, not its own content). This round `verify/
+fetchsrc.py` -- the OTHER P4.5 tool, which retrieves and records provenance
+for cited text, gated through the new host access policy -- ships (edited:
+one incidental contact-email scrub; see its `[[collected]]` entry in the
+lane W5 block below). `citecheck.py` (the ledger-scoring tool this file
+documents) still does not ship, so this file's repair-order/calibration
+detail still has no corresponding shipped tool and stays excluded; the
+fallback below is unchanged in substance but fetchsrc.py's shipped
+`--help`/docstring now covers the retrieval half directly."""
 fallback = """SKILL.md P4.5 is self-contained for a manual pass: write the
 evidence ledger, then read the retrieved text and confirm each claimed span
 is actually present -- the same check `citecheck.py` automates. What is lost
@@ -4152,7 +4282,28 @@ already excluded 2026-08-29 for the same reason -- cited by SKILL.md P4.5 as
 the tool that runs against the evidence ledger and by loop/runs.py's own
 docstring/help text. RE-VERIFIED this round: still machine-bound the same way
 staleclaim.py was found to be (same `verify/` lane, same unshipped contract
-file it depends on)."""
+file it depends on).
+
+CORRECTION 2026-09-12 (lane W5 per-file re-check, COLLECTION-RULES rule 5):
+the "still machine-bound" line above does not hold up under a direct read
+this round -- the file was grepped in full (1163 lines) for the private-path
+and hardcoded-host patterns that justify every other exclusion in this lane,
+and none were found; it imports `access_policy` from the sibling
+`connectors/` directory (portable, ships this round) and carries the same
+one incidental contact-email constant `verify/fetchsrc.py` had (scrubbed
+there to `<contact-email>` this round). Corrected reason to exclude on: this
+file is not part of "the literature-access mechanism" this round's lane was
+scoped to (rule + hook + hook-policy + access_policy.py + fetchsrc.py); at
+1163 lines it needs its own dedicated Procedure-A first-collection read
+rather than a re-check folded into another lane's pass, and its own
+reference doc (`references/verification-gate.md` above) still does not
+ship, so a shipped `citecheck.py` would be a tool with no manual. Staying
+excluded this round on scope + missing-reference-doc grounds, not on
+machine-boundedness, which was this round's actual finding.
+review-when: a future round runs a dedicated Procedure-A pass on this file
+(first collection, not a re-check) -- treat that pass's own read as
+authoritative over both this note and the 2026-09-07 original, not as a
+tie-breaker between them."""
 fallback = """SKILL.md P4.5's inline text states what the script checks (the
 quoted support span is actually present in the retrieved text) in enough
 detail for a person to do the same check by hand against the ledger; what is
@@ -4259,3 +4410,173 @@ fallback = '''None. For turning source material into a deliverable a non-builder
 reads, `skill-toolkit/skills/audience-fit` ships; for the diagrams inside such a
 deliverable, `skill-toolkit/skills/diagram-authoring` and the
 `architecture-diagramming/` capability set do.'''
+
+# === lane W5 2026-09-12 BEGIN ===
+# The literature-access MECHANISM: a rule, a hook + its policy table, and the
+# skill-side policy loader + fetcher, built at the source this cycle as one
+# unit (SSLD W15 wave incident, IEEE Xplore ToU / NTU campus-network redlines).
+# Shipped as one decision, not five separate ones — a hook without its policy,
+# or a rule citing an absent hook, leaves an adopter a pointer to nothing.
+# All six files below read fully portable: Path.home()/CLAUDE_CONFIG_DIR, no
+# hardcoded path, no local service. The four fixtures are a shipped test's
+# (test_runs.py, entry above) direct dependency, confirmed by running its
+# V8/V9 logic against them.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/connectors/access_policy.py"
+source = "~/.claude/skills/literature-search-extract/connectors/access_policy.py"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). First file ever collected under this skill's
+# connectors/ directory — the directory itself stays excluded-by-decision
+# (not_shipped entry above, corrected this round to carve this file out).
+# Read in full: the skill-side read-only view of the same host policy table
+# `hooks/literature-host-policy.json` that `hooks/literature_host_guard.py`
+# enforces at the tool-call boundary — `--url <u> --check` says which surface
+# may touch which host. Fully portable (Path.home()/CLAUDE_CONFIG_DIR), no
+# local service, no hardcoded path. Empty diff against source.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/verify/fetchsrc.py"
+source = "~/.claude/skills/literature-search-extract/verify/fetchsrc.py"
+status = "edited"
+edits = [
+  "NEW 2026-09-12 (lane W5). First file ever collected under this skill's verify/ directory — the directory's other file, verify/citecheck.py, stays excluded (its own not_shipped entry above, corrected this round). CONTACT_BY_HOST dict (identifies the caller to arxiv.org/export.arxiv.org per that project's API politeness convention, a contact address sent WITH requests, not a login): the source's own address, dated by an inline '# arXiv-only consent 2026-08-27' comment, replaced with the <contact-email> token declared this round in [placeholders].path_position_ok — an adopter supplies their own before fetchsrc.py talks to arXiv on their behalf.",
+]
+# Diff against source after the edit is exactly that one dict-literal line;
+# nothing else changed. Retrieves and records provenance (route, HTTP status,
+# sha256 per source) for text that will be cited; consults access_policy.py
+# before any fetch and hands a refused/challenged host to the user with exit
+# 3, per rules/literature-access.md's routing ladder.
+
+[[collected]]
+path = "global-claude-md/rules/literature-access.md"
+source = "~/.claude/rules/literature-access.md"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). Compliance rule for scholarly-host access,
+# written 2026-09-10 from the SSLD W15 wave (an institutional VPN made four
+# paywalled publishers reachable in one step). States the property (a
+# citation-bearing artifact names its access route and licence basis per
+# source, and never contains content obtained by circumventing a technical
+# access control), the routing ladder (open access -> programmatic API ->
+# ordinary HTTP -> in-app browser, human-paced, named target -> hand to
+# user), and cites IEEE Xplore's Terms of Use prohibited-list clause and
+# NTU's campus network regulations (計中 101.4.24 修正) as the governing
+# texts read 2026-09-10. Read in full: no private path, no account name, no
+# credential. Empty diff against source.
+
+[[collected]]
+path = "hooks/literature_host_guard.py"
+source = "~/.claude/hooks/literature_host_guard.py"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). PreToolUse hook enforcing rules/literature-access.md's
+# policy at the tool-call boundary. Portable: CLAUDE_DIR resolves via
+# Path.home() or CLAUDE_CONFIG_DIR, POLICY_PATH via LSE_HOST_POLICY or
+# CLAUDE_DIR/hooks/literature-host-policy.json — both env-overridable, no
+# hardcoded path. Imports `deny_receipt` with a try/except fallback
+# (hooks/deny_receipt.py — a separate hook-deny-message mechanism, NOT in
+# this lane and NOT currently in this repo; see the not_shipped-adjacent
+# cross-lane note below and this round's report §4). Mounted this round in
+# hooks/settings.example.json (see that file's own note) and documented in
+# hooks/README.md (one new table row) — both edited by this lane per the
+# dispatch's explicit instruction, coordinated with lane W3. Empty diff
+# against source.
+
+[[collected]]
+path = "hooks/literature-host-policy.json"
+source = "~/.claude/hooks/literature-host-policy.json"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). The per-host policy data table
+# literature_host_guard.py enforces and access_policy.py reads. Read in
+# full: its `institution` field names "National Taiwan University (the only
+# entitlement this machine has been observed to carry — ops/environment.md
+# §Institutional literature access)" — a factual claim about THIS machine's
+# entitlement, not a credential or a path, left as-is (the never-scrub list
+# protects dated/factual claims; ops/environment.md itself does not ship —
+# out of this lane, cited descriptively the same way other unshipped
+# references are cited elsewhere in this manifest). Empty diff against
+# source.
+
+[[collected]]
+path = "hooks/tests/test_literature_host_guard.py"
+source = "~/.claude/hooks/tests/test_literature_host_guard.py"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). All fixture hosts are synthetic `.example`
+# domains. Empty diff against source. NOT fully green in this repo as
+# shipped: assertions D-01c/D-01d check substrings ("Recorded as row",
+# "report_fp.py") that only appear when literature_host_guard.py's optional
+# `deny_receipt` import succeeds; deny_receipt.py is a separate mechanism
+# (hook-deny-message, born 2026-09-08) not in this lane and not currently in
+# this repo. Ran this round; see this round's report for the exact
+# pass/fail count. Shipped anyway per the same reasoning as every other
+# verbatim test in this collection: the test is the accurate description of
+# the source's behavior, and a gap it exposes is a cross-lane dependency to
+# name, not a reason to withhold the test.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/bad-run/citecheck.json"
+source = "~/.claude/skills/literature-search-extract/loop/tests/fixtures/bad-run/citecheck.json"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). test_runs.py's test_fixtures_two_sided asserts
+# check_run(BAD) FAILs V8/V9 (new 2026-09-11 checks) among the rest; runs.py's
+# V8/V9 code reads this file directly. Without it the shipped test fails on a
+# clean checkout even though test_runs.py itself is declared verbatim with an
+# empty diff — shipping the test and its fixtures is one decision. Read in
+# full: synthetic fixture data, no private content.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/bad-run/ledger.jsonl"
+source = "~/.claude/skills/literature-search-extract/loop/tests/fixtures/bad-run/ledger.jsonl"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). Same test dependency as citecheck.json above.
+# Read in full: synthetic fixture data, no private content.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/bad-run/sources/manifest.json"
+source = "~/.claude/skills/literature-search-extract/loop/tests/fixtures/bad-run/sources/manifest.json"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). Same test dependency; V9 (sources/manifest.json
+# presence, access_route/pending-excerpt/hand_to_user checks) reads this file
+# directly. First file under a `sources/` subdirectory of this fixture —
+# subdirectory created in the repo to receive it. Read in full: synthetic
+# fixture data, no private content.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/bad-run/sources/refused.txt"
+source = "~/.claude/skills/literature-search-extract/loop/tests/fixtures/bad-run/sources/refused.txt"
+status = "verbatim"
+# NEW 2026-09-12 (lane W5). Same test dependency. Read in full: synthetic
+# fixture data, no private content. `run.json` and `record.md` under the same
+# fixture directory were already shipped before this round and are unchanged
+# at the source this round (diff empty) — out of this lane's file list,
+# correctly so (see test_runs.py's collected-entry comment above).
+
+[[not_shipped]]
+path = "skills/literature-search-extract/literature-search-extract-FUTURE-WORK.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-12 (lane W5) — not previously carrying an entry.
+The file's own text names itself, in its own packaging TODO, among the files
+to strip when packaging for sharing: "剔除個人檔案（PDF-GUIDE / FUTURE-WORK /
+sample-run / evals 個人備註）". Same class of evidence as the
+skills/scientific-research-guide/STATUS.md entry above (RE-DECLARED
+2026-08-29): the source's own words about sharing are evidence
+(COLLECTION-RULES hard rule 8), and a personal planning/TODO document is the
+file class the never-collect list already targets independent of that note.
+HONESTY NOTE: that same TODO line names three siblings (PDF-GUIDE.md,
+sample-run, evals' personal-notes) as due the same treatment; PDF-GUIDE.md is
+currently shipped verbatim in this manifest (entry above, not in this lane's
+file list, not touched by this lane) and evals.json ships verbatim as well
+(this lane's own entry above found no personal notes in it on this round's
+read) — so the TODO is evidently un-executed at the source for at least two
+of its four named items. That weakens "the owner already acted on this"
+but not hard rule 8 itself, which rests on the source's OWN STATED INTENT,
+not on whether the intent was carried out; FUTURE-WORK.md, unlike PDF-GUIDE.md
+and evals.json, IS itself the personal-planning artifact the TODO describes,
+so the self-naming is direct, not by association. Flagged for a future round
+to reconcile the other three named items rather than resolved unilaterally
+here — out of this lane's declared scope."""
+fallback = """None named. SKILL.md and the reference files under
+`references/` are the current, shipped statement of the pipeline; a reader
+wanting the roadmap/TODO view has none in this repo, matching the STATUS.md
+precedent's fallback (an internal planning artifact has no substitute a
+reader can act on)."""
+# === lane W5 2026-09-12 END ===

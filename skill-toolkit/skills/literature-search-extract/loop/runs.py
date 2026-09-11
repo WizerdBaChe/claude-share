@@ -13,7 +13,7 @@ lifecycle, §3.11 forcing functions, §6.3 LSEL-04). Invariants are cited as INV
   python runs.py register <run_dir>                     validate; REFUSE without reuse_check; write record.md; index +
                                                         README when filed; state -> delivered
   python runs.py find <terms...>                        NFKC+casefold search over question / keys / claims / domain
-  python runs.py check <run_dir> [--json]               V1-V7 (severity by consumer); exit 2 on any FAIL
+  python runs.py check <run_dir> [--json]               V1-V9 (severity by consumer); exit 2 on any FAIL
   python runs.py check --registry                       consumers/registry.json rows, status transitions, bridge freshness
   python runs.py adopt <unfiled_run_dir>                move an unfiled run into the home and index it (filed -> true)
   python runs.py affected <key-or-identifier> [--scan-srg] [--scan-papersurvey] [--json]
@@ -26,6 +26,16 @@ lifecycle, §3.11 forcing functions, §6.3 LSEL-04). Invariants are cited as INV
 Severity by consumer: FAIL where a downstream tool parses the artifact (schema, ledger presence,
 card keys, key syntax, reuse_check — V1/V2/V3/V4/V7); WARN where a human/LLM reads it (unresolved
 share, footer, wikilinks — V4b/V5/V6). Exit: 0 ok or WARN, 2 any FAIL, 1 usage/environment.
+
+Added 2026-09-11 (NTU library guide round; design references/lse-access-verification-upgrade-design.md §3.5):
+  V8 quotes   — a run past `open` whose citecheck.json still carries a FAIL was delivered over the gate's
+                verdict (SKILL.md failure mode #8; the half-real citation of the guide's p23). Reads the
+                EMITTED citecheck.json, never run.json's summary of it. FAIL.
+  V9 route/retention — every text-bearing source (`access_level` full/partial/abstract) names its
+                `access_route`; `sources/manifest.json` exists and no entry is left `pending-excerpt`
+                (licensed full text still in scratch, nothing derived); an entry whose route the manifest
+                recorded as hand_to_user has no text under its name. FAIL for runs created on/after
+                LEGACY_CUTOFF, WARN before (runs from before the instrument existed cannot carry it).
 Never deletes: rollback of anything here is `git`/the folder, never this tool.
 """
 from __future__ import annotations
@@ -79,6 +89,11 @@ NUM_UNIT_RE = re.compile(
     r"kg|g|mg|µg|sccm|slm|rpm|µF|nF|pF|F|mol|M|mM|wt%|at%|cm²|cm2|µm²)\b")
 FM_KEYS = ("xi:", "what:", "tags:", "aliases:", "date:", "status:", "kind: literature", "source:",
            "verified:", "review-when:", "domain:", "promoted-to:")
+# V9: runs created on/after this date were made with fetchsrc.py available, so a missing manifest or
+# access_route is an omission, not an anachronism. Same constant as verify/citecheck.py LEGACY_CUTOFF.
+LEGACY_CUTOFF = "2026-09-12"
+ROUTES = ("script", "webfetch", "browser_headless", "browser_user", "local_pdf", "user_provided", "hand_to_user")
+TEXT_LEVELS = ("full", "partial", "abstract")
 STOP = {"the", "and", "for", "with", "from", "that", "this", "what", "does", "are", "is", "of", "in",
         "on", "at", "to", "a", "an", "vs", "的", "與", "和", "在", "是", "有", "了"}
 
@@ -350,9 +365,10 @@ def record_md(run: dict, run_dir: Path) -> str:
             "", "## 問題 (question)", "", q, "",
             "## 交付內容 (findings, verbatim)", "", res.get("findings") or "_（尚未交付）_", "",
             "## 來源 (sources)", "",
-            "| key | citation | access | locators | Zotero | aliases |", "|---|---|---|---|---|---|"]
+            "| key | citation | access | route | locators | Zotero | aliases |", "|---|---|---|---|---|---|---|"]
     for s in res.get("sources") or []:
-        body.append(f"| `{s['key']}` | {_q(s.get('citation'))} | [{s.get('access_level')}] | "
+        body.append(f"| `{s.get('key') or '?'}` | {_q(s.get('citation'))} | [{s.get('access_level')}] | "
+                    f"{s.get('access_route') or '—'} | "
                     f"{', '.join(s.get('locators_used') or [])} | {s.get('zotero_key') or '—'} | "
                     f"{', '.join(s.get('aliases') or []) or '—'} |")
     if run.get("related"):
@@ -611,6 +627,65 @@ def check_run(run_dir: Path) -> list[tuple[str, str, str]]:
             out.append(("FAIL", "V7", "reuse_check.ran_at is later than citecheck.ran_at — the reuse check did not precede P2"))
         if rc.get("trail_line") not in (run["result"].get("search_trail") or []) and run["run"]["state"] != "open":
             out.append(("FAIL", "V7", "reuse_check.trail_line is not in result.search_trail — the check was not logged"))
+    # V8 quotes: the gate's own verdict is honoured — read the EMITTED citecheck.json
+    ccp = run_dir / "citecheck.json"
+    if run["run"]["state"] != "open" and ccp.exists():
+        try:
+            cc = read_json(ccp)
+            cc_rows = cc.get("rows", []) if isinstance(cc, dict) else (cc if isinstance(cc, list) else [])
+            failed = []
+            for r in cc_rows:
+                for c in (r.get("checks") or []) if isinstance(r, dict) else []:
+                    v = c.get("verdict") if isinstance(c, dict) else (c[1] if isinstance(c, (list, tuple)) and len(c) > 1 else None)
+                    n = c.get("check") if isinstance(c, dict) else (c[0] if isinstance(c, (list, tuple)) else "?")
+                    if v == "FAIL":
+                        failed.append(f"{r.get('claim_id', '?')}:{n}")
+            if failed:
+                out.append(("FAIL", "V8", f"citecheck.json carries {len(failed)} FAIL ({', '.join(failed[:6])}) but the run is "
+                                          f"past open — a claim the gate rejected was delivered as cited (failure mode #8)"))
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            out.append(("FAIL", "V8", "citecheck.json is not readable — the gate's verdict cannot be confirmed"))
+    # V9 access route + retention (rules/literature-access.md; design §3.5)
+    created = str(run["run"].get("created") or "")[:10]
+    # an unparseable date is UNKNOWN, which is the legacy (WARN) side, not an accident of string order (QA F-14)
+    legacy = not re.fullmatch(r"\d{4}-\d{2}-\d{2}", created) or created < LEGACY_CUTOFF
+    sev9 = "WARN" if legacy else "FAIL"
+    tail9 = f" (legacy run created {created or '?'}; FAIL from {LEGACY_CUTOFF})" if legacy else ""
+    for s in run["result"].get("sources") or []:
+        lvl = s.get("access_level")
+        route = s.get("access_route")
+        if lvl in TEXT_LEVELS and not route:
+            out.append((sev9, "V9", f"source {s.get('key')} [{lvl}] names no access_route — a citation-bearing row states "
+                                    f"how its text was obtained{tail9}"))
+        elif route and route not in ROUTES:
+            out.append(("FAIL", "V9", f"source {s.get('key')} access_route {route!r} is not one of {ROUTES}"))
+        elif route == "hand_to_user" and lvl in TEXT_LEVELS:
+            out.append(("FAIL", "V9", f"source {s.get('key')} is hand_to_user yet tagged [{lvl}] — nothing was retrieved, so "
+                                      "nothing can carry a text-bearing tag"))
+    mp = run_dir / "sources" / "manifest.json"
+    ledger_refs = {Path(str(r.get("source_text") or "")).name for r in rows if r.get("source_text")}
+    if ledger_refs and not mp.exists() and run["run"]["state"] != "open":
+        out.append((sev9, "V9", f"ledger cites {len(ledger_refs)} source text(s) but sources/manifest.json is absent — the "
+                                f"texts were not produced by fetchsrc.py, so their origin is unverifiable{tail9}"))
+    elif mp.exists():
+        try:
+            man = read_json(mp)
+            entries = man.get("entries") if isinstance(man, dict) else None
+            if not isinstance(entries, dict):
+                out.append(("FAIL", "V9", "sources/manifest.json has no entries object — not a fetchsrc manifest"))
+            else:
+                for name, e in entries.items():
+                    if not isinstance(e, dict):
+                        continue
+                    if e.get("retention_state") == "pending-excerpt" and run["run"]["state"] != "open":
+                        out.append(("FAIL", "V9", f"manifest entry {name}: licensed full text still pending-excerpt — run "
+                                                  "`verify/fetchsrc.py excerpt` before delivery (retention ruling R3)"))
+                    fname = Path(str(e.get("file") or f"{name}.txt")).name
+                    if e.get("route") == "hand_to_user" and (run_dir / "sources" / fname).exists():
+                        out.append(("FAIL", "V9", f"sources/{fname} exists although the manifest recorded hand_to_user — a "
+                                                  "text nobody retrieved"))
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            out.append(("FAIL", "V9", "sources/manifest.json is not readable"))
     return out
 
 
@@ -939,11 +1014,11 @@ def selftest() -> int:
     print(f"good-run: {len(gf)} FAIL / {len(g) - len(gf)} WARN  (must be 0 FAIL)")
     for s, r, m in g:
         print(f"   {s:5} {r:4} {m}")
-    print(f"bad-run:  {len(bf)} FAIL / {len(b) - len(bf)} WARN  (must be >= 4 FAIL naming V1/V2/V3/V7)")
+    print(f"bad-run:  {len(bf)} FAIL / {len(b) - len(bf)} WARN  (must be >= 6 FAIL naming V1/V2/V3/V7/V8/V9)")
     for s, r, m in b:
         print(f"   {s:5} {r:4} {m}")
     rules = {r for _, r, _ in bf}
-    ok = not gf and len(bf) >= 4 and {"V1", "V2", "V3", "V7"} <= rules
+    ok = not gf and len(bf) >= 6 and {"V1", "V2", "V3", "V7", "V8", "V9"} <= rules
     print("calibrated" if ok else "BROKEN instrument")
     return 0 if ok else 2
 

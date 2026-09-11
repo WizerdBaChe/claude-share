@@ -73,7 +73,11 @@
                 "type": ["object", "null"],
                 "properties": {"title_norm": {"type": "string"}, "surname": {"type": "string"}, "year": {"type": "string"}, "extra": {"type": "string"}}
               },
-              "version": {"type": ["string", "null"]}
+              "version": {"type": ["string", "null"]},
+              "access_route": {"enum": ["script", "webfetch", "browser_headless", "browser_user", "local_pdf", "user_provided", "hand_to_user"],
+                               "description": "how the text was obtained (rules/literature-access.md); V9 requires it on text-bearing sources of runs created >= 2026-09-12"},
+              "licence_basis": {"type": ["string", "null"],
+                                "description": "the policy row's licence_basis, an OA licence, or 'user's own copy' — why that route was permitted"}
             }
           }
         },
