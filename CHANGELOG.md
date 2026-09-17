@@ -9,6 +9,14 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-18 — moved literature-search-chatgpt to a standalone repository
+
+The ChatGPT/Codex literature package now lives at
+https://github.com/WizerdBaChe/literature-search-chatgpt. Removed its duplicate
+package and repository marketplace from `CLAUDE_SHARE` so this repository stays
+focused on the Claude share collection. The 2026-09-17 entry below records the
+original staging addition.
+
 ## 2026-09-17 — first ChatGPT/Codex plugin package
 
 Added `plugins/literature-search-chatgpt/` with a portable Agent Plugins
