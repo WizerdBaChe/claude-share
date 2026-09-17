@@ -1,0 +1,5 @@
+{
+ "note": "Two DIFFERENT sources whose unresolved bases differ; test_idkey forces them under one hash to prove the COLLISION report (D-L19).",
+ "a": {"title": "Passive alignment of optic fiber array using silicon V-grooves", "author": "Chen, A.", "year": 1997, "extra": "OTFA 1997 ThE.21"},
+ "b": {"title": "Passive alignment of optic fiber array using silicon V-grooves", "author": "Chen, B.", "year": 1997, "extra": "datasheet rev 2"}
+}

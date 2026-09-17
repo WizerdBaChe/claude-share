@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lse-runs/index@1",
+  "title": "evidence-run index (<home>/index.json) — design §3.5",
+  "type": "object",
+  "required": ["schema", "home", "entries"],
+  "properties": {
+    "schema": {"const": "lse-runs/index@1"},
+    "home": {"type": "string"},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["run_id", "path", "question", "created", "depth", "mode", "state", "filed", "keys", "claims", "registered"],
+        "properties": {
+          "run_id": {"type": "string"},
+          "path": {"type": "string"},
+          "question": {"type": "string"},
+          "created": {"type": "string"},
+          "depth": {"type": "string"},
+          "mode": {"enum": [1, 2]},
+          "state": {"type": "string"},
+          "filed": {"type": "boolean"},
+          "keys": {"type": "array", "items": {"type": "string"}},
+          "claims": {"type": "array", "items": {"type": "string"}},
+          "n_sources": {"type": "integer"},
+          "n_ledger_rows": {"type": "integer"},
+          "citecheck_fail": {"type": ["integer", "null"]},
+          "citecheck_warn": {"type": ["integer", "null"]},
+          "domain": {"type": "string"},
+          "related": {"type": "array"},
+          "caller": {"type": "string"},
+          "registered": {"type": "string"}
+        }
+      }
+    }
+  }
+}

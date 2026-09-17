@@ -9,6 +9,22 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-17 — first ChatGPT/Codex plugin package
+
+Added `plugins/literature-search-chatgpt/` with a portable Agent Plugins
+`plugin.json`, a Codex compatibility manifest, a self-contained
+`literature-search-extract` skill adapter, repository marketplace metadata, and
+public Git installation instructions. The package is explicitly labelled for
+ChatGPT/Codex; a future Claude adapter remains a separate package boundary.
+
+The adapter removes machine-local Claude paths and credentials, uses an explicit
+`LSE_HOST_POLICY`, gives evidence runs a per-user data default or `LSE_RUN_HOME`,
+and carries the portable support-span verification lane. The repository share
+gate now records the package's generated bridge receipt as a recomputable public
+integrity value. Validation for this addition: plugin manifest validation passed,
+49 Python loop tests passed, both provenance/policy selftests passed, and
+`python tools/share_gate.py` passed with 333 tracked files.
+
 ## 2026-09-12 — nine lanes, a new `instruments/` folder, and a premise that turned out false
 
 Source `27196ab` → `7c9867b`: 192 commits, 538 paths counting the source's

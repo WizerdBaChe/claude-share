@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lse-runs/consumers@1",
+  "title": "consumer registry (consumers/registry.json) — design §3.8.1",
+  "type": "object",
+  "required": ["schema", "owner_skill", "consumers"],
+  "properties": {
+    "schema": {"const": "lse-runs/consumers@1"},
+    "owner_skill": {"const": "literature-search-extract"},
+    "note": {"type": "string"},
+    "review_when": {"type": "string"},
+    "consumers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "registered", "direction", "consumes", "writes_back", "artifact_kind",
+                     "store", "situations", "why_it_matters_here", "review_when"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9\\-]*$"},
+          "status": {"enum": ["planned", "live", "retired"]},
+          "registered": {"type": "string", "minLength": 10},
+          "first_seen": {"type": ["string", "null"]},
+          "direction": {"enum": ["calls_lse", "lse_calls", "both", "writes_back", "indirect", "store"]},
+          "calls": {
+            "type": ["object", "null"],
+            "properties": {
+              "mode": {"enum": [1, 2]},
+              "presets": {"type": "object"},
+              "seed_field": {"type": "string"}
+            }
+          },
+          "consumes": {"type": "array", "items": {"type": "string"}},
+          "writes_back": {"type": "array", "items": {"enum": ["consumed", "correction", "retraction", "handoff", "rerun"]}},
+          "artifact_kind": {"type": "string"},
+          "store": {
+            "type": "object",
+            "required": ["path", "identity_field", "run_pointer"],
+            "properties": {"path": {"type": "string"}, "identity_field": {"type": "string"}, "run_pointer": {"type": "string"}}
+          },
+          "situations": {"type": "array", "items": {"type": "string"}},
+          "why_it_matters_here": {"type": "string"},
+          "review_when": {"type": "string"},
+          "history": {
+            "type": "array",
+            "items": {"type": "object", "required": ["status", "at"],
+                      "properties": {"status": {"enum": ["planned", "live", "retired"]}, "at": {"type": "string"}, "note": {"type": "string"}}}
+          }
+        }
+      }
+    }
+  }
+}
