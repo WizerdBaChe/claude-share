@@ -21,6 +21,25 @@ shape it has; start with `claude-ops/ops/OPS.md` if you want the rules themselve
 | `.gitattributes` | **New 2026-08-29.** Line endings as a property of the asset rather than of whoever's `core.autocrlf` is in play. The default is `text=auto` (this repo is cloned on unknown platforms); the one path that pins `eol=lf` is `architecture-diagramming/archdiag/**`, because the html that library emits carries a sha256 freeze receipt and a CRLF checkout would invalidate every one with no content change behind it. |
 | `archive/` | Retired material kept locally for traceability, gitignored — not part of the published repo. |
 
+## `.agents/plugins/` — repository plugin marketplace
+
+| File | What it is |
+|---|---|
+| `marketplace.json` | Git-backed marketplace manifest for the public ChatGPT/Codex plugin package. |
+
+## `plugins/literature-search-chatgpt/` — ChatGPT/Codex plugin package
+
+The package is deliberately host-labelled so a future Claude adapter can use a sibling
+manifest and skill directory without silently inheriting ChatGPT/Codex bindings.
+
+| File or folder | What it is |
+|---|---|
+| `plugin.json` | Portable Agent Plugins manifest with `extensions.com.openai` metadata. |
+| `.codex-plugin/plugin.json` | Codex compatibility manifest for hosts that still read the legacy location. |
+| `README.md` | Public Git marketplace installation and runtime boundary. |
+| `SHARE-NOTES.md` | Packaging decisions, exclusions, limits, and verification record. |
+| `skills/literature-search-chatgpt/` | Self-contained `literature-search-extract` skill adapter, evidence loop, references, provenance tools, and tests. |
+
 ## `claude-ops/ops/` — the operating rules layer
 
 Read in this order; `OPS.md` is the entry point and routing table.
