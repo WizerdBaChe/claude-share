@@ -131,8 +131,11 @@ the model: any mechanism name is an example, verify before relying on it.
 | `agents/` | **New 2026-08-14, nine since 2026-09-07.** The subagent definitions `claude-ops/ops/20-dispatch.md` routes to, each with a `tools:` capability allowlist and a defined output contract. The newest, `work-card-executor`, runs one build-ready work card to its machine-checkable acceptance and stops at any fork the card does not settle. |
 | `thinking-notes/` | Twelve numbered design-thinking notes. Argument, not policy — nothing there binds a reader. |
 | `tools/` | The publishing gate — leak, placeholder, reference-disposition, structure, collection-provenance and dead-declaration checks, plus an opt-in source comparison — and `COLLECTION-RULES.md`, the procedure for deciding what may be collected in the first place. Its two procedures are worth reading even if you never collect: **A** for a file that is not here yet, **B** for one that is, because running A over B's files is what a 2026-08-16 refresh did to six deliberate decisions. |
-| `.agents/plugins/` | Repository marketplace manifest for host-specific installable plugins. |
-| `plugins/` | Host-specific plugin packages; `literature-search-chatgpt/` is the first ChatGPT/Codex package and carries its own adapter boundary. |
+
+The ChatGPT/Codex literature package moved on 2026-09-18 to its own public
+repository: [`WizerdBaChe/literature-search-chatgpt`](https://github.com/WizerdBaChe/literature-search-chatgpt).
+This repository remains the Claude-oriented share collection; a future Claude
+adapter can be published with its own host-labelled package boundary.
 
 ## Where things are
 
@@ -145,7 +148,7 @@ the model: any mechanism name is an example, verify before relying on it.
 | When each share was copied and what changed | `CHANGELOG.md` |
 | The rules layer itself | `claude-ops/ops/` (start at `OPS.md`) |
 | Installable skills | `skill-toolkit/skills/` (inventory in `skill-toolkit/README.md`) |
-| Installable ChatGPT/Codex plugin | `plugins/literature-search-chatgpt/README.md` |
+| Standalone ChatGPT/Codex plugin | [`literature-search-chatgpt`](https://github.com/WizerdBaChe/literature-search-chatgpt) |
 | A tool a shipped rule names as its enforcement | `instruments/` (start at `instruments/README.md`) |
 | Why any of this is shaped this way | `environment-guide/PHILOSOPHY.md` |
 | What this repo names but does not ship | `tools/share-manifest.toml` |

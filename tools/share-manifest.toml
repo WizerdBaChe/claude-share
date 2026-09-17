@@ -4059,16 +4059,6 @@ machine: it is the sha256 of a five-row JSON file published two directories
 away, recomputable by anyone holding this repo."""
 
 [[allow]]
-file = "plugins/literature-search-chatgpt/skills/literature-search-chatgpt/references/bridge.md"
-kind = "hash / long hex"
-match = "ddf716c354e9a831"
-reason = """The generated-from receipt for the public ChatGPT/Codex package's
-consumer registry. The registry ships beside this bridge, and the package's
-`loop/runs.py check --registry` recomputes the normalized JSON hash and rejects
-a stale bridge. This is a public, recomputable integrity receipt, not a private
-identifier."""
-
-[[allow]]
 file = "skill-toolkit/skills/literature-search-extract/loop/tests/test_runs.py"
 kind = "absolute local path (non-system drive)"
 # `match` drops the drive letter for the same reason as the entry above it.
