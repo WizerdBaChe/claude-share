@@ -24,6 +24,7 @@ Design invariants (see README.md / MIGRATION-MAP.md):
     delegated to the target agent, which reads its OWN current official docs.
 """
 
+import os
 import re
 import subprocess
 import sys
@@ -33,7 +34,12 @@ REPO = Path(__file__).resolve().parent.parent   # ~/.claude
 CORE = Path(__file__).resolve().parent / "portable-core.md"
 CURATION_STAMP = Path(__file__).resolve().parent / "curation.stamp"
 
-STAMP_RE = re.compile(r"managed-by: claude-interop \| profile: (\S+) \| source: (\S+)")
+# `agent-interop` is the neutral stamp used by new builds.  Accept the
+# historical `claude-interop` stamp so a target generated before the rename is
+# not treated as foreign on the next status/build pass.
+STAMP_RE = re.compile(
+    r"managed-by: (?:claude|agent)-interop \| profile: (\S+) \| source: (\S+)"
+)
 # 2026-08-16 hardening (verified findings, outputs/experiments/2026-08-16-q2-
 # schema-order/): `profiles:` now tolerates whitespace after the colon and the
 # commas — the old pattern silently DROPPED a block on `profiles: light,full`,
@@ -73,10 +79,30 @@ OPEN_MARKER_RE = re.compile(r"<!--\s*block:([\w-]+)")
 # transplant then had no detector for three days and nothing said so: the
 # stamp kept reporting "up to date" against a file the rule had left. A source
 # list narrowed by WHERE a rule currently lives inherits every later move of it.
-CURATION_SOURCES = [
-    "CLAUDE.md",
-    "ops/references/uat.md",
-]
+# The source environment uses `CLAUDE.md` / `ops/`; this share repo keeps the
+# same assets under its published layout.  Resolve the layout instead of
+# letting `status` silently inspect paths that do not exist in the current
+# checkout.
+if (REPO / "CLAUDE.md").is_file():
+    CURATION_SOURCES = [
+        "CLAUDE.md",
+        "ops/references/uat.md",
+    ]
+else:
+    CURATION_SOURCES = [
+        "global-claude-md/CLAUDE.md",
+        "claude-ops/ops/references/uat.md",
+    ]
+
+CORE_REL = CORE.relative_to(REPO).as_posix()
+SCRIPT_REL = Path(__file__).resolve().relative_to(REPO).as_posix()
+INTEROP_SOURCE_PATHS = (CORE_REL, SCRIPT_REL)
+
+# Codex allows a different home for isolated profiles and automation users.
+# Resolve it at runtime; never bake this machine's home path into a payload.
+CODEX_HOME = Path(
+    os.environ.get("CODEX_HOME") or (Path.home() / ".codex")
+).expanduser()
 
 TARGETS = {
     "opencode": {
@@ -92,16 +118,21 @@ TARGETS = {
         "profile": "full",
         "note": "global rules; overrides opencode's fallback to ~/.claude/CLAUDE.md",
     },
-    # USER RULING 2026-08-15: `codex` and `antigravity` REMOVED from the
-    # registry (they had been sync-off since 2026-08-11). Both rows were frozen
-    # at their 2026-07-10 verification while this registry's own header says
-    # those locations are volatile facts that must be re-verified -- so what
-    # was being "kept for later" was an unverifiable snapshot, not a fact.
-    # Re-adding either one goes through README.md's "新增一個目標 agent 的
-    # checklist" step 1 (look the paths and extension points up in the
-    # platform's current docs), which is faster than trusting a stale value.
-    # Full text of both entries: `git show 483435f:archive/2026-08-15-interop-targets-removed/README.md`,
-    # or `git show 596cfc0:interop/interop.py`.
+    # RE-VERIFIED 2026-09-18 against the current Codex documentation:
+    # `AGENTS.override.md` wins over `AGENTS.md` at global scope, and
+    # `CODEX_HOME` may relocate the Codex home.  The override is therefore
+    # observed as a shadowing condition below rather than silently reported as
+    # a live deployment.
+    "codex": {
+        "path": CODEX_HOME / "AGENTS.md",
+        "shadowed_by": CODEX_HOME / "AGENTS.override.md",
+        "profile": "full",
+        "note": "global Codex rules; AGENTS.override.md takes precedence",
+    },
+    # ChatGPT Web is deliberately absent from TARGETS.  It has no equivalent
+    # global AGENTS.md file target: portable workflows go through skills or a
+    # plugin package, while the desktop/Codex import flow is user-selected and
+    # non-destructive.  See MIGRATION-MAP.md and README.md.
     #
     # The `disabled` key below is still honoured by cmd_build/cmd_status (the
     # `[off]` branches) and by ops_health_nudge.py check 12. No target uses it
@@ -208,9 +239,9 @@ def delegation_block(profile):
 def assemble(profile, blocks, src_hash):
     picked = [b for b in blocks if profile in b["profiles"]]
     header = (
-        f"<!-- managed-by: claude-interop | profile: {profile} | source: {src_hash}\n"
-        f"     GENERATED FILE - do not edit. Edit ~/.claude/interop/portable-core.md\n"
-        f"     and rerun: python ~/.claude/interop/interop.py build -->\n\n"
+        f"<!-- managed-by: agent-interop | profile: {profile} | source: {src_hash}\n"
+        "     GENERATED FILE - do not edit. Update the canonical portable-core.md\n"
+        "     and rerun the interop compiler from its owning environment. -->\n\n"
     )
     return (header + "\n\n".join(b["body"] for b in picked)
             + delegation_block(profile) + "\n")
@@ -255,8 +286,7 @@ def cmd_scan():
 def cmd_build():
     # Both stamp-relevant sources — cmd_status diffs against both, so the
     # build-time warning must too (was portable-core.md only until 2026-08-16).
-    if git("status", "--porcelain", "--",
-           "interop/portable-core.md", "interop/interop.py"):
+    if git("status", "--porcelain", "--", *INTEROP_SOURCE_PATHS):
         print("WARNING: portable-core.md / interop.py have uncommitted changes; "
               "the stamp will point at the last commit, not your working copy. "
               "Commit first for an accurate stamp.")
@@ -277,6 +307,10 @@ def cmd_build():
         if t.get("disabled"):
             print(f"[off] {name}: sync disabled ({t['disabled']}) — not written")
             continue
+        shadowed_by = t.get("shadowed_by")
+        if shadowed_by and shadowed_by.exists():
+            print(f"[shadowed] {name}: {shadowed_by} takes precedence over "
+                  f"{path}; generated file will be retained but is not active")
         if not path.parent.is_dir():
             print(f"[skip] {name}: {path.parent} does not exist (agent not installed)")
             continue
@@ -332,7 +366,7 @@ def cmd_status():
             ok = False
             continue
         log = git("log", "--oneline", f"{stamp}..HEAD", "--",
-                  "interop/portable-core.md", "interop/interop.py")
+                  *INTEROP_SOURCE_PATHS)
         if log:
             print(f"[stale] {name}: source changed since {stamp} (run: build)")
             for line in log.splitlines():
@@ -340,6 +374,11 @@ def cmd_status():
             ok = False
         else:
             print(f"[fresh] {name}: profile={m.group(1)}, source={stamp}")
+        shadowed_by = t.get("shadowed_by")
+        if shadowed_by and shadowed_by.exists():
+            print(f"[shadowed] {name}: {shadowed_by} takes precedence; "
+                  "the generated AGENTS.md is not active")
+            ok = False
     print()
     if CURATION_STAMP.exists():
         cur = CURATION_STAMP.read_text(encoding="utf-8").strip()

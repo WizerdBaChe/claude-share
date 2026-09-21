@@ -82,6 +82,30 @@ def t_live_file():
     assert len(b) >= 16, f"live portable-core.md parsed only {len(b)} blocks"
 
 
+def t_codex_target_contract():
+    t = interop.TARGETS.get("codex")
+    assert t is not None, "Codex must be a verified file target"
+    assert t["profile"] == "full", t
+    assert t["path"].name == "AGENTS.md", t["path"]
+    assert t["shadowed_by"].name == "AGENTS.override.md", t["shadowed_by"]
+    assert t["path"].parent == interop.CODEX_HOME, (t, interop.CODEX_HOME)
+    assert "chatgpt-web" not in interop.TARGETS, \
+        "ChatGPT Web is a package/import surface, not an AGENTS target"
+
+
+def t_share_layout_and_stamp_contract():
+    # The source tree uses interop/, while this published copy uses
+    # interop-layer/. Freshness checks must follow the current checkout.
+    assert interop.CORE_REL == "interop-layer/portable-core.md", interop.CORE_REL
+    assert interop.SCRIPT_REL == "interop-layer/interop.py", interop.SCRIPT_REL
+    payload = interop.assemble(
+        "full", interop.parse_blocks(BLOCK), "abcdef1"
+    )
+    assert "managed-by: agent-interop | profile: full | source: abcdef1" in payload
+    assert interop.STAMP_RE.search(payload), payload[:200]
+    assert "~/.claude/interop/portable-core.md" not in payload
+
+
 # --- parser: negative controls (must fail LOUDLY, never drop silently) -------
 def t_missing_close():
     expect_exit(BLOCK + "<!-- block:b profiles:full -->\nno close\n",
@@ -173,7 +197,8 @@ def t_truncation_boundary():
 
 if __name__ == "__main__":
     for fn in [t_good, t_space_after_colon, t_space_after_comma, t_crlf,
-               t_doc_example_inert, t_live_file, t_missing_close,
+               t_doc_example_inert, t_live_file, t_codex_target_contract,
+               t_share_layout_and_stamp_contract, t_missing_close,
                t_bad_profile_word, t_trailing_comma, t_light_without_full,
                t_duplicate_id, t_leak_known_true, t_leak_known_false,
                t_truncation_boundary]:

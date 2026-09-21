@@ -1,4 +1,4 @@
-# Migration Map — layered portability of the ~/.claude environment
+# Migration Map — layered portability of the Claude / Codex / ChatGPT environment
 
 Machine-and-human reference for what transfers to other agent systems, how,
 and what deliberately does not. Consumed by the genesis prompt during
@@ -8,9 +8,10 @@ mechanism-layer translation. Human operating manual: README.md (中文).
 
 | Layer | Assets | Portability | Sync method |
 |---|---|---|---|
-| Instructions | portable subset of CLAUDE.md (distilled into `portable-core.md`) | HIGH — plain prose | Deterministic compile: `interop.py build` (true sync) |
+| Instructions | portable subset of CLAUDE.md (distilled into `portable-core.md`) | HIGH — plain prose | Deterministic compile to file-based targets: `interop.py build` (true sync) |
 | Method content | **RETIRED 2026-08-11** — was: curated playbooks in `interop/refs/` | NONE. The content ported; the TRIGGER never did, and "instructed read" is not a trigger | Delegated: `delegation_block()` tells the target agent to consult ITS OWN current official docs and propose the adaptation |
 | Mechanisms | hooks (`model_cap_guard.py`, `ops_health_nudge.py`), permissions (`settings.json`), skill routing | LOW — bound to each platform's extension points | Agent-assisted translation via `genesis-prompt.md`, stamped, re-translated on staleness flag |
+| Distribution / import | skill payloads, portable plugin packages, and supported product import flows | MEDIUM — target surface decides what is actually executable | Target-native packaging or user-selected import; never treat it as a second canonical source |
 | Memory / state | `projects/<slug>/memory/`, sessions, `ops/environment.md` | NONE by design | Never synced. Cross-CLI isolation is a standing ruling. |
 
 ## Portability classes (per asset)
@@ -56,6 +57,101 @@ mechanism-layer translation. Human operating manual: README.md (中文).
   memory, credentials. Skill/ops BODIES are eligible for reference-compile
   above when their value justifies the context rent — the raw files
   themselves never ship.
+
+## OpenAI migration rule — Core + Adapter + Integration
+
+The reusable part of a skill is not the same thing as the host contract or the
+external connection. Classify those parts separately before moving anything:
+
+| Part | Keep / rewrite | Rule |
+|---|---|---|
+| **Core** | Keep | Domain purpose, decision rules, workflow, output schema, quality bar, references, scripts, assets, and test fixtures that are actually required by the workflow. |
+| **Adapter** | Rewrite per target | Tool names, paths, shell/runtime assumptions, file discovery, permission and confirmation semantics, host routing, metadata, and fallback behavior. |
+| **Integration** | Add only when separately authorised | MCP servers, connectors, credentials, external actions, and persistent services. Re-authenticate and re-scope them on the target; never copy secrets or pretend a missing connection exists. |
+
+Use the following portability classes:
+
+- **Verbatim-portable**: conversation-only work, user-provided files, and
+  general reasoning. Keep the core and change only target metadata or
+  packaging when needed.
+- **Portable with adapter**: the core remains useful, but the host contract
+  must be rewritten for Codex, ChatGPT, or another agent.
+- **Not directly portable**: local vaults, CAD/media pipelines, private
+  services, credentials, hooks, or continuing external actions. Keep the
+  local implementation, or split out a web-capable analysis core and build a
+  separately authorised remote integration.
+
+Do not silently delete execution steps to make a skill look portable. If the
+target lacks the capability, state the missing evidence and the fallback.
+
+### Skill admission fence for this share
+
+This migration pass updates rules and existing records; it does **not** add a
+new skill or plugin. If a later migration proposes a skill, admit it only when
+the deliverable is self-contained: one `SKILL.md` plus optional bundled,
+repo-local `references/` or static assets that are included with the
+deliverable and have no unresolved links.
+
+Do not add or migrate a skill that requires another tool, executable script,
+hook, MCP server, connector, database, private vault, unbundled file, remote
+service, or persistent process. Such a candidate is `not directly portable` or
+deferred until the user separately authorises and supplies the integration.
+Official documentation links in this migration map are verification sources;
+they are not runtime dependencies of a skill package. Existing skills in this
+repo are not duplicated or upgraded under this rule unless the user explicitly
+requests that separate scope.
+
+### Codex file target versus ChatGPT package/import surfaces
+
+Codex has a file-based instruction target: the default global file is
+`~/.codex/AGENTS.md`, or `$CODEX_HOME/AGENTS.md` when `CODEX_HOME` is set.
+`AGENTS.override.md` takes precedence at the same global scope; project and
+nested instructions are then discovered from the repository root down to the
+current directory. The `codex` entry in `interop.py` therefore compiles only
+the portable preference payload, uses `full`, and reports an active override as
+`shadowed` instead of claiming that the generated file is live.
+
+ChatGPT Web is **not** a global `AGENTS.md` target. A reusable workflow for
+ChatGPT and Codex is distributed as a skill or a plugin. The current portable
+skills-only package is:
+
+```text
+plugin-root/
+├── plugin.json
+└── skills/
+    └── <skill-name>/
+        └── SKILL.md
+```
+
+The root `plugin.json` is the portable package format. A Codex/Plugin Creator
+scaffold may also provide `.codex-plugin/plugin.json` as a compatibility
+manifest; it is not a reason to copy Claude settings into the package. Keep
+the skill description specific enough for ChatGPT and Codex to recognise its
+scope, use a stable kebab-case package name, and test the package in a new
+conversation after installation.
+
+The official import surface is a separate, user-selected operation. The
+ChatGPT desktop app can import supported setup and recent work from Claude
+Code, Claude Cowork, or Cursor; Codex CLI can import supported setup from
+Claude Code or Cursor. Import may map instruction files, settings, skills,
+plugins, project folders, memories, chats, MCP configuration, hooks, slash
+commands, and subagents into target-native destinations. It leaves the
+existing setup unchanged, but imported permissions, MCP authentication,
+hooks, marketplaces, and path-dependent prompts still require review.
+
+These facts are the current product surface, not a promise that every account,
+workspace, client, or plugin has the same availability. Re-check the official
+documentation before adding a new target or relying on an import capability:
+
+- Codex instruction discovery: <https://learn.chatgpt.com/docs/agent-configuration/agents-md>
+- Import from another agent: <https://learn.chatgpt.com/docs/import>
+- Build skills: <https://learn.chatgpt.com/docs/build-skills>
+- Build plugins: <https://learn.chatgpt.com/docs/build-plugins>
+
+The share compiler does not automate the product import flow and does not
+publish a ChatGPT Web plugin from `portable-core.md`. Import and plugin
+installation are verified target operations, not evidence that the share repo
+has synchronised global state.
 
 ## Disposition classes — why something is absent (added 2026-08-14)
 
@@ -116,32 +212,35 @@ paragraph carried "15 total" for a day after the 16th block landed, caught by
 an external review 2026-08-16. Re-derive, do not copy the sentence: `build`
 now prints blocks/bytes per target.
 
-## Target registry (opencode row re-verified 2026-08-11 against the CLI and
-the official docs. Re-verify before adding targets — these locations are
-volatile facts)
+## Target registry (re-verify volatile facts before adding or re-enabling a target)
 
-| Target | Global rules file | Profile | Mechanism extension points |
+| Target / surface | Entry or generated artifact | Profile / mode | Relevant extension points or boundary |
 |---|---|---|---|
-| opencode | `~/.config/opencode/AGENTS.md` | **full** (was light; user ruling 2026-08-15) | `~/.config/opencode/opencode.json` — `permission` (allow/ask/deny, per-tool patterns, LAST match wins), `agent(s)/`, `command(s)/`, `skill(s)/`, `plugin` (TS/JS hooks incl. `tool.execute.before`, `permission.ask`), `mcp` |
+| opencode | `~/.config/opencode/AGENTS.md` | **full** (user ruling 2026-08-15) | `~/.config/opencode/opencode.json` — `permission`, `agent(s)/`, `command(s)/`, `skill(s)/`, `plugin`, `mcp` |
+| codex | `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`) | **full**, compiler target re-added 2026-09-18 | Global `AGENTS.override.md` precedence; project/nested `AGENTS.md` chain; Codex `config.toml`, skills, plugins, hooks, and subagents are target-native mechanisms |
+| chatgpt-import | ChatGPT desktop `Settings > Import`, or Codex CLI `/import` | **manual product flow** | User selects supported setup/work/projects/recent work; imported permissions, MCP auth, hooks, marketplaces, and path-dependent prompts require review |
+| chatgpt-web | No generated global file; skill or plugin package | **package surface** | Use portable skill core, root `plugin.json`, `skills/<name>/SKILL.md`, and separately authorised MCP/connectors; do not assume local filesystem or shell |
 
 Notes:
-- **codex and Antigravity were REMOVED from this registry (user ruling
-  2026-08-15)**, having been sync-off since 2026-08-11. Not "disabled" any
-  more — gone. Both rows had been frozen at their 2026-07-10 verification
-  while the heading directly above them says those locations are volatile
-  facts requiring re-verification, and nobody re-verified them for five weeks;
-  Antigravity's application was confirmed uninstalled 2026-08-13, so its row
-  could not be re-verified at all. The reason originally given for keeping
-  them ("the path + profile + cross-tool caveat are verified facts worth
-  keeping") had inverted: they were no longer verified facts, just a stale
-  snapshot presented as a registry. Re-adding either target goes through the
-  README.md checklist step 1 — look the current paths and extension points up
-  in that platform's own docs — which is both faster and safer than trusting
-  the old values. Removed text preserved at
-  `archive/2026-08-15-interop-targets-removed/`; the last commit containing it
-  is `596cfc0`. The `disabled` mechanism itself stays in `interop.py` (the
-  `[off]` branches of `build`/`status`, and check 12's skip) with no target
-  using it, so a future sync-off ruling does not have to re-add it.
+- **Historical Codex removal superseded 2026-09-18.** The 2026-08-15 ruling
+  correctly removed Codex while its path and extension points were only stale
+  snapshots. The current official Codex documentation now re-verifies the
+  global file, override precedence, project chain, and `CODEX_HOME`, so Codex
+  is re-added as a `full` file target. The old removal rationale remains in
+  `archive/2026-08-15-interop-targets-removed/`; it is history, not the current
+  registry state.
+- **Antigravity remains retired.** Its application was confirmed uninstalled
+  on 2026-08-13; it is not re-added merely because the target table changed.
+- **Codex is not ChatGPT Web.** Codex's `AGENTS.md` target is a persistent
+  instruction surface. ChatGPT Web receives skills/plugins and enabled
+  connectors, while the desktop import flow is a user-selected migration
+  operation. A plugin install or product import must not be represented as an
+  `interop.py` file deployment.
+- **Codex override shadowing is observable.** If
+  `$CODEX_HOME/AGENTS.override.md` exists, `interop.py build` may retain the
+  generated `AGENTS.md`, but `interop.py status` reports it as `shadowed` and
+  does not count it as a live target. This prevents a generated-but-ignored
+  file from being mistaken for active evidence.
 - **opencode profile is `full` (user ruling 2026-08-15, was `light`)**, set in
   `interop.py` TARGETS. Two reasons, and the first one is a measurement that
   INVERTED the birth-budget argument that had picked `light`: no AGENTS.md had
@@ -255,3 +354,22 @@ silently tested nothing because the plant landed outside the block markers.
    of the instructions layer need only a spot-check.
 5. **Archive, never delete.** Foreign files at target paths are renamed to
    `*.pre-interop*.bak`, not removed.
+6. **Separate compile, import, and publish.** `interop.py build/status` only
+   handles file-based instruction targets registered in `TARGETS`. The
+   ChatGPT/Codex product import flow and plugin installation are separate
+   user-facing operations; neither is proof that the share repo is deployed.
+7. **Do not copy global state into a skill package.** Exclude global settings,
+   permissions, hooks, sessions, caches, derived indexes, credentials, tokens,
+   cookies, and absolute workstation paths unless a target adapter explicitly
+   defines a safe, reviewed replacement. Official product import may offer
+   selected memories or chats, but that remains user-selected state and never
+   becomes a published repo artifact.
+8. **Capability claims require a fallback.** If a Codex or ChatGPT target does
+   not expose a shell, local filesystem, executable, connector, MCP server, or
+   hook, the migrated workflow must state the missing capability and its
+   fallback. It must not simulate a successful run or silently remove the
+   step.
+9. **Re-verify on product-surface change.** Changes to Codex discovery,
+   plugin manifests, supported import sources, marketplace behavior, client
+   availability, or workspace policy trigger an official-docs recheck before
+   editing the target registry. These are volatile facts, not portable prose.

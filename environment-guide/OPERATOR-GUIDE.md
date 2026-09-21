@@ -125,8 +125,11 @@ status: live
 - **機器管理**：`plugins/`（重裝）。根目錄 `AGENTS.md` 曾是 codex 遺留，
   2026-09-05 隨 Codex 清除一併封存到來源環境自己的封存區（一個非系統碟
   的路徑，此處不列出），不再存在，也不搬。
-- **interop 目標端產物**（`~/.config/opencode/AGENTS.md`）：是建置產物，
-  新機器跑 `interop.py build` 重生，永不手搬。codex 目標端 2026-08-15 已移除。
+- **interop 目標端產物**（`~/.config/opencode/AGENTS.md`、
+  `$CODEX_HOME/AGENTS.md`；未設定時為 `~/.codex/AGENTS.md`）：是建置產物，
+  新機器跑 `interop.py build` 重生，永不手搬。ChatGPT 的 import 與
+  skill/plugin package 是另一條由使用者選取的 product flow，不是這個 compiler
+  產物，也不應手動把它們塞進 Claude 設定。
 
 ---
 
@@ -185,5 +188,6 @@ status: live
 
 - **本文件**：同系統整體搬家（Claude Code → Claude Code），資產全帶。
 - **`interop/`**：把 `~/.claude` 的**可攜子集**單向編譯給**其他** agent
-  系統（opencode/codex/Antigravity）。它刻意不搬記憶、不搬 hooks、
-  不搬 skill 觸發機制。兩者互不取代。
+  系統（opencode/Codex）；ChatGPT 的 import 與 Web skill/plugin package
+  走各自的 product surface。它刻意不搬記憶、不搬 hooks、不搬 skill 觸發
+  機制，也不替有外部 tool／資料庫／檔案依賴的 skill 製造配套。兩者互不取代。

@@ -1957,12 +1957,17 @@ option B's trigger). Tier-B compliance meter:
 - current: **preference ports, method does not.** `portable-core.md` (the
   user's own standing rules) is transplanted; method depth is delegated to the
   target agent, which reads ITS OWN current docs. Every payload is leak-scanned
-  before any write. **opencode is the only target in the registry** (user
-  ruling 2026-08-15), at profile **`full`** (same day, was `light`).
+  before any write. **opencode and codex are the file targets in the registry**
+  at profile **`full`**; ChatGPT import and ChatGPT Web skill/plugin are
+  user-selected/package surfaces, not `interop.py` file targets. This repo's
+  migration pass does not add a dependent skill or integration.
 - why: no documentation can produce the user's own preferences; method is the
   opposite — it needs platform machinery to fire, and copied prose has no
   trigger. `full` because opencode became a dispatch target, and because the
-  birth-budget argument for `light` inverted once measured.
+  birth-budget argument for `light` inverted once measured. Codex was restored
+  only after its current instruction discovery, override precedence, and
+  `CODEX_HOME` behavior were re-verified; ChatGPT has no equivalent global
+  `AGENTS.md` target here.
 - evidence: leak gate — 6/6 planted secret classes aborted the build, nothing
   written. Profile — with nothing deployed opencode fell back to
   `~/.claude/CLAUDE.md` (~16.5 KB of Claude-only mechanism); `full` was
@@ -1970,17 +1975,23 @@ option B's trigger). Tier-B compliance meter:
   `build` now prints blocks/bytes per target; re-derive, never copy the
   figure), so the heavier profile costs the worker less. `status` →
   `[fresh] opencode: profile=full, source=79e3517`, exit 0 (2026-08-15).
-  Surfaced by `hooks/ops_health_nudge.py` check 12, a stat()-only session
+  Codex's file target is documented and covered by migration evals 9–11; no
+  live Codex deployment is claimed by this repo change until those target-side
+  checks are run. Surfaced by `hooks/ops_health_nudge.py` check 12, a stat()-only session
   screen whose only remedy is "run `status`" — why it routes instead of
   judging, and why this layer needed a caller at all: `lessons.md` L-016.
 - history: reference-compile retired, leak gate added, curation narrowed to
   CLAUDE.md, codex + antigravity sync-OFF (2026-08-11); opencode `light` →
   `full`, check 12 added, eval 8 replaced, codex + antigravity REMOVED from the
   registry (2026-08-15 — rows frozen at a 2026-07-10 verification under a
-  heading calling those locations volatile; `lessons.md` L-005 hit 3)
-- review-when: a second target goes live ("`full` costs less than the fallback"
-  is measured against opencode's own fallback and does not transfer), or
-  opencode changes the rules-precedence order that makes it the right baseline
+  heading calling those locations volatile; `lessons.md` L-005 hit 3). On
+  2026-09-18 Codex was re-added after official-doc re-verification; ChatGPT
+  remained a package/import surface rather than a compiler target.
+- review-when: Codex changes its instruction discovery, override precedence, or
+  `CODEX_HOME`; ChatGPT changes import/package availability; or opencode changes
+  the rules-precedence order that makes its current baseline valid. A new skill
+  candidate also reopens this entry only if it passes the self-contained-skill
+  fence; external tools, databases, and unbundled files remain out of scope.
 - rollback: commits 7b3cbc1 / 2e16229 / 7aab241;
   `git show 483435f:archive/interop-refs-2026-08-11/`; `backups/2026-08-15/`
   `ops_health_nudge.py.pre-interop-check12`; removed rows →
