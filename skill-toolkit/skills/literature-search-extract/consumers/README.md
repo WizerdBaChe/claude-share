@@ -1,4 +1,22 @@
-# consumers/ — the consumer registry of the evidence feedback loop
+# consumers/ — evidence loop consumer registry｜證據回饋迴路 consumer 登錄表
+
+> **中文摘要｜Chinese summary**：`registry.json` 是 evidence feedback loop 的
+> 單一決策來源，記錄哪些 skill、store 或 write-back tool 參與迴路，以及它們如何
+> 參與。新增 consumer 只新增一列，不新增 per-consumer code path；schema、
+> affected scan 與 bridge renderer 會讀同一列。
+>
+> **English summary**: `registry.json` is the single registry for participants in the
+> evidence feedback loop. A consumer is a row, not a custom code path; schema
+> validation, affected-run scans, and bridge generation all consume that row.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 來源 | design record §3.8 與 `consumer.schema.json` 是 governing references | Design record §3.8 and `consumer.schema.json` are the governing references |
+| 參與者 | 呼叫本 skill 的 skill、被 handoff 的 skill、迴路 join 的 store、只寫回事件的 tool | A calling skill, handoff target, joined store, or write-back-only tool |
+| 入口 | 編輯 `registry.json`，再跑 bridge 與 registry check | Edit `registry.json`, then run the bridge and registry checks |
+| 不做 | 不為單一 consumer 增加程式分支，也不手改 generated bridge | Do not add per-consumer branches or hand-edit the generated bridge |
 
 `registry.json` is the ONE place that says who participates in the loop and how
 (design of record: `~/.claude/references/lse-feedback-loop-design.md` §3.8; schema:
@@ -8,7 +26,7 @@ that only writes back — is a ROW. Adding one changes no code path (INV-7):
 `reflux.py` validates events by schema, `runs.py affected` scans events by `actor`,
 and `runs.py bridge` renders every row into `../references/bridge.md`.
 
-## How to add a consumer (the whole procedure)
+## 新增 consumer｜Add a consumer (the whole procedure)
 
 1. Add a row (copy the closest existing one). `status: planned` until the first real
    call; `direction` says how it participates; `situations[]` are the lines a reader
@@ -20,7 +38,7 @@ and `runs.py bridge` renders every row into `../references/bridge.md`.
 4. Nothing else. If a step 4 seems necessary, the loop has grown a per-consumer code
    path and that is the defect to fix, not to document.
 
-## Fields worth knowing
+## 欄位速查｜Fields worth knowing
 
 - `status` lifecycle: `planned → live → retired`; `retired → live` needs a new
   `registered` date and a `history[]` note; `planned → retired` is allowed. Any other

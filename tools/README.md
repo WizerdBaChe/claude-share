@@ -1,10 +1,28 @@
-# tools/ — 發佈閘門（給維護者讀的操作手冊）
+# tools/ — 發佈閘門｜Publishing gate and maintainer guide
+
+> **中文摘要｜Chinese summary**：本層是 share repo 的 publishing gate。它檢查外洩、
+> placeholder、reference disposition、packaging structure、collection provenance 與
+> dead declaration；source comparison 是額外的 V check。它只報告或拒絕，不自動改檔。
+>
+> **English summary**: This directory contains the publishing gate for the share repo.
+> It checks leaks, placeholder misuse, reference dispositions, packaging structure,
+> collection provenance, and dead declarations; source comparison is an opt-in V check.
+> The gate does not rewrite files.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 發佈前 | 跑 `share_gate.py`，exit 0 才能把 shipped content 推送出去 | Run `share_gate.py`; exit 0 is the release condition |
+| 收錄時 | 讀 `COLLECTION-RULES.md`，需要來源樹時加 `--source` | Read `COLLECTION-RULES.md` and use `--source` when collecting |
+| 自我驗收 | 跑 `test_share_gate.py` 與 `test_triage.py`；它們會測正向與負向案例 | Run the gate and triage test suites, including positive and negative controls |
+| 不做 | 不替維護者去識別化、不自動修 manifest、不安裝 git hook | No automatic scrubbing, manifest edits, or git-hook installation |
 
 > 機器讀的本體：`share_gate.py`（六道 repo 內檢查 ＋ 一道要掛來源樹的 V）、`sharelib.py`（外洩樣式唯一源）、
 > `share-manifest.toml`（唯一的例外宣告處）、`test_share_gate.py`（閘門自身的驗收）。
 > 建立於 2026-08-14。
 
-## 為什麼有這層
+## 為什麼有這層｜Why this layer exists
 
 在這之前，「去識別化 (de-identification) 與資訊防護」是每次推送時口頭指定的。
 同一個 repo 因此同時發生了兩種相反的失敗，而且**兩種都不是我們自己發現的**，
@@ -17,7 +35,7 @@
 
 兩類現在都是機器判定的。推送時不再需要臨場判斷。
 
-## 日常操作（三個指令）
+## 日常操作｜Daily operations
 
 ```powershell
 python tools/share_gate.py                        # repo 內六道全跑，有發現就 exit 1
@@ -36,7 +54,7 @@ python tools/test_triage.py                       # 分類器自身的驗收：1
 掃描讓六個去識別化決定無聲消失，repo 內的六道檢查全部通過——因為它們沒有一道在
 比對任何東西。
 
-## 六道 repo 內檢查，加一道要來源樹的
+## 六道 repo 內檢查，加一道來源比對｜Six local checks plus source verification
 
 | 代號 | 名稱 | 擋什麼 | 過關的唯一方式 |
 |---|---|---|---|
@@ -52,7 +70,7 @@ P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類
 管全部只會製造噪音而沒有保護；真正危險的只有兩個位置——那才是佔位符可能正藏著
 讀者需要的真實值的地方。`<URL>` 事件同時違反 P 的三條規則。
 
-## 要從 `~/.claude` 搬東西進來？
+## 要從來源環境搬東西進來？｜Collecting from a source environment
 
 **先讀 [`COLLECTION-RULES.md`](COLLECTION-RULES.md)，不要自己臨場決定去識別化policy。**
 那份是給 agent 讀的判定程序：七問決策表、五種判定詞、絕不收錄清單，以及
@@ -63,7 +81,7 @@ P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類
 `referenced-only`「綁機器」整整一個月，實際上它們**完全可攜、只是從來沒被撈進來**。
 判定一旦寫成散文、沒有東西會重測，它就會爛掉。C 檢查與那份規則就是為此存在。
 
-## 跑一整輪同步（2026-09-12 起有操作手冊）
+## 跑一整輪 refresh｜Running a refresh round
 
 一輪同步 (refresh round) 以前每次都靠記憶重建：怎麼把來源的變動分類、怎麼切給
 多個平行的子代理 (subagent)、每個人的指示要寫什麼、怎麼合併、收尾要做哪些事。
@@ -80,7 +98,7 @@ P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類
   lane 下指示（附錄 A）→ 合併（lane 之間的競態只有合併時看得到）→ 收尾。
   判定規則仍以 `COLLECTION-RULES.md` 為準，這份只管編排。
 
-## manifest 怎麼寫
+## manifest 怎麼寫｜Manifest authoring
 
 `share-manifest.toml` 是**唯一**能讓發現通過的地方。三個原則：
 
@@ -101,13 +119,13 @@ P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類
 每筆都必須寫 `fallback`——採用者實際拿到的是什麼（機制？還是散文？）。
 這一欄就是「降級要留痕」的機械化版本。
 
-## 加一道新檢查時
+## 加一道新檢查時｜Adding a check
 
 1. 在 `share_gate.py` 寫成一個 `check_*(manifest, files, findings)` 函式，掛進 `CHECKS`。
 2. 在 `test_share_gate.py` 加一個會**失敗**的案例——沒有人看過它 FAIL 的閘門不算證據。
 3. 跑 `python tools/test_share_gate.py`，確認新案例與既有四案都符合預期。
 
-## 想在 commit 時自動擋
+## 想在 commit 時自動擋｜Optional pre-push wiring
 
 本 repo **不**自動安裝 git hook（那是你機器上的持久設定，屬於你自己的決定）。
 要的話自己建 `.git/hooks/pre-push`：
@@ -117,7 +135,7 @@ P 檢查刻意**不**管一般散文模板（`<project name>`、`<title>` 之類
 python tools/share_gate.py || exit 1
 ```
 
-## 已知邊界（是設計，不是缺陷）
+## 已知邊界｜Known boundaries by design
 
 - **閘門只看得到已被 git 追蹤的檔案。** 還沒 `git add` 的新檔不在範圍內——
   這是刻意的（暫存區的東西還不算要發佈），但也代表「新增檔案後先 add 再跑」。

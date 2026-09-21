@@ -1,4 +1,23 @@
-# instruments — 已出貨規則引用為「強制機制」的可攜驗證工具
+# instruments — 可攜驗證工具｜Portable verification instruments
+
+> **中文摘要｜Chinese summary**：本層只出貨兩支已被規則檔直接引用為
+> Enforcement 的驗證工具：page-fill-gate 與 check_cap_binding.py。它們不是完整
+> tools tree，也不是新的 runtime；收錄理由、安裝位置、已知路徑限制與驗證證據都在
+> 這份 README。
+>
+> **English summary**: This directory ships only the two portable instruments directly
+> named by shipped rules as enforcement: page-fill-gate and check_cap_binding.py. It is
+> not the source tools tree or a new runtime; this README records admission, install
+> layout, path limits, and verification evidence.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 收錄 | page-fill-gate 與 check_cap_binding.py | page-fill-gate and check_cap_binding.py |
+| 先讀 | 先看 admission criterion，再看各工具 README | Read the admission criterion, then the tool-specific README |
+| 驗證 | 每支工具都有 known-TRUE／known-FALSE calibration；本 repo 另有手動測試結果 | Each instrument has two-sided calibration; this README records repo-local runs |
+| 不包含 | source tools tree、私有索引工具與 hook 自己的 regression suite | No source tools tree, private-index tools, or hook-specific regression suite |
 
 > 這個資料夾放兩支工具，不是一套運作模式。來源環境的 `tools/` 整體排除
 > （見 `tools/share-manifest.toml` 的 `[[not_shipped]] path = "tools/"`），
@@ -8,7 +27,7 @@
 > 其餘部分維持排除。證據見該 `not_shipped` 條目的
 > `USER RULING 2026-09-12` 段落。
 
-## 收錄標準 (admission criterion)
+## 收錄標準｜Admission criterion
 
 四個條件同時成立才收：
 
@@ -31,14 +50,14 @@
   `rule-usage-census`、`copy-census`、`class-closure`）——條件 4 不成立：
   離開來源環境自己的目錄結構，這些工具沒有東西可查，收錄了也是空殼。
 
-## 每支工具
+## 每支工具｜Instrument inventory
 
 | 工具 | 檢查什麼 | 哪個已出貨檔案引用它 | 怎麼跑 | 自帶校準 |
 |---|---|---|---|---|
 | `page-fill-gate/fill_gate.py` | 人讀 HTML 有沒有留下不對稱右側空白（具名缺陷：靠左錨定上限 left-anchored cap）；每頁該填多少由 `page_classes.json` 的類別列決定，不是程式分支 | `claude-ops/ops/environment.md`（§Display，"Enforcement:" 一行）、`claude-ops/ops/rule-registry.md`、`claude-ops/ops/references/uat.md`、`claude-ops/ops/lessons.md`（L-048）、`skill-toolkit/skills/ux-walkthrough/SKILL.md` | `python tools/page-fill-gate/fill_gate.py <built.html> [--class X]`（裝到 `~/.claude` 後從那裡跑；也可以在任何目錄下用完整或相對路徑呼叫，見下「已知限制」） | 每次執行先跑 `fixtures/known-bad-left-cap.html`（必須 FAIL）與 `fixtures/known-good-fill.html`（必須 PASS）；任一沒觸發，整次判為無效並丟 `RuntimeError`，不給出任何頁面的判決 |
 | `ops-health-test/check_cap_binding.py` | sweep check 7b：同一個 cap 數值常數，在 `hooks/ops_health_nudge.py`（機制）與 `ops/40-maintenance.md`／`ops/rule-registry.md`（規則文字）兩邊是否一致（DRIFT）、或規則文字的錨點還找不找得到（ANCHOR LOST） | `hooks/ops_health_nudge.py`（docstring 點名為 "TEST SEAM"）、`claude-ops/ops/references/integrity-sweep.md`（check 7b，直接 `import hook_caps`）、`claude-ops/ops/40-maintenance.md`、`claude-ops/ops/rule-registry.md` | `python tools/ops-health-test/check_cap_binding.py`（見下「已知限制」——路徑是相對自己算出來的，裝到哪裡跑才對很重要） | `--selftest`：一組 known-TRUE（五個常數全部一致 → 必須回報乾淨）＋四組 known-FALSE（規則文字值漂移、docstring 復述了數值、規則段落標題改名讓錨點找不到、常數整個從機制刪掉），五案例都要判對才算通過 |
 
-## 安裝
+## 安裝｜Install
 
 複製 `instruments/<x>/` 整個資料夾到 `~/.claude/tools/<x>/`。子路徑刻意跟來源
 環境一致，所以已出貨規則檔裡原封不動的引用——`tools/page-fill-gate/...`、
@@ -50,7 +69,7 @@
 - `check_cap_binding.py` 只用標準庫（`ast`／`os`／`re`／`sys`），裝完即可跑，
   不需要額外安裝。
 
-## 已知限制（附實測結果，2026-09-12）
+## 已知限制與實測｜Known limits and observed evidence
 
 `check_cap_binding.py` 用 `os.path.dirname(__file__)` 往上兩層算「repo 根」，
 再接 `ops/40-maintenance.md`、`ops/rule-registry.md`、
@@ -75,7 +94,7 @@ FileNotFoundError: [Errno 2] No such file or directory:
 `fixtures/`（`HERE = pathlib.Path(__file__).resolve().parent`），不假設任何
 repo 根目錄結構，在這個 repo 的樹裡原地跑就是對的。
 
-## 已於本 repo 驗證
+## 本 repo 驗證紀錄｜Repository-local verification
 
 - `python instruments/page-fill-gate/tests/test_fill_gate.py` —— 15 個案例、
   兩個對照組全部判對（PASS）。
@@ -88,7 +107,7 @@ repo 根目錄結構，在這個 repo 的樹裡原地跑就是對的。
   另在一份模擬「裝進 `~/.claude`」樹狀結構的暫存目錄裡重跑一次主檢查，
   同樣是 10 個站點、全部一致——確認裝對位置就能用，不需要修改這支工具本身。
 
-## 去識別化說明 (de-identification notes)
+## 去識別化說明｜De-identification notes
 
 依 `tools/COLLECTION-RULES.md` 收錄，每筆編輯登記在 `tools/share-manifest.toml`
 的 `[[collected]] edits`。讀者會注意到的兩處，都在 `page-fill-gate/README.md`
@@ -101,7 +120,7 @@ repo 根目錄結構，在這個 repo 的樹裡原地跑就是對的。
 `page_classes.json`、兩個 fixture html、`test_fill_gate.py`、
 `check_cap_binding.py` 六個檔案逐位元組核對過，與來源完全一致，未作任何編輯。
 
-## 與這個 repo 其他部分的關係
+## 與 repo 其他部分的關係｜Repository map
 
 | 你可能在找 | 在哪 |
 |---|---|

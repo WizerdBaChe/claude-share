@@ -9,6 +9,36 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-09-18 — Codex / ChatGPT migration rules re-verified
+
+Re-opened Codex as a verified `AGENTS.md` file target with `CODEX_HOME` and
+`AGENTS.override.md` shadow detection. Kept ChatGPT import and Web skill/plugin
+packaging as separate product surfaces rather than pretending they are compiler
+targets. Updated the existing interop manual, migration map, genesis prompt,
+acceptance evals, operator guide, and rule registry; this pass adds no new skill,
+plugin, tool, database, or external-file integration. Future skill admission is
+limited to a self-contained `SKILL.md` with bundled local references/static
+assets.
+
+## 2026-09-18 — bilingual README reading structure
+
+Reworked all 18 non-archive `README.md` files into a consistent Chinese-first,
+English-summary format with a quick-guide table, bilingual section headings, and
+clearer purpose / adoption / verification / limits ordering. Corrected README
+facts that had drifted with the tree: eleven scoped rules, nine agent definitions,
+twelve `archdiag/` files, the current 21-hook status, and the domain template's
+retired standalone Node 8 reference.
+
+Also corrected the stale `archdiag-capability-set.html` link to the shipped
+`capability-set.html` artifact and updated the manifest's historical archdiag
+count note after confirming `tokens.mjs` is now collected. No new skill, plugin,
+tool, database, connector, or external-file dependency was added.
+
+Validation: `python tools/share_gate.py` passed; `python tools/test_share_gate.py`
+passed 16/16; `python interop-layer/test_interop.py` passed 16/16;
+`python interop-layer/interop.py scan` passed; all 18 README relative links
+resolved; `git diff --check` passed.
+
 ## 2026-09-18 — moved literature-search-chatgpt to a standalone repository
 
 The ChatGPT/Codex literature package now lives at

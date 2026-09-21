@@ -1,8 +1,26 @@
-# page-fill-gate — 人讀的 HTML 頁面有沒有用掉它拿到的寬度
+# page-fill-gate — HTML 寬度使用閘門｜Human-readable page-fill gate
+
+> **中文摘要｜Chinese summary**：這支 instrument 檢查人讀 HTML 交付物是否因
+> left-anchored cap 留下不對稱右側空白。它只回答「頁面是否使用了被分配的寬度」，
+> 不回答閱讀行寬、垂直溢出或美觀；每次執行都先跑 known-bad／known-good controls。
+>
+> **English summary**: This instrument checks whether a human-readable HTML deliverable
+> uses its allocated width instead of leaving an asymmetric right-side void caused by a
+> left-anchored cap. It does not judge line length, vertical overflow, or aesthetics;
+> every run calibrates itself with known-bad and known-good controls.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 入口 | 先看 class table，再依 built HTML 執行 fill gate | Read the class table, then run the gate on built HTML |
+| 正確期待 | exit 0 = 無 FAIL；exit 1 = 有 FAIL；exit 2 = 儀器缺席，不能宣稱 pass | 0 = no FAIL, 1 = FAIL found, 2 = instrument unavailable and no pass claim |
+| 校準 | known-bad 必須 FAIL、known-good 必須 PASS，任一失敗整次無效 | The bad control must fail and the good control must pass |
+| 不回答 | 不取代人眼 visual review，也不處理高度方向 fit | It does not replace visual review or vertical fit checks |
 
 status: live 2026-09-04 · owner: 使用者裁決（寬度缺陷診斷筆記，來源環境 outputs/ 樹下的一份紀錄，不隨本分享收錄）
 
-## 它守哪一條性質
+## 它守哪一條性質｜Property under test
 
 在這台機器（2560×1440 @150% → 邏輯視窗 1707×830；外接 FHD 1920×950）上，人讀的 HTML 交付物
 **不得留下不對稱的右側空白**。具名缺陷叫 **靠左錨定上限 (left-anchored cap)**：頁面容器或有
@@ -11,7 +29,7 @@ status: live 2026-09-04 · owner: 使用者裁決（寬度缺陷診斷筆記，�
 
 置中而左右對稱的空白（短篇閱讀欄）是另一種、被允許的形狀。**一頁該填多少，看它的類別。**
 
-## 類別是資料，不是程式分支
+## 類別是資料，不是程式分支｜Classes are data, not code branches
 
 `page_classes.json` 一列＝一類：`mode`（centered / fill / centered-or-fill）＋門檻。頁面用
 `<html data-page-class="…">` 宣告；沒宣告的頁面由結構推斷，判決降級（FAIL→WARN），因為閘門
@@ -33,7 +51,7 @@ status: live 2026-09-04 · owner: 使用者裁決（寬度缺陷診斷筆記，�
 **區塊層級升格**：某個選擇器的「較窄靠左區塊」被人回報過一次後，把選擇器前綴寫進
 `block_fail_selectors`，該類發現從 WARN 變 FAIL。
 
-## 用法
+## 用法｜Usage
 
 ```powershell
 python tools/page-fill-gate/fill_gate.py <built.html> [...] [--viewport 1707x830] [--class deck] [--json] [--quiet]
@@ -47,13 +65,13 @@ python tools/page-fill-gate/tests/test_fill_gate.py      # 每類正負各一，
 一行輸出長這樣：`fill-gate: FAIL 1707x830  class=document-long reach=69% fill=64% void L/R=72/439px  教科書….html`，
 `reach` 是內容右緣到內容區右緣的比例，`fill` 是內容左右緣之間的比例，chrome（固定側欄 TOC）已扣除。
 
-## 量法（一句話說清楚它看得見什麼、看不見什麼）
+## 量法｜What it can and cannot see
 
 只算有字、有底色／邊框、或是媒體的方塊，純包裝層不算，所以 `.sfit` 之類滿版 wrapper 不會遮掉裡面
 卡在 56em 的框。deck 類逐張 `.slide` 量前 8 張。看不見的：字元級的閱讀行寬（那是設計判斷，
 留給人）、高度方向的溢出（那是 fit-gate 的事）、外觀好不好看（人眼）。
 
-## 接線位置
+## 接線位置｜Integration points
 
 | 誰呼叫 | 何時 |
 |---|---|
@@ -63,7 +81,7 @@ python tools/page-fill-gate/tests/test_fill_gate.py      # 每類正負各一，
 | diagram-authoring `carrier-playbook.md` B-5 | 交付前的 containment 量測旁邊（上界之外補下界） |
 | 全域規則 | `ops/environment.md` §Display（性質）、`rules/deliverable-doc-refs.md`（HTML 與產生器路徑觸發）、CLAUDE.md 一行 |
 
-## 基準（修正前，2026-09-04 量測）
+## 基準｜Baseline before the fix (measured 2026-09-04)
 
 | 檔案 | class | 1707×830 reach | 判決 |
 |---|---|---|---|
@@ -73,7 +91,7 @@ python tools/page-fill-gate/tests/test_fill_gate.py      # 每類正負各一，
 | SSLD 技術版簡報 | deck | 96% | PASS |
 | audience-fit 前後對照 | document-short | 對稱 | PASS |
 
-## 修正後（2026-09-04 同日量測，殼修好、重建鏈跑完）
+## 修正後｜After the fix (measured 2026-09-04)
 
 | 檔案 | class | 1707×830 reach | 1920×950 | 判決 |
 |---|---|---|---|---|

@@ -1,9 +1,26 @@
-# Thinking Notes（思考鏈紀錄）
+# Thinking Notes｜思考鏈紀錄
+
+> **中文摘要｜Chinese summary**：本層是歷史性的 design-thinking notes，以具體任務
+> 記錄需求還原、選型否決、邊界枚舉、心智模擬與驗收自覺。它是 argument and
+> retrospective material，不是 policy、skill runtime，也不是可直接複製的 prompt。
+>
+> **English summary**: These are historical design-thinking notes about task reconstruction,
+> rejected options, boundary enumeration, mental simulation, and acceptance awareness.
+> They are arguments and handoff material, not policy, runtime skills, or copy-ready prompts.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 讀者 | 想理解環境設計取捨與能力限制的維護者 | Maintainers studying design trade-offs and capability limits |
+| 入口 | 先看 03（根因除錯）或 07（跨語言不對稱），再依索引選主題 | Start with 03 or 07, then choose a topic from the index |
+| 使用方式 | 當歷史論證與反思材料引用；不要把它當現行規則 | Use as historical rationale and reflection, not as current rules |
+| 狀態 | 01–11 已落地；12 是尚未落地的新素材（2026-07-13 註記） | 01–11 were operationalized; 12 remains unlanded material |
 
 本資料夾收錄 Claude 對自身能力與思考鏈 (chain of thought) 的拆解紀錄——以具體任務為例，
 記錄「輸出之前」發生的完整工程過程：需求還原、選型否決、邊界枚舉、心智模擬、驗收自覺。
 
-## 索引
+## 索引｜Index
 
 - [01-oneshot-weather-web.md](01-oneshot-weather-web.md) — ONE-SHOT 做出「可選天氣效果展示頁」的完整思考鏈拆解
 - [02-oneshot-game-simulation.md](02-oneshot-game-simulation.md) — ONE-SHOT 做出「Minecraft / GTA5 模擬」級 3D 垂直切片的思考鏈；與 01 的選型軸反轉對照
@@ -18,10 +35,10 @@
 - [11-implementation-capability-gaps.md](11-implementation-capability-gaps.md) — 三方 one-shot 方法論對讀後的缺口盤點：六個明顯缺乏＋五個深度不足＋落地優先序，供環境調整用
 - [12-legacy-revival-campaign.md](12-legacy-revival-campaign.md) — 從單場除錯到長線復活：除錯的認識論骨架（否證迴圈）、遺留系統啟動（考古／對齊分離、證據分級、補丁三分類）、戰役設計（遠征迴圈、決策塑形、停損機制），供技能開發／系統調整用
 
-## 實作狀態
+## 實作狀態｜Implementation status
 
 > **⚠ 標註（2026-07-13）**：文件 01–11 的可操作化項目**均已在本機系統實作與修正完畢**（規則層／坑卡層／模板層落地）。自 [12](12-legacy-revival-campaign.md) 起為尚未落地的新素材。
 
-## 命名慣例
+## 命名慣例｜Naming convention
 
 `NN-短題名.md`，NN 為兩位數流水號。每份文件自成一篇，開頭附任務背景與日期。

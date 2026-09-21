@@ -1,4 +1,24 @@
-# CLAUDE_SHARE
+# CLAUDE_SHARE｜跨 agent 規則與機制分享
+
+> **中文摘要｜Chinese summary**：這是一個從個人 Claude 設定環境整理出的公開
+> share repo。每個子資料夾是一個有範圍、有來源與有驗收界線的 share；它們不是
+> 自動同步的完整環境，也不會把 Claude host-specific 設定直接偽裝成 Codex／
+> ChatGPT skill。
+>
+> **English summary**: This repository contains reviewed, scoped shares extracted from a
+> personal Claude configuration environment. Each directory has its own provenance,
+> adoption notes, and acceptance boundary. The repository is not an auto-synced clone
+> and does not turn Claude-specific host settings into a fake Codex/ChatGPT skill.
+
+## 快速導覽｜Quick guide
+
+| 你要做什麼 | 中文入口 | English entry |
+|---|---|---|
+| 第一次閱讀 | 先看 Lane A，再讀目標 share 的 README | Follow Lane A, then read the target share README |
+| 回來更新 | 先讀 Lane B、CHANGELOG 與 manifest，再信任任何現況 | Follow Lane B, CHANGELOG, and the manifest before relying on state |
+| 要安裝 | 先讀 ADOPTERS.md，再讀目標 README 與 acceptance checklist | Read ADOPTERS.md, the target README, and its acceptance checklist |
+| 要跨平台搬移 | 讀 `interop-layer/`；不要直接複製 `CLAUDE.md`、hooks 或 settings | Use `interop-layer/`; do not copy CLAUDE.md, hooks, or settings verbatim |
+| 要收錄新資料 | 讀 `tools/COLLECTION-RULES.md`，完成後跑 share gate | Read COLLECTION-RULES.md and run the share gate before publishing |
 
 Public-facing extracts from a personal `~/.claude` configuration environment,
 shared piecemeal. Each subfolder is one self-contained share; content is
@@ -9,7 +29,7 @@ Licensed under [MIT](LICENSE).
 
 ---
 
-## 🆕 The architecture-diagram capability set, drawn with its own toolchain
+## 🆕 架構圖能力集合｜Architecture-diagram capability set
 
 **→ [`architecture-diagramming/capability-set.html`](architecture-diagramming/capability-set.html)** — five views, self-checking, regenerable.
 Clone and open it in a browser; the page measures its own geometry on load and
@@ -51,7 +71,7 @@ verify it yourself: [`ACCEPTANCE.md`](architecture-diagramming/ACCEPTANCE.md) (b
 
 ---
 
-## Start here — pick your lane
+## 從這裡開始：選一條閱讀路徑｜Start here — pick your lane
 
 **Never read this repo before?** → Lane A.
 **Read it before and coming back?** → Lane B. Do not skip it. "I looked at this
@@ -60,7 +80,7 @@ repo's own history, not a hypothetical.
 **Going to copy files onto a machine?** → Lane C, and read
 [`ADOPTERS.md`](ADOPTERS.md) first.
 
-### Lane A — first read
+### Lane A — 第一次閱讀｜First read
 
 | Order | Read | Why |
 |---|---|---|
@@ -73,7 +93,7 @@ repo's own history, not a hypothetical.
 It is the most informative file here and also 67 KB and **frozen at 2026-08-11**.
 Read it when you want history, not when you want current state.
 
-### Lane B — you have read this before
+### Lane B — 回訪與更新｜Returning reader
 
 The repo looks stable and is not. Three of the changes that mattered most were
 small diffs that inverted a meaning:
@@ -95,7 +115,7 @@ relying on anything you remember:
 
 | File | What silently inverts in it |
 |---|---|
-| [`interop-layer/MIGRATION-MAP.md`](interop-layer/MIGRATION-MAP.md) | Target registry rows (on/off), portability classes (one is RETIRED), the inbound-dependency entry |
+| [`interop-layer/MIGRATION-MAP.md`](interop-layer/MIGRATION-MAP.md) | File-target, package, and import registry; portability classes; inbound-dependency and self-contained-skill rules |
 | [`tools/share-manifest.toml`](tools/share-manifest.toml) | Which dependencies are declared not-shipped, and what fallback you actually get. **2026-08-14: three hook entries here were wrong for a month** — classified "machine-bound" without re-checking. They ship now. **2026-08-16: the `outputs/` entry was wrong the same way** — called a scratch directory, actually the retrospective layer — and a `[[collected]]` entry claimed two leak gates were identical when they were not. Both corrected in place; neither history deleted. |
 | [`claude-ops/ops/rule-registry.md`](claude-ops/ops/rule-registry.md) | The current value of every cap and standing ruling, plus its value history |
 | [`claude-ops/ops/environment.md`](claude-ops/ops/environment.md) | Machine facts, per-block dated. Every one of them expires. |
@@ -104,7 +124,7 @@ If you are re-reading in order to answer a question, answer it from the file,
 not from memory of the file. `claude-ops/ops/OPS.md` states the same rule for
 the model: any mechanism name is an example, verify before relying on it.
 
-### Lane C — you are going to install something
+### Lane C — 準備採用或安裝｜Adopter
 
 1. [`ADOPTERS.md`](ADOPTERS.md) — where to put this repo (and where not to),
    what it names but does not ship, and which symptoms are your platform rather
@@ -114,14 +134,14 @@ the model: any mechanism name is an example, verify before relying on it.
 3. [`interop-layer/acceptance-evals.md`](interop-layer/acceptance-evals.md) — a
    port with no eval run is not a finished port.
 
-## Shares
+## Shares｜分享內容
 
 | Folder | Contents |
 |---|---|
 | `global-claude-md/` | The top-level global `CLAUDE.md` entry point itself — conditional working preferences for Git workflow, environment/shell syntax, interaction style, engineering judgement, frontend layering (FSD), skill routing, project-operations tiering, file hygiene, and reply language. |
 | `claude-ops/` | Anonymized snapshot of the operational rules layer: authority, command loop, dispatch, judgment, maintenance, bootstrap, evolution. |
 | `skill-toolkit/` | Portable AI-agent skills and a bilingual trigger dictionary, reviewed for personal identifiers and local paths. |
-| `interop-layer/` | Cross-agent sync layer: compiles a portable rules subset into global instruction files for other agents. Method depth is delegated, not shipped. |
+| `interop-layer/` | Cross-agent migration layer: compiles the portable rules subset into file-based targets and records separate ChatGPT import/package rules. Method depth is delegated, not shipped; dependent skills are out of scope. |
 | `environment-guide/` | Human-facing philosophy, operator manual, and commit-message conventions, including a full migration checklist. |
 | `hooks/` | **New 2026-08-14, twenty-one mounted hooks since 2026-09-12.** The mechanical enforcement layer the rules had been citing without shipping: destructive-command deny-list, subagent model cap, browser-pane measurement and scope guards, session health nudge, four shadow probes (delivery gate, context runway, fieldwork threshold — retired 2026-09-12 and shipped unmounted — and rule-load logger), the compact-recovery set (pre-compact bookmark, post-compact pointer card, transcript read-window guard, and **new 2026-09-07** a PostCompact loss recorder over a shared snapshot library), and four shell/git guards — the Bash tool's silent transport defects, two Windows-PowerShell traps that both fail in the direction the author does not expect, and a wrong-branch commit guard written after the prose ritual ran and did not gate. Plus the mounting template. All fail-open, and three of the four shell/git ones ANNOTATE rather than deny, because their backtests said the gate cannot determine intent. **New 2026-09-12:** the literature-access guard with its policy table, a guard on writes into any tree that carries its own collection rules (this one included), a worktree scope guard, and a dispatch-and-commit notice. |
 | `compact-recovery/` | **New 2026-08-16, extended 2026-09-07.** Post-compact recall as an operating mode: a PreCompact/SessionStart bookmark-and-pointer-card bridge over the four hooks above, plus the digest generator (`preserve.py`) their grep-first ladder leans on — what a `/compact` summary drops stays recoverable at on-demand token cost. Ships with a nine-item real-fire acceptance checklist, and with one gap stated in its own README rather than left to be discovered: the recorder ships, its audit tool does not, so the loss log it writes has no reader here. |
@@ -137,7 +157,7 @@ repository: [`WizerdBaChe/literature-search-chatgpt`](https://github.com/WizerdB
 This repository remains the Claude-oriented share collection; a future Claude
 adapter can be published with its own host-labelled package boundary.
 
-## Where things are
+## 查找入口｜Where things are
 
 | If you want | Read |
 |---|---|
@@ -155,7 +175,7 @@ adapter can be published with its own host-labelled package boundary.
 | Where a collected file came from, and every edit made on the way | `tools/share-manifest.toml` `[[collected]]` |
 | The rules for collecting anything else out of the source environment | `tools/COLLECTION-RULES.md` |
 
-## Conventions
+## 共通約定｜Conventions
 
 - One git repo at this root; each share is a subfolder, so future additions land
   as new folders/commits without touching prior shares.

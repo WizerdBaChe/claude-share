@@ -1,4 +1,17 @@
-# red-team — 讓「紅隊審查」的結論可以被機械驗證的運作模式
+# red-team — 可機械驗證的紅隊審查｜Machine-checkable red-team review
+
+> **English summary**: This operating mode makes adversarial code-review reports
+> checkable. Prompt constraints, anchor/scope scoring, and a verifier distinct from the
+> author reduce fabrication risk while preserving an explicit inconclusive outcome.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 解決什麼 | 降低模型捏造 code-review finding 的成本，讓報告可被 anchor、scope 與 refuter 驗證 | Make fabricated review findings expensive and validate reports with anchors, scope, and an adversarial refuter |
+| 核心組成 | prompt、六層 acceptance ladder、score／parser／verify 工具 | Prompt templates, a six-layer acceptance ladder, and score/parser/verify tools |
+| 先做什麼 | 先填 prompt 的 commit 或 file scope，再跑 layer 2–4；layer 5 需自備 dispatcher | Fill the commit or file scope, run layers 2–4, and provide your own dispatcher for layer 5 |
+| 明確缺口 | dispatcher、provider credentials 與來源端私有 allowlist 不隨包出貨 | The dispatcher, provider credentials, and source-private allowlist are not shipped |
 
 > 這不是一支工具,是一組**運作模式 (operating mode)**:一份 prompt 形狀、
 > 一條六層驗收梯 (acceptance ladder)、兩支把其中四層寫成程式的檢查器,
@@ -8,7 +21,7 @@
 > 因驗收層過嚴而毀掉兩個真發現的事故、以及修正後的回歸測試。細節見
 > [`ACCEPTANCE.md`](ACCEPTANCE.md)。
 
-## 問題形狀
+## 問題形狀｜Problem shape
 
 派一個模型去審查程式碼,它會回一份看起來很專業的報告。問題是:
 
@@ -26,7 +39,7 @@
 所以「讓 reviewer ≠ author」只解決了一半——另一半是:**這份報告要能被機器
 反駁**,而且反駁的成本要低於捏造的成本。
 
-## 機制:六層驗收梯
+## 機制：六層驗收梯｜Mechanism: six-layer acceptance ladder
 
 ```
   [1] prompt 形狀            prompts/redteam-v2*.txt
@@ -55,7 +68,7 @@
 第 6 層不需要程式:只要**紀錄由派工方寫入、受審方碰不到**,worker 就無法
 自己記自己的帳。這是結構性質,不是檢查。
 
-## 為什麼是這個形狀(每一條都有實測)
+## 為什麼是這個形狀｜Why this shape (measured evidence)
 
 | 設計 | 依據 | 樣本 |
 |---|---|---|
@@ -74,7 +87,7 @@
 **兩種不同的量具**,而不是 v2 取代 v1。要廣度時用未錨定版並自己讀;要能
 自動化驗收時用錨定版。
 
-## 這個 share 交付什麼
+## 交付內容｜What this share ships
 
 | 檔案 | 是什麼 |
 |---|---|
@@ -92,7 +105,7 @@
 方法的性質。方法論的完整敘述(量測、樣本數、失效簽章)在
 [`../claude-ops/ops/references/external-dispatch.md`](../claude-ops/ops/references/external-dispatch.md)。
 
-## 三種接法
+## 三種接法｜Three integration modes
 
 **A. 純本機(最省事,不需要外部模型)。** 用這個 repo 的
 [`../agents/engineering-code-reviewer.md`](../agents/engineering-code-reviewer.md) subagent 當 reviewer:
@@ -118,7 +131,7 @@ python redteam_verify.py --repo ../my-project --report repaired.json \
 `--commit` 是**選用但強烈建議**的:沒有它就不做範圍檢查,而範圍漂移
 (scope drift) 正是錨點層抓不到的那一類。
 
-## 把層 5 接上你自己的 dispatcher
+## 把層 5 接上自己的 dispatcher｜Connect layer 5
 
 `redteam_verify.py` 用 `--dispatcher` 依名稱載入模組(預設 `extdispatch`,
 也就是來源環境的呼叫方式原封不動)。契約只有兩個符號:
@@ -138,7 +151,7 @@ def dispatch(profile, prompt, repo, grant, verbose=False, only_model=None):
 `profile` 這裡固定是 `"review"`;`grant` 是你自己的配額/授權概念,不需要就忽略。
 不滿足契約時工具會在花掉任何一次呼叫**之前**拒絕並印出缺什麼。
 
-## 可調參數 (tunables)
+## 可調參數｜Tunables
 
 | 參數 | 在哪 | 出貨值 | 合理範圍 / 說明 |
 |---|---|---|---|
@@ -150,7 +163,7 @@ def dispatch(profile, prompt, repo, grant, verbose=False, only_model=None):
 | verifier 數量 | 目前每個 finding 一個 | 1 | 多數決 (2/3、3/5) 是合理的加強;成本線性成長 |
 | 嚴重度詞彙 | prompt 內 | high / medium / low | 自由;`score_redteam.py` 不解讀它 |
 
-## 缺哪一塊,你會看到什麼
+## 缺件時的症狀｜Failure signatures
 
 | 少了 | 症狀 |
 |---|---|
@@ -163,7 +176,7 @@ def dispatch(profile, prompt, repo, grant, verbose=False, only_model=None):
 | verifier ≠ author | 附和。工具會直接拒絕,所以這一格只會發生在你自己手動跑的時候 |
 | `jsonspan.py` | `score_redteam.py` 匯入即失敗——兩個檔案必須同目錄 |
 
-## 已知邊界與失效模式
+## 已知邊界與失效模式｜Known limits and failure modes
 
 - **UTF-8 BOM。** PowerShell 的 `Out-File -Encoding utf8` 會寫入 `EF BB BF`,
   而 `.strip()` 不會移除它,於是完美的 JSON 被判成 `STRUCTURE-FAIL`,錯怪模型。
@@ -186,7 +199,7 @@ def dispatch(profile, prompt, repo, grant, verbose=False, only_model=None):
 - **層 5 沒有解決真值問題。** 它把「一個模型說的」換成「兩個立場相反的模型說的」。
   對事實性缺陷(這行會不會 crash)很有效;對設計品味無效。
 
-## 平台契約與重新查證
+## 平台契約與重新查證｜Platform contract and re-verification
 
 這套機制**不依賴**任何 Claude Code hook、API 或 SDK 型別——它是兩支讀檔案、
 比字串的 Python 腳本加一份 prompt。要重新查證的只有三件事,而且都在本機:
@@ -200,7 +213,7 @@ git -C ../my-project show --pretty=format: --name-only a1b2c3d   # 範圍層問 
 第三行是 `commit_files()` 唯一的外部依賴。任何能回答「這個 commit 動了哪些檔案」
 的 VCS 都可以替換掉它。
 
-## 去識別化說明 (de-identification notes)
+## 去識別化說明｜De-identification notes
 
 依 [`../tools/COLLECTION-RULES.md`](../tools/COLLECTION-RULES.md) 收錄,每筆編輯
 都登記在 [`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的
@@ -219,7 +232,7 @@ git -C ../my-project show --pretty=format: --name-only a1b2c3d   # 範圍層問 
 的代號,不是帳號、路徑或主機名。它讓「這條 parse 規則是誰交過來的」這個宣稱
 對持有來源的人仍然可查——依收錄規則,可查證性的識別碼不是清洗目標。
 
-## 與這個 repo 其他部分的關係
+## 與 repo 其他部分的關係｜Repository map
 
 | 你可能在找 | 在哪 |
 |---|---|

@@ -1,14 +1,31 @@
-# Claude Ops Snapshot
+# Claude Ops Snapshot｜作業規範快照
 
-這個資料夾是個人 `~/.claude/ops/` 作業規範的手動快照，供參考、移植或擷取可重用的代理工作流程。
+> **中文摘要｜Chinese summary**：這是個人 `~/.claude/ops/` 作業規範的手動快照，
+> 用來閱讀、挑選可重用的工作流程，或在 Claude Code 環境中採用。它保留 Claude
+> 路徑與交叉引用；要搬到 Codex／ChatGPT，請改讀
+> [`../interop-layer/README.md`](../interop-layer/README.md)，不要直接複製這層的路徑。
+>
+> **English summary**: This is a reviewed snapshot of a personal `~/.claude/ops/`
+> rules layer. It is suitable for reading and selective adoption in Claude Code.
+> Its paths and cross-references are Claude-specific; use the interop layer for
+> Codex or ChatGPT migration instead of copying this directory verbatim.
 
-## 內容
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 主要用途 | 讀作業規則、派工、維護與啟動流程 | Read operational rules, dispatch, maintenance, and bootstrap workflows |
+| 先讀 | [`ops/OPS.md`](ops/OPS.md) 是規則入口與 routing table | `ops/OPS.md` is the entry point and routing table |
+| 採用前 | 先看路徑對照，再依 `hooks/README.md` 與 manifest 檢查缺件 | Read the path map, then check hooks and manifest for missing pieces |
+| 不直接搬移 | `~/.claude/ops/` 是 Claude 的 host contract，不是 Codex／ChatGPT package | `~/.claude/ops/` is a Claude host contract, not a Codex/ChatGPT package |
+
+## 內容｜Contents
 
 - `ops/`：權限、命令迴圈、任務派送、判斷、維護、教練、啟動與演進等作業規範。
 - `ops/environment.md`：擷取時的工具環境與模型成本上限紀錄。
 - `ops/OPS.md`：各規範文件的入口與使用索引。
 
-## 路徑對照（採用前先看這張表）
+## 路徑對照｜Path map (read before adoption)
 
 `ops/` 底下的檔案彼此以 `~/.claude/ops/...` 互相引用，而且**刻意保留原樣**——
 `~` 在任何機器上都會展開成當前使用者的家目錄，不含帳號名，本身就是可攜寫法。
@@ -21,8 +38,8 @@
 | `~/.claude/CLAUDE.md` | [`../global-claude-md/CLAUDE.md`](../global-claude-md/CLAUDE.md) | 目標機器的 `~/.claude/CLAUDE.md` |
 | `~/.claude/skill-trigger-dict.md` | [`../skill-toolkit/skill-trigger-dict.md`](../skill-toolkit/skill-trigger-dict.md) | 目標機器的 `~/.claude/skill-trigger-dict.md` |
 | `~/.claude/PHILOSOPHY.md` | [`../environment-guide/PHILOSOPHY.md`](../environment-guide/PHILOSOPHY.md) | 目標機器的 `~/.claude/PHILOSOPHY.md` |
-| `hooks/*.py` | [`../hooks/`](../hooks/)（2026-08-14 首次補齊 7 支，現有 12 支——正確數字以 [`../hooks/README.md`](../hooks/README.md) 為準） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
-| `agents/*.md` | [`../agents/`](../agents/)（2026-08-14 補齊，8 支） | 目標機器的 `~/.claude/agents/` |
+| `hooks/*.py` | [`../hooks/`](../hooks/)（歷次 refresh 已更新；目前掛載數與共用函式庫狀態以 [`../hooks/README.md`](../hooks/README.md) 為準） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
+| `agents/*.md` | [`../agents/`](../agents/)（目前 9 支，以該層 README 為準） | 目標機器的 `~/.claude/agents/` |
 | `~/.claude/references/PROJECTS.md` | [`references/PROJECTS.md`](references/PROJECTS.md)（只有格式，沒有資料列） | 目標機器的 `~/.claude/references/PROJECTS.md` |
 | `settings.json` | [`../hooks/settings.example.json`](../hooks/settings.example.json)（範本） | 併進你自己的 `settings.json` |
 
@@ -36,14 +53,14 @@ hook 完全可攜，現已隨附——所以**強制力不再是降級的**，�
 [`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的 `[[not_shipped]]`；
 `../tools/share_gate.py` 的 R 檢查會擋下任何新的未宣告引用。
 
-## 去識別化
+## 去識別化與限制｜De-identification and limits
 
 此快照已移除來源中出現的使用者名稱；未修改規範文件之間的交叉引用，以保留其原始結構與可讀性。分享前仍應依自己的環境檢查路徑、帳號、主機名稱、電子郵件與存取權杖等本機資訊。
 
-## 使用方式
+## 使用方式｜How to use
 
 將本資料夾視為可閱讀的參考資料，而非自動同步來源。若要採用其中內容，請依所使用的代理工具與本機安全政策選擇性調整。
 
-## 授權
+## 授權｜License
 
 本資料夾隨母專案採用 [MIT License](../LICENSE)。

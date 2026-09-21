@@ -1,4 +1,23 @@
-# archdiag — shared library for audit-drawing deliverables
+# archdiag — audit-drawing shared library｜稽核圖交付共用函式庫
+
+> **中文摘要｜Chinese summary**：`archdiag` 是 diagram-authoring 精準 SVG／HTML
+> 交付物的 single-source library。它把 schema、build-time asserts、marker closure、
+> deterministic emission、in-page self-check、a11y 與 sha256 receipt 接成一條可重跑
+> pipeline；本身不選圖，也不替人判斷語意。
+>
+> **English summary**: `archdiag` is the single-source library for precision SVG/HTML
+> audit-drawing deliverables. It combines schema validation, build-time assertions,
+> marker closure, deterministic emission, in-page checks, accessibility assertions, and
+> SHA-256 receipts. It does not choose the diagram or replace human semantic judgment.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 入口 | 先讀 invariants，再讀 `build() contract` | Read the invariants, then the `build() contract` |
+| 核心保證 | selfcheck 單一來源、輸出決定性、可判定問題 build FAIL、行尾 LF pin | One self-check source, deterministic output, fail on determinable defects, LF pin |
+| 驗證 | 先跑 extraction／S2／F3 evidence，再看 visual acceptance 是否開放 | Read extraction/S2/F3 evidence, then check whether visual acceptance remains open |
+| 不包含 | 不包含來源端 build scripts，也不把 semantic／aesthetic judgment 自動化 | Source build scripts are excluded; semantic and aesthetic judgment stays human |
 
 Single-source framework for the diagram-authoring skill's precision SVG/HTML
 deliverables (C4 / statechart / DFD / sequence audit view-sets). Extracted
@@ -11,7 +30,7 @@ within ONE day (F1 v1.1 carried check #8, the frozen F2 script did not —
 false-confidence risk). This library is the single source; the drift class is
 dead only while the invariants below hold.
 
-## Invariants (properties of the asset)
+## 不變式｜Invariants (properties of the asset)
 
 - `selfcheck.mjs` is the ONLY source of the in-page §4 check script. A build
   script that embeds its own copy of any check reintroduces the drift defect.
@@ -40,7 +59,7 @@ dead only while the invariants below hold.
   over every accepted artifact — first-run red on all of them means the
   threshold is wrong (2026-09-05, MAINTENANCE.md log).
 
-## Modules
+## 模組｜Modules
 
 | file | contents |
 |---|---|
@@ -55,7 +74,7 @@ dead only while the invariants below hold.
 | `delta.mjs` | S3 — `diffViews(base, head)` model differ (added/removed/changed, geometry-vs-semantic classes, absent edges counted apart, overlay suggestions); `stripOverlay(views)` recovers a base model from an overlay-flagged one; `deltaTableRows`/`deltaMarkdown` emitters. Replaces F2's measured ~12-min hand B-9 procedure. |
 | `vendor/archify-geometry.mjs` | Geometry primitives vendored verbatim from tt-a1i/archify (MIT, clone `12106be` 2026-08-28; consent 2026-08-29 eval §8 Q3). Upstream rect shape `{x,y,width,height}` — adapt at call sites, never edit in place. |
 
-## build() contract
+## build() 契約｜Build contract
 
 ```js
 import { build } from '../../tools/archdiag/index.mjs';
@@ -77,7 +96,7 @@ build({
 View-model strings are escaped; `doc` strings and `sections[].html` are
 trusted raw (legendbar carries markup by design).
 
-## Extraction acceptance (2026-08-29, S1)
+## 抽取驗收｜Extraction acceptance (2026-08-29, S1)
 
 - F1 v1.1 regenerated through the library **byte-identical**: sha256
   `172fda6b…54e` unchanged, first run — receipt unchanged, no version bump.
@@ -94,7 +113,7 @@ trusted raw (legendbar carries markup by design).
   build-time asserts) were byte-identical across F1/F2 before extraction —
   the only drift was the self-check set, as diagnosed.
 
-## S2 acceptance (2026-08-29, automated half)
+## S2 驗收｜S2 acceptance (2026-08-29, automated half)
 
 Re-routed F2's l2b view from its model minus pts/pillAt through the
 `'channel'` provider: 15/15 edges routed, 0 through-node, crossings 0/0
@@ -108,7 +127,7 @@ the libavoid module; the elkjs-side wrapper is third-party
 zero-dependency, byte-deterministic pipeline, so the self-built provider
 stands (eval §7(c) condition not met).
 
-## F3 field acceptance (2026-08-29) — S1+S2 joint, COMPLETE
+## F3 現場驗收｜F3 field acceptance (2026-08-29) — S1+S2 joint, COMPLETE
 
 Fresh target (media-fetch-pipeline, user-chosen) drawn end-to-end through the
 library + `'channel'` router: 5 views, 79 nodes + 8 containers / 89 edges,
@@ -129,7 +148,7 @@ Measured vs the F1/F2 baselines (pre-registered:
   conditions both closed. `'archify-adapted'` stays spec'd-not-built (build
   trigger: a field round where `'channel'` misses its targets).
 
-## Style tokens (generated — `node tools/archdiag/tokens.mjs`; never hand-edit)
+## 樣式 tokens｜Style tokens (generated; never hand-edit)
 
 Roles, not hex, are the contract (B-6 of the 2026-09-05 diagram-design borrow
 review: the token STRUCTURE was borrowed, the external palette was not). The
@@ -175,14 +194,14 @@ output on 2026-09-05 — regenerate and diff before committing a palette edit.
   `color-scheme: light`; build the map only when a dark deliverable is
   requested (review-when), behind the same `FILL/STROKE/EDGE` names.
 
-## Maintenance
+## 維護｜Maintenance
 
 Event-driven ritual (receipt regression, selfcheck calibration, LF pins,
 router acceptance, provider swap, token table regeneration):
 [MAINTENANCE.md](MAINTENANCE.md). Environment sweep item:
 `ops/references/integrity-sweep.md` check 27.
 
-## S3 acceptance (2026-08-29)
+## S3 驗收｜S3 acceptance (2026-08-29)
 
 `diffViews(stripOverlay(F2), F2)` reproduces the hand B-9 row exactly:
 nodes +8 (RTE/RTA/EVD/ATL/PRS/ESV/EATL/RELP), edges +9

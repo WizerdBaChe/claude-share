@@ -1,4 +1,17 @@
-# compact-recovery — 壓縮後找得回去的運作模式 (post-compact recall operating mode)
+# compact-recovery — 壓縮後找得回去的運作模式｜Post-compact recall operating mode
+
+> **English summary**: This operating mode preserves a small, searchable route back to
+> pre-compaction evidence. It uses event-pair hooks, a digest-first recall ladder, and
+> a read-window guard; the loss recorder is shipped without its audit consumer.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 解決什麼 | `/compact` 後只留下有損摘要時，如何用小指標卡與視窗化召回找回承重事實 | Recover load-bearing facts after lossy compaction with a small pointer card and windowed recall |
+| 核心組成 | 四支 hook、共用 snapshot library、`preserve.py` digest generator 與 recall ladder | Four hooks, a shared snapshot library, the `preserve.py` digest generator, and a recall ladder |
+| 先驗收 | 先看平台契約，再跑九項 `ACCEPTANCE.md` checklist | Check the platform contract, then run the nine-item acceptance checklist |
+| 明確缺口 | loss recorder 會寫 JSONL，但 audit tool 不隨本 repo 出貨 | The loss recorder writes JSONL, but its audit tool is not shipped here |
 
 > 這不是單一工具,是一組**運作模式 (operating mode)**:四支 hook、一支共用函式庫、
 > 一支摘要卡產生器、一條召回紀律,合起來回答一個問題——`/compact` 之後,摘要裡沒有
@@ -11,7 +24,7 @@
 > (PostCompact:**只記錄不判斷**)與一支共用函式庫 `handoff_snapshot.py`。兩支都收了,
 > 但它們帶進一個誠實的缺口,寫在這裡而不是留給你發現——見下面〈交接快照與損失紀錄〉。
 
-## 問題形狀
+## 問題形狀｜Problem shape
 
 Claude Code 的 compaction 把整段對話換成一份有損摘要 (lossy summary)。完整紀錄
 其實**還在磁碟上**(transcript jsonl),但壓縮後的模型三件事都不知道:自己的
@@ -26,7 +39,7 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
   行為是「整檔重讀」,而那一步被 hook 結構性拒絕。
 - 實測摘要卡 (digest) 約為原始逐字稿的 1%(50KB vs 4.3MB,一個真實 session)。
 
-## 機制:一對事件的橋接
+## 機制：一對事件的橋接｜Mechanism: an event-pair bridge
 
 平台契約(2026-08-16 對 code.claude.com hooks 文件與 Agent SDK 型別查證):
 
@@ -63,7 +76,7 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
   ——後者只跟讀者的記性一樣可靠,而它最容易失守的時刻,正是壓縮後急著找事實的
   那個當下。
 
-## 召回梯 (recall ladder)
+## 召回梯｜Recall ladder
 
 指標卡上寫的紀律,由上而下、花費遞增:
 
@@ -78,7 +91,7 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 (決策、數字、路徑、措辭)在摘要裡缺席。「整份重讀一遍以防萬一」不在其中,
 而且被 guard 擋掉。
 
-## 檔案
+## 檔案｜Files
 
 | 檔案 | 裝到哪 | 角色 |
 |---|---|---|
@@ -89,7 +102,7 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 | `../hooks/handoff_snapshot.py` | `<CLAUDE_HOME>/hooks/` | 共用函式庫,**不掛任何事件**;上面三支 import 它 |
 | `preserve.py` | `<CLAUDE_HOME>/tools/memory-pipeline/` | 歸檔 + digest 卡產生器(零依賴、零模型、零網路) |
 
-### 交接快照與損失紀錄(2026-09-07 收錄,含一個誠實的缺口)
+### 交接快照與損失紀錄｜Handoff snapshot and loss record
 
 `handoff_snapshot.py` 是純函式庫:算出交接快照的路徑、判斷它是否**新鮮**(自寫入
 那一輪以來 context 成長未超過門檻)、產生提示字串。它沒有事件可掛,所以刻意不出現
@@ -112,7 +125,7 @@ docstring 裡寫得很完整),但別以為裝上去就有判決。每第 N 次�
 路徑呼叫 preserve——裝在別處它只會安靜跳過(fail-open),digest 那一階梯子退化為
 「直接 Grep 原檔」,其餘照常。
 
-## 安裝
+## 安裝與驗收｜Install and verify
 
 1. 複製六個檔案到上表位置(`handoff_snapshot.py` 一定要跟著,它是另外三支的
    import 對象;少了它那三支載入即失敗)。
@@ -181,7 +194,7 @@ Get-Content NUL | & "<PYTHON_EXE>" "<CLAUDE_HOME>/hooks/compact_pointer.py"
    **複製不等於生效**——hooks 對進行中的 session 立即套用(來源環境實測),
    但驗收要看的是卡片真的出現,不是檔案在不在。
 
-## 可調參數(集中一處,附調整表)
+## 可調參數｜Tunables
 
 | 想改什麼 | 參數 | 所在 | 出貨值 | 合理範圍 |
 |---|---|---|---|---|
@@ -195,7 +208,7 @@ Get-Content NUL | & "<PYTHON_EXE>" "<CLAUDE_HOME>/hooks/compact_pointer.py"
 `SIZE_GATE` 與 `LINE_WINDOW` 在來源環境登記為 PROVISIONAL:定案依據是「哪一次
 deny 擋到了**正當的**整檔需求」——遇到就記下場景再調,不要憑感覺放寬。
 
-## 失敗模式(跑不動時你會看到什麼)
+## 失敗模式｜Failure modes
 
 - **書籤缺失**(機制上線前的壓縮、寫入失敗)→ 指標卡降級:仍有原檔路徑與大小,
   但沒有行數區段。卡片本身是交付物,靜默空白視為缺陷,所以降級卡是刻意設計。
@@ -205,7 +218,7 @@ deny 擋到了**正當的**整檔需求」——遇到就記下場景再調,不�
   記錄場景、調 `SIZE_GATE`/`LINE_WINDOW`,而不是拔 hook。
 - **全部 fail-open**:任何解析錯誤 exit 0,守衛的 bug 不會擋住工作。
 
-## 平台契約備忘(review-when 的復查配方)
+## 平台契約備忘｜Platform contract and review recipe
 
 這個模式押在三個平台行為上,任何一個變了就先復查再信卡片
 (hook docstring 的 review-when 都指到這一節):
@@ -220,7 +233,7 @@ deny 擋到了**正當的**整檔需求」——遇到就記下場景再調,不�
 
 查證基準日 2026-08-16(code.claude.com 的 hooks 文件 + Agent SDK 型別)。
 
-## 邊界(明知不蓋的地方)
+## 邊界｜Known non-goals
 
 - Guard 只管 `Read` 工具;shell 側(`cat`/`Get-Content`)是**已登記的擴充觸發
   事件**——等它真的成為慣性繞道再擴,不預建。
@@ -230,7 +243,7 @@ deny 擋到了**正當的**整檔需求」——遇到就記下場景再調,不�
 - 跨 session 檢索/RAG 不在本模式內——本模式只保證「留下乾淨的語料層與
   grep → 視窗讀的取用原語」讓那一層future 有得接。
 
-## 識別化說明 (de-identification)
+## 識別化說明｜De-identification
 
 依本 repo `tools/COLLECTION-RULES.md` 處理;每一筆編輯都宣告在
 `tools/share-manifest.toml` 的 `[[collected]]` 條目:

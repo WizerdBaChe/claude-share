@@ -1,11 +1,29 @@
-# Global CLAUDE.md Snapshot
+# Global CLAUDE.md Snapshot｜全域 CLAUDE.md 快照
+
+> **中文摘要｜Chinese summary**：這個資料夾是個人 CLAUDE.md（Claude Code 的全域
+> 指令入口）的手動快照，供閱讀或在 Claude Code 環境中選擇性採用。CLAUDE.md、
+> path-scoped rules、claude-ops 與 skill-toolkit 是互相對應的切片；Codex／ChatGPT
+> 的遷移請改讀 [interop-layer README](../interop-layer/README.md)。
+>
+> **English summary**: This directory is a reviewed snapshot of a personal Claude Code
+> global instruction entry point. It is for reading and selective adoption; the interop
+> layer, not this host-specific path, defines the Codex/ChatGPT migration surface.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 主要檔案 | CLAUDE.md：全域偏好；rules/：path-scoped 規則 | CLAUDE.md: global preferences; rules/: path-scoped rules |
+| 先看 | 先讀本 README 的採用方式，再按觸發條件讀 CLAUDE.md 或 rules/ | Read the adoption notes, then load a file by its trigger |
+| 採用 | 只複製與目標 host 相容的部分，並替換三個 environment placeholders | Copy only host-compatible content and replace the three environment placeholders |
+| 不包含 | 不包含 hooks、credentials、session state 或自動同步器 | No hooks, credentials, session state, or auto-sync mechanism is included |
 
 這個資料夾是個人 `~/.claude/CLAUDE.md`（Claude Code 的全域指令入口，套用到所有專案）的手動快照，供參考或移植到其他機器使用。
 
-## 內容
+## 內容｜Contents
 
 - `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。開頭有一段「Path-scoped rules」索引，指到下面 `rules/` 資料夾。
-- `rules/`：本分享收錄十個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
+- `rules/`：本分享收錄十一個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
   新增其中兩條——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`
   （GLSL 靜默失敗模式）——是把原本內嵌在 `CLAUDE.md` 裡的規則搬出來：這兩條規則的觸發
   條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後
@@ -30,7 +48,7 @@
   `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這些規則的內容併回
   `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
 
-## 去識別化 — 以及為什麼大部分路徑「原樣保留」
+## 去識別化與可攜性｜De-identification and portability
 
 原始檔案本身未包含使用者名稱、電子郵件或帳號等個資。逐項檢查後只有一處真正屬於機器綁定資訊，其餘引用其實是可攜路徑，不需要泛化成佔位符：
 
@@ -44,7 +62,7 @@
 
   換句話說：這份 `CLAUDE.md` 不是孤立文件，而是與本 repo 的 `claude-ops/` 和 `skill-toolkit/` **同一套環境的三個切片**，路徑寫法在設計上就是假設三者會被放在同一台機器的 `~/.claude/` 下。單獨只拿這份 `CLAUDE.md` 也能讀、能理解每條規則，但要讓上表那些引用真的可以被讀到，需要一併採用另外兩個分享（見下方「使用方式」）。
 
-## 使用方式
+## 使用方式｜How to adopt
 
 這是可讀取的參考快照，不是自動同步來源。
 
@@ -66,7 +84,7 @@
    `hooks/literature_host_guard.py`，要一併掛上才有效。若目標環境沒有等效機制，直接把這些檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
-## 快照細節
+## 快照細節｜Snapshot details
 
 - 來源：`~/.claude/CLAUDE.md`，複製於 2026-08-02；refreshed 2026-08-06、2026-08-11。
 - 檢查範圍：使用者名稱、電子郵件、帳號、機器綁定的 OS/shell/路徑資訊。
@@ -108,6 +126,6 @@
   身泛化。無其餘新增個資。
 - 這是時間點快照，不是自動同步目標。
 
-## 授權
+## 授權｜License
 
 本資料夾隨母專案採用 [MIT License](../LICENSE)。

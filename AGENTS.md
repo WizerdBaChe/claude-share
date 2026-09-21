@@ -258,12 +258,13 @@ with evidence and attribution grading. Lineage and licence reasoning: `agents/RE
 **Collected, and declared as such since 2026-08-15**: every file above has a
 `[[collected]]` entry in `tools/share-manifest.toml`, and `interop-layer/` is a
 `collected_root`, so check C now enforces provenance here. Before that it did
-not, and the copy silently drifted in both directions for weeks. Three files
-carry declared, deliberate edits — `interop.py` imports the leak patterns from
-`tools/sharelib.py` instead of defining them inline, `test_interop.py`'s
-truncation case is restated against that gate's return shape, and
-`MIGRATION-MAP.md` carries a share-repo-only section on disposition classes.
-None of the three back-flows.
+not, and the copy silently drifted in both directions for weeks. Several files
+carry declared, deliberate share-side edits: `interop.py` imports the leak
+patterns from `tools/sharelib.py` and now adapts the Codex/share layout;
+`test_interop.py` tests that contract; `MIGRATION-MAP.md`, `README.md`,
+`genesis-prompt.md`, and `acceptance-evals.md` record the Codex/ChatGPT
+file-target, package/import, and self-contained-skill boundaries. None of these
+edits back-flow into the source environment.
 
 **As of 2026-08-16 that regime covers every collected root**, not three.
 `claude-ops/`, `global-claude-md/`, `environment-guide/`, `skill-toolkit/` and

@@ -1,8 +1,26 @@
-# Skill Toolkit
+# Skill Toolkit｜可攜式技能工具箱
+
+> **中文摘要｜Chinese summary**：本層收錄 18 顆可攜式 AI-agent skills 與觸發關鍵詞
+> 索引。每顆技能以 SKILL.md 定義用途與邊界，細節依需載入 references；這份 README
+> 先幫你選對技能、判斷缺件，再進入個別 SKILL.md。
+>
+> **English summary**: This directory contains 18 portable AI-agent skills and the
+> trigger dictionary. Each skill defines its scope in SKILL.md and loads supporting
+> references on demand. Use this README to select a skill and understand exclusions
+> before reading its implementation contract.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 適合誰 | 要選技能、審查技能可攜性或安裝一組 skills 的維護者 | Maintainers selecting, auditing, or installing skills |
+| 入口 | 先看下面的情境索引，再讀目標資料夾的 SKILL.md | Use the scenario index, then read the target SKILL.md |
+| 安裝 | 只保留 SKILL.md 與它明確引用的 repo-local references/assets | Keep SKILL.md and its explicitly referenced repo-local references/assets |
+| 不包含 | agent executor、secrets、帳號設定、自動同步與來源端私有工具 | No executor, secrets, account settings, auto-sync, or source-private tools |
 
 一組可攜式的 AI agent 技能 (skills) 與觸發關鍵詞索引。此分享適合用於審查、研究、產品設計、環境維護與工作階段管理；每項技能皆以 `SKILL.md` 定義其適用範圍與操作邊界。
 
-## 這套件特別在哪
+## 設計重點｜Design principles
 
 一般的 prompt 合集給你「一段話」，這套件給你的是**工程紀律**。三個貫穿全套件的共通設計：
 
@@ -10,7 +28,7 @@
 2. **規則都附強制機制**：不是「請注意 X」，而是「用這條檢查擋 X」——檢查項都標明驗證方式，結論可以被重跑驗證。
 3. **有配套系統**：觸發字典負責消歧（教你怎麼提問才會命中對的技能）、更新紀錄採附加式不改寫，全程可稽核。
 
-## 內容
+## 內容與技能索引｜Contents and skill index
 
 - `skill-trigger-dict.md`：雙語觸發字典；用於在相近技能間消歧，並提供較能命中技能的提問句型。
 - 更新紀錄已於 2026-08-07 上移至 repo 根目錄的 `Global_skill_update.md`：它記錄的是整個來源環境的變更（`ops/`、全域 `CLAUDE.md`、hooks 都包含在內），不只此技能組，放在這一層屬於歸錯檔。
@@ -65,19 +83,19 @@
 > 需要的人自行取用並自行做授權判斷。同一顆技能收錄的 `vendor/lottiefiles/` 授權完整
 > （MIT + LICENSE + 具名著作權人），不受影響。
 
-## 一眼案例：我遇到的是哪種情況？
+## 一眼案例：我遇到的是哪種情況？｜Choose by problem shape
 
 - 「怕 AI 把我的 repo 改壞，要怎麼預防」→ `ai-coding-guardrails`
 - 「PR 太多審不完，審了又怕漏」→ `code-review-deep-checklist`
 - 「想做新功能，但怕做到一半發現重工」→ `product-design-thinking`
 
-## 建議閱讀順序
+## 建議閱讀順序｜Suggested reading order
 
 1. `ai-coding-guardrails`——觀念底座，先讀這顆。
 2. 跟自己痛點對應的那顆——用上面的一眼案例對號入座。
 3. `skill-trigger-dict.md`——安裝完成後才需要，負責消歧。
 
-## 使用方式
+## 使用方式｜How to adopt
 
 1. 先閱讀目標 agent 平台的技能安裝規範。
 2. 選取需要的資料夾，將其複製到該平台的 skills 目錄。
@@ -86,10 +104,10 @@
 
 此套件是人工審閱的快照，並非與任何本機技能目錄自動同步；更新時請重新複製、審閱並驗證後再發布。
 
-## 隱私與可攜性
+## 隱私與可攜性｜Privacy and portability
 
 本公開副本已移除或泛化個人帳號、絕對本機路徑、內部專案／套件名稱，以及執行期鎖定資訊。路徑範例使用 `<local-workspace>`、`<suite-repository>`、`<project-repository>` 或 `<global-agent-home>` 佔位符；使用前請替換為自己的環境。唯一例外是 `Global_skill_update.md` 中**指向 skills 檔案的歷史路徑**：為保持該建置紀錄可追溯，這些路徑依原始內容保留。部分技能仍會提及特定 agent 平台的概念，這些屬於功能相容性說明，不代表需要存取原作者的環境。
 
-## 範圍與授權
+## 範圍與授權｜Scope and license
 
 本資料夾只包含技能內容與其輔助資料，不包含 agent 執行器、秘密、帳號設定或自動同步機制。授權請見儲存庫根目錄的 [MIT License](../LICENSE)。

@@ -64,7 +64,7 @@ collected_roots = [
     "red-team/",
     # 2026-08-29 (full sync round): the folder shipped as prose on 2026-08-27
     # and gained its executable half today. The root is the SUBDIRECTORY, not
-    # the folder: `archdiag/` holds the eleven collected files, while the folder
+    # the folder: `archdiag/` holds the twelve collected files, while the folder
     # around it holds repo-authored work — the map, the checklist, and the
     # self-drawn view set with its build script. Scoping the root to where the
     # collected files actually are keeps check C's question exact ("does this
@@ -1183,19 +1183,26 @@ status = "verbatim"
 [[collected]]
 path = "interop-layer/acceptance-evals.md"
 source = "~/.claude/interop/acceptance-evals.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-09-18: added target-surface evals 9-11 for Codex instruction discovery, portable plugin structure, and restricted-host/high-impact fallbacks; expanded the recording template and failure disposition. These are share-repo migration rules, not source-environment portable preference blocks.",
+]
 
 [[collected]]
 path = "interop-layer/genesis-prompt.md"
 source = "~/.claude/interop/genesis-prompt.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-09-18: re-opened Codex as a verified file target, explicitly excluded ChatGPT Web from the file-writing flow, and added Core/Adapter/Integration translation and restricted-capability rules for target-native mechanism work.",
+]
 
 [[collected]]
 path = "interop-layer/README.md"
 source = "~/.claude/interop/README.md"
-status = "verbatim"
+status = "edited"
 edits = [
   "none. Recorded because the previous copy carried four undeclared ones, all now reverted to source: a deleted OPERATOR-GUIDE.md pointer (the citation resolves here via source_map -> environment-guide/OPERATOR-GUIDE.md, so removing it was the over-scrub class this gate exists to catch); 'Claude 專屬' generalised to '平台專屬' (the specificity was the point — portable-core.md excludes Claude-Code-specific mechanism, and this repo ships global-claude-md/ anyway); the archive/interop-refs-2026-08-11/ path replaced by a vague phrase (CHANGELOG.md already names that path openly, so the scrub protected nothing and cost the reader a locator); and a reordered preference list carrying no information either way",
+  "2026-09-18: updated the target table and operating manual for the re-verified Codex AGENTS target, the separate ChatGPT import surface, and ChatGPT Web skill/plugin packaging; added Core/Adapter/Integration classification, product-surface review steps, official-doc links, and explicit non-equivalence/fallback rules.",
 ]
 # 2026-09-12 refresh (lane W2, align to source 7c9867b): found one more small
 # undeclared drift — a "git 歷史（`git show 483435f:...`」wording fragment that
@@ -1211,6 +1218,7 @@ status = "edited"
 edits = [
   "ADDED a share-repo-only section, 'Disposition classes — why something is absent' (~35 lines before ## Profiles). It documents tools/share-manifest.toml, tools/share_gate.py check R and tools/COLLECTION-RULES.md — machinery that exists only here. Exempt from backflow BY CONSTRUCTION: the source environment has no publication layer, so the section would land there as four dangling citations. The section now carries that exemption in its own text, so the next person to diff the two copies does not have to re-derive it.",
   "the same 'git show 483435f:...' wording fragment found drifted in interop-layer/README.md (see that entry) was also missing here, at the archive/interop-refs-2026-08-11/ mention — restored to name the git-history route explicitly (7-char SHA, not a scrub target). 2026-09-12 drift-correction, not new de-identification.",
+  "2026-09-18: added the Core/Adapter/Integration portability rule, Codex file-target and ChatGPT package/import surface model, current target registry rows, official-doc review links, and sync invariants separating compile/import/publish, state exclusion, fallbacks, and volatile-fact re-verification.",
 ]
 
 [[collected]]
@@ -1222,6 +1230,7 @@ edits = [
   "the same import re-exports `_USER` (2026-08-16). test_interop.py builds its known-TRUE home-path samples from it, and the source defines it beside the patterns it moved out of. CORRECTION to the previous wording of the edit above, which claimed 'behaviour is identical — same patterns': it was not. The source list carried `sk_(live|test)_` and `AIza` key shapes that tools/sharelib.py did not, so for the life of this gate those two would have published cleanly. sharelib.py has been widened to match; see its own comment. The claim was written once, in prose, and nothing re-checked it — the failure mode tools/COLLECTION-RULES.md is entirely about.",
   "2026-09-12: restored a 'playbooks survive in git history only (`git show 483435f:...`)' wording fragment that had drifted out (same class as the README.md/MIGRATION-MAP.md drift found this round, not a new privacy edit — 7-char SHA, not a scrub target); also restored the 'or `git show 596cfc0:interop/interop.py`' half of the same comment block, which had drifted to a stale `archive/2026-08-15-interop-targets-removed/` path form.",
   "NEW 2026-09-12: CURATION_SOURCES list — source added 'ops/references/uat.md' this round ('Re-widened by exactly one path on 2026-09-09' comment block, ~9 lines, taken verbatim — it names no source-only path itself). Confirmed this path actually resolves in this repo: `ops/references/uat.md` ships via source_map -> `claude-ops/ops/references/uat.md` (not this lane's file; confirmed resolvable, not re-collected here).",
+  "2026-09-18: made the stamp neutral (`agent-interop`) while accepting the historical `claude-interop` stamp, added runtime `CODEX_HOME` resolution and a Codex target with `AGENTS.override.md` shadow detection, and made curation/freshness paths resolve for both the source layout and this share repo's `interop-layer/` layout. The share-layout branch and target metadata are publication-side adaptations, not source changes.",
 ]
 
 # The compiler's own two-sided calibration, and the reason the previous entry
@@ -1234,6 +1243,7 @@ source = "~/.claude/interop/test_interop.py"
 status = "edited"
 edits = [
   "t_truncation_boundary rewritten. It asserts against the gate's return shape, and the two gates differ: the source's inline scan_text returns 3-tuples truncated past 12 chars, tools/sharelib.py returns 4-tuples (label, kind, line_no, sample) truncated past 25. The PROPERTY under test is unchanged — a match at the boundary must not be printed whole — and is now checked on both sides of this gate's boundary (25 whole, 26 truncated). Exempt from backflow: the source has no sharelib.py. Every other test, including both calibration sets, is byte-identical.",
+  "2026-09-18: added regression cases for the re-verified Codex target contract, ChatGPT Web's deliberate absence from file targets, share-layout freshness paths, and the neutral stamp with backward compatibility. Publication-side tests only; no source behavior is claimed.",
 ]
 # 2026-09-12 refresh (lane W2, align to source 7c9867b): re-diffed against
 # fresh source — zero drift, matches the declared edit exactly. Ran
@@ -1306,13 +1316,11 @@ status = "verbatim"
 # faces; a full README "Style tokens" section) that the previously-shipped
 # repo copy did not have. This is the NORMAL procedure-B direction (same as
 # every other file in this fragment) — refresh repo to match fresh source.
-# `~/.claude/tools/archdiag/tokens.mjs` is a genuinely NEW sibling file at
-# source (born 2026-09-05, `ls -la` confirms it exists at source and does
-# NOT exist anywhere in this repo's archdiag/ folder) that BOTH the refreshed
-# README.md and MAINTENANCE.md now cite (Modules table row, Style-tokens
-# section, M5). It is NOT in this round's file list and is OUT OF SCOPE for
-# W6 — flagged here, not collected. See the frag-level note at the bottom of
-# this file.
+# Historical W6 note: `~/.claude/tools/archdiag/tokens.mjs` was a genuinely NEW
+# sibling at source (born 2026-09-05) and was initially out of scope while the
+# refreshed README.md and MAINTENANCE.md already cited it. The main session then
+# collected it under procedure A; the current archdiag root therefore contains
+# twelve collected files. The live entry is recorded below at the exact path.
 
 [[collected]]
 path = "agents/testing-qa-engineer.md"
@@ -1844,6 +1852,7 @@ edits = [
   "2026-09-12 refresh (procedure B, align to 7c9867b; source `git diff --numstat` = 6 insertions, 2 deletions): re-applied all six edits above onto fresh source bytes — every anchor still matched verbatim, re-applied unchanged. None of the six rows/bullets they target were touched by this round's source diff.",
   "2026-09-12 NEW: §一 判別法-adjacent new dict row (new §7 registry key, not §一) 'ops/references/principle-design-guide.md' + 'ops/references/entry-schema.md §3–§5 (14 面適配表；lint `tools/entry-schema-lint/`)' — the lint tool path is a dead pointer (tools/ excluded wholesale, [[not_shipped]] path = \"tools/\") -> generalised to 'lint 為 source-only 工具，未隨此 repo 收錄'. Both `.md` reference citations are repo-relative (rule 2, not scrub targets) but neither is in this manifest yet — both owned by lane W1b (ops/references/); flagged under Cross-lane.",
   "2026-09-12 NEW: §7 registry, new 'routing/definition entry（分類／路由條目）' row — same `tools/entry-schema-lint/lint.py` dead pointer, same treatment: -> 'lint 為 source-only 工具，未隨此 repo 收錄'. `ops/references/entry-schema.md` citation flagged under Cross-lane as above; integrity-sweep check 29 citation resolves (ships, mine).",
+  "2026-09-18: refreshed the current interop registry entry after Codex was re-verified as a full file target and ChatGPT was separated into import/package surfaces; recorded the self-contained-skill fence and explicitly kept dependent skills/integrations out of this share change.",
 ]
 # NOT edited (verified, ships as pure content growth, no scrub needed):
 # - New §六 quick-table row for the four `[BC]` rules -> `ops/05-authority.md`
@@ -1920,6 +1929,7 @@ edits = [
   "NEW 2026-09-07 (gap from a prior round — this string was already present, unscrubbed, in the previously-shipped 'verbatim' copy): a `projects/<slug>/memory/` example whose mangled home-directory slug embedded the account name -> the same slug with `<user>` in the account-name position (value not recorded here, hard rule 9, corrected 2026-09-12) — the account name embedded in a mangled directory-slug inside a memory-path example, missed by every prior round's scrub pass because 'verbatim' status meant no diff was ever taken against the scrub checklist.",
   "NEW 2026-09-07: a dated 2026-09-05 codex/chatgpt archive folder, written as an absolute path on a non-system drive (hard rule 2), generalized to a Traditional-Chinese descriptive clause naming the capability (archived to the source environment's own archive area, a non-system-drive path, not listed here) without the literal path.",
   "agents count refreshed 8->9 to match this round's work-card-executor.md addition (see agents/README.md's own edit, same round).",
+  "2026-09-18: updated the live migration guidance for the re-verified Codex AGENTS target, separated ChatGPT import/package flows from compiler output, and added the rule that dependent skills are not created or hand-carried.",
 ]
 
 [[collected]]

@@ -1,9 +1,25 @@
-# agents/ — subagent 定義（9 支）
+# agents/ — subagent 定義｜Subagent definitions
 
-`claude-ops/ops/20-dispatch.md` 的派工表點名這些 agent type，但定義檔在
-2026-08-14 之前從未隨附——引用得到、拿不到本體。現已補齊，逐檔 byte-verbatim。
+> **中文摘要｜Chinese summary**：本層收錄 `20-dispatch.md` 會派出的 9 種
+> subagent 定義。每份定義都把能力白名單、工作邊界、Skill 路由與輸出證據格式
+> 寫在同一份檔案裡；這些檔案是 Claude-oriented dispatch assets，不是跨平台
+> agent runtime。
+>
+> **English summary**: This directory contains the nine subagent definitions routed by
+> `20-dispatch.md`. Each definition makes its tool boundary, role boundary, skill
+> routing, and evidence-shaped output contract explicit. The files are Claude-oriented
+> dispatch assets, not a portable agent runtime.
 
-## 名冊
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 讀者 | 要讀派工角色、審查邊界或安裝 Claude agent definitions 的維護者 | Maintainers who need the dispatch roster, review boundaries, or Claude agent installation |
+| 入口 | 先讀 [`claude-ops/ops/20-dispatch.md`](../claude-ops/ops/20-dispatch.md)，再按 `name:` 找定義檔 | Start with `20-dispatch.md`, then select a definition by its `name:` field |
+| 驗收 | 檢查 `tools:`、`Skill`、Output 段與角色專屬的唯讀／施工邊界 | Check `tools:`, `Skill`, the Output section, and each role's read-only/build boundary |
+| 不包含 | 不包含 dispatcher、模型服務、credentials 或通用 runtime | No dispatcher, model service, credentials, or generic runtime is included |
+
+## 名冊｜Roster
 
 | 檔案 | agent type | 邊界（描述裡就寫死的那條線） |
 |---|---|---|
@@ -17,7 +33,7 @@
 | `testing-bug-fixer.md` | `testing-bug-fixer` | 修因不修症；根因沒命名就不算修好；執行施工卡不算修 bug，交給 `work-card-executor` |
 | `work-card-executor.md` | `work-card-executor` | 照一張已定案的施工卡機械化施工到驗收；卡沒解的解讀分歧就停下回報，**不**擴大範圍；規則層檔案（CLAUDE.md、`~/.claude/ops/`、skills/、hooks/、settings.json、agents/）永不寫入 |
 
-## 三個貫穿全部的設計
+## 共通契約｜Shared contracts
 
 1. **`tools:` 白名單即權限邊界。** 審查類（code-reviewer、security-engineer）
    沒有 `Edit`／`Write`，所以「唯讀」不是請求而是能力事實，另配 `permissionMode: dontAsk`。
@@ -27,7 +43,7 @@
    與歸屬分級（`introduced`／`pre-existing`／`amplified`）。沒到證據門檻就回
    `No findings.`，不准補場面話。
 
-## 血緣與授權
+## 來源與授權｜Lineage and licensing
 
 上述 8 支（`work-card-executor.md` 除外）第一行 HTML 註解都留著出處：2026-07-06
 由第三方套件 **ai-team-os** 一次帶入 22 個定義，2026-08-12 其中 8 個 body
@@ -43,7 +59,7 @@ remediation round 直接原生撰寫，不經 ai-team-os，第一行註解記的
 > 對照：`skill-toolkit/motion-design` 的 Three.js 參考套件因為上游沒有正式 LICENSE
 > 而**完全不收錄**。兩者判準一致，結論不同的原因只有一個：這裡的內文已經不是對方的了。
 
-## 安裝
+## 安裝與驗收｜Install and verify
 
 複製到你的 `~/.claude/agents/`。檔名不影響路由，`name:` 才是；派工時用的是
 `backend-architect` 這種 `name`，不是檔名。

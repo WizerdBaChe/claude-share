@@ -1,4 +1,23 @@
-# hooks/ — 機械強制層
+# hooks/ — 機械強制層｜Mechanical enforcement layer
+
+> **中文摘要｜Chinese summary**：目前的 mounting template 掛載 21 支 hook；另有
+> `deny_receipt.py` 與 `handoff_snapshot.py` 這類不掛載的共用函式庫，以及一支已
+> 退役但仍保留測試與檔案的 fieldwork threshold notice。所有 shipped guards 都
+> fail-open；是否真的生效取決於 `settings.json` 的掛載，不是檔案存在本身。
+>
+> **English summary**: The current mounting template wires 21 hooks. Shared libraries
+> such as `deny_receipt.py` and `handoff_snapshot.py` are shipped but not mounted, and
+> `fieldwork_threshold_notice.py` is retained but retired. All shipped guards fail open;
+> presence on disk is not proof of activation—registration in `settings.json` is.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 先看 | 先讀本 README 的採用前注意事項，再看 `settings.example.json` | Read the adoption notes, then inspect `settings.example.json` |
+| 目前狀態 | 21 支 mounted hooks；共用函式庫與 retired 檔案另標明，不列為掛載 hook | 21 mounted hooks; shared libraries and retired files are labelled separately |
+| 驗收 | 逐支手動跑 fail-open self-test，並確認平台真的載入設定 | Run each available self-test and confirm the host registered the settings |
+| 不包含 | 不包含 Claude hook runner、外部 credentials、來源端未出貨 tools tree | No hook runner, external credentials, or excluded source tools tree is included |
 
 > **十六支 hook（2026-08-29 起）。** 2026-08-14 首次收錄十二支，2026-08-29 補齊
 > 四支殼層／git 強制層（`shell_transport_guard`、`ps_errorpref_guard`、
@@ -53,7 +72,7 @@
 > `literature-host-policy.json` 與回歸測試 `tests/test_literature_host_guard.py`。
 > 合計 18 + 3 − 1 + 1，掛載數是**二十一支**。
 
-## 為什麼是 hook 而不是規則文字
+## 為什麼是 hook，而不是規則文字｜Why a hook instead of prose
 
 規則層寫「請記得 X」，模型在自信的當下會讀過去。這幾支的共同判準（`ops/lessons.md`
 L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢查，就該用 hook 擋，不該用散文提醒。**
@@ -61,7 +80,7 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 
 全部 **fail-open**：解析錯誤一律 exit 0。守衛的 bug 不能變成工作的阻礙。
 
-## 內容
+## 內容｜Inventory
 
 | 檔案 | 事件 | 做什麼 |
 |---|---|---|
@@ -97,7 +116,7 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | `tests/test_fieldwork_threshold_notice.py` | — | **2026-09-12 新收**。`fieldwork_threshold_notice.py` 的回歸矩陣（26 案例）——那支 hook 雖已退役（不掛載），檔案仍出貨，所以測它的這支也出貨。手動跑，不是 hook |
 | `tests/test_instructions_loaded_logger.py` | — | **2026-09-12 新收**。`instructions_loaded_logger.py` 的回歸矩陣。手動跑，不是 hook |
 
-## 安裝
+## 安裝與啟用｜Install and activate
 
 1. 把 `*.py` 與兩份 `browser-pane-*.json` 複製到你的 `~/.claude/hooks/`。
 2. 打開 `settings.example.json`，把需要的區塊**併進**你自己的 `settings.json`
@@ -116,7 +135,7 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
    全部 fail-open，所以「安靜地 exit 0」就是健康狀態。**複製不等於生效**——
    裝完請用你平台自己的方式確認 hook 真的註冊了，別用「檔案在」代替「會觸發」。
 
-## 採用前要知道的事
+## 採用前要知道的事｜Before adoption
 
 - **`settings.example.json` 的 permissions 是「一個人的威脅模型」，不是建議值。**
   逐行讀過再決定；照抄一份你沒自己決定過的 allowlist，比沒有 allowlist 更糟。

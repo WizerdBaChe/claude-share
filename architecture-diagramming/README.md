@@ -1,4 +1,18 @@
-# architecture-diagramming — 架構圖的選型・繪製・體檢能力集合 (architecture-diagram capability set)
+# architecture-diagramming — 架構圖能力集合｜Architecture-diagram capability set
+
+> **English summary**: This capability set links diagram selection, source-data gating,
+> precise production, code-based audit, and executable verification. The three skills
+> remain independently usable, but the complete loop requires the theory, production,
+> audit, and archdiag execution layers together.
+
+## 快速導覽｜Quick guide
+
+| 項目 | 中文 | English |
+|---|---|---|
+| 解決什麼 | 把架構圖的選型、來源資料閘門、精準繪製與 code 反向稽核接成一條迴路 | Connect view selection, source-data gating, precise drawing, and code-based audit |
+| 四層 | 理論 → 生產 → 稽核 → 執行；三個入口 skill 加上 archdiag library | Theory → production → audit → execution, with three skills and the archdiag library |
+| 先讀 | 先看本 README 的機制圖，再依入口選 `diagram-authoring` 或 `audit-drawing` | Read the mechanism map, then choose `diagram-authoring` or `audit-drawing` |
+| 驗收 | 跑 `ACCEPTANCE.md`；外觀人審仍與機械檢查分開 | Run `ACCEPTANCE.md`; visual review remains separate from mechanical checks |
 
 > 這不是一顆 skill,是**三顆 skill 拼成的能力集合 (capability set)**:理論層選
 > 「哪種圖回答哪種問題」,生產層把資料變成**可驗證**的圖,稽核層從 code 反向
@@ -9,7 +23,7 @@
 > (co-packaged optics) 產品全架構,含結構模型與缺口表;五項現場修正
 > (FT-1–FT-5) 已回收進 skill 本體。
 
-## 問題形狀
+## 問題形狀｜Problem shapes
 
 架構圖 (block diagram)、狀態機 (FSM/statechart)、Petri net 這類圖,實務上壞在
 三個地方,而且三個壞法互相獨立:
@@ -23,7 +37,7 @@
 
 三顆 skill 各治一個壞法,邊界互不重疊(每顆的 SKILL.md 都明訂 handoff)。
 
-## 機制:一條迴路、兩個入口
+## 機制：一條迴路、兩個入口｜One loop, two entry points
 
 ```
 【設計入口】要一張新圖
@@ -53,7 +67,7 @@
 reference 檔,生產與稽核兩顆 skill 都**指過去引用、不複寫**——第二份規則就是
 一個會漂移的分叉,這是整套環境的標準紀律。
 
-## 檔案(都已收錄在本 repo,manifest 條目見 `tools/share-manifest.toml`)
+## 檔案｜Package contents (all shipped here)
 
 | 檔案 | 角色 | 擁有什麼 |
 |---|---|---|
@@ -63,13 +77,13 @@ reference 檔,生產與稽核兩顆 skill 都**指過去引用、不複寫**—�
 | `../skill-toolkit/skills/diagram-authoring/references/notation-precision.md` | 生產:畫法 | Physics of Notations 派生繪圖規則、各圖種畫法慣例、幾何自檢斷言組 |
 | `../skill-toolkit/skills/diagram-authoring/references/carrier-playbook.md` | 生產:載體 | mermaid/SVG/HTML/PPTX 精度天花板與驗證路徑、再生紀律 |
 | `../skill-toolkit/skills/code-review-deep-checklist/references/project-review.md` | 稽核 | Mode B 體檢視圖層:從 code 重建視圖、integrity pass、與既有圖比對、留檔 |
-| `archdiag/`(11 檔,**2026-08-29 新收**) | 生產:執行層 | 把上面那些紀律變成會跑的程式:schema 驗證 → build-time 幾何斷言 → marker 閉合 → 決定性輸出 → sha256 收據;`selfcheck.mjs` 是頁內第四段自檢的**唯一來源**;`route.mjs` 正交走線;`delta.mjs` 模型 diff |
+| `archdiag/`(12 檔,**2026-08-29 新收**) | 生產:執行層 | 把上面那些紀律變成會跑的程式:schema 驗證 → build-time 幾何斷言 → marker 閉合 → 決定性輸出 → sha256 收據;`selfcheck.mjs` 是頁內第四段自檢的**唯一來源**;`route.mjs` 正交走線;`delta.mjs` 模型 diff |
 
 配套(消歧義):`../skill-toolkit/skill-trigger-dict.md` 有三列速查——精準繪製
 → diagram-authoring;選型理論 → representation-models;全架構重建找缺口 →
 audit-drawing 模式。
 
-## `archdiag/`:紀律變成會跑的程式(2026-08-29)
+## `archdiag/`：紀律變成會跑的程式｜Executable enforcement (2026-08-29)
 
 前四項是散文紀律,這一項不是。它存在的理由是一次**一天內就發生的漂移**:
 兩份 audit 交付各自帶一份「頁內自檢框架」的副本,其中一份多了第 8 項檢查、
@@ -100,10 +114,10 @@ audit-drawing 模式。
 
 不隨附的是來源環境的 build 腳本(在不出貨的 `outputs/` 樹裡)。出貨的是
 **函式庫本體 + README 裡的 `build()` 契約**——build 腳本是照著那份契約寫的,
-本資料夾的 [`archdiag-capability-set.html`](archdiag-capability-set.html) 就是
+本資料夾的 [`capability-set.html`](capability-set.html) 就是
 用出貨的這份程式碼現做的一份,可以當範例讀。
 
-## 安裝
+## 安裝與驗收｜Install and verify
 
 1. 把 `skill-toolkit/skills/` 下的三個資料夾整組複製到你的 skills 目錄:
    `diagram-authoring/`、`product-design-thinking/`、`code-review-deep-checklist/`。
@@ -119,7 +133,7 @@ audit-drawing 模式。
 4. 驗證:跑 [`ACCEPTANCE.md`](ACCEPTANCE.md)。**複製不等於能力成立**——清單
    考的是紀律有沒有跟著檔案一起到(尤其編造防火牆那一項)。
 
-## 圖種涵蓋(誰擁有哪一格)
+## 圖種涵蓋：誰擁有哪一格｜Notation coverage
 
 | 圖種 | 選型列 | 健全性檢查 | 畫法慣例 |
 |---|---|---|---|
@@ -136,7 +150,7 @@ audit-drawing 模式。
 「—」= 該格刻意空缺(不是漏):BPMN 的畫法紀律沿用通用版面規則;event
 storming 明訂為探索輔助、不是可稽核產物。
 
-## 主要可調參數(改哪裡)
+## 主要可調參數｜Tunables
 
 | 想改什麼 | 所在 | 出貨值 |
 |---|---|---|
@@ -147,7 +161,7 @@ storming 明訂為探索輔助、不是可稽核產物。
 | 每 tier 預設視圖組 | representation-models.md per-tier 節 | 速寫 2 圖上限 → 全梯 per-subsystem |
 | 缺口表欄位 | view-integrity-checks.md §3 | view/element/defect/severity/basis |
 
-## 失敗模式(缺件時你會看到什麼)
+## 失敗模式｜Failure signatures
 
 - **只裝 diagram-authoring**:SKILL.md Step 1/2 與 Reference files 節指向
   `../product-design-thinking/references/…` 的兩支檔案讀不到——選型退化成
@@ -162,7 +176,7 @@ storming 明訂為探索輔助、不是可稽核產物。
 - 任何載體的執行期失敗(字型、JS init)依全域慣例**必須自我宣告**——靜默
   空白畫布本身就是缺陷,不是環境問題。
 
-## 邊界(明知不蓋的地方)
+## 邊界｜Known non-goals
 
 - 資料圖表(有軸、有 series 的 chart/plot/dashboard)→ 各自環境的 dataviz
   能力;UI mockup / 畫面流 → design 類工具;這套只管「系統結構與行為」的圖。
@@ -175,7 +189,7 @@ storming 明訂為探索輔助、不是可稽核產物。
   global-claude-md refresh 收。採用者讀 representation-models.md 本體即得
   同一條規則。
 
-## 自我參照的那一份 (`capability-set.html`)
+## 自我參照的那一份｜Self-referential artifact
 
 [`capability-set.html`](capability-set.html) 是這套集合**用自己的工具鏈畫自己**
 的成果,再生源是 [`capability-set.build.mjs`](capability-set.build.mjs)。它同時
@@ -203,7 +217,7 @@ storming 明訂為探索輔助、不是可稽核產物。
 `__geometryReport.receipt` 記錄實際量測字型/DPR/引擎、`MAINTENANCE.md` M6 五組
 字型掃描。上面那段 PASS 因此要讀成「在 Segoe UI 下 PASS」——現在報告會自己說。
 
-## 識別化說明 (de-identification)
+## 識別化說明｜De-identification notes
 
 依本 repo `tools/COLLECTION-RULES.md`;每筆編輯宣告於 `tools/share-manifest.toml`:
 
@@ -223,7 +237,7 @@ storming 明訂為探索輔助、不是可稽核產物。
 - carrier-playbook.md 的 headless 驗證三事實(port 服法、截圖落點)是**來源
   機器的實測值**,檔內附 review-when 復查配方;採用者環境不同就照配方重測,
   別直接信值。
-- **2026-08-29(執行層收錄)**:`archdiag/` 11 檔進來,其中 9 檔 verbatim。
+- **2026-08-29(執行層收錄)**:`archdiag/` 12 檔進來,其中 10 檔 verbatim。
   兩筆編輯,同一類、都已宣告:`MAINTENANCE.md` 的維護儀式指令操作在來源
   不出貨的 `outputs/diagram-authoring/` 樹上,指令逐字保留、上方加share note
   說明採用者的對應目錄;`carrier-playbook.md` 的 `Reference builds:` 那行

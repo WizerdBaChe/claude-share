@@ -1,14 +1,31 @@
-# `domains/` — what ships here, and what deliberately does not
+# `domains/` — 領域設定檔機制｜Domain-profile machinery
 
-This share carries the **machinery** for domain profiles, not the profiles.
+> **中文摘要｜Chinese summary**：這個 share 只帶領域 profile 的 authoring
+> machinery，不帶任何特定研究領域的已填內容。先用 template 建立自己的 profile，
+> 再用 routing manifest 與 expansion guide 驗證；來源端的私有領域知識刻意不在此包。
+>
+> **English summary**: This share contains the machinery for authoring domain profiles,
+> not filled profiles for a particular research field. Start from the template, register
+> the profile in the routing manifest, and run the guide's pre-merge checks.
 
-| File | What it is |
-|---|---|
-| `_template.md` | The 7-node profile skeleton. Start every new domain from it. |
-| `_routing.md` | The load manifest — shipped with its format and four template rows, no real rows. |
-| `domain-expansion-guide.md` | The authoring spec: the two-gate decision tree for base vs sub-profile vs reference vs boundary, node-by-node quality bars, and the pre-merge checklist. |
+## 快速導覽｜Quick guide
 
-## What was excluded, and why
+| 項目 | 中文 | English |
+|---|---|---|
+| 收錄 | template、routing format、authoring／quality guide | Template, routing format, and authoring/quality guidance |
+| 不收錄 | 來源端作者的 condensed-matter／semiconductor filled profiles 與私人 citation inventory | The source author's filled profiles and private citation inventory |
+| 先做什麼 | 先讀 `domain-expansion-guide.md` §2，再複製 `_template.md` | Read §2 of `domain-expansion-guide.md`, then copy `_template.md` |
+| 驗收 | 加入一列 `base` routing，依 guide 的 pre-merge checklist 檢查 | Add one `base` routing row and run the guide's pre-merge checklist |
+
+## 收錄內容｜What ships
+
+| File | 中文用途 | English purpose |
+|---|---|---|
+| `_template.md` | 空白 profile 骨架；包含 Nodes 1–6、literature anchors、source ledger 與 cross-domain sections | Blank profile skeleton for Nodes 1–6, literature anchors, source ledger, and cross-domain sections |
+| `_routing.md` | load manifest 格式，附四列 template rows、沒有真實 domain rows | Load-manifest format with four template rows and no real domain rows |
+| `domain-expansion-guide.md` | base／sub-profile／reference／boundary 的雙閘門決策樹、逐 node 品質線與 pre-merge checklist | Two-gate decision tree, node quality bars, and pre-merge checklist |
+
+## 刻意排除內容與理由｜What is deliberately excluded
 
 The source environment's `domains/` held filled profiles for its author's own
 research fields (condensed-matter and semiconductor-device topics). Those files are
@@ -22,7 +39,7 @@ as an empty template.
 directory tree. Read those as **example filenames**, not as files you should expect
 to find here.
 
-## Consequence for the skill's evals
+## 對 evals 的影響｜Consequence for the skill's evals
 
 `../evals/evals.json` retains assertions written against the excluded profiles (for
 example, one checks that a material sub-profile loads in preference to its generic
@@ -31,12 +48,13 @@ assertion looks like** — they are not runnable against this share as-is. Rewri
 them against your own first domain, or treat their `passed`/`evidence` fields as a
 record from the source environment rather than a claim about this copy.
 
-## Building your first domain
+## 建立第一個 domain｜Build your first domain
 
 1. Read `domain-expansion-guide.md` §2 first — most authoring mistakes are a topic
    put at the wrong level, not bad content.
-2. Copy `_template.md` to `<your_domain>.md` and fill all seven nodes. Node 6
-   (pitfalls) and Node 8 (decision triggers) are what actually fire as standing
-   rules during a session; a profile weak there is decorative.
+2. Copy `_template.md` to `<your_domain>.md` and fill Nodes 1–6 plus the
+   literature/source and cross-domain sections. Node 6 (pitfalls) is the primary
+   standing-trigger home; the former separate “Node 8” decision-trigger section
+   was abolished in the current template, so do not invent it.
 3. Add one `base` row to `_routing.md` and delete the template rows.
 4. Run the guide's pre-merge checklist before relying on it.
