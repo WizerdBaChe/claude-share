@@ -22,7 +22,7 @@
 # CHANGELOG.md entry, so it changes in the SAME commit as that entry and never
 # on its own — a baseline edited separately is a second copy that rots.
 # ---------------------------------------------------------------------------
-source_aligned = "7c9867b"
+source_aligned = "b6ccd3e"
 
 # ---------------------------------------------------------------------------
 # source_env_roots — bare prefixes that mean "an asset of the SOURCE

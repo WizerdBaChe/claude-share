@@ -9,6 +9,102 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-10-02 — the `tools/` tree opens, 33 hooks, and a pack-level status page in place of the packs
+
+Source `7c9867b` → `b6ccd3e`: 842 commits (the round began against `183c129`
+and re-aligned to the close-out HEAD when the source moved by two commits
+mid-round — one lesson card and a regenerated index, both re-collected rather
+than acknowledged as dirty). 267 files changed here, 179 of them new, none
+deleted; tracked files 290 → 469. The manifest goes 256 → 435 `[[collected]]`
+(255 verbatim, 161 edited, 19 template), 54 → 75 `[[not_shipped]]`, 29 → 68
+`[[allow]]`, 3 → 4 `[[unmounted_hook]]`, and `[source_map]` 15 → 60 keys.
+Eight lanes in their own worktrees (W1 ops, W2 CLAUDE.md + rules, W3 hooks, W4a
+skill refresh, W4b new skills, W5a hook test suites, W5b method tools, W5c
+templates), merged `--no-ff` with the gate run at each merge, plus a ninth (W6)
+dispatched at the merge to retire the "does not ship" notes the first eight had
+made false.
+
+**Four owner rulings, asked up front and recorded in the manifest.** (1) The
+source's `tools/` opens to method tools and hook test suites; `system-hmi` and
+`view-launcher` ship as templates (registries reduced to a schema and one
+worked row); the operator's personal stores and carriers — recall, cross-index,
+graph-snapshot, session board, place ledger, the census tools, the memory
+pipeline, scheduled and backup carriers — stay out, each with its reason.
+(2) The three knowledge packs (`render-perf`, `system-design`, `code-layering`)
+stay out; in their place the source gained `KNOWLEDGE-PACKS.md` — the shape of
+a pack, the criteria one must meet to be registered, depended on per branch,
+shared, or split and retired, and a dated status table projected from each
+pack's own tables — written so it ships verbatim under `environment-guide/`.
+The source's `render-perf/INTAKE.md` gained rule 8 (the table is updated in
+the same action as any intake), so the page is a projection, not a copy that
+rots. (3) The per-lesson record tree `ops/lessons/` stays out; the index
+refreshes (56 → 135 cards, nine new scrub edits by class). (4) The hand-made
+四步對照 teaching bundle stays a separate hand-off, not merged here.
+
+**Came in.** `instruments/` grows from two tools to forty-three directories
+(150 files): every hook's hand-run test suite, the lint and proof-of-life
+instruments (`hook-deny-lint`, `entry-schema-lint`, `class-closure`,
+`hook-proof-of-life`, `telemetry-framing`, `context-budget`), and the method
+tools the rules name as their procedure or gate — `process-ledger`,
+`closeout-intake`, `feedback-pool`, `tree-noise`, `cc-delta`, `routing-loop`,
+`eol-sync` with `git-hooks`, `quote-evidence`, `audience-fit-gate`,
+`compact-loss-audit` (the reader `compact-recovery/README.md` had been saying
+did not exist), `rule-usage-census`, `shell-audit`, `tracking-refs`,
+`status-line`, `ui-shot`, the three PPTX gates, `pptx-review`,
+`skill-routing-audit.py` with its test, `glob-fitness.py`, one file of
+`cross-index`, and the two templates. Hooks: eight new
+(`boundary_contract_notice`, `feedback_notice`, `tree_noise_gist`,
+`golive_check`, `system_hmi_summary`, `view_launcher_gist`,
+`verbatim_dispatch_notice`, `session_search_query_notice`) and five whose
+2026-09-07/09-12 exclusion rested only on a tool that now ships
+(`intake_guard`, `intake_match_shadow`, `unattended_run`, `secret_file_guard`,
+`project_registry_gist`) — **33 mounted hooks**; `delivery_gate_shadow.py` was
+retired at the source and joins the unmounted list. Rules: four new
+(`source-quotation-evidence`, `layout-convergence`, `native-render-first`,
+`android-device-states`) — fifteen. Skills: three new (`case-library`,
+`comsol-agent-pipeline`, `pptx-review`) — 21 of the source's 35; the other
+twelve excluded skills re-checked per entry. Root files: `KNOWLEDGE-PACKS.md`
+(verbatim) and `LABEL-REGISTRY.md` (template; until now the standing example
+of a `referenced-only` disposition, so `MIGRATION-MAP.md`'s example is
+rewritten). Ops references: `gate-design.md`, `harness-measurements.md`
+(two machine paths generalized), `maintenance-cases.md`.
+
+**Reversed at the merge, both ways.** Two lane verdicts were true when
+written and false when the lanes met: W5b dropped `tools/pptx-review/` because
+its skill did not ship (W4b shipped it); W5a dropped `tools/secret-guard-test/`
+because its hook did not ship (W3 shipped it). Both collected by main at the
+merge, each verified in place (selftest OK; 12 must-deny / 18 must-pass,
+failures 0). The other direction: ~30 "source-only, does not ship" notes that
+W1 and W2 had carried or added — in `rule-registry.md`, `integrity-sweep.md`,
+`CLAUDE.md`'s unattended-run bullet (its review-when fired), three gates in
+`office-deck-deliverables.md`, `hook-deny-message.md`,
+`naming-and-placement.md` — are restored to the source's text, each manifest
+edit item annotated RETIRED rather than deleted. Two `verbatim` entries whose
+copies main had restructured on 2026-09-18 (the bilingual README round) and
+never redeclared are now `edited` with that edit listed; check V found both.
+
+**Gate.** check S5 read a hook mount's name as the command's last token, so
+`unattended_run.py`'s three mounts (`… scope` / `kickoff` / `stop`) were
+reported twice over, both falsely; it now takes the `hooks/` segment, and
+`test_share_gate.py` gains case 17 in two halves (18 cases, four quiet
+controls). Nine path-position tokens, five command-position tokens and two
+harness tag names declared under `[placeholders]`, each read at its site.
+
+**Source defects found by lanes, reported, not fixed here (D5):**
+`tools/view-launcher/build.py` runs a full build and rewrites the desktop
+shortcut when called with no arguments; `tools/system-hmi/hmi.py` tracebacks
+on a verdict outside a git checkout; `hooks/registry_row_guard.py` imports
+`user_profile_gist.py` and cannot run without it (why it stays out);
+`tools/e2-gate-test/test_shadow_hook.py` raises on its last line when the live
+log is absent (the shipped copy carries a declared fix);
+`literature-search-extract/loop/inbox.py`'s online path runs without a
+citecheck.
+
+Validation at close-out, on the merged tree: `python tools/share_gate.py
+--source <source>` CLEAN over 469 tracked files (435 compared against the
+source); `test_share_gate.py` 18/18; `test_triage.py` 17/17; `git diff --check`
+clean.
+
 ## 2026-09-18 — Codex / ChatGPT migration rules re-verified
 
 Re-opened Codex as a verified `AGENTS.md` file target with `CODEX_HOME` and
