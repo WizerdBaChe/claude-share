@@ -1,0 +1,7 @@
+[
+ {
+  "path_glob": "tools/__pycache__",
+  "reason": "build artifact",
+  "added": "2026-09-19"
+ }
+]

@@ -1,0 +1,20 @@
+{
+ "_comment": "A group is a first-class view over existing subsystems (user ruling M5, 2026-09-19). Additive: subsystem ids never change. A point's face = its own `face`, else the face mapped for its subsystem here. A face with no good reading shows '-' (absence is not pass).",
+ "groups": [
+  {
+   "id": "memory-index",
+   "title_zh": "記憶與索引",
+   "title_en": "Memory & Index",
+   "faces": {
+    "A": "inventory 知道有什麼",
+    "B": "memory 記得決定過什麼",
+    "C": "retrieval 找得到內容",
+    "D": "awareness 知道自己不知道什麼"
+   },
+   "subsystems": {
+    "system-hmi": "A"
+   },
+   "points": {}
+  }
+ ]
+}

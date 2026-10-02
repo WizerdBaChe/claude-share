@@ -1,0 +1,6 @@
+{
+  "_note": "External git repos the reconcile emitter compares against their own record (git). The home repo is implicit. slug becomes the point id reconcile.git.<slug>; the point's subsystem is bound in points.json, not here.",
+  "repos": [
+    {"slug": "example-project", "path": "<project-root>"}
+  ]
+}

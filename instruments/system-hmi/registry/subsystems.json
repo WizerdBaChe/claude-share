@@ -1,0 +1,18 @@
+[
+ {
+  "id": "system-hmi",
+  "title_zh": "本工具自己",
+  "title_en": "system-hmi",
+  "order": 20,
+  "component_rules": [
+   {
+    "glob": "tools/system-hmi",
+    "kind": "tool"
+   },
+   {
+    "glob": "hooks/system_hmi_summary.py",
+    "kind": "hook"
+   }
+  ]
+ }
+]

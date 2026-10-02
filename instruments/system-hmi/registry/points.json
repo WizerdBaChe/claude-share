@@ -1,0 +1,30 @@
+[
+  {
+    "id": "system-hmi.registry-valid",
+    "component": "tools/system-hmi",
+    "alias": "system-hmi registry valid",
+    "tier": "cheap",
+    "class": "integrity",
+    "adapter": "exit-code",
+    "adapter_config": {
+      "argv": [
+        "python",
+        "-X",
+        "utf8",
+        "tools/system-hmi/hmi.py",
+        "validate"
+      ],
+      "cwd": ".",
+      "timeout_s": 60,
+      "exit_map": {
+        "0": "pass",
+        "1": "fail"
+      }
+    },
+    "disposition": {
+      "value": "active"
+    },
+    "remedy": "python -X utf8 tools/system-hmi/hmi.py validate",
+    "why": "Worked example row (share template). The registry must still validate; copy this row's shape for each new point."
+  }
+]

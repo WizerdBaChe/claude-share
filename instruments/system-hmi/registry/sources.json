@@ -1,0 +1,14 @@
+[
+ {
+  "id": "reconcile",
+  "argv": [
+   "python",
+   "-X",
+   "utf8",
+   "tools/system-hmi/emitters/reconcile.py"
+  ],
+  "cwd": ".",
+  "tier": "cheap",
+  "timeout_s": 60
+ }
+]
