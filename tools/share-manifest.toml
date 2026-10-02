@@ -207,7 +207,18 @@ architecture-diagramming round, and two machine-bound wrappers `graph-query` /
 stale by three on both sides, the same lesson a third time. The lesson repeating
 here is that a COUNT is a claim about the source, and this file has no check
 that re-reads the source's skill list; only a human or model going and looking
-does.)"""
+does.)
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): both files byte-unchanged
+since 7c9867b, disposition holds. Count as of this round, by going and looking:
+the source tracks 35 skill directories (a 36th, `skills/synced/`, is an
+untracked sync-marker directory — D6, not a collection candidate); 21 ship
+(the 18 of 2026-09-12 plus `case-library`, `comsol-agent-pipeline` and
+`pptx-review`, first collected this round) and 14 do not, each with its own
+entry: this one, render-perf, system-design, code-layering, graph-query,
+media-fetch-pipeline, post-brief, model3d-pipeline, knowledge-vault,
+app-residue-sweep, paper-distill, paper-story, patents-grabber, motion-video.
+`skill-toolkit/README.md` carries the same two lists and was made true in the
+same commit."""
 
 [[not_shipped]]
 path = "skills/render-perf"
@@ -225,13 +236,31 @@ rules layer, and it has not been made.
 The `## 知識包` section of `skill-toolkit/skill-trigger-dict.md` was removed the
 same day rather than left routing to an absent skill — see that file's edits.
 REVIEW-WHEN: the pack reaches the state its owner calls complete, or its
-references start being cited by something this repo does ship."""
+references start being cited by something this repo does ship.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129), per file: `SKILL.md`,
+`SKILL.md.xi.md` and `references/list-virtualization.md` byte-unchanged since
+7c9867b; `INTAKE.md` grew a §6a (origin classes: user-supplied vs
+model-authored, amended 2026-09-23) and a §8 naming the pack-level status page.
+Disposition holds. USER RULING 2026-10-02: the three knowledge packs
+(render-perf, system-design, code-layering) stay out; the page that represents
+them ships as `environment-guide/KNOWLEDGE-PACKS.md` (lane W2).
+REVIEW-WHEN (supersedes the line above): the pack meets all four 可分享
+(shareable) criteria that page §二 defines — every reference's origin is
+redistributable, no reference carries a content-bearing private-tree pointer,
+the pack is complete for its own declared (or honestly narrowed) scope, and the
+dictionary section ships with the body. That page's own review-when (a) says
+this entry is re-adjudicated in the same action."""
 fallback = """None, and nothing here depends on it: no shipped file cites this
 skill except the trigger dictionary, which no longer does. If you want the
 pattern rather than the contents, the shape is worth copying on its own — a
 skill whose body is triggers and routing only, whose knowledge sits in dated
 reference files, and whose standing instruction is to name the gap out loud when
-a question lands on an unstocked branch."""
+a question lands on an unstocked branch.
+UPDATED 2026-10-02: what DOES ship for this pack is `environment-guide/KNOWLEDGE-PACKS.md`
+— the pack shape, the four pack-level criteria (registrable / dependable /
+shareable / split-retire) and a status row per pack (file count, covered
+branches, origin, posture, shareable verdict). The pack-level criteria and this
+entry's review-when are defined there, not here."""
 
 [[not_shipped]]
 path = "skills/system-design"
@@ -245,12 +274,27 @@ what the two files contain; shipped, it would be a trigger surface with nearly
 nothing behind it.
 Same trigger-dictionary amendment as `render-perf` above.
 REVIEW-WHEN: the pack leaves collect-first posture — i.e. when its own SKILL.md
-stops describing itself as early-stage."""
+stops describing itself as early-stage.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129), per file: `SKILL.md` and
+`SKILL.md.xi.md` rewritten at the source on 2026-09-23 (user ruling 「拆包」:
+the structure cluster split out into the new `code-layering` pack, entry below;
+this pack keeps its two load/reliability files, no longer calls itself
+early-stage, and gained a cross-pack section pointing at code-layering's
+references); `references/message-queue.md` and
+`references/throughput-vs-latency.md` byte-unchanged. The old review-when
+("stops describing itself as early-stage") has therefore technically fired —
+and the answer is the USER RULING 2026-10-02 recorded on render-perf above: the
+three packs stay out; `environment-guide/KNOWLEDGE-PACKS.md` (lane W2) is the
+page that represents them. REVIEW-WHEN (supersedes the line above): that
+page's four 可分享 (shareable) criteria, exactly as for render-perf."""
 fallback = """None. For the backend/system-design questions this pack would
 answer, `skill-toolkit/skills/` ships nothing equivalent and this repo does not
 pretend otherwise; `claude-ops/ops/30-judgment.md` R7 covers only when to go
 looking something up rather than answer from memory, which is the meta-rule, not
-the knowledge."""
+the knowledge.
+UPDATED 2026-10-02: `environment-guide/KNOWLEDGE-PACKS.md` ships as the
+representation of this pack (shape, the four pack-level criteria, this pack's
+status row); the criteria and this entry's review-when are defined there."""
 
 [[not_shipped]]
 path = "skills/graph-query"
@@ -267,7 +311,14 @@ Its dictionary section was removed in the same round (two-part act, row-2
 inverse) — see skill-toolkit/skill-trigger-dict.md edits.
 REVIEW-WHEN: the graph-snapshot tool itself ships (nothing under the source's
 tools/ has that entry today), or the skill gains a mode that answers without
-the derived graph."""
+the derived graph.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): `SKILL.md` (its only file)
+byte-unchanged since 7c9867b. The review-when has NOT fired — the 2026-10-02
+tools adjudication (lane W5) does not ship graph-snapshot. Its dictionary
+section was removed again this round (see skill-toolkit/skill-trigger-dict.md
+edits), and a new routing clause the source added to diagram-authoring's
+architecture-question line ("map files/rules" -> graph-query) was dropped with
+it."""
 fallback = """None. For "what must be read together with X" questions, the
 shipped layers answer differently: the ops files name their read-together sets
 inline, and `claude-ops/ops/rules-usage-dict.md` maps rule-to-layer ownership;
@@ -297,6 +348,16 @@ triggers, exit-code semantics, hard refusals, no logic of its own."""
 # extraction, transcript, translated-doc lanes) — same dependency, same
 # verdict. No new content changes the reasoning above; extended rather than
 # split into four entries.
+# PER-FILE RE-CHECK 2026-10-02 (lane W4b, align to 183c129): the source now
+# tracks three files here, not five — `extensions/transcript.md` and
+# `extensions/translatedoc.md` were DELETED at the source (the program dropped
+# speech-to-text and document translation on 2026-09-16; `SKILL.md` and
+# `extensions/brief.md` were edited to say so, and `SKILL.md` gained a
+# `--write-subs` flag row and a `post_unavailable` exit-3 case).
+# `extensions/quotestack.md` unchanged. Same dependency (the `mfp` CLI, still
+# not published anywhere a reader can install from), same verdict; the
+# review-when has not fired. Its dictionary section and quick-table row were
+# removed again this round.
 
 [[not_shipped]]
 path = "skills/scientific-research-guide/evals/evals.json"
@@ -2242,6 +2303,10 @@ edits = [
   "2026-09-12 (procedure B refresh, lane W4): re-applied ALL SIX edits above onto fresh source bytes — every one recurred (the source had re-added the same excluded-skill sections/rows, the same dangling diagram-authoring avoid-notes, the same drive-path header, the same expanded domain paragraph and V-groove row since 2026-09-07). Re-verified each excluded skill's disposition still holds this round (D2 re-check: app-residue-sweep, asset-vault, media-fetch-pipeline, model3d-pipeline, paper-distill, paper-story, render-perf all unchanged) before re-removing its section; none of their review-when triggers fired.",
   "2026-09-12 NEW: source gained a `patents-grabber` section plus two quick-table rows since 2026-09-07 (a thin wrapper skill around a local `pgb` CLI at an absolute path on a non-system drive, with a local credential file and a local drawing cache — same class as media-fetch-pipeline/post-brief/model3d-pipeline, adjudicated `excluded-by-decision`, own [[not_shipped]] entry added this round). Section (between `run` and `engineering:debug`) and both quick-table rows removed, same row-2-inverse treatment as the six skills above.",
   "2026-09-12 NEW: audience-fit's 邊界 line gained a new '必跑而非可選（2026-09-08）' bullet citing an absolute path on a non-system drive naming one of the source's own research projects -> generalized to '來源環境自己的研究專案'. The policy itself (pages whose CONSUMER is the audience must pass through Mode A before delivery; researcher/developer voice, filenames, PASS counts, run-ids and gate codes on such a page are defects) is kept whole — only the private project pointer is dropped.",
+  "2026-10-02 (procedure B refresh, lane W4b, align to 183c129): re-applied every recurring edit above onto fresh source bytes — the source had re-added every excluded skill's section and row. Removed again: the media-fetch-pipeline / post-brief / patents-grabber sections (one contiguous block), the paper-distill / paper-story sections (pptx-review's, between them and the next section, STAYS — it ships this round), the graph-query, knowledge-vault, model3d-pipeline and app-residue-sweep sections, the whole '## 知識包' H2 (now render-perf + code-layering + system-design) with its trailing rule; the quick-table rows for V-groove, post-brief, render-perf, system-design, code-layering, app-residue-sweep, media-fetch-pipeline, knowledge-vault and both patents-grabber rows; diagram-authoring's graph-query clause and model3d-pipeline avoid-note; the asset-vault header's absolute non-system-drive path; the scientific-research-guide 領域特化 paragraph re-condensed to the 2026-09-07 wording (the source had re-expanded it to a ten-profile keyword list plus cluster/CPO routing); audience-fit's research-project drive path re-generalized. D2 re-check per excluded skill recorded in each entry before its removal; no review-when fired (system-design's old one fired technically and was superseded by the 2026-10-02 user ruling, see its entry).",
+  "2026-10-02 NEW removals for skills the source added or re-pointed since 7c9867b, all excluded (row-2 inverse): the motion-video section, its quick-table row, and the '→ motion-video' pointer appended to motion-design's 避免說法 line; the code-layering section (inside the 知識包 H2) and its row; the new '報告時可能被問什麼' row (routes first to paper-story); case-library's 避免說法 pointers to post-brief and knowledge-vault (the section ships, the targets do not); pptx-review's '→ paper-story 或專案 builder' reduced to '→ 專案 builder'; the consolidated engineering:* plugin section's 轉介 parenthetical routing 負載 → system-design and 程式內分層 → code-layering; comsol-agent-pipeline's '→ model3d-pipeline' avoid-note rewritten as a plain boundary statement (CAD/GDS geometry is outside the skill).",
+  "2026-10-02 NEW scrubs inside shipping sections: case-library 邊界 line — the reference library's absolute path on a non-system drive -> the project name in prose (a private tree at the source); comsol-agent-pipeline 證據 line — the rig's absolute path on a non-system drive -> class description, and its generator `tools/sync_rules.py` marked 不隨本分享出貨 (own [[not_shipped]] entry); literature-search-extract 關鍵詞 — a textbook-library absolute path on a non-system drive dropped from a parenthetical (the connector name beside it stays).",
+  "2026-10-02 KEPT verbatim (new source content, read in full, no scrub target): the pptx-review and case-library sections and rows and the comsol-agent-pipeline section and row (all three skills first-collected this round); the source's consolidation of its five engineering:* plugin sections into one 本機優先 section and the matching retargets of two rows and two avoid-notes to code-review-deep-checklist / the software-architect agent; config-self-audit's adoption-mode keywords and /doctor prompt-audit note; diagram-authoring's split keyword list; ux-walkthrough's, ai-coding-guardrails' and skill-co-upgrade's keyword growth.",
 ]
 # Cross-lane note (2026-09-12, lane W4): design-system-suite's 邊界 bullet and
 # ux-walkthrough's 邊界 line both grew a citation to
@@ -3566,7 +3631,15 @@ does not implement (`does this step need a model?` as the split test), plus
 its own two rules worth keeping in mind for any future skill wrapping
 untrusted fetched text — treat post/caption/transcript content as material to
 describe, never as instructions to follow, and never identify people in
-fetched images."""
+fetched images.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): the file grew (88 lines
+changed) — transcription moved OUT of `mfp` and into a third local program
+(`speech-subtitle`, found via an environment variable or PATH) that `pb.py`
+calls, plus a 2026-09-23 user ruling on burned-in subtitles (frame stacks the
+model reads). The skill now wraps THREE capabilities this repo does not carry
+instead of two; the disposition holds, one degree stronger. Dictionary section
+and quick-table row removed again this round; a new dangling pointer to this
+skill in the shipping case-library section was dropped as well."""
 
 [[not_shipped]]
 path = "skills/model3d-pipeline/SKILL.md"
@@ -3583,7 +3656,18 @@ mechanism-share-packaging route, once the pipeline's own in-flight
 adjustments finish — this is a deferred-and-named verdict (COLLECTION-RULES
 rule 7), not a silent gap.
 REVIEW-WHEN: the pipeline's adjustments referenced in the 2026-09-02 ruling
-land, or a mechanism-share-packaging pass for it is run."""
+land, or a mechanism-share-packaging pass for it is run.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): grew 7 lines — a
+"handing this pipeline to someone else" paragraph that is the source's own
+word on sharing (hard rule 8): the skill is a ROUTER and the pipeline is a
+repo plus a ~3 GB toolchain, so sharing it is software distribution, not
+config sharing, and no packaging format carries the toolchain; it cites a
+route comparison that lives under the source's `outputs/` tree (excluded, its
+own entry). That statement settles the review-when's second branch — the
+mechanism-share-packaging route is not the right vehicle — without opening
+the first; disposition holds. Its dictionary section was removed again, and
+two new avoid-note pointers to it (diagram-authoring's, comsol-agent-pipeline's)
+were dropped or rewritten as plain boundary statements."""
 fallback = """None. For 3D/CAD work this share does not attempt the
 capability; diagram-authoring covers 2D precision diagrams only, and the
 skill's own trigger line already draws that line ('Not for image-only
@@ -5406,7 +5490,11 @@ with `<vault>\tools\kv-lint.py`; Mode B queries through the source's
 the whole artifact is only meaningful inside that private context. This is the
 same class as `skills/asset-vault`, and the two are siblings by design: the
 skill's own routing line splits reusable assets to asset-vault and notes to
-here.'''
+here.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): both files (`SKILL.md`,
+`evals/evals.json`) byte-unchanged since 7c9867b; disposition holds.
+Dictionary section and quick-table row removed again; a new dangling pointer
+in the shipping case-library section was dropped.'''
 fallback = '''None. Nothing shipped cites it. The transferable shape, if useful
 as a pattern: a skill that is a POINTER plus host-specific detail, deferring to
 the target tree's own AGENTS.md on conflict — the same delegation rule
@@ -5428,7 +5516,12 @@ fixed second-drive archive root. Per-file re-check of the `tools/` disposition
 for `tools/app-residue-sweep/`, which the 2026-08-16 and 2026-09-02 passes never
 examined because it did not exist: the verdict is the same as for
 `tools/post-brief/` — the tool IS the capability, and this repo carries neither
-half.'''
+half.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): `SKILL.md` (its only
+file) grew 10 lines — a Python 3.11+ runtime check and a mandatory
+cross-terminal verification step that names two source hooks and two lesson
+ids. Still every operative step calls the unshipped tool; disposition holds.
+Dictionary section and quick-table row removed again this round.'''
 fallback = '''None; nothing shipped cites it. `skill-toolkit/skills/env-cleanup`
 covers the adjacent capability this repo does ship — file-level cleanup of a
 config environment or project tree, archiving rather than deleting — and the two
@@ -5470,7 +5563,24 @@ pass, which is the route `skills/model3d-pipeline/SKILL.md` was put on for the
 same reason on 2026-09-02. Named here so this is a deferred-and-named verdict
 (COLLECTION-RULES rule 7), not a silent gap.
 REVIEW-WHEN: a mechanism-share-packaging pass is run for the paper-reading pair,
-or the skill's home stops defaulting into the private vault.'''
+or the skill's home stops defaulting into the private vault.
+PER-FILE RE-CHECK 2026-10-02 (lane W4b, align to 183c129): the directory grew
+from 28 to 38 tracked files (ten added, one helper moved into `archive/`). By class — (a) new scripts `scripts/crop_all.py`,
+`scripts/units.py`, `scripts/test_units.py`, `scripts/test_library_naming.py`
+and larger `crop.py` / `ingest.py` / `library.py`: all write into the run
+layout under the private-vault home, and `SKILL.md` now also names a second
+private-tree consumer of their output (a sibling project on a non-system
+drive, user ruling 2026-09-27); (b) new `evals/` material (a crop-gate
+calibration report, a seven-paper units audit, a caption-check fixture, a
+302 kB figure crop from a named paper, a units allow-list): dated records of
+real reading work — never-collect class; (c) a second `archive/` batch
+(`archive/2026-09-19-orphan-helper/`): barred structurally; (d) `SKILL.md`,
+`assets/cards.schema.json` and five references edited, still defaulting the
+home into the vault and still calling the vault's own lint. All three grounds
+hold; the review-when has not fired. NOTE for the record: this pair is
+distributed as a separate bundle outside this repo (its own share package),
+which is why no mechanism-share-packaging pass is scheduled here. Dictionary
+section and quick-table row removed again.'''
 fallback = '''None. `skill-toolkit/skills/literature-search-extract` ships the
 adjacent capability — finding scholarly sources and extracting into evidence
 tables with citation traceability — and its own trigger line already distinguishes
@@ -5496,7 +5606,21 @@ than the skill itself and is almost entirely rendered evidence of real talks
 list bars outright.
 REVIEW-WHEN: same trigger as its sibling — a mechanism-share-packaging pass for
 the paper-reading pair. The transferable half if that happens is the narrative
-model (主軸 / 故事線 / 邏輯抽取 with a warrant on every link), not the carriers.'''
+model (主軸 / 故事線 / 邏輯抽取 with a warrant on every link), not the carriers.
+PER-FILE RE-CHECK 2026-10-02 (lane W4b, align to 183c129): no file added or
+removed (46 tracked); 12 edited, and the edits make the exclusion stronger —
+`scripts/lab_deck.py` grew by ~1 000 lines implementing the lab's formal-deck
+rules R6-1…R6-14 and R7-1…R7-12, `references/lab-template.md` and
+`references/talk-conventions.md` encode the lab's page order, fonts and notes
+voice from the user's own hand-tuned decks (rounds 5–7, 2026-09-14/21), and
+`SKILL.md` names the user's final deck files and the vault template folder by
+path. Subject matter of a specific group, arriving inside the structure; the
+`evals/` tree is unchanged and still rendered evidence of real talks. All
+grounds hold; the review-when has not fired. Same record note as the sibling:
+the pair is distributed as a separate bundle outside this repo. Dictionary
+section, quick-table row and the new '報告時可能被問什麼' row (which routes
+first to this skill) removed; pptx-review's avoid-note pointer to this skill
+reduced to the project-builder half.'''
 fallback = '''None. For turning source material into a deliverable a non-builder
 reads, `skill-toolkit/skills/audience-fit` ships; for the diagrams inside such a
 deliverable, `skill-toolkit/skills/diagram-authoring` and the
@@ -5931,7 +6055,10 @@ Its `skill-trigger-dict.md` section (between `run` and `engineering:debug`)
 and its two quick-table rows were removed in the same round (two-part act,
 row-2 inverse) — see that file's own edits list.
 REVIEW-WHEN: the `pgb` CLI is published somewhere a reader can install from,
-matching the review-when already carried for `skills/media-fetch-pipeline`.'''
+matching the review-when already carried for `skills/media-fetch-pipeline`.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): `SKILL.md` (its only
+file) byte-unchanged since 7c9867b; the review-when has not fired. Dictionary
+section and both quick-table rows removed again this round.'''
 fallback = '''None; nothing else shipped cites it. For scholarly literature (as
 opposed to patents), `skill-toolkit/skills/literature-search-extract` ships
 the adjacent capability, and its own SKILL.md already states patents are
@@ -6013,7 +6140,10 @@ content. Found only because a shipped lane-W4 file names it in a root-file
 inventory (hard rule 6: a citation must reach a verdict); not a decision
 about `tools/cross-index` itself, which is outside this lane's scope.
 REVIEW-WHEN: `tools/cross-index` ships in some future round, at which point
-this sidecar's mention resolves on its own.'''
+this sidecar's mention resolves on its own.
+RE-CHECKED 2026-10-02 (lane W4b, align to 183c129): byte-unchanged since
+7c9867b; `tools/cross-index` still does not ship (lane W5's tools
+adjudication); disposition holds.'''
 fallback = '''None needed. The citing bullet's function — telling an env-
 cleanup reader "this filename in your root is a known sidecar, not unknown-
 origin clutter" — is unaffected by whether the reader's own environment
@@ -6586,3 +6716,218 @@ fallback = '''None needed; no shipped procedure depends on it. The skill's own S
 excluded for the same class (see its entry).'''
 
 # === lane W4a-skillsrefresh 2026-10-02 END ===
+
+# === lane W4b 2026-10-02 BEGIN ===
+# New-skill lane of the 2026-10-02 refresh (source 7c9867b -> 183c129). Three
+# skills first-collected (six files, every byte read before publishing), one
+# generator script and two whole skill directories adjudicated not-shipped,
+# and the dictionary refreshed (its entry above carries this round's edits).
+# `skills/synced/` at the source is an untracked, gitignored sync-marker
+# directory holding only an opaque-id subfolder and marker file: D6 (untracked
+# at the source -> do not collect), never a candidate; noted here so the next
+# round's ls-and-compare does not re-ask.
+
+[[collected]]
+path = "skill-toolkit/skills/pptx-review/SKILL.md"
+source = "~/.claude/skills/pptx-review/SKILL.md"
+status = "verbatim"
+# First collection 2026-10-02 (lane W4b). Born at the source 2026-09-29. Read
+# in full: a deck-review loop (resolve a deictic reference to the open slide
+# and shape; apply PowerPoint comments to the deck's BUILD SOURCE with a
+# per-comment confidence rule, local/general classification, one question
+# round, rebuild + gate, record + report). No account name, home path,
+# non-system-drive path, credential or private id anywhere; empty diff after
+# copy. Its one instrument, `tools/pptx-review/pptx_review.py` (cited three
+# times by its source path, read-only cursor/comments reader), lives under the
+# source's excluded `tools/` tree — covered by that directory entry's
+# disposition and listed under Cross-lane for the tools adjudication (lane W5)
+# to re-check per file; the skill's method (steps B.3-B.7) stands without it,
+# which is why this ships where post-brief and app-residue-sweep do not: the
+# tool here is a reader, not the capability. Also names `rules/office-deck-
+# deliverables.md` (ships) and the process ledger (`ledger.py add`, bare name,
+# the source's tool).
+
+[[collected]]
+path = "skill-toolkit/skills/case-library/SKILL.md"
+source = "~/.claude/skills/case-library/SKILL.md"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4b, first collection): line 14, the reference implementation's root — an absolute path on a non-system drive — -> the project name in prose ('the motion-video-lab project, a private tree on a non-system drive of the source environment'); the project name and dates stay, they are what the §Review-when clauses resolve against.",
+  "2026-10-02: line 23 (invariant I-1), the raw-media store's root — an absolute path on a non-system drive, given as an example — -> 'the media-fetch store, a fixed folder on a non-system drive at the source' (class description, same sentence role).",
+]
+# Read in full. The rest is a four-stage method (classify -> collect -> measure
+# -> imitate -> workflow) with eight invariants and scaffolding defaults; every
+# tool it names (`tools/taxonomy.json`, `intake.py`, `build_index.py`,
+# `waiting_pool.py`) is the LIBRARY's own, copied from the reference
+# implementation, not a source-environment asset. Kept: `references/PROJECTS.md`
+# (ships), `tools/recall/recall.py` and `~/.claude/tools/lab-skill-sync` +
+# `tools/lab-skill-sync/sync.py` (the source's excluded `tools/` tree — covered
+# by that entry; listed under Cross-lane for lane W5's per-file re-check), a
+# seven-hex `lab-sync:` short sha (a pointer, not a leak-pattern hit), the
+# names AssetVault / knowledge vault (project names). Line 159's lab-sync
+# watch is the source's own mechanism and is left as is.
+
+[[collected]]
+path = "skill-toolkit/skills/comsol-agent-pipeline/SKILL.md"
+source = "~/.claude/skills/comsol-agent-pipeline/SKILL.md"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4b, first collection): line 10, the rig's root — an absolute path on a non-system drive — -> 'the rig `COMSOL_Test` (a private test-rig project on a non-system drive at the source; ...)'; round ids and dates kept.",
+  "2026-10-02: line 39 (non-negotiable 5), the regeneration instruction 'python tools/sync_rules.py' -> a sentence saying the source's generator regenerates the copy and is not shipped (router edit for the [[not_shipped]] sync_rules.py entry below).",
+  "2026-10-02: line 40 (non-negotiable 6), the COMSOL application library's root — an absolute path on a non-system drive (a product install location, still the class) — -> 'the `Multiphysics\\applications\\` library under the COMSOL 6.2 install root'.",
+  "2026-10-02: line 54 (procedure step 0), the catalog query command's absolute non-system-drive path -> the rig-relative path `29_device-observable-catalog\\ask.py` plus a parenthetical naming the root as a private tree at the source.",
+  "2026-10-02: line 105 (## Files), the catalog folder's absolute non-system-drive path -> the rig-relative folder name '(under the rig root)'.",
+  "2026-10-02: line 111 (## Files), the api-rules.md row's '(`tools/sync_rules.py`; `--check` reports STALE)' -> says the generator runs at the source and does not ship, the generated copy does (same router edit as line 39).",
+]
+# Read in full. Ships as the router + method (route by observable, tag every
+# number, gate = closed form + tolerance + control, deposit shape) with its
+# measured budget table. What the reader does NOT get and the file now says
+# so: the rig itself (rounds, catalog `ask.py`, `deposit_gate.py`, the
+# capability inventory) — all cited by rig-relative paths that the edits above
+# label as the source's private tree. `rules/native-render-first.md` is named
+# via modes.md (see that entry). Not scrubbed: `~/.comsol/v62/comsol.prefs`
+# (a ~-prefixed path, the product's own), `sap read` (a tool name).
+
+[[collected]]
+path = "skill-toolkit/skills/comsol-agent-pipeline/references/api-rules.md"
+source = "~/.claude/skills/comsol-agent-pipeline/references/api-rules.md"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4b, first collection): line 1, the GENERATED header's source file — an absolute path on a non-system drive into the rig — -> 'the rig's 06_feasibility-probe_agent-routes\\pipeline-draft.md (a private tree on a non-system drive at the source; ...)', and 'tools/sync_rules.py' annotated '(not shipped in this share)' (router edit; the digest and date stay).",
+  "2026-10-02: line 26 (R-READ), a sibling project's root — an absolute path on a non-system drive — -> 'The source's `sci-analysis-pipeline` project (a private tree on a non-system drive)'; the module path `sap.ingest.read_comsol` stays.",
+  "2026-10-02: line 382 (R-TIMEINT-3D-HANG evidence trail), 'ledger row 9 of session <an 8-hex session-id prefix>' -> 'ledger row 9 of the round's session' (a session id is a scrub target whatever its length; the ledger row number stays).",
+  "2026-10-02: line 407 (R-REDEFINED-GATE-REPORT), 'ledger row 10 of session <the same prefix>' -> 'ledger row 10 of the round's session'.",
+]
+# Read in full (562 lines, 106 rules). A generated file: the measured COMSOL
+# 6.2 / MPh API trap ledger, every rule citing the rig round that measured it
+# by round/log/probe name (rig-relative identifiers, kept — they are the
+# evidence anchors, not pointers a scrub would protect). Kept unedited:
+# hardware names (a laptop CPU and GPU model), a model id in a quoted API
+# error (R-EXECUTOR-RESUMABLE), `rules/figure-self-read.md` (ships),
+# `references/script-skeleton.py` (ships beside it), seed `.mph` filenames
+# from the product's own library. The file is the generator's OUTPUT and
+# cannot be regenerated from this share (entry below); its `--check` stamp is
+# therefore informational here.
+
+[[collected]]
+path = "skill-toolkit/skills/comsol-agent-pipeline/references/modes.md"
+source = "~/.claude/skills/comsol-agent-pipeline/references/modes.md"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4b, first collection): line 4 (preamble), the evidence-round path pattern rooted at the rig — an absolute path on a non-system drive — -> '`<round>/` under the rig root — a private tree on a non-system drive at the source' (`<round>` is already declared under path_position_ok).",
+  "2026-10-02: line 195 (Card 14), the model-documentation PDF path rooted at the COMSOL install — an absolute path on a non-system drive — -> 'under the COMSOL 6.2 install root at `Multiphysics\\doc\\...\\com.comsol.help.models.<key>.<name>\\`' (install-relative tail kept; `<key>`/`<name>` are the source's own pattern variables and sit in no `/`-delimited position).",
+  "2026-10-02: line 291 (Card 16 evidence), a consuming research project's round folder — an absolute path on a non-system drive whose folder names spell out the owner's research subject — -> '`tools\\comsol_axi_T14.py` in that project's T14 round folder (a private research tree on a non-system drive at the source)'; the project code (SSLD), round id (T14) and the script/log basenames on the following lines stay as evidence ids.",
+]
+# Read in full (16 mode cards + the uncovered list). Kept unedited:
+# `ops/lessons/L-115.md` and `L-116.md` (Card 16) — covered by the
+# `ops/lessons/` [[not_shipped]] directory entry; `rules/native-render-first.md`
+# (Card 12 route order) — a global rule file this worktree does not yet carry
+# under global-claude-md/rules/ as of this lane's start; expected from lane
+# W2's rules refresh, listed under Cross-lane, and a known [R] residue on this
+# file's line 163 until it lands. Every other citation is a rig round, a
+# product seed name, or `api-rules.md` (ships).
+
+[[collected]]
+path = "skill-toolkit/skills/comsol-agent-pipeline/references/script-skeleton.py"
+source = "~/.claude/skills/comsol-agent-pipeline/references/script-skeleton.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W4b). Read in full: the round-script
+# shape (tagged inputs docstring, `reference()` / `build()` stubs, two read
+# helpers, the gate/report/verdict loop and the result-json keys
+# R-RESULT-JSON-SCHEMA names). Resolves nothing outside its own folder
+# (`pathlib.Path(__file__)`); `mph.start(cores=8)` is a measured parameter
+# from the rig, stated as such. Empty diff after copy.
+
+[[not_shipped]]
+path = "skills/comsol-agent-pipeline/tools/sync_rules.py"
+disposition = "excluded-by-decision"
+reason = '''NEW at the source with the skill (2026-09-13..21). The generator that
+writes `references/api-rules.md`: its single input is a hard-coded absolute
+path on a non-system drive into the rig's rule ledger (`pipeline-draft.md`
+§2), and its whole body is "read that section, stamp a digest, write the
+copy". Decision-procedure row 6 — the file is only meaningful inside that
+private tree; with the path templated it would be a 35-line script that reads
+a file the reader does not have, and declaring a token for it would assert a
+reader can fill it in, which no one outside the source can. The one file
+whose BODY is bound to the rig, where the skill's other four files cite the
+rig only as evidence pointers (edited, entries above). Both files that route
+to it were amended in the same act (row-2 inverse): `SKILL.md` lines 39 and
+111 and the generated header of `api-rules.md` now say the generator stays at
+the source and the generated copy ships as a snapshot.
+REVIEW-WHEN: the rig (or its rule ledger) is published somewhere a reader can
+read it from, or the skill moves the ledger inside its own tree.'''
+fallback = '''`references/api-rules.md` ships as a generated snapshot (digest
+774ba515c101, regenerated 2026-09-21 at the source); an adopter edits it by
+hand if they must and loses the "never hand-edit, regenerate" discipline the
+header asks for — stated in the header itself. What travels from the script
+is the shape: a skill carrying a generated copy of a ledger that lives
+elsewhere, with a `--check` that compares a digest so staleness is a
+measured fact rather than a memory.'''
+
+[[not_shipped]]
+path = "skills/motion-video/"
+disposition = "excluded-by-decision"
+reason = '''NEW at the source 2026-09-30 (split out of `motion-design` by user
+ruling), seven tracked files: `SKILL.md`, its `SKILL.md.xi.md` sidecar, and
+five references (whole-film rules, film types, rhythm / transitions / camera,
+build and export, evidence and instruments). Read `SKILL.md` and the sidecar in
+full and the five references for their pointers (12 non-system-drive path hits
+across the seven files, every reference carrying at least one). The skill's
+own first paragraph is the first-hand statement (hard rule 8): "evidence lives
+in the lab ...; the tools stay there too (user 2026-09-30), so this skill cites
+their paths instead of copying them" — every verdict in its "Verdicts this
+skill may give" section is verified by a lab instrument named by lab path, and
+its evidence tiers (user / measured / verified / unvalidated) are defined by
+that lab's rounds. The references are therefore structure around content the
+reader cannot reach: the same shape as `skills/model3d-pipeline` (a router
+whose capability lives on another drive), one degree stronger because here
+the knowledge itself, not only the tooling, is pinned to lab measurements.
+DISTRIBUTION NOTE: this skill is distributed as its own share package outside
+this repo, so a mechanism-share-packaging pass here would duplicate that
+package; excluded by decision, not deferred. Its dictionary section, its
+quick-table row and the new '→ motion-video' pointer on motion-design's
+avoid-note line were removed in the same round (row-2 inverse) — see
+skill-toolkit/skill-trigger-dict.md edits.
+REVIEW-WHEN: the lab's instruments are published alongside the skill (at which
+point the separate package, not this repo, is still the right carrier), or the
+skill's evidence-and-instruments reference stops resolving its numbers through
+lab paths.'''
+fallback = '''`skill-toolkit/skills/motion-design` ships the element-level half
+(duration, easing, springs, choreography) and is the hub this skill split from;
+film-level work (audience, tone, locked ground, section rhythm, transitions,
+camera, export) is not attempted by anything in this share. The transferable
+pattern, if useful: every rule carries an evidence tier, and an unvalidated
+rule is never stated as a proven one.'''
+
+[[not_shipped]]
+path = "skills/code-layering/"
+disposition = "excluded-by-decision"
+reason = '''NEW at the source 2026-09-23 (user ruling 「拆包」: the structure
+cluster split out of `system-design`), five tracked files: `SKILL.md`, its
+sidecar, and three model-authored references (dependency direction, composition
+root, adapter contract tests), each carrying `origin:` + a `verified:` evidence
+line per `render-perf/INTAKE.md` § Origin classes. The third knowledge pack,
+and the same ruling as its two siblings: USER RULING 2026-10-02 — the three
+packs stay out; the page that represents them ships as
+`environment-guide/KNOWLEDGE-PACKS.md` (lane W2). Read `SKILL.md` and the
+sidecar in full (no private value in either) and the references for their
+pointers (ten non-system-drive path hits across the three, in their evidence
+and source lines). Its dictionary section (inside the '## 知識包' H2) and its
+quick-table row were removed in the same round, as was the routing
+parenthetical to it in the consolidated engineering:* section (row-2 inverse).
+REVIEW-WHEN: the pack meets all four 可分享 (shareable) criteria defined in
+that page §二 — redistributable origin on every reference, no content-bearing
+private-tree pointer, scope complete for its own declared (or honestly
+narrowed) range, dictionary section shipped with the body. The pack-level
+criteria and this trigger are defined there, not here; that page's own
+review-when (a) says this entry is re-adjudicated in the same action.'''
+fallback = '''`environment-guide/KNOWLEDGE-PACKS.md` — the pack shape, the four
+pack-level criteria (registrable / dependable / shareable / split-retire) and
+this pack's status row (file count, covered branches, origin, posture,
+shareable verdict). For the layering questions themselves this share ships
+nothing equivalent and does not pretend to; `claude-ops/ops/30-judgment.md` R7
+is the meta-rule (go and look, do not answer from memory), not the knowledge.
+Cross-pack pointers from `system-design` to this pack's references stay in
+that excluded sibling and are not re-created here.'''
+
+# === lane W4b 2026-10-02 END ===
