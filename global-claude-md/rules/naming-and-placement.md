@@ -62,6 +62,18 @@ the folder root. A missing declaration is a defect an integrity sweep can enumer
 - **PL-5 Indexes are regenerated, not accumulated.** README/INDEX/registry tables are derived
   from manifests by a script; a human must be able to find the canonical item WITHOUT the
   index (the index is a machine convenience, not the fix).
+- **PL-6 A view page is reachable from the machine's ONE outermost entry — decided first,
+  not after the page exists** (user ruling 2026-09-21). Any subsystem or project that
+  produces a page a human is meant to LOOK at (overview, dashboard, viewer, 3D page, deck)
+  answers "how does it reach the source environment's single view-launcher page (source-only, does not ship here)" as part of its placement, before its
+  internal layout: either it lands where xi's `deliverables` globs cover it (then it is
+  picked up automatically, grouped by project and round, the next day), or — for a page no
+  index reaches (gitignored `out/`, an unregistered root) — it gets an entry PROPOSED in that
+  launcher's page registry (a source-only tool, does not ship here). A per-project index page is fine INSIDE its project and
+  never a substitute: measured 2026-09-21, the user did not know a finished projects
+  dashboard existed, and named "no entry layer, so I forgot" as the cause; SSLD adds a case
+  or round every few days, which is the growth this clause exists for. The launcher points
+  AT pages and never takes copies (PL-3/PL-4 still decide where the page itself lives).
 
 ## §3 Naming clauses
 
@@ -88,6 +100,52 @@ the folder root. A missing declaration is a defect an integrity sweep can enumer
   in writing and log which reading holds; executing both is the failure mode this clause
   names.
 
+## §4a Promotion — where a node's learning goes when the node closes
+
+Added 2026-09-13 from the SSLD T00 three-document set (retrospective + playbook +
+beginner field manual, all three hand-built after the round closed). §1 classifies an
+item the moment it is CREATED; these clauses classify a piece of LEARNING the moment
+its round ends, which is the point at which it otherwise stops moving. The gap that
+paid for them is statable in this environment's own vocabulary: `workflow-checkpoint`
+fires when work continues but archives STATE only; `project-retrospective` distils
+METHOD but is gated on "nothing follows" — so a finished NODE of a continuing
+pipeline has no owner for its method, and the distillation gets hand-built outside
+every mechanism. The axis is not "is the project over" but **"will this node's
+process recur"**.
+
+- **PR-1 Every piece of learning is assigned a layer at node close.** The layers are
+  §1's LEVEL values read as half-lives: rule-tier (binds an asset CLASS, any project)
+  → `~/.claude/rules/`; owning skill (binds the NODE — whichever skill already owns
+  that pipeline stage) → that skill's `references/`; project CLAUDE.md (binds this
+  project only); round record (binds only that round). **"Stays in the round record"
+  is a legal and the DEFAULT answer** — and if every piece lands there, the node
+  produces no playbook and no manual, only its checkpoint. Writing a portable
+  document because the round was large is the failure mode this clause names.
+- **PR-2 A staging document has an expiry event.** A portable rule parked in a
+  project-level playbook rather than promoted is a DEBT, and its `review-when` event
+  is *the next node of the same kind opening* — that node's kickoff lists the
+  outstanding clauses by id. Without the event the playbook becomes the permanent
+  home of a cross-project rule, which §1 forbids for a record. (Measured at the
+  instance: 2 of 20 rules promoted, 18 still parked.)
+- **PR-3 A teaching carrier is a REBUILT artifact, never the origin of a rule.** The
+  audience edition is generated from the rule layer (or from one content module
+  shared with every other carrier); it may not be the only place a rule exists, and
+  two hand-written carriers of one body of material are drift with a delay, not two
+  deliverables. The instance: an MD and a deck written separately drifted in 24 hours
+  (a column renamed in one), and one wrong worked example reached three carriers
+  because each was copied rather than generated.
+- **PR-4 A promotion ends by rebuilding the index that answers the next prior-art
+  question.** Depositing into `~/.claude` invalidates the derived graph, and
+  `gsnap.py query` then REFUSES (INV-3, stale corpus) — so the next session cannot
+  find what was just deposited and re-derives it by hand, which is how the same
+  correction gets paid for twice. Run the layer's index build in the same action as
+  the deposit. Measured: this round's two rule deposits were part of the 9 changed
+  files that made the graph refuse.
+
+The promotion ACT already has precedent (`references/claude-config-decisions.md`
+D-026 "External dispatch enters the rules layer"); what these clauses add is the
+TRIGGER, so it stops depending on someone noticing.
+
 ## §5 Gate object for embedded items
 
 - **GO-1** The emitted artifact of an embedded item (inline SVG, iframe, image, slide) is the
@@ -111,4 +169,28 @@ T46-round migration script (internal path, not shared) (snapshot / plan / apply 
   fits a non-research repo or needs a per-project-class variant.
 - When `ops/references/integrity-sweep.md` gains the declaration check (§1 last paragraph):
   drop the "not enumerated yet" caveat in `rule-registry.md`.
+- ~~When a SECOND node closes under §4a~~ **FIRED 2026-09-13 (SSLD T01, a coding /
+  analysis node, not a sweep). Three findings, and §4a no longer rests on one instance:**
+  1. **PR-1's four layers fit** — the learning split cleanly (7 clauses to rule-tier, 2 to
+     project CLAUDE.md, the rest stayed in the round record as the default intends).
+  2. **The "owning skill" layer was EMPTY at both nodes.** No skill owns this pipeline
+     stage, so the layer has never once been used. It stays in the list (the next node may
+     belong to `paper-distill` or `product-design-thinking`), but a third empty node makes
+     it a layer that exists only in this document — check again then.
+  3. **PR-2's expiry event needs a SECOND SHAPE, and this is the amendment.** PR-2 assumes
+     a parked clause expires when *the next node of the same kind opens*. T01 parked three
+     items that do not expire that way: they wait for **a second INSTANCE of the defect**
+     (a second deliverable that publishes a relation; a second corpus-coding round; a
+     second project where an outside opinion is offered in place of a verifier pass) — an
+     event that may never arrive, which is the correct outcome for a tool built for one
+     caller. So a parked item declares which shape its trigger has, and an
+     instance-triggered item carries the trigger **in the artifact itself** (there: the
+     gate's own docstring) as well as in the round record, because no future kickoff note
+     will be reading this round's JSON. Live instance: SSLD's own T01 round record
+     (internal path, not shared) `parked_promotions_T01`.
+  PR-3 was not exercised (no teaching carrier was produced). PR-4 was exercised twice and
+  held: `gsnap.py build` re-run in the same action as each deposit.
+- When `workflow-checkpoint` or `project-retrospective` changes its trigger to cover a
+  recurring node: §4a's opening paragraph names a gap that would then be closed — rewrite
+  it to cite the skill instead of describing the gap.
 - When `model3d-pipeline` ships its host-embed contract (R-HOST-EMBED): §5 GO-1 cites it.

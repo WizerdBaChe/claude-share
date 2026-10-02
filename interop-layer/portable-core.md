@@ -96,19 +96,41 @@ project memory override these when they conflict.
 <!-- /block -->
 
 <!-- block:git-workflow profiles:light,full -->
-## Git workflow — applies only when actually committing, branching, or pushing
+## Git workflow — applies whenever work lands on disk (new folder, file changed, commit, branch, push)
 
-- **Meaningful code work that will be committed**: use a feature branch,
-  then a PR — keep the default branch clean. (A single-file,
+- **New project folder or key folder** (anything more than one session will
+  write into): `git init` it in the same step, commit the scaffold, pin line
+  endings with `.gitattributes` by primary consumer (CRLF: text a human
+  reads or copies, Windows script loaders; LF: everything machine-read);
+  no remote unless asked. A work folder
+  without a repo is a defect to name, never a default.
+- **Commit cadence — standing authorization, do not ask**: every time an
+  item LANDS (a file/feature/record finished, a phase closes, a gate passes,
+  or just before a risky edit), commit it; never end a turn with finished
+  work uncommitted — the point is a rollback point. Stage by path
+  (`git add <paths>`, never `-A`), because another agent may share the
+  working tree and index; a guard that refuses the commit is the rule
+  firing, not a reason to skip it. PUSH still asks, except inside 「收掉」
+  (below).
+- **When the user says 「收掉」/「收工」, and after any PR merge**: drive the
+  WHOLE chain to done without re-asking — push → PR → merge → tag/release
+  (if the project releases) → verify branch deletion and CI/deploy →
+  checkpoint — then report in one line. It authorizes push for that chain;
+  failing tests/build or a refusing guard still stops it, said plainly. A
+  half-done chain handed back is a miss.
+- **Meaningful code work**: use a feature branch, then a PR (no remote →
+  local fast-forward merge) — keep the default branch clean. (A single-file,
   zero-behaviour-change, already-verified fix may go straight to the
   default branch; if unsure whether it qualifies, ask.)
 - **Commit messages**: Conventional Commits — `type(scope): subject`
   (`feat`/`fix`/`docs`/`refactor`/`test`/`chore`/`style`/`perf`). Subject
   imperative, lower-case, no trailing period. Split a batch into semantic
-  commits by theme. Body only when the *why* isn't obvious.
-- **Before committing or pushing**: run the project's tests and build first
-  and show the relevant output. Never claim a change works without having
-  verified it; if tests fail or a step was skipped, say so plainly.
+  commits by theme. Body only when the *why* isn't obvious. A checkpoint
+  commit whose verification is incomplete says so (`wip(scope): …`).
+- **Before merging to the default branch or pushing**: run the project's
+  tests and build first and show the relevant output. Never claim a change
+  works without having verified it; if tests fail or a step was skipped,
+  say so plainly.
 <!-- /block -->
 
 <!-- block:evidence-over-claims profiles:light,full -->
@@ -258,6 +280,11 @@ the checklist was written and where it will be read:
   representation": compare representations next (candidates × cost /
   quality / dependencies), not another patch — the tell is a fix that
   patches the hole the last fix left.
+- When fixing a reported defect (a bug, a reviewer's BLOCK, a stale value):
+  the object of the fix is the CLAIM, not the line it was reported at —
+  grep its keywords and its number across everywhere it travels (headings,
+  indexes, sibling artifacts, downstream documents that quote it) and settle
+  every hit before calling it fixed.
 - When fixing a bug in code that already passed user acceptance: before
   editing, list the already-accepted behaviours; after the fix, re-check
   each and state that none regressed. Overwriting previously-accepted

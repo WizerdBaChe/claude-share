@@ -6,6 +6,11 @@ paths:
   - "**/*.spec.{ts,tsx,js,jsx}"
   - "**/*geometry*.{ts,tsx,js,jsx}"
   - "**/theme.{css,ts,tsx}"
+  - "**/gates*.py"
+  - "**/*_gates.py"
+  - "**/gate_*.py"
+  - "**/figaudit*.py"
+  - "**/check_viewer*.py"
 ---
 
 # Visual gates: measure the ink, and survey the class
@@ -55,6 +60,22 @@ Two properties of any suite that does browser geometry:
 2. A scope exemption ("buttons only, `<input>` belongs to the settings
    rework") carries the event that retires it. Both halves of that example
    shipped; only the exemption survived.
+
+The same property holds for gates over generated figures, 3D viewers and
+decks, which is why the `paths:` above also match gate modules (added
+2026-09-22, `ops/lessons.md` L-044: four SSLD recurrences, and this rule's
+CSS-only globs never loaded while those gates were written):
+
+3. **A gate born from a user's rejection lives in the asset CLASS's shared
+   gate set** (an instrument, a suite every deliverable of the class runs),
+   never only in the rejected deliverable's own copy. SSLD T04's 3D gates were
+   copied per round; T09 added `G-ghost-default` in its copy after the user
+   rejected solid housings, so a round copying T04 would ship the defect again.
+4. **A clause about what the user SEES reads the artifact the user OPENS.**
+   T04's material gate read the GLB's alpha and passed while the emitted viewer
+   opened in solid mode; the fix reads the viewer HTML. Each clause names the
+   artifact its gate reads, and a clause about default state, interaction or
+   layout reads the emitted page, never the asset feeding it.
 
 ## What this does not claim
 

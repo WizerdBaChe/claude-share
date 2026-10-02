@@ -57,6 +57,79 @@ Consequences the ladder settles:
 - Every rung ≥ 2 runs its known-true positive in the same invocation as the
   real check (two-sided calibration, global CLAUDE.md gate rule): a property that
   has never failed is not known to be measuring.
+- **A control is proven by the ASSERTED VALUE differing between the correct and
+  the defective build — record both values, not the verdict flip** (`ops/lessons.md`
+  L-062, re-folded here 2026-09-23 from a global CLAUDE.md clause that sat outside
+  the test files where its recurrences happened). Every shape L-062 collected is
+  this one tell: an assertion aimed at a decision label the defect does not move;
+  two sufficient defences, each hiding the other's removal; a requirement another
+  requirement already satisfies; a hardcoded verdict; a mutation that lands in a
+  gap of the data (next bullets). In each, the asserted value is IDENTICAL on both
+  sides, and a record that prints the pair shows it in one run — the 2026-09-11
+  SSLD T58d catch (19.36 / 28.32 pt on both sides) is the positive instance. A
+  control whose record carries only PASS/FAIL is rung 0 about itself.
+- **When the real input already FAILS an assertion, its known-true side must be a
+  REPAIRED input, never a mutant** (SSLD 操作手冊 audit 2026-09-13). The usual
+  calibration shape — perturb the value the assertion rests on, watch the verdict
+  flip — silently degenerates on an assertion that is already False: False → False
+  reads as "the control fired" while the assertion has discriminated nothing. So
+  the pair is stated by VERDICT, not by direction: one input that must return True
+  and one that must return False, whichever side the real data happens to sit on.
+  For an already-failing check the True side is constructed by applying the fix
+  (there: the label split normalised so it closes over its denominator, and the
+  unreproducible quote replaced by the number the preserved transcript prints) —
+  which also proves the proposed fix is the fix. Measured: a checker written the
+  usual way reported `INSTRUMENT FAULT` on exactly the two of its five assertions
+  that were already failing.
+- **A control set whose size is FIXED while the artifact grows is an anecdote;
+  generate the controls FROM the artifact** (2026-09-13, SSLD T01 DIR-1). One
+  hand-written mutant proves the instrument can fire once. Mutating every object
+  the artifact already carries — flip the direction word in each of the deck's
+  own passing sentences, re-judge, require all of them caught — makes the control
+  count scale with what is being checked, so it keeps measuring as the artifact
+  grows instead of certifying the one case its author imagined. Measured: 6 fixed
+  controls plus 4/4 artifact-derived mutants; the fixed six would still have passed
+  a build whose new pages the gate could not reach.
+- **The control's MUTATION MAGNITUDE comes from the data too, not only its
+  existence** (2026-09-16, local-transcript-maker gap Q; L-062's eighth
+  recurrence). The assertion can be aimed at exactly the value the defect would
+  change and the control still not fire, because the mutation was too small to
+  move that value: a threshold nudged from −1.0 to −0.5 changed a 31/61 count to
+  31/61, since `avg_logprob` is a per-WINDOW number and the 61 neighbours carried
+  **three** distinct values (−1.1691 / −0.3084 / −0.2071) — the new threshold
+  landed in the gap between two clusters. The test read as calibrated and measured
+  nothing. So a mutation is derived from the values actually present (here: the
+  recording's own maximum, which forces `bad == total`), never picked because it
+  looks like a reasonable number. Tell: the mutated run returns the SAME value as
+  the unmutated one, and the test passes anyway because it only asserts a
+  difference downstream.
+- **A gate that declines to rule publishes its declined pile, and reads it BY HAND
+  once.** The global gate rule says anything a gate cannot determine is
+  downgrade-and-forward, never veto — which quietly creates a second pile nobody
+  audits, and a screen can reach a perfect record by declining everything. So the
+  first run of such a gate reads every out-of-range object once and records how
+  many were read: measured 2026-09-13, 4 in-range against 30 out-of-range, all 30
+  read, no missed claim — and one source-quoted line found that the gate correctly
+  could not judge and a human could. Publish the two counts side by side forever
+  after; a 4-verdict gate reported without its 30 declines reads as coverage.
+- **Two independent passes over one deliverable report their OVERLAP.** Running a
+  second reviewer is only evidence if the two are not reading the same thing.
+  Measured (SSLD T01): an external review of the deck and two independent verifier
+  passes produced DISJOINT defect sets — zero overlap, which is what justifies
+  keeping both. High overlap is the signal to drop one, and it is not knowable
+  without the comparison.
+- **A gate that compares a computed result with a reference THROUGH an estimator
+  (a fit, a slope, a window average, a quadrature) runs that estimator on the
+  reference's own samples first, at the gate's grid and window, and it must
+  return the reference inside the gate tolerance** (2026-09-15, COMSOL_Test
+  round 24; `ops/lessons.md` L-097). "Calibrate with a known-TRUE input" was
+  being read as "the control fires"; the missing half is "the ruler recovers
+  the reference". Two gates read FAIL at −7 % with both model and closed form
+  right — a log-slope ruler assuming a Gaussian the profile did not have, and a
+  window fit compared with a t = 0 derivative — and each cost three solver runs
+  before the ruler was blamed. The self-test costs seconds and no solver time; a
+  ruler that fails it is a defect of the spec, and the gate does not run until
+  it passes.
 - The rung is written where the claim is: the test's name/docstring, the gate's
   status line, the INV-n `verified-by:` field (product-design-thinking
   document-ladder). A rung claimed in prose only is rung 0.
@@ -132,3 +205,51 @@ Live instances of this property: two source-only tools (both 2026-09-10, each
 shipping its calibration in `--selftest`; do not ship here); SSLD T48 `verify/`.
 Review-when: a project adopts a runner that writes its own immutable evidence
 store (the transcript then names that store instead of a `_run.txt`).
+
+**A verbatim span certifies PRESENCE, not SUPPORT** (2026-09-13, SSLD T01,
+independent data audit). A screen that keeps the triggering sentence with every
+code looks self-evidencing, and the discipline is real — but "this sentence is
+in the source" and "this sentence supports this code" are different claims, and
+only the first is mechanically checked. Measured: three published values rested
+on spans that were verbatim, quoted, and about something else — solder REFLOW
+compatibility read as solder self-ALIGNMENT, a technique's own name ("photonic
+wire bonding") read as a bonded interface, index-matching OIL read as a solid
+bond. So a screen that publishes spans also publishes a **support** rate from a
+sample a reader judged, and it is sampled **per CODE, not per axis**: the axis
+looked ordinary while one of its codes was 6/6 wrong, because a rate averaged
+over an instrument's codes hides the code that is entirely wrong. Audit the
+lowest-support codes first — they are both the most likely to be artefacts and
+the cheapest to enumerate exhaustively.
+
+## The third property — a claim class whose evidence is a READER, and the trap in saying so
+
+Added 2026-09-13 from SSLD T01. The ladder assumes a rung is reachable in
+process. Some claim classes have none: the defect is not a property of the
+artifact but of the **inference a reader draws from it**, so every gate reads a
+file in which nothing is wrong.
+
+**A deliverable naming such a class carries one external (non-author) READ before
+it is called accepted, and the record names WHICH classes that read covered.**
+An external read named only as "reviewed" certifies nothing — same rule as a gate
+that matches zero objects.
+
+The measured instance: a slide listed "fill the gap with a high-index medium"
+among the ways to escape a tolerance line whose own printed table showed the
+product FALLING with index. Every number was right; the direction was not. Five
+text gates held green. Four classes generalise from that round — framing that
+licenses a stronger inference than it states; terminology precision; ontology
+mixing inside a published vocabulary; an aggregate used as if it were a member —
+plus direction claims about relations the artifact does not publish.
+
+**The trap, and the reason this property is written with a deletion rule.**
+"Needs human judgement" is the cheapest possible excuse, and it is usually
+wrong: of the twelve reader-found defects in that round, seven were mechanisable
+and became gates the same day. So the class list is CLOSED, each row carries the
+instance it came from, and **a row leaves the list the day an instrument reaches
+it**, its regression case moving into that instrument. A direction claim about a
+relation the deliverable DOES publish is gated, not read: model each relation's
+variables with the sign of ∂outcome/∂variable, rule only on sentences that assert
+a direction for one of them, and publish the out-of-range count beside the
+verdicts (SSLD's own T01-round verify script `check_claim_direction_T01.py`, internal path, not shared; DIR-1). Review-when:
+a project adds a sixth class without an instance — that is the list rotting back
+into an excuse.

@@ -118,6 +118,7 @@ PH-11 的 AP-61…AP-64）。
 ~/.claude/                     ← 整個目錄是一個 git repo（版控即歷史）
 ├── CLAUDE.md                  憲法層：條件式偏好，每 session 必載（預算 ~15K，2026-08-01 起）
 ├── PHILOSOPHY.md              本文件：非規範性世界觀（人讀）
+├── KNOWLEDGE-PACKS.md         知識包的形狀、判準與現況（人讀；分享版裡代替知識包本體）
 ├── settings.json              權限、hooks 掛載、預設模型 ⚠️ 內含機器綁定路徑
 ├── skill-trigger-dict.md      skill 路由字典：哪句話觸發哪個 skill（按需載入）
 ├── audit-archive/     審計軌跡：已凍結（2026-08-11），僅存歷史敘事

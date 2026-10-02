@@ -24,6 +24,11 @@ define-before-use and hover-card properties rest on nothing outside the repo and
 do not expire. A date is not a trigger: this line replaced "review 2027-02" on
 2026-09-08 (ES-3).
 
+**An audience-facing HTML deck** (page class `deck`, not a paper-story practice copy) also carries the
+presentation-class content rules P1–P4 (figure-led, declared density, flat and clean, sample page first). They live
+in ONE place, `rules/office-deck-deliverables.md` §Presentation-class content, shared with PPTX. Read it before
+building the deck.
+
 **Asset property — a human-facing HTML deliverable (deck, report, dashboard-doc)
 must not contain a coded ID or symbol whose definition the reader has not been
 given a path to.** Three layers, cheapest first; the first is mandatory, the
@@ -168,6 +173,35 @@ implementations: long document = the SSLD project's own textbook shell
 (fluid main + a rail-style 本節速查 aside, hidden below 1500 px and in print;
 not shipped here); deck = the source environment's asset library reference
 implementation (text blocks uncapped, `data-page-class="deck"`).
+
+**Asset property — styling follows the CONTENT class, prose or node** (user
+rulings 2026-09-21, from a Markdown→HTML→PDF reference and two A/B rounds;
+recorded in a dated source-only note, does not ship here). Decide first what the page holds:
+
+- **Prose** (page class `document-long` / `document-short`: textbooks, manuals,
+  explainers, reports — read top to bottom). **An explanatory document must not
+  carry more than four type tiers in its reading path, a filled callout box other
+  than a warning or an open question, monospace outside literal values and code,
+  or a coloured bar standing in for heading space.** Every new explanatory
+  document, in any project, meets this by loading the source environment's asset-library `prose-doc-layer`
+  (not shipped here) as its LAST style source — a shell
+  with other class names maps them to the layer's vocabulary (its README) rather
+  than forking the rules. Existing accepted documents are not retrofitted; a
+  shell's next build adopts it.
+- **Node** (`dashboard` / `tool`: launchers, monitors, catalogues — the reader
+  scans and compares entities). **A node view must keep a visible container per
+  entity and colour per entity class**; there the box is the node boundary and
+  colour is information. Only two prose rules carry over: few type tiers, and one
+  meaning per colour. Removing boxes to "reduce clutter" flattens the hierarchy —
+  measured and rejected on VIEWS.html (the fix for its clutter was grouping the
+  side panel and demoting the regenerate command, not deleting containers).
+
+No gate reads this yet. Promotion trigger: the user reports a second prose
+document as hard to read after it shipped → add a tier count and a
+filled-box-per-screen count to `tools/page-fill-gate/` as WARN for
+`document-*`, calibrated on the textbook A (13 tiers / 90 fills) and B
+(4 primary tiers / 23 fills) copies. review-when: `page_classes.json` gains a
+class that is neither prose nor node, or `prose-doc-layer` is deprecated.
 
 Interaction chrome standard carried by the same asset (user-accepted 2026-08-31):
 ←/→ paging, M TOC, counter + progress bar, print CSS, JS-dead degradation to a
