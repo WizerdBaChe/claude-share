@@ -1,0 +1,9 @@
+{
+  "name": "ui-shot",
+  "private": true,
+  "description": "Durable runner for the AssetVault ui-state-probe asset - the default out-of-process pixel route for browser-pane UI verification (ops/references/browser-pane-pixel-route.md). Exact-pinned; doctor.mjs verifies and repairs the install.",
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.62.1"
+  }
+}
