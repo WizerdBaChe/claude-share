@@ -227,6 +227,61 @@ try:
 finally:
     sys.stdin = real_stdin
 
+# ---------------------------------------------------------------- concurrency
+print("\n-- concurrency: parallel hook processes may not lose or tear rows")
+
+# C-1 (2026-09-14). The desktop app fires this hook from several CLI processes in the
+# same second; the old `open(path, "a")` lost 70/480 rows and tore 3 under 8x60. The
+# positive control runs a NAIVE writer the same way on the same host: the race is
+# timing-dependent, so if the naive writer shows no loss the instrument could not
+# see the defect this run and C-1 is reported UNDETERMINED, never passed.
+import subprocess
+
+CHILD = r'''
+import importlib.util, io, json, sys
+path, n, mode = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+if mode == "hook":
+    spec = importlib.util.spec_from_file_location("ill", sys.argv[4]); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+for i in range(n):
+    row = {"session_id": f"s{i}", "hook_event_name": "InstructionsLoaded", "note": "x" * 200}
+    if mode == "hook":
+        sys.stdin = io.StringIO(json.dumps(row)); m.main()
+    else:
+        with open(path, "a", encoding="utf-8", newline="\n") as fh:
+            fh.write(json.dumps({"ts": "t", "payload": row}) + "\n")
+'''
+
+
+def race(mode: str, procs: int = 6, each: int = 40):
+    d = Path(tempfile.mkdtemp(prefix=f"ill-race-{mode}-"))
+    log = d / "rule-loads.jsonl"
+    env = dict(_os.environ, CLAUDE_TELEMETRY_DIR=str(d))
+    ps = [subprocess.Popen([sys.executable, "-c", CHILD, str(log), str(each), mode, str(HOOK)], env=env)
+          for _ in range(procs)]
+    for p in ps:
+        p.wait()
+    lines = [ln for ln in log.read_bytes().split(b"\n") if ln.strip()] if log.is_file() else []
+    bad = 0
+    for ln in lines:
+        try:
+            json.loads(ln.decode("utf-8"))
+        except Exception:
+            bad += 1
+    return procs * each, len(lines), bad
+
+
+want, naive_rows, naive_bad = race("naive")
+control_fired = naive_rows != want or naive_bad > 0
+print(f"     control: naive writer kept {naive_rows}/{want} rows, {naive_bad} torn "
+      f"-> {'fired' if control_fired else 'DID NOT FIRE'}")
+want, rows_n, bad_n = race("hook")
+if control_fired:
+    check("C-1 parallel hook processes keep every row", rows_n, want)
+    check("C-1b and tear none", bad_n, 0)
+else:
+    print(f"note [UNDETERMINED] C-1 not ruled: the naive control showed no loss this run, so "
+          f"{rows_n}/{want} rows from the hook proves nothing. Re-run the suite.")
+
 # ------------------------------------------------------- isolation + live note
 print("\n-- isolation, and one observation that is counted in no verdict")
 

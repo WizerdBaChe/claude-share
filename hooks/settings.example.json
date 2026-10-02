@@ -21,57 +21,55 @@
     "",
     "OMISSIONS, named rather than left pointing at files you do not have (all",
     "declared in tools/share-manifest.toml with a reason):",
-    "  · the two external-dispatch hooks — they gate a dispatcher this share",
-    "    does not ship;",
-    "  · session_board_register.py and project_registry_gist.py — each is one",
-    "    half of a source-environment tool (the session board, the project",
-    "    registry) that does not ship; the rule they serve degrades to the",
+    "  · the three external-dispatch hooks (extdispatch_entrypoint_guard.py,",
+    "    extdispatch_route_shadow.py, codex_dispatch_guard.py) — they gate a",
+    "    dispatcher this share does not ship;",
+    "  · session_board_register.py — one half of a source-environment tool (the",
+    "    session board) that does not ship; the rule it serves degrades to the",
     "    by-hand steps stated in claude-ops/ops/20-dispatch.md §7a;",
-    "  · secret_file_guard.py — a local secrets policy, not a portable rule;",
+    "  · user_profile_gist.py and registry_row_guard.py — the first injects a",
+    "    personal profile of one operator, the second imports it as its parser",
+    "    and refuses a registry row that has no row in that profile, so it is",
+    "    inert (and its self-test fails) without it. project_registry_gist.py",
+    "    ships alone and covers the registry digest;",
+    "  · past_work_recall_inject.py and subagent_retrieval_brief.py — both read",
+    "    the operator's personal memory silos through a recall tool that does",
+    "    not ship;",
+    "  · moc_closeout_notice.py and deliverable_birth_notice.py — each is bound",
+    "    to a source-only index tree or graph snapshot;",
     "  · xi_card_guard.py — a shadow probe for a cross-index pipeline this",
-    "    share does not carry (registry.json names real absolute store roots,",
-    "    its parser lives in tools/cross-index/); telemetry/ is excluded too;",
-    "  · intake_guard.py and intake_match_shadow.py — the DENY guard and the",
-    "    shadow match probe for the lesson-intake store (ops/lessons/); both",
-    "    are one half of tools/closeout-intake/ (the CLI that alone can write",
-    "    that store), which this share does not carry. intake_guard.py's own",
-    "    deny message points at that CLI, so shipping the guard without it",
-    "    would block writes to a path this repo does not even ship (ops/lessons/",
-    "    itself is excluded — only the generated ops/lessons.md index ships).",
-    "    No by-hand fallback is named here; author your own lesson-record",
-    "    convention if you want one.",
-    "  · unattended_run.py (three mounts: PreToolUse scope guard, UserPromptSubmit",
-    "    kickoff, Stop) — the whole [unattended-run] carrier is built on",
-    "    tools/process-ledger/ (ledger.py, report.py), which this share does not",
-    "    carry: the Stop guard's own block condition requires a report file only",
-    "    that tool can generate, so shipping the hook without it would block",
-    "    every session end once a run is kicked off. No fallback named; the",
-    "    obligations text (scope discipline, a canary pair, a stop report) is a",
-    "    pattern to re-implement against your own process-tracking tool, not a",
-    "    file to copy.",
-    "  · the SessionEnd memory-pipeline mount — its script now ships as",
+    "    share does not carry; it is unmounted at the source too;",
+    "  · the SessionEnd memory-pipeline mount — its script ships as",
     "    compact-recovery/preserve.py, but the mount still points outside",
     "    hooks/ and this template mounts hooks/ and nothing else; the optional",
     "    SessionEnd block lives in compact-recovery/README.md.",
-    "  · hooks/fieldwork_threshold_notice.py — RETIRED at the source 2026-09-11",
-    "    (user ruling R-3, rules-debt audit): unregistered from settings.json",
-    "    after 293 shadow rows measured >=52% quantifiably false. The file and",
-    "    its telemetry shape are kept here for provenance/rollback (the source",
-    "    kept them too), but no mount exists to carry over — this template",
-    "    mirrors that.",
-    "Every hook in hooks/ that is MOUNTED AT THE SOURCE is mounted here — if you",
-    "find one that is not, that is a defect in this template, not a",
-    "recommendation. Three .py files directly under hooks/ are deliberately NOT",
+    "",
+    "Tool-backed hooks. Several mounted hooks call a method tool by its source",
+    "path (tools/<name>/...): the tools ship under instruments/<name>/ in this",
+    "repo, so copy each one to <CLAUDE_HOME>/tools/<name>/ before relying on the",
+    "hook that cites it. Three of them also read a registry that ships as a",
+    "template (system-hmi registry/subsystems.json, view-launcher views.json,",
+    "references/PROJECTS.md); until you fill it they stay silent or say so.",
+    "A hook whose tool is absent degrades to silence or a one-line notice; it",
+    "never blocks. unattended_run.py is the exception worth knowing: its Stop",
+    "guard blocks the end of a session ONLY while an [unattended-run] manifest",
+    "is armed and no run report exists, and that state is created only by the",
+    "kickoff hook beside it.",
+    "",
+    "Every hook in hooks/ that is MOUNTED AT THE SOURCE and ships is mounted",
+    "here — if you find one that is not, that is a defect in this template, not",
+    "a recommendation. Four .py files directly under hooks/ are deliberately NOT",
     "mounted, none is a defect: hooks/deny_receipt.py and hooks/handoff_snapshot.py",
     "are plain shared libraries (deny/notice receipt clauses; snapshot_path,",
     "is_fresh, notice) imported by other hooks — each has no event to mount at,",
     "the same way a Python module you import is not itself wired into an event;",
-    "hooks/fieldwork_threshold_notice.py is the retired probe named above. The",
-    "four files under hooks/tests/ (test_browser_pane_scope_guard.py,",
-    "test_fieldwork_threshold_notice.py, test_instructions_loaded_logger.py,",
-    "test_transcript_read_guard.py) are regression matrices, run by hand",
-    "(`python hooks/tests/<name>.py`), not hooks — mounting a test as a hook",
-    "would put a test harness on every matched tool call.",
+    "hooks/fieldwork_threshold_notice.py (retired 2026-09-11, user ruling R-3) and",
+    "hooks/delivery_gate_shadow.py (retired at the source 2026-09-27, its",
+    "SubagentStop mount removed) are retired probes — files and telemetry shapes",
+    "are kept for provenance and rollback, but no mount exists to carry over, and",
+    "this template mirrors that. The regression suites under hooks/tests/ are run",
+    "by hand (`python hooks/tests/<name>.py`), not hooks — mounting a test as a",
+    "hook would put a test harness on every matched tool call.",
     "",
     "Verify after wiring: run each hook by hand with empty stdin and check it",
     "exits 0 (they are all fail-open), then confirm the matcher fires on a real",
@@ -111,6 +109,16 @@
   "hooks": {
     "PreToolUse": [
       {
+        "matcher": "Read|Grep|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/secret_file_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Bash|PowerShell",
         "hooks": [
           {
@@ -126,7 +134,8 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/branch_commit_guard.py\"",
-            "timeout": 5
+            "timeout": 5,
+            "if": "Bash(*git*)"
           },
           {
             "type": "command",
@@ -135,7 +144,25 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
-            "timeout": 5
+            "timeout": 5,
+            "if": "Bash(*git*)"
+          }
+        ]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/branch_commit_guard.py\"",
+            "timeout": 5,
+            "if": "PowerShell(*git*)"
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
+            "timeout": 5,
+            "if": "PowerShell(*git*)"
           }
         ]
       },
@@ -150,6 +177,11 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/verbatim_dispatch_notice.py\"",
             "timeout": 5
           }
         ]
@@ -205,11 +237,41 @@
         ]
       },
       {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/unattended_run.py\" scope",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/boundary_contract_notice.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/feedback_notice.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "Read",
         "hooks": [
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/transcript_read_guard.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/intake_guard.py\"",
             "timeout": 5
           }
         ]
@@ -233,6 +295,16 @@
             "timeout": 6
           }
         ]
+      },
+      {
+        "matcher": "mcp__.*__search_session_transcripts",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/session_search_query_notice.py\"",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -243,6 +315,16 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ui_verify_guard.py\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/golive_check.py\"",
+            "timeout": 150
           }
         ]
       }
@@ -282,8 +364,28 @@
           },
           {
             "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/project_registry_gist.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/view_launcher_gist.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/worktree_scope_guard.py\"",
             "timeout": 8
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/system_hmi_summary.py\"",
+            "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/tree_noise_gist.py\"",
+            "timeout": 5
           }
         ]
       },
@@ -302,11 +404,6 @@
       {
         "matcher": "",
         "hooks": [
-          {
-            "type": "command",
-            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/delivery_gate_shadow.py\"",
-            "timeout": 10
-          },
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dispatch_commit_notice.py\"",
@@ -335,6 +432,28 @@
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/context_runway_shadow.py\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/unattended_run.py\" kickoff",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/intake_match_shadow.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/unattended_run.py\" stop",
+            "timeout": 10
           }
         ]
       }
@@ -342,6 +461,7 @@
   },
   "disableWorkflows": true,
   "effortLevel": "medium",
+  "switchModelsOnFlag": false,
   "cleanupPeriodDays": 3650,
   "env": {
     "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "0",

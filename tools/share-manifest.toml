@@ -578,7 +578,8 @@ entry below), a deny_receipt import + receipt/fp clauses, self-identification
 on the deny text per the hook-deny-message contract, and AP-62 undetermined
 guards. The denial text's `python ~/.claude/tools/extdispatch/extdispatch.py`
 pointer is UNCHANGED. Disposition holds: still gates a CLI this repo does not
-ship."""
+ship.
+RE-CHECK 2026-10-02 (lane W3-hooks, align to 183c129): source unchanged since 7c9867b (git diff empty for this path). Still mounted at the source and still omitted from hooks/settings.example.json, whose _README now names it with codex_dispatch_guard.py as the external-dispatch group. The dependency it routes the caller to (tools/extdispatch/) is still excluded. Disposition holds."""
 fallback = """None, and the honest consequence is that the single-gated-entry-
 point pattern ships as prose only. The pattern is worth copying if you dispatch
 outward: one shell entry that runs the gates, everything else denied, because a
@@ -605,7 +606,8 @@ undetermined guards, a CLAUDE_TELEMETRY_DIR redirect, and a new `session_id`
 field on each logged row (2026-09-11, R-3: needed to group rows by task for an
 honest false-positive rate). `ALLOWLIST = ... / "extdispatch" / "allowlist.txt"`
 is UNCHANGED. Disposition holds: still a shadow probe for a pipeline this repo
-does not ship."""
+does not ship.
+RE-CHECK 2026-10-02 (lane W3-hooks, align to 183c129): source unchanged since 7c9867b. It still reads tools/extdispatch/allowlist.txt, which is still excluded, so it still measures nothing here. Disposition holds; the fallback (the shadow-probe pattern in context_runway_shadow.py) still ships."""
 fallback = """None. The rule it measures (`20-dispatch.md` §4a) ships; the
 measurement does not. If you build the layer, `hooks/delivery_gate_shadow.py`
 and `hooks/context_runway_shadow.py` both ship and are the house pattern for
@@ -871,9 +873,17 @@ loop, you just start with an empty directory."""
 [[collected]]
 path = "hooks/dangerous_command_guard.py"
 source = "~/.claude/hooks/dangerous_command_guard.py"
-status = "verbatim"
-# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
-# byte-identical, status unchanged.
+status = "edited"
+edits = [
+  "2026-10-02 (lane W3-hooks, align to 183c129): docstring, receipt-rows paragraph: a session-id reference (class: session id) -> 'one session'. The receipt rows, dates and telemetry file name stay.",
+  "2026-10-02: docstring, false-positive-log paragraph: a second session-id reference (class: session id) -> 'another session'. The telemetry/hook-false-positives.jsonl pointer stays.",
+  "2026-10-02: docstring: the example of a path the guard saw, an absolute path on a non-system drive (class: absolute local path) -> the class name 'an absolute path on a non-system drive'. The behaviour described is unchanged.",
+]
+# 2026-09-12 (lane W3, align to 7c9867b): byte-identical, status verbatim.
+# CHANGED 2026-10-02: the source grew a false-positive-log entry citing two
+# session ids and one absolute path, so the file stopped being byte-identical
+# and the status moved to edited. Verified: the diff against the source is the
+# three declared edits and nothing else.
 
 [[collected]]
 path = "hooks/ops_health_nudge.py"
@@ -884,7 +894,7 @@ edits = [
   "2026-09-02: source grew check 17 (session-transcript mirror heartbeat, D-052 item 5). Its default MIRROR_MARKER was an absolute path on a non-system drive (a private mirror root) -> dropped to an env-var-only default (empty string), which the existing archive-root gate already treats as absence-is-normal (same as CC_BIN); the scheduled-task name dropped from the docstring and both live msgs.add() strings -- the capability description ('check your mirror task's scheduler entry') stays; the same private absolute mirror-logs path (non-system drive) in the FAIL-state message dropped for 'your mirror log directory'. The tool pointer tools/claude-session-transcript-mirror.ps1 and ruling id D-033/D-052 are kept. The docstring's review-when also cited a rule-registry.md key ('session mirror heartbeat') -> 'your own rule registry'.",
   "2026-09-07 (this round): source RETIRED the LESSON_CAP unfolded-entry counter entirely (ops/lessons.md is now a generated index of ops/lessons/, per tools/closeout-intake) and rewrote check 1 to subprocess `tools/closeout-intake/intake.py report --nudge`. That tool is excluded-by-decision this round (see hooks/intake_guard.py's not_shipped entry) and ops/lessons/ itself does not ship either (only the generated ops/lessons.md index does, per this repo's directory exclusions) -- so check 1's subprocess call always raises FileNotFoundError in this share, caught by the existing `except Exception: pass`. This is NOT a new failure mode: the check's own comment already documents 'a missing tool ... prints nothing' as an anticipated, legitimate fail-open branch (same treatment check 16 already gives a missing ops/cc-reconciled.json), so no functional edit was made -- a one-line SHARE EDITION comment was added immediately above the try block naming why this check is a permanent no-op in this repo, so a reader does not mistake silence for a bug. SIZE_CAP (22K->26K), CLAUDE_MD_CAP (19,968->23,040) and DICT_CAP (28K->42K) config-value bumps carried verbatim (pure numbers, no privacy content). Check 15's remedy_kind branch-selection logic (2026-09-06) and the graph-rot finding text carried verbatim (repo-relative tools/graph-snapshot and references/_moc pointers kept per the established precedent).",
   "2026-09-07 NEW FINDING (pre-existing gap from an earlier round, corrected here): the docstring/comment for check 1 named an 8-hex-char spawn_task ticket id (pointing into tools/session-board/tickets.json -- a tree this repo already excludes, see hooks/session_board_register.py's not_shipped entry) -> dropped, leaving 'the stale-path attribution ticket'. Also NEW FINDING: check 15's two msgs.add() strings named a second scheduled task verbatim, unscrubbed since at least the 2026-08-29 collection (same scrub class already applied to the mirror task's name in check 17, just never applied to this one) -> both occurrences replaced with 'your graph-watchdog task's scheduler entry', matching the wording already used for the mirror task. Re-verified: no scheduled-task name or ticket id remains anywhere in the file (grep-checked post-edit) -- and note for the manifest maintainer: this entry itself now deliberately does NOT quote either removed literal (the prior round's entry for check 17 quoted the mirror task's name in this very edits list, which republishes in the manifest's own prose exactly what the code-level edit removed; not corrected here since it is outside this file's scope, but flagged in this worker's final report).",
-  "2026-09-12 (lane W3, align to 7c9867b): source grew a NEW carrier task name, class scheduled-task-name, at check 18 (copy-census) -- 3 occurrences (one comment, two msgs.add() strings) -> same treatment as check 17's mirror task, replaced with 'your copy-census scheduled task' / 'your copy-census task's scheduler entry'. Check 15/16's graph-watchdog task name grew a THIRD occurrence this round (a new review-when comment beside WATCHDOG_RUN_LIMIT_MIN) beyond the two already-declared msgs.add() occurrences -> same class, same replacement wording ('your graph-watchdog task's scheduler entry' / \"...task's ExecutionTimeLimit changes\" for the review-when form). Check 13's widened comment (2026-09-10) named an artifact filed under outputs/ (class: a named artifact inside a non-shipping tree) -> capability description ('a deferred-extraction record filed under outputs/'), no filename kept. The check-11 ops-layer gate and the check-1 closeout-intake SHARE EDITION comment (both declared in the first entry above) were re-applied against the freshly re-copied source unchanged -- their anchors still exist verbatim upstream. Verified via diff against fresh source: only the declared+new edits differ; `python hooks/ops_health_nudge.py` smoke-tested directly (this hook's HOME resolves via `os.path.expanduser('~/.claude')`, not CLAUDE_CONFIG_DIR, so the run read real machine state; it is read-only -- no writes anywhere in the hook -- so nothing outside this worktree was touched), exit 0, sensible output. No in-repo test suite ships for this hook -- tools/ops-health-test/ stays excluded per the 2026-08-16 ruling.",
+  "2026-09-12 (lane W3, align to 7c9867b): source grew a NEW carrier task name, class scheduled-task-name, at check 18 (copy-census) -- 3 occurrences (one comment, two msgs.add() strings) -> same treatment as check 17's mirror task, replaced with 'your copy-census scheduled task' / 'your copy-census task's scheduler entry'. Check 15/16's graph-watchdog task name grew a THIRD occurrence this round (a new review-when comment beside WATCHDOG_RUN_LIMIT_MIN) beyond the two already-declared msgs.add() occurrences -> same class, same replacement wording ('your graph-watchdog task's scheduler entry' / \"...task's ExecutionTimeLimit changes\" for the review-when form). Check 13's widened comment (2026-09-10) named an artifact filed under outputs/ (class: a named artifact inside a non-shipping tree) -> capability description ('a deferred-extraction record filed under outputs/'), no filename kept. The check-11 ops-layer gate and the check-1 closeout-intake SHARE EDITION comment (both declared in the first entry above) were re-applied against the freshly re-copied source unchanged -- their anchors still exist verbatim upstream. Verified via diff against fresh source: only the declared+new edits differ; `python hooks/ops_health_nudge.py` smoke-tested directly (this hook's HOME resolves via `os.path.expanduser('~/.claude')`, not CLAUDE_CONFIG_DIR, so the run read real machine state; it is read-only -- no writes anywhere in the hook -- so nothing outside this worktree was touched), exit 0, sensible output. No in-repo test suite ships for this hook -- tools/ops-health-test/ stays excluded per the 2026-08-16 ruling.",  "2026-10-02 (lane W3-hooks, align to 183c129): re-copied from the fresh source and every edit above re-applied by a clean 3-way merge (old source, this copy, new source); the diff against the new source equals the edits above plus the following. NEW this round, 8 edits by class and position: (1) a comment in check 13 naming a record under outputs/ (class: named artifact in a non-shipping tree) -> 'a dict-review round record'; (2) check 18's comment citing a design file under references/ (class: named artifact) -> 'design record under references/'; (3) a comment naming a scheduled task (class: scheduled-task name) -> 'your home-bundle scheduled task'; (4) the same scheduled task's name inside one msgs.add() string -> 'your home-bundle scheduled task'; (5) BUNDLE_STATUS default, an absolute path on a non-system drive (class: absolute local path, a private backup root) -> no default (env var only) plus a SHARE EDITION comment, the same treatment as MIRROR_MARKER; (6) VAULT_ROOT default, an absolute path on a non-system drive (class: absolute local path, a private notes vault) -> no default (env var only) plus a SHARE EDITION comment; (7) a comment in the cc-delta check pointing at a README under reports/ (class: named artifact) -> 'the cc-upgrade-delta report folder's README'; (8) the check-1 SHARE EDITION comment rewritten: it said tools/closeout-intake/ does not ship, which stopped being true this round (it ships under instruments/closeout-intake/); the new text says copy it to tools/ to enable the check and that the store ops/lessons/ stays source-only, so the silent no-op branch remains the documented fail-open path. Verified: diff against fresh source = declared edits only; `python hooks/ops_health_nudge.py` exits 0 with an empty home. No in-repo test suite ships for this hook.",
 ]
 
 # --- PART 1: settings template (procedure B, dirty source) ------------------
@@ -896,6 +906,9 @@ status = "verbatim"
 # 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
 # byte-identical, status unchanged. hooks/tests/test_instructions_loaded_logger.py
 # (new this round) ran clean: ALL TESTS PASSED.
+# 2026-10-02 (lane W3-hooks, align to 183c129): the source gained commits for
+# this file; re-copied and re-diffed, byte-identical, status unchanged. Its test
+# suite re-run: ALL TESTS PASSED.
 
 [[collected]]
 path = "hooks/browser-pane-blocklist.json"
@@ -942,6 +955,7 @@ edits = [
   "docstring: replaced a local session id with 'a local transcript' — the id points at a transcript no reader can open, so it carried no evidence value outward",
   "2026-09-07 refresh: source closed an inheritance-bypass gap (2026-09-05 user ruling): an Agent call omitting `model` now requires either an explicit `model` or a `subagent_type` naming a LOCAL agents/*.md definition whose frontmatter pins a capped model (read via the new local_agent_model() helper, path-resolved off __file__/../agents — portable, no machine-bound value, and directly exercisable against this repo's own shipped agents/*.md files). Docstring session id re-applied per the existing edit above ('session b66f6a9b' -> 'in a local transcript', same wording already used in the sentence). New docstring paragraph cites reports/2026-09-05-model-effort-inventory.md — kept verbatim as a repo-relative filename (reports/ does not ship in this repo, but the path itself names no account, host or session and is not a scrub target under COLLECTION-RULES rule 2; same treatment as ui_verify_guard.py's kept ops/references/browser-pane-pixel-route.md citation).",
   "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edit above already covers. Re-applied the same session-id edit unchanged. Verified via diff against fresh source: only that one edit differs.",
+  "2026-10-02 (lane W3-hooks, align to 183c129): the first edit's session id re-applied (the source's known-limitation line still carries it, class: session id, position: the resume-path docstring paragraph) -> 'in a local transcript'. NEW: a docstring pointer to a named report under reports/ (class: named artifact in a non-shipping tree) -> 'a model/effort inventory report'. Verified: diff against fresh source = those two edits; python hooks/model_cap_guard.py exits 0.",
 ]
 
 [[collected]]
@@ -951,6 +965,7 @@ status = "edited"
 edits = [
   "docstring: 'session 8ee03a1f emitted 19 events' -> 'one session emitted 19 events' — same reason as model_cap_guard",
   "2026-09-12 (lane W3, align to 7c9867b): source grew a large VOCABULARY REBUILD (2026-09-08) docstring section (measured replay statistics: 451 transcripts, 85.1%/60.3% would_block under portable/local vocabularies, 73 rescued, 140 weak-evidence, 38 unverified), a VERIFY_LOCAL regex, a WEAK_SHELL regex + weak_evidence tracking, a .NET clause on VERIFY_SHELL, and CLAUDE_TELEMETRY_DIR redirect support. Read in full and scanned for scrub targets: none found -- the new content is measured statistics and regex vocabulary, no session ids or absolute paths. Re-applied the declared session-id edit unchanged. Verified via diff against fresh source: only that one edit differs. No in-repo test ships for this hook (its own Proof-of-life line cites the excluded tools/e2-gate-test/test_shadow_hook.py); syntax-checked via ast.parse.",
+  "2026-10-02 (lane W3-hooks, align to 183c129): RETIRED at the source (commit ef0d0eb, 2026-09-27: SubagentStop mount removed; the file and its telemetry shape stay). The session-id edit above re-applied (class: session id; position: the docstring's event-count sentence). NEW: the user-ruling line cited a named evaluation report under reports/ (class: named artifact in a non-shipping tree) -> 'an overdue-shadow-hooks evaluation report'. Because the source unmounted it, hooks/settings.example.json no longer mounts it and an [[unmounted_hook]] entry in this lane's block records why; the same-named test-suite pointer in its Proof-of-life line now resolves in this share under instruments/e2-gate-test/ (if that lane ships it). Verified: diff against fresh source = the two declared edits.",
 ]
 
 [[collected]]
@@ -959,6 +974,9 @@ source = "~/.claude/hooks/ui_verify_guard.py"
 status = "verbatim"
 # 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
 # byte-identical, status unchanged.
+# 2026-10-02 (lane W3-hooks, align to 183c129): re-copied and re-diffed, byte-
+# identical, status unchanged (the source grew a result-aware router refinement;
+# no scrub target in the new content).
 # WAS 'edited' until 2026-08-16 (second round): two pointers to a private
 # asset-library entry were dropped from the docstring and denial text. The
 # source rewrote this hook into a result-aware router the same day and removed
@@ -983,6 +1001,8 @@ edits = []
 # 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
 # byte-identical, status unchanged. hooks/tests/test_browser_pane_scope_guard.py
 # ran clean: ALL TESTS PASSED.
+# 2026-10-02 (lane W3-hooks, align to 183c129): re-copied and re-diffed,
+# byte-identical, status unchanged; the suite re-run: ALL TESTS PASSED.
 
 [[collected]]
 path = "hooks/settings.example.json"
@@ -998,6 +1018,7 @@ edits = [
   "the two external-dispatch hook mounts (PreToolUse Bash|PowerShell: extdispatch_entrypoint_guard.py; PreToolUse Agent|Workflow: extdispatch_route_shadow.py) remain omitted, per the existing _README bullet -- unchanged this round, outside this worker's file list, re-verified still absent from this template.",
   "2026-09-07 self-caught gap, fixed before delivery: the _README's mount-invariant paragraph ('Every hook in hooks/ IS mounted here ... The one .py under hooks/ that is deliberately NOT mounted is hooks/tests/test_transcript_read_guard.py') was stale the moment handoff_snapshot.py joined hooks/ this round -- it is also correctly unmounted (shared library, no event to mount at), making TWO deliberately-unmounted .py files, not one. Rewrote the paragraph to name both and say why each is not a defect. Verified by direct count: `find hooks -name '*.py'` = 20 files, mounted-hook regex extraction against the file = 18, difference = exactly {tests/test_transcript_read_guard.py, handoff_snapshot.py}. Re-validated `python -c \"import json; json.load(open('hooks/settings.example.json'))\"` OK after the edit.",
   "2026-09-12 (lane W3, align to 7c9867b): source `git status --porcelain settings.json` is now clean (the 2026-09-07 dirty delta landed in a commit) -- source_dirty_ack dropped per its own review-when. Re-derived the whole hooks block against the fresh source, reading it end to end (374 lines): added dispatch_commit_notice.py to the Bash|PowerShell and Agent|Workflow PreToolUse matchers and to SubagentStop (3 mounts, matching the source's own 3 mount points for this new D3 hook, all timeout 5); added published_record_guard.py to a new PreToolUse Write|Edit matcher (timeout 5, 1 mount, matching source); added worktree_scope_guard.py to a new PreToolUse Write|Edit|NotebookEdit|Bash|PowerShell matcher (timeout 6) and to SessionStart's \"\" matcher (timeout 8) -- 2 mounts, matching source exactly. REMOVED the PreToolUse Read|Grep|Glob matcher (fieldwork_threshold_notice.py's mount) -- source commit bd834ea retired this hook and dropped the mount entirely (see hooks/fieldwork_threshold_notice.py's own entry, D4 disposition: file+telemetry kept, mount not). Did NOT add literature_host_guard.py's mount (its Bash|PowerShell|WebFetch|mcp(...)navigate matcher in the source) -- that hook and its data file are lane W5's, not this worker's; main resolves that merge. Re-verified the two other omitted mounts (extdispatch_entrypoint_guard.py, extdispatch_route_shadow.py) and the four excluded-by-decision groups (intake_guard.py+intake_match_shadow.py, unattended_run.py's three mounts, session_board_register.py, xi_card_guard.py, secret_file_guard.py, project_registry_gist.py) are still absent from the source-derived template, unchanged this round. Added a new _README bullet naming fieldwork_threshold_notice.py's retirement and rewrote the mount-invariant paragraph: 20 unique hook files are mounted (recount after this round's additions/removal), 3 top-level hooks/*.py files are deliberately not mounted (deny_receipt.py + handoff_snapshot.py, shared libraries; fieldwork_threshold_notice.py, retired), and the 4 files under hooks/tests/ (one more than before -- test_browser_pane_scope_guard.py, test_fieldwork_threshold_notice.py, test_instructions_loaded_logger.py all new this round) are named as regression matrices, not hooks. Verified: `python -c \"import json; json.load(open('hooks/settings.example.json'))\"` OK; printed the full hooks-block structure and cross-checked every matcher/hook pair against the fresh source by hand.",
+  "2026-10-02 (lane W3-hooks, align to 183c129): re-derived the hooks block against the fresh source and mounted every hook that ships after this lane: 33 files. Added the mounts for boundary_contract_notice, feedback_notice, intake_guard, intake_match_shadow, unattended_run (three mounts: PreToolUse scope, UserPromptSubmit kickoff, Stop stop), tree_noise_gist, secret_file_guard, project_registry_gist, golive_check, system_hmi_summary, view_launcher_gist, verbatim_dispatch_notice and session_search_query_notice, each with the source's own event, matcher, if and timeout. REMOVED delivery_gate_shadow's SubagentStop mount (the source retired it, commit ef0d0eb 2026-09-27) and declared the file an [[unmounted_hook]]. The source gained `if`-gated mounts (Bash(*git*) / PowerShell(*git*)) for branch_commit_guard and dispatch_commit_notice; the template carries them but moves the PowerShell-gated entries into their own PowerShell matcher block, because the share gate counts one mount per hook per event+matcher and the two are otherwise one hook twice on 'Bash|PowerShell'. The split is behaviour-identical: each if-rule already names its tool. Dropped from the source's mount set, as before: the SessionEnd preserve mount and every not-shipped hook's mount (extdispatch_entrypoint_guard, extdispatch_route_shadow, codex_dispatch_guard, session_board_register, moc_closeout_notice, deliverable_birth_notice, user_profile_gist, subagent_retrieval_brief, past_work_recall_inject, registry_row_guard). Also dropped the machine keys claudeMdExcludes, enabledPlugins, extraKnownMarketplaces, autoUpdatesChannel, theme, agentPushNotifEnabled. New top-level key kept: switchModelsOnFlag (false, added at the source in 8389c2e5; I could not verify its documented meaning, so it is carried as the source has it). The _README was rewritten: omissions list, tool-backed-hooks paragraph (tools ship under instruments/ and are copied to tools/), and the mount-invariant paragraph (33 mounted, 4 deliberately unmounted: deny_receipt, handoff_snapshot, fieldwork_threshold_notice, delivery_gate_shadow). Verified: json loads; mounted-file set equals the set of hooks/*.py minus those four.",
 ]
 
 # --- PART 2: new files this round, shipped -----------------------------------
@@ -3074,52 +3095,13 @@ fresh source (25 lines changed) -- grew a STATUS/Proof-of-life header (naming
 the excluded tools/session-board-test/), an OBSERVED ONCE UNEXPLAINED note
 about a single unreproduced 2026-09-09 test failure (ruling H-3: not patched
 on a guess), and a CLAUDE_TELEMETRY_DIR redirect. `TICKETS_PATH` still
-defaults to `tools/session-board/tickets.json`. Disposition holds unchanged."""
+defaults to `tools/session-board/tickets.json`. Disposition holds unchanged.
+RE-CHECK 2026-10-02 (lane W3-hooks, align to 183c129): source unchanged since 7c9867b. Still mounted at the source (PostToolUse on spawn_task) and still named in the template's omission list; tools/session-board/ is still excluded. Disposition holds. The by-hand fallback, ops/20-dispatch.md section 7a, ships."""
 fallback = """§7a's three steps done by hand, which is what the source did
 before 2026-08-21 and what the section still describes step by step — a
 distinctive opening sentence, the `deliverables` field, and the cwd check. The
 section's own edit for this share says so; the degradation is one line of
 bookkeeping per dispatched ticket, not a lost capability."""
-
-[[not_shipped]]
-path = "hooks/secret_file_guard.py"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-08-29. Mounted by the source's settings.json and therefore
-named in `hooks/settings.example.json`'s omission list. It gates reads of one
-operator's own secret-bearing files; the policy IS the file list, and a file
-list for someone else's machine is not a rule. No shipped file cites it as a
-mechanism, so nothing here degrades.
-PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
-fresh source (37 lines changed) -- grew a STATUS/Proof-of-life header (naming
-the excluded tools/secret-guard-test/), a deny_receipt import + receipt/fp
-clauses on both deny sites, self-identification per the hook-deny-message
-contract, and an AP-62 undetermined guard. The CONFIG block (the personal
-credential-filename regex, SECRET_TOKEN) is UNCHANGED. Disposition holds: a
-file list for one operator's machine is still not a portable rule."""
-fallback = """None needed — nothing in this share depends on it. If you want the
-shape, `hooks/dangerous_command_guard.py` is the same deny-list pattern with a
-portable subject."""
-
-[[not_shipped]]
-path = "hooks/project_registry_gist.py"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-08-29. Mounted by the source's settings.json (SessionStart)
-and named in the template's omission list. It injects a compressed digest of the
-source's own project registry — `references/PROJECTS.md`'s live rows, which this
-repo ships only as a header and one example row. The hook without the inventory
-prints an empty card.
-PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
-fresh source (92 lines changed) -- grew a STATUS/Proof-of-life header (naming
-hooks/tests/test_project_registry_gist.py, see its own not_shipped entry
-below) and a real defect fix: the parser used to accept ANY five-cell table
-row as a project line, so a renamed-column table silently shipped a foreign
-header as a gist line; it is now anchored on the DECLARED header and reports
-column drift instead of injecting garbage (2026-09-09). `REG = ... /
-"references" / "PROJECTS.md"` is UNCHANGED and still reads the full registry
-this repo does not ship. Disposition holds unchanged."""
-fallback = """`claude-ops/references/PROJECTS.md` (the format) plus the
-prior-art rule in `global-claude-md/CLAUDE.md` that the injected card serves.
-Fill the registry first; the injection is an optimisation over reading it."""
 
 [[not_shipped]]
 path = "ops/cc-reconciled.json"
@@ -3251,7 +3233,8 @@ at the source -- see that entry's path fix below), a TEMPLATE_RX exclusion so
 skill-asset templates (paper-distill/paper-story *-template.md) are skipped
 rather than counted as would-deny, and a CLAUDE_TELEMETRY_DIR redirect.
 `REGISTRY_PATH = ... / "tools" / "cross-index" / "registry.json"` is
-UNCHANGED. Disposition holds unchanged."""
+UNCHANGED. Disposition holds unchanged.
+RE-CHECK 2026-10-02 (lane W3-hooks, align to 183c129): source CHANGED since 7c9867b (3 lines, commit ef0d0eb 2026-09-27): the source RETIRED this hook together with delivery_gate_shadow.py (mount removed, file kept). The change touches no scrub target and does not move the disposition: the cross-index pipeline it probed is still excluded. It is no longer mounted at the source either, so the template's omission list now says so. Disposition holds."""
 fallback = """None; the hook is SHADOW (never warns or denies) and nothing
 downstream reads its telemetry today. If the cross-index tool itself ever
 ships, this file is a portable PostToolUse pattern to revisit: fail-open on
@@ -3273,7 +3256,8 @@ hooks/tests/test_xi_card_guard.py this round (alongside the same move for
 hooks/tests/test_transcript_read_guard.py's siblings), confirmed by its
 absence at the old path and presence at the new one. Content diffed: grew a
 TEMPLATE_RX regression case pairing the hook's new skip-template guard.
-Disposition holds unchanged."""
+Disposition holds unchanged.
+RE-CHECK 2026-10-02 (lane W3-hooks, align to 183c129): source unchanged since 7c9867b; the hook it tests is still excluded (and now retired at the source), so the test stays out. Disposition holds."""
 fallback = """None needed; see the `hooks/xi_card_guard.py` entry."""
 
 [[not_shipped]]
@@ -3326,9 +3310,20 @@ diagrams (diagram-authoring)')."""
 [[collected]]
 path = "hooks/shell_transport_guard.py"
 source = "~/.claude/hooks/shell_transport_guard.py"
-status = "verbatim"
-# 2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source;
-# byte-identical, status unchanged.
+status = "edited"
+edits = [
+  "2026-10-02 (lane W3-hooks, align to 183c129): docstring, backtest paragraph: a pointer to a named audit report under outputs/ (class: named artifact in a non-shipping tree) -> 'a dated shell-command error-audit report'. The incident figures it supports stay.",
+  "2026-10-02: docstring, rule (4) UNQUOTED WINDOWS DRIVE PATH: the worked example named a real work root on a non-system drive (class: absolute local path) -> the declared placeholder form 'D:<dir>' (path form with a <dir> token, which the leak pattern exempts). The point of the example, that bash strips the backslash and find receives 'D:' plus the name, is unchanged.",
+  "2026-10-02: docstring, UNQUOTED PATH backtest paragraph: a pointer to a named audit folder under outputs/ holding the backtest script and result (class: named artifact in a non-shipping tree) -> 'a retrieval-linkage audit's guard-backtest folder'. The counts (53,458 calls, 29 flagged, 0 unresolved) stay.",
+]
+# 2026-09-12 (lane W3, align to 7c9867b): byte-identical, status verbatim.
+# CHANGED 2026-10-02: rule (4), added at the source on 2026-09-20, arrived with
+# two named-artifact pointers and one private work-root example, so the file
+# stopped being byte-identical. The hook's own synthetic one-character drive
+# tokens (examples inside its docstring and a scanner comment) are excused by
+# the [[allow]] entries in this lane's block, same class as the existing
+# '/Program ' entry. Verified: the diff against the source is the three declared
+# edits and nothing else.
 
 [[collected]]
 path = "hooks/ps_errorpref_guard.py"
@@ -3348,6 +3343,7 @@ status = "edited"
 edits = [
   "docstring, WHY A HOOK: the absolute path of the retrospective that raised ruling #8 -> its project-relative tail. The ruling number and the file name stay — they are how the claim stays checkable by the person who has the source.",
   "2026-09-12 (lane W3, align to 7c9867b): source grew the same class of additions as ps_errorpref_guard.py this round (STATUS/Proof-of-life header naming the excluded tools/ps-pipeline-close-test/ suite, deny_receipt import, CLAUDE_TELEMETRY_DIR redirect, notice() self-identification, and an upstream drop of a 'Detail: ops/lessons.md L-027' pointer from compose()). The declared edit above re-applied unchanged. Verified via diff against fresh source: only that edit differs; ast.parse confirms valid syntax.",
+  "2026-10-02 (lane W3-hooks, align to 183c129): re-copied; the declared edit re-applied by a clean 3-way merge (class: absolute path of a retrospective; position: the WHY A HOOK paragraph). No new scrub target in the new source content. Verified: diff against fresh source = that one edit.",
 ]
 
 [[collected]]
@@ -4155,6 +4151,7 @@ edits = [
   "4 occurrences of the account name in the --selftest calibration fixtures (MUST_FIRE / MUST_STAY_SILENT arrays) -- four absolute paths of the shape C:\\Users\\<account>\\AppData\\..., covering the AnnouncementWatchDog install dir, the npm Roaming cache, a Windows Store package dir, and the session scratchpad's notes.txt -> the account-name segment in all four replaced with the already-declared substitution placeholder '<user>' (tools/share-manifest.toml [placeholders].substitution already lists <user>; no new token declared; this entry deliberately does not quote the removed account name itself). Verified the substitution does not change --selftest's verdict: the guard's actual matching logic (SURFACES regexes) keys only on %LOCALAPPDATA%/AppData\\Local/HKCU: shapes, never on the account segment, so `python hooks/appdata_view_guard.py --selftest` still reports PASS both sides after the edit (re-run and confirmed). The Windows Store package-family-name literal was left unchanged: it is a per-app, not per-account, identifier and is not a scrub target under COLLECTION-RULES rule 2.",
   "no other change: the D-057 incident narrative, the byte/entry counts, the AnnouncementWatchDog project name, and the SID suffix pattern (…-1001, a generic Windows well-known RID, not this account's actual SID) are all kept verbatim -- they are the evidentiary content the guard's warning text depends on, and none resolves to an identifiable account, host or credential.",
   "2026-09-12 (lane W3, align to 7c9867b): source history for this file now shows real commits and a clean working tree -- the file that was untracked at the prior collection is now committed. source_dirty_ack dropped per its own review-when; content re-verified against the fresh, now-tracked copy: the file grew a STATUS/Proof-of-life docstring header and a deny_receipt import, both portable, no new scrub targets. Re-applied both declared edits unchanged (verified the 4 account-name-class occurrences -- an absolute path on the system drive under the account's profile, in the --selftest calibration fixtures -- via a byte-safe Python replace run through Bash, since the live published_record_guard.py hook, itself newly collected this round, correctly refuses an Edit-tool write of that path SHAPE into a tree carrying tools/COLLECTION-RULES.md, which this repo is; this is the same false-positive class its own docstring already names for a --selftest calibration fixture, and the same workaround this entry's own edits list above already describes using). `python hooks/appdata_view_guard.py --selftest` re-run: PASS both sides. Verified via diff against fresh source: only the 2 declared edits differ.",
+  "2026-10-02 (lane W3-hooks, align to 183c129): re-copied; both declared edits re-applied by a clean 3-way merge (the install-line replacement, and the account-name segment -> '<user>' in the --selftest fixtures, class: account name in a path). No new scrub target in the new source content. Verified: diff against fresh source = the two declared edits; python hooks/appdata_view_guard.py --selftest PASS both sides.",
 ]
 
 # --- PART 2: candidates evaluated and excluded this round --------------------
@@ -4722,137 +4719,6 @@ record tree; the index's own header now says so explicitly (see that entry's
 2026-09-07 edit above). An adopter who wants the full narrative behind a card
 does not have it, by the same reasoning `ops/references/lessons-detail.md`
 already established for the pre-cutover ledger shape."""
-
-[[not_shipped]]
-path = "hooks/intake_guard.py"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-09-07 (claude-config Phase 23, closeout-capture R4 M2). A
-PreToolUse DENY guard (matcher Write|Edit|Bash|PowerShell) that blocks any
-write to `ops/lessons/` or `ops/lessons.md` outside the `closeout-intake`
-CLI's own INV-2 discipline (a lesson record is born once through `intake.py
-add`, later facts appended via `intake.py event`, the index re-rendered by
-`intake.py render`; nothing else may touch those paths). Its own deny message
-(REASON constant) points the model at
-`python tools/closeout-intake/intake.py add --from <draft>` as the only
-legitimate way to satisfy the block. `tools/closeout-intake/` is under this
-repo's blanket `tools/` exclusion (same precedent as
-hooks/session_board_register.py and hooks/xi_card_guard.py's entries) --
-verified by reading intake_guard.py in full: it imports nothing from tools/
-directly (path resolution is portable, CLAUDE_CONFIG_DIR/Path.home() only),
-but its STORE (`ops/lessons/`) and its only prescribed remedy (the CLI) are
-both source-environment-only. `ops/lessons/` itself does not ship in this repo
-(directory exclusion list: 'ops/lessons/ (record cards; the ops/lessons.md
-index DOES ship)'), so shipping this guard would mount a DENY hook blocking
-writes to a path this repo does not even carry, with its only escape hatch
-(the CLI) also absent -- worse than the xi_card_guard.py precedent (a SHADOW
-probe that merely no-ops) because this hook actively blocks and has severity
-DENY, not WARN."""
-fallback = """None named. ops/lessons.md ships in this repo only as the
-generated INDEX (a snapshot of lesson cards, per the repo's directory
-exclusions); this repo carries no by-hand lesson-intake convention to fall
-back to. An adopter who wants the same discipline (one record born once,
-later facts appended as events, an index regenerated from records) would
-need to author their own store and CLI, using ops/lessons.md's own card shape
-(mechanism / fix / cheap detection check / hits: count) as the format to
-target.
-PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
-fresh source (41 lines changed) -- grew a C-90c discriminator case (same
-suffix under a different root must PASS), a TELEMETRY CAVEAT documenting that
-~100 of 137 live rows are the suite's own pre-2026-09-09 unisolated fixtures
-(closed, not hand-corrected), a deny_receipt import + receipt/fp clauses, and
-self-identification on the deny text per the hook-deny-message contract (which
-also DROPPED the old message's read-elsewhere pointers to two references/*.md
-design docs — an upstream fix). `STORE_DIR = ... / "ops" / "lessons"` and the
-CLI remedy are UNCHANGED. Disposition holds: still gates a store and a CLI
-this repo does not ship."""
-
-[[not_shipped]]
-path = "hooks/intake_match_shadow.py"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-09-07, paired with hooks/intake_guard.py above (same
-closeout-capture R4 milestone, M3). A UserPromptSubmit SHADOW probe (never
-prints, never blocks) that subprocesses
-`python tools/closeout-intake/intake.py match --text-file <prompt> --json`
-on every prompt and logs a telemetry row (n_cards/bytes/ids/top_score/ms) —
-calibration data for a future decision on whether to graduate this into a
-real lesson-card injection. Read in full: `INTAKE = CLAUDE_DIR / "tools" /
-"closeout-intake" / "intake.py"` is a HARD dependency (the function
-`run_match` subprocesses this exact path, and `main()` no-ops immediately if
-`not INTAKE.is_file()`), so without tools/closeout-intake/ this hook is a
-permanent, silent no-op on every single prompt in this share -- the same
-'shadow probe for an absent pipeline' shape this repo's hooks/xi_card_guard.py
-not_shipped entry already names for the cross-index files, just applied to a
-different tools/ tree. Excluded as a pair with hooks/intake_guard.py and its
-CLI, not as a judgement on portability (the code itself is portable:
-CLAUDE_CONFIG_DIR/Path.home() resolution, no hardcoded machine value, no
-prompt-text logging)."""
-fallback = """None; the hook is SHADOW (never surfaces anything to the model)
-and its only consumer is a future human decision this repo's owner has not
-made. If tools/closeout-intake/ is ever revisited for this share, this file
-is a portable UserPromptSubmit pattern to reuse: bounded subprocess timeout,
-fail-open on every path (missing tool / timeout / non-zero exit / bad JSON),
-and an INTAKE_MATCH_STORE / INTAKE_MATCH_LOG env-var test seam so its own
-controls harness never touches a real store or log.
-PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
-fresh source (7 lines changed) -- grew a Proof-of-life line (naming the
-excluded tools/closeout-intake/controls.py, 63/63 as of 2026-09-09) and a
-CLAUDE_TELEMETRY_DIR redirect. `INTAKE = ... / "tools" / "closeout-intake" /
-"intake.py"` is UNCHANGED and still the hard dependency `main()` no-ops
-without. Disposition holds unchanged."""
-
-[[not_shipped]]
-path = "hooks/unattended_run.py"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-09-07 (design: references/long-run-probe-design.md).
-Three hook entry points over one run manifest (`[unattended-run]` kickoff on
-UserPromptSubmit, a PreToolUse scope-DENY guard on Write|Edit|NotebookEdit,
-and a Stop-block guard) -- read in full (399 lines). Path resolution itself
-is portable (CLAUDE_CONFIG_DIR/Path.home(), %LOCALAPPDATA%/Temp/claude via
-os.environ), but the carrier is built end-to-end on
-`tools/process-ledger/` (the tools/ blanket exclusion, same precedent class as
-hooks/session_board_register.py and hooks/project_registry_gist.py):
-`obligations()`'s printed text instructs `python tools/process-ledger/
-ledger.py manifest ...` and `... ledger.py add ...` on every kickoff, and --
-more consequentially -- `mode_stop()`'s own block condition (`report_exists`)
-requires a report file at `reports/*-run-<slug>.md` that only
-`python tools/process-ledger/report.py` can generate; without that tool, a
-session that gets kicked off with `[unattended-run]` and then tries to stop
-would be blocked by `report_exists() == False` up to STOP_BLOCKS (2) times
-with no way to legitimately satisfy the condition, before falling back to the
-bounded allow. Shipping the Stop guard alone would therefore mount a
-mechanism that partially malfunctions (a bounded false block, not a silent
-no-op) for any adopter who has not also built process-ledger/report.py --
-worse than a pure shadow-probe gap. Excluded as a set with its tool, per the
-same 'pair, not portability' reasoning used for the two hooks above and for
-the existing session_board_register.py/project_registry_gist.py entries.
-PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
-fresh source (58 lines changed) -- grew a STATUS/Proof-of-life header, a
-deny_receipt import + receipt/fp clauses on both the scope-deny and stop-block
-messages, self-identification per the hook-deny-message contract, a
-CLAUDE_TELEMETRY_DIR redirect, a re-tag path for a live manifest (Q4, user
-ruling 2026-09-08: a widened scope re-tags in place rather than minting a new
-run id), and a negative-canary probe notice. `tools/process-ledger/report.py`
-and `ledger.py` remain the hard dependencies for the Stop guard's block
-condition and the kickoff obligations text. Disposition holds unchanged."""
-fallback = """None named as a drop-in. The obligations text itself (scope
-discipline, a canary pair stamped into deliverables, a stop-time report with
-named blockers, ending the run on the user's next untagged prompt) is a
-pattern worth re-implementing against whatever process-tracking tool an
-adopter already has -- global-claude-md/CLAUDE.md's own '[unattended-run]'
-paragraph (if/when that section is collected) describes the six obligations
-in prose, independent of this specific hook's file format. FLAGGED FOR THE
-DISPATCHER: this worker's file list did not include global-claude-md/CLAUDE.md,
-and this worker's own operating CLAUDE.md carries a live '[unattended-run]'
-paragraph that names 'The kickoff hook' and cites tools/process-ledger/README.md
-as spec+audit -- if another worker this round collects that paragraph
-verbatim into global-claude-md/CLAUDE.md, it will cite a hook and a tool this
-repo does not ship, the exact 'shipped file routes to an excluded candidate'
-gap COLLECTION-RULES.md's decision procedure (row 2's inverse) warns about.
-Not resolved here (outside this worker's touch scope, and CLAUDE.md is
-outside hooks/) -- surfaced for the round coordinator to check against
-whatever that worker's file list currently says grep of this repo for
-'unattended-run' / 'process-ledger' / 'closeout-intake' at round close should
-come back clean unless a disposition for each has been written."""
 
 [[not_shipped]]
 path = "skills/ux-walkthrough/references/calibration-2026-09-07.md"
@@ -5685,6 +5551,9 @@ status = "verbatim"
 # a matching record call. Confirmed byte-identical to fresh source via diff.
 # No scrub-worthy content. `python hooks/dispatch_commit_notice.py --selftest`
 # run: ALL PASS 32/32.
+# 2026-10-02 (lane W3-hooks, align to 183c129): the source grew `if`-gated
+# mounts for this hook (git commands only); the file itself was re-copied and
+# re-diffed, byte-identical, status unchanged; --selftest now ALL PASS 33/33.
 
 [[collected]]
 path = "hooks/published_record_guard.py"
@@ -5720,6 +5589,10 @@ status = "verbatim"
 # appears verbatim in this session's own transcript. Confirmed byte-identical
 # to fresh source via diff. No scrub-worthy content. `python
 # hooks/worktree_scope_guard.py --selftest` run: ALL PASS 37/37.
+# 2026-10-02 (lane W3-hooks, align to 183c129): re-copied and re-diffed,
+# byte-identical, status unchanged. The source added reparse-point counting to
+# the announcement (L-120), a STATE_DIR_LABELS note and a longer deny text; none
+# carries a scrub target. --selftest now ALL PASS 41/41.
 
 [[collected]]
 path = "hooks/tests/test_browser_pane_scope_guard.py"
@@ -5764,20 +5637,10 @@ re-checked this round). A two-sided calibration suite (MUST_PASS/MUST_DENY,
 plus vocabulary-coverage assertions C-1/C-2 that every live
 ALLOWED_SUBCOMMANDS/POST_INDICATORS token has a case). Excluded for the same
 reason as the hook it tests -- a test suite for a hook that does not ship
-would be dead weight, not a capability."""
+would be dead weight, not a capability.
+RE-CHECK 2026-10-02 (lane W3-hooks, align to 183c129): source unchanged since 7c9867b; the hook it tests is still excluded, so the test stays out. Disposition holds."""
 fallback = """None needed; see the `hooks/extdispatch_entrypoint_guard.py`
 entry."""
-
-[[not_shipped]]
-path = "hooks/tests/test_project_registry_gist.py"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-09-09 at the source, paired with
-hooks/project_registry_gist.py (see that not_shipped entry above, re-checked
-this round). A two-sided calibration suite whose L-1/L-2 cases parse the LIVE
-references/PROJECTS.md (this repo ships only a header + one example row) and
-a mutated copy of it -- doubly tied to source-environment-only content, not
-just to the hook. Excluded for the same reason as the hook it tests."""
-fallback = """None needed; see the `hooks/project_registry_gist.py` entry."""
 
 # (Three placeholder [[not_shipped]] entries for the literature-access files
 # stood here on this lane's branch, so a README sentence disclaiming them would
@@ -5856,3 +5719,550 @@ proving the guard's second pattern (a non-Windows home directory) also denies
 inside a governed tree. A placeholder account name, not a real one."""
 
 # === lane W3 2026-09-12 END ===
+
+# === lane W3-hooks 2026-10-02 BEGIN ===
+#
+# Hooks lane, align to 183c129 (user ruling 2026-10-02: tools/ opens to method tools
+# and hook test suites, so a hook whose only private-tree dependency is such a
+# tool ships with it; the tools are collected by other lanes under
+# instruments/<same-name>/). Six not_shipped entries were CONVERTED to collected
+# below (their old text is carried in the comment above each, the old entry was
+# removed from the file, and git history keeps it). One hook the brief listed
+# for shipping, registry_row_guard.py, did NOT ship: see its not_shipped entry.
+
+# PRIOR [[not_shipped]] entry for hooks/secret_file_guard.py, disposition excluded-by-decision, REMOVED 2026-10-02 (git keeps it).
+# --- reason ---
+# NEW 2026-08-29. Mounted by the source's settings.json and therefore
+# named in `hooks/settings.example.json`'s omission list. It gates reads of one
+# operator's own secret-bearing files; the policy IS the file list, and a file
+# list for someone else's machine is not a rule. No shipped file cites it as a
+# mechanism, so nothing here degrades.
+# PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+# fresh source (37 lines changed) -- grew a STATUS/Proof-of-life header (naming
+# the excluded tools/secret-guard-test/), a deny_receipt import + receipt/fp
+# clauses on both deny sites, self-identification per the hook-deny-message
+# contract, and an AP-62 undetermined guard. The CONFIG block (the personal
+# credential-filename regex, SECRET_TOKEN) is UNCHANGED. Disposition holds: a
+# file list for one operator's machine is still not a portable rule.
+# --- fallback ---
+# None needed — nothing in this share depends on it. If you want the
+# shape, `hooks/dangerous_command_guard.py` is the same deny-list pattern with a
+# portable subject.
+# --- end of prior entry ---
+# REVERSED 2026-10-02 (user ruling): tools/ opens to method tools and their hook test suites, so a hook whose only private-tree dependency is such a tool ships together with it. The portability reading that excluded it (a local secrets policy) was wrong: the patterns are generic.
+[[collected]]
+path = "hooks/secret_file_guard.py"
+source = "~/.claude/hooks/secret_file_guard.py"
+status = "verbatim"
+# 2026-10-02: shipped verbatim (ruling above; the hook's matcher is a generic credential-
+# filename shape, not a personal file list, and its own CONFIG block names the single
+# edit point). Read in full: no scrub target. The deny text's pointer
+# `~/.claude/skills/literature-search-extract/connectors/probe.py` is home-relative and kept; the
+# skill ships under skill-toolkit/skills/ but its connectors/probe.py is not in this repo yet
+# (cross-lane note in the lane report). Its proof-of-life suite tools/secret-guard-test/ is a
+# hook test suite and is cited, not shipped, by this lane. Fail-open verified: malformed
+# stdin, an empty home and a clean path all exit 0 with no output; a credential-shaped
+# path denies.
+
+# PRIOR [[not_shipped]] entry for hooks/project_registry_gist.py, disposition excluded-by-decision, REMOVED 2026-10-02 (git keeps it).
+# --- reason ---
+# NEW 2026-08-29. Mounted by the source's settings.json (SessionStart)
+# and named in the template's omission list. It injects a compressed digest of the
+# source's own project registry — `references/PROJECTS.md`'s live rows, which this
+# repo ships only as a header and one example row. The hook without the inventory
+# prints an empty card.
+# PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+# fresh source (92 lines changed) -- grew a STATUS/Proof-of-life header (naming
+# hooks/tests/test_project_registry_gist.py, see its own not_shipped entry
+# below) and a real defect fix: the parser used to accept ANY five-cell table
+# row as a project line, so a renamed-column table silently shipped a foreign
+# header as a gist line; it is now anchored on the DECLARED header and reports
+# column drift instead of injecting garbage (2026-09-09). `REG = ... /
+# "references" / "PROJECTS.md"` is UNCHANGED and still reads the full registry
+# this repo does not ship. Disposition holds unchanged.
+# --- fallback ---
+# `claude-ops/references/PROJECTS.md` (the format) plus the
+# prior-art rule in `global-claude-md/CLAUDE.md` that the injected card serves.
+# Fill the registry first; the injection is an optimisation over reading it.
+# --- end of prior entry ---
+# REVERSED 2026-10-02 (user ruling): the registry now ships as a template header with an example row, so the hook is no longer 'an empty card' for an adopter, and the user opened tools/ and hook tests.
+[[collected]]
+path = "hooks/project_registry_gist.py"
+source = "~/.claude/hooks/project_registry_gist.py"
+status = "verbatim"
+# 2026-10-02: shipped verbatim. Read in full: no scrub target. Live-reads
+# references/PROJECTS.md, which ships as a template (lane W5c / main): absent file ->
+# silent exit 0, verified with an empty home. Needs the registry's header row to equal
+# DECLARED = (project, status, path, last-checkpoint, next, predecessor); on drift the
+# hook names the drift instead of injecting garbage. Its suite hooks/tests/test_project_registry_gist.py
+# ships beside it.
+
+# PRIOR [[not_shipped]] entry for hooks/intake_guard.py, disposition excluded-by-decision, REMOVED 2026-10-02 (git keeps it).
+# --- reason ---
+# NEW 2026-09-07 (claude-config Phase 23, closeout-capture R4 M2). A
+# PreToolUse DENY guard (matcher Write|Edit|Bash|PowerShell) that blocks any
+# write to `ops/lessons/` or `ops/lessons.md` outside the `closeout-intake`
+# CLI's own INV-2 discipline (a lesson record is born once through `intake.py
+# add`, later facts appended via `intake.py event`, the index re-rendered by
+# `intake.py render`; nothing else may touch those paths). Its own deny message
+# (REASON constant) points the model at
+# `python tools/closeout-intake/intake.py add --from <draft>` as the only
+# legitimate way to satisfy the block. `tools/closeout-intake/` is under this
+# repo's blanket `tools/` exclusion (same precedent as
+# hooks/session_board_register.py and hooks/xi_card_guard.py's entries) --
+# verified by reading intake_guard.py in full: it imports nothing from tools/
+# directly (path resolution is portable, CLAUDE_CONFIG_DIR/Path.home() only),
+# but its STORE (`ops/lessons/`) and its only prescribed remedy (the CLI) are
+# both source-environment-only. `ops/lessons/` itself does not ship in this repo
+# (directory exclusion list: 'ops/lessons/ (record cards; the ops/lessons.md
+# index DOES ship)'), so shipping this guard would mount a DENY hook blocking
+# writes to a path this repo does not even carry, with its only escape hatch
+# (the CLI) also absent -- worse than the xi_card_guard.py precedent (a SHADOW
+# probe that merely no-ops) because this hook actively blocks and has severity
+# DENY, not WARN.
+# --- fallback ---
+# None named. ops/lessons.md ships in this repo only as the
+# generated INDEX (a snapshot of lesson cards, per the repo's directory
+# exclusions); this repo carries no by-hand lesson-intake convention to fall
+# back to. An adopter who wants the same discipline (one record born once,
+# later facts appended as events, an index regenerated from records) would
+# need to author their own store and CLI, using ops/lessons.md's own card shape
+# (mechanism / fix / cheap detection check / hits: count) as the format to
+# target.
+# PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+# fresh source (41 lines changed) -- grew a C-90c discriminator case (same
+# suffix under a different root must PASS), a TELEMETRY CAVEAT documenting that
+# ~100 of 137 live rows are the suite's own pre-2026-09-09 unisolated fixtures
+# (closed, not hand-corrected), a deny_receipt import + receipt/fp clauses, and
+# self-identification on the deny text per the hook-deny-message contract (which
+# also DROPPED the old message's read-elsewhere pointers to two references/*.md
+# design docs — an upstream fix). `STORE_DIR = ... / "ops" / "lessons"` and the
+# CLI remedy are UNCHANGED. Disposition holds: still gates a store and a CLI
+# this repo does not ship.
+# --- end of prior entry ---
+# REVERSED 2026-10-02 (user ruling): tools/ opens to method tools and their hook test suites, so a hook whose only private-tree dependency is such a tool ships together with it. The CLI it points at ships under instruments/closeout-intake/.
+[[collected]]
+path = "hooks/intake_guard.py"
+source = "~/.claude/hooks/intake_guard.py"
+status = "edited"
+edits = [
+  "docstring STATUS paragraph: two named design/PSM documents under references/ (class: named artifact in a non-shipping tree) -> prose 'the closeout-capture R3 design note' / 'that round's PSM'. The section ids S-6, INV-9 and 3.2 stay.",
+  "docstring FALSE-POSITIVE LOG, 2026-09-09 entry: two session ids (class: session id) -> 'two sessions'. The telemetry file pointer, dates and the three misfire shapes stay.",
+  "docstring FALSE-POSITIVE LOG, 2026-09-22 entry: one session id (class: session id) -> removed from the parenthetical; 'feedback pool review round 1' stays.",
+]
+# 2026-10-02: shipped edited. Cites tools/closeout-intake/intake.py and controls.py and
+# tools/hook-deny-lint/report_fp.py by source path (cross-lane: they ship under instruments/).
+# DENY guard for writes to ops/lessons/ and ops/lessons.md; fires on those path shapes
+# whether or not the CLI is installed, so install closeout-intake first (README says so).
+# Self-test: the repo copy denies a write to ops/lessons/L-999.md and an `echo >>` into
+# ops/lessons/, exit 0 with an empty home.
+
+# PRIOR [[not_shipped]] entry for hooks/intake_match_shadow.py, disposition excluded-by-decision, REMOVED 2026-10-02 (git keeps it).
+# --- reason ---
+# NEW 2026-09-07, paired with hooks/intake_guard.py above (same
+# closeout-capture R4 milestone, M3). A UserPromptSubmit SHADOW probe (never
+# prints, never blocks) that subprocesses
+# `python tools/closeout-intake/intake.py match --text-file <prompt> --json`
+# on every prompt and logs a telemetry row (n_cards/bytes/ids/top_score/ms) —
+# calibration data for a future decision on whether to graduate this into a
+# real lesson-card injection. Read in full: `INTAKE = CLAUDE_DIR / "tools" /
+# "closeout-intake" / "intake.py"` is a HARD dependency (the function
+# `run_match` subprocesses this exact path, and `main()` no-ops immediately if
+# `not INTAKE.is_file()`), so without tools/closeout-intake/ this hook is a
+# permanent, silent no-op on every single prompt in this share -- the same
+# 'shadow probe for an absent pipeline' shape this repo's hooks/xi_card_guard.py
+# not_shipped entry already names for the cross-index files, just applied to a
+# different tools/ tree. Excluded as a pair with hooks/intake_guard.py and its
+# CLI, not as a judgement on portability (the code itself is portable:
+# CLAUDE_CONFIG_DIR/Path.home() resolution, no hardcoded machine value, no
+# prompt-text logging).
+# --- fallback ---
+# None; the hook is SHADOW (never surfaces anything to the model)
+# and its only consumer is a future human decision this repo's owner has not
+# made. If tools/closeout-intake/ is ever revisited for this share, this file
+# is a portable UserPromptSubmit pattern to reuse: bounded subprocess timeout,
+# fail-open on every path (missing tool / timeout / non-zero exit / bad JSON),
+# and an INTAKE_MATCH_STORE / INTAKE_MATCH_LOG env-var test seam so its own
+# controls harness never touches a real store or log.
+# PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+# fresh source (7 lines changed) -- grew a Proof-of-life line (naming the
+# excluded tools/closeout-intake/controls.py, 63/63 as of 2026-09-09) and a
+# CLAUDE_TELEMETRY_DIR redirect. `INTAKE = ... / "tools" / "closeout-intake" /
+# "intake.py"` is UNCHANGED and still the hard dependency `main()` no-ops
+# without. Disposition holds unchanged.
+# --- end of prior entry ---
+# REVERSED 2026-10-02 (user ruling): tools/ opens to method tools and their hook test suites, so a hook whose only private-tree dependency is such a tool ships together with it. It is a pair with intake_guard and ships with it.
+[[collected]]
+path = "hooks/intake_match_shadow.py"
+source = "~/.claude/hooks/intake_match_shadow.py"
+status = "edited"
+edits = [
+  "docstring STATUS paragraph: two named design/PSM documents under references/ (class: named artifact in a non-shipping tree) -> prose 'the closeout-capture R3 design note' / 'that round's PSM'. Section ids S-8, INV-7 and 3.3 stay.",
+]
+# 2026-10-02: shipped edited. Shadow probe: never prints, never blocks; a missing
+# tools/closeout-intake/intake.py makes main() exit at once (silent no-op), verified with an
+# empty home. Cites tools/closeout-intake/controls.py as its proof-of-life.
+
+# PRIOR [[not_shipped]] entry for hooks/unattended_run.py, disposition excluded-by-decision, REMOVED 2026-10-02 (git keeps it).
+# --- reason ---
+# NEW 2026-09-07 (design: references/long-run-probe-design.md).
+# Three hook entry points over one run manifest (`[unattended-run]` kickoff on
+# UserPromptSubmit, a PreToolUse scope-DENY guard on Write|Edit|NotebookEdit,
+# and a Stop-block guard) -- read in full (399 lines). Path resolution itself
+# is portable (CLAUDE_CONFIG_DIR/Path.home(), %LOCALAPPDATA%/Temp/claude via
+# os.environ), but the carrier is built end-to-end on
+# `tools/process-ledger/` (the tools/ blanket exclusion, same precedent class as
+# hooks/session_board_register.py and hooks/project_registry_gist.py):
+# `obligations()`'s printed text instructs `python tools/process-ledger/
+# ledger.py manifest ...` and `... ledger.py add ...` on every kickoff, and --
+# more consequentially -- `mode_stop()`'s own block condition (`report_exists`)
+# requires a report file at `reports/*-run-<slug>.md` that only
+# `python tools/process-ledger/report.py` can generate; without that tool, a
+# session that gets kicked off with `[unattended-run]` and then tries to stop
+# would be blocked by `report_exists() == False` up to STOP_BLOCKS (2) times
+# with no way to legitimately satisfy the condition, before falling back to the
+# bounded allow. Shipping the Stop guard alone would therefore mount a
+# mechanism that partially malfunctions (a bounded false block, not a silent
+# no-op) for any adopter who has not also built process-ledger/report.py --
+# worse than a pure shadow-probe gap. Excluded as a set with its tool, per the
+# same 'pair, not portability' reasoning used for the two hooks above and for
+# the existing session_board_register.py/project_registry_gist.py entries.
+# PER-FILE RE-CHECK 2026-09-12 (lane W3, align to 7c9867b): diffed against the
+# fresh source (58 lines changed) -- grew a STATUS/Proof-of-life header, a
+# deny_receipt import + receipt/fp clauses on both the scope-deny and stop-block
+# messages, self-identification per the hook-deny-message contract, a
+# CLAUDE_TELEMETRY_DIR redirect, a re-tag path for a live manifest (Q4, user
+# ruling 2026-09-08: a widened scope re-tags in place rather than minting a new
+# run id), and a negative-canary probe notice. `tools/process-ledger/report.py`
+# and `ledger.py` remain the hard dependencies for the Stop guard's block
+# condition and the kickoff obligations text. Disposition holds unchanged.
+# --- fallback ---
+# None named as a drop-in. The obligations text itself (scope
+# discipline, a canary pair stamped into deliverables, a stop-time report with
+# named blockers, ending the run on the user's next untagged prompt) is a
+# pattern worth re-implementing against whatever process-tracking tool an
+# adopter already has -- global-claude-md/CLAUDE.md's own '[unattended-run]'
+# paragraph (if/when that section is collected) describes the six obligations
+# in prose, independent of this specific hook's file format. FLAGGED FOR THE
+# DISPATCHER: this worker's file list did not include global-claude-md/CLAUDE.md,
+# and this worker's own operating CLAUDE.md carries a live '[unattended-run]'
+# paragraph that names 'The kickoff hook' and cites tools/process-ledger/README.md
+# as spec+audit -- if another worker this round collects that paragraph
+# verbatim into global-claude-md/CLAUDE.md, it will cite a hook and a tool this
+# repo does not ship, the exact 'shipped file routes to an excluded candidate'
+# gap COLLECTION-RULES.md's decision procedure (row 2's inverse) warns about.
+# Not resolved here (outside this worker's touch scope, and CLAUDE.md is
+# outside hooks/) -- surfaced for the round coordinator to check against
+# whatever that worker's file list currently says grep of this repo for
+# 'unattended-run' / 'process-ledger' / 'closeout-intake' at round close should
+# come back clean unless a disposition for each has been written.
+# --- end of prior entry ---
+# REVERSED 2026-10-02 (user ruling): tools/ opens to method tools and their hook test suites, so a hook whose only private-tree dependency is such a tool ships together with it. Its Stop guard needs the report only the process-ledger tool generates, and that tool ships.
+[[collected]]
+path = "hooks/unattended_run.py"
+source = "~/.claude/hooks/unattended_run.py"
+status = "edited"
+edits = [
+  "docstring Design line: a named design document under references/ (class: named artifact in a non-shipping tree) -> 'a long-run probe design note'. The section ids stay.",
+  "docstring, user-return paragraph: a session id (class: session id) -> 'one session'. The 2h42m figure and the failure narrative stay.",
+]
+# 2026-10-02: shipped edited. Three entry points (kickoff / scope / stop) over one run manifest.
+# The Stop guard blocks the end of a session only while a manifest is armed and no run
+# report exists, and the manifest is created only by kickoff on a prompt carrying the
+# [unattended-run] tag, so an adopter who never types that tag is never affected: verified
+# with an empty home that scope and a plain stop exit 0 silently when nothing is armed. The
+# run report is generated by tools/process-ledger/report.py (ships under
+# instruments/process-ledger/). Cites tools/hook-proof-of-life/pol.py as well. The runtime
+# path template reports/<date>-run-<slug>.md is the hook's own output location and stays.
+# NOTE for the template: share_gate S5 reads the mounted file name as the text after the
+# last '/' of the command, so the three arg-bearing mounts of this hook read as unmounted;
+# reported to main in the lane report.
+
+# PRIOR [[not_shipped]] entry for hooks/tests/test_project_registry_gist.py, disposition excluded-by-decision, REMOVED 2026-10-02 (git keeps it).
+# --- reason ---
+# NEW 2026-09-09 at the source, paired with
+# hooks/project_registry_gist.py (see that not_shipped entry above, re-checked
+# this round). A two-sided calibration suite whose L-1/L-2 cases parse the LIVE
+# references/PROJECTS.md (this repo ships only a header + one example row) and
+# a mutated copy of it -- doubly tied to source-environment-only content, not
+# just to the hook. Excluded for the same reason as the hook it tests.
+# --- fallback ---
+# None needed; see the `hooks/project_registry_gist.py` entry.
+# --- end of prior entry ---
+# REVERSED 2026-10-02 (user ruling): the hook it tests ships now, so the test ships.
+[[collected]]
+path = "hooks/tests/test_project_registry_gist.py"
+source = "~/.claude/hooks/tests/test_project_registry_gist.py"
+status = "edited"
+edits = [
+  "fixture row in G-1 and its assertion (2 positions): a real project root on a non-system drive (class: absolute local path) -> 'D:\\\\<WORK_ROOT>\\\\Prism', using the already-declared <WORK_ROOT> token. The project name Prism stays.",
+  "fixture in G-6: the repeated one-character path 'D:\\\\x' -> 'D:\\\\<x>' (class: absolute local path form), so the leak pattern does not need an allow entry.",
+  "fixture in C-4: the real project root again -> 'D:\\\\<WORK_ROOT>\\\\some-long-folder-name-NN\\\\sub'.",
+]
+# 2026-10-02: shipped edited. L-1/L-2 check the LIVE references/PROJECTS.md and print a loud
+# SKIP when it is absent (the repo ships a template, so with the template filled in they run;
+# without it the rest passes: ALL TESTS PASSED). All other cases are hermetic.
+
+[[collected]]
+path = "hooks/boundary_contract_notice.py"
+source = "~/.claude/hooks/boundary_contract_notice.py"
+status = "edited"
+edits = [
+  "docstring, WHY THE LEDGER paragraph: a session id (class: session id) -> 'one session'. The measured figures (17 visible messages, 10 text blocks) stay.",
+]
+# 2026-10-02: NEW, procedure A. Read in full. Cites tools/process-ledger/ledger.py (cross-lane).
+# Self-test ALL PASS 26/26; empty-home run exits 0 silent. A notice only, never a deny.
+
+[[collected]]
+path = "hooks/feedback_notice.py"
+source = "~/.claude/hooks/feedback_notice.py"
+status = "edited"
+edits = [
+  "docstring STATUS: a named design document under references/ (class: named artifact in a non-shipping tree) -> 'a feedback-pool design note'. The section id 3.4 stays.",
+]
+# 2026-10-02: NEW, procedure A. Read in full. Imports `feedback` from tools/feedback-pool/ and cites
+# tools/process-ledger/ledger.py (cross-lane: both ship under instruments/). Without the
+# import it falls back inside its own try/except (fail-open). Self-test ALL PASS 14/14.
+
+[[collected]]
+path = "hooks/tree_noise_gist.py"
+source = "~/.claude/hooks/tree_noise_gist.py"
+status = "verbatim"
+# 2026-10-02: NEW, procedure A, verbatim. Read in full. The docstring's example names a notes vault
+# project (a project-registry name, kept: project names are not a scrub target) and a date.
+# Imports noise from tools/tree-noise/ (cross-lane: ships under instruments/tree-noise/).
+# Empty-home run: exit 0, no output.
+
+[[collected]]
+path = "hooks/golive_check.py"
+source = "~/.claude/hooks/golive_check.py"
+status = "verbatim"
+# 2026-10-02: NEW, procedure A, verbatim. Read in full. Imports pol from tools/hook-proof-of-life/
+# and closure from tools/class-closure/, and loads tools/system-hmi/hmi/scan.py plus the
+# system-hmi registry (cross-lane). Absent tools degrade to silence (empty-home run: exit 0,
+# no output). Its suite hooks/tests/test_golive_check.py needs those tools laid out under
+# tools/ (5 of its 22 cases build fixture trees from them). Measured here: 17 pass alone, 20 with
+# the other lanes' tools laid out under tools/, and the last 2 (registry_gap_real_tree,
+# e2_real_registered_hook_passes_silently) need a system-hmi registry that registers
+# hooks/golive_check.py and tools/class-closure -- the template ships one subsystem only.
+
+[[collected]]
+path = "hooks/system_hmi_summary.py"
+source = "~/.claude/hooks/system_hmi_summary.py"
+status = "edited"
+edits = [
+  "docstring STATUS: a design-folder pointer under outputs/ (class: named artifact in a non-shipping tree) -> 'the system-hmi design'. The item id HMI-05 and 'design 17' stay.",
+]
+# 2026-10-02: NEW, procedure A. Read in full. Reads tools/system-hmi/out/snapshot.json and
+# known-good.json (generated by hmi.py) and imports tools/system-hmi/hmi/deferral.py (cross-lane,
+# ships as a template). Snapshot absent: prints one line 'snapshot unavailable' and exits 0.
+# Suite hooks/tests/test_system_hmi_summary.py 18/18.
+
+[[collected]]
+path = "hooks/view_launcher_gist.py"
+source = "~/.claude/hooks/view_launcher_gist.py"
+status = "verbatim"
+# 2026-10-02: NEW, procedure A, verbatim. Read in full. Imports build from tools/view-launcher/ and reads
+# its views.json (cross-lane: ships as a template). Register absent, empty or broken: silent exit 0
+# (its own selftest cases G4-G9). --selftest 9/9 with the tool laid out beside it.
+
+[[collected]]
+path = "hooks/verbatim_dispatch_notice.py"
+source = "~/.claude/hooks/verbatim_dispatch_notice.py"
+status = "edited"
+edits = [
+  "docstring WHAT IT GATES: a session id and the title of the deck project the session built (class: session id plus a pointer into a private project) -> 'a deck-building session'. The incident date, the quoted prompt fragment and the error text stay.",
+]
+# 2026-10-02: NEW, procedure A. Read in full. Enforces rules/source-quotation-evidence.md (ships
+# through the global-claude-md lane) and cites tools/quote-evidence/qe.py (cross-lane).
+# Notice only. Suite hooks/tests/test_verbatim_dispatch_notice.py 16/16.
+
+[[collected]]
+path = "hooks/session_search_query_notice.py"
+source = "~/.claude/hooks/session_search_query_notice.py"
+status = "edited"
+edits = [
+  "docstring WHY A HOOK: a pointer to a named audit document under outputs/ (class: named artifact in a non-shipping tree) -> 'a retrieval-linkage audit's false-null incident statistics'. The counts (640 transcripts, 15 multi-word calls, 11 empty) stay.",
+]
+# 2026-10-02: NEW, procedure A. Read in full; no tool dependency. Notice only. Suite
+# hooks/tests/test_session_search_query_notice.py 17/17.
+
+[[collected]]
+path = "hooks/tests/test_golive_check.py"
+source = "~/.claude/hooks/tests/test_golive_check.py"
+status = "edited"
+edits = [
+  "t_live_reads_real_declarations: the assertion that a personal-profile hook (not shipped) declares its live reads was dropped; the project_registry_gist assertion stays. Class: reference to a hook that does not ship; position: the first two lines of that test. Without the edit the case fails on a missing file.",
+]
+# 2026-10-02: NEW test, procedure A. 22 cases; 17 pass standing alone in this repo, 22 with the tools
+# it exercises copied to tools/ (hook-proof-of-life, class-closure, system-hmi, with a registry
+# that registers hooks/golive_check.py and tools/class-closure).
+
+[[collected]]
+path = "hooks/tests/test_system_hmi_summary.py"
+source = "~/.claude/hooks/tests/test_system_hmi_summary.py"
+status = "verbatim"
+# 2026-10-02: NEW test, verbatim. Read in full; hermetic (fixtures in a temp dir). 18/18.
+
+[[collected]]
+path = "hooks/tests/test_verbatim_dispatch_notice.py"
+source = "~/.claude/hooks/tests/test_verbatim_dispatch_notice.py"
+status = "edited"
+edits = [
+  "fixture prompts, 2 positions: a path on a non-system drive under the operator's work root (class: absolute local path) -> 'D:/<WORK_ROOT>/x/source/images/...' with the already-declared <WORK_ROOT> token. The Chinese file names stay.",
+]
+# 2026-10-02: NEW test. Hermetic; 16/16 after the edit.
+
+[[collected]]
+path = "hooks/tests/test_session_search_query_notice.py"
+source = "~/.claude/hooks/tests/test_session_search_query_notice.py"
+status = "verbatim"
+# 2026-10-02: NEW test, verbatim. Read in full; hermetic. 17/17.
+
+[[not_shipped]]
+path = "hooks/registry_row_guard.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-29, listed for shipping by the 2026-10-02 brief on the premise that its only private
+dependency is references/PROJECTS.md. Read in full: it also IMPORTS hooks/user_profile_gist.py
+(`parsers()` loads it by file name) and refuses a registry row that has no row in the
+USER-PROFILE.md beside the registry. Both are personal (a profile of one operator) and stay out. Measured in
+this repo: with user_profile_gist.py absent the hook's --selftest raises FileNotFoundError, and
+as a mounted guard it fails open on every call, so a shipped copy would be a guard that can never
+fire and whose self-test crashes. Not shipped for that reason, not for portability of the code."""
+fallback = """hooks/project_registry_gist.py ships and anchors on the registry's declared header, so column
+drift in the shipped references/PROJECTS.md template is named at every session start. The row
+format is documented by the template itself; add rows by hand. If user_profile_gist.py and a profile
+are ever shipped, this guard ships with them (its fixtures already build their own tree)."""
+
+[[not_shipped]]
+path = "hooks/codex_dispatch_guard.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-23. A PreToolUse guard that makes the Codex CLI tier honour the external-dispatch
+redlines (never send the source tree or the share tree to an external model). Its proof-of-life
+checks agreement with `extdispatch.redline_check`, i.e. tools/extdispatch/, which is excluded, and
+it fails CLOSED on a missing redline source, so shipping it alone would deny every codex call it
+matches. Excluded with the extdispatch group (see hooks/extdispatch_entrypoint_guard.py).
+RE-CHECK 2026-10-02: still mounted at the source and still omitted from the template, whose _README names it."""
+fallback = """The rule it enforces ships as prose: claude-ops/ops/20-dispatch.md section 4b. If you dispatch to
+an external tier, a deny-list guard in the shape of hooks/dangerous_command_guard.py is the pattern."""
+
+[[not_shipped]]
+path = "hooks/tests/test_codex_dispatch_guard.py"
+disposition = "excluded-by-decision"
+reason = """The suite of hooks/codex_dispatch_guard.py (excluded above); a test for a hook that does not ship cannot ship. RE-CHECK 2026-10-02: unchanged."""
+fallback = """None needed; see the hooks/codex_dispatch_guard.py entry."""
+
+[[not_shipped]]
+path = "hooks/deliverable_birth_notice.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-21. A PostToolUse notice: a commit that adds a human-facing deliverable with no
+function name asks for one. The name register it checks, tools/cross-index/function-names.json, and the
+sidecar convention belong to cross-index, which is excluded; without them the notice would ask for a
+name that has nowhere to be recorded. RE-CHECK 2026-10-02: still mounted at the source; the template's _README names it."""
+fallback = """The rule ships as prose in global-claude-md/rules/naming-and-placement.md (name by level and consumer
+first). Keep your own list of core pages and name them by what they do, not by the task that made them."""
+
+[[not_shipped]]
+path = "hooks/moc_closeout_notice.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-23. Fires when a session appends to a references/*-session-digest.md and asks for the
+MOC regeneration the session owes; the command it names is tools/graph-snapshot/moc_regen.py and the
+subject is references/_moc, both excluded (graph-snapshot is a borderline store tool left out of the
+method-tools ruling). RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README."""
+fallback = """None needed: nothing in this share depends on it. The close-out digest duty itself is stated in
+global-claude-md/CLAUDE.md."""
+
+[[not_shipped]]
+path = "hooks/tests/test_moc_closeout_notice.py"
+disposition = "excluded-by-decision"
+reason = """The suite of hooks/moc_closeout_notice.py (excluded above). RE-CHECK 2026-10-02: unchanged."""
+fallback = """None needed; see the hooks/moc_closeout_notice.py entry."""
+
+[[not_shipped]]
+path = "hooks/past_work_recall_inject.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-20. A UserPromptSubmit hook that, on a past-work phrase, runs
+`tools/recall/recall.py query ... --legs mem,proj,les,deliv` and injects the candidates. The recall tool
+reads the operator's personal memory silos, the project registry and the deliverables index; the
+method-tools ruling left it out as a borderline store tool, and the hook is a no-op without it.
+RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README."""
+fallback = """The prior-art check it automates is a prose rule in global-claude-md/CLAUDE.md; hooks/project_registry_gist.py
+ships the registry card that rule consults first."""
+
+[[not_shipped]]
+path = "hooks/tests/test_past_work_recall_inject.py"
+disposition = "excluded-by-decision"
+reason = """The suite of hooks/past_work_recall_inject.py (excluded above). RE-CHECK 2026-10-02: unchanged."""
+fallback = """None needed; see the hooks/past_work_recall_inject.py entry."""
+
+[[not_shipped]]
+path = "hooks/subagent_retrieval_brief.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-20. A SubagentStart hook that hands every subagent the one retrieval entry point
+(tools/recall/) its context lacks. Same dependency as hooks/past_work_recall_inject.py: the recall tool
+over personal memory silos is excluded, so the brief would point every subagent at a tool that is
+absent. RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README."""
+fallback = """Name the retrieval entry you do have in the dispatch prompt by hand; claude-ops/ops/20-dispatch.md
+carries the brief template."""
+
+[[not_shipped]]
+path = "hooks/tests/test_subagent_retrieval_brief.py"
+disposition = "excluded-by-decision"
+reason = """The suite of hooks/subagent_retrieval_brief.py (excluded above). RE-CHECK 2026-10-02: unchanged."""
+fallback = """None needed; see the hooks/subagent_retrieval_brief.py entry."""
+
+[[not_shipped]]
+path = "hooks/user_profile_gist.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-09-19. A SessionStart hook that injects a profile of ONE operator (approved descriptive
+facts plus an effort map computed from the project registry), read from references/USER-PROFILE.md. The
+file is personal by construction; a template of it would be a blank form for a hook whose whole value
+is the specific person's facts. Also the parser library registry_row_guard.py imports. RE-CHECK 2026-10-02:
+still mounted at the source; named in the template's _README."""
+fallback = """None needed. If you want the pattern, hooks/project_registry_gist.py is the same SessionStart
+shape over a portable subject."""
+
+[[not_shipped]]
+path = "hooks/tests/test_user_profile_gist.py"
+disposition = "excluded-by-decision"
+reason = """The suite of hooks/user_profile_gist.py (excluded above). RE-CHECK 2026-10-02: unchanged."""
+fallback = """None needed; see the hooks/user_profile_gist.py entry."""
+
+[[unmounted_hook]]
+file = "hooks/delivery_gate_shadow.py"
+reason = """RETIRED at the source, not a live hook: source commit ef0d0eb (2026-09-27) removed its
+SubagentStop mount in settings.json and kept the file and its telemetry shape, the same arrangement as
+hooks/fieldwork_threshold_notice.py above. This lane's hooks/settings.example.json follows the source: the
+mount this file carried is gone, and the template's _README names the retirement. The file ships for
+provenance and rollback; it was a SHADOW probe and never blocked anything, so nothing is lost by the missing mount."""
+
+# Four [[allow]] entries for hooks/shell_transport_guard.py: the hook's rule (4) is about
+# unquoted drive-letter paths, so its docstring and one scanner comment must show examples of
+# the shape. Each is a one- or three-character synthetic token, not a location; `match` is kept shorter than the
+# pattern it excuses (no drive letter), the same discipline as the entries above.
+
+[[allow]]
+file = "hooks/shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ':\x'
+reason = """Calibration example inside the hook's own documentation: the docstring's find example, 'D:' plus a one-character directory. A synthetic token that names no location."""
+
+[[allow]]
+file = "hooks/shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ':\a'
+reason = """Calibration example inside the hook's own documentation: the docstring's and the scanner comment's quoted-versus-unquoted example (two lines). A synthetic token that names no location."""
+
+[[allow]]
+file = "hooks/shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ':\dir'
+reason = """Calibration example inside the hook's own documentation: the docstring's counter-example of a double-quoted path ending in a backslash. A synthetic token that names no location."""
+
+[[allow]]
+file = "hooks/shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ':\\x'
+reason = """Calibration example inside the hook's own documentation: the docstring's 'known blind spot' example, the same token with doubled backslashes. A synthetic token that names no location."""
+
+# === lane W3-hooks 2026-10-02 END ===

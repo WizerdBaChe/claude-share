@@ -75,7 +75,8 @@ review-when: the harness changes the PostToolUse payload shape (the marker
 degrades to "unknown"/fail-open — check the annotate branch still parses), or
 a new browser surface (mcp__* prefix) joins the environment (extend matchers).
 
-Proof-of-life: `python tools/ui-verify-test/test_ui_verify_guard.py` (20/20).
+Proof-of-life: `python tools/ui-verify-test/test_ui_verify_guard.py` (26/26
+as of 2026-09-23, incl. 3 unclassifiable-payload + 3 unclassifiable-tool_input).
 """
 import json
 import os
@@ -294,6 +295,8 @@ def main() -> None:
         sys.exit(0)
     if not isinstance(payload, dict):
         sys.exit(0)      # undetermined: parses, but is not a payload object (AP-62)
+    if not isinstance(payload.get("tool_input") or {}, dict):
+        sys.exit(0)      # same class, one level in: both handlers call tool_input.get
 
     event = str(payload.get("hook_event_name", "PreToolUse"))
     if event == "PostToolUse":

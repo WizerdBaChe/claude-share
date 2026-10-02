@@ -28,7 +28,7 @@ out-of-process route. The cost is real and accepted: a first-time legitimate
 host is denied once, and the user allowlists it if the pane is genuinely needed.
 
 HARNESS COMPATIBILITY (user ruling 2026-08-14; rule in L-011). The harness's
-`<browser_surfaces>` block names this pane the default surface - that
+`<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) block names this pane the default surface - that
 instruction cannot be edited from here and this hook does not contradict it.
 The same block lists `claude-in-chrome` as an available surface, so the denial
 picks a listed alternative and states why. Narrowing within the harness's own

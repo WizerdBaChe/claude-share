@@ -12,8 +12,9 @@ triggers them.
 Checks (all cheap, no network; ONE subprocess in the steady state -- check 14's
 `git status`, scoped to cwd == ~/.claude and budgeted at 2 s. Check 16 adds a
 SECOND one, but only after the claude binary's stat() fingerprint moves, which
-is rare and measured at 86-102 ms. Every other check is stat() or a small
-read):
+is rare and measured at 86-102 ms. Check 18 adds two `git ls-files` calls,
+but only while an untracked path sits under a capability dir. Every other
+check is stat() or a small read):
   1. lesson intake report (`intake.py report --nudge`) -> route a hits>=2
      record through 40-maintenance S2a / a folded-but-recurring fix did not
      hold / a status projection drifted (replaced the LESSON_CAP entry count
@@ -47,6 +48,22 @@ read):
  17. session-transcript mirror marker FAIL, missing, or older than
      MIRROR_STALE_DAYS -> the backup task may be dead while cleanupPeriodDays
      deletion keeps running (reads MIRROR_MARKER, one small file)
+ 18. committed instruction surface points at an untracked file
+     -> commit the target by path (cwd == ~/.claude only; runs
+     tools/tracking-refs in-process ONLY when check 14's status shows an
+     untracked path under TRACKING_REFS_TARGET_DIRS; integrity-sweep check 34)
+ 19. off-disk git bundle of ~/.claude FAILED, drill failed, or older than
+     BUNDLE_STALE_DAYS -> run tools/home-bundle/run-daily.ps1 (reads
+     BUNDLE_STATUS, one small JSON; cwd == ~/.claude only)
+ 20. an Obsidian vault junction does not resolve, or the vault's declared
+     junctions and its actual reparse points disagree -> WARN band
+     (reads VAULT_AGENTS_MD's area table + lists VAULT_ROOT's top level;
+     cwd == ~/.claude only)
+ 21. a tracked file's working-tree line ending disagrees with what
+     .gitattributes pins (mixed endings inside one file = ALARM; whole-file
+     drift = BREACH with the rewrite named) -> `git ls-files --eol`, budget
+     EOL_GIT_TIMEOUT; cwd == ~/.claude only; born 2026-09-29 (852 drifted
+     files found by hand that day; nothing had measured the property)
 NO THRESHOLD NUMBER APPEARS IN THIS DOCSTRING, and none may be added. Every
 line above names the CONSTANT; the constant's assignment below is the single
 site that carries the value. This is a property of the file, not a style
@@ -81,6 +98,7 @@ enough that they were the repo's three oldest debts.
 
 Proof-of-life: `python tools/ops-health-test/test_ops_health_nudge.py` (52/52).
 """
+import datetime
 import json
 import os
 import re
@@ -149,8 +167,8 @@ BODY_CAP = 300          # lines, whole SKILL.md. Charged only on invoke, not at
                         # session start. Over cap means EXTRACT to references/,
                         # never compress in place. why/history:
                         # ops/rule-registry.md
-CLAUDE_MD_CAP = 23040      # BYTES (22.5 KB). why/history: ops/rule-registry.md
-DICT_CAP = 49 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
+CLAUDE_MD_CAP = 23552      # BYTES (23.0 KB). why/history: ops/rule-registry.md
+DICT_CAP = 60 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # reasoning as SIZE_CAP: the dict is charged only on a
                        # routing miss. Raised 20K->24K on 2026-08-15 after
                        # tools/skill-routing-audit.py showed the file's problem
@@ -166,7 +184,7 @@ DICT_CAP = 49 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # the trigger asked for happened; raising the cap after
                        # it is this rule's own stated intended outcome.
                        # Raised 28K->42K on 2026-09-04 after dict-review round
-                       # 2 (outputs/dict-review-round2-2026-09-04.md): first
+                       # 2 (a dict-review round record): first
                        # round to move a coverage number (schedule and
                        # update-config 0% -> 100%), 3 phantom targets
                        # tombstoned, DEAD 13->8. It also checked the RULER:
@@ -210,6 +228,20 @@ DICT_CAP = 49 * 1024   # BYTES. REVIEW TRIGGER, not a budget -- same class (b)
                        # sequence, not the value, was the defect: a guardrail
                        # edit is proposed in drafts/ and applied after the
                        # word, the way environment.md's exemption above was.
+                       # Raised 49K->56K on 2026-09-22 by NAMED user ruling
+                       # (「dict 上限調 56K」) after dict-review round 4: 7
+                       # slash/middle-dot tokens spelled out, the audit's
+                       # detector widened from `/` to the joiner class, and
+                       # the trigger-probe MISS residue 7->1 through
+                       # user-ruled dict + description edits. File 52,081 B =
+                       # 90.8% of the new cap.
+                       # Raised 56K->60K on 2026-10-01 by NAMED user ruling
+                       # (「先調上限」) after the routing audit: the 4 DEAD
+                       # entries are not fiction -- engineering:* are official
+                       # Anthropic plugins the user enables now and then. A
+                       # trim + redirect of those entries toward the local
+                       # skills is a separate, user-ruled dict edit. File
+                       # 57,509 B = 93.6% of the new cap.
                        # Provisional. why/history: ops/rule-registry.md, key
                        # `routing dict cap`.
 # RETIRED 2026-08-11: `Global_skill_update.md` is frozen as the historical
@@ -239,6 +271,28 @@ INTEROP_SOURCES = ("portable-core.md", "interop.py")
 STALE_WORK_DAYS = 3
 STALE_WORK_GIT_TIMEOUT = 2.0   # seconds; settings.json allows 3 s for the whole
                                # hook; measured 0.23 s on 663 tracked files.
+# Check 21. Working tree vs .gitattributes (born 2026-09-29). `git ls-files --eol`
+# is the SECOND subprocess of this hook, home-only like check 14; measured 0.44 s
+# on ~1800 tracked files. Two classes, two severities: `w/mixed` (LF lines
+# appended onto a CRLF file -- the L-024 corruption, alarm) and a file whose
+# working-tree ending is the OTHER one than its `eol=` attribute pins (breach:
+# the index is normalised, so git only warns at the next touch, and the Edit
+# tool preserves the wrong ending forever). 852 such files were measured on
+# 2026-09-29 before the first rewrite. Since 2026-10-01 the remedy is wired to
+# the commit (tools/git-hooks/post-commit -> tools/eol-sync), so a breach here
+# means a file slipped past it or the hook is unwired. why/review-when:
+# ops/rule-registry.md key `eol conformance`.
+EOL_GIT_TIMEOUT = 1.5
+# Check 18. The instrument is loaded from this hook's own repo, never from HOME,
+# so a test fixture home is judged by the real tracking-refs code. It runs two
+# `git ls-files` calls, each capped here; measured 0.5 s for the whole CLI run
+# (process start included) on the live tree 2026-09-18, and only when check 14
+# saw an untracked path under one of TRACKING_REFS_TARGET_DIRS.
+TRACKING_REFS_PY = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "tools", "tracking-refs", "refs.py")
+TRACKING_REFS_TARGET_DIRS = ("skills/", "tools/", "hooks/", "rules/",
+                             "agents/", "commands/")
+TRACKING_REFS_GIT_TIMEOUT = 1.0
 # Check 15. Days the graph rot watchdog's status file may age before its
 # carrier (the daily scheduled task) is presumed dead. PROVISIONAL, declared
 # guess: the task is daily, so 3 tolerates two missed days (machine off)
@@ -270,6 +324,27 @@ WATCHDOG_STATUS = os.path.join(HOME, "tools", "graph-snapshot", "out",
 # review-when: your graph-watchdog task's ExecutionTimeLimit changes.
 # why/history: ops/rule-registry.md, key `graph rot watchdog`.
 WATCHDOG_RUN_LIMIT_MIN = 30
+# Check 15's remedy per watchdog `remedy_kind` -- a CLOSED table; an unknown
+# kind is reported as such, never served a default (L-068).
+GRAPH_REMEDY = {
+    "build":
+        " — rebuild first: `python -X utf8 tools/"
+        "graph-snapshot/gsnap.py baseline` / `build` / "
+        "`verify`, and see which step exits nonzero — "
+        "every other number in this status file is the "
+        "LAST GOOD build's. Another session editing "
+        "~/.claude during the run no longer fails a step "
+        "(since 2026-09-26 it is listed as `changed by "
+        "ANOTHER writer`, not a zero-touch violation — "
+        "gs_writes.py), so the failing step's own last "
+        "line names the finding",
+    "regenerate":
+        " — regenerate and commit in one step: `python -X utf8 "
+        "tools/graph-snapshot/moc_regen.py --commit`",
+    "harvest":
+        " — harvest due: read tools/graph-snapshot/out/"
+        "integrity-report.md (graph-query skill, J3)",
+}
 WATCHDOG_RUN = os.path.join(HOME, "tools", "graph-snapshot", "out",
                             "watchdog-run.json")
 
@@ -304,8 +379,8 @@ MIRROR_STALE_DAYS = 3
 # absence-is-normal rule as CC_BIN.
 MIRROR_MARKER = os.environ.get("OPS_NUDGE_MIRROR_MARKER") or ""
 
-# Check 18. copy-census (tools/copy-census, design references/copy-census-
-# design.md). Its carrier is your copy-census scheduled task, so the same
+# Check 18. copy-census (tools/copy-census, design record under references/).
+# Its carrier is your copy-census scheduled task, so the same
 # silent-when-dead argument as checks 15 and 17 applies -- and this one has a
 # measured precedent: on 2026-09-09 the graph watchdog's task was killed
 # mid-run, wrote no log line, and left a status file still reporting all-clear.
@@ -315,6 +390,114 @@ COPY_CENSUS_STALE_DAYS = 3
 COPY_CENSUS_STATUS = (os.environ.get("OPS_NUDGE_COPY_CENSUS_STATUS")
                       or os.path.join(HOME, "tools", "copy-census", "out",
                                       "run-status.json"))
+
+
+# Check 19. home-bundle (tools/home-bundle, HANDOFF-1 L-3, user ruling LR-2'
+# 2026-09-19): the only copy of ~/.claude's history off disk C:. Daily carrier
+# your home-bundle scheduled task; 3 days tolerates two off days (check-15 argument).
+# SEV_LOSS, not ALARM: nothing is broken yet, committed work is merely
+# unprotected against a C: failure. The env var is the TEST SEAM.
+BUNDLE_STALE_DAYS = 3
+# SHARE EDITION: no default status path ships here -- the source's default was an
+# absolute path on a non-system drive (a private backup root, the same leak
+# class as MIRROR_MARKER above). Point OPS_NUDGE_BUNDLE_STATUS at your own
+# status file; an unset/empty value's parent dir does not exist, so check 19
+# below stays silent by the same absence-is-normal rule.
+BUNDLE_STATUS = os.environ.get("OPS_NUDGE_BUNDLE_STATUS") or ""
+
+# Check 20. vault junctions (HANDOFF-1 L-4, user ruling LR-3 2026-09-19). The
+# vault's AGENTS.md declares its wings in an area table ("NTFS junction" in the
+# last column); the predicate reads those DECLARATIONS and the vault's actual
+# reparse points and compares the two, so a wing added, removed or dangling is
+# found without either path being written here. WARN band (SEV_QUEUE): the
+# reader is an LLM, per the gate-severity-by-consumer ruling. Promotion
+# trigger: a session acts on a dangling wing's content (reads an empty domains/
+# as "no profiles") -> SEV_LOSS. Env vars are the TEST SEAMS.
+# SHARE EDITION: no default vault root ships here -- the source's default was an
+# absolute path on a non-system drive (a private notes vault). Point
+# OPS_NUDGE_VAULT_ROOT at your own vault; unset/empty, check 20 below reads
+# AGENTS.md relative to the cwd, finds no area table (or raises inside its own
+# try/except) and stays silent.
+VAULT_ROOT = os.environ.get("OPS_NUDGE_VAULT_ROOT") or ""
+VAULT_AGENTS_MD = os.path.join(VAULT_ROOT, "AGENTS.md")
+
+
+def description_value(text):
+    """The skill description AS DELIVERED: the YAML value, folded, not its
+    source bytes. Until 2026-09-19 check 5 measured the raw indented
+    continuation lines only, which was wrong both ways: a folded block counted
+    its own indentation and newlines (skill-co-upgrade: 813 raw, 788 real --
+    a false breach), and a ONE-LINE description had no continuation lines, so
+    it measured 0 (audience-fit 1039, ux-walkthrough 1106 -- two real breaches
+    never reported). Stdlib only, so this folds by hand: block scalars
+    (`>`/`|` with chomping) and multi-line plain or quoted scalars. Escapes
+    inside a double-quoted scalar are not decoded, so `\\"` counts 2 where YAML
+    counts 1 -- measured 1-4 chars over on 4 of 40 skills, the safe side for
+    a cap."""
+    if not text.startswith("---"):
+        return None
+    end = text.find("\n---", 3)
+    lines = text[3:end if end != -1 else len(text)].splitlines()
+    for i, line in enumerate(lines):
+        m = re.match(r"description:\s*(.*)$", line)
+        if not m:
+            continue
+        head = m.group(1).strip()
+        cont = []
+        for follow in lines[i + 1:]:
+            if follow.strip() and not follow[:1] in (" ", "\t"):
+                break
+            cont.append(follow.strip())
+        while cont and not cont[-1]:
+            cont.pop()
+        if re.fullmatch(r"[>|][+-]?", head):
+            joiner = "\n" if head.startswith("|") else " "
+            return joiner.join(cont)
+        value = " ".join([head] + [c for c in cont if c])
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+            value = value[1:-1]
+        return value
+    return None
+
+
+def _is_junction(path):
+    """True for an NTFS junction or a symlink. os.path.isjunction is 3.12+."""
+    isj = getattr(os.path, "isjunction", None)
+    if isj is not None and isj(path):
+        return True
+    if os.path.islink(path):
+        return True
+    try:
+        st = os.lstat(path)
+    except OSError:
+        return False
+    return bool(getattr(st, "st_file_attributes", 0) & 0x400)  # REPARSE_POINT
+
+
+def vault_junction_findings(vault_root, agents_md):
+    """Return a list of problem strings; empty when declarations and disk agree
+    and every junction resolves. Pure over the filesystem, for the tests."""
+    declared = set()
+    with open(agents_md, encoding="utf-8") as f:
+        for line in f:
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if len(cells) >= 2 and "junction" in cells[-1].lower():
+                m = re.match(r"`([^`/\\]+)[/\\]?`", cells[0])
+                if m:
+                    declared.add(m.group(1))
+    actual = {n for n in os.listdir(vault_root)
+              if _is_junction(os.path.join(vault_root, n))}
+    problems = []
+    for name in sorted(declared | actual):
+        full = os.path.join(vault_root, name)
+        if name in declared and name not in actual:
+            problems.append(f"{name}/ declared a junction but is "
+                            + ("a plain folder" if os.path.isdir(full) else "missing"))
+        elif name in actual and name not in declared:
+            problems.append(f"{name}/ is a junction the AGENTS.md area table does not declare")
+        if name in actual and not os.path.isdir(full):
+            problems.append(f"{name}/ junction target does not resolve")
+    return problems
 
 
 class _CopyCensusHandled(Exception):
@@ -415,6 +598,35 @@ def split_by_band(found, ceiling=None):
         bands = bands[:-1]
 
 
+# hmi-report/1 emitter (2026-09-19, tools/system-hmi/PROTOCOL.md). The DECLARED
+# list is what makes a skipped check visible: a slug here that never reached
+# `begin()` is reported `not-reached`, never silently passed. (slug, alias,
+# home_only). Slugs are the stable key -- the numbers are display aliases only,
+# and two comment blocks in this file both call themselves "Check 18".
+HMI_CHECKS = (
+    ("relaxation-gate", "ops-health 11", False),
+    ("lesson-intake", "ops-health 1", False),
+    ("stale-uncommitted-work", "ops-health 14", True),
+    ("untracked-pointers", "ops-health 18a", True),
+    ("graph-watchdog", "ops-health 15", True),
+    ("cc-build-reconciled", "ops-health 16", False),
+    ("transcript-mirror", "ops-health 17", True),
+    ("copy-census", "ops-health 18", True),
+    ("home-bundle", "ops-health 19", True),
+    ("vault-junctions", "ops-health 20", True),
+    ("eol-conformance", "ops-health 21", True),
+    ("ops-file-size", "ops-health 2", False),
+    ("rule-registry-idle", "ops-health 3", False),
+    ("routed-files-exist", "ops-health 4", False),
+    ("skill-preload-budgets", "ops-health 5+6", False),
+    ("root-file-budgets", "ops-health 7+8", False),
+    ("dict-sync", "ops-health 10", False),
+    ("interop-freshness", "ops-health 12", False),
+    ("advisory-outputs", "ops-health 13", False),
+)
+HMI_STATE = {"alarm": "fail", "loss": "fail", "breach": "warn", "queue": "warn"}
+
+
 class Nudges(object):
     """Severity-ordered finding collector.
 
@@ -434,16 +646,86 @@ class Nudges(object):
 
     def __init__(self):
         self._items = []
+        self._current = None
+        self._begun = {}
 
-    def add(self, text, sev, label):
-        self._items.append((sev, len(self._items), text, label))
+    def begin(self, slug, ran=True):
+        """Name the check whose block starts here (hmi-report/1 emitter).
+
+        `ran=False` records a check that was SKIPPED by design (wrong cwd), so
+        a reader of `--json` can tell "ran and found nothing" from "did not
+        run" -- the text output cannot, because a pass prints nothing. Known
+        limit: `ran` means the block was ENTERED; a fail-open `except` inside
+        it still reads as a pass.
+        """
+        self._current = slug
+        self._begun[slug] = bool(ran)
+
+    def add(self, text, sev, label, deferral=None):
+        """`deferral` (hmi-report/1 `deferred`, JSON only): this finding is a
+        deliberate deferral, [{"item", "trigger"}] plus "ruling". The text
+        transport never reads it."""
+        self._items.append((sev, len(self._items), text, label, self._current,
+                            deferral))
 
     def __len__(self):
         return len(self._items)
 
     def ordered(self):
         """[(sev, text, label)], most severe first, ties broken by arrival."""
-        return [(s, t, n) for s, _, t, n in sorted(self._items)]
+        return [(s, t, n) for s, _, t, n, _c, _d in sorted(self._items,
+                                                          key=lambda i: i[:2])]
+
+    def report(self):
+        """hmi-report/1 document: one point per declared check, ran or not.
+
+        A point whose EVERY finding is a deferral carries `deferred` (the
+        claim, never a state change: system-hmi resolves it, PROTOCOL.md R-6).
+        One finding that is not a deferral and the point carries no claim."""
+        by_check, deferrals = {}, {}
+        for sev, _, text, label, slug, dfr in sorted(self._items,
+                                                     key=lambda i: i[:2]):
+            by_check.setdefault(slug, []).append(
+                {"severity": SEV_NAME[sev], "label": label, "text": text})
+            deferrals.setdefault(slug, []).append(dfr)
+        points = []
+        for slug, alias, home_only in HMI_CHECKS:
+            ran = self._begun.get(slug)
+            finds = by_check.pop(slug, [])
+            if ran is None:
+                state, skip = None, "not-reached"
+            elif not ran:
+                state, skip = None, ("cwd-not-home" if home_only
+                                     else "cwd-is-home")
+            else:
+                skip = None
+                state = "pass"
+                for f in finds:
+                    s = HMI_STATE[f["severity"]]
+                    if s == "fail" or state == "pass":
+                        state = s
+            point = {"id": "ops-health." + slug, "alias": alias,
+                     "ran": bool(ran), "skip_reason": skip,
+                     "state": state, "findings": finds}
+            dfrs = deferrals.get(slug) or []
+            if dfrs and all(dfrs):
+                items = [it for d in dfrs for it in d["items"]]
+                point["deferred"] = {
+                    "kind": "manual",
+                    "trigger": "; ".join(it["trigger"] for it in items),
+                    "ruling": "; ".join(d["ruling"] for d in dfrs),
+                    "items": items}
+            points.append(point)
+        # a finding whose check never called begin() must not vanish
+        for slug, finds in by_check.items():
+            points.append({"id": "ops-health." + str(slug), "alias": None,
+                           "ran": True, "skip_reason": None,
+                           "state": "fail", "undeclared": True,
+                           "findings": finds})
+        return {"protocol": "hmi-report/1", "source": "ops-health",
+                "generated_at": datetime.datetime.now(
+                    datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "points": points}
 
 
 def _pid_alive(pid):
@@ -516,7 +798,8 @@ def main():
     # same cwd rules, no cap, one finding per line. It deliberately does NOT
     # read stdin -- a hook reading a terminal's stdin would hang, and a hint
     # nobody can run is not a hint.
-    show_all = "--all" in sys.argv[1:]
+    as_json = "--json" in sys.argv[1:]
+    show_all = "--all" in sys.argv[1:] or as_json
 
     # 11. relaxation gate: a project CLAUDE.md without an ops-relaxation: line
     #     means the 05-authority.md §2 question was never asked or recorded.
@@ -537,6 +820,7 @@ def main():
                    == os.path.normcase(os.path.abspath(HOME)))
     except Exception:
         is_home = False
+    msgs.begin("relaxation-gate", ran=not is_home)
     try:
         proj_md = os.path.join(cwd, "CLAUDE.md")
         # SHARE-EDITION SPECIALIZATION (declared in tools/share-manifest.toml;
@@ -577,6 +861,7 @@ def main():
     except OSError:
         pass
 
+    msgs.begin("lesson-intake")
     # 1. lesson intake report. Replaced the LESSON_CAP unfolded-entry count and
     #    the misfiled-card check on 2026-09-07 (closeout-capture R4 M2): the
     #    ledger is now ops/lessons/ (one record per file, born only through
@@ -590,14 +875,14 @@ def main():
     #    every cwd (lessons are global). Fail-open: a timeout, a missing tool
     #    or a non-zero exit prints nothing -- sweep check 5 runs the full
     #    `intake.py check --against HEAD --index` two-sided.
-    # SHARE EDITION: tools/closeout-intake/ does not ship in this repo -- its
-    # store (ops/lessons/) and CLI are source-environment-only, the same
-    # tools/ exclusion class as tools/session-board/ (see hooks/intake_guard.py's
-    # not_shipped entry, same round). The subprocess below therefore always
-    # raises FileNotFoundError, caught by the except clause -- exactly the "a
-    # missing tool ... prints nothing" branch the check's own comment above
-    # already names as a legitimate silent no-op, the same treatment check 16
-    # gives a missing ops/cc-reconciled.json.
+    # SHARE EDITION: tools/closeout-intake/ ships in this repo under
+    # instruments/closeout-intake/ (copy it to tools/closeout-intake/ to enable
+    # this check), but its store (ops/lessons/) is source-environment-only. With
+    # either one absent the subprocess below raises FileNotFoundError or exits
+    # non-zero, caught by the except clause -- exactly the "a missing tool ...
+    # prints nothing" branch the check's own comment above already names as a
+    # legitimate silent no-op, the same treatment check 16 gives a missing
+    # ops/cc-reconciled.json.
     try:
         r = subprocess.run(
             [sys.executable,
@@ -616,6 +901,7 @@ def main():
     except Exception:
         pass
 
+    msgs.begin("stale-uncommitted-work", ran=is_home)
     # 14. stale uncommitted work in THIS tree -- cwd == ~/.claude only, so other
     #     projects pay nothing. Born 2026-08-21 from the stale-path attribution
     #     ticket: 17 complete, correct record artifacts from 5
@@ -634,6 +920,7 @@ def main():
     #     why sweep check 24 drives the two-sided suite rather than reading
     #     silence as health. why/threshold/review-when: ops/rule-registry.md
     #     key `stale uncommitted work`.
+    status_out = None                     # reused by check 18
     if is_home:
         try:
             r = subprocess.run(
@@ -642,6 +929,7 @@ def main():
                 capture_output=True, text=True, encoding="utf-8",
                 errors="replace", timeout=STALE_WORK_GIT_TIMEOUT)
             if r.returncode == 0:
+                status_out = r.stdout
                 now = time.time()
                 stale, fresh = [], 0
                 for line in r.stdout.splitlines():
@@ -681,6 +969,48 @@ def main():
         except Exception:
             pass
 
+    msgs.begin("untracked-pointers", ran=is_home)
+    # 18. committed pointer -> untracked file (tools/tracking-refs, sweep check
+    #     34). Born 2026-09-18: `skills/comsol-agent-pipeline/` sat unadded for
+    #     4 days while committed PROJECTS.md named it, and the committed
+    #     CLAUDE.md indexed an untracked rule; check 14 judges by AGE and could
+    #     not see that those paths were load-bearing. Gated on check 14's own
+    #     status output: the scan runs only when an UNTRACKED path sits under a
+    #     capability dir -- the only place a `dangling` target can live -- so
+    #     the steady state pays nothing. Loaded from THIS hook's repo (not
+    #     HOME) so a fixture home is scanned by the real instrument. No age
+    #     gate: the pointer is already in history, so the hole is real the
+    #     moment it exists. Fail-open. why/review-when: ops/rule-registry.md,
+    #     key `tracking refs`.
+    if status_out is not None:
+        try:
+            untracked_cap = any(
+                ln.startswith("?? ")
+                and ln[3:].strip('"').startswith(TRACKING_REFS_TARGET_DIRS)
+                for ln in status_out.splitlines())
+            if untracked_cap:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location(
+                    "tracking_refs", TRACKING_REFS_PY)
+                tr = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(tr)
+                res = tr.scan(HOME, timeout=TRACKING_REFS_GIT_TIMEOUT)
+                if res and res["dangling"]:
+                    items = list(res["dangling"].items())
+                    msgs.add(
+                        f"committed pointer(s) to uncommitted file(s): "
+                        f"{len(items)} — "
+                        + ", ".join(f"{s[0]} → {t}" for t, s in items[:3])
+                        + " — a rollback would restore the pointer without "
+                        "its target: commit each target by path (`git add -- "
+                        "<target>`) or fix the pointer; detail: `python "
+                        "tools/tracking-refs/refs.py` (integrity-sweep check 34)",
+                        SEV_LOSS,
+                        f"{len(items)} dangling pointer(s)")
+        except Exception:
+            pass
+
+    msgs.begin("graph-watchdog", ran=is_home)
     # 15. graph rot watchdog (tools/graph-snapshot/gs_watchdog.py). Reads the
     #     status file the daily task writes -- one small JSON, no build, no
     #     subprocess. Born 2026-08-26: live-surface broken links went 14 -> 38
@@ -782,6 +1112,31 @@ def main():
                         " and check your graph-watchdog task's scheduler entry",
                         SEV_ALARM, "graph watchdog silent"
                     )
+                elif isinstance(wd.get("graded"), list):
+                    # Graded status (user ruling 2026-09-23): a defect alarms,
+                    # derived work that missed its processing window is a
+                    # breach (HMI warn), and a MOC lag still inside its window
+                    # (`pending`) is not in `graded` at all -- the close-out
+                    # step has not had its chance yet, so it is not a finding.
+                    # Each graded item is its own message, so a warn-grade MOC
+                    # lag is never promoted to fail by sharing a line with a
+                    # defect.
+                    for g in wd["graded"]:
+                        kind = g.get("remedy_kind")
+                        remedy = GRAPH_REMEDY.get(kind)
+                        if remedy is None:
+                            remedy = (f" — this surface has no remedy for "
+                                      f"remedy_kind {kind!r}: gs_watchdog."
+                                      "evaluate() gained a kind check 15 was "
+                                      "never extended for, so act on the "
+                                      "finding above and add the branch "
+                                      "(hooks/ops_health_nudge.py check 15)")
+                        overdue = g.get("grade") == "overdue"
+                        msgs.add("graph rot watchdog: " + str(g.get("text"))
+                                 + remedy,
+                                 SEV_BREACH if overdue else SEV_ALARM,
+                                 "graph MOC overdue" if overdue
+                                 else "graph rot reported")
                 elif wd.get("finding"):
                     finding = str(wd["finding"])
                     # The remedy follows the finding (round 4, audit G-1): a
@@ -820,25 +1175,7 @@ def main():
                             kind = "regenerate"
                         else:
                             kind = "harvest"
-                    remedy = {
-                        "build":
-                            " — rebuild first: `python -X utf8 tools/"
-                            "graph-snapshot/gsnap.py baseline` / `build` / "
-                            "`verify`, and see which step exits nonzero — "
-                            "every other number in this status file is the "
-                            "LAST GOOD build's. A common cause is not a "
-                            "graph defect: the corpus changed under the "
-                            "build, which verify reports as an INV-2 "
-                            "zero-touch violation — another session editing "
-                            "~/.claude while it ran",
-                        "regenerate":
-                            " — regenerate: gsnap.py baseline / build / verify, "
-                            "then `python -X utf8 tools/graph-snapshot/gsnap.py "
-                            "emit-moc`, and commit references/_moc",
-                        "harvest":
-                            " — harvest due: read tools/graph-snapshot/out/"
-                            "integrity-report.md (graph-query skill, J3)",
-                    }.get(kind)
+                    remedy = GRAPH_REMEDY.get(kind)
                     if remedy is None:
                         remedy = (f" — this surface has no remedy for remedy_kind"
                                   f" {kind!r}: gs_watchdog.evaluate() gained a "
@@ -850,6 +1187,7 @@ def main():
         except Exception:
             pass
 
+    msgs.begin("cc-build-reconciled")
     # 16. Claude Code build vs the build ops/ was reconciled against. NOT
     #     is_home-scoped: a stale ops fact misleads in whatever project is
     #     open, not only while editing ~/.claude. Born 2026-08-26, after the
@@ -887,6 +1225,18 @@ def main():
                     "build: `python tools/cc-delta/cc_delta.py`",
                     SEV_ALARM, "ops/ reconciled at an older build"
                 )
+        # The stamp must name its feature-delta record (user ruling
+        # 2026-09-27; the cc-upgrade-delta report folder's README). cc_delta.py
+        # --stamp refuses without one; this catches a stamp edited by hand.
+        rec = cc.get("feature_delta")
+        if want and not (rec and os.path.isfile(os.path.join(HOME, rec))):
+            msgs.add(
+                f"ops/cc-reconciled.json stamps {want} but names no existing "
+                "feature-delta record — write reports/cc-upgrade-delta/"
+                "<date>_<from>-<to>.md and restamp with `cc_delta.py --stamp "
+                "--record <it>`",
+                SEV_LOSS, "upgrade delta unrecorded"
+            )
     except FileNotFoundError:
         msgs.add(
             "ops/cc-reconciled.json missing — the Claude Code version-delta "
@@ -897,6 +1247,7 @@ def main():
     except Exception:
         pass
 
+    msgs.begin("transcript-mirror", ran=is_home)
     # 17. session-transcript mirror heartbeat (born 2026-09-01, D-052 item 5).
     #     The mirror (tools/claude-session-transcript-mirror.ps1, D-033) is
     #     the only thing between cleanupPeriodDays deletion and the
@@ -941,6 +1292,7 @@ def main():
         except Exception:
             pass
 
+    msgs.begin("copy-census", ran=is_home)
     # 18. unguarded copies (tools/copy-census, born 2026-09-09). Reads ONE
     #     small JSON its carrier writes; never scans anything itself -- the
     #     scan costs ~1 s over two roots and this hook has a 3 s budget for
@@ -1011,6 +1363,110 @@ def main():
         except Exception:
             pass
 
+    msgs.begin("home-bundle", ran=is_home)
+    # 19. off-disk bundle backup (tools/home-bundle, born 2026-09-19). Same
+    #     three states as 17/18: missing, failed, stale. The drill verdict rides
+    #     in the same record, so a bundle that no longer restores is as loud as
+    #     one that was never written. Absence of the DEST folder is silent
+    #     (host without the backup disk); an installed tool with no record is not.
+    if is_home:
+        try:
+            tool_dir = os.path.join(HOME, "tools", "home-bundle")
+            dest_root = os.path.dirname(BUNDLE_STATUS)
+            fix = ("run tools/home-bundle/run-daily.ps1 and check the "
+                   "your home-bundle scheduled task")
+            if not os.path.isdir(tool_dir) or not os.path.isdir(
+                    os.path.dirname(dest_root)):
+                pass
+            elif not os.path.isfile(BUNDLE_STATUS):
+                msgs.add("off-disk bundle of ~/.claude has never recorded a "
+                         "run — committed history exists only on C: : " + fix,
+                         SEV_LOSS, "home bundle never ran")
+            else:
+                age = (time.time() - os.path.getmtime(BUNDLE_STATUS)) / 86400
+                with open(BUNDLE_STATUS, encoding="utf-8") as f:
+                    rec = json.load(f)
+                drill = rec.get("drill") or {}
+                if rec.get("status") != "OK":
+                    msgs.add("off-disk bundle of ~/.claude FAILED its last run ("
+                             + str(rec.get("error", "?"))[:120] + ") — " + fix,
+                             SEV_LOSS, "home bundle failed")
+                elif drill and not drill.get("ok"):
+                    msgs.add("off-disk bundle of ~/.claude did not restore in "
+                             "its drill (" + str(drill.get("line", "?"))[:120]
+                             + ") — " + fix, SEV_LOSS, "home bundle drill failed")
+                elif age > BUNDLE_STALE_DAYS:
+                    msgs.add(f"off-disk bundle of ~/.claude silent {age:.1f}d "
+                             f"(>{BUNDLE_STALE_DAYS}d) — " + fix,
+                             SEV_LOSS, "home bundle silent")
+        except Exception:
+            pass
+
+    msgs.begin("vault-junctions", ran=is_home)
+    # 20. vault junctions (born 2026-09-19). Declarations vs disk, plus
+    #     resolution. A vault that is not mounted on this host is silent.
+    if is_home:
+        try:
+            if os.path.isfile(VAULT_AGENTS_MD):
+                problems = vault_junction_findings(VAULT_ROOT, VAULT_AGENTS_MD)
+                if problems:
+                    msgs.add("vault junction: " + "; ".join(problems[:3])
+                             + " — recreate the junction (mklink /J) or fix the "
+                             "area table in the vault's AGENTS.md",
+                             SEV_QUEUE, "vault junction mismatch")
+        except Exception:
+            pass
+
+    msgs.begin("eol-conformance", ran=is_home)
+    # 21. working tree vs .gitattributes (born 2026-09-29). Two classes: a file
+    #     with MIXED endings (the L-024 corruption: `cat >>` of LF lines onto a
+    #     CRLF file) is an alarm; a file whose whole working copy holds the
+    #     ending its `eol=` attribute does NOT pin is a breach with the rewrite
+    #     named. Only tracked files, only this tree; git failure/timeout prints
+    #     nothing (fail-open). The property lives in .gitattributes and CLAUDE.md
+    #     Environment; until this check nothing measured it (852 drifted files
+    #     on 2026-09-29, found by hand).
+    if is_home:
+        try:
+            r = subprocess.run(
+                ["git", "-C", HOME, "-c", "core.quotepath=off", "ls-files", "--eol"],
+                capture_output=True, text=True, encoding="utf-8",
+                errors="replace", timeout=EOL_GIT_TIMEOUT)
+            if r.returncode == 0:
+                mixed, drift = [], []
+                for line in r.stdout.splitlines():
+                    attrs, _, path = line.partition("\t")
+                    if not path:
+                        continue
+                    if "w/mixed" in attrs:
+                        mixed.append(path)
+                    elif ("w/lf" in attrs and "eol=crlf" in attrs) or \
+                            ("w/crlf" in attrs and "eol=lf" in attrs):
+                        drift.append(path)
+                if mixed:
+                    msgs.add(
+                        f"mixed line endings inside {len(mixed)} tracked file(s): "
+                        + ", ".join(mixed[:3])
+                        + " — LF lines were appended onto a CRLF file (never "
+                        "`>>`/`cat >>` onto a pinned file; modify with Edit); "
+                        "rewrite each file to the ending its .gitattributes "
+                        "line pins",
+                        SEV_ALARM, f"mixed line endings in {len(mixed)} file(s)")
+                if drift:
+                    msgs.add(
+                        f"{len(drift)} tracked file(s) hold the other line "
+                        f"ending than .gitattributes pins (e.g. {drift[0]}): the "
+                        "index is normalised, so git only warns at the next "
+                        "touch and Edit preserves the wrong ending — run "
+                        "`python -X utf8 tools/eol-sync/eol_sync.py --all` "
+                        "(rewrites every UNMODIFIED path from the index); the "
+                        "post-commit hook should have done this, so check "
+                        "`eol_sync.py --wiring` too",
+                        SEV_BREACH, f"{len(drift)} file(s) off the pinned line ending")
+        except Exception:
+            pass
+
+    msgs.begin("ops-file-size")
     # 2. oversized ops files -- ONE message for all of them: the remedy is
     #    shared, and this line is charged every session.
     try:
@@ -1036,6 +1492,7 @@ def main():
     except OSError:
         pass
 
+    msgs.begin("rule-registry-idle")
     # 3. audit-trail staleness
     try:
         trail = os.path.join(OPS, "rule-registry.md")
@@ -1049,6 +1506,7 @@ def main():
     except OSError:
         pass
 
+    msgs.begin("routed-files-exist")
     # 4. ghost-rule guard: every routed file must exist
     missing = [f for f in ROUTED_FILES
                if not os.path.isfile(os.path.join(OPS, f))]
@@ -1059,6 +1517,7 @@ def main():
             SEV_ALARM, "routed ops file(s) missing"
         )
 
+    msgs.begin("skill-preload-budgets")
     # 5+6. preload budgets: skill descriptions and SKILL.md body size
     try:
         fat_desc, fat_body = [], []
@@ -1068,11 +1527,8 @@ def main():
                 continue
             with open(p, encoding="utf-8") as f:
                 text = f.read()
-            m = re.search(
-                r"^description:[^\n]*\n((?:[ \t]+[^\n]*\n|\n(?=[ \t]))*)",
-                text, re.M,
-            )
-            if m and len(m.group(1)) > DESC_CAP:
+            desc = description_value(text)
+            if desc is not None and len(desc) > DESC_CAP:
                 fat_desc.append(name)
             if text.count("\n") > BODY_CAP:
                 fat_body.append(name)
@@ -1094,6 +1550,7 @@ def main():
     except OSError:
         pass
 
+    msgs.begin("root-file-budgets")
     # 7-9. root-file budgets. The two are DIFFERENT rule classes (S3): CLAUDE.md
     #      is charged unconditionally every session, so the number IS the budget
     #      and the remedy is merge/relocate. The dict is charged only on a
@@ -1126,6 +1583,7 @@ def main():
         except OSError:
             pass
 
+    msgs.begin("dict-sync")
     # 10. dict-sync drift: every local skill must appear in the trigger dict
     #     (ops/40-maintenance.md S2 dict-sync corollary; silent when in sync)
     try:
@@ -1145,9 +1603,39 @@ def main():
                 SEV_ALARM,
                 "skill(s) absent from the routing dict"
             )
+        # 10b. unmatchable keywords (2026-09-22). A keyword written as a choice
+        #      (`模場 / MFD`, `A・B`) is one literal token to the router and
+        #      never matches. Round 3 (09-08) spelled out 31; seven more were
+        #      written in the next two weeks and surfaced only at the 49K cap
+        #      breach, the one moment the audit was run. The detector is the
+        #      audit's own (tools/skill-routing-audit.py split_tokens +
+        #      ALTERNATION_JOINERS), imported so there is one definition.
+        try:
+            import importlib.util as _ilu
+            _sp = _ilu.spec_from_file_location(
+                "skill_routing_audit",
+                os.path.join(HOME, "tools", "skill-routing-audit.py"))
+            _ra = _ilu.module_from_spec(_sp)
+            _sp.loader.exec_module(_ra)
+            bad = [t for l in dict_text.splitlines()
+                   if l.lstrip("- ").startswith("關鍵詞：")
+                   for t in _ra.split_tokens(l.split("：", 1)[1])
+                   if any(c in t for c in _ra.ALTERNATION_JOINERS)]
+        except Exception:
+            bad = []
+        if bad:
+            msgs.add(
+                f"{len(bad)} keyword(s) in skill-trigger-dict.md join "
+                "alternatives with `/` or `・` and can never match: "
+                + ", ".join(bad[:4]) + (" …" if len(bad) > 4 else "")
+                + " — spell each alternative as its own 、-separated keyword",
+                SEV_BREACH,
+                f"{len(bad)} unmatchable dict keyword(s)"
+            )
     except OSError:
         pass
 
+    msgs.begin("interop-freshness")
     # 12. interop freshness. `interop.py status` already computes all of this
     #     and exits 1 -- but nothing ran it, so the opencode target sat
     #     `[missing]` (never deployed at all) from 2026-08-11 until it was
@@ -1205,6 +1693,7 @@ def main():
     except OSError:
         pass
 
+    msgs.begin("advisory-outputs")
     # 13. advisory-output status lines (rules-usage-dict.md S7, 2026-08-16).
     #     Advisory artifacts under outputs/ declare handling status in a
     #     greppable line within their first 10 lines; this screen surfaces the
@@ -1231,6 +1720,9 @@ def main():
     #     A file with no date in its name, or dated on/before the convention's
     #     birth, is exempt from the missing-line flag (no backfill --
     #     evidence-block precedent).
+    #     One waiting shape reads SEV_QUEUE, not SEV_LOSS (T-024, 2026-09-22):
+    #     `DEFERRED — trigger: <event>`, a deliberate deferral that names what
+    #     starts the work. Regression cases in check13_deferral_cases.
     try:
         import glob as _glob
         spent_rx = re.compile(r"SPENT|已執行|否決|已裁")
@@ -1248,9 +1740,25 @@ def main():
                 head = [next(f, "") for _ in range(10)]
             stamps[rel] = next((l for l in head if status_rx.match(l)), None)
 
-        waiting, undetermined = {}, 0
+        # A DELIBERATE deferral (T-024, 2026-09-22) is the one waiting state a
+        # compliant file can sit in indefinitely, so it may not read as a loss:
+        # a gate no compliant state can clear is an alarm people learn to skip.
+        # It is determinable only by its SHAPE -- the defined word DEFERRED
+        # leading the body, plus a non-empty `trigger:` naming the event that
+        # starts the work. Anything short of that (lower-case "deferred", no
+        # trigger) stays in the waiting family below at SEV_LOSS. Tested before
+        # the spent keywords so a deferral that quotes a ruling (已裁) stays
+        # visible instead of going silent.
+        deferred_rx = re.compile(r"^DEFERRED\b.*?\btrigger\s*[:：][ \t]*\S[^\n]*\S")
+        waiting, deferred, undetermined = {}, [], 0
         for rel, line in stamps.items():
-            if line is None or spent_rx.search(line):
+            if line is None:
+                continue
+            lead = re.sub(r"^[*：:\s]+", "", status_rx.sub("", line))
+            if deferred_rx.search(lead):
+                deferred.append(rel)
+                continue
+            if spent_rx.search(line):
                 continue
             body = re.sub(r"\s+", " ", status_rx.sub("", line).strip())
             if not waiting_rx.search(body):
@@ -1271,10 +1779,27 @@ def main():
                     if m and m.group(1) > "2026-08-16":
                         unstamped.append(base)
         if waiting or undetermined:
+            # L-119 (2026-09-22): a stamp can stay "awaiting ruling X" for
+            # weeks after X was ruled. tools/status-line resolves the awaited
+            # id in the owning tool's registers; annotation only, never a veto.
+            try:
+                import importlib.util as _ilu
+                _sp = _ilu.spec_from_file_location(
+                    "status_line",
+                    os.path.join(HOME, "tools", "status-line", "status_line.py"))
+                _sl = _ilu.module_from_spec(_sp)
+                _sp.loader.exec_module(_sl)
+                _hint = lambda rel: _sl.ruled_hint(HOME, rel, stamps[rel] or "")
+            except Exception:
+                _hint = lambda rel: None
             items = []
             for (d, _k), files in sorted(waiting.items()):
-                items.append(os.path.basename(files[0]) if len(files) == 1
-                             else f"{d}/ x{len(files)}")
+                item = (os.path.basename(files[0]) if len(files) == 1
+                        else f"{d}/ x{len(files)}")
+                h = _hint(files[0])
+                if h:
+                    item += f" (its awaited ruling is already recorded: {h})"
+                items.append(item)
             # The undetermined count rides in the same message but never
             # DEPENDS on it: a run with only unruleable stamps must still say
             # so, or the class the parse cannot close disappears from the
@@ -1296,6 +1821,26 @@ def main():
                 f"{len(items)} advisory output(s) OPEN"
                 if items else f"{undetermined} advisory stamp(s) unruleable"
             )
+        if deferred:
+            # The JSON transport also carries each file's trigger as a
+            # deferral claim, so system-hmi reads this point as "deferred,
+            # trigger not fired" instead of a standing warn (2026-09-23). The
+            # trigger here is prose a human judges, so the claim is `manual`;
+            # it fires by restamping the file OPEN, which reads SEV_LOSS above.
+            trig_rx = re.compile(r"\btrigger\s*[:：][ \t]*([^;；\n]*[^;；\s])")
+            msgs.add(
+                "advisory output(s) deliberately DEFERRED with a named trigger: "
+                + ", ".join(os.path.basename(r) for r in sorted(deferred))
+                + " — nothing needs doing until the trigger in its status line "
+                "fires (rules-usage-dict.md S7)",
+                SEV_QUEUE,
+                f"{len(deferred)} advisory output(s) deferred",
+                deferral={
+                    "ruling": "each file's own status line (rules-usage-dict.md S7): "
+                              + ", ".join(sorted(deferred)),
+                    "items": [{"item": r,
+                               "trigger": (trig_rx.search(stamps[r]) or [None, ""])[1]}
+                              for r in sorted(deferred)]})
         if unstamped:
             msgs.add(
                 "advisory output(s) born without a status line: "
@@ -1309,7 +1854,10 @@ def main():
         pass
 
     found = msgs.ordered()
-    if show_all:
+    if as_json:
+        # hmi-report/1: machine reader only; never injected into a session.
+        print(json.dumps(msgs.report(), ensure_ascii=False, indent=1))
+    elif show_all:
         if found:
             shown_n = len(split_by_band(found)[0])
             print(f"[ops-health] {len(found)} finding(s), most severe first "

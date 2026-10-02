@@ -161,7 +161,10 @@ def decide(payload: dict) -> tuple:
     """Return (decision, text). decision in dispatch|stop|notice|pass-marker|pass-pathspec|skip."""
     event = str(payload.get("hook_event_name", ""))
     tool = str(payload.get("tool_name", ""))
-    session = str(payload.get("session_id", "") or "unknown")
+    sid = payload.get("session_id")
+    if sid is not None and not isinstance(sid, str):   # unclassifiable: never str()-ed into a state name
+        raise TypeError("session_id is not a string")
+    session = sid or "unknown"
     agents = load_state(session)
 
     if event == "SubagentStop":
@@ -200,7 +203,8 @@ def main() -> None:
             sys.exit(0)
     except Exception:
         sys.exit(0)
-    session = str(payload.get("session_id", "") or "unknown")
+    sid = payload.get("session_id")
+    session = (sid or "unknown") if sid is None or isinstance(sid, str) else None
     try:
         decision, text = decide(payload)
         if decision != "skip":
@@ -339,13 +343,20 @@ def _selftest() -> int:
                                              "session_id": sid}),
                            capture_output=True, text=True, env=env)
         rows = [json.loads(l) for l in LOG_PATH.read_text(encoding="utf-8").splitlines()]
-        check("U-1 non-mapping tool_input: exit 0, silent",
+        check("U-1 unclassifiable non-mapping tool_input: exit 0, silent",
               r.returncode == 0 and r.stdout.strip() == "")
-        check("U-1b and recorded as `error`, not folded into skip or notice",
+        check("U-1b and recorded as `error` (undetermined), not folded into skip or notice",
               len(rows) == before + 1 and rows[-1]["decision"] == "error")
+        r = subprocess.run([py, me], input=json.dumps(pre("Agent", {"subagent_type": "x"}, session={"a": 1})),
+                           capture_output=True, text=True, env=env)
+        rows = [json.loads(l) for l in LOG_PATH.read_text(encoding="utf-8").splitlines()]
+        got = (r.returncode, r.stdout.strip(), rows[-1]["decision"], rows[-1]["session"],
+               sorted(p.name for p in STATE_DIR.glob("*a___1*")))
+        check(f"U-1c unclassifiable non-string session_id: error row, session None, no state file  got={got}",
+              got == (0, "", "error", None, []))
         for cid, raw in (("U-2", "[1, 2]"), ("U-3", '"a string payload"'), ("U-4", "null")):
             r = subprocess.run([py, me], input=raw, capture_output=True, text=True, env=env)
-            check(f"{cid} payload that parses but is not an object: exit 0, silent",
+            check(f"{cid} unclassifiable payload (parses, not an object): exit 0, silent",
                   r.returncode == 0 and r.stdout.strip() == "")
         # Negative control: without it, U-1b would also pass on a hook that
         # errored on everything.

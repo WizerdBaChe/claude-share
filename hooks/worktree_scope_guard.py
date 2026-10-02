@@ -29,6 +29,11 @@ things silently differ, and each half of this hook covers them:
       worktrees the guard missed" and "the guard is broken". An empty orphan
       needs nothing from anyone; a `(NOT empty)` one holds files no branch
       carries and is read before it is removed.
+    - each listed worktree carries `reparse N` (junctions/symlinks to 3 levels,
+      added 2026-09-24): `git worktree remove` on Windows deletes THROUGH a
+      junction into its target (L-120 emptied a shared checkout's .venv and
+      node_modules; git said nothing, the paths were ignored). N > 0 means the
+      links are dropped and their targets checked before the removal step.
       Silent only when there are neither worktrees nor residue.
   PreToolUse (matcher "Write|Edit|NotebookEdit|Bash|PowerShell"):
     - Write/Edit/NotebookEdit whose target lies inside a linked worktree of the
@@ -103,7 +108,22 @@ placing one by hand) — add it to POOL_DIRS, which is the single edit point;
 (f) `git worktree remove` stops leaving the directory behind on Windows (a git
 release note, or the failure stops reproducing) — R-5's shape would then be
 unreachable in practice and the clause could be reconsidered, but do not delete
-it on the strength of one clean run.
+it on the strength of one clean run; (g) the Desktop app's built-in PreToolUse
+`worktree-write-guard` changes. Measured 2026-09-23 in app 2.7032 (app.asar):
+it blocks Write/Edit/NotebookEdit (`file_path`/`notebook_path`) anywhere under
+the base checkout from a Desktop worktree session, without checking whether the
+target is gitignored, and suggests the worktree path instead -- which THIS hook
+denies for ignored paths. Together they leave no Write/Edit route to truly
+ignored state (cache/handoff). Of 10 host blocks found in worktree transcripts
+2026-09-11..23, 4 were MEMORY edits sent to the canonical path because this
+hook's announcement listed `projects/` as gitignored -- stale since the
+2026-09-06 .gitignore change tracks `projects/*/memory/*.md` -- so the sessions
+believed the worktree copy could not merge, the host's (correct) advice looked
+wrong, and one user ruling was lost for a day. Fixed here: STATE_DIR_LABELS
+names the tracked exception; the text no longer claims "write ignored state
+under the canonical tree" (blocked) or "ExitWorktree moves this session" (a
+no-op for Desktop-pooled worktrees). If the host guard starts exempting ignored
+paths, the canonical route for cache/handoff can come back.
 """
 import json
 import os
@@ -137,7 +157,7 @@ SEG_SPLIT = re.compile(r"&&|\|\||;|\r?\n")
 CD_SEG = re.compile(r"^\s*(?:cd|pushd|Set-Location|sl)\s+(?:/d\s+)?[\"']?([^\"';&|]+?)[\"']?\s*$",
                     re.IGNORECASE)
 GIT_TIMEOUT = 4
-ANNOUNCE_MAX = 1400
+ANNOUNCE_MAX = 1600   # 1400 cut the hand-off sentence at a 26-char branch name (2026-09-23)
 
 # Where the Desktop app pools its per-session worktrees, relative to a repo root.
 # Scanned for RESIDUE: a directory here that `git worktree list` does not name.
@@ -252,8 +272,60 @@ def dirty_count(wt: str):
     return len([ln for ln in out.splitlines() if ln.strip()]) if rc == 0 else "?"
 
 
+# L-120 (2026-09-23): `git worktree remove` on Windows deletes THROUGH a directory
+# junction/symlink, emptying the link's TARGET -- a shared checkout's .venv or
+# node_modules junctioned into the worktree came back as empty folders, and git
+# reported nothing because the damage was all in ignored paths. The announce
+# therefore counts reparse points (junctions, symlinks) in each linked worktree
+# so the removal ritual (shared-tree-git §1a) sees them BEFORE the destructive
+# step. Depth-limited: dependency links sit at the top few levels, and a full
+# walk of every pooled worktree at each SessionStart is not worth the seconds.
+REPARSE_DEPTH = 3
+
+
+def reparse_count(wt: str, depth: int = REPARSE_DEPTH):
+    """Number of directory entries under `wt` (to `depth` levels, .git skipped)
+    that are symlinks or Windows reparse points (junctions). `?` on any error."""
+    attr_rp = getattr(__import__("stat"), "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    n = 0
+
+    def walk(path: str, lvl: int):
+        nonlocal n
+        try:
+            with os.scandir(path) as it:
+                for e in it:
+                    if e.name == ".git":
+                        continue
+                    is_rp = e.is_symlink()
+                    if not is_rp:
+                        try:
+                            is_rp = bool(e.stat(follow_symlinks=False).st_file_attributes & attr_rp)
+                        except (AttributeError, OSError):
+                            is_rp = False
+                    if is_rp:
+                        n += 1
+                        continue  # never descend into a link
+                    if lvl < depth and e.is_dir(follow_symlinks=False):
+                        walk(e.path, lvl + 1)
+        except OSError:
+            raise
+
+    try:
+        walk(wt, 1)
+    except Exception:
+        return "?"
+    return n
+
+
+# A STATE_DIRS entry whose subtree is only PARTLY ignored gets its exception named in the
+# announcement. Without it "projects/" read as "memory is ignored" -- false since the
+# 2026-09-06 .gitignore change -- and sessions sent memory edits to the canonical path,
+# where the Desktop app's worktree-write-guard blocks them (2026-09-22/23, four times).
+STATE_DIR_LABELS = {"projects": "projects/ (transcripts; */memory/*.md is TRACKED)"}
+
+
 def state_present(wt: str):
-    return [d + "/" for d in STATE_DIRS if os.path.isdir(os.path.join(wt, d))]
+    return [STATE_DIR_LABELS.get(d, d + "/") for d in STATE_DIRS if os.path.isdir(os.path.join(wt, d))]
 
 
 def cd_to_canonical(cmd: str, before: int) -> bool:
@@ -381,16 +453,19 @@ def announce(cwd: str) -> str:
             f"written or committed here reach {canon} only after {b} is merged — until then only the "
             f"worktree path resolves, and a close-out here ends with the ff-merge onto {main} from "
             f"{canon}, not with the commit. Gitignored paths here never merge (present now: "
-            f"{', '.join(present) if present else 'none'}); that class is written under {canon}."
+            f"{', '.join(present) if present else 'none'}); that class belongs under {canon}."
         )
         if governed(info):
             text += (
                 f" Hooks, skills and rules load from {canon}, never from this copy; live-environment "
                 f"verification does not run here. This hook's PreToolUse half denies Write/Edit into an "
                 f"ignored path here and denies gsnap.py/xi.py state builds by relative path (an absolute "
-                f"canonical path, or the marker {MARKER} in the command, passes)."
+                f"canonical path, or the marker {MARKER} in the command, passes). The Desktop app's own "
+                f"worktree-write-guard blocks Write/Edit under {canon} and ExitWorktree is a no-op "
+                f"here: a tracked file (memory .md included) is edited HERE and merged; an ignored "
+                f"one (cache/handoff) goes to a session in {canon} as target + new text at the "
+                f"edge of your reply."
             )
-        text += f" ExitWorktree moves this session to {canon}."
         return text[:ANNOUNCE_MAX]
     # primary checkout: list its linked worktrees
     rc, out = git(["worktree", "list", "--porcelain"], cwd=info["root"])
@@ -426,12 +501,16 @@ def announce(cwd: str) -> str:
         ahead = ahead_count(info["root"], main, tip) if tip else "?"
         dirty = dirty_count(path) if os.path.isdir(path) else "missing"
         present = state_present(path) if os.path.isdir(path) else []
+        links = reparse_count(path) if os.path.isdir(path) else "?"
         parts.append(f"{os.path.basename(path)} (branch {b}, +{ahead} unmerged, dirty {dirty}, "
-                     f"ignored state: {', '.join(present) if present else 'none'})")
+                     f"ignored state: {', '.join(present) if present else 'none'}, reparse {links})")
     text = (f"[worktree-scope] {len(linked)} linked worktree(s) of {info['root']} still exist: "
             + "; ".join(parts) + f" — a branch with unmerged commits holds files no path under "
             f"{info['root']} resolves; a worktree with ignored state holds builds {info['root']} "
-            f"does not have.")
+            f"does not have; a worktree with reparse points (junction/symlink, counted to "
+            f"{REPARSE_DEPTH} levels) is NOT removed until each link is dropped with "
+            f"`cmd /c rmdir <link>` and its target verified non-empty — `git worktree remove` "
+            f"deletes through a junction into the shared target (L-120).")
     if orphans:
         text += (f" Also in the pool, git does not know about: {'; '.join(orphans)} — residue, "
                  f"not worktrees (an empty one is a removal whose last unlink lost a race with "
@@ -459,7 +538,9 @@ def deny_message(verdict: str, f: dict) -> str:
             f"content): the target {f['target']} matched git's ignore rules inside the linked worktree "
             f"{f['wt']} (branch {f['branch']}) of {f['canonical']}. An ignored path never merges, so "
             f"whatever lands there stays in the worktree and cannot be found from {f['canonical']}. "
-            f"To proceed: write the same file under the canonical tree — {f['canonical_target']} — "
+            f"To proceed: the file belongs at {f['canonical_target']}, which the Desktop app's "
+            f"worktree-write-guard refuses from this session (Write/Edit), so put that target and the "
+            f"new text at the edge of your reply for a session started in {f['canonical']}; "
             f"or, when this worktree's ignored state is deliberately kept local, opt in once with "
             f"echo ok > \"{allow_path}\" (PowerShell: 'ok' | Set-Content \"{allow_path}\") and re-run "
             f"the write."
@@ -651,6 +732,39 @@ def selftest() -> int:
         _shutil.rmtree(pool, ignore_errors=True)
         check("R-7", announce(canon).startswith("[worktree-scope] 1 linked worktree"),
               "with the pool gone the announce returns to the plain worktree line")
+
+        # REPARSE (J-*) — L-120. Positive: a junction (Windows) / symlink (else)
+        # two levels down in the worktree, pointing at a folder OUTSIDE it, is
+        # counted and the announce names the removal rule. Negative: the count
+        # is 0 once the link is dropped, and dropping it did not empty the
+        # target — the exact damage L-120 describes. J-3 is what makes J-1
+        # capable of failing on an inverted build: a count that ignored links
+        # would print 0 both times.
+        target = os.path.join(tmp, "shared-deps")
+        os.makedirs(target, exist_ok=True)
+        with open(os.path.join(target, "keep.txt"), "w", encoding="utf-8") as fh:
+            fh.write("x\n")
+        os.makedirs(os.path.join(wt, "gui"), exist_ok=True)
+        link = os.path.join(wt, "gui", "node_modules")
+        if os.name == "nt":
+            lr = subprocess.run(["cmd", "/c", "mklink", "/J", link, target], capture_output=True, text=True)
+            linked_ok = lr.returncode == 0
+        else:
+            os.symlink(target, link, target_is_directory=True)
+            linked_ok = True
+        check("J-0", linked_ok and os.path.isdir(link), "setup: junction/symlink created inside the worktree")
+        j1 = announce(canon)
+        check("J-1", "reparse 1" in j1 and "L-120" in j1,
+              "a worktree holding one junction announces reparse 1 and names the L-120 rule")
+        check("J-2", reparse_count(wt, depth=1) == 0,
+              "the depth limit is real: a link two levels down is outside depth 1")
+        if os.name == "nt":
+            subprocess.run(["cmd", "/c", "rmdir", link], capture_output=True, text=True)
+        else:
+            os.unlink(link)
+        j3 = announce(canon)
+        check("J-3", "reparse 0" in j3 and os.path.isfile(os.path.join(target, "keep.txt")),
+              "link dropped -> reparse 0, and the target kept its contents")
 
         # NEGATIVE — allow
         check("N-1", call("Write", {"file_path": os.path.join(wt, "references", "c.md"), "content": "c"}, wt) == "allow",

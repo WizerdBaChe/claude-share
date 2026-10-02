@@ -1,4 +1,4 @@
-"""PreToolUse guard: deterministic deny-list for destructive shell commands.
+r"""PreToolUse guard: deterministic deny-list for destructive shell commands.
 
 STATUS: LIVE since 2026-07-29 (backfilled 2026-09-08 from the first commit; entry-schema ES-1).
 
@@ -28,12 +28,13 @@ Temp roots (scratchpad/TEMP) are exempt from the deletion rules: recursive
 deletes inside them are routine cleanup.
 
 Proof-of-life: `python tools/dangerous-command-test/test_dangerous_command_guard.py`
-(65 cases as of 2026-09-09, printed by the suite: 27 must-deny / 29 must-pass /
+(80 cases as of 2026-09-22, printed by the suite: 38 must-deny / 33 must-pass /
 3 undetermined + 3 determinable twins / fail-open / coverage / isolation). The
 coverage case reads this file's own RULES list, so a shape added here without a
 specimen there fails the suite rather than shipping unmeasured (PH-11 / AP-61).
 
-OVER-MATCH, MEASURED 2026-09-08, OBSERVED 0 TIMES: the patterns match inside
+OVER-MATCH, MEASURED 2026-09-08 (the machine-state half OBSERVED 4 times on
+2026-09-22 and narrowed -- FALSE-POSITIVE LOG; the rm -rf half still 0): the patterns match inside
 quoted strings, so a command that merely NAMES a shape is denied — measured on
 `git commit -m "... rm -rf / ..."` and `echo 'the shutdown procedure ...'`. Both
 are pinned in the suite's OVERMATCH block, which reports them and counts them in
@@ -41,6 +42,28 @@ no verdict. Nothing was narrowed: the loosening trigger for this guard is an
 OBSERVED false-positive count (rules/hook-deny-message.md, FALSE-POSITIVE LOG),
 and a synthetic hit is not one. When a real session hits one, the shape is
 already named and those two cases are the regression floor for the narrowing.
+
+FALSE-POSITIVE LOG:
+- 2026-09-22, 4 observed, one session (receipt rows c52979, 858980, 8f6b91,
+  87d0a1): the machine-state rule denied read-only work that NAMED the word — two
+  grep patterns (`...\|shutdown\|...`), a report_fp.py `--why` text, and a Python
+  heredoc calling `srv.shutdown()` on an HTTP server. The misfire report itself was
+  denied by the same rule, so the exit could not record it. Loosened: that ONE rule
+  now matches only in command position (see RULES); the other rules and the
+  quoted-`rm -rf` OVERMATCH case are unchanged (not observed). Regression: the four
+  shapes are MUST-PASS in the suite, and chained / launched / quoted-command spellings
+  of every machine-state verb are MUST-DENY. Known gap, labelled: a verb reached
+  through `ssh host shutdown` or an alias is not in command position and passes to
+  the normal permission flow.
+- 2026-09-11, 1 observed, another session (telemetry/hook-false-positives.jsonl
+  ts 1789074447), surfaced by the feedback pool's review round 1 on 2026-09-22: a
+  multi-statement PowerShell block whose destructive target was `$SB` under %TEMP%
+  was denied because an absolute path on a non-system drive appeared in a LATER read-only
+  statement (`Get-ChildItem`) of the same block — attribution is per command text,
+  not per statement. Different rule from the 09-22 four (path-scope, not
+  machine-state). NOT narrowed: 1 observed; the loosening trigger for this shape is
+  3. If it recurs, the narrowing is per-statement attribution (split on `;`/newline
+  before matching a path rule), with this block as the MUST-PASS regression.
 
 review-when: RULES is an enumeration of command SHAPES, and an enumeration loses
 to the first member nobody wrote down — none of the facts below is visible from
@@ -96,7 +119,15 @@ RULES = [
      "Direct registry modification is blocked; ask the user to run it themselves."),
     ("ps", re.compile(r"\b(Set|New|Remove)-ItemProperty\b[^|]*\bHK(LM|CU|CR|U|CC):", re.I),
      "Registry writes via *-ItemProperty are blocked; ask the user to run it themselves."),
-    ("any", re.compile(r"\b(shutdown|Restart-Computer|Stop-Computer|Format-Volume|Clear-Disk|diskpart|mkfs(\.\w+)?)\b", re.I),
+    # COMMAND POSITION only (narrowed 2026-09-22, FALSE-POSITIVE LOG below): the verb must
+    # start a line, follow an unescaped separator (; & | ( { $( backtick), or follow a
+    # launcher (sudo/start/exec/xargs/call, -c, /c, /k, -Command), optionally opening a
+    # quote. A grep pattern `\|shutdown`, a method call `srv.shutdown()` and prose naming
+    # the word no longer match.
+    ("any", re.compile(r"(?:^|(?<!\\)[;&|({`]|\$\(|\b(?:sudo|start|exec|xargs|call)\s+"
+                       r"|(?:^|\s)(?:-c|/c|/k|-Command)\s+)\s*[\"']?"
+                       r"(shutdown(\.exe)?|Restart-Computer|Stop-Computer|Format-Volume"
+                       r"|Clear-Disk|diskpart(\.exe)?|mkfs(\.\w+)?)\b", re.I | re.M),
      "Machine-state / disk-formatting commands are blocked; ask the user."),
     ("ps", re.compile(r"\bSet-ExecutionPolicy\b", re.I),
      "Changing PowerShell execution policy is a system security setting; ask the user."),

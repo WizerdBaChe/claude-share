@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 r"""Delivery gate -- SHADOW MODE (E2 phase 1). Observes, never blocks.
 
-STATUS: SHADOW (observe-only) since 2026-08-11; graduation criterion: the rule-registry
-entry that names this hook (measured false-positive rate before any deny).
+STATUS: RETIRED since 2026-09-27 — unregistered from settings.json by user ruling on an overdue-shadow-hooks evaluation report: the registry's pre-committed criterion (hand-judged false share > ~30% after 2026-09-11 -> RETIRE, no third vocabulary pass) fired at >=14/15 false; the predicate itself is wrong (`2>/dev/null` and scratchpad writes counted as deliverables, 77% of events could not read the subagent transcript). File and telemetry kept; rollback = re-register (ops/rule-registry.md "delivery gate"). Was: SHADOW (observe-only) since 2026-08-11.
 
 WHAT THIS IS
 ------------

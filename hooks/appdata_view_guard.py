@@ -112,6 +112,24 @@ SURFACES = (
     (re.compile(r"HKEY_CURRENT_USER", re.I), "HKEY_CURRENT_USER"),
 )
 
+# A program under AppData\Local\Programs at COMMAND position (start of a
+# statement, or after ; | & && || ( or PowerShell's `&` call operator) names the
+# program being RUN, not state being READ, so it is blanked before the literal
+# AppData\Local pattern is searched. Narrowed 2026-09-23 (user ruling on the
+# notice-hook audit): 375 of 443 live rows named nothing else — mostly the
+# absolute python.exe path settings.json itself uses. The same path as an
+# ARGUMENT (`Remove-Item …\Programs\x\x.exe`, `ls …\Programs`) still fires:
+# that is the cleanup-plan shape the guard exists for. So does an ASSIGNMENT
+# (`P=…\Programs\…`, `$py = "…"`): what the variable is later used for is not
+# determinable from here.
+PROGRAMS_EXE_AT_COMMAND = re.compile(
+    r"""(?:^|(?<=[;|&(\n]))(\s*&?\s*)"""
+    r"""(?:"[^"\n]*?AppData[\\/]+Local[\\/]+Programs[\\/]+[^"\n]*"|"""
+    r"""'[^'\n]*?AppData[\\/]+Local[\\/]+Programs[\\/]+[^'\n]*'|"""
+    r"""[^\s"';|&()=]*?AppData[\\/]+Local[\\/]+Programs[\\/]+[^\s"';|&()]*)(?=[\s;|&)]|$)""",
+    re.I,
+)
+
 # CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp
 # dir; production never sets it).
 LOG_PATH = os.path.join(
@@ -165,6 +183,7 @@ def hits_for(cmd):
         return []
     if not cmd or MARKER in cmd:
         return []
+    cmd = PROGRAMS_EXE_AT_COMMAND.sub(lambda m: m.group(1) + "<exe>", cmd)
     return [label for pattern, label in SURFACES if pattern.search(cmd)]
 
 
@@ -201,6 +220,13 @@ MUST_FIRE = [
     r"Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'",
     r"reg query HKEY_CURRENT_USER\Software",
     r'cat "$LOCALAPPDATA/app/config.json"',
+    # 2026-09-23 narrowing, fire side: a Programs path as an ARGUMENT, and a
+    # real surface behind an exempted exe, must still annotate.
+    r'Remove-Item "C:\Users\<user>\AppData\Local\Programs\Foo\foo.exe"',
+    r"ls C:\Users\<user>\AppData\Local\Programs",
+    r'& "C:\Users\<user>\AppData\Local\Programs\Python\Python312\python.exe" -c "print(open(r\"C:\Users\<user>\AppData\Local\app\config.json\").read())"',
+    r"C:\Users\<user>\AppData\Local\Programs\Python\Python312\python.exe x.py; Get-ItemProperty HKCU:\Software",
+    r"cd /c/x; P=C:/Users/<user>/AppData/Local/Programs/Foo/settings.json; cat $P",
 ]
 
 MUST_STAY_SILENT = [
@@ -211,6 +237,12 @@ MUST_STAY_SILENT = [
     r'ls "C:\Users\<user>\AppData\Local\Packages\Claude_pzs8sxrjxfjjc"',
     r'cat "C:\Users\<user>\AppData\Local\Temp\claude\scratchpad\notes.txt"',
     r'ls "$env:LOCALAPPDATA\app" [view-checked]',
+    # 2026-09-23 narrowing, silent side: an exe under Programs being RUN.
+    r'"C:/Users/<user>/AppData/Local/Programs/Python/Python312/python.exe" "C:/Users/<user>/.claude/hooks/x.py"',
+    r"& C:\Users\<user>\AppData\Local\Programs\Python\Python312\Scripts\yt-dlp.exe --version",
+    r'git status; & "C:\Users\<user>\AppData\Local\Programs\Microsoft VS Code\Code.exe" .',
+    r'C:\Users\<user>\AppData\Local\Programs\Python\Python312\python.exe "C:\Users\<user>\AppData\Local\Temp\claude\s\run.py"',
+    r'cd /c/x && /c/Users/<user>/AppData/Local/Programs/Python/Python312/python -c "print(1)"',
 ]
 
 

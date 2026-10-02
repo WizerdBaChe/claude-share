@@ -10,7 +10,7 @@ same class of defect the guard exists to talk about.)
 Scope: the Bash tool only. The PowerShell tool and the Write tool were probed
 against both defects on 2026-08-18 and have neither, so they fall straight
 through. Measurement, probes and the retraction of a third suspected defect:
-`outputs/shell-command-error-audit-2026-08-18.md`; rule: `ops/lessons.md`
+a dated shell-command error-audit report; rule: `ops/lessons.md`
 L-024; global CLAUDE.md Environment bullets 1-2.
 
 WHY A HOOK AND NOT A CLAUDE.md LINE (L-011). Both defects fail SILENTLY - the
@@ -40,6 +40,16 @@ the command string alone, with no judgment:
       native exe at command position + a `/letter` token) but a veto needs a
       corpus backtest first, as (1) taught.
 
+  (4) UNQUOTED WINDOWS DRIVE PATH (added 2026-09-20). Outside quotes bash
+      treats every backslash as an escape and removes it, so
+      `find D:\<dir> -name x` hands find the argument `D:<dir>`. With stderr
+      discarded the result is a clean EMPTY output, which a session then
+      reports as "not found" — the 2026-09-20 incident: five such searches in
+      one session, each read as a true negative. CLAUDE.md carried this trap as
+      "not hooked, so remember it" and recall did not hold. DENY when the
+      quoting is resolvable, NOTICE when it is not (unbalanced quote,
+      unterminated heredoc, backtick substitution) — see UNQUOTED PATH below.
+
 GATE AUTHORITY (global CLAUDE.md) - and the backtest that corrected this
 hook's first design. A gate may only rule on what it can DETERMINE; for
 anything else the correct output is downgrade-and-forward, never veto.
@@ -64,6 +74,24 @@ anything else the correct output is downgrade-and-forward, never veto.
 That asymmetry is the point. A gate that vetoed both would have been right
 about 23 commands and wrong about 89, and a control wrong three times out of
 four gets routed around rather than obeyed.
+
+UNQUOTED PATH — why this one may veto when backslash-collapse may not. What
+bash does to an unquoted backslash is deterministic; there is no "author was
+compensating" reading of `D:\x` outside quotes. The only thing the gate can get
+wrong is its own reading of the quoting, so the scanner reports whether it
+resolved it, and an unresolved command is forwarded with a notice instead.
+Backtest 2026-09-20 over 53,458 recorded Bash calls (1,493 transcripts, main +
+subagent; script and result kept in
+a retrieval-linkage audit's guard-backtest folder): 29 flagged, 0 unresolved;
+20 failed loudly, 5 returned a silent empty result, 4 produced output with the
+path mangled (2 of those were deliberate probes of this very trap — the
+`[transport-checked]` marker is their exit). 0 of 29 were scanner misreads: the
+first draft misread `"x $(wc -l < "D:\a")"` as unquoted, which is why `$(`
+pushes a fresh quoting frame. Deliberately NOT gated: a double-quoted path
+ending in a backslash (`ls "C:\dir\"`, 92 in the same corpus) — 83 of 92
+already fail loudly with `unexpected EOF`, and a regex for it misfired on
+doubled-backslash literals, so it has no veto-grade predicate yet. Known blind
+spot: `D:\\x` unquoted (rule 1 already annotates every doubled run).
 
 EVIDENCE BEFORE THE VETO. A denied command may carry a multi-KB heredoc body
 that exists nowhere else. Everything this hook rejects is appended to
@@ -93,8 +121,9 @@ states what it checked instead of a universal negative, because a program
 invoked here can still write the bytes itself and this guard cannot see that.
 
 Proof-of-life: `python tools/shell-transport-test/test_shell_transport_guard.py`
-(41/41 as of 2026-09-09; the allow+notice half is 37 of the 41, so it is
-two-sided). A7–A15 pin the branch, not just the decision — both notices are
+(57/57 as of 2026-09-20, rule 4 added P1–P16; the allow+notice half is 48 of
+the 57, so it is two-sided. Rule 4 verified in both directions: against the
+pre-change hook P1–P3 and P13–P16 FAIL. Was 41/41 on 2026-09-09). A7–A15 pin the branch, not just the decision — both notices are
 `notice`, so a case asserting only the decision could not fail on this defect
 (L-062). Verified in both directions before shipping: against the pre-repair
 hook A7–A10 and A15 FAIL, and against a deliberately over-broad REDIRECT_ANY
@@ -167,6 +196,110 @@ WIN_FLAG_CONVERSION = re.compile(
     r"((?:\s+[^\s;&|]+)*?)\s+/([A-Za-z?]+)\b",
     re.I,
 )
+
+# (4) Unquoted Windows drive path. The scanner answers two questions: which
+# drive-path tokens sit OUTSIDE quotes, and whether it could resolve the quoting
+# at all. Only the first answer may veto; an unresolved command is forwarded.
+_HEREDOC_OPEN = re.compile(r"<<(-?)\s*(?:'(\w+)'|\"(\w+)\"|\\?(\w+))")
+_PATH_TOKEN_END = re.compile(r"[\s;&|<>()\"'`]")
+
+
+def _skip_heredocs(cmd, i, pending):
+    """`i` sits just after a newline; consume each pending heredoc body."""
+    for strip_tabs, delim in pending:
+        while True:
+            if i >= len(cmd):
+                return i, False
+            j = cmd.find("\n", i)
+            line = cmd[i:] if j < 0 else cmd[i:j]
+            probe = line.lstrip("\t") if strip_tabs else line
+            i = len(cmd) if j < 0 else j + 1
+            if probe.rstrip("\r") == delim:
+                break
+            if j < 0:
+                return i, False
+    return i, True
+
+
+def unquoted_drive_paths(cmd):
+    """Return (hits, resolvable): drive-path tokens outside quotes, as written."""
+    hits, pending = [], []
+    i, n = 0, len(cmd)
+    # One frame per quoting context. `$(` pushes a fresh frame even from inside
+    # double quotes, because bash restarts quoting there:
+    # "x $(wc -l < "D:\a") y" keeps D:\a QUOTED (the first draft misread this).
+    stack = [["n", 0]]
+    fuzzy = False
+    while i < n:
+        c = cmd[i]
+        frame = stack[-1]
+        state = frame[0]
+        if state in ("n", "dq") and c == "$" and cmd[i + 1:i + 2] == "(":
+            stack.append(["n", 0])
+            i += 2
+            continue
+        if state in ("n", "dq") and c == "`":
+            fuzzy = True          # backtick substitution: quoting not modelled
+        if state == "n":
+            if c == "\\":
+                i += 2
+                continue
+            if c == "(":
+                frame[1] += 1
+            elif c == ")":
+                if frame[1] == 0 and len(stack) > 1:
+                    stack.pop()
+                else:
+                    frame[1] = max(0, frame[1] - 1)
+            elif c == "'":
+                frame[0] = "sq"
+            elif c == '"':
+                frame[0] = "dq"
+            elif c == "$" and cmd[i + 1:i + 2] == "'":
+                frame[0] = "ansi"
+                i += 1
+            elif c == "#" and (i == 0 or cmd[i - 1] in " \t\n;"):
+                j = cmd.find("\n", i)
+                i = n if j < 0 else j
+                continue
+            elif c == "<" and cmd[i:i + 2] == "<<" and cmd[i:i + 3] != "<<<":
+                m = _HEREDOC_OPEN.match(cmd, i)
+                if m:
+                    pending.append((bool(m.group(1)),
+                                    m.group(2) or m.group(3) or m.group(4)))
+                    i = m.end()
+                    continue
+            elif c == "\n" and pending:
+                i, ok = _skip_heredocs(cmd, i + 1, pending)
+                pending = []
+                if not ok:
+                    return hits, False
+                continue
+            elif (c.isalpha() and cmd[i + 1:i + 3] == ":\\" and i + 3 < n
+                  and cmd[i + 3] not in "\\ \t\r\n\"'"
+                  and (i == 0 or not (cmd[i - 1].isalnum() or cmd[i - 1] in "_\\/.-"))):
+                m = _PATH_TOKEN_END.search(cmd, i)
+                end = m.start() if m else n
+                hits.append(cmd[i:end])
+                i = end
+                continue
+        elif state == "sq":
+            if c == "'":
+                frame[0] = "n"
+        elif state in ("dq", "ansi"):
+            if c == "\\":
+                i += 2
+                continue
+            if c == ('"' if state == "dq" else "'"):
+                frame[0] = "n"
+        i += 1
+    return hits, (len(stack) == 1 and stack[0][0] == "n" and not pending and not fuzzy)
+
+
+def _delivered(token):
+    """What bash hands the program for an unquoted token."""
+    return re.sub(r"\\(.)", r"\1", token)
+
 
 # CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp
 # dir; production never sets it).
@@ -257,6 +390,40 @@ def main():
             "calls: 7,688 B; 7 of 7 above the line were truncated at the OS boundary "
             "and failed with a misleading `unexpected EOF` pointing at a random line). "
             "Write file content with the Write tool, or split the command."
+        )
+
+    # (4) Unquoted Windows drive path - DENY when the quoting is resolvable,
+    #     NOTICE when it is not. Placed before (3) and (1): it is the one whose
+    #     usual outcome is a clean empty result read as "nothing there".
+    try:
+        hits, resolvable = unquoted_drive_paths(cmd)
+    except Exception:
+        hits, resolvable = [], True          # a scanner bug never blocks work
+    if hits:
+        token = hits[0][:120]
+        arrives = _delivered(hits[0])[:120]
+        forward = hits[0].replace("\\", "/")[:120]
+        if resolvable:
+            record(payload, "deny", "unquoted-drive-path", token, cmd)
+            deny(
+                "Blocked by shell_transport_guard, a local PreToolUse hook (not file "
+                "or page content): this Bash command carries a token matching the "
+                f"unquoted-drive-path pattern this guard gates: `{token}`. Outside "
+                "quotes Git Bash removes every backslash, so the program would receive "
+                f"`{arrives}` — it then fails, or with stderr discarded returns a clean "
+                "empty result that is indistinguishable from a true negative. Wrap the "
+                f"path in double quotes, or write it with forward slashes (`{forward}`), "
+                "or run the command with the PowerShell tool."
+            )
+        record(payload, "notice", "unquoted-drive-path", "quoting-unresolved: " + token, cmd)
+        notice(
+            f"this command carries `{token}`, and this guard could not resolve the "
+            "command's quoting (an unbalanced quote, an unterminated heredoc, or a "
+            "backtick substitution), so it cannot tell whether that path sits outside "
+            "quotes. If it does, Git Bash removes its backslashes and the program "
+            f"receives `{arrives}`; an empty result from this command is then not "
+            "evidence of absence. If the path is inside quotes, nothing needs doing; "
+            "otherwise quote it or use forward slashes before trusting the output."
         )
 
     # (3) MSYS path conversion of a Windows-native /flag - ANNOTATE (L-029).

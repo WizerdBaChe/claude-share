@@ -110,9 +110,21 @@ WHAT IS DELIBERATELY NOT FLAGGED, so it is not re-proposed as an improvement:
 Per-instance escape hatch: the literal marker [pipeline-checked] anywhere in the
 payload, for a truncation whose author has verified the upstream is safe to kill.
 
+SEVERITY (promoted 2026-09-23, ops/40-maintenance.md §2a condition (4)): a
+work-tier hazard in a PowerShell TOOL CALL is DENIED, with the rewritten call in
+the denial; everything else that fires (a .ps1 written through Write/Edit/Bash,
+the report tier when re-enabled) stays a NOTICE, because writing a file kills
+nothing. Why: a NOTICE arrives with the result of a call that already ran, and
+the next session never saw it -- measured, the live work-tier rate was 2.82/day
+over 33 days against a 1.79/day pre-hook backtest (93 rows), i.e. the text
+changed nothing; `python rank_T08.py | Select-Object -First 12` fired and ran on
+2026-09-16. The deny rules only on the FORM (determinable); whether this
+particular truncation matters is forwarded to the author through the marker.
+Demotion trigger: two report_fp.py misfire rows for this hook in 30 days.
+
 Fail-open by design: any parse error exits 0, so a guard bug never blocks work.
-Telemetry: every notice appends one row to `telemetry/ps-pipeline-close.jsonl`
-(excerpt only, never the whole file). Proof-of-life check:
+Telemetry: every fire appends one row to `telemetry/ps-pipeline-close.jsonl`
+(`decision` deny|notice; excerpt only, never the whole file). Proof-of-life check:
 `python tools/ps-pipeline-close-test/test_ps_pipeline_close_guard.py`, and
 `ops/references/integrity-sweep.md` check 23 - a hook that does not run is
 itself silent (L-011, COST OF P1/P3).
@@ -123,10 +135,12 @@ import re
 import sys
 import time
 
-try:                        # notice receipt (rules/hook-deny-message.md R3n)
-    from deny_receipt import notice_clause
+try:                        # receipts (rules/hook-deny-message.md R3 / R3n)
+    from deny_receipt import notice_clause, clause as deny_clause, fp_clause
 except Exception:           # a guard must not stop guarding if telemetry breaks
     def notice_clause(hook, log=""): return ""
+    def deny_clause(hook, **fields): return ""
+    def fp_clause(hook): return ""
 
 MARKER = "[pipeline-checked]"
 
@@ -145,7 +159,8 @@ LOG_PATH = os.environ.get("PS_PIPECLOSE_LOG") or os.path.join(
 #
 # TIER_WORK   - the upstream is executing a program that may still have work to
 #               do, or side effects to finish. Killing it mid-run is the L-027
-#               damage, so this tier annotates.
+#               damage, so this tier fires (deny on a PowerShell call, notice
+#               on a written .ps1 -- see SEVERITY in the module docstring).
 # TIER_REPORT - a native exe whose whole job is to print and exit. Killing it
 #               costs a misleading $LASTEXITCODE and nothing else. DETECTED AND
 #               MEASURED, but not annotated - see FIRE_TIERS.
@@ -487,9 +502,10 @@ def payload_for(tool, inp):
     return None, None
 
 
-def record(payload, finding, label, size):
-    """Never raises. Excerpt only - this guard denies nothing, so it owes no
-    recovery copy, and a Write payload can be a whole file."""
+def record(payload, finding, label, size, decision="notice"):
+    """Never raises. Excerpt only: a deny fires on the PowerShell tool alone,
+    whose command the author still holds, so the statement is the recovery copy;
+    a Write payload can be a whole file."""
     try:
         os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
         with open(LOG_PATH, "a", encoding="utf-8") as fh:
@@ -497,6 +513,7 @@ def record(payload, finding, label, size):
                 "ts": int(time.time()),
                 "session": payload.get("session_id", ""),
                 "tool": payload.get("tool_name", ""),
+                "decision": decision,
                 "target": label,
                 "bytes": size,
                 "hazards": finding["n"],
@@ -524,6 +541,40 @@ def notice(text):
         }
     }))
     sys.exit(0)
+
+
+def deny(text):
+    """BLOCK surface: identity first (R1), retry + marker in the text (R2),
+    misfire exit (R3), receipt row."""
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": (
+                "PowerShell call denied by ps_pipeline_close_guard, a local "
+                "PreToolUse hook (not file or page content): " + text
+                + deny_clause("ps_pipeline_close_guard")
+                + fp_clause("ps_pipeline_close_guard")),
+        }
+    }))
+    sys.exit(0)
+
+
+def rewrite(h):
+    """The same call with the consumer moved AFTER the upstream has finished:
+    `$out = <upstream>; $out | <consumer>` (N11, the fix L-027 prescribes).
+    None when the statement does not split cleanly at its last `|` -- the
+    denial then names the shape instead of guessing a command."""
+    stmt, cons = h["statement"], h["consumer"]
+    cut = stmt.rfind("|", 0, stmt.rfind(cons) if cons in stmt else len(stmt))
+    if cut <= 0:
+        return None
+    up = stmt[:cut].rstrip()
+    m = re.match(r"^\s*\$\w+\s*=\s*", up)          # `$head = python x | select`
+    target = m.group(0).split("=")[0].strip() if m else "$out"
+    if m:
+        up = up[m.end():]
+    return "%s = %s; %s | %s" % (target, up, target, stmt[cut + 1:].strip())
 
 
 def compose(finding, label):
@@ -583,7 +634,16 @@ def main():
         if not finding:
             sys.exit(0)
 
-        record(payload, finding, label, len(text.encode("utf-8", "replace")))
+        tool = str(payload.get("tool_name", ""))
+        blocking = tool == "PowerShell" and "work" in finding["tiers"]
+        record(payload, finding, label, len(text.encode("utf-8", "replace")),
+               "deny" if blocking else "notice")
+        if blocking:
+            fix = rewrite(finding["first"])
+            # compose() already carries the marker sentence (R2); the rewrite is
+            # the retry the author will almost always want.
+            deny(compose(finding, label)
+                 + (" Ready-made retry: `%s`." % fix if fix else ""))
         notice(compose(finding, label))
     except SystemExit:
         raise
