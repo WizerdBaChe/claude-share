@@ -70,7 +70,7 @@ no code names, PM register).
   edge, bevel or extrusion on shapes, lines, text or table cells. This includes decoration INHERITED from the
   theme: an untouched python-pptx `add_shape()` inherits an outer shadow, so builders set
   `shadow.inherit = False` and an explicit fill. At most 3 distinct non-grey colours per slide, with figures
-  exempt. Gate: a source-only presentation-gate tool (does not ship here), run with `--class <class>`. Decoration FAILs a
+  exempt. Gate: `tools/pptx-presentation-gate/presentation_gate.py --class <class>`. Decoration FAILs a
   presentation deck and WARNs a conclusion deck; the colour count is always WARN. HTML decks follow the same
   property (no decorative `box-shadow` / gradients on slide content; UI chrome such as hover cards is exempt),
   as an authoring rule until an HTML check exists.
@@ -231,8 +231,8 @@ build script is where they are enforced:**
 - **A deck delivered as EDITABLE survives one more line of its own kind in
   every content frame.** Every other check here measures the deck standing
   still; this one measures the reader's first edit, which is why the file was
-  shipped editable at all. Gate: a source-only headroom-measurement tool (does
-  not ship here), run as `<deck> --content <shape-name regex>` — it duplicates each frame's own last
+  shipped editable at all. Gate: `~/.claude/tools/pptx-edit-headroom/headroom.py
+  <deck> --content <shape-name regex>` — it duplicates each frame's own last
   paragraph (self-similar, so the probe scales with the frame), re-measures with
   PowerPoint's layout engine, restores, and rules on three breaks: CLIP
   (an `autosize=none` frame now taller than its inner height), ESCAPE (a growing
@@ -260,7 +260,7 @@ build script is where they are enforced:**
   `hangingPunct` alone do not). Builders set `lang`/`altLang` on every run
   (the source environment's asset-library deck builder, `_set_font`; not shipped here). Where a line breaks is known only to
   PowerPoint, so the gate reads its layout:
-  a source-only line-start gate (does not ship here), run as `<deck>` (COM `TextRange.Lines`,
+  `~/.claude/tools/pptx-line-start/line_start.py <deck>` (COM `TextRange.Lines`,
   two-sided width-sweep controls every run; exit 3 = uncalibrated, no ruling).
   Presentation class blocks on a hit; conclusion reports it once.
 - **Visual acceptance is a render loop, not a claim**: export slides to PNG

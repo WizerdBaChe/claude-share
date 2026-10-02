@@ -15,7 +15,7 @@ then `intake.py event L-nnn --kind recurrence --held yes|no --note "..."`. A car
 hits reaches 2 is routed through `ops/40-maintenance.md` §2a (fold: `--kind fold --target
 "<file §anchor>"`). Full text, recurrences and provenance: the `Record:` path on each card (at the source).
 Rules and semantics: the intake design record under the source's references/ tree (not shipped).
-generated-at: 2026-09-29T11:51:23+08:00   records: 134
+generated-at: 2026-10-02T15:36:47+08:00   records: 135
 
 ## L-001 2026-07-10 tags: dispatch|cost-cap|hooks hits: 1 state: folded→hooks/model_cap_guard.py
 what: L-001 舊帳本搬入 (legacy import, folded): a cost cap enforced at DISPATCH time does not survive a `SendMessage` resume: th
@@ -1061,3 +1061,11 @@ Pitfall: Both readers died on `API Error: 400 Output blocked by content filterin
 Fix: Route change, not retry: evidence = locator + one quote <= 15 CJK-eq; presence proven by local Windows OCR + fuzzy match (tools/quote-evidence/qe.py, PASS >= 0.80); an independent verifier opens the images and returns match/mismatch and paraphrase findings only. Result in the incident: 86/86 quotes matched, gate 270 PASS, nothing blocked. Rule: rules/source-quotation-evidence.md; dispatch notice: hooks/verbatim_dispatch_notice.py.
 Detection: A dispatch prompt or a main-loop plan containing verbatim/transcribe/逐字/抄錄 next to pages/book/scan/image paths; or the string `Output blocked by content filtering policy` in a task-notification.
 Record: ops/lessons/L-134.md
+
+## L-135 2026-10-02 tags: self-review|records|delivery|claim-calibration hits: 1 state: live
+what: 篩檢說明是手寫的，寫進了沒做過的檢查 (a hand-written screening record claimed checks that never ran)
+Context: Teaching pack for an outside reader: 22 verbatim originals screened (user ruling: block secrets, names, identity; paths allowed), a screening section written into the main HTML before zipping.
+Pitfall: The scan printed 8 findings and a calibration line; the screening prose was then written from intent, not from that output. Two sentences claimed work that never ran: an exclusion of "project records with other people's correspondence" (never evaluated) and "the three retrospectives were manually confirmed" (only a keyword grep ran). A screening record reads as evidence by default, and the reader cannot tell a planned check from a performed one.
+Fix: Derive the screening section from the scan's own output: findings count and classes, the calibration pair, the exclusion list with a reason per excluded file, and a limits line naming what was NOT read end to end. Before shipping, read every "已/confirmed/excluded" sentence against a tool call in this session.
+Detection: For each verb of completion in a screening or verification section, point at the tool call that did it. No call means the sentence goes, or it becomes a limit.
+Record: ops/lessons/L-135.md

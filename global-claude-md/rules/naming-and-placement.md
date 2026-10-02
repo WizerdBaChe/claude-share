@@ -65,11 +65,11 @@ the folder root. A missing declaration is a defect an integrity sweep can enumer
 - **PL-6 A view page is reachable from the machine's ONE outermost entry — decided first,
   not after the page exists** (user ruling 2026-09-21). Any subsystem or project that
   produces a page a human is meant to LOOK at (overview, dashboard, viewer, 3D page, deck)
-  answers "how does it reach the source environment's single view-launcher page (source-only, does not ship here)" as part of its placement, before its
+  answers "how does it reach the environment's single view-launcher page (the one `tools/view-launcher/build.py` emits)" as part of its placement, before its
   internal layout: either it lands where xi's `deliverables` globs cover it (then it is
   picked up automatically, grouped by project and round, the next day), or — for a page no
-  index reaches (gitignored `out/`, an unregistered root) — it gets an entry PROPOSED in that
-  launcher's page registry (a source-only tool, does not ship here). A per-project index page is fine INSIDE its project and
+  index reaches (gitignored `out/`, an unregistered root) — it gets an entry PROPOSED for
+  `tools/view-launcher/views.json`. A per-project index page is fine INSIDE its project and
   never a substitute: measured 2026-09-21, the user did not know a finished projects
   dashboard existed, and named "no entry layer, so I forgot" as the cause; SSLD adds a case
   or round every few days, which is the growth this clause exists for. The launcher points

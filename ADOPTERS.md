@@ -93,15 +93,32 @@ shipped doc still names one of those tools as runnable, it says so at the
 citation. Same failure class a third time, which is why the audit now runs per
 file rather than per root.
 
+**Corrected again 2026-10-02 — most of `tools/` is here now.** The owner ruled
+that method tools and hook test suites ship, with two monitoring tools
+(`system-hmi`, `view-launcher`) as templates whose registries hold a schema and
+one worked row. `instruments/` grew from two tools to forty-three directories;
+the same install rule applies (copy `instruments/<x>/` to `~/.claude/tools/<x>/`),
+and five hooks excluded earlier because their only private dependency was one
+of those tools now ship with it. What stays out of `tools/` is the operator's
+personal stores and carriers — the recall and cross-index pipelines, the
+session board, the place ledger, the census tools, the memory pipeline, the
+scheduled-task and backup carriers, the external dispatcher's runtime — each
+with a reason in the manifest's `tools/` entry.
+
 What genuinely stays out: your own `settings.json` values, the operator's project
-index rows, dated internal reports, runtime telemetry, the external dispatcher
-and its allowlist, and five skills — `asset-vault`, which operates a private
-library; the two knowledge packs `render-perf` and `system-design`, withheld
-2026-08-17 because they are unfinished at the source and a half-stocked pack
-ships a trigger with nothing behind it; and the two machine-bound wrappers
-`graph-query` and `media-fetch-pipeline`, adjudicated 2026-08-27 — each fronts
-a tool that exists only on the source machine. So `skill-toolkit/` ships **16 of
-the source environment's 21 skills**, stated rather than left to be noticed.
+index rows, dated internal reports, runtime telemetry, the lesson-card record
+tree behind `claude-ops/ops/lessons.md` (the index ships; the per-lesson files do
+not), the external dispatcher and its allowlist, and fourteen skills — `asset-vault`,
+which operates a private library; the three knowledge packs `render-perf`,
+`system-design` and `code-layering`, withheld by the owner's 2026-10-02 ruling
+and represented instead by `environment-guide/KNOWLEDGE-PACKS.md` (their shape,
+the criteria a pack must meet to ship, and a dated status table); the two
+machine-bound wrappers `graph-query` and `media-fetch-pipeline`, adjudicated
+2026-08-27; and eight more that front a private project, vault or tool
+(`post-brief`, `model3d-pipeline`, `knowledge-vault`, `app-residue-sweep`,
+`paper-distill`, `paper-story`, `patents-grabber`, `motion-video`). So
+`skill-toolkit/` ships **21 of the source environment's 35 skills**, stated
+rather than left to be noticed.
 
 That number was wrong for weeks before anyone looked: it read "14 of 15" while
 the source had quietly grown to 18. Nothing checks it — a count is a claim about

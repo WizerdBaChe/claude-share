@@ -131,7 +131,62 @@ foreign_roots = [
 # ops-health-test/, so the rest of that source directory stays declared
 # not_shipped under the `tools/` entry below and must not resolve here.
 "tools/page-fill-gate/" = "instruments/page-fill-gate/"
-"tools/ops-health-test/check_cap_binding.py" = "instruments/ops-health-test/check_cap_binding.py"
+# 2026-10-02: the check_cap_binding.py FILE key became a directory key — the
+# rest of tools/ops-health-test/ (the hook's own suite) ships this round
+# under the user ruling below.
+"tools/ops-health-test/" = "instruments/ops-health-test/"
+# 2026-10-02 (merge step; user ruling of the same day, recorded in the
+# `tools/` not_shipped entry): method tools, hook test suites and two
+# template collections ship under instruments/<same name>/. Same pattern as
+# the two lines above — citing files keep the source spelling and resolve
+# through the map; an adopter copies instruments/<x>/ to ~/.claude/tools/<x>/.
+# Three keys are FILES (the only thing shipped from their directory, or a
+# loose tool file); every other key is a whole directory. Lanes: W5a (hook
+# test suites, lint and proof-of-life instruments), W5b (method tools), W5c
+# (templates), merge step (pptx-review).
+"tools/branch-guard-test/" = "instruments/branch-guard-test/"
+"tools/class-closure/" = "instruments/class-closure/"
+"tools/context-budget/" = "instruments/context-budget/"
+"tools/dangerous-command-test/" = "instruments/dangerous-command-test/"
+"tools/e2-gate-test/" = "instruments/e2-gate-test/"
+"tools/entry-schema-lint/" = "instruments/entry-schema-lint/"
+"tools/hook-deny-lint/" = "instruments/hook-deny-lint/"
+"tools/hook-proof-of-life/" = "instruments/hook-proof-of-life/"
+"tools/model-cap-test/" = "instruments/model-cap-test/"
+"tools/ps-errorpref-backtest/" = "instruments/ps-errorpref-backtest/"
+"tools/ps-errorpref-test/" = "instruments/ps-errorpref-test/"
+"tools/ps-pipeline-close-backtest/" = "instruments/ps-pipeline-close-backtest/"
+"tools/ps-pipeline-close-test/" = "instruments/ps-pipeline-close-test/"
+"tools/shell-transport-test/" = "instruments/shell-transport-test/"
+"tools/telemetry-framing/" = "instruments/telemetry-framing/"
+"tools/ui-verify-test/" = "instruments/ui-verify-test/"
+"tools/process-ledger/" = "instruments/process-ledger/"
+"tools/closeout-intake/" = "instruments/closeout-intake/"
+"tools/feedback-pool/" = "instruments/feedback-pool/"
+"tools/tree-noise/" = "instruments/tree-noise/"
+"tools/cc-delta/" = "instruments/cc-delta/"
+"tools/routing-loop/" = "instruments/routing-loop/"
+"tools/eol-sync/" = "instruments/eol-sync/"
+"tools/git-hooks/" = "instruments/git-hooks/"
+"tools/quote-evidence/" = "instruments/quote-evidence/"
+"tools/audience-fit-gate/" = "instruments/audience-fit-gate/"
+"tools/compact-loss-audit/" = "instruments/compact-loss-audit/"
+"tools/rule-usage-census/" = "instruments/rule-usage-census/"
+"tools/shell-audit/" = "instruments/shell-audit/"
+"tools/tracking-refs/" = "instruments/tracking-refs/"
+"tools/status-line/" = "instruments/status-line/"
+"tools/ui-shot/" = "instruments/ui-shot/"
+"tools/pptx-edit-headroom/" = "instruments/pptx-edit-headroom/"
+"tools/pptx-line-start/" = "instruments/pptx-line-start/"
+"tools/pptx-presentation-gate/" = "instruments/pptx-presentation-gate/"
+"tools/pptx-review/" = "instruments/pptx-review/"
+"tools/secret-guard-test/" = "instruments/secret-guard-test/"
+"tools/skill-routing-audit-test/" = "instruments/skill-routing-audit-test/"
+"tools/system-hmi/" = "instruments/system-hmi/"
+"tools/view-launcher/" = "instruments/view-launcher/"
+"tools/glob-fitness.py" = "instruments/glob-fitness.py"
+"tools/skill-routing-audit.py" = "instruments/skill-routing-audit.py"
+"tools/cross-index/xi_cards.py" = "instruments/cross-index/xi_cards.py"
 
 # ---------------------------------------------------------------------------
 # not_shipped — assets this repo NAMES but does not contain.
@@ -598,6 +653,15 @@ Rows, one per directory (IN = ships; OUT = stays out, with the reason):
   OUT pptx-review/ (2) — the comment/cursor bridge for a live PowerPoint
       session. The rule cites it as the review loop, not as enforcement, and
       its skill (skills/pptx-review) does not ship.
+      REVERSED AT THE MERGE STEP, same day: the premise was false by merge
+      time — lane W4b shipped skills/pptx-review/SKILL.md (verbatim), which
+      cites this tool three times by its source path, and the rule's
+      Review-loop paragraph cites both. A cross-lane race of the kind
+      SYNC-RUNBOOK §3 names, caught where it says to catch it. Both files
+      collected verbatim (entries in the merge-step block at the end of this
+      file); the two leak hits are the OOXML extension-URI GUID every
+      `a:ext uri=` carries and the selftest's invented deck path, both
+      declared as [[allow]] there.
   OUT, verdict only, unchanged and NOT re-read this round (carried from the
       round brief's expected-OUT list): recall/, graph-snapshot/,
       session-board/ (and session-board-test/), place-ledger/, copy-census/,
@@ -2300,7 +2364,7 @@ edits = [
   "NEW 2026-09-12: Prior-art check bullet, vault-index clause — an account-holder's given name embedded in a local Obsidian notes vault's folder-naming convention, generalized to \"the local Obsidian notes vault\" (class: account-bound label naming a private local asset path; position: the second of two vault labels in the parenthetical list). `AssetVault` (the sibling label, a project/asset name, not account-bound) kept as-is per hard rule 2. This is a genuine, previously-unnoticed privacy leak in the currently-shipped copy — the prior rounds' edit lists never declared a scrub for this clause, so it shipped unfixed until this round re-touched the exact line. The identical leak also exists in `claude-ops/ops/rule-registry.md`, out of this lane's scope — flagged cross-lane.",
   "NEW 2026-10-02: Prior-art check bullet, recall clause — the source now routes the prior-art sweep through a recall-sweep command under its `tools/` tree (a private tool the reader cannot run; the tool is not shipped by any lane) -> \"a source-only recall-sweep command (does not ship here; covers all memory silos, PROJECTS, lessons, xi, gsnap, digests)\", the covered-silo parenthetical kept; the same bullet's last route in the chain, a source-only past-session search script (named by filename in the source) -> \"a source-only past-session search tool (does not ship here)\". The injected-context tags `[project-registry]` and `[past_work_recall_inject]` and the sibling label `AssetVault` are kept (a tag name and a project name, rule 2). The account-holder's given name in the notes-vault label (the 2026-09-12 edit above) recurs in the rewritten sentence and is generalized the same way.",
   "RETIRED 2026-10-02 (was: 'Decision charter' bullet generalization of the `tools/process-ledger/ledger.py add` pointer): the process-ledger tool ships this round (lane W5b), so the source's own command text is restored verbatim. The bullet is now an unedited copy of the source's rewritten text.",
-  "'[unattended-run]' bullet, 2026-10-02 re-anchor: (1) \"the kickoff hook writes the run manifest\" -> \"a kickoff mechanism (source-only, does not ship here) writes the run manifest\"; (2) \"scope and stop shape are hook-enforced\" -> \"scope and stop shape are enforced where the environment provides the matching hooks\". The closing \"Spec + audit: `tools/process-ledger/README.md`\" pointer is KEPT as written (the tool ships, lane W5b) — retiring the 2026-09-12 generalization of it. JUDGMENT CALL carried over, not drift-restoration: edit (2) keeps the softened claim because the enforcing hook (`hooks/unattended_run.py`) is `excluded-by-decision` in this manifest at the time of this lane, so the source's plain \"hook-enforced\" would be false for this repo. REVIEW-WHEN: the hooks lane ships `unattended_run.py` or the process-ledger report generator in this round — then restore both phrases verbatim and drop this edit. The 2026-09-12 edit that turned `reports/*-run-<slug>.md` into \"omitting a run report\" is retired: the source itself dropped that clause.",
+  "'[unattended-run]' bullet, 2026-10-02 re-anchor: (1) \"the kickoff hook writes the run manifest\" -> \"a kickoff mechanism (source-only, does not ship here) writes the run manifest\"; (2) \"scope and stop shape are hook-enforced\" -> \"scope and stop shape are enforced where the environment provides the matching hooks\". The closing \"Spec + audit: `tools/process-ledger/README.md`\" pointer is KEPT as written (the tool ships, lane W5b) — retiring the 2026-09-12 generalization of it. JUDGMENT CALL carried over, not drift-restoration: edit (2) keeps the softened claim because the enforcing hook (`hooks/unattended_run.py`) is `excluded-by-decision` in this manifest at the time of this lane, so the source's plain \"hook-enforced\" would be false for this repo. REVIEW-WHEN: the hooks lane ships `unattended_run.py` or the process-ledger report generator in this round — then restore both phrases verbatim and drop this edit. The 2026-09-12 edit that turned `reports/*-run-<slug>.md` into \"omitting a run report\" is retired: the source itself dropped that clause. REVIEW-WHEN FIRED 2026-10-02 (merge step): lane W3 ships `hooks/unattended_run.py` (three mounts) and lane W5b ships `tools/process-ledger/` with its report generator, so both phrases are restored verbatim and this bullet is now an unedited copy of the source's text.",
   "'Compact Instructions' section: `references/compaction-pipeline-design.md` generalized to \"the source environment's own compaction-pipeline design note, not shipped here\"; `cache/handoff/<session_id>.md` (cache/ excluded) generalized to \"a per-session handoff file (a source-only mechanism keyed by session id)\".",
   "Path-scoped rules index line: taken verbatim from fresh source. 2026-09-12 it listed eleven files; 2026-10-02 it lists fifteen — the four additions (`layout-convergence`, `native-render-first`, `source-quotation-evidence`, `android-device-states`) all ship this round as NEW entries in this lane's 2026-10-02 block, so the index and `global-claude-md/rules/` agree again. `ops/references/principle-design-guide.md` is a shipped collected file (the 2026-09-12 cross-lane flag is closed).",
 ]
@@ -2357,13 +2421,13 @@ status = "edited"
 edits = [
   "Opening paragraph: the AssetVault reference-implementation pointer generalized to 'a reference implementation lives in the source environment's asset library' — a private asset library that does not ship, same class as deliverable-doc-refs.md's own AssetVault edits.",
   "'Height, not only width' bullet (NEW this round, part of the dirty-source addition above): its citation `ops/lessons/L-078.md` (a per-file path into the excluded ops/lessons/ tree) rewritten to `ops/lessons.md` L-078 — this share ships lessons as one consolidated file (see claude-ops lane), not the source's per-file tree, so the pointer is rewritten to where the content actually resolves in this repo rather than generalized away.",
-  "'A deck delivered as EDITABLE...' bullet, Gate clause: a source-only headroom-measurement tool's literal invocation path (`~/.claude/tools/pptx-edit-headroom/headroom.py`, tools/ tree excluded) generalized to 'a source-only headroom-measurement tool (does not ship here), run as `<deck> --content <shape-name regex>`' — the command-line CONTRACT (flags/args) is kept since it documents the tool's calling convention, only the unshippable literal path is dropped.",
+  "'A deck delivered as EDITABLE...' bullet, Gate clause: a source-only headroom-measurement tool's literal invocation path (`~/.claude/tools/pptx-edit-headroom/headroom.py`, tools/ tree excluded) generalized to 'a source-only headroom-measurement tool (does not ship here), run as `<deck> --content <shape-name regex>`' — the command-line CONTRACT (flags/args) is kept since it documents the tool's calling convention, only the unshippable literal path is dropped. RETIRED 2026-10-02 (merge step): pptx-edit-headroom ships under instruments/pptx-edit-headroom/ (lane W5b); the source's home-prefixed invocation is restored verbatim.",
   "2026-10-02: the 'Height, not only width' bullet's citation reverted to the source's per-file lesson-card path on the fresh copy, and the same rewrite to `ops/lessons.md` L-078 re-applied (the 2026-09-12 edit above, now with the bullet in a committed state).",
-  "NEW 2026-10-02: 'Presentation-class content' P3 gate clause and the Review-loop paragraph name source-only tools (`tools/pptx-presentation-gate/presentation_gate.py --class <class>` -> \"a source-only presentation-gate tool (does not ship here), run with `--class <class>`\", the calling contract kept as in the headroom edit above). The Review-loop paragraph's own `skills/pptx-review` and `tools/pptx-review` pointers are KEPT as written — the pptx-review skill is a new source skill whose disposition belongs to the skills lane (see Cross-lane in the lane report).",
+  "NEW 2026-10-02: 'Presentation-class content' P3 gate clause and the Review-loop paragraph name source-only tools (`tools/pptx-presentation-gate/presentation_gate.py --class <class>` -> \"a source-only presentation-gate tool (does not ship here), run with `--class <class>`\", the calling contract kept as in the headroom edit above). The Review-loop paragraph's own `skills/pptx-review` and `tools/pptx-review` pointers are KEPT as written — the pptx-review skill is a new source skill whose disposition belongs to the skills lane (see Cross-lane in the lane report). RETIRED 2026-10-02 (merge step): pptx-presentation-gate ships under instruments/pptx-presentation-gate/ (lane W5b); the P3 gate clause is restored to the source's command. The Review-loop pointers resolve too: the skill ships (lane W4b) and the tool was collected at the merge step.",
   "NEW 2026-10-02: the Cross-medium counterparts line cites a design-principles note under the source's private top-level `references/` tree -> \"a source-only cross-medium design-principles note (does not ship here)\"; the sentence that follows (this file stays canonical for decks) is kept.",
   "NEW 2026-10-02: Intake paragraph, the options-listing command: the vault root, an absolute path on a non-system drive, -> `<vault>` (the tail `tools/consumers.py options` resolves in the adopter's own vault and is kept; `<vault>` is already declared). The paragraph's other `consumers.py take` / `consumers.py sync` mentions are bare subcommand names, kept.",
   "NEW 2026-10-02: 'Shared layout code lives in one place' bullet, the vault-pointer to the shared deck builder (AssetVault by name plus an item name) -> \"the source environment's asset-library deck builder, not shipped here\" — same class as the opening-paragraph edit above.",
-  "NEW 2026-10-02: CJK-run-language bullet, two pointers: the vault deck-builder helper reference -> \"the source environment's asset-library deck builder, `_set_font`; not shipped here\"; and the line-start gate's invocation under the source's `tools/` tree (home-prefixed) -> \"a source-only line-start gate (does not ship here), run as `<deck>`\" — contract kept (COM `TextRange.Lines`, exit 3 = uncalibrated), literal path dropped.",
+  "NEW 2026-10-02: CJK-run-language bullet, two pointers: the vault deck-builder helper reference -> \"the source environment's asset-library deck builder, `_set_font`; not shipped here\"; and the line-start gate's invocation under the source's `tools/` tree (home-prefixed) -> \"a source-only line-start gate (does not ship here), run as `<deck>`\" — contract kept (COM `TextRange.Lines`, exit 3 = uncalibrated), literal path dropped. PARTLY RETIRED 2026-10-02 (merge step): the line-start half — pptx-line-start ships under instruments/pptx-line-start/ (lane W5b), so the source's home-prefixed invocation is restored; the `_set_font` deck-builder pointer stays generalized (the asset library does not ship).",
 ]
 
 [[collected]]
@@ -3838,7 +3902,15 @@ status = "verbatim"
 [[collected]]
 path = "architecture-diagramming/archdiag/README.md"
 source = "~/.claude/tools/archdiag/README.md"
-status = "verbatim"
+status = "edited"
+# 2026-10-02 (merge step): status verbatim -> edited. Main's 2026-09-18
+# bilingual-README commit (78956d9) restructured this file in the share
+# without updating this entry, and check V reported the drift this round.
+# Procedure B: the copy is the source's text with the edit below layered on;
+# no scrub target in the file at either end (re-checked against b6ccd3e).
+edits = [
+  "2026-09-18 (main, bilingual README round): a Chinese/English summary block and a quick-guide table inserted after the title, and every H2 given a bilingual heading (中文｜English); body text unchanged. A share-side reading aid, exempt from backflow — the source keeps the English-only README its builder scripts expect.",
+]
 # Confirmed byte-for-byte identical to fresh source via
 # `diff -u <(tr -d '\r' < source) <(tr -d '\r' < repo)`, exit 0. Grown from
 # 134 to 194 lines picking up the 2026-09-05 a11y/checks-#9-#10/style-tokens
@@ -4040,6 +4112,10 @@ literal = [
     # the harness's own instruction-block tag, quoted in rule-registry.md when
     # recording what the harness says about the in-app browser pane
     "<browser_surfaces>",
+    # 2026-10-02: the harness renamed that block; rule-registry.md now quotes
+    # the two current tag names beside the old one ("was <browser_surfaces>")
+    # at every site. Same class — a tag the harness emits, not a value.
+    "<browsers>", "<built_in_browser>",
 ]
 
 # The adopter substitutes these with their own environment's values.
@@ -4179,6 +4255,28 @@ path_position_ok = [
                         # matcher's own pattern variable, any URL's host
                         # (`<worktree-slug>` and `<repo>` are used by
                         # WORKTREE_SCOPE too; declared once, above.)
+    # --- 2026-10-02 arrivals (merge step). Each read at its one site against
+    # source b6ccd3e; each is the source's own generic notation for a layout
+    # shape the reader's tree or runtime supplies, not a real path a scrubber
+    # ate.
+    "<worktree>",       # lessons.md L-120: `cd <worktree>/tools/graph-snapshot`
+                        # — whichever linked worktree the probe ran in
+    "<n>",              # lessons.md L-121 (`worktrees/<n>`), integrity-sweep.md
+                        # check 34 (`rules/<n>.md`, `skills/<n>`): a numbered or
+                        # named slot, same class as <N>/<name> above
+    "<conversation_id>",  # external-dispatch.md: the Antigravity worker's own
+                        # transcript folder `brain/<conversation_id>/…`, minted
+                        # by that CLI per run
+    "<pkg>", "<ver>",   # external-dispatch.md, the same row: the CLI's
+                        # `node_modules/<pkg>/<ver>` cache shape
+    "<pid>",            # inbound-routing.md: the platform's `.in_use/<pid>`
+                        # marker inside a pooled worktree — the process id
+    "<build>",          # source-quotation-evidence.md: the deliverable's own
+                        # build folder (`<build>/ocr`), named one line above
+    "<what>",           # comsol-agent-pipeline/SKILL.md: the round-folder
+                        # naming shape `<NN>_<what>/` (<NN> is the round number)
+    "<item>",           # comsol-agent-pipeline/references/api-rules.md:
+                        # `out/<item>_result.json`, one file per catalogue item
 ]
 
 # Tokens allowed on a runnable line — the reader is expected to fill them in.
@@ -4233,6 +4331,16 @@ command_position_ok = [
     # printed that would work generally, same rationale as <path>/<sha>
     # above.
     "<original>", "<companion>",
+    # 2026-10-02 (merge step): skill-toolkit/skills/pptx-review/SKILL.md, the
+    # two fenced commands of its step B.1 and B.2 — `pptx_review.py comments
+    # <deck.pptx> --out <project>/build/review/comments-<YYYYMMDD-HHMM>.json`
+    # and the hand-made-deck copy `<name>_applied_<date>.pptx`. The tool ships
+    # this round (instruments/pptx-review/); the slots are the reader's own
+    # deck, project folder and timestamp, and the skill's prose names each
+    # one before the fence. Same class as <built.html> above. <project>,
+    # <name> and <date> are already in path_position_ok; a command line is a
+    # second position, declared separately as the check reads them.
+    "<deck.pptx>", "<project>", "<YYYYMMDD-HHMM>", "<name>", "<date>",
 ]
 
 # ---------------------------------------------------------------------------
@@ -4690,7 +4798,15 @@ status = "verbatim"
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/consumers/README.md"
 source = "~/.claude/skills/literature-search-extract/consumers/README.md"
-status = "verbatim"
+status = "edited"
+# 2026-10-02 (merge step): status verbatim -> edited, for the same reason as
+# architecture-diagramming/archdiag/README.md above — main's 2026-09-18
+# bilingual-README commit restructured the copy without updating this entry;
+# check V caught it this round. Diff against b6ccd3e: the three hunks below,
+# nothing else.
+edits = [
+  "2026-09-18 (main, bilingual README round): a Chinese/English summary block and a quick-guide table inserted after the title, and the two H2s given bilingual headings; body text unchanged. Share-side reading aid, exempt from backflow.",
+]
 # NEW 2026-09-07 first collection. Generic procedure/field documentation for
 # the consumer registry; no private paths. Its closing line ("the registry is
 # a human decision record, like `../connectors/registry.json`") is a plain
@@ -5467,7 +5583,10 @@ the target tree's own AGENTS.md on conflict — the same delegation rule
 rule.'''
 
 [[not_shipped]]
-path = "skills/app-residue-sweep"
+path = "skills/app-residue-sweep/"
+# 2026-10-02 (merge step): trailing slash added — check R covers a directory
+# disposition only through a `/`-terminated path, and lessons.md L-097 cites
+# `skills/app-residue-sweep/SKILL.md` by file.
 disposition = "excluded-by-decision"
 reason = '''NEW 2026-09-07. The SKILL.md is a seven-step contract whose body is
 stated to live in the source's `tools/app-residue-sweep/` ("Body lives in
@@ -5958,9 +6077,9 @@ status = "edited"
 # lint rule ids P1-P4/R1-R3/R2n/R3n, F-8/F-9/H-1 fixture ids) kept — these are
 # in-file structural ids, not scrub targets.
 edits = [
-  "opening paragraph: `tools/hook-deny-lint/` (source-only, tools/ tree excluded) generalized to 'a source-only lint tool (does not ship in this repo)'.",
+  "opening paragraph: `tools/hook-deny-lint/` (source-only, tools/ tree excluded) generalized to 'a source-only lint tool (does not ship in this repo)'. RETIRED 2026-10-02 (merge step): hook-deny-lint ships under instruments/hook-deny-lint/ (lane W5a); the source's pointer is restored.",
   "review-when section, message-rewrite bullet: a dated probe-run pointer under the source's own `outputs/` tree (outputs/ tree excluded) generalized to 'a dated probe run under the source's `outputs/` tree (does not ship here)'.",
-  "NEW 2026-10-02 (lane W2-global, align to source 183c129; the file grew 164 -> 171 lines): the 'third transport' paragraph (F-9) now names the lint's source-only script by its tool-tree path -> 'run of the source-only lint tool (does not ship in this repo)', same family as the opening-paragraph edit; the new review-when bullet about a guard that denies the misfire-report call cites (a) a row key in the source's private feedback pool -> 'tracked in a source-only feedback pool, does not ship here' (class: pointer to a private record; position: the parenthetical of the 'third guard denies' bullet), and (b) the lint tool's report script by its tool-tree path -> 'the lint tool's misfire-report script (`report_fp.py`, source-only)'. The hook names in that bullet (dangerous_command_guard, intake_guard) are kept, they are names of hooks, not paths; the 2026-09-12 edits above were re-applied.",
+  "NEW 2026-10-02 (lane W2-global, align to source 183c129; the file grew 164 -> 171 lines): the 'third transport' paragraph (F-9) now names the lint's source-only script by its tool-tree path -> 'run of the source-only lint tool (does not ship in this repo)', same family as the opening-paragraph edit; the new review-when bullet about a guard that denies the misfire-report call cites (a) a row key in the source's private feedback pool -> 'tracked in a source-only feedback pool, does not ship here' (class: pointer to a private record; position: the parenthetical of the 'third guard denies' bullet), and (b) the lint tool's report script by its tool-tree path -> 'the lint tool's misfire-report script (`report_fp.py`, source-only)'. The hook names in that bullet (dangerous_command_guard, intake_guard) are kept, they are names of hooks, not paths; the 2026-09-12 edits above were re-applied. RETIRED 2026-10-02 (merge step), all three parts: hook-deny-lint ships under instruments/hook-deny-lint/ (lane W5a) and feedback-pool under instruments/feedback-pool/ (lane W5b), so the F-9 `lint.py` pointer, the `report_fp.py` pointer and the pool-row parenthetical (a row KEY naming this rule file — a record-format pointer whose tool now ships, not a private value) are all restored to the source's text. The file's only remaining edit is the outputs/ probe-run pointer above.",
 ]
 
 [[collected]]
@@ -5975,7 +6094,7 @@ status = "edited"
 edits = [
   "opening paragraph: a dated global-rule-candidate note's path in the source's own top-level `references/` tree (references/ excluded) generalized to 'a global-rule-candidate note in the source environment's own `references/` tree (dated 2026-09-04, not shipped here)'.",
   "§6 Migration discipline, reference-implementations sentence: an SSLD-project internal migration-script path (project name kept per hard rule 2; the internal round-folder + filename dropped, class: private-project internal file path; position: second reference implementation named, after the PaperSurvey one which is kept as-is — PaperSurvey's cited command is a shipped-skill CLI contract, not a private path) generalized to \"SSLD's own T46-round migration script (internal path, not shared)\".",
-  "NEW 2026-10-02 (lane W2-global, align to source 183c129; the file grew 110 -> 195 lines: placement clause PL-6 and a whole section on where a node's learning goes at node close, PR-1..PR-4, plus a fired review-when). Three scrub targets, all pointers into private trees: (a) PL-6, the machine's single view-launcher page, named by a home-prefixed filename -> \"the source environment's single view-launcher page (source-only, does not ship here)\"; (b) PL-6, a launcher registry file under the source's `tools/` tree -> \"that launcher's page registry (a source-only tool, does not ship here)\"; (c) the fired review-when's SSLD round-record path with a Chinese-named internal folder (class: private-project internal file path) -> \"SSLD's own T01 round record (internal path, not shared)\", the record's key name `parked_promotions_T01` kept as the instance label. KEPT deliberately: the section-4a citation of a ruling id (D-026) located in the source's `references/` decisions register — a ruling id with its locator is not a scrub target (rule 2), the `references/` tree already carries a `[[not_shipped]]` disposition, and the same register is cited unedited from a shipped skill; `gsnap.py query` / `gsnap.py build` (bare tool names, the same spelling the global CLAUDE.md shipped before); `xi`. The 2026-09-12 edits above were re-applied.",
+  "NEW 2026-10-02 (lane W2-global, align to source 183c129; the file grew 110 -> 195 lines: placement clause PL-6 and a whole section on where a node's learning goes at node close, PR-1..PR-4, plus a fired review-when). Three scrub targets, all pointers into private trees: (a) PL-6, the machine's single view-launcher page, named by a home-prefixed filename -> \"the source environment's single view-launcher page (source-only, does not ship here)\"; (b) PL-6, a launcher registry file under the source's `tools/` tree -> \"that launcher's page registry (a source-only tool, does not ship here)\"; [RETIRED 2026-10-02 at the merge step, both: view-launcher ships as a template under instruments/view-launcher/ (lane W5c). (b) is restored to the source's `tools/view-launcher/views.json`; (a) is re-worded to \"the environment's single view-launcher page (the one `tools/view-launcher/build.py` emits)\" rather than restored, because the source names the page by a home-prefixed filename that is the launcher's OUTPUT, which this repo does not ship — the pointer now resolves to the shipped builder instead of a generated file]; (c) the fired review-when's SSLD round-record path with a Chinese-named internal folder (class: private-project internal file path) -> \"SSLD's own T01 round record (internal path, not shared)\", the record's key name `parked_promotions_T01` kept as the instance label. KEPT deliberately: the section-4a citation of a ruling id (D-026) located in the source's `references/` decisions register — a ruling id with its locator is not a scrub target (rule 2), the `references/` tree already carries a `[[not_shipped]]` disposition, and the same register is cited unedited from a shipped skill; `gsnap.py query` / `gsnap.py build` (bare tool names, the same spelling the global CLAUDE.md shipped before); `xi`. The 2026-09-12 edits above were re-applied.",
 ]
 
 [[not_shipped]]
@@ -8935,3 +9054,78 @@ match = ':\\x'
 reason = """Calibration example inside the hook's own documentation: the docstring's 'known blind spot' example, the same token with doubled backslashes. A synthetic token that names no location."""
 
 # === lane W3-hooks 2026-10-02 END ===
+
+# === merge step 2026-10-02 BEGIN ===
+# Two collections made by main at merge time, both reversing a lane verdict
+# that was true when written and false by the time the lanes met: lane W5b
+# dropped tools/pptx-review/ because its skill did not ship (lane W4b shipped
+# it); lane W5a dropped tools/secret-guard-test/ because its hook did not ship
+# (lane W3 shipped it). SYNC-RUNBOOK §3's cross-lane race check, applied.
+
+[[collected]]
+path = "instruments/pptx-review/README.md"
+source = "~/.claude/tools/pptx-review/README.md"
+status = "verbatim"
+# First collection 2026-10-02 (merge step), source b6ccd3e. Read in full (54
+# lines): the comment-to-shape resolution table, what was verified live
+# against PowerPoint 16 COM and what was not, the selftest's fixture. Names
+# the upstream it borrows from (a public MIT repository) — a public
+# identifier, kept. No scrub target.
+
+[[collected]]
+path = "instruments/pptx-review/pptx_review.py"
+source = "~/.claude/tools/pptx-review/pptx_review.py"
+status = "verbatim"
+# First collection 2026-10-02 (merge step). Read in full (540 lines): OOXML
+# comment parsing, COM cursor reader, generated-fixture selftest. Two leak
+# hits, both allowed below: the OOXML extension-URI GUID every `a:ext uri=`
+# element carries (a published schema constant, not a session id) and the
+# fake COM app's invented deck path. `selftest` run in place from this repo
+# after collection: OK (all checks PASS, two negative controls C3/C7 held).
+# Needs pywin32 + python-pptx for `cursor` and `selftest`; `comments` is
+# stdlib-only.
+
+[[allow]]
+file = "instruments/pptx-review/pptx_review.py"
+kind = "UUID (session-id shape)"
+match = "FF2B5EF4"
+reason = """The OOXML extension-list URI — the one fixed GUID every
+`<a:ext uri=…>` wrapper of an `a16:creationId` carries, published in the
+Office Open XML extension schema; the fixture builder writes it the way
+PowerPoint does on save. A schema constant, not an id minted on this machine.
+`match` is the first group only: the whole value would make this manifest a
+finding under its own pattern (and the first draft of this reason did exactly
+that, caught by the gate)."""
+
+[[allow]]
+file = "instruments/pptx-review/pptx_review.py"
+kind = "absolute local path (non-system drive)"
+match = ":\\x"
+reason = """The fake COM app's `FullName` in `_fake_app()` — a one-letter
+invented deck path the cursor selftest reads back, never opened. Same class as
+lane W5a's `x:` fixture allows above."""
+
+[[collected]]
+path = "instruments/secret-guard-test/test_secret_file_guard.py"
+source = "~/.claude/tools/secret-guard-test/test_secret_file_guard.py"
+status = "edited"
+# First collection 2026-10-02 (merge step), source b6ccd3e. Read in full (292
+# lines): two-sided calibration of hooks/secret_file_guard.py — 12 must-deny,
+# 18 must-pass, 3 undetermined (asserted, counted in no verdict), 3
+# unclassifiable-shape (fail-open), plus a telemetry-isolation check. Run in
+# place from this repo after the edits below (the suite finds the hook two
+# levels up, which this repo's hooks/ satisfies): failures 0.
+edits = [
+  "MUST_DENY / MUST_PASS / LIVE_ENV fixtures, 6 sites in three spellings (raw, backslash-escaped, forward-slash): the operator's own project tree for a credential-file path — an absolute path on a non-system drive, project name PatentsGrabber kept (rule 2) — -> `<WORK_ROOT>\\PatentsGrabber` / `<WORK_ROOT>/PatentsGrabber` (declared substitution token). The guard keys on the FILENAME shape, so the fixtures still exercise the same branches; verified by the in-place run.",
+  "MUST_PASS 'ordinary session traffic' row: a Read of a shipped skill file by its absolute home path (account name + home directory) -> `<CLAUDE_HOME>\\skills\\literature-search-extract\\SKILL.md`.",
+]
+
+[[allow]]
+file = "instruments/secret-guard-test/test_secret_file_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/certs"
+reason = """A MUST_DENY fixture (`client.p12` under an invented `certs` folder on
+the system drive) — a credential-shaped filename the guard must deny; the
+folder exists on no machine. The pattern cannot tell an invented system-drive
+folder from a private one, which is what [[allow]] is for."""
+# === merge step 2026-10-02 END ===

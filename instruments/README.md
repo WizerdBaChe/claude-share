@@ -17,7 +17,7 @@
 
 | 項目 | 中文 | English |
 |---|---|---|
-| 收錄 | 18 個資料夾、43 個檔案（本 README 之外） | 18 directories, 43 files besides this README |
+| 收錄 | 43 個資料夾、150 個檔案（本 README 之外）：A 原有兩支、B hook 測試套件、C 規則／紀錄格式／存活證明工具、D 方法工具與兩個模板 | 43 directories, 150 files besides this README: A the original two, B hook test suites, C rule / record-format / proof-of-life instruments, D method tools and two templates |
 | 先讀 | 收錄標準，再看「每支工具」表的「需要什麼」欄 | Read the admission criterion, then the "needs" column |
 | 驗證 | 每個套件雙側校準（known-TRUE 與 known-FALSE）；數字見「本輪實測」 | Every suite is two-sided; measured counts are under "Measured this round" |
 | 不包含 | 來源環境的 tools tree 其餘部分、操作者私有檔案清單的守衛測試、私有索引工具 | The rest of the source tools tree, suites of guards that gate one operator's private files, private-index tools |
@@ -37,8 +37,9 @@
 
 **明確不收，附理由：**
 
-- `secret-guard-test`：對象 `hooks/secret_file_guard.py` 不出貨（它的政策就是一個操作者的私有
-  檔名清單，見 manifest 該 hook 的 `not_shipped` 條目）。對象不在，測試無從跑。
+- `secret-guard-test`：本輪一度不收（理由寫成「對象 hook 不出貨」），但合併時 hooks 管線已把
+  `hooks/secret_file_guard.py` 出貨，前提失效，於是改收——見下方 D 節；夾具裡的專案路徑與家目錄
+  路徑依類別改寫，改動登記在 manifest。
 - `session-board-test`：對象 `hooks/session_board_register.py` 不出貨，且它寫入的 session-board
   登記簿是來源環境的私有紀錄。
 - `skill-routing-audit-test`：測試跟著對象走，對象是 `skill-routing-audit.py`，它出不出貨由 `tools/` 的
@@ -164,6 +165,38 @@ dangerous-command-test、branch-guard-test、model-cap-test 在一份 `hooks/` �
 | hook-deny-lint 守的規則本身 | `global-claude-md/rules/hook-deny-message.md` |
 | 被測的 hook | `hooks/`，各 hook 的 docstring 開頭有 STATUS／Proof-of-life 標頭 |
 
-<!-- MAIN: rows for the W5b (method tools) and W5c (system-hmi / view-launcher templates)
-     lanes go in a new subsection here, "D. 方法工具與模板｜Method tools and templates",
-     using the same column set as section C. Update the counts in the Quick guide table. -->
+### D. 方法工具與模板｜Method tools and templates（2026-10-02）
+
+使用者 2026-10-02 裁示開放的那一類：規則檔點名為流程或閘門的工具（不只 Enforcement），
+以及兩個監控工具的**樣板**（登錄檔只留 schema 與一列示範）。每支工具自己的 README 或
+docstring 是權威說明；這裡只記「它是什麼、哪個已出貨檔案用它、怎麼跑、需要什麼」。
+路徑一律用來源寫法 `tools/<x>/`，裝到 `<CLAUDE_HOME>/tools/<x>/` 後原封解析。
+
+| 資料夾 | 它是什麼 | 哪個已出貨檔案用它 | 怎麼跑／需要什麼 |
+|---|---|---|---|
+| `process-ledger` | 決策／回授／邊界契約的過程帳本：決定當下落盤，之後每個續接點機械地讀回；`report.py` 產 `[unattended-run]` 的收尾報告 | `global-claude-md/CLAUDE.md`（Decision charter、unattended-run）、`hooks/unattended_run.py`、`boundary_contract_notice.py`、`feedback_notice.py`、`dispatch_commit_notice.py` | `python tools/process-ledger/ledger.py add …`；`controls.py` 自測；stdlib |
+| `closeout-intake` | 教訓紀錄（`ops/lessons/`）的無損寫入器：`add`／`event` fail-closed，`check`／`report` 只警告 | `claude-ops/ops/lessons.md` 頁首、`hooks/intake_guard.py`、`intake_match_shadow.py`、`integrity-sweep.md` check 5 | `python tools/closeout-intake/intake.py add --from draft.md`；`controls.py`；本 repo 不出 `ops/lessons/` 紀錄樹，所以在地只能跑自測 |
+| `feedback-pool` | 子系統回授池：把 ledger 的 feedback 列與機器產生的缺陷訊號依 target 計數，到門檻在 HMI 亮 warn | `hooks/feedback_notice.py`、`rules/hook-deny-message.md` | `python tools/feedback-pool/feedback.py`；`controls.py`；讀 process-ledger |
+| `tree-noise` | 純 git 把髒檔分成「雜訊」與「真工作」 | `hooks/tree_noise_gist.py`、`rule-registry.md` TREE_NOISE | `python tools/tree-noise/noise.py`；`controls.py`；git |
+| `cc-delta` | Claude Code 版本差異報告：自上次對齊以來哪些變動可能讓 ops 寫下的東西失效 | `rule-registry.md`、`claude-ops/ops/environment.md` | `python tools/cc-delta/cc_delta.py`；`test_cc_delta.py` |
+| `routing-loop` | skill 路由與模型路由的回饋迴圈（事件、儲存、迴圈三件）與一頁講解 | `rule-registry.md`、`skill-toolkit/skill-trigger-dict.md` | `python tools/routing-loop/loop.py`；`tests/` |
+| `eol-sync` | 把已追蹤檔案的工作樹行尾對齊 `.gitattributes`，commit 時由 `git-hooks/post-commit` 呼叫 | `global-claude-md/CLAUDE.md`（Line endings）、`rule-registry.md` | `python tools/eol-sync/eol_sync.py`；`test_eol_sync.py`；git |
+| `git-hooks` | 來源環境的 `post-commit`（呼叫 eol-sync） | 上列 | 複製進 `.git/hooks/` 才生效；本 repo 不代裝 |
+| `quote-evidence` | 受著作權保護頁面的指標證據：locator ＋ ≤15 CJK 單位的引文，靠本機 OCR 證明在頁上，絕不印 OCR 全文 | `rules/source-quotation-evidence.md`、`hooks/verbatim_dispatch_notice.py` | `python tools/quote-evidence/qe.py`；`ocr.ps1` 用 Windows OCR；`controls.py` |
+| `audience-fit-gate` | audience-fit skill 的兩條可判定規則做成閘門，第三條明說判不了 | `skills/audience-fit/SKILL.md` §Gate | `python tools/audience-fit-gate/afgate.py all original companion`；`--selftest` |
+| `compact-loss-audit` | 讀 `compact_loss_record.py` 寫的 JSONL，判 handoff 完整度與誤導性；`hook_controls.py` 校準那支 hook | `compact-recovery/README.md`、`hooks/compact_loss_record.py`、`rule-registry.md` | `python tools/compact-loss-audit/audit.py`；要有 `telemetry/compact-loss.jsonl` |
+| `rule-usage-census` | 規則使用率普查（哪些規則面在真實 session 被用到、主迴圈是哪個模型）；只出 README 與 `census.py` | `claude-ops/ops/40-maintenance.md` §3、`rule-registry.md` | `python tools/rule-usage-census/census.py`；讀本機 session 逐字稿，離開來源環境只能跑自測 |
+| `shell-audit` | L-024 背後的儀器：Bash 傳輸缺陷的探針、不變式與掃描 | `rule-registry.md`（多處）、`global-claude-md/CLAUDE.md`（Environment）、`hooks/shell_transport_guard.py` | `python tools/shell-audit/sweep.py`／`invariants.py`；`controls.py`；`PROBES.md` 記錄量測 |
+| `tracking-refs` | 已提交的指令檔指向 git 沒收的檔案（懸空指標）檢查 | `integrity-sweep.md` check 34、`hooks/ops_health_nudge.py` check 18 | `python tools/tracking-refs/refs.py`；`controls.py`；git |
+| `status-line` | 寫入並交叉核對 advisory 狀態列（rules-usage-dict S7） | `claude-ops/ops/rules-usage-dict.md` §S7 | `python tools/status-line/status_line.py` |
+| `ui-shot` | 瀏覽器窗格的 out-of-process 截圖路徑（Node；`doctor.mjs` 自檢） | `claude-ops/ops/environment.md`、`rule-registry.md`、`hooks/ui_verify_guard.py` | `node tools/ui-shot/doctor.mjs`；需 `npm install`（lockfile 隨附） |
+| `pptx-edit-headroom` | 可編輯簡報：每個文字框加一行後還撐不撐得住 | `rules/office-deck-deliverables.md` | `python tools/pptx-edit-headroom/headroom.py deck.pptx --content <shape-name regex>`；Windows ＋ PowerPoint COM |
+| `pptx-line-start` | 換行後的行首是否落在閉合標點（，、。）」…） | `rules/office-deck-deliverables.md` | `python tools/pptx-line-start/line_start.py deck.pptx`；COM；`--selftest` |
+| `pptx-presentation-gate` | office-deck 規則 P3（flat and clean）對 EMITTED `.pptx` 的檢查 | `rules/office-deck-deliverables.md` P3 | `python tools/pptx-presentation-gate/presentation_gate.py deck.pptx --class <class>` |
+| `pptx-review` | 唯讀讀取審稿人的 PowerPoint 註解（解析到最可能的 shape、附方法與信心）與目前游標 | `skills/pptx-review/SKILL.md`、`rules/office-deck-deliverables.md` Review-loop | `python tools/pptx-review/pptx_review.py comments deck.pptx`／`cursor`／`selftest`；`cursor` 需 PowerPoint COM；本輪 `selftest` 在本 repo 樹內 OK |
+| `skill-routing-audit.py`＋`skill-routing-audit-test/` | `skill-trigger-dict.md` 的機械路由稽核與它的合成逐字稿測試 | `integrity-sweep.md` check 18、`rule-registry.md` | `python tools/skill-routing-audit.py`；測試 `python tools/skill-routing-audit-test/test_skill_routing_audit.py` |
+| `glob-fitness.py` | 路徑範圍規則的 glob 到底搆不搆得到它講的程式碼 | `rule-registry.md`、`claude-ops/ops/40-maintenance.md` | `python tools/glob-fitness.py` |
+| `cross-index/xi_cards.py` | cross-index 管線裡唯一出貨的一支：讀 xi 卡片 front matter | `instruments/entry-schema-lint`、`instruments/system-hmi`（import） | 只作為依賴出貨；管線其餘部分不出貨 |
+| `system-hmi`（樣板） | 唯讀的系統級監控中介層：把每一種既有檢查正規化成 state × quality 讀值 | `hooks/system_hmi_summary.py`、`golive_check.py`、`feedback-pool`、`entry-schema-lint` ES-9 | `python tools/system-hmi/hmi.py validate／collect／show／scan`；`controls.py` 104/108（4 項綁來源登錄檔，照實回報）；`registry/*.json` 只留 schema ＋ 一列示範，照自己的子系統填 |
+| `view-launcher`（樣板） | 最外層檢視入口（側邊欄＋儀表）的產生器；`views.json` 只留結構與一列示範頁 | `hooks/view_launcher_gist.py`、`rules/naming-and-placement.md` PL-6 | `python tools/view-launcher/build.py --selftest` 28/28；**注意**：不帶參數會整頁重建並改寫桌面捷徑（來源端缺陷，本輪回報） |
+| `secret-guard-test` | `hooks/secret_file_guard.py` 的雙側校準（12 must-deny、18 must-pass、3 undetermined 另計） | `hooks/secret_file_guard.py` | `python tools/secret-guard-test/test_secret_file_guard.py`；本輪在本 repo 樹內跑：failures 0；夾具裡的專案路徑改成 `<WORK_ROOT>`、家目錄改成 `<CLAUDE_HOME>`（manifest 登記） |

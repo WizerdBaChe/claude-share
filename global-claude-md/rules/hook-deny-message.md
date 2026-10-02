@@ -10,7 +10,7 @@ Sunk from `hooks/transcript_read_guard.py`'s docstring on 2026-09-07, where it
 was written after the 2026-08-29 false positives. It is stated here because it
 is a property of THE TEXT, not of that hook: 12 hooks in this environment emit
 deny text and only one carried the rule, so 11 inherited nothing. Enforced by
-a source-only lint tool (does not ship in this repo). Index line in `CLAUDE.md`.
+`tools/hook-deny-lint/`. Index line in `CLAUDE.md`.
 
 ## The asset property
 
@@ -43,7 +43,7 @@ requirements do not, and their replacements are R2n and R3n below.
 Bare stdout of a `SessionStart` or `UserPromptSubmit` hook is injected verbatim
 into an agent's context. Which entries `settings.json` registers for it is
 printed, read live from `settings.json`, on the `not ruled on:` line of every
-run of the source-only lint tool (does not ship in this repo) — this file deliberately carries no count
+`tools/hook-deny-lint/lint.py` run — this file deliberately carries no count
 and no list. (Until 2026-09-23 it did: "10 entries", hand-copied, while the
 lint said 10, the lint's comment 8, the registry 7, and `settings.json` held
 12 — four copies, none derived, all stale.) Their text is composed from file
@@ -153,9 +153,9 @@ which is not the same as never having misfired.
   agent and must conform to this file.
 - **A third guard denies the `report_fp.py --why` call that reports it** (parked
   2026-09-22, user: 先放著; two so far — dangerous_command_guard 09-22,
-  intake_guard 09-22; tracked in a source-only feedback pool, does not ship here)
+  intake_guard 09-22; pool row `rule:rules/hook-deny-message.md` action `left`)
   → the misfire-report route needs a guard-independent path: ALLOW
-  the lint tool's misfire-report script (`report_fp.py`, source-only) in every deny guard, or let report_fp read the
+  `hook-deny-lint/report_fp.py` in every deny guard, or let report_fp read the
   reason from a file written with the Write tool.
 - A message is rewritten → re-run that hook's regression suite unchanged.
   Rewriting TEXT must never alter a CONDITION. (2026-09-09: none of the seven

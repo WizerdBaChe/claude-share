@@ -55,8 +55,9 @@
 hook 完全可攜，現已隨附——所以**強制力不再是降級的**，只要你照
 [`../hooks/README.md`](../hooks/README.md) 掛上去。
 
-仍然引用了但沒附的是：`~/.claude/LABEL-REGISTRY.md`、`reports/`、以及 `settings.json`
-裡兩個絕對路徑。每一項的原因與「你實際拿到的是什麼」記在
+仍然引用了但沒附的是：`reports/`、`outputs/`、`ops/lessons/` 的逐課紀錄樹、以及 `settings.json`
+裡兩個絕對路徑（`~/.claude/LABEL-REGISTRY.md` 自 2026-10-02 起以範本形式附在
+`../environment-guide/LABEL-REGISTRY.md`）。每一項的原因與「你實際拿到的是什麼」記在
 [`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的 `[[not_shipped]]`；
 `../tools/share_gate.py` 的 R 檢查會擋下任何新的未宣告引用。
 

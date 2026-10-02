@@ -172,7 +172,7 @@ fails any citation that neither resolves nor carries one of these.**
 | Class | Means | Example |
 |---|---|---|
 | `upstream-absent` | the source environment has no such artifact either | MCP servers, connectors — never existed here |
-| `referenced-only` | it exists at the source, but only its INTENT ships; no portable artifact was ever produced | `LABEL-REGISTRY.md` — the citing rules degrade from "use the registered label" to "use a consistent label" |
+| `referenced-only` | it exists at the source, but only its INTENT ships; no portable artifact was ever produced | `LABEL-REGISTRY.md` was the standing example until 2026-10-02, when it began shipping as a template (`environment-guide/LABEL-REGISTRY.md`); the class is now empty and kept for the next arrival |
 | `excluded-by-decision` | a concrete file exists and was deliberately withheld | `skills/asset-vault` — operates a private library at a hardcoded path and delegates authority to a non-public file |
 | `partial` | only part of it ships | `settings.json` — structure and permission example ship as a template; the two absolute paths cannot |
 

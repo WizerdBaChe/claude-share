@@ -11,7 +11,7 @@
 | 解決什麼 | `/compact` 後只留下有損摘要時，如何用小指標卡與視窗化召回找回承重事實 | Recover load-bearing facts after lossy compaction with a small pointer card and windowed recall |
 | 核心組成 | 四支 hook、共用 snapshot library、`preserve.py` digest generator 與 recall ladder | Four hooks, a shared snapshot library, the `preserve.py` digest generator, and a recall ladder |
 | 先驗收 | 先看平台契約，再跑九項 `ACCEPTANCE.md` checklist | Check the platform contract, then run the nine-item acceptance checklist |
-| 明確缺口 | loss recorder 會寫 JSONL，但 audit tool 不隨本 repo 出貨 | The loss recorder writes JSONL, but its audit tool is not shipped here |
+| 審計端 | loss recorder 寫 JSONL；下判斷的 `compact-loss-audit` 自 2026-10-02 起隨本 repo 出貨在 `../instruments/compact-loss-audit/` | The loss recorder writes JSONL; its judge, `compact-loss-audit`, ships since 2026-10-02 under `../instruments/compact-loss-audit/` |
 
 > 這不是單一工具,是一組**運作模式 (operating mode)**:四支 hook、一支共用函式庫、
 > 一支摘要卡產生器、一條召回紀律,合起來回答一個問題——`/compact` 之後,摘要裡沒有
