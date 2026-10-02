@@ -1,14 +1,17 @@
 ---
 name: code-review-deep-checklist
 description: >-
-  Deep-methodology code review — only when the user explicitly asks for a DEEP /
-  HOLISTIC / PROJECT-WIDE pass: "深入review", "完整審查", "健檢", full code-smell taxonomy,
-  requirement traceability, or dependency/選型 fitness audit. Modes: (A) single file/PR
-  deep review, (B) whole-project architecture health, (C) dependency fitness audit:
+  Deep-methodology code review — when the user asks for a DEEP / HOLISTIC /
+  PROJECT-WIDE pass: "深入review", "完整審查", "健檢", "架構健檢", "架構檢核", full
+  code-smell taxonomy (spaghetti code), requirement traceability, or dependency/選型
+  fitness audit. Modes: (A) single file/PR deep review, (B) whole-project
+  architecture health: 文件/README 與實作不一致、從 code 重建現況、architecture
+  drifted from its design, (C) dependency fitness audit:
   套件選型評估、依賴適配 (dependency fitness)、「套件還適不適合」,
-  "is library X still the right fit". NOT for routine pre-merge checks
-  ("review this before I merge" → /code-review) or debt backlog deliverables
-  (→ engineering:tech-debt). Full disambiguation: ~/.claude/skill-trigger-dict.md.
+  "is library X still the right fit"; a prioritized 技術債盤點 (tech-debt
+  backlog) is built here from Mode A/B findings. NOT for routine pre-merge
+  checks ("review this before I merge" → /code-review). Full disambiguation:
+  ~/.claude/skill-trigger-dict.md.
 ---
 
 # Code Review Deep Checklist
@@ -129,15 +132,17 @@ and keep this skill consistent with the user's global preferences:
   A spot-check hit is recorded as a `sec.*` discovery-stage candidate
   (output-contract.md §5) — no receipts, low confidence, handoff recommended;
   never run that skill's validation/attack-path pipeline from here.
-- User wants a standalone, prioritized debt backlog as the deliverable →
-  engineering:tech-debt (bring this skill's Mode A/B findings as input).
+- User wants a standalone, prioritized debt backlog as the deliverable → stays
+  HERE: run Mode A/B, then rank the findings (impact × cost-to-fix × spread) into
+  the backlog. The official `engineering:tech-debt` plugin only when the user
+  names it with the plugin enabled (user ruling 2026-10-01: local tools first).
 - Mode C concludes a dependency should be replaced → the decision record is an ADR;
-  hand to engineering:architecture.
+  hand to the `software-architect` agent.
 - Findings are process-level (AI PR volume outpacing review, missing diff caps,
   no cross-model review, agent permission gaps) → ai-coding-guardrails.
 - Documentation drift surfaced by Mode B's spot-check → findings stay here
   (detection); rewriting/maintaining the docs → engineering:documentation;
-  a prioritized doc-debt backlog → engineering:tech-debt.
+  a prioritized doc-debt backlog is built here (debt-backlog bullet above).
 - The "requirement is wrong / feature needs redesign" → product-design-thinking.
 - Presentation-grade rendering of Mode B's reconstructed views (HTML/PPTX
   deliverables for humans) → diagram-authoring; Mode B embeds working views in

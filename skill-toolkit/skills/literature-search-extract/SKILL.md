@@ -64,7 +64,7 @@ scope:          field/date/venue constraints, known key papers or authors (none)
 output_format:  one of the catalog below, or "caller-specified template" (inline summary)
 depth:          quick (3–5 sources) | standard (5–15) | exhaustive (standard)
                 — exhaustive wraps the pipeline in references/exhaustive-prisma.md;
-                budget-warn the caller before running
+                budget-warn the caller before running; E0 adds anchor round + PoP pack
 language:       language of the deliverable (Traditional Chinese for human docs,
                 English for machine-consumed returns)
 ```
@@ -116,18 +116,17 @@ retried through another User-Agent, browser or profile. Text that will be cited 
 with `verify/fetchsrc.py`, which records route, status and sha256 per source.
 Core principles:
 - Build queries from a **vocabulary ledger**: core terms + synonyms + the three keyword
-  layers a database exposes (author keywords, controlled vocabulary, index terms); iterate
-  batch n → keyword set n+1 with the terms the first hits actually use, and run one
-  **anchor round** (a review + the most-cited paper's co-citations) before saturation
-  counts — `references/search-sources.md` §Query building.
+  layers a database exposes (author / controlled / index terms, harvested from the seeds);
+  iterate batch n → set n+1 with the terms the first hits use; run one **anchor round** (a
+  review, the most-cited paper's co-citations, 3–5 recent on-topic seeds) and read hits by
+  year × citations before saturation counts — `references/search-sources.md` §Query building.
 - Prefer identifiers when known: DOI, arXiv ID, ISBN — resolve directly.
 - When a channel fails (key wall, rate limit, outage), the literature is partly
   non-English, or the user has a local PDF collection, apply the matching strategy in
   `references/search-sources.md` — log substitutions, language coverage, and any
   personal key or polite-pool resource spent in `search_trail`.
-- Chase citations both ways for `standard`/`exhaustive` depth: references OF a key paper
-  (backward) and papers CITING it (forward) — the fastest route to the load-bearing
-  literature.
+- Chase citations both ways at `standard`/`exhaustive` depth (references OF / papers CITING
+  a key paper); hops count from the anchor-round seeds — §Citation chasing.
 - **Stopping rule:** stop when new queries return only already-seen sources (saturation),
   or when the depth quota is met and the extraction targets are filled. Log what was NOT
   searched if stopping early (feeds `gaps` and `search_trail`).
@@ -255,6 +254,7 @@ Assemble extracted items into the `output_format`, in the requested `language`:
 | Parameter sheet | numeric values needed | rows = parameter; cols = value±unc., unit, conditions, source+locator |
 | Comparison matrix | choosing between methods/materials/models | rows = options; cols = caller's criteria; every cell cited |
 | Quote pack | exact wording needed (definitions, standards) | short quotes + full locators |
+| Concept matrix | literature review, gap scoping | rows = sources; cols = ledger concepts; cell = locator or —; empty column = gap candidate |
 
 ## Failure modes to actively avoid
 

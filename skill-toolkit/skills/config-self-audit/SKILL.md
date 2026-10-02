@@ -1,13 +1,14 @@
 ---
 name: config-self-audit
 description: >-
-  Cheap audit of durable Claude Code config; fixes only after consent. DEFAULT
-  mode (ONE artifact): a skill, hook, subagent definition, global CLAUDE.md
-  rule, or settings.json change — trigger on 稽核/audit/review one
-  (「檢查這個 hook」「這條規則安不安全」「安全性遺漏 (security gap)、乾淨度」),
+  Cheap audit of durable Claude Code config. DEFAULT mode (ONE artifact): a
+  skill, hook, subagent definition, global CLAUDE.md rule, or settings.json
+  change — trigger on 稽核/audit/review one (「檢查這個 hook」「這條規則安不安全」
+  「安全性遺漏 (security gap)、乾淨度」「確認有寫進規則、規則調用得到嗎」
+  「跟各 skill/規則的交互邊界與衝突」),
   when a NEW skill/hook/subagent was just authored here, or when a
   /doctor-style report needs verifying. ADOPTION mode: config copied from
-  another environment, or a `reconciled: no` stamp — audits
+  another environment (移植規則、併入別人的設定 repo、規則打架), or a `reconciled: no` stamp — audits
   RELATIONS between rules: trigger collisions, ordering, unshipped mechanisms.
   NOT for authoring skills (→ skill-creator), ONE third-party skill
   (→ skill-share-packaging), or file cleanup (→ env-cleanup). Disambiguation:
@@ -69,16 +70,16 @@ holds the copy-time SOP and the stamp format.
 
 ## Order of operations (non-negotiable)
 
-**§2 runs first**, before every other section and before evaluating any claim
-from an external report. Any finding — yours or an external tool's — referencing a
-path, command, hook, or event that does not exist NOW is **void**: mark it
-`stale finding`, cite the check that voided it, drop it. Then §1 and §3–§8 in any
-order. **Adoption mode inverts this**: in adopted config a reference to a missing
-mechanism IS the finding, not a reason to void one (AD4). Run AD1 first there.
+**§2 runs first**, before every other section and before evaluating any claim,
+whoever made it — an external tool, a past record of this skill, a memory file, or
+your own recollection: gates bind the CLAIM, never its source. A finding referencing
+a path, command, hook, or event that does not exist NOW is **void**: mark it `stale
+finding`, cite the check that voided it, drop it. Then §1 and §3–§8 in any order.
+**Adoption mode inverts this**: a reference to a missing mechanism IS the finding (AD4). AD1 first.
 
-Why a rule, not a preference: a measured `/doctor` run (2026-07-25) made "a hook
-times out on 98.6% of 220 tool calls" its headline finding for a script archived
-18 days earlier. One `Test-Path` voids it. Record: `references/telemetry.md`.
+Why a rule: `/doctor` (2026-07-25) headlined a hook timing out for a script archived
+18 days earlier — one `Test-Path` voids it; and this skill itself (2026-09-28)
+labelled two busy skills "rare" from that same report — one fresh run voids it.
 
 ## Checklist (run every item; each finding must carry a verification method)
 
@@ -101,10 +102,12 @@ Every path, interpreter, command, event name, and file referenced: `Test-Path` /
   config change log, frozen 2026-08-11 and moved to `audit-archive/` 2026-08-15.
   Do not re-derive the sweep — it is integrity-sweep check 3, and it now greps
   the general shape ("Log … in <some>.md") rather than one dead filename, since
-  the next retirement will have a different name. Track record: four live
-  instruction files still pointed at the frozen log three weeks after the
-  freeze, and a fifth (`skill-share-packaging`) survived four days past the
-  rename. Assume there is one more.
+  the next retirement will have a different name. Assume there is one more
+  (track record: `references/telemetry.md` §2).
+- **Frontmatter of skills, agents and commands:** `claude plugin validate <dir>`
+  (one shot, `--json`). A SKILL.md whose YAML fails to parse still loads with
+  EVERY field dropped — name falls back to the directory, description to the
+  body's first line, `allowed-tools`/`model` stop applying — and nothing warns.
 - **Conditionally-referenced mechanisms.** A body line of the form "if X
   hook/task is installed, do Y" names a MECHANISM, not a path — `Test-Path`
   cannot void it. Verify the install state NOW (settings.json for hooks,
@@ -120,7 +123,7 @@ commands in `references/telemetry.md` §2:
   wins). Keys differing only by case or separator (`D:\x` / `D:/x` / `d:/x`) are
   distinct to JSON — a duplicate-only check calls the file clean — yet
   case-insensitive consumers reject it and the product fragments per-project state
-  across them. Measured here: 0 exact, 6 collision groups.
+  across them. Measured here 2026-07-25: 0 exact, 6 collision groups.
 - **CLI self-validation warnings.** Claude Code validates permission rules at
   startup and prints problems to stderr — free and authoritative. Known class:
   `Write(<path>)` rules never match (only `Edit(<path>)` does, and it covers every
@@ -153,21 +156,21 @@ commands in `references/telemetry.md` §2:
 ### 4. Trigger quality (skills and CLAUDE.md rules)
 - Conditional, not always-on: the description/rule must name the situation that fires
   it ("When X..."). "Always trigger proactively" is a defect — rewrite as ask-first.
+- Trigger text is not behavioural text: a frontmatter `description` may carry
+  calibrated urgency and enumerated phrases when a trigger eval
+  (`tools/trigger-probe/`) backs them; the same shouting inside a BODY is a
+  finding — pressure language over-applies on current models.
 - Overlap: read ALL existing skill descriptions; if two can match the same user
   sentence, add mutual-disambiguation lines to both.
 - **Cross-surface duplicates:** check every source reaching the skill listing, not
-  just `~/.claude/skills` — plugin namespaces (`<plugin>:<skill>`) and the desktop
-  skills cache — BOTH roots under `%APPDATA%/Claude/local-agent-mode-sessions/`:
-  `skills-plugin/*/*/skills/*/SKILL.md` and `*/*/rpm/plugin_*/skills/*/SKILL.md`.
-  Unit = SKILL.md FILES per root (`find <cache dir> -path '*/<pattern>' | wc -l`,
-  integrity-sweep check 9 split by root): 15 / 35 on 2026-08-12, same on
-  2026-08-22; a dir-level count (1 / 5) is a unit mismatch, not a moved layout.
-  Checking only the first misses the larger one.
-  Same name or description = routing ambiguity plus wasted listing budget, and a
-  copy rots the moment the canonical file changes. If a documented cache root
-  or pattern matches NOTHING, say so — an empty match on a path this checklist
-  hardcodes is a finding about the checklist (the cache layout moved), never a
-  clean result.
+  just `~/.claude/skills` — plugin namespaces (`<plugin>:<skill>`), the desktop
+  skills cache (two roots) and the plugin cache, whose `@inline` twin outlives
+  `claude plugin uninstall`. Roots, patterns, measured counts and the inventory
+  rule (filesystem or `claude plugin list`, never `ListPlugins`):
+  `references/telemetry.md` §6. Same name or description = routing ambiguity
+  plus wasted listing budget, and a copy rots the moment the canonical file
+  changes. A documented root or pattern matching NOTHING is a finding about the
+  checklist (the layout moved), never a clean result.
 - CLAUDE.md additions: must not duplicate or contradict an existing rule; if it
   refines one, merge instead of appending a near-duplicate. This bullet covers a
   rule being ADDED; for near-duplicates already installed across two files — the
@@ -192,37 +195,31 @@ commands in `references/telemetry.md` §2:
 ### 5. Performance / token cost
 - Hooks on `PreToolUse`/`PostToolUse` with matcher `*` run on EVERY tool call — flag
   process spawns, network calls, timeouts; require fail-fast when the backend is absent.
-- Skill body size: SKILL.md loads whole on trigger. If >~150 lines, move detail to
-  `references/`.
-- The skill listing is budgeted at ~1% of context; once summed descriptions exceed
-  it, entries truncate and routing degrades.
-- **Usage is measurable locally — measure it, don't guess and don't defer.**
-  `python ~/.claude/tools/usage-window.py --days 30` reports per-skill, per-MCP,
-  per-hook and denial activity keyed on event timestamps (§7).
-- **Zero usage is not a removal verdict.** Classify intent first: `intent: on-demand`
-  (domain tool, rare by design — a research or incident skill used twice a year is
-  working as intended) vs `intent: routine` (a long-term zero means the trigger
-  failed or the need was imagined). Recommend removal only for `routine`; otherwise
-  ask. Reversibility is not the counter-argument — the config is reversible, the
-  user's memory that the tool existed is not.
+- Skill body size: SKILL.md loads whole on trigger. Birth budget ~150 lines (soft);
+  the hook-enforced cap is 300 (`ops_health_nudge.py` BODY_CAP) — over it, extract.
+- Skill listing budget ≈1% of context; over it, entries truncate and routing degrades.
+- **Usage is measurable locally — measure, don't guess:** `usage-window.py
+  --days 14` reports skill, MCP, hook and denial activity by event timestamp (§7).
+- **Zero usage is not a removal verdict; classification evidence is ≤14 days
+  old.** Run `usage-window.py --days 14` AT DECISION TIME — a past report, an
+  older run or a standing label is a claim, never evidence (ruling 2026-09-28:
+  this skill labelled two of the busiest research skills "rare" from a July
+  report while a same-session run showed 24 and 7 dispatches). No `intent:`
+  frontmatter, no standing dict note: the on-demand signal already lives in
+  `ops/references/skill-trigger-classes.md` (`class:` + `zero-means:` per
+  skill, read by `skill-routing-audit.py`), and a non-trivial fresh count
+  REFUTES it. `class: fires`, none in 14 days → routine → recommend removal;
+  else ask. Config reverts; the user's memory of the tool does not.
 
 ### 6. Language & format conventions (this user's global rules)
 - SKILL.md, hooks, config, comments: entirely English (machine-read).
 - Reports for the user: Traditional Chinese.
 - CLAUDE.md rules: conditional phrasing, `type(scope)` style consistency.
 
-### 7. Telemetry window integrity
-Any finding derived from session transcripts — yours or an external report's — is
-unusable until all three hold:
-- **Timestamps, not mtimes.** Selecting the N most-recently-modified transcripts is
-  fine; dating an event from those mtimes is not. A resumed session rewrites its
-  mtime while its content stays old (measured 2026-07-25: 20 of 50 files skewed
-  ≥3 days, max 26).
-- **Spot-check any claimed window.** Open one cited finding, confirm its in-file
-  `timestamp` falls in the stated range. One check exposes a whole-report skew.
-- **Present state wins.** Where telemetry and the filesystem disagree, the
-  filesystem is right: downgrade to `stale finding` and say when it was actually
-  true (`git log` of the fix is usually one command away).
+### 7. Evidence-age integrity (any measurement taken at another time)
+Every finding whose evidence predates NOW — transcripts, a past report, a memory
+file, a prior run of this skill, its own "Measured" lines, whoever made it — is
+unusable until three hold (timestamps not mtimes, window spot-checked, present state wins): `references/telemetry.md` §5.
 
 ### 8. Subagent definitions (`agents/*.md`)
 A definition is a durable artifact whose failures are all silent — nothing errors,
@@ -243,20 +240,26 @@ the subagent just behaves wrong in a way that looks like a bad task. Run all fou
   are the usual source — a kit's own tooling survives in the prose after its hooks
   are gone.
 - **Orphan and enum checks.** Each `name:` should be referenced by a routing rule
-  (`ops/20-dispatch.md`); an unreferenced definition is roster noise, not a spare.
-  `color:` must be one of the eight documented values; anything else is an imported
-  invention. Duplicate `name:` in one directory resolves by filesystem order — no
-  documented precedence — so treat any duplicate as a defect.
+  (`ops/20-dispatch.md`); an unreferenced definition is roster noise, not a spare — but
+  EVERY name orphaned at once means the routing moved: check the file, not the roster.
+  `color:` must be a documented value (eight as of 2026-08; re-read the docs before
+  rejecting a ninth). Duplicate `name:` resolves by filesystem order — a defect.
 
 ### 9. External health-check tools (optional input, lowest priority)
-This checklist does not depend on `/doctor` (alias `/checkup`). Run §1–§8 and
-report; reach for it only on request, or for what §1–§8 cannot produce (install /
-PATH repair, version currency). Its findings are UNVERIFIED claims — §2 gate → §7
-→ then §1/§3/§5 — and never batch-accepted: CLAUDE.md trims fall under §1,
-permission proposals under §3, "never used → remove" under §5. A headless run is a
-full nested session (61 tool calls, measured), not a cheap probe — disclose that
-before invoking it. Mechanics, the Git-Bash path-mangling trap, and its measured
-defects: `references/telemetry.md` §3–§4.
+This checklist does not depend on `/doctor` (alias `/checkup`) nor on its
+2.1.283 subcommand `/doctor prompt-audit [<path>]` (the bundled claude-api
+skill's dated-pattern audit). They answer different questions — `/doctor`: what
+wastes context; `prompt-audit`: which instruction text no longer FITS the running
+model or the project. Run §1–§8 and report; reach for them only on request, or
+for what §1–§8 cannot produce (install / PATH repair, version currency, a
+model-relative fit pass). Their findings are UNVERIFIED claims — §2 gate → §7 →
+then §1/§3/§5 — and never batch-accepted: CLAUDE.md trims fall under §1,
+permission proposals under §3, "never used → remove" under §5, and every
+prompt-audit row passes the house-style overlay (`references/telemetry.md` §7).
+A headless run is a full nested session, not a cheap probe — disclose that
+first. Which tool when, mechanics, traps, defects: `references/telemetry.md`
+§3–§4, §8. Review-when: the main-loop model family changes, or the extracted
+prompt-audit guide diffs on a CLI upgrade → re-run it on `CLAUDE.md` and the skills.
 
 ## Output format
 
@@ -267,9 +270,8 @@ voided items separately as `stale finding` with the check that voided them — t
 are evidence the gate worked, not noise. Order by severity. If everything passes,
 say so explicitly with the checks performed. Every run ALSO declares the
 checklist items NOT run and why (budget, out of scope, tooling failed) — a
-silent skip reads as a pass. Measured 2026-08-16: a same-day audit skipped §4
-cross-surface and §5 usage with no trace in its output, and the skip was only
-discovered because the same session later re-ran the skill on another target.
+silent skip reads as a pass (2026-08-16: an audit skipped §4 cross-surface and
+§5 usage with no trace; found only because the same session re-ran on another target).
 
 Adoption mode adds a **reconciliation ledger** — one row per imported artifact:
 `artifact | source | collisions | class | resolution | mechanism status | stamp`.

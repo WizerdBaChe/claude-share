@@ -192,6 +192,19 @@ class TestCheck(TempHome):
         self.assertTrue(any(s == "FAIL" and r == "V9" and "pending-excerpt" in m for s, r, m in f), f)
         self.assertTrue(any(s == "FAIL" and r == "V8" and "C1:support" in m for s, r, m in f), f)
 
+    def test_v9_pending_excerpt_uncited_is_staged_warn(self):
+        # inbox.py ingest registers a licensed PDF that arrived after delivery: no ledger row cites it
+        # yet, so there is nothing to excerpt — WARN, not FAIL. The cited case above stays FAIL.
+        d = self.place_good("20260903_staged")
+        (d / "sources" / "manifest.json").write_text(json.dumps({"schema": "lse-sources-manifest@1", "entries": {
+            "park2022": {"file": "sources/park2022.txt", "route": "script", "retention_policy": "full",
+                         "retention_state": "full", "status": "written"},
+            "Park2022_fulltext": {"file": "sources/Park2022_fulltext.txt", "route": "local_pdf", "key": "doi:10.1/x",
+                                  "retention_policy": "excerpt", "retention_state": "pending-excerpt"}}}), encoding="utf-8")
+        f = runs.check_run(d)
+        self.assertFalse(any(s == "FAIL" and r == "V9" and "pending-excerpt" in m for s, r, m in f), f)
+        self.assertTrue(any(s == "WARN" and r == "V9" and "Park2022_fulltext" in m and "staged" in m for s, r, m in f), f)
+
     def test_selftest_calibrated(self):
         import io
         import contextlib

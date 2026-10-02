@@ -100,6 +100,7 @@ negative control — showed the wiring forced the opposite.)
 | Signal in the user's message | Likely tier | Load |
 |---|---|---|
 | "research question", 題目, 為什麼要做, 概念操作化 | Tier 0 前置框架 | tier-framework §0 |
+| 卡住, 卡關, 寫不下去, 做不下去 | 先分類再建議（概念未成形／材料不足／情緒逃避） | tier-framework §0.6 |
 | 文獻, systematic review, PRISMA, 搜尋策略, gap | Tier 1 文獻 | tier-framework §1 |
 | 假設, 實驗設計, 對照組, 抽樣, 樣本量, 倫理 | Tier 2 研究設計 | tier-framework §2 |
 | 蒐集資料, 標注/labeling, 排除標準, 資料品質 | Tier 3 資料蒐集 | tier-framework §3 |

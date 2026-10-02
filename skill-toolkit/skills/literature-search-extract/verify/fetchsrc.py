@@ -60,6 +60,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))                    # spannorm: the shared normal form, imported below
 sys.path.insert(0, str(HERE.parent / "connectors"))
 import access_policy  # noqa: E402
 
@@ -81,6 +82,21 @@ def now_iso() -> str:
 
 def sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
+
+
+def write_text_lf(p: Path, text: str) -> None:
+    """Write a source text so the BYTES ON DISK are the bytes we hashed.
+
+    Every payload this tool stores is hashed in memory (LF) and the manifest's sha256 is what
+    citecheck's provenance check later compares the file against. `Path.write_text` opens in
+    universal-newline text mode, so on Windows it silently turns every "\\n" into "\\r\\n" AFTER
+    the hash was taken: the check then reads bytes nobody hashed and rules "edited after
+    retrieval" on every multi-line source. `newline=""` writes the string through unchanged, so
+    a run is byte-identical on Windows and POSIX. Never use write_text for a hashed payload.
+    (SSLD T00 L8, 2026-09-12 — 12 of 12 multi-line sources FAILed provenance.)
+    """
+    with p.open("w", encoding="utf-8", newline="") as fh:
+        fh.write(text)
 
 
 def scratch_root() -> Path:
@@ -225,19 +241,25 @@ def _store(run: Path, m: dict, name: str, text: str, entry: dict, retention: str
     """Write text per retention. Returns the entry status."""
     if not valid_name(name):
         raise ValueError(f"invalid source name {name!r}: one path segment [A-Za-z0-9._-], no '..'")
+    # LF is a PROPERTY of a stored source, not an accident of where the text came from: a PDF
+    # extractor that hands back "\r\n" would otherwise give the same document a different sha on a
+    # different machine. Normalise at the door, hash after, write through unchanged (write_text_lf).
+    # Same shape as tools/archdiag/index.mjs, which normalises at emission because its sha256 is a
+    # freeze receipt; ~/.claude/.gitattributes §"receipt-stable regeneration assets" is the ruling.
+    text = text.replace("\r\n", "\n")
     full_sha = sha256_bytes(text.encode("utf-8"))
     entry.update({"sha256_full": full_sha, "bytes": len(text.encode("utf-8")), "chars": len(text),
                   "retention_policy": retention, "fetched_at": now_iso(), "tool": TOOL})
     if retention == "full":
         p = run / "sources" / f"{name}.txt"
-        p.write_text(text, encoding="utf-8")
+        write_text_lf(p, text)
         entry.update({"retention_state": "full", "status": "written", "file": f"sources/{name}.txt",
                       "sha256_file": full_sha})
     else:
         sd = scratch_root() / run.name
         sd.mkdir(parents=True, exist_ok=True)
         sp = sd / f"{name}.txt"
-        sp.write_text(text, encoding="utf-8")
+        write_text_lf(sp, text)
         entry.update({"retention_state": "pending-excerpt", "status": "scratch", "scratch_path": str(sp),
                       "file": f"sources/{name}.txt"})
     m["entries"][name] = entry
@@ -329,6 +351,10 @@ def cmd_local(a) -> int:
     entry = {"name": a.name, "path": str(pdf), "host": "", "route": "local_pdf", "kind": "pdf",
              "sha256_source_file": sha256_bytes(b), "policy_row": "n/a", "policy_class": "local",
              "licence_basis": a.oa or "user's own copy on disk (Zotero storage / local library); text is a working derivative"}
+    if getattr(a, "key", ""):
+        # identity key of the work this PDF is (loop/inbox.py ingest passes it): lets the dashboard
+        # lift the source out of "missing full text" without re-reading the PDF
+        entry["key"] = a.key
     st = _store(run, m, a.name, text, entry, "full" if a.oa else "excerpt")
     print(f"local {a.name}: route=local_pdf sha256={entry['sha256_source_file'][:12]} chars={len(text):,} {st}")
     return 0
@@ -356,48 +382,12 @@ def cmd_paste(a) -> int:
 
 
 # ---------------------------------------------------------------- excerpt (retention pass)
-def norm_with_map(text: str) -> tuple[str, list[int]]:
-    """citecheck.norm() with an index map back to the raw string (one raw index per norm char)."""
-    out: list[str] = []
-    idx: list[int] = []
-    i, n = 0, len(text)
-    prev_space = True
-    while i < n:
-        ch = text[i]
-        # hyphenation across a line break: "de-\n  vice" -> "device"
-        if ch == "-" and i + 1 < n:
-            j = i + 1
-            while j < n and text[j] in " \t":
-                j += 1
-            if j < n and text[j] == "\n":
-                j += 1
-                while j < n and text[j] in " \t\r\n":
-                    j += 1
-                i = j
-                continue
-        if ch.isspace():
-            if not prev_space:
-                out.append(" ")
-                idx.append(i)
-            prev_space = True
-            i += 1
-            continue
-        prev_space = False
-        folded = unicodedata.normalize("NFKC", ch)
-        folded = {"’": "'", "‘": "'", "“": '"', "”": '"', "–": "-", "—": "-", "−": "-"}.get(folded, folded)
-        for c in folded.casefold():
-            out.append(c)
-            idx.append(i)
-        i += 1
-    s = "".join(out).strip()
-    if out and out[-1] == " ":
-        idx = idx[:len(s)]
-    return s, idx
-
-
-def norm_span(span: str) -> str:
-    s, _ = norm_with_map(span)
-    return s
+# The normal form is defined ONCE, in spannorm.py, and this pass imports it rather than
+# re-implementing it. It used to be a hand-written char walk that was meant to match
+# citecheck.norm() and measurably did not (3171 of 4000 random strings folded differently;
+# 247 of those changed a hyphen ruling). What cuts the excerpt and what rules on the span
+# must be the same function, or the cutter removes the text the gate then asks for.
+from spannorm import norm_span, norm_with_map  # noqa: E402,F401  (re-exported for callers)
 
 
 def ledger_spans_for(run: Path, name: str) -> list[str]:
@@ -481,7 +471,7 @@ def cmd_excerpt(a) -> int:
             continue
         text, found, missing = excerpt_text(full, spans, a.window)
         p = run / "sources" / f"{name}.txt"
-        p.write_text(text, encoding="utf-8")
+        write_text_lf(p, text)
         e.update({"retention_state": "excerpt", "status": "written", "spans_found": found, "spans_missing": missing,
                   "spans_cited": sorted(set(spans)), "window": a.window,
                   "sha256_file": sha256_bytes(text.encode("utf-8")), "excerpted_at": now_iso()})
@@ -518,10 +508,14 @@ def selftest() -> int:
 
     calls: list[str] = []
     canned = {
+        # both bodies carry MORE THAN ONE paragraph on purpose: html_to_text then puts a real "\n" in the
+        # stored text, which is what the platform's text-mode newline translation would corrupt. A
+        # single-line fixture cannot see that defect (it was blind to it until 2026-09-12).
         "https://open.example/paper": (200, b"<html><body><p>We report a propagation length of 200 um at 780 nm for silver "
-                                             b"films.</p><script>x</script></body></html>", "text/html"),
+                                             b"films.</p><p>A second paragraph, so the stored text contains a newline."
+                                             b"</p><script>x</script></body></html>", "text/html"),
         "https://landing.example/a1": (200, b"<html><p>Abstract: the film shows sub-nanometer roughness of 0.4 nm RMS " +
-                                            b"in every sample measured. " * 40 + b"</p></html>", "text/html"),
+                                            b"in every sample measured.</p><p> " * 40 + b"</p></html>", "text/html"),
         "https://landing.example/a2": (200, b"<html><p>second</p></html>", "text/html"),
         "https://wall.example/x": (403, b"<html>Just a moment... cf-chl challenge-platform</html>", "text/html"),
         "https://nobody1.example/p": (200, b"<html><p>one</p></html>", "text/html"),
@@ -573,6 +567,13 @@ def selftest() -> int:
             ok("must-WRITE open host full text", rc == 0 and f.exists() and "propagation length of 200 um" in f.read_text(encoding="utf-8"))
             ok("must-STRIP script tags", "x" != f.read_text(encoding="utf-8").strip()[-1] and "<script>" not in f.read_text(encoding="utf-8"))
             ok("must-RECORD sha256 matching the file", e.get("sha256_file") == sha256_bytes(f.read_bytes()) and e.get("route") == "script")
+            # the manifest hash is a hash of BYTES ON DISK: assert against read_bytes(), never read_text()
+            # (read_text folds CRLF back to LF and would hide the defect). A text with no newline cannot
+            # exercise this, hence the multi-paragraph fixture above.
+            raw = f.read_bytes()
+            n_crlf = raw.count(b"\r\n")
+            ok("must-STORE the text with the newline it was hashed with (no platform CRLF translation)",
+               b"\n" in raw and n_crlf == 0, f"{n_crlf} CRLF in {f.name}")
             # 3 landing (excerpt) host: scratch only, no file in the run
             rc = cmd_fetch(A(run=str(run), url="https://landing.example/a1", name="landing", oa=""))
             m = load_manifest(run)
@@ -580,6 +581,10 @@ def selftest() -> int:
             ok("must-NOT write licensed full text into the run folder", rc == 0 and not (run / "sources" / "landing.txt").exists())
             ok("must-KEEP full text in scratch with pending-excerpt state",
                e.get("retention_state") == "pending-excerpt" and Path(e.get("scratch_path", "")).exists())
+            sraw = Path(e.get("scratch_path", "")).read_bytes()
+            ok("must-RECORD sha256_full matching the scratch bytes (feedback-loop.md: sha256_full proves the "
+               "excerpt came from that text)", b"\n" in sraw and e.get("sha256_full") == sha256_bytes(sraw),
+               f"{sraw.count(b'\r\n')} CRLF in scratch")
             # 4 max_per_run on landing host
             rc = cmd_fetch(A(run=str(run), url="https://landing.example/a2", name="landing2", oa=""))
             ok("must-REFUSE second document on a max_per_run 1 host", rc == 3)
@@ -625,7 +630,10 @@ def selftest() -> int:
             ok("must-DERIVE excerpt containing the span", rc == 0 and "sub-nanometer roughness of 0.4 nm RMS" in txt)
             ok("must-SHRINK to windows (not the full text)", len(txt) < len(Path(e["scratch_path"]).read_text(encoding="utf-8")) // 2,
                f"{len(txt)} chars")
-            ok("must-RECORD excerpt state + sha", e.get("retention_state") == "excerpt" and e.get("sha256_file") == sha256_bytes(txt.encode("utf-8")))
+            xraw = (run / "sources" / "landing.txt").read_bytes()
+            ok("must-RECORD excerpt state + sha", e.get("retention_state") == "excerpt" and e.get("sha256_file") == sha256_bytes(xraw))
+            ok("must-WRITE the excerpt with the newline it was hashed with (no CRLF translation)",
+               b"\n" in xraw and xraw.count(b"\r\n") == 0, f"{xraw.count(b'\r\n')} CRLF in landing.txt")
             # 7b QA F-11: a second ledger row citing a new span in the same source re-derives the excerpt
             rc = cmd_excerpt(A(run=str(run), window=30))
             ok("must-SKIP an excerpt whose ledger spans are unchanged", rc == 0 and
@@ -645,6 +653,35 @@ def selftest() -> int:
             ok("must-LOCATE a span across hyphenation + collapsed whitespace", found == 1 and "200 um" in text, f"{found} {missing}")
             text, found, missing = excerpt_text(full, ["propagation length was 900 um"], 5)
             ok("must-REPORT a span the text does not contain", found == 0 and missing, f"{found}")
+            # 8b SSLD T00 2026-09-12: a lone "-" cell means "not reported" — it is data, not
+            # hyphenation. Dropping it wherever it preceded a newline cut an excerpt that no
+            # longer carried the span citecheck then demanded to find in it.
+            tbl = ("Current work\nMeasured Multi-tip taper\n1550 nm\n-1.50 dB \n- \n- \nCurrent work\n" + "pad " * 50)
+            text, found, missing = excerpt_text(tbl, ["Measured Multi-tip taper 1550 nm -1.50 dB - -"], 5)
+            ok("must-LOCATE a span ending in two '- -' not-reported cells", found == 1 and not missing, f"{found} {missing}")
+            text, found, missing = excerpt_text(tbl, ["-1.50 dB - x"], 5)
+            ok("must-REPORT a '- -' span the text does not carry (the rule stayed narrow)", found == 0 and missing, f"{found}")
+            try:
+                import citecheck as _cc
+            except ImportError:
+                _cc = None   # share edition: verify/citecheck.py is not shipped; its half of the check below is named, not skipped silently
+            import spannorm
+            # The cutter and the gate must not merely agree — they must BE the same function.
+            # Equality over fixtures is what used to be asserted here, and it passed while the two
+            # implementations disagreed on 3171 of 4000 random strings (spannorm.py header).
+            if _cc is None:
+                ok("must-USE the one shared normal form (fetchsrc half only: citecheck.py is not part of this share)",
+                   norm_with_map is spannorm.norm_with_map, "fetchsrc has its own normalizer again")
+            else:
+                ok("must-USE the one shared normal form, not a copy that agrees on the fixtures",
+                   norm_with_map is spannorm.norm_with_map and _cc.norm is spannorm.norm,
+                   "fetchsrc or citecheck has its own normalizer again")
+            _rule = spannorm.selfcheck()
+            ok("must-HOLD the normal form's own properties (spannorm.selfcheck)", not _rule, f"{_rule}")
+            text, found, missing = excerpt_text("on wafer-\nscale high-density arrays here " + "pad " * 50,
+                                                ["wafer-scale high-density arrays"], 5)
+            ok("must-LOCATE a span whose compound was split at its own hyphen", found == 1 and not missing,
+               f"{found} {missing}")
             # 9 paste: origin unverifiable flagged
             (tmpp / "p.txt").write_text("the user pasted this passage " * 30, encoding="utf-8")
             a = A(run=str(run), name="pasted", oa="", origin="")
@@ -653,6 +690,15 @@ def selftest() -> int:
             m = load_manifest(run)
             ok("must-MARK paste as user_provided / origin_verifiable false",
                rc == 0 and m["entries"]["pasted"].get("route") == "user_provided" and m["entries"]["pasted"].get("origin_verifiable") is False)
+            # 9b a producer that hands back CRLF (a PDF extractor on Windows) must not change the
+            # document's identity: the store normalises at the door, so the sha is platform-free
+            crlf_entry = {"name": "crlfsrc", "route": "local_pdf", "host": "", "policy_row": "n/a"}
+            _store(run, m, "crlfsrc", "line one\r\nline two\r\n", crlf_entry, "full")
+            m = load_manifest(run)
+            craw = (run / "sources" / "crlfsrc.txt").read_bytes()
+            ok("must-NORMALISE a CRLF-bearing producer text to LF before hashing it",
+               craw == b"line one\nline two\n" and m["entries"]["crlfsrc"]["sha256_file"] == sha256_bytes(craw),
+               f"{craw!r}")
             # 10 local pdf (only if a PDF library is present)
             try:
                 import fitz  # type: ignore
@@ -683,6 +729,7 @@ def main() -> int:
     sub = ap.add_subparsers(dest="cmd")
     f = sub.add_parser("fetch"); f.add_argument("--run", required=True); f.add_argument("--url", required=True); f.add_argument("--name", required=True); f.add_argument("--oa", default="")
     l = sub.add_parser("local"); l.add_argument("--run", required=True); l.add_argument("--pdf", required=True); l.add_argument("--name", required=True); l.add_argument("--oa", default="")
+    l.add_argument("--key", default="", help="identity key of the work (doi:… / arxiv:…), recorded in the manifest entry")
     p = sub.add_parser("paste"); p.add_argument("--run", required=True); p.add_argument("--from", required=True); p.add_argument("--name", required=True); p.add_argument("--origin", default=""); p.add_argument("--oa", default="")
     e = sub.add_parser("excerpt"); e.add_argument("--run", required=True); e.add_argument("--window", type=int, default=WINDOW)
     e.add_argument("--redo", action="store_true", help="re-derive every excerpt from scratch even if the ledger spans are unchanged")

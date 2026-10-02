@@ -99,9 +99,9 @@ inventory (ruleId namespace `review.contract.*`):
   claims (setup steps, listed endpoints, stated invariants, ADR "we chose X
   because Y") and verify each against the code; every mismatch is a
   `review.contract.doc-drift` finding. Detection only — rewriting or
-  restructuring the docs is engineering:documentation's deliverable, and a
-  doc-debt backlog is engineering:tech-debt's; hand off with the mismatch
-  list.
+  restructuring the docs is engineering:documentation's deliverable; a
+  doc-debt backlog is ranked here from the mismatch list (SKILL.md,
+  debt-backlog handoff bullet).
 - **Security note**: the attacker-facing projections of these drifts (client-
   only validation, hidden-but-unprotected functions, enforcement-point desync)
   are already security-deep-checklist territory — record them as `sec.*`
@@ -153,8 +153,8 @@ view selection / tier view set: `representation-models.md` beside it.
 
 ## Organizational Debt-Management Lens
 
-(Report on these as observations; building the backlog itself is
-engineering:tech-debt's deliverable.)
+(Report on these as observations; when the user asks for the backlog itself,
+rank the findings into it here — SKILL.md, debt-backlog handoff bullet.)
 
 - Is technical debt a living, visible backlog (description, tags, severity,
   suggested owner), or tribal knowledge?

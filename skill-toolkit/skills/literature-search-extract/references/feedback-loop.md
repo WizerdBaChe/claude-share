@@ -88,6 +88,14 @@ cites moves the run to `invalidated` (`wasInvalidatedBy`, `invalidatedAtTime`) �
 folder stays; a wrong event is answered by a later event, never by editing the file.
 Only runs that are indexed (delivered when filed, or adopted) resolve as targets.
 
+**Full text arriving later is not a reflux event.** A PDF found after delivery goes into
+`literature/Inbox/`; `python ../loop/inbox.py ingest [--apply]` files it as
+`filed/<FirstAuthor><Year>_<DOI suffix>.pdf` and registers it through `fetchsrc.py local
+--key <key>` in every run that cites the work at `[abstract]` or was refused it. That
+manifest entry lifts the source off the dashboard's missing list; ledger rows keep their tag
+until the claims are re-read (an extra mark, not a precondition). `correction` stays reserved
+for evidence that was wrong (user ruling 2026-09-23).
+
 ## Consumers (INV-7)
 
 Who calls, with which preset, what they consume and write back, where their store's
@@ -110,8 +118,9 @@ claims are numeric · V3 record.md card · V4 keys well-formed (V4b > 30 % unres
 V5 footer · V6 related wikilinks · V7 reuse_check precedes the gate and is logged ·
 **V8** (2026-09-11) the emitted `citecheck.json` carries no FAIL once the run is past
 `open` — a rejected claim delivered as cited is failure mode #8 · **V9** every
-text-bearing source names its `access_route`, `sources/manifest.json` exists, no entry is
-left `pending-excerpt`, and no text exists under a `hand_to_user` entry. FAIL where a
+text-bearing source names its `access_route`, `sources/manifest.json` exists, no entry a
+ledger row cites is left `pending-excerpt` (an uncited one — full text staged by Inbox
+`ingest` — is a WARN), and no text exists under a `hand_to_user` entry. FAIL where a
 tool parses (V1/V2/V3/V4/V7/V8), WARN where a human reads (V4b/V5/V6); V9 is WARN for
 runs created before 2026-09-12 (the instrument did not exist) and FAIL after.
 V2's numeric detector is a unit LIST (`runs.py NUM_UNIT_RE`), deliberately not a grammar:

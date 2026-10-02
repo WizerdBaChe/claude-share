@@ -45,7 +45,7 @@ Runtime-glob caveat: if code references the candidate's PARENT directory
 inside is effectively referenced → KEEP the directory's contents wholesale.
 
 Quality is NOT a signal: ugly, unused-looking but referenced code is KEEP
-(tech-debt is engineering:tech-debt's job, not cleanup's).
+(tech debt is code-review-deep-checklist's job, not cleanup's).
 
 ## §4 Optional per-project keep-list
 

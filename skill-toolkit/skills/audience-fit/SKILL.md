@@ -1,6 +1,6 @@
 ---
 name: audience-fit
-description: 'Post-production audience-adaptation pass (受眾調校) for anything a NON-BUILDER will read. Two jobs: (A) turn an engineering-voiced deliverable (audit/summary HTML, report, README, release notes) into a reader-facing version in a NEW file; (B) write or fix UI copy (設定頁、狀態列、錯誤訊息) from the USER''s stance instead of the engine''s. Trigger on 「使用者導向」「消費者導向」「寫給一般人/非工程師看」「白話版」「UI 文案」「設定頁文字」「這段太工程」「AI味」 "make this readable for stakeholders", "rewrite for end users" — and OFFER once, unprompted, right after any skill (diagram-authoring, code-review-deep-checklist, bench reports, …) produces a deliverable whose primary consumer is not its builder. NOT for machine-read docs (phase logs, decisions files, specs — the language policy already governs those), NOT visual layout/theming (→ artifact-design / dataviz), NOT authoring technical docs from code (→ engineering:documentation), NOT task/flow/interaction/state evaluation — 「走得通嗎」「停用還是隱藏」「等待/取消/失敗後」「鍵盤/窄版」 (→ ux-walkthrough; Mode B hands those findings there and takes wording findings back).'
+description: 'Post-production audience-adaptation pass (受眾調校) for anything a NON-BUILDER reads: (A) turn an engineering-voiced deliverable (report, summary HTML, README, release notes) into a reader-facing version in a NEW file; (B) write or fix UI copy (設定頁、狀態列、錯誤訊息) from the user''s stance, not the engine''s. Trigger on 「使用者導向」「白話版」「寫給非工程師看」「UI 文案」「這段太工程」「AI味」 "rewrite for end users"; OFFER once, unprompted, after any skill produces a deliverable whose primary consumer is not its builder. NOT machine-read docs (phase logs, specs), NOT layout/theming (→ artifact-design), NOT technical docs from code (→ engineering:documentation), NOT task/flow/state evaluation 「走得通嗎」「停用還是隱藏」 (→ ux-walkthrough; findings hand off both ways).'
 ---
 
 # audience-fit — adapt finished output to the human who will actually read it
@@ -206,11 +206,6 @@ reader's patience:
 ```powershell
 python ~\.claude\tools\audience-fit-gate\afgate.py all <original> <companion>
 ```
-
-> **Share edition:** `tools/audience-fit-gate/` is source-only and does not ship
-> in this repo (`tools/share-manifest.toml`, `[[not_shipped]]`). The command
-> above is the source environment's; the two checks below are described fully
-> enough to reproduce.
 
 - `voice` — a bare `<n> PASS`, a file path, a sha, a run id or a gate id in the
   reader's MAIN text is a FAIL ("add zero facts" has a twin: add no builder

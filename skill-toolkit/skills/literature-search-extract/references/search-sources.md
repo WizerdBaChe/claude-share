@@ -73,6 +73,20 @@ request volume — rate limits below matter mainly as "don't loop fetches" guida
   WebSearch queries mentioning the topic + "scholar" or by fetching a known result URL —
   expect this to be unreliable; prefer Semantic Scholar/OpenAlex for programmatic needs.
 - Best use: quick citation-count sanity checks and finding which venues host a topic.
+- **Breadth the other channels lack (theses, books, grey literature, non-indexed venues)
+  goes to the user through Publish or Perish**, not through a browser: Harzing's free
+  desktop app (Windows, macOS) queries Google Scholar on the user's machine and exports the
+  list (CSV, RIS, BibTeX, JSON…, abstracts included). The run's output is a query pack
+  (`output-templates.md` §Query pack, PoP variant); the export the user drops into the run
+  folder enters as `user_provided` METADATA — every row still goes through identifier
+  resolution before it is cited, because Scholar records are scraped and noisy, and is
+  de-duplicated against the Semantic Scholar hits by DOI, then title. Keep it to one or two
+  PoP queries per question: dense Scholar querying meets a CAPTCHA (reported in the
+  researcher.tw PoP article), and that CAPTCHA is the user's, in their own session — never
+  something this skill routes around. Registry row `publish_or_perish` (needs_user). Scope
+  (user ruling R3, 2026-09-14): offered at `exhaustive` depth or on survey-style projects
+  (the SSLD class), not on every run. Facts re-checked 2026-09-14 on harzing.com;
+  review-when PoP drops Google Scholar as a source or changes licence.
 
 ### Semantic Scholar (papers, citation graph)
 - API: `api.semanticscholar.org/graph/v1/` — works unauthenticated. Re-verified
@@ -282,6 +296,10 @@ When the user points to a folder of paper PDFs they already have:
 - **With a corpus tool over the same folder**: if the collection is also indexed by a
   live `local_corpus` connector, rank/relate there first, then Read the underlying PDF
   for `[full]`-level extraction — a digest alone stays `[partial]`.
+- **Textbooks are a different corpus with their own rules** — the source environment's
+  `textbook_library` connector (TOC/index search, printed-page calibration, OCR sidecars
+  with excluded pages) and its rules file are not shipped here; `credibility-rubric.md` §5
+  carries the edition rules, and the locator is the printed page plus the edition read.
 
 ### "Password-protected" is usually a false refusal (SKILL.md P3 points here)
 
@@ -419,12 +437,16 @@ layers. Every database exposes up to three keyword layers, and each has a blind 
 
 | layer | who wrote it | good for | blind spot |
 |---|---|---|---|
-| author keywords | the authors | the paper's own framing, new coinages | inconsistent across papers; a niche term you did not guess is invisible |
-| controlled vocabulary (IEEE Terms, MeSH, INSPEC, Emtree) | the indexer | recall across spellings and synonyms in one hit | lags new topics by 1–3 years; the term may not exist yet |
-| index terms / auto-extracted (Semantic Scholar fields, OpenAlex concepts, "Index Terms") | a machine | breadth, cross-field hits | noisy; a frequent word is not a topic |
+| author keywords (Xplore field `"Author Keywords"`) | the authors, at submission | the paper's own framing, new coinages, niche names | inconsistent across papers; a niche term you did not guess is invisible |
+| controlled vocabulary (Xplore `"IEEE Terms"` — IEEE Thesaurus, shown on the page as "IEEE Keywords"; `"INSPEC Controlled Terms"`; MeSH; Emtree) | an indexer (machine-aided + manual) | recall across spellings and synonyms in one hit | lags new topics by 1–3 years; the term may not exist yet |
+| index terms / auto-extracted (Xplore `"Index Terms"`; Semantic Scholar fields; OpenAlex concepts) | a machine (ML/NLP over metadata and full text) | breadth, cross-field hits | noisy; a frequent word is not a topic |
 
 Query from at least two layers. A term that appears in only one column is a candidate,
-not a keyword, until a second hit uses it.
+not a keyword, until a second hit uses it. Xplore's `"INSPEC Non-controlled Terms"` sit
+between the rows: indexer-side but outside the thesaurus, so they often carry a new name
+before the controlled layer does — read them when the controlled layer comes back thin.
+(Xplore field names and the "Index Terms" definition re-checked 2026-09-14 against the
+Xplore help pages and a library command-search guide; review-when Xplore renames a field.)
 
 **2. Iterate batch n → keyword set n+1.** Read the first 5–10 relevant hits' keywords and
 titles, add the terms they use to the ledger, and re-run. Stop iterating when a round adds
@@ -432,7 +454,8 @@ no new column entries — that is vocabulary saturation, and it precedes result 
 Log the ledger's final state in `search_trail` (one line: `vocabulary: <terms added by
 round 2>`), because that line is what the next run seeds from.
 
-**3. The anchor round (before any saturation claim).** Two anchors, one round:
+**3. The anchor round (before any saturation claim).** Three anchors, one round. Together
+they are the run's **seeds** — the papers §Citation chasing counts hops from:
 - a **review article** on the topic — its reference list is a curated backward set and its
   vocabulary is the field's; at `standard` depth one review read at `[partial]` (intro +
   references) is cheaper than three more queries;
@@ -440,7 +463,31 @@ round 2>`), because that line is what the next run seeds from.
   `/citations`), its **co-citations** (papers cited together with it, S2 `/references` of
   its citers) and **bibliographic coupling** (papers that share its references) surface the
   cluster a keyword query cannot name. This is the citation-index snowball the guide
-  recommends over more keyword rounds.
+  recommends over more keyword rounds;
+- **3–5 recent on-topic seeds** (about the last three years, picked for fit to the
+  extraction targets, never for citation count). The pearl is old by construction —
+  citations accumulate with age — so its snowball reaches the field as it WAS. Recent
+  seeds have few citers yet: chase them **backward**, which shows what the current front
+  still builds on. Where their reference lists and the pearl's cluster diverge, the
+  vocabulary moved; the new terms go into the ledger.
+
+**Harvest each seed's keyword layers.** A seed's own labels are the best-calibrated query
+terms a run can get: copy its author keywords, controlled terms and index terms into the
+ledger's columns. On IEEE papers the article page lists all of them side by side, but
+Xplore is `agent_banned` — so the harvest rides the query pack (ask for the named seeds'
+Keywords section back, `output-templates.md` §Query pack), never a fetch.
+
+**Year × citation read — a gap SIGNAL, not a finding.** Tabulate the hits by year ×
+`citationCount` (both in the S2 fields list above). Citations are age-confounded: compare
+within a year band, never across. Four shapes to name in `search_trail`:
+- an old, highly cited paper that the snowball's reference lists keep naming but the run
+  never read → a missed backward link: chase it before synthesis;
+- many recent low-citation papers on one ledger term, no review among them → an emerging
+  line; a `gaps` candidate worded "no synthesis found yet", not "unexplored";
+- an old high-citation block with nothing after year Y → the question either closed or was
+  renamed; the recall check below decides which, with a control from after Y;
+- an empty band between populated neighbours → almost always vocabulary drift: the query's
+  fault until a control from inside that band is found.
 
 **4. Hygiene.** Field tags (`[tiab]`, `"Author Keywords":`, `site:`) narrow; quotation
 marks fix phrases; wildcards (`wave*`) recover plurals and inflections; Boolean groups
@@ -476,8 +523,10 @@ unfilled.
 **Stopping conditions (any one suffices — log which fired in `search_trail`):**
 - Saturation: a chasing round adds no source that fills an unfilled extraction target.
 - Quota: depth's source budget reached AND all extraction targets filled.
-- Depth cap: chase at most 1 hop from seed papers at `standard` depth (2 hops at
-  `exhaustive`); deeper chains almost always leave the caller's question.
+- Depth cap: chase at most 1 hop from the seeds at `standard` depth (2 hops at
+  `exhaustive`); deeper chains almost always leave the caller's question. Seeds = the
+  anchor-round papers (§Query building step 3) plus any grep-verified `scope` seed; a
+  paper reached by chasing is not a seed, so a chain cannot reset its own hop count.
 - Diminishing credibility: remaining candidates are all below the credibility bar
   already applied in P3.
 
@@ -512,7 +561,9 @@ in, never the ones that never surfaced.
 ### Procedure
 
 1. Pick the control BEFORE concluding, and **withhold it** — do not put its title, DOI,
-   or distinctive phrasing into any query.
+   or distinctive phrasing into any query. When the year × citation read (§Query building)
+   showed an empty or truncated band, pick the control from inside that band: that is
+   where the query is most likely to be blind.
 2. Run the queries as they actually stand.
 3. Ask: did those queries surface the control on their own?
    - **Found** → the query reaches this neighbourhood. A "not found" for a *different*
