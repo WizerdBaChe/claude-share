@@ -8,12 +8,12 @@
 ## 審查家族 (Review Family) — 最易互相誤觸，先看這區
 
 ### code-review-deep-checklist（深度審查方法論）
-- 關鍵詞：深入review、完整審查、架構健檢 (architecture health check)、代碼異味 (code smell)、需求追溯 (requirement traceability)、選型評估 (dependency fitness)、全專案審查 (whole-project review)
+- 關鍵詞：深入review、完整審查、架構健檢 (architecture health check)、代碼異味 (code smell)、需求追溯 (requirement traceability)、選型評估 (dependency fitness)、全專案審查 (whole-project review)、技術債盤點 (tech-debt backlog)
 - 精準句型：
   - Mode A：「幫我**深入 review** 這個 PR/檔案」("deep review")
   - Mode B：「幫**整個專案**做架構**健檢**」(whole-project health check)；稽核入口不帶「健檢」字的說法（外部語料 2026-09-02）：「這份架構說法跟 code 對得上嗎」/「找出文件跟實作不一致」/「重建現況，不要相信 README」/ "where has the architecture drifted?"——evidence 模式＝code、交付物＝漂移表，不是畫圖請求（→ diagram-authoring 只在其視圖稽核回呼時出場）；**覆蓋義務 (coverage obligation) 判別子（2026-09-05）**：本 skill 有——inventory-first `coverage.json`，沒審的單元進 `deferred`／`explicitExclusions`，標準層視圖集成員（C4／每個生命週期實體的 statechart／每個關鍵入口的 sequence pair／決策表）要有名字；要「整個系統沒漏看」的保證、或既有系統重構前的診斷 → 這裡（B focused），畫圖 skill 的 audit mode 只宣告不盤點
   - Mode C：「評估 X 套件**還適不適合**」("still the right fit")
-- 避免說法：「merge 前幫我看一下」（→ /code-review）、「盤點技術債列 backlog」（→ engineering:tech-debt）
+- 避免說法：「merge 前幫我看一下」（→ /code-review）、「盤點技術債列 backlog」（→ code-review-deep-checklist）
 
 ### /code-review（內建快速抓蟲）
 - 關鍵詞：merge前、review this diff、有沒有bug、安全嗎 (is this safe)
@@ -45,27 +45,22 @@
   - 全套：「幫整個系統做**資安健檢**」
 - 避免說法：「merge 前看一下安全」（→ /security-review）、「順便看 code 品質」（→ code-review-deep-checklist）、「新系統該怎麼設計權限」（設計期 → product-design-thinking Phase 2）
 
-### engineering:tech-debt（技術債盤點）
-- 關鍵詞：技術債 (tech debt)、重構優先序 (refactor priorities)、code health
-- 精準句型：「幫我**盤點技術債，列成優先序 backlog**」— 交付物是債務清單本身
-- 避免說法：「健檢」（→ deep-checklist Mode B；它只把債當透鏡，不產 backlog）
-
-### engineering:architecture（ADR）
-- 關鍵詞：ADR、技術選型（**新決策**）、Kafka vs SQS、trade-off
-- 精準句型：「該選 A 還是 B？幫我寫 ADR」— **向前看的新決策**
-- 避免說法：「現在用的 X 還適合嗎」（回顧性 → deep-checklist Mode C）
+### engineering:tech-debt、engineering:architecture、engineering:system-design、engineering:debug、engineering:testing-strategy（Anthropic 官方 plugin，平時關閉）
+- 規則：**本機優先**——plugin 關閉時不存在；開啟時也只在使用者點名 plugin 才用（使用者 2026-10-01：工程向官方工具不如本機）
+- 關鍵詞：重構優先序、ADR、trade-off、設計 API、資料模型設計 (data model design)、stack trace、staging好的prod壞、test plan、測試策略 (testing strategy)
+- 轉介：技術債 backlog → code-review-deep-checklist（Mode A/B 後排序）｜ADR／新選型 → `software-architect` agent｜系統/API/資料模型設計 → product-design-thinking Mode B｜除錯 → `testing-bug-fixer` agent（小錯主迴圈直接修）｜測試策略 → `testing-qa-engineer` agent＋`rules/verification-ladder.md`
 
 ### ai-coding-guardrails（AI 協作防護體系與流程）
-- 關鍵詞：AI寫壞了、agent刪了不該刪的、怎麼限制agent、AI PR審不完、護欄 (guardrails)、AGENTS.md設計
+- 關鍵詞：AI寫壞了、agent刪了不該刪的、怎麼限制agent、AI PR審不完、AI PR 量太大、review 追不上、護欄 (guardrails)、AGENTS.md設計
 - 精準句型：「AI PR 量太大 review 追不上，幫我設計**流程/機制**」— 對象是制度，不是單一改動
 - 避免說法：「幫我深審這段 AI 產的 code」（單一改動 → deep-checklist Mode A §9）
 
 ### config-self-audit（Claude Code 設定檔稽核）
 - 觸發實態（量測 2026-08-17）：幾乎全為**程序觸發**——新 skill/hook 收尾驗證、co-upgrade 稽核步、明講 skill 名；自然語句路由罕見（30 fires 僅 1）。
-- 關鍵詞：稽核這個skill (audit this skill)、檢查這個hook、安全性遺漏 (security gap)、乾淨度、這條規則安不安全
+- 關鍵詞：稽核這個skill (audit this skill)、檢查這個hook、安全性遺漏 (security gap)、乾淨度、這條規則安不安全、移植過來的規則、規則跟原本的打架、別人的設定 repo、併入別人的設定
 - 精準句型：「幫我 audit 這個 skill/hook/CLAUDE.md 規則」/「這個 skill 有沒有安全性遺漏或乾淨度問題」— 只審 Claude Code 設定物件，不審專案代碼
 - **兩個 mode**：預設審**單一物件**；**adoption mode** 審搬進來設定間的**關係**（觸發碰撞、順序、機制沒跟著到）。觸發詞：「移植過來的規則跟原本的打架」「別人的設定 repo 併進來了」、或 `reconciled: no` 戳記。**單一** skill 搬入 → `skill-share-packaging` Mode B
-- 與 `/doctor` 分工：本 skill **自足**，`/doctor` 輸出一律當未驗證宣稱（理由＋實測：SKILL.md §9、`skills/config-self-audit/references/telemetry.md`）
+- 與 `/doctor` 分工：本 skill **自足**，`/doctor` 與 2.1.283 起的 `/doctor prompt-audit [<path>]`（內建 claude-api skill 的過時提示模式稽核）輸出一律當未驗證宣稱，prompt-audit 各列先過 house-style overlay（理由＋實測：SKILL.md §9、`skills/config-self-audit/references/telemetry.md` §3a／§7）
 
 ---
 
@@ -88,15 +83,12 @@
 - 避免說法：單一 app 的樣式調整（不觸發）、單一 app 的選單怎麼排／網址要不要記狀態（→ ux-walkthrough）
 
 ### diagram-authoring（精準圖示繪製與缺口檢測）
-- 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (statechart)、FSM 圖、時序圖、序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、機制架構檢查・系統架構盤點・檢查項（audit mode：無「圖」字也觸發，交付＝可校驗架構圖＋缺口表＋檢查項；2026-08-31 實戰 miss 補）、圖要放進簡報、圖要放進 HTML、圖要放進 PPTX
+- 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (statechart)、FSM 圖、時序圖、序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、機制架構檢查、系統架構盤點、架構盤點、架構檢查項、圖要放進簡報、圖要放進 HTML、圖要放進 PPTX
+- 備註：audit mode 無「圖」字也觸發；交付＝可校驗架構圖＋缺口表＋檢查項（2026-08-31 實戰 miss 補；2026-09-22 把原本以「・」串成的單一詞拆開）
 - 精準句型：「把這個系統畫成方塊圖＋狀態機圖，缺的接口標出來」/「用現有資料重建 CPO 全架構圖，找出缺口」/「對整個 X 系統進行一次機制架構檢查（架構盤點），整理成未來可參照的檢查項」/「這組圖要能放進簡報（PPTX 可編輯）」
 - 不帶圖字的架構追問（外部語料 2026-09-02，判別靠「物件＋交付物＋evidence 模式」而非關鍵字）：「這東西到底怎麼串起來的」/「幫我把元件、資料流、狀態拆開讓新人看懂」/「把交接失敗路徑攤開」/ "show me how these components hang together" / "map out the runtime, handoff, and trust boundaries"（物件＝runtime/trust boundary 才是本 skill）
 - 邊界：選哪種圖（理論）→ product-design-thinking `representation-models.md`；健全性檢核 → 同目錄 `view-integrity-checks.md`；codebase 架構健檢（code smell/依賴）→ code-review-deep-checklist Mode B（其視圖稽核回呼本 skill 做呈現級繪製），「機制/系統」的架構檢查・盤點 → 本 skill audit mode；**覆蓋義務判別子（2026-09-05）**：audit mode 一題一主視圖、無盤點義務——交付只宣告視圖集成員「已畫／明列排除」（Step 6 coverage declaration），要「沒漏看」的保證（`deferred` 表、全 codebase 盤點）→ code-review-deep-checklist Mode B focused（AWD 2026-09-03 個案：沒畫的 lifecycle 視圖沒名字，09-05 重建才補）；資料圖表 → dataviz；UI mockup → design；Artifact 頁面機制 → artifact-design/artifact-diagramming；PPTX 機制 → anthropic-skills:pptx
 - 避免說法：「畫個長條圖/趨勢圖/dashboard」（資料視覺化 → dataviz）、「幫我設計這個頁面/mockup」（→ design）
-
-### engineering:system-design（單一系統/服務架構設計）
-- 關鍵詞：設計一個系統、設計 API、資料模型設計 (data model design)
-- 精準句型：「幫我設計一個處理 X 的系統/API/資料模型」— 範圍窄於 product-design-thinking
 
 ### product-management:write-spec（幻影條目 — 2026-09-04 查證：本機不存在，勿路由）
 - 事實：`product-management` plugin 不在 catalog、未安裝、不在本 session 可用清單。留 tombstone 而非刪除（比照 deep-research）。
@@ -110,7 +102,7 @@
 - 避免說法：「幫我把報告排版美化」（→ artifact-design）、「寫個 README 說明這段程式」（→ engineering:documentation）、「這個流程使用者走得通嗎」（→ ux-walkthrough）
 
 ### ux-walkthrough（UX 走查／認知走查）
-- 關鍵詞：UX 走查、認知走查 (cognitive walkthrough)、可用性審查 (usability review)、啟發式評估 (heuristic evaluation)、走得通嗎、從入口到結果跑一遍、使用者會不會誤以為、決策位置 (decision point)、停用還是隱藏 (disable vs hide)、等待後怎麼辦、取消後怎麼辦、失敗後怎麼辦、空狀態 (empty state)、鍵盤走得通嗎、窄版走得通嗎、可用性測試怎麼設計、使用者導向有沒有真的落地、導覽怎麼分、選單怎麼排、資訊架構 (information architecture)、任務導向、要不要先問身分、身分分流 (segmentation)、網址要不要記住狀態、可以分享連結嗎、深層連結 (deep link)、重整後會不會跑掉、返回鍵回到哪、主從式版面 (master–detail)、檢核表進度存哪
+- 關鍵詞：UX 走查、認知走查 (cognitive walkthrough)、可用性審查 (usability review)、啟發式評估 (heuristic evaluation)、走得通嗎、從入口到結果跑一遍、使用者會不會誤以為、決策位置 (decision point)、停用還是隱藏 (disable vs hide)、等待後怎麼辦、取消後怎麼辦、失敗後怎麼辦、空狀態 (empty state)、鍵盤走得通嗎、窄版走得通嗎、可用性測試怎麼設計、使用者導向有沒有真的落地、導覽怎麼分、選單怎麼排、資訊架構 (information architecture)、任務導向、要不要先問身分、身分分流 (segmentation)、網址要不要記住狀態、可以分享連結嗎、深層連結 (deep link)、重整後會不會跑掉、返回鍵回到哪、主從式版面 (master–detail)、檢核表進度存哪、walk the task、輔助科技走得通嗎 (assistive tech)
 - 精準句型：「把『載入另一份對話』這條路從入口走到結果，看使用者卡在哪」/「這顆按鈕該停用還是隱藏？」/「等待、取消、失敗後使用者知道保留了什麼嗎」/「幫我設計一個任務型可用性測試」
 - 性質：**原則層**（決策位置契約、show/disable/hide 條件表、等待–取消–復原契約、證據階梯 UE0–UE4），不是元件庫；只評估與開規格，不改產品程式
 - 比例規則：一顆按鈕＝一個決策位置（幾行發現）；一條流程＝任務卡＋決策點表；「有沒有落地」＝2–3 條最高價值任務；測試計畫只在使用者要「觀察」時才寫
@@ -146,14 +138,6 @@
 - 關鍵詞：把 app 跑起來、啟動專案、跑起來截圖、把它跑起來看
 - 精準句型：「把 app 跑起來 / 截圖給我看改動效果」
 
-### engineering:debug（結構化除錯）
-- 關鍵詞：錯誤訊息、stack trace、staging好的prod壞
-- 精準句型：「這個 error 幫我 debug：<貼錯誤>」
-
-### engineering:testing-strategy（測試策略）
-- 關鍵詞：這該怎麼測、test plan、測試策略 (testing strategy)、測試覆蓋要多少
-- 精準句型：「這個模組該怎麼測 / 幫我規劃 test plan」
-
 ### deep-research（幻影條目 — 2026-09-03 查證：本機從未安裝，勿路由）
 - 關鍵詞：深度研究報告、有引用來源的研究、deep research
 - 事實：不在 `skills/`、不在已啟用 plugin、不在 plugin 目錄；自 2026-07-06 baseline 起只存在於本字典。留作 tombstone 而非刪除，讓舊的 `search_trail` 與引用讀得懂（比照 prism connector 的 tombstone）。
@@ -167,8 +151,14 @@
 - 領域特化 (domain profiles)：來源環境另維護多支領域 profile（該領域的研究問題也直接觸發本 skill；精確數量、載入清單與叢集消歧規則以 `domains/_routing.md` 為唯一真實來源，計數會腐爛，別在別處硬記數字或檔名）。**本分享不含任何 profile 檔** — 它們是作者自身研究領域的主題知識（見 `domains/` 資料夾的 README 與列數為零的 `_routing.md`）；請依 `domains/domain-expansion-guide.md` 自建自己的領域列。
 - 避免說法：「有來源的深度研究報告」（→ literature-search-extract `exhaustive`）、「純寫程式/修 bug」（→ engineering skills）、「寫 PRD」（→ product-design-thinking；本機無 product-management plugin）
 
+### pptx-review（在 PowerPoint 裡指認／留註解 → 回到建置原始碼套用，2026-09-29 借鏡 open-slide）
+- 關鍵詞：這頁、這張、這個表格、這個框、這個圖（簡報脈絡的指示詞）、目前這頁、我選的、PowerPoint 註解、套用註解、照註解改、我在簡報上留了意見
+- 精準句型：「**這頁**的表格太擠」/「我在 PowerPoint **留了註解**，幫我**套用**」/「**我選的這個框**字改小」
+- 性質：迴圈層；儀器 `tools/pptx-review/pptx_review.py`（唯讀：`cursor` 每個指示詞回合重讀、`comments` 解析註解→圖形並標定位方法與信心）；改動落在**建置原始碼**再重建，被註解的 pptx 永不覆寫；通則型註解記 ledger（origin user），升格成規則仍經使用者
+- 避免說法：「幫我**做**一份簡報」（→ 專案 builder）、「檢查**跑版／溢出**」（→ office-deck 規則的 gate）、HTML 簡報的修改（直接改來源）
+
 ### literature-search-extract（文獻檢索與萃取服務）
-- 關鍵詞：找論文、這篇paper重點、教科書怎麼定義X、整理幾篇的方法比較、查參數的文獻值、evidence table、annotated bibliography、comparison matrix、引用可追溯 (citation traceability)、access tag
+- 關鍵詞：找論文、這篇paper重點、教科書怎麼定義X、我書庫裡的教科書 (`textbook_library` connector)、整理幾篇的方法比較、查參數的文獻值、evidence table、annotated bibliography、comparison matrix、引用可追溯 (citation traceability)、access tag
 - 精準句型：
   - 直接：「**找 X 主題的論文**並整理**方法比較**（每格要有引用）」/「這篇 paper 的**重點/方法/限制**」/「**教科書**裡怎麼定義 X」/「**查這個參數的文獻值**」
   - 服務：其他 skill 傳入 request contract，接回 result contract
@@ -178,6 +168,12 @@
 ---
 
 ## 素材庫
+
+### case-library（同類案例的分類蒐集 → 深入分析 → 模仿實測 → workflow，裁定 2026-09-27）
+- 關鍵詞：先分類蒐集素材庫、建案例庫 (case library)、之後會有更多這種案例要分析、特化分析、實測模仿、整理出 workflow、照 workflow 分析新案例
+- 精準句型：「這類**案例**先**分類、蒐集**，之後會有更多」/「照 **workflow** 分析新案例：<URL>」/「對這批案例做**特化分析**再**實測模仿**」
+- 避免說法：「把這個元件**存進素材庫**」（單件可重用素材 → asset-vault，「素材庫」一詞兩邊都用：**一串同類案例要比較、量測、模仿**才是這裡）、「這個**動效**怎麼做」（領域方法 → motion-design）
+- 邊界：目前唯一實例是來源環境的 motion-video-lab 專案（非系統磁碟上的私有工作樹）；第二個領域開庫時依 SKILL.md §Review-when 重新抽出通用條款
 
 ### asset-vault（個人跨棧素材庫）
 - 關鍵詞：素材庫、元件庫、抽進素材庫 (extract to vault)、查素材庫 (check the vault)、有沒有現成的X、可重用素材 (reusable asset)、素材庫健檢
@@ -199,6 +195,12 @@
 - 擴充：新增動效函式庫（GSAP、Framer Motion、Rive…）**一律併入本 hub**，程序見 `local/extending.md`
 - 避免說法：「多產品統一 design tokens / theme packs」（→ design-system-suite）、「把這個動畫元件**存進素材庫**」（→ asset-vault）、「整個產品的設計流程」（→ product-design-thinking）
 
+### comsol-agent-pipeline（COMSOL 6.2 無頭執行管線）
+- 關鍵詞：COMSOL、MPh、跑模擬 (run the simulation)、建模求解 (build and solve)、模場、MFD、2D 元件電場 (device field)、電晶體 I-V、Gummel、C(V)、CPW Z₀、MRR 光譜、FSR、光束傳播 (beam envelopes)、表面電導片、SPP、參數最佳化 (optimisation)、UQ、容差 (tolerance)、3D taper 可行性、閘門 (gate)、對照 (control)、PASS、FAIL、UNDET
+- 精準句型：「用 COMSOL 算 X 對不對」/「把這個 brief 跑成 COMSOL 結果」/「這個結構的 n_eff／穿透率／I-V 用 COMSOL 跑一輪」；一律由觀測量選 mode（`references/modes.md`），不由模組名選
+- 證據：來源環境的 COMSOL 測試區（非系統磁碟上的私有專案；數字是預算不是元件陳述）；API 陷阱表 `references/api-rules.md` 由來源端的 `tools/sync_rules.py`（不隨本分享出貨）從 rig 產生
+- 避免說法：「我的研究下一步該量什麼」（→ scientific-research-guide，它可反過來把「該量的觀測量」交給本 skill 執行）、「查 X 的文獻參數值」（→ literature-search-extract）、「把 X 建成 3D 模型／GDS」（CAD/GDS 幾何不在本 skill；本 skill 的幾何是求解用的，不是圖紙）、「熱／熱機械／熱光」（使用者 2026-09-14 裁定暫緩，本 skill 無卡片）
+
 ---
 
 ## 環境設定
@@ -218,7 +220,7 @@
 ### env-cleanup（環境自清潔）
 - 關鍵詞：清理環境 (clean up environment)、無關檔案 (leftover files)、stray files、環境整理、掃描垃圾檔、封存舊檔 (archive stale files)
 - 精準句型：Mode A「幫我**清理 .claude 環境**，列出不再使用的檔案」；Mode B「**掃描這個專案的無關檔案**並整理封存」
-- 避免說法：「稽核/檢查這個 skill 安不安全」（審內容 → config-self-audit）、「規則檔太肥幫我修剪」（修內容 → ops/40-maintenance §3）、「盤點技術債」（→ engineering:tech-debt）
+- 避免說法：「稽核/檢查這個 skill 安不安全」（審內容 → config-self-audit）、「規則檔太肥幫我修剪」（修內容 → ops/40-maintenance §3）、「盤點技術債」（→ code-review-deep-checklist）
 - 邊界：只判斷「檔案還該不該存在」並封存，**永不編輯內容、永不刪除**；先列表徵詢
 
 ### skill-share-packaging（skill 跨環境打包與匯入稽核）
@@ -234,7 +236,7 @@
 - 邊界：只做程序骨架與漣漪清單；目的 repo 的 COLLECTION-RULES 永遠權威，**絕不**複寫進來（雙源漂移）；來源唯讀（SHA 驗證）；zip 不進版控；push 等使用者（首跑 2026-08-16）
 
 ### skill-co-upgrade（skill 實測共升級迴圈）
-- 關鍵詞：跑一輪迴圈 (run a co-upgrade round)、交互升級 (co-upgrade)、硬化這個 skill (harden this skill)、實測缺口、繞過了才做對 (had to bypass the skill to do it right)、拿這份指南/規範對照升級 (upgrade against an external standard；2026-09-11 起的 standard-comparison round)
+- 關鍵詞：跑一輪迴圈 (run a co-upgrade round)、交互升級 (co-upgrade)、硬化這個 skill (harden this skill)、實測缺口、繞過了才做對 (had to bypass the skill to do it right)、拿這份指南對照升級、拿這份規範對照升級 (upgrade against an external standard；2026-09-11 起的 standard-comparison round)
 - 精準句型：「跑一輪 co-upgrade 迴圈」/「這個 skill 實測有缺口，硬化它」/「分析這份 PDF，盤點現況、對比、升級這個 skill」
 - 主動提議（僅一次，never unprompted）：skill 明顯誤觸發/被繞過、大改寫後首戰前、或使用者交來一份外部規範
 - 避免說法：「稽核這個 skill 的內容」（靜態稽核 → config-self-audit，本迴圈的驗證步）、「建/改 skill」（→ skill-creator）、「清理檔案」（→ env-cleanup）
@@ -268,14 +270,16 @@
 | 畫成方塊圖・FSM・爆炸圖（精準可驗證）/ 重建全架構標缺口（宣告哪些視圖沒畫） | diagram-authoring |
 | 哪種圖適合表達 X（選型理論） | product-design-thinking `representation-models.md` |
 | 研究下一步 / 統計檢定 / 實驗設計 / 投稿前補什麼 | scientific-research-guide |
+| 用 COMSOL 跑／算 X・MPh・模場/I-V/C(V)/光譜/傳播/最佳化/UQ 的閉環結果 | comsol-agent-pipeline（mode 依觀測量選 `references/modes.md`） |
 | 動效/轉場怎麼做・Three.js/WebGL/shader・品牌動態識別 | motion-design |
 | 這段太工程・白話版・UI 文案從使用者角度改 | audience-fit (A/B/C) |
 | 這條流程使用者走得通嗎・停用還是隱藏・等待/取消/失敗後・鍵盤/窄版・可用性測試怎麼設計・導覽怎麼分・要不要先問身分・網址要不要記住狀態・可以分享連結嗎 | ux-walkthrough |
 | 打包 skill 分享給別人 / 網路抓的 skill 能不能安全裝 | skill-share-packaging (A/B) |
 | 找論文 / paper 重點・方法・限制 / 教科書定義 / 查文獻參數值 | literature-search-extract |
+| 簡報的「這頁／這個」指的是哪裡 / 我在 PowerPoint 留了註解幫我套用 | pptx-review (A cursor / B comments) |
 | 幫我做某主題有引用來源的深度研究報告 | literature-search-extract (`depth: exhaustive`) |
-| 盤點技術債列 backlog | engineering:tech-debt |
-| 該選 A 還是 B（新決策） | engineering:architecture |
+| 盤點技術債列 backlog | code-review-deep-checklist |
+| 該選 A 還是 B（新決策） | `software-architect` agent（ADR） |
 | AI PR 審不完（流程） | ai-coding-guardrails |
 | 深審這段 AI 產的 code | code-review-deep-checklist (A §9) |
 | 稽核這個 skill/hook / 搬進來的規則跟原本的打架 | config-self-audit（預設 / adoption mode） |
