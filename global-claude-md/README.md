@@ -23,7 +23,7 @@
 ## 內容｜Contents
 
 - `CLAUDE.md`：全域工作偏好設定，涵蓋 Git 工作流程、環境語法慣例、互動風格、工程判斷準則、技能路由、專案作業層級、檔案整理慣例、以及回覆語言規則。每條規則都標註了觸發情境（applies only when...），非情境內時應完全忽略、不主動提及。開頭有一段「Path-scoped rules」索引，指到下面 `rules/` 資料夾。
-- `rules/`：本分享收錄十一個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
+- `rules/`：本分享收錄十五個 `paths:`-scoped 規則檔，只在讀到對應副檔名檔案時才載入。2026-08-11
   新增其中兩條——`frontend-layering.md`（FSD 分層）與 `shader-failure-modes.md`
   （GLSL 靜默失敗模式）——是把原本內嵌在 `CLAUDE.md` 裡的規則搬出來：這兩條規則的觸發
   條件是「正在碰某種檔案」，`paths:` frontmatter 能直接對應這個觸發形狀,搬出去後
@@ -44,7 +44,15 @@
   點陣圖的紀錄，不只是量測工具的判定）。同一輪另一個收錄批次收進了第十一條
   `literature-access.md`（文獻取用權限規則：帶引用的證據要寫明取得途徑與授權，絕不繞過
   存取控制），它和執行它的 hook `hooks/literature_host_guard.py` 及其政策表一起出貨，見
-  `hooks/README.md`。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是
+  `hooks/README.md`。2026-10-02 refresh 再新增四條，共十五條——`layout-convergence.md`
+  （圖／簡報版面擁擠時，哪一層物件可以動：固定層、帶狀層、可繞線層、可降級層，以及依
+  簡報類別計數的停止規則）、`native-render-first.md`（工具算出結果的圖，先出該工具自己的
+  原生渲染並保留，自繪重畫只能附加在旁邊）、`source-quotation-evidence.md`（受版權保護
+  的頁面只指向、不轉錄：證據只帶位置標示加至多一句短引文，由本機儀器證明引文存在；
+  「輸出被內容過濾擋下」是路由訊號，不是傳輸故障）、`android-device-states.md`（Android
+  應用程式驗收要涵蓋的視窗／組態狀態矩陣與不變量）。其中 `source-quotation-evidence.md`
+  的「機制」段指向一支 hook 與一個本機儀器；兩者各自是否隨此 repo 出貨，以
+  `tools/share-manifest.toml` 為準。要在自己的環境生效,必須放在對應機制存在的位置(Claude Code 是
   `~/.claude/rules/`);若目標環境沒有等效的 path-scoped 規則機制,把這些規則的內容併回
   `CLAUDE.md` 本體即可,只是會变回「每 session 都付費」。
 
@@ -75,12 +83,14 @@
 3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符換成該機器實際的 OS/shell；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 把 `rules/` 下十一份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
+6. 把 `rules/` 下十五份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
    `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`、
    `verification-ladder.md`、`web-navigation-state.md`、`hook-deny-message.md`、
-   `naming-and-placement.md`、`figure-self-read.md`、`literature-access.md`）複製到目標機器的
+   `naming-and-placement.md`、`figure-self-read.md`、`literature-access.md`、
+   `layout-convergence.md`、`native-render-first.md`、`source-quotation-evidence.md`、
+   `android-device-states.md`）複製到目標機器的
    `~/.claude/rules/`。這是 path-scoped 規則機制實際運作所需的檔案，與 `CLAUDE.md` 開頭的
-   path-scoped 索引行列出的十一條一一對應。`literature-access.md` 的強制那一半在
+   path-scoped 索引行列出的十五條一一對應。`literature-access.md` 的強制那一半在
    `hooks/literature_host_guard.py`，要一併掛上才有效。若目標環境沒有等效機制，直接把這些檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
@@ -124,6 +134,23 @@
   SSLD 專案自己內部路徑的引用（分別是一支遷移腳本的完整路徑、以及來源筆記檔名），比照
   既有「Phase Z11」前例的作法：專案名與回合代號（SSLD、T46、T47、T48）保留，內部路徑本
   身泛化。無其餘新增個資。
+- 2026-10-02 refresh（對齊來源 `183c129`）：`CLAUDE.md` 的 path-scoped 索引行由十一條增為
+  十五條；Git workflow 小節重寫（新資料夾即 `git init`、commit 節奏、「收掉」整串流程）；
+  Decision charter、gate 規則、`[BC]` 與 Prior-art check 重新措辭。仍引用的機制中，隨本輪
+  一併出貨的（`ops/references/gate-design.md`、`tools/eol-sync`、
+  `tools/process-ledger/`、`hooks/boundary_contract_notice.py`）原樣保留，不再泛化；仍屬
+  來源私有的（召回掃描指令、過去 session 搜尋工具、筆記庫索引）維持「能力描述、不附指標」
+  的作法。`[unattended-run]` 那條仍保留 2026-09-12 的判斷：強制它的 hook
+  不在本輪出貨清單內時，「hook-enforced」改為「在環境提供對應 hook 的地方強制」。
+  `rules/` 新增四份：`layout-convergence.md`、`native-render-first.md`（皆逐字收錄）、
+  `source-quotation-evidence.md`（1 處非系統碟絕對路徑已泛化）、`android-device-states.md`
+  （2 處非系統碟絕對路徑與 1 處私有專案內部路徑已泛化）。其餘既有規則檔重新對齊來源：
+  `office-deck-deliverables.md` 的 `source_dirty_ack` 因來源端已提交而撤回；
+  `naming-and-placement.md`、`hook-deny-message.md`、`verification-ladder.md`、
+  `deliverable-doc-refs.md`、`office-deck-deliverables.md` 各有新增的私有指標按類別泛化；
+  `figure-self-read.md`、`visual-gate-scope.md` 的新增內容無私有指標。本輪另外收錄的
+  `environment-guide/KNOWLEDGE-PACKS.md`、`environment-guide/LABEL-REGISTRY.md` 見該資料夾的
+  README。無其餘新增個資。
 - 這是時間點快照，不是自動同步目標。
 
 ## 授權｜License

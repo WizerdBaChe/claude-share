@@ -61,6 +61,34 @@ licence to claim.
 - Write the record where the claim is: the verify JSON beside the figure
   (`visual_read:` field) or the delivery note's evidence list.
 
+## Two clauses the read alone does not supply (SSLD T04, 2026-09-15)
+
+- **A sentence that a figure SHOWS something names the view and axis where it is
+  visible.** A multi-view figure can hold a feature in one panel and correctly
+  lack it in another; "the refraction is drawn" was true for the side view's y
+  and physically absent in the plan view's x, and the user, reading the plan,
+  judged the report false (`ops/lessons.md` L-096). Same lesson, content side:
+  a schematic convenience (a hold, clamp or fixed reach point) on a quantity a
+  model computes must not erase a feature the reader expects from physics (a
+  kink at a material interface); an expected feature that is physically absent
+  is labelled on the figure.
+- **An item kind a wrapper adds at runtime is outside the instrument's object
+  vocabulary until the wrapper gates it.** A legend added around a frozen
+  label placer kept a green collision gate while leaders crossed it; only the
+  read saw it, and three layout patches later the fix was a different
+  representation (the key in its own band below the view), not spacing
+  (`ops/lessons.md` L-095). The wrapper ships its own read-back of the added
+  kind, with a two-sided control, before the figure is called clean.
+
+- **A figure is drawn from the SAME variables the gate ruled on, never from a
+  recomputation inside the plotting code** (COMSOL_Test round 24, 2026-09-15).
+  A gate used κ = 2·c₂ (PASS) while the plot block still carried the discarded
+  −κ draft, so the shipped figure showed the reference parabola inverted
+  against the model points it certified. The read caught it after the run;
+  the property prevents it: the plot receives the gate's own arrays and
+  scalars, and when only the drawing is wrong the figure is regenerated from
+  the stored result file, not by a re-solve.
+
 ## Extension clause
 
 A new figure class (a new generator, a new style preset, a new artifact kind
