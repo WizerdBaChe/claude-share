@@ -3,10 +3,10 @@ xi: 1
 what: literature-search-extract 與每個消費者的橋接——依情況互相呼叫、共用什麼、什麼不跨越；由登錄表產生，勿手改 (bridge between the literature skill and its consumers, generated from consumers/registry.json)
 tags: [literature-search-extract, bridge, consumers, generated]
 aliases: [LSE 橋接, 文獻 skill 消費者橋接, lse bridge, literature-search-extract bridge]
-date: 2026-09-07
+date: 2026-10-02
 status: live
 ---
-<!-- generated-from: consumers/registry.json sha256:2d82f1ff56838a747ce75e27644265475b7b3b643afe86f2a73daad6010fca9d — rendered by loop/runs.py bridge; never hand-edit (design D-L17) -->
+<!-- generated-from: consumers/registry.json sha256:b6899bc0bb4313356fef7c4564144f52d5cb4d74ac1183374531f8a2bdbb19f8 — rendered by loop/runs.py bridge; never hand-edit (design D-L17) -->
 
 # Bridge — literature-search-extract and its consumers (generated)
 
@@ -34,7 +34,8 @@ Edit the row, then `python loop/runs.py bridge`.
 - request presets (fill the rest from context):
   - `gate_b_verify`: purpose=Gate B: verify a method-canon or standard claim before advising; output_format=evidence table; depth=quick; source_types=papers | textbooks | standards
   - `citation_identity`: purpose=identity / access-tier / currency verification of a cited source (user-supplied-citations delegation rule; guide §9 step 2); output_format=caller-specified template: canonical identifier + access tag + one-line relevance + limitations (promotion-table columns); depth=quick; source_types=any
-  - `parameter_lookup`: purpose=a literature value for a profile's typical-range cell; output_format=parameter sheet; depth=quick; source_types=papers | data
+  - `parameter_lookup`: purpose=a literature value for a profile's typical-range cell; output_format=parameter sheet; depth=quick; source_types=papers | data | textbooks
+  - `canonical_definition`: purpose=the field's agreed definition / canonical formulation / vocabulary for a concept before a research-stage step names it (e.g. the fields of an optical-state vector, a coupling-efficiency definition) — from the textbook shelf first, papers only to corroborate; output_format=quote pack; depth=quick; source_types=textbooks | papers; question_template=How does the canonical text define <concept>? Quote the definition with edition + section + printed page; list the variables and conditions it names; name the index terms the book files it under.; connector_hint=textbook_library (a local textbook-shelf connector this share does not ship)
 - consumes: `findings`, `sources[].key`, `gaps`, `confidence`, `search_trail`, `run_id`, `review_when`
 - writes back: `consumed`, `correction`
 - artifact: Source Ledger row (§7b) / user-supplied-citations promotion row · store `skills/scientific-research-guide/domains/**/*.md#7b ; skills/scientific-research-guide/references/user-supplied-citations.md` · identity field: Identifier cell (free text; the key is derived at read time by idkey.find_all — no migration) ; Canonical identity cell · run pointer: Verification status cell `run:<run_id>` ; Disposition cell `run:<run_id>`

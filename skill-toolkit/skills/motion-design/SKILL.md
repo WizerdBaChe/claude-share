@@ -7,9 +7,10 @@ description: >-
   on UI animation, transitions, micro-interactions, loading/success/error
   states, page transitions, scroll effects, brand motion identity, particles,
   WebGL — 「這個按鈕的動效怎麼做（時長、緩動、編舞）」「定品牌動態識別」「轉場/微互動怎麼設計」「用 Three.js
-  做 X」「寫 shader/GLSL 效果」. NOT design tokens across a
-  product suite (→ design-system-suite) or storing a reusable component (→
-  asset-vault). Disambiguation: ~/.claude/skill-trigger-dict.md.
+  做 X」「寫 shader/GLSL 效果」. NOT suite-wide design
+  tokens (→ design-system-suite), storing a component (→ asset-vault), or a
+  whole video (a separate whole-film skill this share does not ship).
+  Disambiguation: ~/.claude/skill-trigger-dict.md.
 ---
 
 # motion-design — the animation hub
@@ -41,6 +42,8 @@ anything in `vendor/`.
 | **Local obligations, every delivery** | `local/env-bridge.md` |
 | Whether the vendored Three.js text is still accurate | `local/currency.md` |
 | Adding a new motion skill/library to this hub | `local/extending.md` |
+| Measured spring (zeta/omega, indicator stretch, retarget) and black/white swap numbers for one element | `local/element-motion-params.md` |
+| A WHOLE video (sections, transitions, camera, export) | a separate whole-film skill this share does not ship, not this hub |
 | Why an animation should exist at all; three pillars, motion layers | `vendor/lottiefiles/director/core-philosophy.md` |
 | Full decision pipeline from brief → keyframes | `vendor/lottiefiles/director/decision-framework.md` |
 | Anticipation, follow-through, squash/stretch, arcs (12 principles, UI-adapted) | `vendor/lottiefiles/director/disney-principles.md` |

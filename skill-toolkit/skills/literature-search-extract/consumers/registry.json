@@ -16,7 +16,8 @@
         "presets": {
           "gate_b_verify": {"purpose": "Gate B: verify a method-canon or standard claim before advising", "output_format": "evidence table", "depth": "quick", "source_types": "papers | textbooks | standards"},
           "citation_identity": {"purpose": "identity / access-tier / currency verification of a cited source (user-supplied-citations delegation rule; guide §9 step 2)", "output_format": "caller-specified template: canonical identifier + access tag + one-line relevance + limitations (promotion-table columns)", "depth": "quick", "source_types": "any"},
-          "parameter_lookup": {"purpose": "a literature value for a profile's typical-range cell", "output_format": "parameter sheet", "depth": "quick", "source_types": "papers | data"}
+          "parameter_lookup": {"purpose": "a literature value for a profile's typical-range cell", "output_format": "parameter sheet", "depth": "quick", "source_types": "papers | data | textbooks"},
+          "canonical_definition": {"purpose": "the field's agreed definition / canonical formulation / vocabulary for a concept before a research-stage step names it (e.g. the fields of an optical-state vector, a coupling-efficiency definition) — from the textbook shelf first, papers only to corroborate", "output_format": "quote pack", "depth": "quick", "source_types": "textbooks | papers", "question_template": "How does the canonical text define <concept>? Quote the definition with edition + section + printed page; list the variables and conditions it names; name the index terms the book files it under.", "connector_hint": "textbook_library (a local textbook-shelf connector this share does not ship)"}
         }
       },
       "consumes": ["findings", "sources[].key", "gaps", "confidence", "search_trail", "run_id", "review_when"],

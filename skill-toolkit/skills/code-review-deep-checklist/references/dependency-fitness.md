@@ -1,7 +1,7 @@
 # Mode C — Syntax / Library / Framework Fitness Audit
 
 This mode audits choices ALREADY MADE (retrospective fitness). Making and
-documenting a NEW choice is an ADR → engineering:architecture. Evaluate layers in
+documenting a NEW choice is an ADR → the `software-architect` agent. Evaluate layers in
 order — each is a gate; a failure at an earlier layer makes later layers moot.
 Use WebSearch/WebFetch for maintenance-health and CVE facts — do not answer these
 from memory.
@@ -64,7 +64,7 @@ For every audited dependency, answer explicitly:
 > change?
 
 If the audit concludes "replace / wrap / fork X": recommendation goes in this
-report; the decision record itself is an ADR — hand off to
-engineering:architecture. If the fix is "put it behind a swappable interface",
+report; the decision record itself is an ADR — hand off to the
+`software-architect` agent. If the fix is "put it behind a swappable interface",
 that aligns with the user's standing baseline-behind-interface preference — say so
 and scope the wrapper, don't rewrite the pipeline.

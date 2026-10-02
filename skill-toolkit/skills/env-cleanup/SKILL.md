@@ -99,4 +99,4 @@ transcript-cleanup stamp, unrelated to this skill).
 | ops/40-maintenance.md §4 ghost checks | Mode A's orphan detection (see manifest §4) is the file-existence half of §4; content-level "rule exists but is never used" stays with §4 at retrospectives. |
 | Claude Code built-in transcript cleanup | `projects/` is protected; this skill never duplicates the CLI's transcript pruning. |
 | workflow-checkpoint / project-retrospective | Those archive knowledge (phase logs, lessons); this skill archives files. A finished project wanting lessons → retrospective, not cleanup. |
-| engineering:tech-debt / deep-checklist | Never judge code quality here; "ugly but referenced" = KEEP. |
+| code-review-deep-checklist (incl. debt backlog) | Never judge code quality here; "ugly but referenced" = KEEP. |

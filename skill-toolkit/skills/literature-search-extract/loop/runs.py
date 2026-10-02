@@ -677,10 +677,16 @@ def check_run(run_dir: Path) -> list[tuple[str, str, str]]:
                 for name, e in entries.items():
                     if not isinstance(e, dict):
                         continue
-                    if e.get("retention_state") == "pending-excerpt" and run["run"]["state"] != "open":
-                        out.append(("FAIL", "V9", f"manifest entry {name}: licensed full text still pending-excerpt — run "
-                                                  "`verify/fetchsrc.py excerpt` before delivery (retention ruling R3)"))
                     fname = Path(str(e.get("file") or f"{name}.txt")).name
+                    if e.get("retention_state") == "pending-excerpt" and run["run"]["state"] != "open":
+                        if fname in ledger_refs:
+                            out.append(("FAIL", "V9", f"manifest entry {name}: licensed full text still pending-excerpt — run "
+                                                      "`verify/fetchsrc.py excerpt` before delivery (retention ruling R3)"))
+                        else:
+                            # staged full text no ledger row cites yet (inbox.py ingest registers a PDF that arrived
+                            # after delivery): nothing to excerpt until a row cites it, and the text sits in scratch
+                            out.append(("WARN", "V9", f"manifest entry {name}: licensed full text staged (pending-excerpt), "
+                                                      "no ledger row cites it yet — excerpt runs once a row does"))
                     if e.get("route") == "hand_to_user" and (run_dir / "sources" / fname).exists():
                         out.append(("FAIL", "V9", f"sources/{fname} exists although the manifest recorded hand_to_user — a "
                                                   "text nobody retrieved"))

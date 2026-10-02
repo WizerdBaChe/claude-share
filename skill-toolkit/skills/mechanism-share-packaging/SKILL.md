@@ -32,6 +32,55 @@ comparison; 34 findings to 0 in four loops; 1 previously-collected file
 un-shipped) — findings below; the
 checklist held, with one refinement to the counts item.
 
+## Delivery routes — this skill currently knows ONE, and there is a second
+
+This skill's whole procedure targets a **share repo**: files land in a governed
+tree, the recipient reads `ADOPTERS.md` and copies what they want out. That route
+ships FILES. It does not ship **triggers** — the repo's own `ADOPTERS.md` states
+the consequence: *"preference ports, method does not… Copy it and you get the text
+without the trigger, which is read either always or never."* For a mechanism,
+whose whole point is firing at the right moment, that is the load-bearing loss.
+
+**The second route is a plugin**, and nothing in this skill uses it yet.
+A plugin is a directory with `.claude-plugin/plugin.json` plus any of
+`skills/ commands/ agents/ hooks/ mcpServers/ lspServers/`; a marketplace is a repo
+with `.claude-plugin/marketplace.json`. The recipient runs
+`/plugin marketplace add <owner>/<repo>` then `/plugin install <name>@<marketplace>`,
+and the hooks arrive registered — the trigger travels with the text. Verified
+2026-09-13 against `code.claude.com/docs/en/plugin-marketplaces` and against the
+official `claude-security` plugin, which ships `agents/ hooks/ scripts/ skills/
+workflows/` together.
+
+**Status: the claim is MEASURED; the procedure is still unwritten.** The smallest
+plugin was built and run on 2026-09-13 (`plugin-arrival-probe`, a synthetic probe
+carrying one hook and nothing else). **"Hooks arrive registered" is TRUE on this
+host** — 15 hook fires from one session open, with no `settings.json` edit. That
+was this route's load-bearing unknown and it is now closed. What is still absent
+is a repeatable packaging procedure, so the repo route below remains the one with
+live runs behind it.
+
+Four measured facts that change how you would write that procedure (the
+calibration record behind them stays in the source environment and is not shipped
+here):
+
+- `/plugin …` is an interactive-terminal slash command. Anything written for a
+  recipient or a script uses `claude plugin …`, and `claude plugin validate`
+  before shipping.
+- The interpreter is host-specific: official examples launch with `python3`,
+  which on Windows is the Store alias stub — the hook then dies silently. Measure
+  it; never inherit it.
+- A directory-source marketplace has `installLocation` EQUAL to the source path,
+  so the plugin runs in place AND a version-pinned cache copy exists. Two roots,
+  and the platform registers the plugin under two identities (`@<marketplace>`
+  and the desktop app's `@inline`) — the duplicate survives uninstall. Never
+  anchor state to `${CLAUDE_PLUGIN_ROOT}`; it is already not one value.
+- `SessionStart` fires once per session, but one user-visible session open
+  created five sessions here. Cost scales with sessions created.
+
+Route selection, the cost comparison, and what no packaging format can fix (gates
+must travel with the flow; fixture data usually cannot be published) are worked
+out in a source-environment record that is not shipped here.
+
 ## Hard rules
 
 1. **Delegation, not duplication.** The target repo's collection rules,

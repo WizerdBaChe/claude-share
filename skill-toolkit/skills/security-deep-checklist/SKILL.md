@@ -3,7 +3,8 @@ name: security-deep-checklist
 description: >-
   Deep security (資安) audit — blue-team informed defensive review beyond a quick diff
   scan. Trigger on "資安檢核", "資安健檢", "程式碼資安稽核", "資安稽核", "security audit",
-  "找漏洞" on a module/project, deployment/config posture review (部署與設定的資安姿態),
+  "找漏洞" on a module/project, 從不同角度檢查資安 (使用者資料、本機資料外洩),
+  deployment/config posture review (部署與設定的資安姿態),
   air-gapped risk assessment, "如果被攻擊我們看得到嗎", or named
   vulnerability classes (XSS, SQL injection, CSRF, supply chain 投毒…) as the review goal.
   Modes: (A) code-level audit, (B) deployment & environment posture, (C) detection &
@@ -100,7 +101,7 @@ Deployment context modifies Mode B/C weighting — establish it in Part 0.
 - General quality / smells / debt on the same code → code-review-deep-checklist.
   A `sec.*` candidate arriving FROM a code review has no receipts yet — treat it
   as discovery-stage input, run validation + attack-path here before publishing.
-- "Should we replace this risky dependency" decision record → engineering:architecture (ADR).
+- "Should we replace this risky dependency" decision record → the `software-architect` agent (ADR).
 - Findings are design-level for a system still being designed → product-design-thinking Phase 2 security-by-design rules.
 - Findings are about AI-agent permissions, blast radius, review process → ai-coding-guardrails.
 - Fixing a confirmed vulnerability → normal implementation flow after user approval; re-audit the fix (author ≠ verifier).

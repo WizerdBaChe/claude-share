@@ -8,8 +8,8 @@ description: >-
   (新增能力、擴充既有 pipeline、可複用工具、審核/檢測機制、其他 session
   會調用的工具). 第一性原理 (first-principles) 拆解, prior-art search
   BEFORE designing, build-ready docs (Concept Note/CIM/PIM/PSM/DSL
-  semantic contract). Triggers: 新產品構想/想法, 「新工具設計」, feasibility
-  evaluation, 重新架構/換技術路線 (re-architecture), undecided-approach
+  semantic contract). Triggers: 新產品構想/想法, 「新工具設計」, 發想/開始設計、整套系統,
+  feasibility evaluation, 重新架構/換技術路線 (re-architecture), undecided-approach
   complex features (incl. MID-CONVERSATION), PSM-grade remediation
   (「PSM等級修正案」). Heavyweight — NOT for 單一缺陷修復, one-shot scratch
   scripts, small in-product tweaks, or 按既有規格施工. Disambiguation:
@@ -178,8 +178,10 @@ full strength.
 
 Why the PSM row is not "docs → Chinese": a PSM's next reader is an implementing
 session, not the user. Defaulting it to Chinese because it is a `.md` under `docs/`
-is a recorded miss (2026-07-25). This row implements the global CLAUDE.md **File
-output** rule, which stays authoritative if the two ever diverge. Escape hatch: a
+is a recorded miss (2026-07-25). This table is the CANONICAL per-section list for
+the global CLAUDE.md **File output** rule (moved here 2026-09-22 as a byte sink;
+CLAUDE.md keeps the gist and points here) and binds wherever such a document is
+written, inside this skill or not. Escape hatch: a
 concept whose original Chinese wording carries the meaning stays Chinese inside an
 English section — keep it and gloss it rather than force a lossy translation.
 

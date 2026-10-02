@@ -4,8 +4,8 @@ description: >-
   Field-test co-upgrade loop for this environment's skills: run a REAL task
   through a skill, collect gaps under the standard "a gap exists iff the
   executor had to BYPASS the skill", then verify, adopt, and hand off via
-  disposition files so the loop continues across sessions. Trigger on
-  「跑一輪迴圈」「交互升級」「co-upgrade」「硬化這個 skill」
+  disposition files. Trigger on
+  「跑一輪迴圈」「交互升級」「co-upgrade」「硬化這個 skill」「用實際任務重新調整技能方法論」
   「這個 skill 實測有缺口/繞過了才做對」「拿這份指南/規範對照升級這個 skill」.
   OFFER once — never run unprompted — when a skill visibly misfired or had to
   be bypassed during real work, when a substantially rewritten skill is about

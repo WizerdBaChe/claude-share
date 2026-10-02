@@ -1,15 +1,16 @@
 ---
 name: diagram-authoring
 description: >-
-  Precision diagram PRODUCTION & gap finding — turn user data / design docs /
-  code into visually verifiable diagrams: block/C4, FSM/statechart, sequence,
-  DFD, timing, exploded-view product architectures（方塊圖、狀態機圖、時序圖、
-  爆炸圖式架構、關聯圖）, incl. reconstructing an EXISTING system (e.g. CPO
-  全架構) with an explicit gap report（找缺口）. Carriers: Mermaid sketch,
-  precise SVG, self-contained HTML, editable PPTX. Trigger on 畫架構圖、精準繪製、
-  把 X 畫成圖、從資料重建架構圖、機制/系統架構檢查・架構盤點 (audit — fires
-  without any 圖 word; deliverable = verifiable diagram + gap report + 檢查項)、
-  圖要放進簡報/HTML. NOT data charts/plots
+  Precision diagram PRODUCTION & gap finding — data / design docs / code into
+  verifiable diagrams: block/C4, FSM/statechart, sequence, DFD, timing,
+  exploded-view architectures（方塊圖、狀態機圖、時序圖、爆炸圖式架構、關聯圖）,
+  incl. reconstructing an EXISTING system (e.g. CPO 全架構) with a gap
+  report（找缺口）. Carriers: Mermaid, SVG, HTML, editable PPTX. Trigger on
+  畫架構圖、精準繪製、把 X 畫成圖、從資料重建架構圖、機制/系統架構檢查・架構盤點
+  (audit — fires without any 圖 word; deliverable = diagram + gap report +
+  檢查項)、這東西怎麼串起來 (how components hang
+  together)、交接與失敗路徑、runtime/handoff/trust boundaries、圖要放進簡報/HTML.
+  NOT data charts/plots
   (→ dataviz), NOT UI mockups (→ design), NOT which-view-selection theory
   (→ product-design-thinking representation-models). Full disambiguation:
   ~/.claude/skill-trigger-dict.md.
@@ -34,7 +35,7 @@ in the same directory.
 | Figure inside a doc (design doc, README, report) | Doc figure | mermaid if auto-layout suffices; inline SVG when position/alignment carry meaning |
 | Standalone deliverable to view/share | Standalone | self-contained HTML (inline SVG + pan/zoom) or an Artifact |
 | Editable slides humans will present/annotate | Deck | PPTX via anthropic-skills:pptx — native shapes + bound connectors, never baked images |
-| Reconstruct an EXISTING system from data and find holes（體檢繪圖、找缺口） | Audit drawing | any of the above + mandatory gap report; precision view-set → `tools/archdiag` (carrier-playbook §archdiag) |
+| Reconstruct an EXISTING system from data and find holes（體檢繪圖、找缺口） | Audit drawing | any of the above + mandatory gap report; precision view-set → `architecture-diagramming/archdiag/` (carrier-playbook §archdiag) |
 
 ## Workflow
 
@@ -127,6 +128,9 @@ code-review-deep-checklist Mode B focused first (Handoffs).
   content and precision, those own the page.
 - PPTX file mechanics (templates, layouts, text frames) →
   anthropic-skills:pptx; this skill owns shape geometry and diagram content.
+  A diagram placed on an audience deck is flat (no inherited theme shadow, gradient
+  or bevel, ≤ 3 non-grey colours): `rules/office-deck-deliverables.md` P3, checked by
+  `tools/pptx-presentation-gate`.
 - Which view answers which question / per-tier view sets →
   product-design-thinking `representation-models.md` (theory stays there).
 - The 體檢 that DECIDES what to reconstruct → code-review-deep-checklist

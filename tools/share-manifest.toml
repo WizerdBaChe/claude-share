@@ -314,7 +314,12 @@ leaves. This entry records a reversal, not deleted history — the v1 copy
 remains in git history, and nothing shipped cites the file (grepped
 2026-08-27).
 REVIEW-WHEN: the domain profiles themselves ship (their harness follows them),
-or the source splits framework cases from profile cases into separate files."""
+or the source splits framework cases from profile cases into separate files.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file unchanged since the last aligned source commit. Re-counted: the
+case count grew by one since this entry was written, and the prompts and
+grading evidence still quote the withheld domain profiles at row level.
+Disposition stands."""
 fallback = """The skill still carries `evals/fixtures/research-state.example.md`
 (a neutral fixture, unaffected). Authoring eval cases against your own domain
 profiles is the same act as authoring the profiles — see
@@ -2334,7 +2339,8 @@ status = "edited"
 edits = [
   "2026-09-07: re-applied — the round-2 field-proof pointer, v2 (a named artifact inside a non-shipping tree; its filename is not recorded here, hard rule 9, corrected 2026-09-12) replaced by a generic description: 'an owner-view render that passed user gate 2026-08-31'. Nothing else changed since the last refresh.",
   "2026-09-12 (lane W4): re-applied unchanged onto fresh source — same anchor, same replacement, diff confirmed to touch exactly this one span and nothing else.",
-  "2026-09-12 (merge step): '## Gate' section, a four-line 'Share edition' blockquote added directly after the afgate.py command block, saying the tool is source-only (`tools/audience-fit-gate/`, [[not_shipped]]) and that the two checks are described well enough to reproduce. Addition only; the command itself is kept as the source wrote it. Decision-table row 2 inverse: a non-shipping tool that a shipped file routes to gets an edit at the router.",
+  "2026-09-12 (merge step): RETIRED 2026-10-02 (lane W4a) - the Share edition blockquote is no longer in the shipped file; see the dated edit below.",
+  "2026-10-02 (lane W4a): edit 1 re-applied (the source again names the round-2 field-proof page by filename, version and gate date; replaced by the same generic clause as before, one hunk). Edit 3 (the Share edition blockquote after the afgate command) is RETIRED and must not be re-applied: the lane brief retires it (the Gate section runs as the source wrote it; the gate tool itself belongs to another lane, see the report). The source description was shortened; taken as-is. Diff against source 183c129 is the single field-proof hunk.",
 ]
 # 2026-09-12 (lane W4): source grew a new '## Gate (Mode A...)' section
 # (2026-09-10) describing a determinable check for two of the skill's prose
@@ -2405,11 +2411,20 @@ status = "verbatim"
 # `ops/references/uat.md` as the single owner (same round as the agents/
 # refresh elsewhere in this file) instead of restating it inline — pure
 # content change, no private paths. Byte-identical to source after copy.
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129 (the
+# file had drifted from 7c9867b). Delta read: the description gained
+# deep-review trigger phrases and the tech-debt backlog is now built here; the
+# debt-backlog and ADR hand-offs that named official plugin skills now name
+# this skill and the software-architect agent (user ruling 2026-10-01, local
+# tools first). The agent ships under agents/. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/code-review-deep-checklist/references/dependency-fitness.md"
 source = "~/.claude/skills/code-review-deep-checklist/references/dependency-fitness.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: two ADR hand-offs re-pointed from a plugin skill to the
+# software-architect agent, which ships. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/code-review-deep-checklist/references/output-contract.md"
@@ -2420,11 +2435,16 @@ status = "verbatim"
 path = "skill-toolkit/skills/code-review-deep-checklist/references/project-review.md"
 source = "~/.claude/skills/code-review-deep-checklist/references/project-review.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: two debt-backlog hand-offs now rank the backlog here and point back
+# at SKILL.md. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/code-review-deep-checklist/references/single-review.md"
 source = "~/.claude/skills/code-review-deep-checklist/references/single-review.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: one debt-backlog sentence re-pointed at SKILL.md. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/config-self-audit/SKILL.md"
@@ -2456,6 +2476,13 @@ status = "verbatim"
 # check scans). Expected to self-resolve once the `ops/references/`-owning
 # lane's collection lands in the same round; if it does not, these two
 # citations need revisiting.
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129 (about
+# 140 changed lines). Delta: the section-2 gate now binds a claim whatever its
+# source, new pointers into references/telemetry.md (which ships),
+# skill-listing and body-size rules, an evidence-age section, and the doctor
+# prompt-audit paragraph. Tools it names are tools/ names covered by that
+# directory disposition. No account name, drive path or private-tree artifact
+# in the new lines.
 
 [[collected]]
 path = "skill-toolkit/skills/config-self-audit/evals/evals.json"
@@ -2476,7 +2503,14 @@ status = "verbatim"
 [[collected]]
 path = "skill-toolkit/skills/config-self-audit/references/telemetry.md"
 source = "~/.claude/skills/config-self-audit/references/telemetry.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): was declared verbatim; the source file grew by about 195 lines (sections 5-8, doctor prompt-audit recipe) and the new and old text carry pointers that fail rule 2, so the status is now edited. Edits follow.",
+  "the doctor prompt-audit command: an absolute home path to the CLAUDE.md of the source environment -> the tilde form `~/.claude/CLAUDE.md`, which resolves for any reader.",
+  "section 3a closing bullet and section 4 lead-in: two pointers to dated report files under the excluded reports/ tree, each introduced as Report: or Full analysis: -> dropped; the conclusions they supported are already stated inline in those sections.",
+  "section 6, plugin-cache bullet: an Origin: sentence naming a dated record under outputs/ (a named artifact in a non-shipping tree) -> dropped; the measured facts stay.",
+  "section 8, table row: a destination under reports/ named for recording the delta -> the clause now ends at record the delta.",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/design-system-suite/SKILL.md"
@@ -2489,7 +2523,10 @@ edits = [
 [[collected]]
 path = "skill-toolkit/skills/diagram-authoring/SKILL.md"
 source = "~/.claude/skills/diagram-authoring/SKILL.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): the Mode-router row for audit drawing named the library by the source tool path `tools/archdiag`; re-pointed to `architecture-diagramming/archdiag/`, where this repo ships it (carrier-playbook.md already says so). Everything else is byte-identical to source 183c129; new in this refresh: a description widened with handoff, failure-path and trust-boundary trigger phrases, and one sentence on flat diagrams on audience decks that cites rules/office-deck-deliverables.md (ships) and the tools/ name pptx-presentation-gate (covered by the tools/ disposition).",
+]
 # 2026-09-07 refresh: source added a Step-1 closing-line requirement, a new
 # "Coverage declaration (audit mode)" paragraph, and a Handoffs clause
 # widening the code-review-deep-checklist Mode B pointer to any ask carrying
@@ -2533,6 +2570,9 @@ edits = [
 path = "skill-toolkit/skills/env-cleanup/SKILL.md"
 source = "~/.claude/skills/env-cleanup/SKILL.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: one table cell re-pointed from a plugin skill to
+# code-review-deep-checklist. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/env-cleanup/references/manifest-claude.md"
@@ -2547,6 +2587,9 @@ edits = [
 path = "skill-toolkit/skills/env-cleanup/references/project-heuristics.md"
 source = "~/.claude/skills/env-cleanup/references/project-heuristics.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: one clause re-pointed from a plugin skill to
+# code-review-deep-checklist. No scrub target.
 
 [[not_shipped]]
 path = "skills/literature-search-extract/PDF-GUIDE.md"
@@ -2565,7 +2608,14 @@ owed. Not applied from the same A1 note, on purpose: generalising the `prism`
 name and dropping the trigger-dict reference from the frontmatter. Those steps
 describe a STANDALONE skill export, where the dictionary does not travel; this
 repo ships the dictionary, and rule 2 keeps project names. The repo copy was
-moved to the gitignored archive with a note, not deleted."""
+moved to the gitignored archive with a note, not deleted.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file changed since the last round (its item 4 now records the
+retirement of a local corpus server instead of advising its use); the
+exclusion does not rest on that content. The skill own packaging note
+(FUTURE-WORK section A1) still names it as a personal file to strip, no
+shipped file routes to it (grepped), and the fallback is unchanged.
+Disposition stands."""
 fallback = """`references/search-sources.md`, section "Local PDF library" —
 the machine-read body of the same integration, which ships, and which the
 guide itself names as authoritative when the two disagree."""
@@ -2578,6 +2628,7 @@ edits = [
   "2026-09-12 refresh (lane W5): the source grew a new P2 paragraph ('Host access policy before any fetch' -- `connectors/access_policy.py`, `~/.claude/hooks/literature-host-policy.json`, `verify/fetchsrc.py`) as part of this round's literature-access mechanism (rule + hook + hook-policy table + skill-side loader/fetcher, decided as one unit). All three files that paragraph names now ship in this repo (access_policy.py and fetchsrc.py are new per-file carve-outs out of the otherwise-excluded connectors/ and verify/ lanes -- see their own not_shipped entries below), so that paragraph needed NO edit -- left verbatim, and it is now an accurate, resolving pointer rather than a dead one.",
   "Reference map opening line + the two dead-tool bullets: re-applied the standing edit (previously reasoned 'seven of nine reference files ship, connectors.md and verification-gate.md do not') and updated it for this round's carve-outs. Rewritten to: 'Seven of these nine reference files ship with this copy of the skill... Not shipped in this repo: references/connectors.md and references/verification-gate.md, together with the connectors/ and verify/ tool lanes they document -- machine-bound to this owner's local Zotero HTTP connector, local PDF index, and local registry, none of which travel. Two files from those same directories ship despite that: connectors/access_policy.py and verify/fetchsrc.py are the skill-side half of rules/literature-access.md's host access policy -- a separate, portable mechanism from the routing/registry content those two reference files document, with no local-service dependency, and already named directly at P2 above. P5's Zotero close-out above is inlined so it does not depend on connectors.md; P4.5's ledger procedure is likewise self-contained in this file...' Both dead bullets keep their '**not shipped in this repo.**' flag; the connectors.md bullet gains one sentence naming access_policy.py + the hook policy file as the separate mechanism that does ship; the verification-gate.md bullet's 'Tools:' line now reads `verify/citecheck.py` (not shipped), `verify/fetchsrc.py` (ships) instead of listing both undifferentiated.",
   "P5's 'Zotero collection close-out' bullet: the source's condensed form (same wording as the prior round: 'append the wave's newly READ papers to the project bib and regenerate the RIS, per references/connectors.md §Zotero collection close-out') is still a dead pointer -- connectors.md still does not ship. Re-applied the standing edit: restored the fuller inline procedure (command syntax, --collection-name convention, File -> Import re-import/merge guidance, the localhost:23119 read-only warning) -- re-verified this round against the CURRENT source connectors.md (`~/.claude/skills/literature-search-extract/references/connectors.md` §Zotero collection close-out, read directly) to confirm the procedure text is byte-for-byte unchanged since the last round, then closed with the same explicit line: 'This copy inlines the full procedure because references/connectors.md does not ship here -- scripts/zotero_ris_export.py does.'",
+  "2026-10-02 (lane W4a): all three standing edits re-applied at their anchors (P5 Zotero close-out inlined, Reference-map opening paragraph, the two not-shipped bullets); the source text at those spots is again the condensed pointer form. New source content taken as-is: the E0 sentence (anchor round plus Publish-or-Perish pack), anchor-seed wording in the keyword and citation-chasing bullets, and a Concept-matrix catalog row (output-templates.md section 8 ships). textbook-extraction.md is not named in this file. Diff against source 183c129 is those hunks only.",
 ]
 # Diff against source after all three edits applied is exactly those three
 # hunks (P5 Zotero close-out bullet body, Reference map opening paragraph,
@@ -2633,6 +2684,10 @@ status = "verbatim"
 path = "skill-toolkit/skills/literature-search-extract/references/exhaustive-prisma.md"
 source = "~/.claude/skills/literature-search-extract/references/exhaustive-prisma.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: the exhaustive-depth line now adds the anchor round, a
+# Publish-or-Perish query pack and a query pack for agent-banned databases;
+# every section it cites in search-sources.md ships. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/extraction-playbook.md"
@@ -2658,6 +2713,10 @@ status = "verbatim"
 # left untouched per "never scrub a path that resolves"), and
 # `access_route`/`licence_basis` fields in the Mode-2 result-contract
 # example. No private paths.
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: section 8 (Concept matrix, with a synthetic filled example),
+# anchor-keyword rows, the Publish-or-Perish query-pack variant, and the
+# format count. Example rows are synthetic; no scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/portability.md"
@@ -2672,7 +2731,10 @@ edits = [
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/references/search-sources.md"
 source = "~/.claude/skills/literature-search-extract/references/search-sources.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): was declared verbatim; one edit. The new Local-PDF-library bullet about textbooks named the local textbook shelf by an absolute path on a non-system drive and routed the reader to references/textbook-extraction.md, which this share does not ship (its own not_shipped entry in the lane W4a block). Rewritten: the bullet says the connector and its rules file are not shipped here, and points at credibility-rubric.md section 5 and the printed-page-plus-edition locator rule instead. Everything else new in this refresh (Publish-or-Perish route, anchor-round seeds, keyword-layer harvest, year x citation read, seed-based hop counting) is byte-identical to source 183c129.",
+]
 # 2026-09-07 refresh: copied source over repo, empty diff. No private paths;
 # `prism` (retired MCP server name) and the Taiwan-specific channel names are
 # real, resolvable identifiers/URLs, not private assets -- left as-is per
@@ -2724,7 +2786,12 @@ status = "verbatim"
 [[collected]]
 path = "skill-toolkit/skills/mechanism-share-packaging/SKILL.md"
 source = "~/.claude/skills/mechanism-share-packaging/SKILL.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): was declared verbatim; the source gained a 49-line section on a second delivery route (a plugin) whose two pointers fail rule 2, so the status is now edited. Two edits.",
+  "section Delivery routes, the sentence introducing four measured facts: a pointer to a dated calibration record under the excluded outputs/ tree -> a clause saying the record stays in the source environment and is not shipped.",
+  "same section, last paragraph: a pointer to a dated route-comparison file under outputs/ -> a clause saying the comparison is a source-environment record that is not shipped. The measured facts and the plugin-route description are unchanged.",
+]
 # 2026-09-12: re-collected — source grew a new sentence citing
 # claude-ops/ops/20-dispatch.md §2 and claude-ops/ops/lessons.md L-057 (a
 # 2026-09-07 finding about the orchestrator/fragment-writer gap). Both cited
@@ -2758,6 +2825,7 @@ status = "edited"
 edits = [
   "frontmatter description: the source's (a)/(b) split advertising a Three.js API reference reverted to the motion-only description. vendor/threejs/ is not redistributed here (upstream ships no LICENSE file and names no copyright holder), so a description promising it would route readers to files that are absent.",
   "body: the Three.js exclusion note restored under the vendor line, stating that every vendor/threejs/ row below is a pointer the adopter must supply.",
+  "2026-10-02 (lane W4a): both standing edits re-applied (Three.js (b) clause out of the description; the Three.js exclusion note back under the vendor line). Third edit: the source description and one new routing row point whole-film work at a separate skill this share does not ship; both now say so in words instead of naming it, so no router points at an absent file while the not-for guidance survives. The new row for local/element-motion-params.md stays: that file ships this round.",
 ]
 
 [[collected]]
@@ -2889,6 +2957,10 @@ status = "verbatim"
 # skill alone..."). AnnouncementWatchDog is a project name, not a scrub
 # target (hard rule 2). No account names, absolute paths, or private-tree
 # pointers; ships verbatim, empty diff confirmed.
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: two extra trigger phrases in the description, and the per-section
+# file-output table is now named as the canonical list for the global
+# CLAUDE.md rule. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/product-design-thinking/references/design-rules.md"
@@ -2976,6 +3048,7 @@ edits = [
   "Gate A Step 0 example: a named domain profile replaced by <that_field>, since no base profile ships.",
   "the domains/ file list: restored the note that this share ships no base profiles, and that with an empty manifest Gate A finds no matching row and the generic Layer-A framework carries the turn. Without it the skill instructs the reader to load files that are not there.",
   "2026-09-07: the prior rung-2 Clusters/disambiguation pointer edit is now MOOT for this file and was NOT re-applied — the source's own 2026-09-06 BODY_CAP trim condensed the old detailed 4-rung Step-0-resolution-ladder paragraph (which named 'the Clusters/disambiguation sections below') into a short paragraph that no longer names them; the detail, and the scrub, moved into domains/_routing.md's new '### The four rungs in full' subsection instead (see that file's own edit entry). Source also renamed its 'NOT for cited topic reports' pointer from `deep-research` to `literature-search-extract, exhaustive depth` — a plain content sync, not a private pointer (literature-search-extract already ships and is already cited elsewhere in this same file); taken as-is, not counted as an edit.",
+  "2026-10-02 (lane W4a): the two standing Gate A edits re-applied (source re-added the plasmonic example in step 1 and the named base profiles in the domains/ bullet; restored the generic example and the this-share-ships-none note, same text as before). New source content taken as-is: a routing row mapping stuck-or-blocked phrasing to tier-framework section 0.6 (ships).",
 ]
 
 [[collected]]
@@ -3019,6 +3092,7 @@ source = "~/.claude/skills/scientific-research-guide/references/deliverables.md"
 status = "edited"
 edits = [
   "the research-state template's Layer-B line: a named domain + sub-profile example replaced by the generic '<base profile + 已載入的 sub-profile>'.",
+  "2026-10-02 (lane W4a): the one standing edit re-applied (the research-state template Layer-B line again carried a named domain and sub-profile). New source content taken as-is, no private content: the generative-AI disclosure checkbox, a submission-readiness checkbox, the T6b submission pack and T6c story-line card templates, and a blocking-items table.",
 ]
 
 [[collected]]
@@ -3029,7 +3103,12 @@ status = "verbatim"
 [[collected]]
 path = "skill-toolkit/skills/scientific-research-guide/references/tier-framework.md"
 source = "~/.claude/skills/scientific-research-guide/references/tier-framework.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): was declared verbatim; the source gained about 100 lines (feasibility three questions, stuck classification, submission readiness 6.7, story line 6.8) with two spots that fail rule 2, so the status is now edited. Two edits.",
+  "section 6.8, relationship paragraph: the sentence routing reading-someone-else-s-paper work to two named skills by their internal names -> it now says that work belongs to two source-environment skills this share does not ship (row-2 inverse: a router must not point at files the reader lacks).",
+  "section 6.8, source line: the post-brief record was cited by an absolute path on a non-system drive -> the clause keeps the date and says the record stays in the source environment.",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/scientific-research-guide/references/user-supplied-citations.md"
@@ -3050,6 +3129,9 @@ edits = [
 path = "skill-toolkit/skills/security-deep-checklist/SKILL.md"
 source = "~/.claude/skills/security-deep-checklist/SKILL.md"
 status = "verbatim"
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: one extra trigger phrase and one ADR hand-off re-pointed from a
+# plugin skill to the software-architect agent, which ships. No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/security-deep-checklist/references/code-audit.md"
@@ -3087,11 +3169,21 @@ edits = [
 # KNOWN OPEN GATE FINDING: `share_gate.py --source` reports [R] on this file's
 # line 110 for the same citation, as of this lane's close-out. Expected to
 # self-resolve once lane W5's collection lands in the same round.
+# 2026-10-02 (lane W4a): Re-collected byte-identical to source 183c129; the
+# only delta against the previous collection is two lines of the description.
+# No scrub target.
 
 [[collected]]
 path = "skill-toolkit/skills/skill-share-packaging/SKILL.md"
 source = "~/.claude/skills/skill-share-packaging/SKILL.md"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): was declared verbatim; the source gained about 60 lines (validator-path correction, a new-watched-place paragraph, a plugin-route section) with four spots that fail rule 2, so the status is now edited. Four edits.",
+  "new-watched-place paragraph, first sentence: an example location rooted at a second-drive work folder -> the class, a second-drive work root.",
+  "same paragraph, last clause: the measured example named one export folder by an absolute path on a non-system drive -> the clause ends at one such export (the measurement date stays).",
+  "plugin-route status paragraph: a pointer to a dated calibration record under the excluded outputs/ tree -> a clause saying the record stays in the source environment and is not shipped.",
+  "plugin-route comparison line: a pointer to a dated route-comparison file under outputs/ -> a clause saying it is a source-environment record that is not shipped. The registry-file pointer under tools/ in the same paragraph is a tools/ name and is kept.",
+]
 
 [[collected]]
 path = "skill-toolkit/skills/skill-share-packaging/evals/evals.json"
@@ -3327,7 +3419,11 @@ exhaustively against the manifest this round and neither entry actually
 existed; the claim was false from the day it was written. That is now fixed
 by the two entries added above rather than inherited as already-true. This
 remains the executable half of the same lane, and shipping it alone would
-leave a script whose contract lives in files this share does not carry."""
+leave a script whose contract lives in files this share does not carry.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file unchanged since the last aligned source commit. Still the
+executable half of the verification lane whose reference file and sibling tool
+are excluded; still not shipped. Disposition stands."""
 fallback = """The lesson card states the failure and the check in prose, which
 is what the citation is for. The skill itself ships and works without the
 verification lane; what you lose is the mechanical stale-claim pass."""
@@ -3394,7 +3490,10 @@ only started asking when a refreshed lessons.md card cited it. An internal
 status artifact of one skill's build-out: what is authored, what is planned,
 which profiles are half-migrated. The source's own packaging note lists it as
 strip-on-share, and COLLECTION-RULES.md rule 8 makes that statement outrank a
-re-reading of the file."""
+re-reading of the file.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file unchanged since the last aligned source commit. Disposition
+stands."""
 fallback = """`skill-toolkit/skills/scientific-research-guide/domains/README.md`
 states what ships and what does not, which is the only part of a status file an
 adopter can act on. `domain-expansion-guide.md`'s share edit already re-points
@@ -3865,6 +3964,20 @@ path_position_ok = [
                    # 2026-08-27 consent-dated comment; edited this round to
                    # this token so an adopter supplies their own before
                    # fetchsrc.py talks to arXiv on their behalf.
+    # --- 2026-10-02 arrivals (lane W4a). Each is the source's own generic
+    # notation in a layout or filename SHAPE the reader's own tree supplies,
+    # read at its one site and confirmed against source 183c129; none is a
+    # real path a scrubber ate.
+    "<marketplace>", "<plugin>", "<version>",  # config-self-audit/
+                   # references/telemetry.md section 6: the plugin-cache layout
+                   # `plugins/cache/<marketplace>/<plugin>/<version>/` that the
+                   # section measures; the runtime fills all three
+    "<FirstAuthor>",  # literature-search-extract/references/feedback-loop.md:
+                   # the filename shape `filed/<FirstAuthor><Year>_<DOI
+                   # suffix>.pdf` that loop/inbox.py ingest produces
+    "<owner>",     # mechanism-share-packaging/SKILL.md: the plugin-route
+                   # install command `/plugin marketplace add <owner>/<repo>`;
+                   # the adopter's own repo owner (<repo> is declared below)
     # --- 2026-09-12 arrival (W1b), shared-tree-git.md's new §1a (Desktop-app
     # pooled worktrees). Both are the SOURCE's own generic notation for a
     # mechanism description, not a real path a scrubber ate — read at their
@@ -4233,7 +4346,9 @@ kind = "hash / long hex"
 # `match` is a 16-hex prefix, deliberately shorter than the 32-hex run the
 # pattern needs: writing the full receipt here would make this manifest a
 # finding in its own right (the same discipline as every match above).
-match = "2d82f1ff56838a74"
+# 2026-10-02 (lane W4a): prefix updated to the re-rendered header's value; the
+# registry file was refreshed this round, so its sha256 and this prefix moved.
+match = "b6899bc0bb431335"
 reason = """The generated-from receipt in a GENERATED file's header. Its input
 — `consumers/registry.json` — ships in this repo, and the shipped
 `loop/runs.py check --registry` (R4) recomputes this exact value and refuses on
@@ -4346,6 +4461,7 @@ edits = [
   "2026-09-07: Guardrails' AssetVault ruling-id pointers '(AssetVault G-20; R-10 ...)' replaced by '(AssetVault-GUI's own ruling: ...)', keeping the quoted rule text and dropping both IDs.",
   "2026-09-07: the References-list bullet for `calibration-2026-09-07.md` rewritten to state plainly that this share does not include that file (see its own not_shipped entry below) and to give the reader a working fallback (build your own known-true-positive record) instead of a dangling pointer.",
   "2026-09-12: all six edits above re-applied at their (slightly shifted) anchors — source re-expanded the same six spots verbatim (the intro pointer sentence grew a 'kept verbatim at ... under ~/.claude' clause around the same references/ pointer; the other five recurred unchanged). Source also grew substantial new content citing `references/navigation-ia-contract.md` (a Step-2 load instruction, a new IA/navigation layer-table row + row entry with NAV-6/NAV-8, and a new References-list bullet with the NAV-O1..O3 / NAV-1..12 discriminator list) — that file is this same lane's new D3 collection (see its own [[collected]] entry below), so these citations resolve within this share and were kept verbatim, no scrub.",
+  "2026-10-02 (lane W4a): all six standing edits re-applied at their current anchors (same text recurred). The source description was shortened and reordered; taken as-is. Diff against source 183c129 is the six hunks.",
 ]
 
 [[collected]]
@@ -4411,6 +4527,7 @@ edits = [
   "NEW 2026-09-07 first collection, shipped as template per COLLECTION-RULES rule 5 (rows are the owner's private consumers, structure is generic). Three of the eight source rows dropped entirely rather than scrubbed: `paper-distill`, `paper-story` and `paper-survey-library` -- the first two name skills this repo explicitly does not ship (task brief: 'paper-distill and paper-story are consumers of this skill at the source -- a citation to either is a dead pointer here'), and paper-survey-library's sole content is a read-only join against paper-distill's private PaperSurvey index, the same dead end one hop further. No code path in loop/runs.py depends on row count or specific row ids (cmd_bridge / check_registry both iterate `reg.get('consumers', [])` generically -- confirmed by reading the source); loop/tests/test_runs.py has no hardcoded dependency on the dropped rows either (confirmed via grep). The `note` field gained one appended sentence stating the three-row drop and that remaining paths are placeholders.",
   "Remaining `zotero-local` row: `store.path` named the operator's Zotero library by absolute path under their home directory -> `<zotero-library> (copy-then-read via connectors/zotero_local.py)` (new placeholder token, declared below; the `connectors/zotero_local.py` mention itself left as an accurate implementation pointer -- connectors/ is excluded-by-decision below, same descriptive-citation treatment as elsewhere in this fragment).",
   "Remaining `paperlens` row: `store.path` gave the project's workspace as an absolute path on a non-system drive -> `<local-workspace>/PaperLens (design stage)`, reusing the existing `<local-workspace>` substitution token -- the drive and root are scrubbed, the project name `PaperLens` is kept (it is a real project name, never-scrub per the task brief).",
+  "2026-10-02 (lane W4a): refresh against source 183c129, edits re-applied by text surgery (the file was not re-serialised): the three rows for consumer skills this repo does not ship dropped again, the zotero-local store path (a home-directory path) and the paperlens store path (a non-system-drive path) replaced by the same two tokens as before, and the note sentence about the drop re-appended. New in source: a canonical_definition preset whose connector_hint named references/textbook-extraction.md; the hint now reads that a local textbook-shelf connector is not shipped (one more edit; no code reads the key). sha256 of the shipped file starts b6899bc0bb43 (full value in the generated header of references/bridge.md).",
 ]
 # Verified: `python -c "json.loads(...)"` parses cleanly; the five remaining
 # rows (scientific-research-guide, product-design-thinking, zotero-local,
@@ -4432,6 +4549,7 @@ edits = [
   "NEW 2026-09-07 first collection, shipped as template -- this file is a GENERATED rendering of consumers/registry.json (loop/runs.py `bridge`command; never hand-edited even at the source), so its shape follows the registry template above: the `paper-distill`, `paper-story` and `paper-survey-library` sections are dropped (same rows, same reason), the `zotero-local` and `paperlens` sections carry the same two path substitutions, and `date:` is set to 2026-09-07 (the day this template was actually rendered for this repo) rather than the source's 2026-09-03.",
   "Intro paragraph: the source's 'Shape precedent: `paper-story/references/bridge.md`.' clause is a dead pointer to an unshipped skill's file (whether or not that skill's bridge.md itself is machine-bound) -- dropped, leaving the substantive sentence 'A consumer is a ROW in `consumers/registry.json`; this file is that registry rendered for reading.' This exactly mirrors the loop/runs.py `cmd_bridge()` edit below, since this file is that function's output for the shipped registry.json.",
   "`generated-from: consumers/registry.json sha256:...` header updated to the shipped registry.json's actual hash (starts 2d82f1ff5683; the full receipt is in the file itself, which is the one place it belongs), replacing the source's sha for the un-templated 8-row registry.",
+  "2026-10-02 (lane W4a): RE-RENDERED, not edited by hand: ran loop/runs.py bridge against the shipped registry.json and replaced the file with its output (loop/runs.py check --registry passes). Date is the render day; the generated-from sha starts b6899bc0bb43. Diff against source 183c129: the date, the sha, the intro clause (same runs.py edit), the new canonical_definition preset line carrying the rewritten connector hint, the three dropped consumer sections, and the same two store-path substitutions.",
 ]
 # Verification (not a manual eyeball check): wrote a standalone Python
 # script that re-implements loop/runs.py's `cmd_bridge()` list-building logic
@@ -4451,6 +4569,7 @@ edits = [
   "The run-folder diagram's `home = ...` line gave the vault root as an absolute path on a non-system drive -> `home = <vault>\\literature\\EvidenceRuns` (same `<vault>` token as portability.md and loop/runs.py).",
   "Closing review-when line: the vault note contract was cited by that same absolute root -> `<vault>\\AGENTS.md` (same token); the '§2 changes its required keys' trigger is kept, since the review-when is only useful if it still names the event.",
   "2026-09-07 (merge step, cross-worker): the reflux `handoff` synopsis line named the excluded deep-reading skill inside its `--note` example -> `--note \"<why the consumer should deep-read it>\"`. Same call, and the same wording, as the rules-usage-dict.md reflux-event row this round: the skill does not ship, its registry row was dropped from consumers/registry.json, and the generalized token says what the field is for without routing at something absent. The seven tokens on this block's runnable lines are declared under [placeholders] command_position_ok — this is a CLI synopsis, where the argument shape is the content and there is no real value to print.",
+  "2026-10-02 (lane W4a): all three edits re-applied at their anchors (run-folder home line, the handoff --note example, the closing review-when). New source content read and kept: a paragraph saying full text arriving later is not a reflux event (loop/inbox.py ingest, which ships this round), and the V9 wording about uncited staged texts. Diff against source 183c129 is exactly the three hunks.",
 ]
 # Diff against source is exactly those three lines. Grep-confirmed (drive-letter
 # absolutes both cases, and the account name) no other private path in the file;
@@ -4497,6 +4616,7 @@ edits = [
   "`PAPERSURVEY_HOME` env-var default, same vault root, same treatment -> `r\"<vault>\\literature\\PaperSurvey\"`.",
   "`cmd_init`'s vault-missing refusal message named that root a third time -> `(<vault>\\\\AGENTS.md)` (same token; verified via a controlled PowerShell test that `pathlib.Path.exists()` degrades gracefully -- returns False, no exception -- for a path containing `<`/`>`, and traced every call site (`cmd_init`, `cmd_open`, `home_available`) to confirm each always gates on `.exists()` before any mkdir/write, so the placeholder never reaches a real filesystem call).",
   "`cmd_bridge()`'s generated markdown: dropped the 'Shape precedent: `paper-story/references/bridge.md`.' dead-pointer clause from the rendered intro paragraph, same edit and same reason as references/bridge.md above (this function is literally what produces that file).",
+  "2026-10-02 (lane W4a): all four edits re-applied at their anchors (three vault-root defaults and the init refusal text; the bridge intro clause). The source delta is portable and was read: the V9 rule now FAILs a pending-excerpt text only when a ledger row cites it and WARNs for a staged one (pairs with loop/inbox.py, which ships this round, and the new test case). Diff against source 183c129 is exactly the four hunks.",
 ]
 # Diff against source (`diff <(tr -d '\r' < source) <(tr -d '\r' < repo)`) is
 # exactly these four hunks and nothing else. Caught and self-corrected during
@@ -4600,6 +4720,9 @@ status = "verbatim"
 # not two. `run.json` and `record.md` under the same fixture directory were
 # already shipped and are unchanged at the source this round (diff empty) --
 # out of this lane's file list, correctly so.
+# 2026-10-02 (lane W4a): Re-collected byte-verbatim from source 183c129.
+# Delta: one new case (an uncited, staged licensed text is a V9 WARN, a cited
+# one stays FAIL). The suite passes in this tree.
 
 [[collected]]
 path = "skill-toolkit/skills/literature-search-extract/loop/tests/fixtures/good-run/run.json"
@@ -5112,7 +5235,19 @@ rest of this directory (`registry.json`, `README.md`, `probe.py`,
 machine-bound as re-verified above and stays excluded; "both are excluded
 together rather than piecemeal" (the original 2026-09-07 wording) no longer
 describes this directory now that one file inside it ships -- the directory
-entry now means "excluded except access_policy.py", not "excluded whole"."""
+entry now means "excluded except access_policy.py", not "excluded whole".
+
+RE-CHECKED 2026-10-02 (lane W4a): per file, against source 183c129. connectors/registry.json changed (the new
+textbook_library row) and still carries an absolute home path of the owner, so
+it stays machine-bound. Two NEW files, connectors/textbook_index.py and
+connectors/textbook_ocr.py, read: both default their root to the owner local
+textbook shelf on a non-system drive and exist only to index and OCR that
+shelf, the same lane as pdf_index.py; excluded with the rest.
+connectors/zotero_local.py changed (annotation reader) and reads the local
+Zotero service; excluded. connectors/access_policy.py is unchanged at source
+and keeps shipping verbatim. README.md, probe.py, pdf_index.py, .env.example
+and pdf-index.json are unchanged. The directory still means: excluded except
+access_policy.py."""
 fallback = """`references/search-sources.md` and `references/portability.md`
 document the same source classes and channels without the local-connector
 shortcut: WebSearch/WebFetch against the public APIs (Crossref, OpenAlex,
@@ -5147,7 +5282,13 @@ that policy is a different mechanism from this file's routing/registry/
 secret-boundary content (it governs WHICH HOST a fetch may touch, not which
 local connector to call), ships this round as its own carve-out (see the
 `connectors` directory entry above), and is already named directly at
-SKILL.md P2 rather than depending on this file."""
+SKILL.md P2 rather than depending on this file.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file changed (an annotations command and a marks-are-attention rule).
+Re-read: the Zotero field-map section still embeds an absolute home path of
+the owner, so the file stays excluded on its own content as well as on the
+lane it documents. No shipped file routes to it after the lane W4a edits
+(SKILL.md carries the inlined close-out). Disposition stands."""
 fallback = """`references/search-sources.md` §Degradation ladder and
 `references/portability.md` cover the same P2 routing decision (registered
 connector -> local corpus -> WebSearch/WebFetch) generically, without the
@@ -5178,7 +5319,14 @@ lane W5 block below). `citecheck.py` (the ledger-scoring tool this file
 documents) still does not ship, so this file's repair-order/calibration
 detail still has no corresponding shipped tool and stays excluded; the
 fallback below is unchanged in substance but fetchsrc.py's shipped
-`--help`/docstring now covers the retrieval half directly."""
+`--help`/docstring now covers the retrieval half directly.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file changed (two named limits of the numeric and support checks, and
+recalibrated case counts). Re-read in full: still no private path, and the
+exclusion still follows its paired tool, not its content. New cross-reference:
+it names verify/spannorm.py, which ships this round as the shared normal form
+imported by fetchsrc.py. The pair (this file plus verify/citecheck.py) stays
+out together; see the citecheck entry for the consequences found this round."""
 fallback = """SKILL.md P4.5 is self-contained for a manual pass: write the
 evidence ledger, then read the retrieved text and confirm each claimed span
 is actually present -- the same check `citecheck.py` automates. What is lost
@@ -5217,7 +5365,24 @@ machine-boundedness, which was this round's actual finding.
 review-when: a future round runs a dedicated Procedure-A pass on this file
 (first collection, not a re-check) -- treat that pass's own read as
 authoritative over both this note and the 2026-09-07 original, not as a
-tie-breaker between them."""
+tie-breaker between them.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file grew (about 80 KB now). Grepped again: no drive path and no home
+path; the only account-name hits are the arXiv contact-address constant, the
+class already scrubbed in fetchsrc.py. Not machine-bound. VERDICT CLOSED, not
+deferred (hard rule 7): it stays excluded-by-decision on the skill own
+packaging note (rule 8). FUTURE-WORK section A1 lists the ship set as
+SKILL.md, references/ and evals.json and names the personal files to strip;
+verify/ tools are not in that list, and this repo carries only the two verify/
+files that a shipped mechanism needs (fetchsrc.py for the host-access policy,
+spannorm.py because fetchsrc.py imports it). The earlier review-when (a
+dedicated first-collection pass) is SUPERSEDED by this verdict; a later round
+reopens it only by a new owner statement. CONSEQUENCES FOUND this round, both
+handled in the shipped copies: (1) the source fetchsrc.py self-test imports
+this file, so the shipped copy guards that one import (see its collected
+entry); (2) the shipped loop/inbox.py reaches it lazily for a Crossref
+author/year fallback, so that path raises ImportError here; the --offline flag
+avoids it and the inbox collected entry says so."""
 fallback = """SKILL.md P4.5's inline text states what the script checks (the
 quoted support span is actually present in the retrieved text) in enough
 detail for a person to do the same check by hand against the ledger; what is
@@ -5367,6 +5532,7 @@ source = "~/.claude/skills/literature-search-extract/verify/fetchsrc.py"
 status = "edited"
 edits = [
   "NEW 2026-09-12 (lane W5). First file ever collected under this skill's verify/ directory — the directory's other file, verify/citecheck.py, stays excluded (its own not_shipped entry above, corrected this round). CONTACT_BY_HOST dict (identifies the caller to arxiv.org/export.arxiv.org per that project's API politeness convention, a contact address sent WITH requests, not a login): the source's own address, dated by an inline '# arXiv-only consent 2026-08-27' comment, replaced with the <contact-email> token declared this round in [placeholders].path_position_ok — an adopter supplies their own before fetchsrc.py talks to arXiv on their behalf.",
+  "2026-10-02 (lane W4a): the one standing edit (arXiv contact-address constant -> the <contact-email> token) re-applied. NEW in source: the file imports its normal form from the sibling verify/spannorm.py (ships this round, verbatim) and its --selftest imports verify/citecheck.py, which this share does not ship. Second edit, behaviour-preserving when the sibling exists: that one import is wrapped so a missing citecheck.py leaves the cutter-and-gate shared-normal-form control checking the fetchsrc half only, under a label that says so, instead of crashing the whole self-test with ModuleNotFoundError. With citecheck.py present the original assertion runs unchanged. Self-test in this tree: 0 broken. Revert this edit if a later round ships citecheck.py.",
 ]
 # Diff against source after the edit is exactly that one dict-literal line;
 # nothing else changed. Retrieves and records provenance (route, HTTP status,
@@ -5506,7 +5672,12 @@ RECONCILED 2026-09-12 (merge step, same round): all four named items now have
 a verdict. PDF-GUIDE.md stopped shipping (its own [[not_shipped]] entry); the
 worked sample run left in the 2026-08-16 round (CHANGELOG, "personal
 working-state files removed"); evals.json carries no personal notes on this
-round's full read, so it keeps shipping; this file is excluded above."""
+round's full read, so it keeps shipping; this file is excluded above.
+
+RE-CHECKED 2026-10-02 (lane W4a): source file changed (new backlog items and measured-evidence rows, some naming
+files under the private references/ and outputs/ trees). Still the personal
+planning document that section A1 of the file itself says to strip.
+Disposition stands."""
 fallback = """None named. SKILL.md and the reference files under
 `references/` are the current, shipped statement of the pipeline; a reader
 wanting the roadmap/TODO view has none in this repo, matching the STATUS.md
@@ -6323,3 +6494,95 @@ intake spec at the level a reader needs to build their own pack. You do not get
 the spec's exact processing wording."""
 
 # === lane W2-global 2026-10-02 END ===
+
+# === lane W4a-skillsrefresh 2026-10-02 BEGIN ===
+
+# Refresh round 2026-10-02, procedure B (31 existing entries updated in place
+# above, each with a dated note) plus procedure A for the new files below.
+# Source head at lane start: 183c129.
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/loop/inbox.py"
+source = "~/.claude/skills/literature-search-extract/loop/inbox.py"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): first collection. A stdlib tool that files a PDF dropped into an Inbox folder, names it from its DOI, and registers it through fetchsrc.py local in every run that cites the work at the abstract tag or was refused it (the loop mechanism the shipped feedback-loop.md now describes). It pairs with the shipped runs.py V9 rule and the new test case.",
+  "docstring: three environment-variable roots that were absolute paths into the owner knowledge vault -> `<vault>/literature/EvidenceRuns`, `<vault>/literature/Inbox` and `<vault>/literature/Bibliography` (the same <vault> token runs.py already uses; the env vars still override).",
+  "the three DEFAULT_* constants: same substitution as the docstring, so the shipped defaults and the shipped docs agree.",
+  "four README-template command lines: the absolute path to the source-environment skills folder -> `<CLAUDE_HOME>/skills/literature-search-extract/loop/inbox.py`.",
+  "Behaviour note, not an edit: the online Crossref author/year fallback lazily imports verify/citecheck.py, which this share does not ship (see its not_shipped entry); on that path the tool raises ImportError here, and `--offline` avoids it. --selftest passes in this tree.",
+]
+# Ship verdict (hard rule 7, closed): portable by inspection once the vault
+# roots are tokens; no credential, host or contact address; it is the executable
+# half of a reflux path that shipped files already describe (row-2: a shipped
+# reference that routes to a tool should find the tool).
+
+[[collected]]
+path = "skill-toolkit/skills/literature-search-extract/verify/spannorm.py"
+source = "~/.claude/skills/literature-search-extract/verify/spannorm.py"
+status = "verbatim"
+# 2026-10-02 (lane W4a): first collection. The one normal form (NFKC, dash and
+# quote folding, whitespace) that the cutter fetchsrc.py and the gate share;
+# the shipped fetchsrc.py imports it, so without this file the shipped tool
+# cannot start. Grepped for drive paths, home paths, account names and hosts:
+# none. Its --selftest passes in this tree.
+
+[[collected]]
+path = "skill-toolkit/skills/motion-design/local/element-motion-params.md"
+source = "~/.claude/skills/motion-design/local/element-motion-params.md"
+status = "edited"
+edits = [
+  "2026-10-02 (lane W4a): first collection (the new SKILL.md routing row for this file ships, so the file must). The measured element-motion parameter table (durations, easing curves, stagger) ships as written.",
+  "the provenance sentence that named the private motion lab by an absolute path on a non-system drive -> a generic clause, a private motion lab's cards, with the measurement date kept.",
+  "the pointer to the lab's spring-fitting tool by its path -> a clause saying the lab's fitting tool is not shipped.",
+  "two pointers to the separate whole-film skill and its files -> a clause saying that skill is not shipped in this share (the same wording motion-design/SKILL.md now uses).",
+]
+
+[[not_shipped]]
+path = "skills/literature-search-extract/references/textbook-extraction.md"
+disposition = "excluded-by-decision"
+reason = '''NEW at the source since the last alignment. The rules file for the
+textbook-shelf connector (connectors/textbook_index.py and
+connectors/textbook_ocr.py, both already excluded with the connectors/
+directory): how the owner's local textbook shelf is indexed, OCR'd and quoted.
+Its operative sections cite the shelf by an absolute path on a non-system
+drive and name private-library paths throughout, and the lane it documents
+exists only on the owner's machine. Decision-procedure row 6: the whole file
+is meaningful only inside that private context, so there is no portable
+remainder to extract.
+Row-2 inverse, done in this round: the two shipped files that would route to
+it were rewritten so no router points at an absent file. SKILL.md does not
+name it; references/search-sources.md (Textbooks bullet) now says the
+connector and its rules file are not shipped and points at
+credibility-rubric.md section 5 and the printed-page-plus-edition locator rule
+instead; consumers/registry.json (connector_hint) and the regenerated
+references/bridge.md say a local textbook-shelf connector is not shipped.
+REVIEW-WHEN: the textbook connector is generalised to take a user-supplied
+root with no owner default.'''
+fallback = '''For a book as a source, the shipped search-sources.md Textbooks
+bullet and credibility-rubric.md section 5 give the rule: cite the printed
+page plus the edition, and treat a figure read from an OCR layer as unverified
+until read against the page image.'''
+
+[[not_shipped]]
+path = "skills/scientific-research-guide/scientific-research-guide-FUTURE-WORK.md"
+disposition = "excluded-by-decision"
+reason = '''Modified at the source since the last alignment (ten lines added: two
+backlog items and a debt note; one names a record under the private outputs/
+tree). The file has never carried a manifest entry; it was simply never
+collected, and this entry makes the decision explicit. The skill's personal
+planning document: backlog items, measured-evidence rows and dated notes, some
+of which name files under the source's private references/ and outputs/ trees
+and the owner's own project work. Hard rule 8 applied to the sibling skill: the
+literature-search-extract packaging note says the share ships SKILL.md,
+references/ and evals.json and strips the planning document, and
+skill-share-packaging's Mode A drops TODO, plans and sample runs; this file is
+the same class. It is named, not routed to, in one provenance blockquote of the
+shipped domains/domain-expansion-guide.md section 9 (a historical note about
+where an authoring procedure used to live; no reader needs the file to follow
+the section, which is self-contained).
+REVIEW-WHEN: the owner states that the backlog should be public.'''
+fallback = '''None needed; no shipped procedure depends on it. The skill's own STATUS.md is
+excluded for the same class (see its entry).'''
+
+# === lane W4a-skillsrefresh 2026-10-02 END ===

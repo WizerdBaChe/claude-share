@@ -166,8 +166,8 @@ similar blocks (only variable names differ — subtler, missed by the previous).
 - Deprecated dependencies: does this file rely on deprecated/unmaintained library
   APIs?
 
-Want the full backlog as a deliverable? Hand off to engineering:tech-debt with
-these findings as input.
+Want the full backlog as a deliverable? Rank these findings into one here
+(SKILL.md, debt-backlog handoff bullet).
 
 ## 9. AI-Generated Code Extra Checks
 

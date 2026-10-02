@@ -193,6 +193,40 @@ copyright boundary), full locator (page/section/clause), access tag, and a one-l
 
 ---
 
+## 8. Concept matrix
+
+**Use when:** the caller is writing or scoping a literature review, or asks where the gaps
+are — the question is "which concepts has the literature covered, and by whom", not "which
+option wins" (that is §6).
+
+**Structure** (Webster & Watson 2002, *MIS Quarterly* 26(2), xiii–xxiii — the concept-centric
+review): rows = sources; columns = CONCEPTS, taken from the vocabulary ledger's field-terms
+column (`search-sources.md` §Query building), never invented for the table. A cell carries
+the locator where the source addresses the concept; a source that does not address it
+gets `—`. Add one column for the system / unit of analysis when sources differ in it
+(device vs. material vs. model) — most gaps live in a concept × system cell, not a column.
+
+**Reading it:** a column full of locators is the settled core; one or two locators is thin;
+an EMPTY column or (concept × system) cell is a gap **candidate** — it enters `gaps` worded
+"no source in this run addresses X for Y", and only the recall check (`search-sources.md`
+§Recall check) may upgrade it to an absence claim. Write the review down the columns
+(concept by concept), not along the rows: a row-by-row write-up is an annotated
+bibliography, not a synthesis.
+
+**Filled example:**
+
+| source | L_spp measured | loss mechanism | wafer-scale fabrication | system |
+|---|---|---|---|---|
+| Park 2022 [full] | Table 2 | §4.1 grain-boundary scattering | §5 | template-stripped Ag film |
+| Chen 2023 [full] | Fig. 4b | §3.3 | — | single-crystal flake |
+| Lee 2021 [abstract] | — | abstract only: surface roughness | — | evaporated Ag film |
+
+Gap candidate: wafer-scale fabrication is addressed for one system only (1 of 3 sources) →
+`gaps`: "no source in this run addresses wafer-scale fabrication for single-crystal Ag —
+recall check pending".
+
+---
+
 ## Query pack — hand-to-user retrieval (P2/P3 point here)
 
 **Use when:** a channel the question needs is `institutional_only` or `agent_banned` in
@@ -210,6 +244,7 @@ a Licensed User; the agent never touches the host.
     <database syntax, e.g. TITLE-ABS-KEY("template-stripped" AND silver AND "propagation length")>
     — 詞彙帳（vocabulary ledger）：<terms by column>
 - 指定開啟：<DOI / URL 1> ；<DOI / URL 2>   （每筆註明要看的段落：Table 2、Methods §2.1…）
+- 錨點關鍵字（有指定錨點論文時）：每篇 Keywords 區原樣貼回，一層一行（Author Keywords／IEEE Keywords／INSPEC／Index Terms）。
 - 請回傳：每筆 (1) 定位 locator，(2) 逐字片段 support span（含數值與單位），(3) 存取層級。
 - 回傳後的處理：片段以 fetchsrc.py paste 登錄為 user_provided；交付物來源表標示 [user-provided passage]。
 ```
@@ -222,7 +257,19 @@ a Licensed User; the agent never touches the host.
 > - 檢索式：`("Document Title":plasmonic waveguide) AND ("Author Keywords":silver OR "Index Terms":Ag film) AND ("propagation length")`
 >   — 詞彙帳：使用者詞 SPP waveguide ／ 文獻詞 long-range SPP, LRSPP ／ 索引詞 Plasmons, Optical waveguides
 > - 指定開啟：DOI 10.1109/JLT.2011.xxxxxxx（Table I 的 L_spp @ 1550 nm）
+> - 錨點關鍵字：同一篇的 Keywords 區四層原樣貼回（補詞彙帳的索引詞欄）。
 > - 請回傳：locator、逐字片段、存取層級。
+
+**PoP variant — Google Scholar breadth through Publish or Perish** (`search-sources.md`
+§Google Scholar). The pack names a PoP query instead of a database syntax and asks for the
+export file back instead of passages:
+
+> ### 請您代查（query pack）— Google Scholar（經 Publish or Perish）
+> - 為什麼由您執行：Google Scholar 沒有官方 API、程式存取會被擋；Publish or Perish 在您的電腦上執行查詢，查詢是您的操作。
+> - PoP 查詢：資料來源選 Google Scholar；標題字詞 `plasmonic waveguide`；關鍵字 `"propagation length" silver`；年份 2019–2026
+>   — 詞彙帳：使用者詞 SPP waveguide ／ 文獻詞 long-range SPP, LRSPP
+> - 請回傳：結果匯出成 CSV（或 RIS），存到本次 run 資料夾的 `user_provided/pop-<日期>.csv`。
+> - 回傳後的處理：這份是 user_provided 的**書目清單**，不是全文；每列先走 P2 識別碼解析才可引用，解析不到的列進 gaps。
 
 Every pack line also goes into `gaps` as `not retrieved, hand-to-user: <host> (<n> items,
 query pack §)` — never as "not found".
@@ -230,7 +277,7 @@ query pack §)` — never as "not found".
 ## Result contract — complete Mode 2 example
 
 Returned to a calling skill (English, structure-stable). `findings` embeds one of the
-seven formats above; the other four fields are always present.
+eight formats above; the other four fields are always present.
 
 ```
 {

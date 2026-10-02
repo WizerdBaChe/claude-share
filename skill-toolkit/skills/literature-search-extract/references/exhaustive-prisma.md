@@ -29,8 +29,13 @@ Write the protocol block; it ships as an appendix of the deliverable:
     logged with its reason.
 - **Information sources planned**: at least 2 independent scholarly databases (e.g.
   Semantic Scholar + Crossref/OpenAlex) + 1 preprint server where the field uses one
-  + citation chasing + any local corpus listed live in `../connectors/registry.json`
-  (a user PDF library, a reference manager). English-only
+  + the anchor round (a review, the most-cited paper's co-citations, 3–5 recent on-topic
+  seeds — `search-sources.md` §Query building step 3), citation chasing counted from its
+  seeds + one Publish or Perish query pack for Google Scholar breadth (theses, books, grey
+  literature; the user runs it — `search-sources.md` §Google Scholar) + a query pack for
+  any agent-banned database the field depends on (IEEE Xplore), never a fetch + any local
+  corpus listed live in `../connectors/registry.json` (a user PDF library, a reference
+  manager). English-only
   searching must be an explicit, justified protocol decision (rubric §6 language skew).
 - **Extraction targets**: the P1 target list, verbatim.
 
