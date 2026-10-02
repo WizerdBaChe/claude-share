@@ -244,12 +244,6 @@ ls -1 skills/*/SKILL.md | wc -l; grep -n '^## L-[0-9]' ops/lessons.md | wc -l
 #     2026-08-15: the dict explained 0% of actual fires for every entry except
 #     workflow-checkpoint (21%), while config-self-audit fired 28x on
 #     vocabulary the dict does not list. Not a grep - it needs the transcripts.
-# SHARE EDITION: tools/skill-routing-audit.py does not ship -- declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` ("serves records this
-# share does not carry": it reads this machine's own session transcripts).
-# `ops/references/skill-trigger-classes.md`, which this check's 18b extension
-# reads, does ship; running the audit against your own transcripts is a build
-# you would have to write yourself.
 python tools/skill-routing-audit.py --surface
 # read the FIRING ANYWAY block first: an entry with fires and 0 coverage means
 # the dict records words nobody says. A DEAD entry that never fired is only a
@@ -319,11 +313,6 @@ ls -dt ~/.claude/backups/*/ 2>/dev/null | head -3   # -t: newest FIRST, and the
 #     the same omission shape as check 19, and the reason this is a sweep item
 #     rather than a note in a ticket. T-009 and T1 both stay open by design;
 #     what must not happen is them going quiet and being read as finished.
-# SHARE EDITION: tools/e2-gate-test/ does not ship -- declared `[[not_shipped]]`
-# under `tools/share-manifest.toml` (2026-08-16 user ruling: a test of this
-# machine's own layout as much as of the hook it drives; deferral closed, not
-# collected). `hooks/delivery_gate_shadow.py`, the hook it tests, does ship;
-# there is no packaged suite to drive it with here.
 python tools/e2-gate-test/check_shadow_log.py -n 40 --commands
 python - <<'PY'
 import json, io
@@ -423,11 +412,6 @@ PY
 #     the hook proves it RUNS, ANNOTATES and WRITES. It does not prove the
 #     predicates are right -- the input is chosen with those same predicates.
 #     For that, re-run the two-sided suite and the corpus backtest:
-# SHARE EDITION: tools/ps-errorpref-test/ and tools/ps-errorpref-backtest/ do
-# not ship -- declared `[[not_shipped]]` under `tools/share-manifest.toml`
-# (the general `tools/` exclusion; test/backtest harnesses this share does not
-# carry). `hooks/ps_errorpref_guard.py` ships and is enforced; its regression
-# and corpus evidence stay source-only.
 python tools/ps-errorpref-test/test_ps_errorpref_guard.py    # must be 45/45
 python tools/ps-errorpref-backtest/backtest.py --sample 4
 #     Act on: a registration count of 0; ALIVE but the suite failing (the
@@ -551,11 +535,6 @@ PY
 #     row. It does not prove the tier tables are right -- the inputs are chosen
 #     with the same predicates. For that, re-run the two-sided suite and the
 #     corpus backtest:
-# SHARE EDITION: tools/ps-pipeline-close-test/ and tools/ps-pipeline-close-
-# backtest/ do not ship -- declared `[[not_shipped]]` under `tools/share-
-# manifest.toml` (the general `tools/` exclusion). `hooks/ps_pipeline_close_
-# guard.py` ships and is enforced; its regression and corpus evidence stay
-# source-only.
 python tools/ps-pipeline-close-test/test_ps_pipeline_close_guard.py   # must be 49/49
 python tools/ps-pipeline-close-backtest/backtest.py --sample 4
 #     Act on: a registration count of 0; ALIVE but the suite failing (the
@@ -574,13 +553,6 @@ python tools/ps-pipeline-close-backtest/backtest.py --sample 4
 #     in a fake home and back-dates paths with os.utime (known-TRUE: a 5-day-old
 #     untracked path and a 5-day-old tracked modification MUST fire; known-FALSE:
 #     a fresh path, a clean repo, no repo at all, a project cwd MUST stay quiet).
-# SHARE EDITION: this one file of tools/ops-health-test/ does not ship. Only
-# `tools/ops-health-test/check_cap_binding.py` (checks 7b and 15 above) ships
-# in this repo, mapped through `[source_map]`; `test_ops_health_nudge.py` is a
-# separate file in the same source directory and stays declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` (a test of this
-# machine's own layout, per the 2026-08-16 ruling). `hooks/ops_health_nudge.py`
-# ships and is enforced; its 28-case regression suite stays source-only.
 python tools/ops-health-test/test_ops_health_nudge.py          # must be 28/28
 #     Then look at the live tree the way the hook does, unscoped:
 git -C ~/.claude status --porcelain --untracked-files=all | wc -l
@@ -788,11 +760,6 @@ python tools/hook-proof-of-life/controls.py | tail -1   # ALL PASS n/n — the i
 #     earlier noisy run lost rows in EVERY write mode including two candidate
 #     fixes — a positive control that does not fire is not a control. So this
 #     counts instead, and a RISING count is the reproduction a fix would need.
-# SHARE EDITION: tools/telemetry-framing/ does not ship -- declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` (the general `tools/`
-# exclusion; new since this round, not individually adjudicated before now).
-# It reads `telemetry/*.jsonl`, which is itself excluded (runtime logs of real
-# work), so there is nothing in this share for it to read even if it shipped.
 python tools/telemetry-framing/framing.py               # WARN at baseline, FAIL above it
 python tools/telemetry-framing/controls.py | tail -1    # ALL PASS n/n — the instrument itself
 #     Act on: FAIL → new damage since the baseline; find it with `--verbose`,
@@ -872,10 +839,6 @@ python tools/class-closure/exercise.py                  # RUN-TIME half (2026-09
 #     NAME refs (backticked rule name → rules/<n>.md; dict `### <skill>` →
 #     skills/<n>) from CLAUDE.md, settings.json, the dict, skills/ hooks/ rules/
 #     ops/ agents/ commands/, references/*.md and tools/*/README.md.
-# SHARE EDITION: tools/tracking-refs/ does not ship -- declared `[[not_shipped]]`
-# under `tools/share-manifest.toml` (the general `tools/` exclusion). Nothing to
-# run here; `git ls-files --others --exclude-standard` plus a grep for the paths
-# your rule files cite is the hand substitute.
 python tools/tracking-refs/refs.py                      # exit 1 on any `dangling` row; `--verbose` for the REPORT classes
 python tools/tracking-refs/controls.py | tail -1        # ALL PASS n/n — the instrument itself
 #     Act on: FAIL → commit each named target by path, or fix the pointer if the

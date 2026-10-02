@@ -485,10 +485,6 @@
 - review-when: `tools/skill-routing-audit.py` reports coverage above ~50% for
   most entries — at that point the dict is load-bearing and its size argument
   changes. Also re-open if skill routing stops being description-driven.
-> **Share note.** `tools/skill-routing-audit.py` is source-only
-> (excluded-by-decision, `tools/share-manifest.toml`). Substitute: sample your
-> own transcripts by hand for turns where a skill fired without matching dict
-> vocabulary, the same coverage question the audit answers mechanically.
 - rollback: `git show 7ff7d0c^:hooks/ops_health_nudge.py` (pre-dictcap-28k).
   Earlier step: `git show aa5e7d1^:hooks/ops_health_nudge.py` (pre-dictcap-24k;
   dated backup pruned)
@@ -1748,10 +1744,6 @@ auto summaries honour CLAUDE.md Compact Instructions — the first Desktop sessi
   a genuine deny by a listed session in a listed file is skipped too —
   needs a look); a suite is found writing to production again (the
   `telemetry_isolation_check` pattern goes into THAT suite).
-> **Share note.** `tools/telemetry-framing/` (`framing.py`, `report_fp.py`) is
-> source-only (excluded-by-decision, `tools/share-manifest.toml`). The hooks'
-> raw `.jsonl` telemetry ships nowhere either; this entry documents the
-> precedence rule as design, not a report this copy can run.
 - rollback: the env var is additive — unset, every writer lands where it
   did before; delete `suite-sessions.json` and both readers count every row
   (C-14 pins that a missing list skips nothing).
@@ -1766,10 +1758,6 @@ checkpoint nag), plants the canary pair in `<session>.canary.json`; `compact_poi
 last 40 ledger rows after compaction; `run_audit.py` scores F1/F4/F6 + canary for any session, F3/F7
 only under a manifest. Offline branch below adds the manifest and the two guards.
 Live 2026-09-05 (design `references/long-run-probe-design.md`, tools `tools/process-ledger/`).
-> **Share note.** `tools/compact-loss-audit/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`), so `run_audit.py` does not ship; `tools/process-ledger/`
-> (`ledger.py`, `report.py`) ships here under `instruments/`, and the hooks that
-> write `*.ledger.jsonl` and `cache/handoff/*.json` ship with it.
 One manifest (`cache/handoff/<session>.run.json`, written when a prompt carries `[unattended-run]`;
 every other field optional — scope defaults to cwd/**, canary auto-generated, deliverables/acceptance
 model-derived via `ledger.py manifest` and marked `filled_by: model`, user ruling 2026-09-05 "no form-filling")
@@ -2017,11 +2005,6 @@ option B's trigger). Tier-B compliance meter:
   Also: an extension-glob-dispatched rule's fire rate may be read as accuracy
   ONLY after checking the rule against its own source project — if the globs
   cannot see that project, the low rate is blindness, not accuracy.
-> **Share note.** `tools/context-budget/` and `tools/glob-fitness.py` are
-> source-only (excluded-by-decision, `tools/share-manifest.toml`). Substitute:
-> grep `telemetry/rule-loads.jsonl` by hand for the same `session_start` /
-> `path_glob_match` breakdown, and write a small recall/precision script
-> against your own rule globs if you need the reachability check.
 - rollback: `ops/environment.md` "Instruction-loading mechanics"
 
 ### advisory-output surfacing — ops-health check 13
@@ -2069,10 +2052,6 @@ option B's trigger). Tier-B compliance meter:
 - rollback: `git show f2e8bc2^:hooks/ops_health_nudge.py` (pre-check13; dated backup pruned)
 
 ### eol conformance — ops-health check 21
-> **Share note.** The post-commit hook under `tools/git-hooks/` is source-only
-> (excluded-by-decision, `tools/share-manifest.toml`); `tools/eol-sync/` is the
-> shipped half — point your own `core.hooksPath` at a one-line hook that calls
-> it, or run `eol_sync.py --all` by hand after a bulk write.
 - current: at session start with cwd == `~/.claude` ONLY, `git ls-files --eol`
   (budget `EOL_GIT_TIMEOUT`); a tracked file reported `w/mixed` is an ALARM
   (mixed endings inside one file — the L-024 corruption: LF lines appended onto
@@ -2158,10 +2137,6 @@ option B's trigger). Tier-B compliance meter:
   recoverable pre-state)
 
 ### tracking refs — integrity-sweep check 34 + ops-health check 18
-> **Share note.** `tools/tracking-refs/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`); the sweep it names does not run on this copy.
-> Substitute: `git ls-files --others --exclude-standard` plus a grep for each
-> path your own rule files cite.
 - current: `tools/tracking-refs/refs.py` reads PATH and NAME references out of
   every committed/uncommitted instruction surface (CLAUDE.md, settings.json,
   skill-trigger-dict, skills/ hooks/ rules/ ops/ agents/ commands/,
@@ -2301,11 +2276,6 @@ option B's trigger). Tier-B compliance meter:
   changes on an upgrade; the suite or `tools/ui-shot/doctor.mjs` fails; a
   probe marker stays `unknown` in live use (`tool_response` unpopulated). A
   user "I'm watching" is a temporary premise flip, not an edit trigger.
-> **Share note.** `tools/ui-shot/` and `tools/ui-verify-test/` are source-only
-> (excluded-by-decision, `tools/share-manifest.toml`); `hooks/ui_verify_guard.py`
-> ships and still routes/denies. Substitute your own headless Playwright
-> screenshot script for the durable runner; there is no shipped `doctor.mjs`
-> to check it.
 - rollback: `git show 4ba4528^:hooks/ui_verify_guard.py` (pre-router; dated backup pruned);
   `drafts/2026-08-16-pane-pixel-route/`
 
@@ -2400,10 +2370,6 @@ option B's trigger). Tier-B compliance meter:
   disappears, the routing argument weakens to a preference and this entry should
   be re-judged. Once the live transcripts age out (cleanupPeriodDays, ~30d), add
   `--root <MIRROR_ROOT>`.
-> **Share note.** `tools/shell-audit/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`). On this copy, re-derive P1/P2/P4 by hand
-> against your own harness and re-time the Write/Bash/PowerShell/Grep calls
-> yourself; there is no shipped `sweep.py` to run.
 - rollback: remove CLAUDE.md Environment bullets 1–2; `lessons.md` L-024 keeps
   the measurement so the decision can be re-made without a re-sweep.
 
@@ -2503,11 +2469,6 @@ option B's trigger). Tier-B compliance meter:
   against the backtested 0.14% / 2.7%; a notice rate far above 2.7% of the Bash
   total (from `sweep.py`) means the sink patterns drifted. Discount the first
   ~90 telemetry rows — the test suite writes real entries.
-> **Share note.** `tools/shell-audit/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`), so `invariants.py`'s drift check does not ship
-> either. Substitute: read the hook's own deny/notice counters from
-> `telemetry/shell-transport-guard.jsonl` and compare by hand against the
-> 0.14%/2.7% rates above.
 - promotion triggers of the NOTICE branches (`ops/40-maintenance.md` §2a(4),
   audit 2026-09-23; all three kept as NOTICE and closed by user ruling
   2026-09-23 — not re-raised unless a trigger below fires):
@@ -2759,11 +2720,6 @@ option B's trigger). Tier-B compliance meter:
   check 21 each sweep. (c) if the backtest's Edit or Bash rows accumulate fires
   while unregistered, the matcher decision reopens — that is the evidence it was
   deferred for, and it is measured whether or not anyone remembers to ask.
-> **Share note.** `tools/shell-audit/` (PROBES.md) and `tools/ps-errorpref-*`
-> are source-only (excluded-by-decision, `tools/share-manifest.toml`).
-> Substitute: hand-test a `$ErrorActionPreference='Stop'` native call under
-> your own PowerShell version and confirm which of directions (A)/(B) still
-> holds.
 - promotion trigger (idiom-changing notice, `ops/40-maintenance.md` §2a(4)):
   live rate ≥ 0.375/day over any 30-day window means the text changes nothing.
   No cost-free rewrite exists ('Stop' is right for cmdlets; adding a
@@ -2873,10 +2829,6 @@ option B's trigger). Tier-B compliance meter:
   appears that can MUTATE something (a cloud CLI, `reg`, `schtasks`, a signing
   or publish tool), the name is mis-tiered and moves to `TIER_WORK` — the
   membership rule is stated in the hook beside the tables.
-> **Share note.** `tools/shell-audit/` and `tools/ps-pipeline-close-*` are
-> source-only (excluded-by-decision, `tools/share-manifest.toml`). Substitute:
-> re-check the alias table (`curl`/`wget`/`ls`/`sort`) by hand against
-> whichever PowerShell version you run.
 - rollback: unregister the `PowerShell` PreToolUse block in `settings.json`; the
   file is inert without it. `ops/lessons.md` L-027 keeps carrying the rule as
   text exactly as it did before — and what the measurement says that is worth is
@@ -2923,10 +2875,6 @@ option B's trigger). Tier-B compliance meter:
   Standing check after any bulk write or `.gitattributes` edit:
   `python -X utf8 tools/eol-sync/eol_sync.py --all --check` (0 drift) and
   `python tools/shell-audit/invariants.py` (mixed-ending count must stay 0).
-> **Share note.** `tools/shell-audit/invariants.py` is source-only
-> (excluded-by-decision, `tools/share-manifest.toml`); `tools/eol-sync/` is
-> the shipped half. Substitute for the mixed-ending count: `git grep -Il $'\r'`
-> after a bulk write, and confirm the set of touched files matches intent.
 - rollback: restore the previous default line (`git show 3bc8b57:.gitattributes`)
   and run `eol_sync.py --all`; the index never changes, only working-tree bytes.
 
@@ -3209,10 +3157,6 @@ option B's trigger). Tier-B compliance meter:
   produces the actual delta: changelog entries in `(stamped, running]`, filtered
   to eight categories that mirror what `ops/` records. NOT `is_home`-scoped — a
   stale ops fact misleads in whatever project is open.
-> **Share note.** `tools/cc-delta/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`); check 16 ships and still stamps the mismatch,
-> but producing the actual delta is left to you — read the CLI's own
-> changelog for the version range by hand.
 - why: measured 2026-08-26 — the CLI went 2.1.200 → 2.1.246 while `ops/` sat at
   `as-of 2026-08-12`, and 8 recorded facts had gone stale, one of them listing
   the Workflow tool as an available dispatch mechanism in an environment whose
