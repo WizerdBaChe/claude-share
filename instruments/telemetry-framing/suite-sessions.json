@@ -1,0 +1,12 @@
+{
+  "schema": 2,
+  "literals": [
+    "synthtest-transport",
+    "selftest",
+    "calib",
+    "probe"
+  ],
+  "session_files": {},
+  "why": "SHARE TEMPLATE. The source machine's allowlist maps real working-session ids to the telemetry files that session's suite runs polluted; those ids point at transcripts nobody else can open, so `session_files` ships empty. The schema is unchanged. Scope is per FILE, not per session: a session that ran a suite also did real work, so a session-wide skip would hide real rows. `literals` are synthetic session_id VALUES a suite writes on purpose (synthtest-transport, selftest, calib, probe) and are skipped in every file. Extend `session_files`, never mutate a .jsonl, when a suite-contaminated (session, file) pair is identified on your own machine. KNOWN LIMIT: a genuine deny by a listed session in a listed file is skipped with the suite rows; the count cannot tell them apart.",
+  "as_of": "2026-10-02"
+}
