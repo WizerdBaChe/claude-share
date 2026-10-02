@@ -19,6 +19,7 @@ Design invariants:
     to prevent (see PLACEHOLDER checks in share_gate.py).
 """
 
+import os
 import re
 import sys
 import tomllib
@@ -112,6 +113,67 @@ if ACCOUNT_NAME_ACTIVE:
     LEAK_PATTERNS.append(("account name (bare)", re.compile(
         r"(?i)(?<![A-Za-z0-9])" + re.escape(_USER) + r"(?![A-Za-z0-9])")))
 
+# 2026-10-03. Known personal names: the class no pattern above can see, because
+# a name has no shape. Every finding the leak scan ever reported was an
+# identifier (path, address, id); a real person's name — a lab member, an
+# exchange counterpart — scanned clean. The people who could leak are a closed,
+# known set, so they are listed rather than detected (the reference-list idea in
+# pii-guard, which stores a list's location, never its values). The list lives
+# OUTSIDE this repo, next to it, and is read at run time like _USER, so no name
+# is ever written here. One entry per line: `value` or `TYPE<TAB>value`, `#`
+# comments. A finding's sample is the entry NUMBER, never the name: a gate report
+# is read by the agent fixing it, and the list's location plus the line number
+# is all it needs. Absent list = the class is OFF, and the CLEAN line says so.
+KNOWN_NAMES_FILE = Path(os.environ.get("SHARE_KNOWN_NAMES")
+                        or REPO_ROOT.parent / "_private" / "known-names.txt")
+_CJK = re.compile(r"[㐀-鿿豈-﫿]")
+
+
+def _name_pattern(value):
+    """CJK: plain substring (no word boundaries exist), 2+ chars. Latin 4+:
+    whole word, any case. Latin 2-3 (a given name like a two-letter one):
+    whole word, exact case, and only where it ends a phrase — followed by CJK
+    (spaces allowed), or closing punctuation or a quote. The first
+    calibration (2026-10-03) excluded only "followed by a lowercase word"
+    and fired 30/30 false on the English article before a capital, quote or
+    backtick (`An HTML`, `An "x"`); a second clause accepting the line end
+    fired 8/8 false on hard-wrapped prose. In English prose a short name is
+    indistinguishable from a word. The cost: a short name inside an English
+    sentence ("An said") or ending a wrapped line is a miss, said here."""
+    if _CJK.search(value):
+        return re.compile(re.escape(value)) if len(value) >= 2 else None
+    if len(value) >= 4:
+        return re.compile(r"(?i)(?<![A-Za-z0-9])" + re.escape(value) + r"(?![A-Za-z0-9])")
+    if len(value) >= 2:
+        return re.compile(r"(?<![A-Za-z0-9])" + re.escape(value)
+                          + r"(?=[ \t]*[㐀-鿿豈-﫿]"
+                          r"|[)）」』\"'’,，.。、:：;；!?！？])")
+    return None
+
+
+def _load_known_names(path):
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return None
+    out = []
+    for n, line in enumerate(lines, 1):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        value = line.partition("\t")[2].strip() if "\t" in line else line
+        rx = _name_pattern(value)
+        if rx is not None:
+            out.append((n, rx))
+    return out
+
+
+KNOWN_NAME_PATTERNS = _load_known_names(KNOWN_NAMES_FILE)
+KNOWN_NAMES_STATUS = (
+    f"known-names: {len(KNOWN_NAME_PATTERNS)} entr(ies) from the private list"
+    if KNOWN_NAME_PATTERNS is not None
+    else "known-names: list ABSENT — personal names NOT checked")
+
 
 def scan_text(text, label):
     """Return [(label, kind, line_no, sample)] for anything that must not ship."""
@@ -122,6 +184,11 @@ def scan_text(text, label):
             line_no = text.count("\n", 0, m.start()) + 1
             hits.append((label, kind, line_no,
                          s[:24] + "…" if len(s) > 25 else s))
+    for entry_no, rx in KNOWN_NAME_PATTERNS or ():
+        for m in rx.finditer(text):
+            line_no = text.count("\n", 0, m.start()) + 1
+            hits.append((label, "known personal name", line_no,
+                         f"entry {entry_no} of the known-names list"))
     return hits
 
 

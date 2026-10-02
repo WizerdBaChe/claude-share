@@ -53,8 +53,15 @@ Every case is a real incident, not a hypothetical:
                      file that does not ship is still reported by its real
                      name. check S5 had read the command's last token as the
                      hook name and reported one correct mount twice.
+ 18  leak            a listed personal name (2026-10-03), two halves: a CJK
+                     name and a short name ending a phrase fire, reported by
+                     entry number, never by value; and a CONTROL that the
+                     same short name used as an English word before a capital,
+                     quote or backtick stays quiet (the first calibration of
+                     the class fired 30/30 false on that shape). The list is
+                     synthetic and handed over through SHARE_KNOWN_NAMES.
 
-Four of the eighteen cases assert that the gate stays QUIET. That ratio is deliberate: a
+Five of the twenty cases assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -449,6 +456,56 @@ def main():
         expect_absent=['__ghost_for_test__.py" scope'],
         mutate=lambda: tmpl_path.write_text(tmpl_ghost, encoding="utf-8", newline=""),
         restore=lambda: tmpl_path.write_text(tmpl_saved, encoding="utf-8", newline=""),
+    ))
+
+    # 18 — known personal names (2026-10-03). A name has no shape, so the
+    #      list is private and lives outside the repo; this case points the
+    #      gate at a SYNTHETIC list through SHARE_KNOWN_NAMES, so no real
+    #      name is ever written here. (a) a CJK name and a two-letter name
+    #      ending a phrase fire, and the report carries the entry number,
+    #      never the name; (b) CONTROL: the same two letters as an English
+    #      article before a capital, a quote or a backtick stay quiet — the
+    #      30/30 false-fire shape of the first calibration.
+    import os
+    import tempfile
+    names_tmp = Path(tempfile.mkdtemp()) / "known-names.txt"
+    # Assembled at run time: a literal here would make this file a finding
+    # under the synthetic list it plants (the case-16 lesson).
+    cjk_name, short_name = "王小" + "測", "Q" + "a"
+    names_tmp.write_text(f"{cjk_name}\nPERSON\t{short_name}\n", encoding="utf-8")
+    prior_env = os.environ.get("SHARE_KNOWN_NAMES")
+
+    def with_names(text):
+        def go():
+            os.environ["SHARE_KNOWN_NAMES"] = str(names_tmp)
+            target.write_text(text, encoding="utf-8", newline="")
+        return go
+
+    def without_names():
+        if prior_env is None:
+            os.environ.pop("SHARE_KNOWN_NAMES", None)
+        else:
+            os.environ["SHARE_KNOWN_NAMES"] = prior_env
+        target.write_text(saved, encoding="utf-8", newline="")
+
+    results.append(case(
+        "leak: a listed personal name (CJK, and a short name ending a phrase)",
+        expect_fail=True,
+        expect_in_output=["known personal name", "entry 1 of the known-names list",
+                          "entry 2 of the known-names list", OVER_SCRUB_FILE],
+        expect_absent=[cjk_name],
+        mutate=with_names(saved + "\n\n<!-- planted by test_share_gate.py -->\n"
+                          f"客戶{cjk_name}的回覆，轉述自 human \"{short_name}\"。\n"),
+        restore=without_names,
+    ))
+    results.append(case(
+        "control: a short listed name used as an English word stays quiet",
+        expect_fail=False,
+        expect_in_output=["share gate CLEAN", "known-names: 2 entr(ies)"],
+        mutate=with_names(saved + "\n\n<!-- planted by test_share_gate.py -->\n"
+                          f"{short_name} HTML page. {short_name} \"Objects\" line. "
+                          f"{short_name} `x` here. {short_name} **bold**.\n"),
+        restore=without_names,
     ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")

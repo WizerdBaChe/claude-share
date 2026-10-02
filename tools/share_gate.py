@@ -58,7 +58,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from sharelib import (REPO_ROOT, load_manifest, scan_text, allowed,  # noqa: E402
-                      LEAK_PATTERNS)
+                      LEAK_PATTERNS, KNOWN_NAMES_STATUS)
 
 TEXT_SUFFIXES = {".md", ".py", ".toml", ".json", ".txt", ".yml", ".yaml", ".cfg"}
 SKILLS_ROOT = "skill-toolkit/skills"
@@ -786,7 +786,7 @@ def main():
 
     if not f:
         print(f"share gate CLEAN — {len(files)} tracked file(s), "
-              f"checks {'+'.join(NAMES[c] for c in selected)}")
+              f"checks {'+'.join(NAMES[c] for c in selected)}; {KNOWN_NAMES_STATUS}")
         return 0
 
     print(f"SHARE GATE FAILED — {len(f.items)} finding(s)\n")
