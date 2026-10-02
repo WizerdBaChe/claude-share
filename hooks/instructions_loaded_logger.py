@@ -28,6 +28,16 @@ CONTRACT
           session is worse than no logger.
 - output: %USERPROFILE%\.claude\telemetry\rule-loads.jsonl (gitignored),
           size-capped with one rotation so it cannot grow without bound.
+- concurrency: one exclusive append per row. The desktop app starts 2-4 CLI
+          processes within a second, each firing this hook. Windows emulates
+          O_APPEND as seek-to-end + write, which is not atomic across
+          processes: measured 2026-09-14 with the old `open(path, "a")`, 8
+          processes x 60 events kept 410/480 small rows (3 torn) and 362/480
+          large ones -- rows are OVERWRITTEN, not merely interleaved, and the
+          live log had 17/6,069 torn fragments. Each row is now one
+          `os.write` under a byte-range lock placed past EOF (so readers of the
+          log are never blocked). If the lock is not obtained within
+          LOCK_WAIT_S the row is written anyway: fail-open beats a lost row.
 
 Proof-of-life: `python hooks/tests/test_instructions_loaded_logger.py`
 --------------------------------------------------------------------
@@ -47,14 +57,69 @@ this file is OBSERVATION only, it enforces nothing.
 import json
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+try:
+    import msvcrt
+except ImportError:  # non-Windows
+    msvcrt = None
+    import fcntl
 
 # CLAUDE_TELEMETRY_DIR redirects the whole telemetry dir (suites use a temp dir;
 # production never sets it).
 LOG_PATH = Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (Path.home() / ".claude" / "telemetry")) / "rule-loads.jsonl"
 MAX_BYTES = 5 * 1024 * 1024  # rotate once past this; bounded disk use
 MAX_PAYLOAD_CHARS = 4000  # truncate pathological payloads, keep the shape
+# The lock covers one byte far past any real EOF (the log rotates at MAX_BYTES), so it serialises
+# writers without ever overlapping data a reader wants; below 2**31 for the CRT's 32-bit lock offset.
+LOCK_OFFSET = 0x7FFFFFF0
+LOCK_WAIT_S = 2.0  # well inside the hook's 5 s timeout in settings.json
+
+
+def _lock(fd):
+    """Try to take the writer lock until LOCK_WAIT_S; -> True if held."""
+    deadline = time.monotonic() + LOCK_WAIT_S
+    while True:
+        try:
+            if msvcrt:
+                os.lseek(fd, LOCK_OFFSET, os.SEEK_SET)
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            else:
+                fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB, 1, LOCK_OFFSET, os.SEEK_SET)
+            return True
+        except OSError:
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(0.005)
+
+
+def _unlock(fd):
+    try:
+        if msvcrt:
+            os.lseek(fd, LOCK_OFFSET, os.SEEK_SET)
+            msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+        else:
+            fcntl.lockf(fd, fcntl.LOCK_UN, 1, LOCK_OFFSET, os.SEEK_SET)
+    except OSError:
+        pass  # closing the descriptor releases it anyway
+
+
+def append_row(path, data):
+    """Append `data` (bytes, one whole row) as a single write under the writer lock."""
+    fd = os.open(str(path), os.O_WRONLY | os.O_APPEND | os.O_CREAT | getattr(os, "O_BINARY", 0), 0o644)
+    try:
+        locked = _lock(fd)
+        try:
+            view = memoryview(data)
+            while view:
+                view = view[os.write(fd, view):]
+        finally:
+            if locked:
+                _unlock(fd)
+    finally:
+        os.close(fd)
 
 
 def rotate_if_needed(path):
@@ -121,8 +186,7 @@ def main():
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         rotate_if_needed(LOG_PATH)
-        with open(LOG_PATH, "a", encoding="utf-8", newline="\n") as fh:
-            fh.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+        append_row(LOG_PATH, (json.dumps(record, ensure_ascii=False, default=str) + "\n").encode("utf-8"))
     except Exception:
         pass  # fail-open: observability must never cost a session
 

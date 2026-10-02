@@ -30,7 +30,7 @@ and ops/lessons.md L-001. Re-check for an interception point when the hooks
 API changes.
 
 Inheritance gap closed 2026-09-05 (user ruling, playbook P5 in
-reports/2026-09-05-model-effort-inventory.md): an Agent call that OMITS `model`
+a model/effort inventory report): an Agent call that OMITS `model`
 inherits the main loop's model, which on this machine is opus/fable — the cap
 was bypassed silently. Measured over 2026-08-06..09-04: 155 dispatches omitted
 `model`; 109 of them targeted a local agents/*.md definition whose frontmatter
@@ -58,10 +58,10 @@ tier"' telemetry/model-cap-guard.jsonl` shows 3+ rows and no name among them was
 ever classified into BLOCKED or WITHIN_CAP — at that point the vocabulary is
 demonstrably not keeping up with the fleet and the safe default has moved.
 
-Proof-of-life: `python tools/model-cap-test/test_model_cap_guard.py` (37 cases
-as of 2026-09-09, printed by the suite rather than typed: 14 must-deny / 12
-must-pass, each also asserted SILENT / 4 must-notice / 2 undetermined + 2 twins
-/ fail-open / coverage / isolation). Three of the
+Proof-of-life: `python tools/model-cap-test/test_model_cap_guard.py` (ALL PASS
+40/40 as of 2026-09-23, printed by the suite rather than typed: 14 must-deny /
+12 must-pass, each also asserted SILENT / 4 must-notice / 2 undetermined + 2
+twins / fail-open + 3 unclassifiable-shape / coverage / isolation). Three of the
 must-deny cases and one must-notice case run against a PLANTED agents/ corpus,
 because the classes "a local definition pins opus/fable" and "a local definition
 pins a tier nobody has classified" have no live instance — every definition pins
