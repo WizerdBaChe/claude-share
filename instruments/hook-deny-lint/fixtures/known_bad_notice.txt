@@ -1,0 +1,1 @@
+L-029: MSYS2 path conversion applies to this command. Arguments that look like POSIX paths are transformed before a Windows-native executable ever sees them, so `/c` becomes `C:/` and the call may exit 0 with nothing at all having happened. Detail: ops/lessons.md L-029 and the transport table in references/shell-transport.md.

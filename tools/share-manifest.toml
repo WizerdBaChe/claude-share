@@ -5984,6 +5984,10 @@ status = "verbatim"
 # where the equivalent files live under `claude-ops/ops/` rather than
 # `ops/`. `instruments/README.md` ("已知限制") records both runs (source
 # baseline; a scratch directory mimicking the installed layout).
+# 2026-10-02 (lane W5a, align to source HEAD 183c129): re-verified verbatim --
+# diff against source empty with line endings normalised. The instruments/
+# folder now also ships the hook test suites and lint instruments listed in
+# the lane W5a block at the end of this file; this entry is unchanged.
 # === lane W8 2026-09-12 END ===
 
 # === lane W1b 2026-09-12 BEGIN ===
@@ -8058,3 +8062,466 @@ fallback = """Written by the same build.py run as the HTML page."""
 #     shipped). The template does not change its behaviour.
 
 # === lane W5c-templates 2026-10-02 END ===
+
+# === lane W5a 2026-10-02 BEGIN ===
+# Hook test suites and verification/lint instruments, opened by the owner's
+# 2026-10-02 ruling on the `tools/` entry: a directory ships when its SUBJECT is
+# a hook, rule or record format this repo ships, and its data files are
+# fixtures rather than this machine's records. Source `tools/<name>/` maps to
+# `instruments/<name>/` (see `[source_map]`). All 36 files below are FIRST
+# collections (procedure A): every byte read, copied with `cp`, diffed with line
+# endings normalised, the diff equal to the declared edits. Verification ran in
+# a scratch tree laid out like an installed config home (`hooks/`, `ops/`,
+# `rules/`, `agents/` beside `tools/`), NOT in this repo's own tree -- see
+# instruments/README.md for what each suite needs.
+# Account-name handling, one choice for the whole lane: where a fixture must
+# carry a home-path SHAPE, the account segment was replaced by the single
+# character `x` (the file dangerous-command-test's own TEMP_DIR default already
+# used it, and the gate's home-path pattern needs two or more characters). That
+# keeps the tested shape and needs no allow entry that would itself publish a
+# name.
+
+[[collected]]
+path = "instruments/branch-guard-test/test_branch_commit_guard.py"
+source = "~/.claude/tools/branch-guard-test/test_branch_commit_guard.py"
+status = "edited"
+edits = [
+  "module docstring, PRIOR ART line: a named calibration record inside the source's non-shipping outputs/ tree -> 'the 2026-08-27 calibration record (... a private note, not shipped)'. The 13/13 and 5-deny/8-allow counts and the date are kept.",
+]
+# First collection (lane W5a). Subject: hooks/branch_commit_guard.py (ships).
+# Drives the hook as a subprocess; installed-layout only (finds the hook two
+# levels above itself). Redirects the telemetry writer, so no live log is touched.
+
+[[collected]]
+path = "instruments/class-closure/closure.py"
+source = "~/.claude/tools/class-closure/closure.py"
+status = "verbatim"
+# First collection (lane W5a). Static scan: for every hook suite that declares a
+# class, does a case exist? Reads hooks/ and tools/ of the installed layout.
+# `golive_check` (hooks, lane W3) names this tool. No machine-bound value.
+
+[[collected]]
+path = "instruments/class-closure/controls.py"
+source = "~/.claude/tools/class-closure/controls.py"
+status = "verbatim"
+# First collection (lane W5a). Two-sided calibration; synthetic trees only.
+# One gate finding is a false positive on a Python source snippet held in a
+# string (see the [[allow]] below).
+
+[[collected]]
+path = "instruments/class-closure/exercise.py"
+source = "~/.claude/tools/class-closure/exercise.py"
+status = "edited"
+edits = [
+  "module docstring, last paragraph: a named evidence note inside the source's non-shipping reports/ tree -> 'a dated evidence note (private, not shipped)'. The 36/15 branch counts and the surrounding finding are kept.",
+]
+# First collection (lane W5a).
+
+[[collected]]
+path = "instruments/class-closure/probe/sitecustomize.py"
+source = "~/.claude/tools/class-closure/probe/sitecustomize.py"
+status = "verbatim"
+# First collection (lane W5a). The branch-execution probe; inert unless its
+# environment variable is set (the suite asserts this).
+
+[[collected]]
+path = "instruments/context-budget/ACCEPTANCE.md"
+source = "~/.claude/tools/context-budget/ACCEPTANCE.md"
+status = "edited"
+edits = [
+  "step 1: the source config home written as an absolute home path carrying the account name -> the `$HOME`-relative form the document already uses in its other steps.",
+]
+# First collection (lane W5a). A dated manual acceptance procedure (T-007: path-
+# scoped rules load on demand). Kept as written: the revert commit named in its
+# triage table is a short sha, not scrubbed.
+
+[[collected]]
+path = "instruments/context-budget/rule_loads.py"
+source = "~/.claude/tools/context-budget/rule_loads.py"
+status = "verbatim"
+# First collection (lane W5a). Breaks down the InstructionsLoaded hook's own
+# telemetry file; exits 2 with a 'not found' line where that file does not exist.
+
+[[collected]]
+path = "instruments/context-budget/startup_baseline.py"
+source = "~/.claude/tools/context-budget/startup_baseline.py"
+status = "edited"
+edits = [
+  "usage block: the example `--project` value was the source machine's project-directory slug (it spells the account name) -> `<project-dir-name>`.",
+  "always_loaded_inventory(): the same slug was hard-coded as a path component of the MEMORY.md row -> computed from the config home with a regex that turns every non-alphanumeric character into a dash (identical result on the source machine; a SHARE EDITION comment says so).",
+]
+# First collection (lane W5a). Reads the platform's own session transcripts.
+
+[[collected]]
+path = "instruments/dangerous-command-test/test_dangerous_command_guard.py"
+source = "~/.claude/tools/dangerous-command-test/test_dangerous_command_guard.py"
+status = "edited"
+edits = [
+  "4 fixture strings (2 must-deny commands, 1 out-of-scope-tool case, 1 undetermined-class twin): the account segment of a home-path argument -> `x`. The guard classifies the delete TARGET by shape, so the verdicts are unchanged (suite 80/80 before and after, run against the source hooks in an installed-layout scratch tree).",
+]
+# First collection (lane W5a). Subject: hooks/dangerous_command_guard.py (ships).
+# Two planted fixture paths (a lowercase temp tree and a server tree on drive C)
+# trip the non-system-drive pattern; declared by [[allow]] below, not scrubbed.
+
+[[collected]]
+path = "instruments/e2-gate-test/README.md"
+source = "~/.claude/tools/e2-gate-test/README.md"
+status = "edited"
+edits = [
+  "line 4: the ticket pointer named a file inside the source's non-shipping references/ tree -> the ticket id alone (T-009 is a ticket id, kept).",
+]
+# First collection (lane W5a). Subject: hooks/delivery_gate_shadow.py (ships).
+
+[[collected]]
+path = "instruments/e2-gate-test/check_shadow_log.py"
+source = "~/.claude/tools/e2-gate-test/check_shadow_log.py"
+status = "verbatim"
+# First collection (lane W5a). Reads the shadow hook's own telemetry file; does
+# not write anything. Reports on a log that only exists after the hook has run.
+
+[[collected]]
+path = "instruments/e2-gate-test/make_fixture.py"
+source = "~/.claude/tools/e2-gate-test/make_fixture.py"
+status = "edited"
+edits = [
+  "module docstring, usage line: the example `--path` value was an absolute path on a non-system drive -> a relative example path. Code unchanged.",
+]
+# First collection (lane W5a).
+
+[[collected]]
+path = "instruments/e2-gate-test/test_shadow_hook.py"
+source = "~/.claude/tools/e2-gate-test/test_shadow_hook.py"
+status = "edited"
+edits = [
+  "happy-path transcript pair (PROJ, SID, REAL_AGENT): the source pointed at one REAL session on disk (a project-directory slug that spells the account name, a session UUID, an agent id) -> a synthetic main/subagent transcript pair built in a temp tree with the same layout the harness uses. Four cases that resolved against the real pair resolve against the synthetic one; 22/22 pass.",
+  "last report line: `before[0]` raised TypeError whenever the real telemetry log was absent (a fresh install) -> `before[0] if before else 'log absent'`. A source defect, found while verifying this copy; the source file is untouched and carries it still.",
+]
+# First collection (lane W5a). Subprocess-driven; installed-layout (finds the
+# hook under the config home). The real log is only STAT-ed, never opened.
+
+[[collected]]
+path = "instruments/entry-schema-lint/README.md"
+source = "~/.claude/tools/entry-schema-lint/README.md"
+status = "edited"
+edits = [
+  "usage block, --project-root example: an absolute path on a non-system drive with a `<repo>` token -> a relative example path (also removes a placeholder token the placeholder check would have flagged in command position).",
+]
+# First collection (lane W5a). Subject: the entry-schema record format
+# (claude-ops/ops/references/entry-schema.md ships). ES-9 reads the source's
+# system-hmi registry; see instruments/README.md for what that means here.
+
+[[collected]]
+path = "instruments/entry-schema-lint/controls.py"
+source = "~/.claude/tools/entry-schema-lint/controls.py"
+status = "verbatim"
+# First collection (lane W5a). 46 controls. Three of them (C-00, C-32, C-35)
+# need a system-hmi tree beside it and FAIL without one; verified 43/46 without
+# it and 46/46 with the source's. Placeholder drive paths in fixtures are
+# declared by [[allow]] below.
+
+[[collected]]
+path = "instruments/entry-schema-lint/lint.py"
+source = "~/.claude/tools/entry-schema-lint/lint.py"
+status = "verbatim"
+# First collection (lane W5a). Without a system-hmi tree it reports ES-9 as an
+# anchor loss and exits 2 (undetermined, never a clean pass) -- by design.
+
+[[collected]]
+path = "instruments/hook-deny-lint/fixtures/known_bad.txt"
+source = "~/.claude/tools/hook-deny-lint/fixtures/known_bad.txt"
+status = "edited"
+edits = [
+  "the planted deny text names a digest directory under an absolute home path -> the account segment replaced by `x`. The lint's FAIL checks are structural (a path governed by a read verb), so the known-bad text still fails them; controls re-run: all four behave.",
+]
+# First collection (lane W5a). A planted known-bad message, kept bad on purpose.
+
+[[collected]]
+path = "instruments/hook-deny-lint/fixtures/known_bad_notice.txt"
+source = "~/.claude/tools/hook-deny-lint/fixtures/known_bad_notice.txt"
+status = "verbatim"
+# First collection (lane W5a). Planted known-bad notice text. Diff against source empty.
+
+[[collected]]
+path = "instruments/hook-deny-lint/fixtures/known_good.txt"
+source = "~/.claude/tools/hook-deny-lint/fixtures/known_good.txt"
+status = "verbatim"
+# First collection (lane W5a). Known-good deny text. Diff against source empty.
+
+[[collected]]
+path = "instruments/hook-deny-lint/fixtures/known_good_notice.txt"
+source = "~/.claude/tools/hook-deny-lint/fixtures/known_good_notice.txt"
+status = "verbatim"
+# First collection (lane W5a). Known-good notice text. Diff against source empty.
+
+[[collected]]
+path = "instruments/hook-deny-lint/lint.py"
+source = "~/.claude/tools/hook-deny-lint/lint.py"
+status = "verbatim"
+# First collection (lane W5a). Subject: the hook-deny-message rule (ships under
+# global-claude-md/rules/). Static AST extraction over hooks/ and settings.json
+# of the installed layout; the controls need no tree.
+
+[[collected]]
+path = "instruments/hook-deny-lint/report_fp.py"
+source = "~/.claude/tools/hook-deny-lint/report_fp.py"
+status = "verbatim"
+# First collection (lane W5a). The misfire exit every conforming deny message
+# names. Records only; honours CLAUDE_TELEMETRY_DIR.
+
+[[collected]]
+path = "instruments/hook-proof-of-life/README.md"
+source = "~/.claude/tools/hook-proof-of-life/README.md"
+status = "verbatim"
+# First collection (lane W5a). Diff against source empty.
+
+[[collected]]
+path = "instruments/hook-proof-of-life/controls.py"
+source = "~/.claude/tools/hook-proof-of-life/controls.py"
+status = "verbatim"
+# First collection (lane W5a). 29 controls; synthetic hooks dir. One placeholder
+# drive path in a fixture settings.json (see the [[allow]] below).
+
+[[collected]]
+path = "instruments/hook-proof-of-life/pol.py"
+source = "~/.claude/tools/hook-proof-of-life/pol.py"
+status = "verbatim"
+# First collection (lane W5a). Sweeps every hook the installed settings.json
+# registers and runs each hook's DECLARED suite; a suite this repo does not ship
+# is reported as FAIL (not hidden). Measured in the scratch tree (source hooks
+# beside it): 43 registered hooks, 39 distinct suites run, 19 FAIL and exit 1 --
+# each a suite whose tool or data is not part of this lane (a missing tool
+# directory, or a hook self-test needing the source's own data); every suite
+# this lane ships passed inside that sweep.
+
+[[collected]]
+path = "instruments/model-cap-test/test_model_cap_guard.py"
+source = "~/.claude/tools/model-cap-test/test_model_cap_guard.py"
+status = "verbatim"
+# First collection (lane W5a). Subject: hooks/model_cap_guard.py (ships).
+# Diff against source empty; no machine-bound value.
+
+[[collected]]
+path = "instruments/ops-health-test/test_ops_health_nudge.py"
+source = "~/.claude/tools/ops-health-test/test_ops_health_nudge.py"
+status = "edited"
+edits = [
+  "one comment (the exemption fixture's rationale): a pointer to a named proposal note inside the source's non-shipping drafts/ tree -> 'the 2026-09-08 exemption proposal's step 6 (a private note)'.",
+  "check 15 fixture record, `carrier` field: a scheduled-task name (a private literal) -> the generic string 'graph-watchdog-task'. No case asserts on it.",
+  "cases 17 and 19 (stale OK marker / stale OK record), 2 expected substrings: each asserted the carrier's scheduled-task name, a private literal that the shipped hook also words differently -> the single word 'task', with a SHARE EDITION comment above each case. The staleness is still asserted by the ' silent' substring beside it; only 'the message names its carrier' got weaker.",
+]
+# First collection (lane W5a). Subject: hooks/ops_health_nudge.py (ships).
+# Fixture file names such as outputs/numberref-extraction-deferred-2026-09-10.md
+# are PLANTED data inside a temp tree the suite builds itself; kept as written.
+# Needs a git identity (case 18 commits in a temp repo); installed-layout.
+
+[[collected]]
+path = "instruments/ps-errorpref-backtest/backtest.py"
+source = "~/.claude/tools/ps-errorpref-backtest/backtest.py"
+status = "edited"
+edits = [
+  "DEFAULT_ROOTS: the second corpus root was an offline session archive on a non-system drive -> dropped, with a SHARE EDITION comment; `--root` (already supported) takes extra roots.",
+  "BASELINE comment: the same archive named as a path -> 'the offline session archive'.",
+  "BASELINE comment: one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+]
+# First collection (lane W5a). Reads real session transcripts; with none present
+# it prints 'no PowerShell-language payloads found' and exits 1.
+
+[[collected]]
+path = "instruments/ps-errorpref-test/test_ps_errorpref_guard.py"
+source = "~/.claude/tools/ps-errorpref-test/test_ps_errorpref_guard.py"
+status = "verbatim"
+# First collection (lane W5a). Subject: hooks/ps_errorpref_guard.py (ships).
+# Planted fixture paths are invented trees (project, runs, interpreter and
+# one-letter directories) declared by [[allow]] below.
+
+[[collected]]
+path = "instruments/ps-pipeline-close-backtest/backtest.py"
+source = "~/.claude/tools/ps-pipeline-close-backtest/backtest.py"
+status = "edited"
+edits = [
+  "DEFAULT_ROOTS: the second corpus root was an offline session archive on a non-system drive -> dropped, with a SHARE EDITION comment; `--root` (already supported) takes extra roots.",
+  "BASELINE comment: the same archive named as a path -> 'the offline session archive'.",
+  "BASELINE comment: one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+]
+# First collection (lane W5a). Same needs as ps-errorpref-backtest.
+
+[[collected]]
+path = "instruments/ps-pipeline-close-test/test_ps_pipeline_close_guard.py"
+source = "~/.claude/tools/ps-pipeline-close-test/test_ps_pipeline_close_guard.py"
+status = "edited"
+edits = [
+  "case P2 (one line): the analysed directory was a named benchmark-output tree on a non-system drive -> a one-character placeholder tree. The guard reads the PIPELINE shape (call operator, interpreter, early-closing consumer), not the argument; suite 56/56 before and after.",
+]
+# First collection (lane W5a). Subject: hooks/ps_pipeline_close_guard.py (ships).
+# The remaining drive paths are invented one-character or file-name trees,
+# declared by [[allow]] below.
+
+[[collected]]
+path = "instruments/shell-transport-test/test_shell_transport_guard.py"
+source = "~/.claude/tools/shell-transport-test/test_shell_transport_guard.py"
+status = "edited"
+edits = [
+  "6 fixture strings (halved-backslash and MSYS-spelling cases): the account segment of a home-path argument -> `x`. The guard classifies the delivered shape, not the name.",
+  "WIN constant, the forward-slash and POSIX-drive spellings of it, and the two assertions on the deny reason (6 lines): a private project directory path on a non-system drive and its project-name leaf -> an invented two-segment tree. Consistent across all sites, so the delivered-form assertion (the backslash-stripped spelling) still holds; suite 57/57 before and after.",
+]
+# First collection (lane W5a). Subject: hooks/shell_transport_guard.py (ships).
+# Two invented non-system-drive trees remain, declared by [[allow]] below.
+
+[[collected]]
+path = "instruments/telemetry-framing/controls.py"
+source = "~/.claude/tools/telemetry-framing/controls.py"
+status = "edited"
+edits = [
+  "GOOD_ROWS, row 2: a JSON-escaped cwd naming a real project directory on a non-system drive -> an invented two-segment tree. The row only proves that backslash escapes round-trip through the framing scan.",
+]
+# First collection (lane W5a). Synthetic fixtures in a temp dir; 25/25.
+
+[[collected]]
+path = "instruments/telemetry-framing/framing.py"
+source = "~/.claude/tools/telemetry-framing/framing.py"
+status = "verbatim"
+# First collection (lane W5a). Counts unparseable rows in the installed
+# telemetry/*.jsonl. BASELINE (16, dated 2026-09-08) is a measurement of the
+# SOURCE machine's logs, kept as the source wrote it; an adopter re-records it
+# per its own review-when line. A missing suite-sessions.json skips nothing.
+
+[[collected]]
+path = "instruments/telemetry-framing/suite-sessions.json"
+source = "~/.claude/tools/telemetry-framing/suite-sessions.json"
+status = "template"
+edits = [
+  "session_files: 9 entries mapping real working-session ids (and one placeholder key) to the telemetry files that session's suite runs polluted -> {}. The ids point at transcripts no reader can open; the schema, the four synthetic `literals` (values the suites write on purpose) and the as_of key are kept.",
+  "why / why_2026_09_23 prose: two dated paragraphs that quoted session ids, row counts and a commit sha of the source machine's own contamination history -> one generic paragraph describing the semantics (per-file scope, literals, extend-never-mutate, known limit). as_of -> 2026-10-02.",
+]
+# First collection (lane W5a). framing.py's loader treats a missing or empty
+# file as an empty allowlist, so the template changes no behaviour except the
+# source machine's historical skips.
+
+[[collected]]
+path = "instruments/ui-verify-test/test_ui_verify_guard.py"
+source = "~/.claude/tools/ui-verify-test/test_ui_verify_guard.py"
+status = "verbatim"
+# First collection (lane W5a). Subject: hooks/ui_verify_guard.py (ships).
+# Redirects the hook's telemetry; asserts the live receipt file is untouched.
+
+# --- [[allow]]: planted fixture data (the suites must contain what their guards refuse) ---
+
+[[allow]]
+file = "instruments/class-closure/controls.py"
+kind = "absolute local path (non-system drive)"
+match = "x:"
+reason = """False positive, not a path: the sample is a Python source snippet held
+in a string (`def f(x):` followed by a newline escape), which the drive-letter
+pattern reads as a drive. It is the fixture the exercise scanner is run on."""
+
+[[allow]]
+file = "instruments/dangerous-command-test/test_dangerous_command_guard.py"
+kind = "absolute local path (non-system drive)"
+match = '\temp'
+reason = """Planted data for a hook test: a cmd-style recursive-delete target the
+guard must deny. An invented lowercase temp tree on drive C (the gate's own
+exemption is case-sensitive). Not a real location."""
+
+[[allow]]
+file = "instruments/dangerous-command-test/test_dangerous_command_guard.py"
+kind = "absolute local path (non-system drive)"
+match = '\srv'
+reason = """Planted data for a hook test: the determinable twin of a PowerShell
+variable-target case (the same delete with the variable written out). An
+invented server tree. Not a real location."""
+
+[[allow]]
+file = "instruments/entry-schema-lint/controls.py"
+kind = "absolute local path (non-system drive)"
+match = ":/py"
+reason = """Planted data for a lint control: a fixture settings.json command line
+naming an interpreter, so the hook-registration parser has a Windows-shaped
+path to read. Invented, not a real location."""
+
+[[allow]]
+file = "instruments/entry-schema-lint/controls.py"
+kind = "absolute local path (non-system drive)"
+match = ":/x"
+reason = """Planted data for a lint control: one-character placeholder config homes
+in fixture settings.json rows (registered, wrongly-statused and absent hooks).
+Same placeholder class as the entries for hooks/published_record_guard.py."""
+
+[[allow]]
+file = "instruments/hook-proof-of-life/controls.py"
+kind = "absolute local path (non-system drive)"
+match = ":/x"
+reason = """Planted data for a calibration control: a one-character placeholder
+config home in a fixture settings.json that registers the synthetic hooks the
+sweep is proven to read. Same placeholder class as above."""
+
+[[allow]]
+file = "instruments/ps-errorpref-test/test_ps_errorpref_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/proj"
+reason = """Planted data for a hook test: an invented project tree used as the
+file_path of Write/Edit payloads and the working directory of PowerShell
+heredocs the guard must classify. Not a real location."""
+
+[[allow]]
+file = "instruments/ps-errorpref-test/test_ps_errorpref_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/runs"
+reason = "Planted data for a hook test: an invented run-directory assignment inside a PowerShell fixture script. Not a real location."
+
+[[allow]]
+file = "instruments/ps-errorpref-test/test_ps_errorpref_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/py"
+reason = "Planted data for a hook test: an invented interpreter path inside a PowerShell fixture script. Not a real location."
+
+[[allow]]
+file = "instruments/ps-errorpref-test/test_ps_errorpref_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/a"
+reason = "Planted data for a hook test: an invented one-letter source tree in a Copy-Item fixture line. Not a real location."
+
+[[allow]]
+file = "instruments/ps-pipeline-close-test/test_ps_pipeline_close_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/x"
+reason = """Planted data for a hook test: one-character placeholder trees (and a
+runs subdirectory of one) as the arguments of PowerShell pipelines the guard
+must classify. The guard reads the pipeline shape, not the argument. Same
+placeholder class as the entries above."""
+
+[[allow]]
+file = "instruments/ps-pipeline-close-test/test_ps_pipeline_close_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/big.log"
+reason = "Planted data for a hook test: an invented file at a drive root, the argument of a Get-Content pipeline. Not a real location."
+
+[[allow]]
+file = "instruments/ps-pipeline-close-test/test_ps_pipeline_close_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/o.txt"
+reason = "Planted data for a hook test: an invented file at a drive root, a redirect target. Not a real location."
+
+[[allow]]
+file = "instruments/ps-pipeline-close-test/test_ps_pipeline_close_guard.py"
+kind = "absolute local path (non-system drive)"
+match = '\\t'
+reason = """Planted data for a hook test: an invented one-letter directory inside
+an escaped string (two backslashes in the Python source), the executable path
+of a call-operator fixture. Not a real location."""
+
+[[allow]]
+file = "instruments/shell-transport-test/test_shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/work"
+reason = """Planted data for a hook test: the invented two-segment tree that stands
+in for a project directory in the forward-slash and delivered-form cases (the
+guard must deny the backslash spelling and offer this forward-slash form).
+Replaces a real project path (see the file's edits). Not a real location."""
+
+[[allow]]
+file = "instruments/shell-transport-test/test_shell_transport_guard.py"
+kind = "absolute local path (non-system drive)"
+match = ":/nb"
+reason = "Planted data for a hook test: an invented notebook path in a NotebookEdit payload. Not a real location."
+
+# === lane W5a 2026-10-02 END ===
