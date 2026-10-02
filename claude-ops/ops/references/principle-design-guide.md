@@ -182,8 +182,12 @@ classes its author never saw. The four are the belief's four clauses in order.
   `tools/*/controls.py`, `hooks/tests/*.py`, each hook's declared suite — must name the
   `undetermined` verdict; FAIL for any suite lacking it, no exemption set, promoted
   2026-09-09 the day the 28-name legacy backlog was drained to 0 — 31/31 carry; word-level
-  proxy, the line is printed); the one-specimen-PER-declared-class half stays audit (reads
-  the case list against the instrument's own class vocabulary). The drain is this property's
+  proxy, the line is printed) and `tools/class-closure/exercise.py` for whether that named
+  case RUNS (same check, run-time half since 2026-09-23: a line probe over every suite;
+  WARN on `named-only`; 37/51 reach an instrument branch in the canonical tree, 14 answer
+  the class as a value the probe cannot see); the one-specimen-PER-declared-class half stays audit (reads the case
+  list against the instrument's own class vocabulary — the probe finds branches that NAME
+  the unclassifiable class or guard a type, not an instrument's list of real classes). The drain is this property's
   own strongest evidence: writing the 28 missing specimens found five hooks folding an
   unclassifiable input into a real verdict (a non-string url RECORDED AS a navigation that
   happened; a non-string path COUNTED AS a read file) and ten crashing on a payload that
@@ -279,6 +283,15 @@ classes its author never saw. The four are the belief's four clauses in order.
 - **AP-51** [rule-file, registry-row] declares `layer:` / `audience:` only where the path does
   not fix them; inside `~/.claude` rule directories the value is derivable and may be omitted
   — detect: documented (`entry-schema.md` §3 conditional fields).
+- **AP-65** [node-distillation-set] every clause in a round's portable playbook carries the
+  LAYER it is destined for (rule-tier / owning skill / project CLAUDE.md / stays in the round),
+  and the set's audience edition is GENERATED from that layer rather than hand-written beside
+  it — detect: audit (`rules/naming-and-placement.md` §4a PR-1/PR-3; a second hand-written
+  carrier of the same material is the finding). Instance: SSLD T00's three documents, where
+  one wrong worked example reached three carriers and two carriers drifted in 24 h.
+- **AP-66** [node-distillation-set] a clause parked in the playbook rather than promoted names
+  its expiry EVENT — the next node of the same kind opening — and that node's kickoff lists
+  the outstanding ids — detect: audit (PR-2; 2 of 20 promoted at the instance).
 
 ## CLAUDE.md «Four deliverable-shape rules»
 
@@ -286,7 +299,7 @@ classes its author never saw. The four are the belief's four clauses in order.
   `B 體驗` shape (`ops/references/uat.md`) — detect: audit (grep the SKILL.md for `必驗` when it
   names a visual deliverable).
 
-## CLAUDE.md «When fixing a bug in code that already passed user acceptance»
+## CLAUDE.md «If the code already passed user acceptance»
 
 - **AP-53** [tool, hook] loosening a gate ships a regression case reproducing what it used to
   catch; the controls' case count never decreases — detect: audit (git diff of `controls.py`).
@@ -348,6 +361,7 @@ classes its author never saw. The four are the belief's four clauses in order.
 | registry-row | AP-05 AP-18 AP-20 AP-21 AP-24 AP-29 AP-33 AP-42 AP-51 |
 | page-builder | AP-06 AP-37 AP-38 AP-39 AP-49 AP-56 |
 | tool | AP-04 AP-22 AP-23 AP-28 AP-31 AP-37 AP-40 AP-43 AP-44 AP-45 AP-46 AP-53 AP-55 AP-61 AP-62 AP-63 AP-63a AP-64 |
+| node-distillation-set | AP-47 AP-51 AP-65 AP-66 |
 
 Mechanically detected today (ES-1..ES-8): AP-04 AP-06 AP-11 AP-12 AP-16 AP-30 AP-32 AP-33
 AP-36 AP-38 AP-39 AP-47 AP-49 (+ AP-05 AP-15 AP-22 AP-26 AP-27 AP-29 AP-40 through existing

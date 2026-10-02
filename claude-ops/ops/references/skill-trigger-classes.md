@@ -58,10 +58,24 @@ PROCEDURE and belong in the body. For an `ask-first` PROACTIVE skill the ask IS
 the fire — `workflow-checkpoint` keeps "proactively ASK" in its description for
 that reason, and it is routing there, not procedure.
 
+RECALL OVER PRECISION — the default error preference of every description
+(user ruling 2026-09-28, trigger-probe DESIGN D-10): one or two extra
+candidates the managing model confirms or drops cost less than a skill that
+never surfaces. So a description names the user's plain phrasings for its
+situation and does not gate on "only when explicitly asked"; the price of a
+wrong fire is paid by on-fire (above) — `ask-first` asks, `execute` has a cheap
+first step. Two limits stay: a should-not probe the skill would LEAD (rank 1)
+is still a defect, and a word that flips an accepted should-not probe is not
+worth its recall (2026-09-28: a bare 安全 bigram in security-deep-checklist
+turned 「merge 前看一下安全」 into FALSE_FIRE, so the pass wrote 資安). The
+measure is `trigger_probe.py run` at shortlist k=3.
+review-when: the user reverses the ruling, or real-traffic false fires from
+this pass show up in `tools/skill-routing-audit.py` BYPASS rows.
+
 SOURCE — what selects the skill. `skill-trigger-dict.md` models `utterance`
 only, so a dict entry for an artifact-context or omission skill is fiction by
-construction, not by neglect (see the glossary in
-references/claude-config-context.md).
+construction, not by neglect (see the glossary in the claude-config project
+context record under the source's references/ tree, not shipped here).
 
 THE ROUTING/PROCEDURE TEST. Routing = text that changes WHETHER OR WHEN the
 skill is selected. Procedure = text that only changes what happens AFTER it is
@@ -114,8 +128,9 @@ zero-means: expected — user ruling 2026-08-15: ALL THREE MODES wait for an
 class: user-manual
 source: utterance
 on-fire: ask-first    # a full deep pass is a long commitment
-zero-means: expected — the description requires an explicit DEEP/HOLISTIC ask.
-proc: Modes: (A) single file/PR deep review, (B) whole-project architecture health, (C) dependency fitness audit:
+zero-means: expected — it waits for a DEEP/HOLISTIC ask (no longer an "explicit"
+  one since the D-10 recall pass, 2026-09-28), and such asks are rare.
+proc: Modes: (A) single file/PR deep review, (B) whole-project architecture health:
 
 ## config-self-audit
 class: always-on
@@ -124,7 +139,9 @@ on-fire: execute      # user ruling: 叫到就驗，只會好不會壞
 zero-means: would be a defect; measured 28 fires, so it is healthy. Its 0% dict
   coverage is the dict's limit, not the skill's — the object under edit selects
   it, and no utterance vocabulary can capture that.
-proc: fixes only after consent
+  (Former proc "fixes only after consent" left the description 2026-09-28 for
+  D-10 vocabulary; the body keeps it: "After applying fixes (only with user
+  consent)". Procedure share now 0%.)
 
 ## design-system-suite
 class: phase-gated
@@ -154,6 +171,14 @@ source: utterance
 on-fire: execute      # reference and methodology, read-only
 zero-means: expected — fires only in a UI/animation implementation phase, and
   13 dict occasions in 43 days were discussion, not implementation.
+
+## motion-video
+class: phase-gated
+source: utterance
+on-fire: execute      # router + references; the film itself is the caller's deliverable
+zero-means: expected between video productions — fires only when a whole film is
+  being made or planned. Split from motion-design 2026-09-30 (user ruling); element
+  motion questions still route to motion-design.
 
 ## product-design-thinking
 class: conditional
@@ -209,7 +234,7 @@ class:      conditional
 source:     utterance
 on-fire:    ask-first
 zero-means: no skill accumulated field-test debt in the window (no misfire or bypass was reported, no fresh rewrite took a first real run) and the user did not ask for a round; the loop is deliberately on-demand after convergence
-proc:       then verify, adopt, and hand off via disposition files so the loop continues across sessions
+proc:       then verify, adopt, and hand off via disposition files
 
 <!-- Batch added 2026-09-08 (debt sweep): the registry covered 15 of 29 skills.
      The audit's `quiet` population is built from the DICT, so an unregistered
@@ -302,12 +327,29 @@ zero-means: no paper needed turning into a talk or deck. See paper-distill: the
   pair must be read together, and the lab's weekly cycle is the occasion
   generator for both.
 
+## pptx-review
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no built deck was reviewed in PowerPoint (no deictic 「這頁」 on a
+  .pptx, no comment round). Born 2026-09-29; its occasion is the SECOND round of a
+  deck (the first build has nothing to review), so a zero while decks are being
+  built for the first time is expected, not a routing finding.
+
 ## post-brief
 class:      conditional
 source:     utterance
 on-fire:    execute
 zero-means: nobody asked what a pasted post says. Stage 1 of 2 by design; the
   GUI stage is a separate product and its absence is not this skill's zero.
+
+## case-library
+class:      conditional
+source:     utterance
+on-fire:    execute
+zero-means: no new stream of same-kind examples was brought in, and no case was
+  added to an existing library. Added 2026-09-27 with one instance
+  (motion-video-lab); a long zero is expected between batches of cases.
 
 ## render-perf
 class:      conditional

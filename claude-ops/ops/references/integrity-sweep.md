@@ -64,10 +64,6 @@ grep -h '^color:' agents/*.md | sort -u | grep -vE 'red|blue|green|yellow|purple
 #    INV-4 hits/state in every card equal what its events derive; INV-5 the
 #    index equals a fresh render (generated-from hash); INV-6 every record
 #    carries a locator. Must print nothing and exit 0.
-# SHARE EDITION: tools/closeout-intake/ does not ship in this repo -- declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` (source-environment-only
-# CLI and store). Both commands below always fail in this share; there is no
-# adopter-side equivalent to run in their place.
 python tools/closeout-intake/intake.py check --against HEAD --index
 # ^ calibrated two-sided in controls.py: C-11 (a planted invalid file), C-21
 #   (a hand-edited Pitfall), C-22 (status: contradicting the events), C-23 (an
@@ -288,7 +284,8 @@ python tools/skill-routing-audit.py --surface
 #     backups/ and memory-archive/ were once the SOLE surviving copies.
 #     Derived from ai-coding-guardrails section 8, whose MVG is exactly "verify
 #     TODAY" - the one of its nine sections not already covered by an always-on
-#     rule (coverage table: references/claude-config-tickets.md T-017).
+#     rule (coverage table: the claude-config ticket ledger under the source's
+#     references/ tree, not shipped here, T-017).
 git reflog --date=iso | tail -1        # oldest entry = the REAL retention window
 git config --get gc.reflogExpire || echo 'reflogExpire UNSET (default 90d) -- ACT'
 git config --get gc.reflogExpireUnreachable || echo 'unreachable UNSET (30d) -- ACT'
@@ -642,6 +639,9 @@ python -X utf8 tools/graph-snapshot/tests/test_smoke.py   # 41 checks; 6 drive e
 #     with every test green — the motivating case is the eol hazard (commit
 #     6fbe14c: a CRLF checkout would have corrupted all receipts silently).
 #     Regeneration MUST be a byte-level no-op:
+# SHARE EDITION: outputs/ does not ship in this repo (`[[not_shipped]]` under
+# `tools/share-manifest.toml`), so the two commands below have nothing to run
+# against here; the check stays as the pattern (rebuild, then a clean `git status`).
 for b in outputs/diagram-authoring/*.build.mjs; do node "$b" >/dev/null || echo "BUILD FAILED: $b"; done
 git status --porcelain outputs/diagram-authoring/*.html   # must print nothing
 #     Act on: any diff = receipt drift — find the library edit that caused it;
@@ -680,13 +680,7 @@ git ls-files -ic --exclude-standard -x 'projects/'
 #     a mechanical detection. An OMISSION fires no event (40-maintenance §2a
 #     P2), so the absence is enumerated here. Legacy artifacts (first commit on
 #     or before 2026-09-08) WARN with a count that must not rise; born-after FAIL.
-# SHARE EDITION: tools/entry-schema-lint/ does not ship -- declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` (the general `tools/`
-# exclusion; new since this round, not individually adjudicated before now).
-# `ops/references/entry-schema.md` and `ops/references/principle-design-
-# guide.md`, the two files this lint enforces, both ship; the lint itself does
-# not, so its ES-1..ES-8 checks stay a documented-only property in this share.
-python -X utf8 tools/entry-schema-lint/controls.py | tail -1   # ALL PASS 41/41 — two-sided; read this line BEFORE trusting the next
+python -X utf8 tools/entry-schema-lint/controls.py | tail -1   # ALL PASS 46/46 — two-sided; read this line BEFORE trusting the next (ES-9 system-hmi registry coverage added 2026-09-29, C-32..C-36)
 python -X utf8 tools/entry-schema-lint/lint.py                  # exit 0; last line `entry-schema-lint: 0 FAIL / 0 WARN / anchors ok`
 #     Born-RED baseline 2026-09-08 = 0 FAIL / 59 WARN; same day after R2 (user
 #     ruling, STATUS backfilled from first-commit dates) and R3 (model3d ruling
@@ -754,11 +748,6 @@ git worktree list                                            # canonical tree on
 #     inert for a day. Its suite existed and passed the moment someone ran it.
 #     Declarations live in each hook's own docstring (`Proof-of-life: `python
 #     ...``), so coverage grows by editing the hook, never a list here.
-# SHARE EDITION: tools/hook-proof-of-life/ does not ship -- declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` (the general `tools/`
-# exclusion; new since this round, not individually adjudicated before now).
-# Each hook's own `Proof-of-life:` docstring line, which this tool reads and
-# runs, still ships with the hook; there is no runner here to execute it.
 python tools/hook-proof-of-life/pol.py --list      # seconds: classify only, no suites run
 python tools/hook-proof-of-life/pol.py             # MEASURED 57s over 25 suites (2026-09-08, idle)
 python tools/hook-proof-of-life/controls.py | tail -1   # ALL PASS n/n — the instrument itself
@@ -820,17 +809,15 @@ python tools/telemetry-framing/controls.py | tail -1    # ALL PASS n/n — the i
 #     hook's declared Proof-of-life suite (through pol.py's grammar, so 31 and
 #     33 never disagree on what a declaration is); a suite it cannot read is
 #     itself `undetermined` and excluded from the counts.
-# SHARE EDITION: tools/class-closure/ does not ship -- declared
-# `[[not_shipped]]` under `tools/share-manifest.toml` (the general `tools/`
-# exclusion; new since this round, not individually adjudicated before now).
-# Same gap as check 31: nothing here to run it against, and the suites it
-# would enumerate (`tools/*/controls.py`) are themselves mostly source-only.
 python tools/class-closure/closure.py                   # FAIL on any lacking suite (promoted 2026-09-09)
 python tools/class-closure/controls.py | tail -1        # ALL PASS n/n — the instrument itself
 #     "Carries" is a WORD-LEVEL proxy (undetermined / unclassifiable / UNDET in
-#     the suite text; `inconclusive` deliberately excluded) and the matching line
-#     is printed — a comment can satisfy it, so a `carries` row is evidence the
-#     class is NAMED, not that it is exercised. Act on: FAIL → that suite has
+#     the suite's CODE tokens — since 2026-09-23 comments and docstrings do not
+#     count, and a .py that does not parse is `undetermined`; `inconclusive`
+#     deliberately excluded) and the matching line is printed — a string that
+#     is never asserted can still satisfy it, so a `carries` row is evidence the
+#     class is NAMED in code, not that it is exercised — the run-time half below
+#     (exercise.py) is what reads execution. Act on: FAIL → that suite has
 #     no unclassifiable specimen; add one (the line the tool prints says what).
 #     There is no softer level and no exemption set: PROMOTED 2026-09-09, the
 #     day it was born — the 28-name legacy backlog was drained the same day
@@ -838,6 +825,11 @@ python tools/class-closure/controls.py | tail -1        # ALL PASS n/n — the i
 #     slices), so LEGACY_LACKING and the WARN branch are gone.
 #     BASELINE 2026-09-09 (post-drain): **31 suites / 31 carry / 0 lack / 0
 #     undetermined — PASS.** Any `lacks` row is the regression.
+#     REGROWN AND RE-DRAINED 2026-09-23: 10 of 51 lacked the case again, since
+#     this sweep was the verdict's only runner. Now also run at save
+#     (hooks/golive_check.py `closure_gap`) and by the HMI point
+#     `health-checks.class-closure`. BASELINE 2026-09-23: **51 / 51 carry /
+#     0 lack / 0 undetermined — PASS.**
 #     What the drain found, which is the argument for the severity: five hooks
 #     folded unclassifiable input into a real verdict (browser_pane_scope_guard
 #     recorded a non-string url as a navigation that happened;
@@ -846,6 +838,59 @@ python tools/class-closure/controls.py | tail -1        # ALL PASS n/n — the i
 #     not an object while their docstrings claimed fail-open, and several
 #     instruments had a correct `undetermined` branch no case had ever reached.
 #     None of that was visible from the counts.
+python tools/class-closure/exercise.py                  # RUN-TIME half (2026-09-23): WARN on named-only, ~80 s
+#     The static proxy above cannot tell a case that RUNS from a word that sits
+#     there. exercise.py runs every suite closure.py enumerates (imported, one
+#     enumeration) through pol.run_suite with a sys.monitoring line probe on
+#     PYTHONPATH (python children inherit it) and asks: did a NAMED case line
+#     execute, and did an instrument BRANCH execute — a guarded statement naming
+#     the class, the body of an `if` testing it, or a `not isinstance` guard
+#     body (the wordless form hooks use; labelled `(shape)`). Rows:
+#     exercised / branch-unreached / case-only / named-only / unnamed-exercise /
+#     absent / undetermined. Only `named-only` counts (WARN, born 2026-09-23;
+#     promotion trigger in the exercise.py docstring); `unnamed-exercise` is
+#     advice on a suite closure.py already FAILs (the case exists, rename it);
+#     `case-only` means the instrument answers the class as a VALUE (a command
+#     grammar, an enum, a table shape) the probe cannot see — forwarded, never
+#     a finding. Act on: named-only → the named case never ran (dead code, or a
+#     --selftest hook whose word is in production code only); make it run.
+#     BASELINE 2026-09-23 (canonical tree): **51 — 37 exercised (18 named
+#     branch, 19 shape only), 14 case-only, 0 named-only, 0 undetermined —
+#     PASS.** A linked worktree reads 36/15: a `not isinstance` guard can also
+#     filter a legal variant fed by live data (e2-gate / delivery_gate_shadow
+#     skipping string `content` in real transcripts), so a shape-only row is
+#     the weakest evidence. Serial cost 233 s vs 228 s untraced; the recorded
+#     false negative (dispatch_commit_notice at c0b30ee~1) replays as
+#     unnamed-exercise. Not run at save time.
+# 34. (2026-09-18) committed instruction surfaces pointing at files git does
+#     not hold. Check 14 of the nudge judges dirty paths by AGE; it cannot see
+#     that an untracked path is load-bearing because something ALREADY IN
+#     HISTORY names it — and a rollback to any commit in that window restores
+#     the pointer without its target. Found 2026-09-18: `skills/comsol-agent-
+#     pipeline/` never added (4 days), and the committed CLAUDE.md indexing an
+#     untracked `rules/layout-convergence.md` by bare name. Reads PATH refs and
+#     NAME refs (backticked rule name → rules/<n>.md; dict `### <skill>` →
+#     skills/<n>) from CLAUDE.md, settings.json, the dict, skills/ hooks/ rules/
+#     ops/ agents/ commands/, references/*.md and tools/*/README.md.
+# SHARE EDITION: tools/tracking-refs/ does not ship -- declared `[[not_shipped]]`
+# under `tools/share-manifest.toml` (the general `tools/` exclusion). Nothing to
+# run here; `git ls-files --others --exclude-standard` plus a grep for the paths
+# your rule files cite is the hand substitute.
+python tools/tracking-refs/refs.py                      # exit 1 on any `dangling` row; `--verbose` for the REPORT classes
+python tools/tracking-refs/controls.py | tail -1        # ALL PASS n/n — the instrument itself
+#     Act on: FAIL → commit each named target by path, or fix the pointer if the
+#     target is not meant to exist; never widen .gitignore to silence it.
+#     `pending` (both halves uncommitted) and `ignored` (a deliberate exclusion)
+#     are REPORT; `undetermined` (target found nowhere — prose, or a path
+#     relative to another repo such as the COMSOL rig) is counted apart and
+#     never moves the exit code; a non-repo root is undetermined, exit 2.
+#     BASELINE 2026-09-18 (post-sweep, `a016bd1`): **0 dangling / 0 pending /
+#     18 ignored / 106 undetermined — PASS.** Positive control on real history:
+#     worktree at `b142312` + the then-untracked files → exactly the 2 cases
+#     above, exit 1. Record: a dated git-tracking-sweep report under the
+#     source's `reports/` tree (not shipped here).
+#     Also runs at session start as nudge check 18, only when the tree has an
+#     untracked capability path (steady state pays nothing).
 ```
 
 ## Check 7's rationale (added 2026-08-12)

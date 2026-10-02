@@ -26,10 +26,10 @@ reviews nobody can act on — the action was performed, the outcome missed.
 ## Step 1 — Check the ledger before acting
 
 Three quick checks: (a) task tracker — already started, maybe half-done?
-(b) the lessons ledger — grep `ops/lessons.md` for a prior hit (the source's
-tag-overlap match tool is source-only and not shipped here) — and past notes
-— already hit and solved? (c) skill/tool catalogue — a tool for exactly this
-already exists?
+(b) the lessons ledger — `python tools/closeout-intake/intake.py match --text
+"<task words>" [--project <name>]` returns ≤3 cards by tag overlap (grep
+`ops/lessons.md` is the fallback) — and past notes — already hit and solved?
+(c) skill/tool catalogue — a tool for exactly this already exists?
 
 **Why**: in long-running agent environments the dominant waste is reinvention —
 duplicate mechanisms built because nobody looked first.
@@ -150,13 +150,20 @@ ticket, explain the reorder when reporting.
 1. **Report**: one-sentence conclusion first → key details → next step. Large
    deliverables by path, not pasted.
 2. **Feed the loop**: route the lesson per `40-maintenance.md` §2 (check for an
-   existing entry first). A global-level pitfall is a structured record: front
-   matter `what` / `tags`, `## Record` with `locator:`, `## Context` /
-   `## Pitfall` / `## Fix` [+ `## Detection`, `## Narrative` for the verbatim
-   rest], added through a guarded intake process (source-only tooling, not
-   shipped here) rather than by hand-editing the lessons ledger. A decision
-   with rejected options, a ≥2-round problem, or a plan deviation also lands
-   in the project's decision journal (`60-bootstrap.md` §G write-triggers).
+   existing entry first — `intake.py match`). A global-level pitfall is ONE
+   command: write a draft (front matter `what` / `tags`, `## Record` with
+   `locator:`, `## Context` / `## Pitfall` / `## Fix` [+ `## Detection`,
+   `## Narrative` for the verbatim rest]) then
+   `python tools/closeout-intake/intake.py add --from <draft>`; a recurrence is
+   `intake.py event L-nnn --kind recurrence --held yes|no --note "…"`. Never
+   edit `ops/lessons/` or `ops/lessons.md` by hand (the guard denies it; a
+   reject names the rule and the repair). A decision with rejected options, a
+   ≥2-round problem, or a plan deviation also lands in the project's decision
+   journal (`60-bootstrap.md` §G write-triggers). A subsystem defect (skill /
+   tool / hook / rule) met mid-task and not yet recorded is ONE
+   `ledger.py feedback` row (feedback pool, `tools/feedback-pool/README.md`);
+   `feedback.py report --mine` lists this session's rows — a `left` one is
+   named in the report, never absorbed.
 3. **Reconcile commitments**: everything you said you'd do — done, or
    rescheduled with notice? Before ending the turn, check for any ticket still
    marked active and owned by you (including one interrupted by an incoming

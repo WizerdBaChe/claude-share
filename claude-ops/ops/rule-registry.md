@@ -138,13 +138,38 @@
 - rollback: `backups/2026-08-12/`
 
 ### `CLAUDE_MD_CAP` — global CLAUDE.md always-loaded budget
-- current: **23,040 bytes (22.5 KiB)** — user ruling 2026-09-06; file at
+- current: **23,552 bytes (23.0 KiB)** — user ruling 2026-09-22 (+512 B), made
+  on this entry's own terms: the 2026-09-22 sink pass below had just run and
+  left 55 B, and the L-105 fold then needed ~220 B in the always-loaded layer —
+  its recurrence (SSLD T14) happened because the rule lived only in one
+  project's docs and never reached another project, so an on-demand home
+  (`30-judgment.md` R2, where the ❌/✅ pair also stays) is the layer that had
+  already failed. Merged into the fix-a-defect bullet, not appended. File after:
+  see the 09-22 pass line. Next addition runs find-a-sink and merge FIRST.
+- previous: **23,040 bytes (22.5 KiB)** — user ruling 2026-09-06; file at
   **22,985 B since 2026-09-10 (headroom 55 B)** after a sink-and-merge pass,
   no raise; **22,996 B (headroom 44 B)** the same evening after the audience
   ruling R-1 (user: "兩層宣告，不分檔") added a Readers line to the preamble and
   a `[main]` tag on six main-loop-only bullets, paid for by four restatement
   cuts (the commit-type list, "especially the review family", the UAT-P8
   restatement, a spec pointer).
+- 2026-09-22 pass, no raise: the file had crept to 23,489 B (native-render-first
+  index entry, 收掉 ruling +338 B). Sinks, all restatements with a canonical
+  copy: (1) the build-spec / concept-doc language sub-bullets' per-section
+  lists → `skills/product-design-thinking/SKILL.md` Phase 3 rung table, now
+  declared canonical and binding outside the skill (gist + pointer kept);
+  (2) path-scoped index hints cut back to trigger hints (5 had regrown rule
+  text); (3) the auto-mode rationale → this file's `shell tool routing` key;
+  (4) lesson-id lists behind two pointers whose targets carry them. One
+  trigger clause added (L-104 fold: judge IMPLEMENTATION by what the task will
+  produce, +~95 B). Net 23,489 → 22,985 B (headroom 55 B), no distinct rule
+  dropped; entry-schema-lint 0/0. Then, under the raised cap: L-105 merged into
+  the fix-a-defect bullet (+267 B) and the contract bullet gained its ledger
+  carrier + hook pointer (+152 B) → **23,404 B (headroom 148 B)**. Same day,
+  user 「<session>也跑」 (the quoted session id dropped): the system-hmi K5 duty (design 17 M-4: a hook may not
+  direct user-facing output, so "name a standing alarm at the reply's edge"
+  had to be a CLAUDE.md clause) merged into the pre-existing-issues bullet
+  (+106 B) → **23,510 B (headroom 42 B)**. The next addition needs a sink.
 - 2026-09-10's pass (rules-debt audit, `reports/2026-09-10-rules-debt-audit.md`
   §5; user-confirmed): the file had crept to 23,522 B (+1,508 since the
   09-06 pass, three rules and a CJK clause). Sinks found, in the order this
@@ -257,7 +282,31 @@
   deletions + 1 new rule, sink check empty for the residual)** → cap unchanged,
   file 23,522 → 22,985 B (2026-09-10, user-confirmed sink-and-merge; shell
   bullets onto the hook, 4 candidates merged, 0 rules dropped)
-- review-when: any proposed global-CLAUDE.md change (headroom 55 B as of
+- 2026-09-14 evidence — WHICH loads are charged (closes O-1 of a dated
+  rules-debt audit; full record in a dated loaders root-cause report — both
+  under the source's `reports/` tree, which this repo does not ship). The ~35–55/day
+  CLAUDE.md `session_start` loads with no transcript are all
+  `entrypoint=claude-desktop` processes that receive `initialize` and never a
+  user message: (a) prewarm sessions discarded unclaimed (`[CCD] prewarm …
+  discarded (ttl|superseded)` in the app bundle), (b) relaunch auto-resume
+  warms (`warmTrigger:"launch_quit_resume"`), (c) temporary config-loading
+  queries that list slash commands (`getCommandsFromTemporaryQuery`, observed
+  living ~2 s, `--strict-mcp-config`). Such a process sends NO Messages
+  request — measured with `tools/rule-usage-census/zero_msg_probe.py`: `init`
+  0 requests in 90 s, positive control `message` 7 requests carrying CLAUDE.md
+  — and the 138 such session ids appear in 0 prompt/tool hook logs. So "loaded
+  in full every session" holds for every session that sends ≥1 message; a
+  no-message Desktop load is a local file read, not a token charge. The cap's
+  value and doctrine are unchanged (each real session still pays the full
+  file); only O-1's cost multiplier was wrong. No user setting to disable
+  prewarm was found in the bundle (not proven absent — may be server-gated).
+  Pinned: Desktop 1.52386.3.0, CLI 2.1.266, api-key auth (OAuth cannot be
+  probed locally), bare `initialize` payload.
+- review-when: the desktop app or its bundled CLI changes version AND
+  `loaders.py` shows no-transcript loads appearing in prompt/tool hook logs, or
+  a CLI release adds a startup request (cf. anthropics/claude-code#47922
+  "Warmup") → re-run `zero_msg_probe.py message` then `init`; a nonzero `init`
+  count reopens the 2026-09-14 evidence. Also: any proposed global-CLAUDE.md change (headroom 55 B as of
   2026-09-10 — the wording reserve is still spent, so re-run find-a-sink /
   merge FIRST and treat the headroom as unspendable), or a rule in this file
   gains a valid `paths:` sink and can leave. Also: the shell-guard re-judge
@@ -295,8 +344,8 @@
 - rollback: `hooks/ops_health_nudge.py` `DESC_CAP`
 
 ### routing dict cap
-- current: **49K bytes on `skill-trigger-dict.md`, ROLE = REVIEW TRIGGER**
-  (2026-09-08, after dict-review round 3). Firing means "run the routing
+- current: **60K bytes on `skill-trigger-dict.md`, ROLE = REVIEW TRIGGER**
+  (2026-10-01, named user ruling 「先調上限」, after the routing audit). Firing means "run the routing
   audit and correct the entries it reports as fiction", NOT "extract detail".
 - why: same class (b) argument as `ops file cap` — charged only on a routing
   miss — plus one this file has that the ops files do not. `tools/skill-routing
@@ -390,6 +439,30 @@
     repair for an unmatchable token is a token that matches only in context,
     not the shortest one. Still not an "entries true" reading: coverage stayed
     at 0% for most entries, so the three-in-a-row test has not started.
+  - `2026-09-22 51,858 B`: **breach open, cap NOT raised.** The audit found 6
+    new slash-alternation tokens (5 in `comsol-agent-pipeline`, 1 in
+    `skill-co-upgrade`, all written after round 3), now spelled out; its
+    detector caught them the day it ran, as designed. DEAD 3 = 2 plugin /
+    built-in skills (`engineering:system-design`, `run`) plus one phase-gated
+    entry, none fiction. The routing-miss residue in
+    a dated trigger-probe report under the source's outputs/ tree, which this
+    repo does not ship (7 predicted MISS), is a dict
+    EDIT, user-ruled (INV-2). Raising the cap is proposed, not applied: the
+    2026-09-08 authorization note requires a named yes for this constant, and
+    「走建議」 on a batch did not name it.
+    **CLOSED the same day (round 4):** the user named the value (「dict 上限調
+    56K」) and ruled the edits (「trigger也改」). A 7th unmatchable token was
+    found by hand — `機制架構檢查・系統架構盤點・檢查項`, joined with `・`,
+    invisible to a slash-only detector — so the detector now tests the joiner
+    CLASS (`ALTERNATION_JOINERS`; controls: both joiners flagged, a clean
+    token passes). The 7 predicted MISS phrasings went into the dict and two
+    descriptions; after a re-fit (the old calibration was STALE, and a run on
+    it used an uncalibrated 0.30 floor — a different ruler) MISS 7→1. One edit
+    was walked back within the hour: `移植過來的規則` added the bigram `來的`,
+    which stole `這東西到底怎麼串起來的` from diagram-authoring. The remaining
+    17 predicted fails are stopword/bigram thieves of the lex-1 ruler, not
+    description defects. Raised 49K→56K; file 52,081 B = 90.8%. Not an
+    "entries true" reading either: the three-in-a-row test has not started.
 - history: 20K (birth) → **24K (2026-08-15**, user ruling, after the first
   routing audit) → **28K (2026-08-17**, after dict-review round 1) → **42K
   (2026-09-04**, user ruling, after dict-review round 2) → **49K
@@ -397,7 +470,13 @@
   so the next expansion re-runs the decision — applied BEFORE the named
   authorization `70-evolution.md` §1 invariant 1 requires for a `hooks/` edit,
   disclosed the same session, and RATIFIED by the user 2026-09-08; the sequence
-  was the defect, not the value). The
+  was the defect, not the value) → **56K (2026-09-22**, named user ruling,
+  after dict-review round 4; 90.8% at landing) → **60K (2026-10-01**, named user
+  ruling 「先調上限」; the audit's 4 DEAD entries are not fiction —
+  `engineering:*` are official Anthropic plugins the user enables now and then,
+  so the 2026-09-22 reading below held; trimming them and redirecting their
+  triggers to the local skills is a separate user-ruled dict edit; 93.6% at
+  landing). The
   2026-08-15 breach was the first time anything checked whether its contents
   corresponded to reality. **The 2026-08-17 raise was never recorded here** and
   this entry read "24K" until 2026-08-27, while `40-maintenance.md` §3 read
@@ -675,12 +754,10 @@
   tool-rewritten projection in xi vocabulary (S-9). `ops/lessons.md` is a
   GENERATED index of capped cards (INV-5, `intake.py render`) with NO count cap;
   the `## L-nnn` heading shape is kept so citations and gsnap keep resolving.
-> **Share note.** `tools/closeout-intake/` (the `intake.py` CLI and its
-> `controls.py`) is source-only (excluded-by-decision, `tools/share-manifest.toml`).
-> `ops/lessons.md` ships here as a generated snapshot, and `ops/lessons/` does
-> not ship at all (`[[not_shipped]]`, `excluded-by-decision`) — there is no
-> shipped `add`/`event`/`render`/`report`/`match`/`check` to run against this
-> copy; build your own capture tool against the record shape described below.
+> **Share note.** `tools/closeout-intake/` ships here under `instruments/`; the
+> record tree it writes, `ops/lessons/`, does not (`[[not_shipped]]`,
+> `tools/share-manifest.toml`) and `ops/lessons.md` ships as a generated
+> snapshot — the commands below run only against a record tree you start yourself.
   Sub-keys — values are PROVISIONAL and live in the code; the registry NAMES
   them and never restates them (a second site would be a drift surface):
   - `INTAKE_FIELD_CAPS` — `intake_core.DEFAULT_CAPS`, byte caps on Context /
@@ -964,6 +1041,10 @@
 - evidence: enforced mechanically by `hooks/model_cap_guard.py`, which reads
   the Agent tool's own `model` argument — NOT `settings.json`. Verified
   2026-08-11 when the session default moved haiku → sonnet: no interaction.
+  Its one NOTICE branch (an unrecognised tier, since 2026-09-09) is a
+  reading-context notice; its promotion triggers (i)/(ii) live in the hook's
+  own docstring and read `telemetry/model-cap-guard.jsonl` — 0 such rows as of
+  2026-09-23; closed by user ruling 2026-09-23.
 - history: unchanged since birth
 - rollback: `ops/environment.md` "Subagent cost cap"
 
@@ -1153,7 +1234,7 @@
   without it.
 
 ### in-app Browser pane — "Already loaded. Default to this."
-- harness: `<browser_surfaces>` names the pane the default surface; it also
+- harness: `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) names the pane the default surface; it also
   lists claude-in-chrome as an alternative, so choosing that IS narrowing.
 - local narrowing: allowlist, not blocklist — see the Mechanisms entry
   `in-app Browser pane` below for the current state and its evidence.
@@ -1171,7 +1252,7 @@
   host was ever promoted, so the review trigger below has not yet fired. Suite:
   `hooks/tests/test_browser_pane_scope_guard.py` (D-01..D-08 / A-01..A-09,
   M-1 mutation keeps the allow side honest, FO-1..FO-3b fail-open).
-- review-when: `<browser_surfaces>` wording changes; OR a third crash occurs;
+- review-when: `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) wording changes; OR a third crash occurs;
   OR `telemetry/browser-nav.jsonl` shows a DENY the user had to override.
 
 ### workflows — "Do not use workflows unless the user requested it"
@@ -1242,10 +1323,17 @@
   default-private behaviour changes.
 
 ### External dispatch path — a second dispatch carrier with a one-way asymmetry
-- current: LIVE. extdispatch is the only shell entry point to the external
+- current: LIVE. extdispatch is the only shell entry point to the FREE external
   tiers; `hooks/extdispatch_entrypoint_guard.py` denies direct `opencode` and
   hand-rolled POSTs to the local serve API. Marker escape:
-  `[user-approved-direct-opencode]`.
+  `[user-approved-direct-opencode]`. The Codex CLI is a second external route
+  outside extdispatch (since 2026-09-19); `hooks/codex_dispatch_guard.py`
+  (LIVE 2026-09-23) holds it to the same `REDLINE_PREFIXES`, imported not
+  copied, with no allowlist/grant and a hook-side audit row (user rulings
+  2026-09-23). Evidence: `hooks/tests/test_codex_dispatch_guard.py` ALL PASS
+  101/101 (35 must-deny incl. calibrating D-01 redline -C, 43 must-pass incl.
+  P-01 allowlisted dir, agreement with `redline_check` on 11 paths, fail-closed
+  on a missing redline source), 4 KNOWN_GAPS counted in neither total.
 - why: this carrier crosses the trust boundary ONE WAY — work leaves under this
   machine's authority and nothing enforceable comes back. A control can only sit
   where the work is still a PATH, i.e. at the entry point; once the prompt is on
@@ -1257,7 +1345,10 @@
   that imports the HTTP helper — the honest limit below, kept as a named hole
   rather than folded into the pass count.
 - what: `tools/extdispatch/` dispatches work to free external model tiers
-  (opencode/Zen keyless, NVIDIA NIM keyed) over `opencode serve`. Path choice
+  (opencode/Zen keyless, NVIDIA NIM keyed) over `opencode serve`, plus the
+  `agy` provider (Antigravity CLI, subscription login, subprocess) behind the
+  `query` profile since 2026-09-15. The entrypoint guard does NOT yet deny a
+  direct `agy -p` — a named gap, deferred 2026-09-15. Path choice
   lives in `20-dispatch.md` §4a, redlines and disclosure in §4b, detail in
   `ops/references/external-dispatch.md`, environment facts in `environment.md`.
 > **Share note.** `tools/extdispatch/` ships `partial` (`tools/share-manifest.toml`):
@@ -1314,15 +1405,21 @@
   destroy the only record of when the practice started.
 - Mid-session reminders push `TaskCreate`/`TaskUpdate`; the local progress
   system is the `references/` ticket ledger, which is durable. The harness task
-  list is per-session. Keep the ledger; the reminder is advisory.
+  list is per-session. Keep the ledger; the reminder is advisory. Since CC
+  2.1.268 the task/todo tools are offered only on Claude 3.x, Opus 4.0–4.7,
+  Sonnet 4.0–4.6 and Haiku 4.5 (`CLAUDE_CODE_ENABLE_TODO_TOOLS=1` re-enables);
+  observed 2026-09-19 on 2.1.276: an Opus 5 session has neither tool, loaded or
+  deferred, and the env var is unset. On current models the ledger is the ONLY
+  progress mechanism, not the preferred one.
 - review-when: any of the three stops being cosmetic — i.e. produces a wrong
   artifact rather than a stylistic difference.
 
 ### subagent instruction surface — what reaches a worker, and what it costs
 - current: **`Explore` and `Plan` are the ONLY subagents that omit global
   CLAUDE.md** (and the parent's git status). Every other built-in AND every
-  custom `agents/*.md` role loads the full CLAUDE.md hierarchy. There is no
-  frontmatter field or per-agent setting that changes this. **Auto memory
+  custom `agents/*.md` role loads the full CLAUDE.md hierarchy unless its
+  definition sets `omitClaudeMd: true` (frontmatter / `--agents` JSON, added CC
+  2.1.271) — no local definition sets it as of 2026-09-19. **Auto memory
   (`MEMORY.md` + its fact files) reaches NO subagent at all**, fork excepted;
   a worker that needs a memory fact must be given it in the dispatch prompt.
   Preamble cost of one `general-purpose` dispatch: **~49,200–49,700 tokens**
@@ -1365,6 +1462,25 @@
   subagents, which inherit the parent conversation instead of starting fresh.
   (a) and (b) are now noted in `20-dispatch.md` §roster; (c) and (d) change no
   rule here yet.
+- re-read 2026-09-27 against build 2.1.281. Explore/Plan still skip CLAUDE.md
+  and git status; the rest of the hierarchy still reaches every other
+  subagent. Two changes: (e) a per-agent `omitClaudeMd` frontmatter field now
+  exists, so "no per-agent setting" holds only for opting Explore/Plan IN, and
+  not for opting OUT; (f) the CLAUDE.md bullet now includes "any `AGENTS.md`
+  files loaded as project instructions". Since 2.1.277 a project with no
+  CLAUDE.md reads AGENTS.md instead, and `~/.claude` has no project-level
+  CLAUDE.md, so `~/.claude/AGENTS.md` (the Codex-side rewrite) now reaches
+  every main session and subagent opened here. `InstructionsLoaded` does not
+  fire for an AGENTS.md read this way (documented), so `rule_loads.py`
+  cannot see it. User ruling (same day): stop the load. Done NARROWLY with
+  `claudeMdExcludes` for that one file in `settings.json`, not with the
+  global `instructionFiles: claude-md`, because five projects (AssetVault,
+  interactive-guide-platform, LocusScribe, ShareForge, obsidian_Nathan)
+  have only an AGENTS.md. Checked with fresh `claude -p` probes: `~/.claude`
+  no longer shows AGENTS.md; the obsidian_Nathan vault still shows its own.
+  Subagents of a session that was already running still get it. Probe (haiku Explore, same
+  day): no CLAUDE.md, MEMORY.md, registry, profile or git status, and the
+  SubagentStart brief was quoted back.
 - history: the Explore exception sat unverified in `20-dispatch.md`'s roster
   table from birth; cost was never measured; the auto-memory gap was unknown
   until 2026-08-15; doc re-read 2026-09-06 (2.1.257) — claims unchanged, list
@@ -1379,7 +1495,7 @@
 
 ## Mechanisms
 
-### delivery gate (`hooks/delivery_gate_shadow.py`)
+### delivery gate (`hooks/delivery_gate_shadow.py`) — RETIRED 2026-09-27 (was SHADOW)
 - current: SubagentStop, SHADOW ONLY — computes `would_block`, never blocks.
   Enforcement stays off until the false-positive rate is measured.
 - why: a gate that fires wrongly is worse than no gate; and "a verification
@@ -1418,7 +1534,28 @@
   if below, this is the enable decision. Or `SubagentStop`'s payload shape
   changes on a Claude Code upgrade, which is what `resolve_transcript()` works
   around.
-- rollback: unregister from `settings.json`; commits 4239d27 / 44fe7e4
+- history: 2026-09-19 — CC 2.1.275 fixed `SubagentStop` hooks with a specific
+  `matcher` firing for subagents with an empty agent type; checked against this
+  trigger and found not applicable (our matcher is `""`, catch-all).
+- **2026-09-27 ruling (user, 「delivery走建議退役」 on
+  a dated overdue-shadow-hooks evaluation under the source's `reports/` tree,
+  which this repo does not ship): RETIRED —
+  unregistered from `settings.json` (backup
+  `backups/2026-09-27/settings.json.pre-shadow-retire`), file and
+  `telemetry/delivery-gate-shadow.jsonl` kept.** This entry's own 09-24 clause
+  fired: 15-row random sample of the 80 post-09-11 `would_block ∧ dispatch`
+  rows, ≥14/15 false (11 wrote no deliverable — scratchpad/`/tmp` helpers, or
+  read-only commands whose `2>/dev/null` / `> /tmp/x` matched `WRITE_SHELL`;
+  3 verified with `validate.py` / `intake.py check` the vocabulary lacks;
+  1 borderline). Explore — no Write/Edit tool — was 18 of 80. 660/859 events
+  (77%) could not read the subagent transcript at all.
+- review-when (post-retirement): a retrospective records a subagent reporting
+  done on code it never ran, AND the main loop's acceptance did not catch it —
+  then re-derive the predicate from that instance (deliverable paths outside
+  scratch/tmp, a real write tool, the transcript actually read) before
+  re-registering; never re-register this form.
+- rollback: re-add the `SubagentStop` handler from the backup above; commits
+  4239d27 / 44fe7e4
 
 ### context runway (`hooks/context_runway_shadow.py`)
 
@@ -1473,7 +1610,7 @@ auto summaries honour CLAUDE.md Compact Instructions — the first Desktop sessi
   graduation decision, and it judges the WORDING at that moment, not the band).
 - rollback: unregister `UserPromptSubmit` from `settings.json`.
 
-### xi card guard (`hooks/xi_card_guard.py`) — SHADOW
+### xi card guard (`hooks/xi_card_guard.py`) — RETIRED 2026-09-27 (was SHADOW)
 - current: PostToolUse on `Write|Edit`, shadow only (`ok` / `would-warn` /
   `would-deny` rows in `telemetry/xi-card-guard.jsonl`, never a deny). Born
   2026-08-30 for the cross-index M3 card grammar on stores whose
@@ -1497,7 +1634,31 @@ auto summaries honour CLAUDE.md Compact Instructions — the first Desktop sessi
   carrier (e.g. one verdict per (session, path), or a `draft:` front-matter
   escape that leaves a mark) — otherwise stay shadow or retire. Also: a
   store's `covers_state` flips (the hook's own re-check trigger).
-- rollback: unregister from `settings.json`; `XI_CARD_GUARD_LOG` redirects the log.
+- **2026-09-27 ruling (user, 「xi_card_guard 看起來有點雞肋…可以整個退役」, over
+  the report's recommendation to graduate the deny class): RETIRED —
+  unregistered from `settings.json` (backup
+  `backups/2026-09-27/settings.json.pre-shadow-retire`), file, tests and
+  `telemetry/xi-card-guard.jsonl` kept.** Evidence
+  (that dated overdue-shadow-hooks evaluation §2, under the source's
+  `reports/` tree, not shipped here): post-09-11 the
+  deny class was 6/6 real (free-text `status:` → card silently dropped; the
+  same cards were found a day later by the retrieval audit, `f8ceaef`), the
+  warn class 0/19 (`layer`/`audience` are REQUIRED by
+  `rules/naming-and-placement.md`), repeat-fire still uncarried. The deciding
+  weight: the `xi` leg answered 0 of the recall golden questions in all nine
+  daily evals 09-19..09-27 (`tools/recall/out/eval-*.json`
+  `leg_contribution`), so a spawn on every Write/Edit (~1,228/day) guarded a
+  low-priority leg.
+- coverage given up: a card whose `status:` falls outside `live|spent|draft`
+  (or that fails any M3 rule) is again invisible until someone runs
+  `xi.py emit`, which names each rejected card; the daily scheduled emit's
+  status line does NOT surface rejections.
+- review-when (post-retirement): a card is reported missing from a query and
+  the cause is an emit rejection — then surface the rejected count in the
+  scheduled emit's status (cheaper than a write-time hook) rather than
+  re-register this one; or the `xi` leg starts carrying golden-question hits.
+- rollback: re-add the `PostToolUse` `Write|Edit` handler from the backup
+  above; `XI_CARD_GUARD_LOG` redirects the log.
 
 ### intake match shadow (`hooks/intake_match_shadow.py`) — SHADOW
 - current: UserPromptSubmit, shadow only — would-inject lesson cards
@@ -1605,12 +1766,10 @@ checkpoint nag), plants the canary pair in `<session>.canary.json`; `compact_poi
 last 40 ledger rows after compaction; `run_audit.py` scores F1/F4/F6 + canary for any session, F3/F7
 only under a manifest. Offline branch below adds the manifest and the two guards.
 Live 2026-09-05 (design `references/long-run-probe-design.md`, tools `tools/process-ledger/`).
-> **Share note.** `tools/process-ledger/` and `tools/compact-loss-audit/` are
-> source-only (excluded-by-decision, `tools/share-manifest.toml`). The
-> `ledger.py`/`run_audit.py`/`report.py` commands below do not ship; the
-> hooks that write `*.ledger.jsonl` and `cache/handoff/*.json` do ship
-> (`hooks/unattended_run.py` and siblings), so the DATA this describes is
-> still produced — reading and summarising it is left to the adopter.
+> **Share note.** `tools/compact-loss-audit/` is source-only (excluded-by-decision,
+> `tools/share-manifest.toml`), so `run_audit.py` does not ship; `tools/process-ledger/`
+> (`ledger.py`, `report.py`) ships here under `instruments/`, and the hooks that
+> write `*.ledger.jsonl` and `cache/handoff/*.json` ship with it.
 One manifest (`cache/handoff/<session>.run.json`, written when a prompt carries `[unattended-run]`;
 every other field optional — scope defaults to cwd/**, canary auto-generated, deliverables/acceptance
 model-derived via `ledger.py manifest` and marked `filled_by: model`, user ruling 2026-09-05 "no form-filling")
@@ -1745,10 +1904,18 @@ option B's trigger). Tier-B compliance meter:
   so the blocklist was structurally incapable of preventing the event that
   motivated it. What IS knowable in advance is the safe set. Accepted cost: a
   first-time legitimate host is denied once.
-- harness relation: `<browser_surfaces>` calls this pane the default surface and
+- harness relation: `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) calls this pane the default surface and
   that instruction cannot be edited from here. The denial picks
   `claude-in-chrome` — an alternative the same block lists — and states why.
   Narrowing within the harness's menu, not overriding it (L-011).
+  Re-read 2026-09-27 (2.1.281): the block was split into `<browsers>` +
+  `<built_in_browser>`. It still names the pane the default and still lists
+  claude-in-chrome, so the narrowing holds. New clauses: "a blocked site or a
+  declined approval does not make a browser unavailable", and if the user
+  NAMED one browser and it is unavailable, "say so and ask before using the
+  other one". Result: after a deny on a task where the user asked for the
+  pane BY NAME, ask before switching to Chrome. Otherwise the listed
+  alternative is still the route.
 - evidence: 7/7 hook cases pass (2026-08-14): loopback + `*.localhost` allow,
   third-party deny, claude-in-chrome untouched, known crasher carries its
   recorded reason, `back`/`forward` and `preview_start {name}` pass through.
@@ -1756,7 +1923,7 @@ option B's trigger). Tier-B compliance meter:
   the previous "every navigation is LOGGED" claim was unproven for two days.
 - history: L-013 scope rule in lessons only (2026-08-12) → logging + blocklist
   (2026-08-12) → allowlist + loud reporting (2026-08-14)
-- review-when: `<browser_surfaces>` changes wording on a Claude Code upgrade;
+- review-when: `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) changes wording on a Claude Code upgrade;
   OR sweep check 13 shows `"loud": true` rows the user never adjudicated;
   OR a legitimate host is denied twice, which means the allowlist is too tight.
 - why: the pane shares the desktop app's GPU child. A page can crash it,
@@ -1858,7 +2025,7 @@ option B's trigger). Tier-B compliance meter:
 - rollback: `ops/environment.md` "Instruction-loading mechanics"
 
 ### advisory-output surfacing — ops-health check 13
-- current (2026-09-10): **two scopes, deliberately asymmetric.** MAY be polled:
+- current: (2026-09-10) **two scopes, deliberately asymmetric.** MAY be polled:
   any `outputs/**/*.md` that stamps ITSELF (opting in is what the stamp does),
   minus `outputs/skill-reviews/` — its disposition convention (D-032) already
   carries status. OWES a stamp: still only candidates files
@@ -1901,6 +2068,42 @@ option B's trigger). Tier-B compliance meter:
   rule), or `skill-reviews` drops its disposition convention.
 - rollback: `git show f2e8bc2^:hooks/ops_health_nudge.py` (pre-check13; dated backup pruned)
 
+### eol conformance — ops-health check 21
+> **Share note.** The post-commit hook under `tools/git-hooks/` is source-only
+> (excluded-by-decision, `tools/share-manifest.toml`); `tools/eol-sync/` is the
+> shipped half — point your own `core.hooksPath` at a one-line hook that calls
+> it, or run `eol_sync.py --all` by hand after a bulk write.
+- current: at session start with cwd == `~/.claude` ONLY, `git ls-files --eol`
+  (budget `EOL_GIT_TIMEOUT`); a tracked file reported `w/mixed` is an ALARM
+  (mixed endings inside one file — the L-024 corruption: LF lines appended onto
+  a CRLF file); a file whose whole working copy holds the ending its `eol=`
+  attribute does not pin is a BREACH naming the rewrite (delete the unmodified
+  path, `git checkout -- <path>`). Report-only; git failure/timeout prints
+  nothing. HMI point `ops-health.eol-conformance` (subsystem uncommitted-work)
+  reads the nudge's verdict through the existing `ops-health` source.
+- why: the property is pinned in `.gitattributes` and stated in CLAUDE.md
+  Environment + L-024, but nothing measured the working tree against it: on
+  2026-09-29, 852 of ~1800 tracked files held LF under `eol=crlf`, found by hand
+  while chasing five "LF will be replaced by CRLF" warnings. The index is
+  normalised, so the drift is invisible to `git status` and Edit preserves the
+  wrong ending indefinitely; only a file-level mixed ending is a real defect,
+  which is why the two classes carry two severities. Layering: the instrument is
+  the nudge (cheap git-only checks already plumbed to the HMI), never a point
+  that computes the rule inside the HMI. Event-layer fixer since 2026-10-01
+  (after the user ruled the pin criterion, key `line endings`): not a
+  PostToolUse re-encoder (that would change Write's semantics) but a git
+  post-commit hook — `tools/git-hooks/post-commit` → `tools/eol-sync`, active
+  only while `core.hooksPath` points at it, which HMI
+  `uncommitted-work.eol-sync-wiring` reads on every collect. It rewrites only
+  clean files, from the index blob. This check stays as the backstop.
+- evidence: `tools/ops-health-test/test_ops_health_nudge.py` check21_cases —
+  known-FALSE (a tree holding the pinned ending everywhere is silent), whole-file
+  drift → breach text with the rewrite, mixed file → alarm; hmi-json 19 points.
+- review-when: `.gitattributes` stops pinning `eol=`; the harness's Write tool
+  starts honouring `.gitattributes`; the breach fires on a tree the user
+  deliberately keeps LF (then scope it to `w/mixed` only).
+- rollback: remove the check-21 block and its `HMI_CHECKS` row, and the point.
+
 ### stale uncommitted work — ops-health check 14
 - current: at session start with cwd == `~/.claude` ONLY, `git status
   --porcelain -uall`; any dirty path whose mtime exceeds **3 days**
@@ -1921,8 +2124,7 @@ option B's trigger). Tier-B compliance meter:
   path touches no object, so it is undecidable from outside (the proposing
   ticket misattributed three times by cwd), and `list_sessions` is an MCP tool a
   SessionStart hook cannot reach; the fresher-path count carries the intent of
-  the proposal's condition (B) with no API and no guess. Proposal as received:
-  `drafts/2026-08-21-stale-work-nudge/APPLY.md`.
+  the proposal's condition (B) with no API and no guess.
 - evidence: **PROVISIONAL — 3 days is the most conservative zero-false-positive
   point on ONE day's data**: 72 h catches 7 of the 17 paths, 48 h catches 9,
   both with zero false positives against the same-hour in-flight peer work
@@ -1943,7 +2145,9 @@ option B's trigger). Tier-B compliance meter:
 - history: proposed 2026-08-21 by the stale-path attribution ticket
   (task_406a32d8) as a hand-off to a rules-layer session; built the same day
   in-session, with the user's L2 mandate for the ops cleanup as the named
-  authorization (`70-evolution.md` §1.1).
+  authorization (`70-evolution.md` §1.1). Proposal as received:
+  `drafts/2026-08-21-stale-work-nudge/APPLY.md` (gitignored scratch, gone;
+  moved here from `why:` 2026-09-19 — provenance belongs to history).
 - review-when: this repo gains a remote (the backpressure source changes; the
   threshold and the check's reason to exist are both re-judged); or the
   session-board / `list_sessions` layer gains a way to attribute a dirty path
@@ -1952,6 +2156,50 @@ option B's trigger). Tier-B compliance meter:
 - rollback: `git show 425a7e5^:hooks/ops_health_nudge.py` (pre-check14; dated backup
   pruned. The companion test file was untracked and its backup pruned — no
   recoverable pre-state)
+
+### tracking refs — integrity-sweep check 34 + ops-health check 18
+> **Share note.** `tools/tracking-refs/` is source-only (excluded-by-decision,
+> `tools/share-manifest.toml`); the sweep it names does not run on this copy.
+> Substitute: `git ls-files --others --exclude-standard` plus a grep for each
+> path your own rule files cite.
+- current: `tools/tracking-refs/refs.py` reads PATH and NAME references out of
+  every committed/uncommitted instruction surface (CLAUDE.md, settings.json,
+  skill-trigger-dict, skills/ hooks/ rules/ ops/ agents/ commands/,
+  references/*.md, tools/*/README.md) and classes each target: **dangling**
+  (tracked source → existing untracked target) = FAIL, exit 1; `pending` /
+  `ignored` = REPORT; `undetermined` (target found nowhere) counted apart;
+  non-repo root = undetermined, exit 2. The nudge runs it in-process at session
+  start (cwd == ~/.claude) ONLY when check 14's `git status` shows an untracked
+  path under a capability dir; no age gate. Report-only; never commits.
+- why: 2026-09-18 (user found it): `skills/comsol-agent-pipeline/` had never
+  been added for 4 days while committed PROJECTS.md and the COMSOL digest named
+  it, and the committed CLAUDE.md indexed an untracked
+  `rules/layout-convergence.md` by bare name. Check 14 saw them only as "stale
+  by age" — it cannot tell a load-bearing path from scratch. A rollback in that
+  window restores the pointer without its target. User ruling same day: make
+  the reverse-reference scan a sweep check that can be automated or remind.
+- evidence: controls 21/21 two-sided (a classifier mutated to never say
+  `dangling` turns 5 red); ops-health suite 75/75 with 4 check-18 cases (a
+  mutated instrument path turns the positive case red, 74/75); replay of
+  `b142312` + the then-untracked files → exactly the two real cases, exit 1;
+  live tree after the sweep 0 dangling / 0 pending / 18 ignored / 106
+  undetermined; live hook run 0.31 s, silent. The first replay MISSED the
+  CLAUDE.md case (bare-name reference) — the NAME form was added because of it.
+- severity basis: a dangling pointer is a determinable closure (both ends are
+  read from git), so FAIL, not WARN (`gate-severity-by-consumer` ruling
+  2026-08-26). `undetermined` never moves the exit code: most of its 106 rows
+  are prose or paths relative to another repo (the COMSOL rig's
+  `tools/deposit_gate.py`, the vault's `tools/kv-lint.py`).
+- review-when: this repo gains a remote (a pushed pointer to an unpushed file
+  is the next class); a new surface kind starts naming capabilities (add it to
+  `SURFACE`, with a control); the house index form changes (e.g. rules named
+  some way other than a backticked bare name, or the dict drops `### <skill>`
+  headings — the NAME form would silently stop matching); `settings.json` lowers
+  the SessionStart timeout below 3 s.
+- rollback: `git revert` the commits touching `tools/tracking-refs/`,
+  `hooks/ops_health_nudge.py` check 18 and its test cases; record: a dated
+  git-tracking-sweep report under the source's `reports/` tree, which this
+  repo does not ship.
 
 ### interop — what crosses to other agents
 - current: **preference ports, method does not.** `portable-core.md` (the
@@ -2044,12 +2292,12 @@ option B's trigger). Tier-B compliance meter:
   outputs/ tree, which this repo does not ship.
 - evidence: headless 1.4–1.5s WITH pixels vs pane 5s timeout with none; fresh
   pane born hidden/0×0/rAF-stalled; archive-wide 80 pane-screenshot calls vs
-  853 DOM/state reads; hook suite 20/20 (`tools/ui-verify-test/`); live
+  853 DOM/state reads; hook suite 26/26 as of 2026-09-23 (`tools/ui-verify-test/`); live
   router check in-session (marker annotated `hidden`, route denial fired).
 - history: detect-first CLAUDE.md line (2026-08-05) → PreToolUse gate
   (2026-08-08) → result-aware router + default inversion + durable runner
   (2026-08-16)
-- review-when: `<browser_surfaces>` or the screenshot tool's error wording
+- review-when: `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) or the screenshot tool's error wording
   changes on an upgrade; the suite or `tools/ui-shot/doctor.mjs` fails; a
   probe marker stays `unknown` in live use (`tool_response` unpopulated). A
   user "I'm watching" is a temporary premise flip, not an edit trigger.
@@ -2168,9 +2416,11 @@ option B's trigger). Tier-B compliance meter:
   (`cmd /c`, `taskkill /PID`, `reg … /v`, `findstr /i`, `sc`, `net`,
   `schtasks`, `wmic`…): MSYS rewrites it (`/c` → `C:/`, `/PID` →
   `C:/Program Files/Git/PID`) before the exe runs; skipped when the command
-  carries `MSYS_NO_PATHCONV`; `//c` never matches. PowerShell/Write fall
+  carries `MSYS_NO_PATHCONV`; `//c` never matches. **DENY (rule 4,
+  2026-09-20)** an unquoted Windows drive path when the quoting is resolvable,
+  **NOTICE** when it is not. PowerShell/Write fall
   straight through. Escape hatch `[transport-checked]`. Fail-open.
-  (2026-08-18; rule 3 added 2026-08-23)
+  (2026-08-18; rule 3 added 2026-08-23; rule 4 added 2026-09-20)
 - why: the two defects differ in what the gate can DETERMINE, and the global
   gate-authority rule makes that the deciding question, not severity.
   Size is fully determinable. The backslash collapse is not: the FIRST version
@@ -2223,6 +2473,29 @@ option B's trigger). Tier-B compliance meter:
   2026-09-09 (F-8): the notice TEXT moved its identity and its receipt onto the
   transport (`notice()`), and a read-elsewhere pointer was removed from the MSYS
   branch. No condition changed; suite still 41/41. See `AGENT_FACING_TEXT`.
+  2026-09-20: rule 4 added — **DENY** an UNQUOTED Windows drive path
+  (`find D:\a\b` hands find `D:ab`); **NOTICE** instead when the scanner cannot
+  resolve the quoting (unbalanced quote, unterminated heredoc, backtick
+  substitution). Trigger: a session ran five such searches, each returned a
+  clean empty result, and it reported the target as not found
+  (the dated retrieval-linkage audit under the source's outputs/ tree, which
+  this repo does not ship). Unlike the backslash COLLAPSE
+  this one may veto, because what bash does to an unquoted backslash has no
+  "author was compensating" reading — the only thing the gate can get wrong is
+  its own reading of the quoting, and it reports when it could not. Backtest
+  over 53,458 recorded Bash calls (1,493 transcripts, main + subagent): 29
+  flagged, 0 unresolved; 20 failed loudly, 5 silent-empty, 4 mangled output
+  (2 of them deliberate probes — the marker is their exit); 0 scanner misreads
+  after `$(` was made to push a fresh quoting frame (the first draft misread
+  `"x $(wc -l < "D:\a")"`). Suite 41 → 57 (P1–P16; the pre-change hook fails
+  P1–P3 and P13–P16). NOT gated, measured: a double-quoted path ending in a
+  backslash (`ls "C:\dir\"`), 92 in the corpus, 83 already fail loudly and the
+  regex misfired on doubled-backslash literals — no veto-grade predicate yet.
+  Script + result + APPLY record:
+  the audit's guard-backtest folder, under the source's outputs/ tree (not
+  shipped here). Rollback:
+  `backups/2026-09-20/shell_transport_guard.py.bak`.
+
 - review-when: any Claude Code upgrade — `tools/shell-audit/PROBES.md` P1 and
   P3; if the collapse disappears the notice branch becomes noise, and if the
   ceiling moves `SIZE_LIMIT` is stale in the UNSAFE direction. Drift check:
@@ -2235,9 +2508,194 @@ option B's trigger). Tier-B compliance meter:
 > either. Substitute: read the hook's own deny/notice counters from
 > `telemetry/shell-transport-guard.jsonl` and compare by hand against the
 > 0.14%/2.7% rates above.
+- promotion triggers of the NOTICE branches (`ops/40-maintenance.md` §2a(4),
+  audit 2026-09-23; all three kept as NOTICE and closed by user ruling
+  2026-09-23 — not re-raised unless a trigger below fires):
+  (1) backslash collapse — a READING-CONTEXT notice: compensating for the
+  collapse is legitimate, so the fire rate is not its ruler (live 13.73/day over
+  the last 30 days against the 13.8/day backtest is the expected shape, not a
+  failure). Trigger: a `report_fp.py` misfire row, or a sink corrupted with this
+  notice present in the transcript → re-open the sink sub-case, never a blanket
+  deny (89 of 112 were compensations). (2) unquoted drive path, quoting
+  unresolved — reading-context, same trigger; 1 live row in 3.5 days.
+  (3) MSYS `/flag` — idiom-changing with a cost-free rewrite (`//c`), so it was
+  backtested 2026-09-23 (a backtest script in the dated notice-hook audit under the source's
+  outputs/ tree, not shipped here;
+  imports the hook's predicate; 52,349 Bash calls): before go-live 6 hits in
+  61 days = 0.098/day = 0.50 per 1k Bash calls; after, 8 in 32 days = 0.25/day
+  = 0.20 per 1k. Per day it rose, per call it fell 60% — Bash volume rose 6.4×,
+  so the per-call rate is the ruler here. It is NOT veto-grade: reading the 14
+  hits, about 8 are the predicate matching a heredoc body, a commit message or
+  a flag inside `cmd //c "…"`'s own quoted argument. Trigger: the per-1k rate
+  back at ≥ 0.50 over 30 days → first give the predicate rule 4's quote- and
+  heredoc-aware scanner, then re-run the backtest; only then is a deny
+  discussable.
 - rollback: unregister from `settings.json` (the `Bash|PowerShell` PreToolUse
   block); the file is inert without it. CLAUDE.md Environment bullets 1-2 keep
   working as text.
+
+### `session_search_query_notice` — a multi-word session search is a phrase search
+- current: PreToolUse on `mcp__.*__search_session_transcripts`. **NOTICE, never
+  deny**, when the query contains whitespace: the tool matches the whole query
+  string as ONE literal case-insensitive substring, so an empty result is not
+  evidence of absence; retry with a single distinctive token. Single tokens,
+  other tools and malformed input stay silent. Fail-open. (2026-09-20)
+- why: the tool's semantics cannot be changed from here, its empty result is
+  textually identical to a true negative, and the prose alternative is the kind
+  measured not to hold. Notice rather than deny because an exact phrase is
+  sometimes intended and the gate cannot determine intent. PreToolUse rather
+  than PostToolUse because the condition is decidable from the query alone and
+  no PostToolUse hook in this environment has ever been measured delivering text
+  to the model.
+- evidence: 640 main-loop transcripts — 15 multi-word calls, 11 no-match; 9
+  single-token calls, 0 no-match; 0 calls in 724 subagent transcripts
+  (the retrieval-linkage audit's records 02 and 05, under the source's
+  outputs/ tree, not shipped here). Incident
+  session: eight multi-word queries empty in a row, while `dashboard.html`
+  alone hit ten sessions. Suite `hooks/tests/test_session_search_query_notice.py`
+  15/15 two-sided (6 notice-side, 9 silent-side); lint conforms; live-verified
+  2026-09-20 (the notice arrived with a real call's result).
+- history: born 2026-09-20. Named gap: a long CJK query with no whitespace is
+  the same trap and is not gated.
+- promotion trigger (idiom-changing notice, `ops/40-maintenance.md` §2a(4)):
+  baseline 15 multi-word calls in 640 main-loop transcripts (one per ~43
+  sessions); after 30 days, a live rate not below that means the text changes
+  nothing. No cost-free rewrite exists (an exact phrase is sometimes meant), so
+  the answer then is on the tool side (split the query before it runs), not a
+  deny. 2026-09-23: 1 row in 3.5 days, and that row is the go-live probe —
+  not yet due; closed by user ruling 2026-09-23 until the trigger is due.
+- review-when: the tool starts tokenising queries itself → retire.
+- rollback: remove the `mcp__.*__search_session_transcripts` entry from
+  `settings.json` PreToolUse FIRST, then the hook file
+  (`backups/2026-09-20/settings.json.bak`).
+
+### `verbatim_dispatch_notice` — a copyrighted page is pointed at, never transcribed
+- current: `rules/source-quotation-evidence.md` (path-scoped, indexed in the
+  CLAUDE.md `**Path-scoped rules**` line). Evidence from a copyrighted page =
+  locator + one quote ≤ 15 CJK-eq, presence checked by
+  `tools/quote-evidence/qe.py` (local Windows OCR, PASS ≥ 0.80 / UNDET ≥ 0.60,
+  short non-exact quotes UNDET), verifier returns verdicts only. PreToolUse
+  NOTICE (never deny) on Agent/Workflow when a dispatch prompt asks for an
+  un-negated verbatim transcription of pages/images. Fail-open. (2026-09-28,
+  user ruling: make this the default practice)
+- why: the API output filter blocks long reproduction of a copyrighted text
+  (`API Error: 400 Output blocked by content filtering policy`); the error reads
+  like a transport fault, so the obvious move is a retry. Notice rather than
+  deny because the hook sees the request's words, not the pages' rights status.
+- evidence: a local session (當代中文 verb-section deck): main-loop
+  transcription blocked twice, then the subagent "Independent transcription of
+  4 page images" (request id kept in the source's own record). After switching to
+  the pointer route: 86/86 quotes matched by an independent verifier, gate 270
+  PASS. Suites: `hooks/tests/test_verbatim_dispatch_notice.py` 16/16 (6
+  notice-side incl. the incident prompt, 5 silent-side incl. a rule-following
+  prompt, 4 undetermined, 1 telemetry); `tools/quote-evidence/controls.py`
+  18/18 (end-to-end OCR pair included; C7b caught a short-quote ordering
+  defect at birth, fixed in qe.py and in the source project's gate, 839c3e1).
+- history: born 2026-09-28.
+- promotion trigger: a second blocked dispatch in telemetry
+  (`telemetry/verbatim-dispatch-notice.jsonl` row followed by the same
+  session's content-filter failure) means the notice text is read past →
+  consider a deny with an `[own-text]` escape.
+- review-when: see the rule file's frontmatter.
+- rollback: remove the `verbatim_dispatch_notice.py` entry from the
+  `Agent|Workflow` PreToolUse block in `settings.json` FIRST, then the hook.
+
+### `appdata_view_guard` — a command naming `%LOCALAPPDATA%` / `HKCU` reads THIS shell's view
+- current: PreToolUse on `Bash|PowerShell`, Windows only. **NOTICE, never
+  deny**, when the command text names `%LOCALAPPDATA%` / `$env:LOCALAPPDATA` /
+  `$LOCALAPPDATA`, a literal `AppData\Local` path (except `\Packages` and
+  `\Temp`), `HKCU:` or `HKEY_CURRENT_USER`: this process tree runs inside the
+  Claude desktop MSIX package's silo, whose hive overlays HKCU, so a reading is
+  evidence about this view only — no cleanup/deletion/migration plan on it.
+  Since 2026-09-23 a program under `AppData\Local\Programs` at COMMAND position
+  (being run, e.g. the absolute python.exe path) is blanked before matching;
+  the same path as an argument or in an assignment still fires. Escape
+  `[view-checked]`. Fail-open. (2026-09-05; registry row added 2026-09-23 —
+  the hook had none until the notice-hook audit found it.)
+- why: D-057 (AnnouncementWatchDog, 2026-09-05) — a cleanup plan written from
+  the assistant shell's reading deleted what it took for a duplicate and was
+  the only copy of 36 configured boards; the project already carried the rule
+  as text. Mechanism measured 2026-09-09 (silo hive overlay; the user's shell
+  lists different Run value names). Notice rather than deny: whether THIS call
+  is on the diverging side is not determinable, and the surface has many
+  legitimate uses.
+- evidence: `python hooks/appdata_view_guard.py --selftest` (11 must-fire / 12
+  must-stay-silent / 4 undetermined inputs + 5 payloads). 2026-09-23 narrowing:
+  replay over the 446 live rows (a replay script in the same
+  dated notice-hook audit, under the source's outputs/ tree) silences 264 and keeps 182; inversion controls
+  (`controls_appdata.py`) — the pre-change hook fires on every new silent case,
+  and an any-position Programs exemption silences the new argument/assignment
+  cases, so both halves of the narrowing are load-bearing. One of the 443 rows
+  before it was this audit's own read of a telemetry file.
+- promotion trigger (reading-context notice, `ops/40-maintenance.md` §2a(4) —
+  reading the surface is legitimate, so the fire rate is not the ruler): a
+  cleanup/deletion plan built on an assistant-shell reading with this notice
+  present in the transcript → promote that shape (a destructive verb on the
+  surface) to a deny; three `report_fp.py` misfire rows → narrow further.
+  Kept as NOTICE and closed by user ruling 2026-09-23.
+- review-when: the desktop app stops running shells inside the package silo
+  (re-run the 2026-09-09 Run-value comparison) → retire.
+- rollback: remove the hook's entries from `settings.json`; the narrowing alone
+  reverts with `git revert` of its commit.
+
+### `past_work_recall_inject` — a past-work phrase in the prompt triggers a machine lookup
+- current: UserPromptSubmit (no matcher). When the prompt carries 之前 / 上次 /
+  先前 / 以前 / 做過 / 用過 / "like before" / "last time" / "previously", the hook
+  runs `tools/recall/recall.py` on the prompt's topic words (legs `mem,proj,les`,
+  3 per leg, 4 s timeout) and prints the candidates to stdout, which the harness
+  injects beside the prompt. **Never blocks.** Harness-authored prompts
+  (compaction banner, task notification, slash-command echo), "在 X 之前" and
+  phrases inside code fences stay silent. One telemetry row per fired prompt,
+  written before printing (`telemetry/past-work-recall.jsonl`; prompt text not
+  logged). Fail-open. (2026-09-20)
+- why: the prose trigger it replaces ("when the user refers to past work,
+  consult …") was followed by retrieval in ~22% of genuine callbacks, uniformly
+  across models — the capability existed and the edge into it depended on the
+  reader. Only the fast legs run (measured: mem 0.3 s, four local legs 0.9 s,
+  `cards` 4.8 s, `xi` ~10 s); the slow ones are named in the text as not run.
+- evidence: the retrieval-linkage audit's record 04 (calibration) and its
+  trigger-hook backtest folder (under the source's outputs/ tree, not shipped
+  here) — matcher on the 40 hand-labelled rows: precision
+  45% -> 82%, recall of genuine callbacks 18/18, 17/19 non-callbacks silenced;
+  filler removal neutral on the golden set (16/27 either way, none lost) and
+  moves the incident prompt's memory file from rank 4 to rank 1. Suite
+  `hooks/tests/test_past_work_recall_inject.py` 23/23 two-sided, including one
+  end-to-end case on the real tool. The telemetry row also carries the cleaned
+  topic query (not the prompt) since 2026-09-20 — the ruler for query cleaning
+  and for the bge-m3 rebuild decision.
+- history: born 2026-09-20 as order 2 of the retrieval-linkage audit. Named
+  gaps: a callback phrased without any listed word; subagents (UserPromptSubmit
+  does not fire for them — the dispatcher must pass findings in the brief).
+- rollback: remove the entry from `settings.json` UserPromptSubmit FIRST
+  (`backups/2026-09-20/settings.json.pre-order2.bak`), then the hook file.
+- review-when: recall.py's `--json` block shape changes; a leg's latency moves
+  by more than 2x; the word list is edited (re-run `backtest_matcher.py run`);
+  the follow-through report (`tools/recall/trigger_followthrough.py`) shows the
+  injected candidates opened in under a fifth of fired prompts — then the text
+  is noise and the design, not the wording, is wrong.
+
+### `subagent_retrieval_brief` — every subagent is handed the recall entry point
+- current: SubagentStart (no matcher, all agent types). Prints one static
+  paragraph through `hookSpecificOutput.additionalContext`: the federated recall
+  command and the two empty-result traps (literal-phrase session search,
+  unquoted Windows path in Git Bash). Payload-independent; rules on nothing.
+  One telemetry row per subagent start with `agent_type`
+  (`telemetry/subagent-retrieval-brief.jsonl`). (2026-09-20)
+- why: measured 2026-09-20 — general-purpose and custom subagents get CLAUDE.md
+  and the MEMORY.md index but no SessionStart injection; Explore gets none of
+  them; UserPromptSubmit does not fire for a dispatch prompt. The prior-art
+  chain's first step therefore did not exist for any subagent.
+- evidence: delivery is MEASURED, not documented — a nonce probe on
+  SubagentStart was quoted back by a general-purpose and an Explore subagent,
+  and the shipped text was quoted back by an Explore subagent the same day.
+  Suite `hooks/tests/test_subagent_retrieval_brief.py` 12/12; hook-deny-lint
+  FAIL 0.
+- history: born 2026-09-20. It overturns the audit's earlier "cannot be changed"
+  row for subagent context (the audit's synthesis record §6 rows 1-2, under the source's outputs/ tree).
+- rollback: remove the `SubagentStart` block from `settings.json` FIRST, then
+  the hook file.
+- review-when: any Claude Code upgrade (re-run the nonce probe); the harness
+  starts delivering SessionStart output to subagents; recall.py moves.
 
 ### `ps_errorpref_guard` — annotate `$ErrorActionPreference='Stop'` over a native exe
 - current: PreToolUse on `Write|PowerShell`. **NOTICE, never deny**, when
@@ -2306,6 +2764,13 @@ option B's trigger). Tier-B compliance meter:
 > Substitute: hand-test a `$ErrorActionPreference='Stop'` native call under
 > your own PowerShell version and confirm which of directions (A)/(B) still
 > holds.
+- promotion trigger (idiom-changing notice, `ops/40-maintenance.md` §2a(4)):
+  live rate ≥ 0.375/day over any 30-day window means the text changes nothing.
+  No cost-free rewrite exists ('Stop' is right for cmdlets; adding a
+  `$LASTEXITCODE` read changes behaviour), so the answer then is a carrier
+  change, not a deny. Measured 2026-09-23: 4 rows / 33.5 days = 0.12/day, below
+  the baseline — kept as NOTICE; closed by user ruling 2026-09-23, not re-raised
+  unless this trigger fires.
 - rollback: unregister the `Write|PowerShell` PreToolUse block in
   `settings.json`; the file is inert without it. Global CLAUDE.md Environment,
   the "calling a native executable from PowerShell" bullet, keeps carrying the
@@ -2313,13 +2778,22 @@ option B's trigger). Tier-B compliance meter:
   is worth 0/1.
 
 ### `ps_pipeline_close_guard` — annotate an early-closing consumer downstream of a live process
-- current: PreToolUse on `PowerShell`. **NOTICE, never deny**, when a pipeline
-  puts an interpreter/builder/exe upstream of `Select-Object -First N` (or its
-  `select` alias, or `| more`), because closing the pipeline TERMINATES the
-  upstream process. Two tiers: `work` (interpreter, builder, or anything that
-  can mutate) annotates; `report` (`git`, `gh`, `rg`, `findstr`, `tree`,
-  `tasklist`…, things that only print) is detected, counted, and SILENT. Escape
-  hatch `[pipeline-checked]`. Fail-open. (2026-08-21)
+- current: PreToolUse on `PowerShell`. **DENY since 2026-09-23** (was NOTICE
+  from 2026-08-21) when a PowerShell tool call puts an interpreter/builder/exe
+  upstream of `Select-Object -First N` (or its `select` alias, or `| more`),
+  because closing the pipeline TERMINATES the upstream process; the denial
+  carries the ready-made retry `$out = <upstream>; $out | <consumer>`, which the
+  same hook passes (suite D1–D4). A `.ps1` written through Write/Edit/Bash stays
+  a NOTICE (writing kills nothing). Two tiers: `work` fires; `report` (`git`,
+  `gh`, `rg`, `findstr`, `tree`, `tasklist`…, things that only print) is
+  detected, counted, and SILENT. Escape hatch `[pipeline-checked]`. Fail-open.
+- promotion evidence (2026-09-23, `ops/40-maintenance.md` §2a condition (4)):
+  live work-tier rate 2.82/day over 33 days (93 rows) vs the 1.79/day pre-hook
+  backtest — the notice changed nothing, and L-027's 2026-09-16 recurrence
+  (`python rank_T08.py | Select-Object -First 12`) is telemetry row 79: it fired
+  and the call ran. **Demotion trigger**: two `report_fp.py` misfire rows for
+  this hook within 30 days. review-when: the harness lets a PreToolUse hook
+  rewrite the call's input (the deny then becomes a silent rewrite).
 - why: `ops/lessons.md` L-027, hits: 2 — the same call shape cost two full
   diagnosis rounds days apart, and hit 1 left no artifact behind so hit 2 paid
   the price again. Both halves of the damage point AWAY from the cause: output
@@ -2409,10 +2883,24 @@ option B's trigger). Tier-B compliance meter:
   2 hits and 2 diagnosis rounds.
 
 ### line endings — pinned by `.gitattributes`, not by `core.autocrlf`
-- current: `~/.claude/.gitattributes` declares `* text=auto eol=crlf`, with
-  `eol=lf` for `*.sh` and `provider-episodic/cli/*` (shebang scripts) and a
-  `binary` list as a forward safety net. (2026-08-18)
-- why: no write path available to an agent emits CRLF — only Edit preserves an
+- current: (2026-10-01, user ruling) the ending is chosen by the file's PRIMARY
+  CONSUMER. Default `* text=auto eol=lf` (machine-read: code, config, skills,
+  rules, ops, references, JSON). CRLF classes: text a human opens, reads or
+  copies (`outputs/**` and `reports/**` md/txt, `audit-archive/`,
+  `thinking-notes/`, every `README.md`, `OPERATOR-GUIDE.md`, `PHILOSOPHY.md`,
+  `*.csv`) and Windows-native script loaders (`*.bat *.cmd *.ps1 *.psm1 *.psd1
+  *.reg *.vbs *.wsf`). Tool-written exceptions keep their LF pins; `binary` list
+  unchanged. The commit-time realigner is `tools/eol-sync` (key
+  `eol conformance`).
+- why: (2026-10-01) the user's words — CRLF exists for human reading/copying and
+  for bat-style scripts that fail to start otherwise, on this Windows machine;
+  everything else follows the writer. The CRLF-everywhere default fought every
+  agent write path: 9 files drifted within two days of the 09-29 rewrite, and
+  the rewrite itself broke the plugin gate (multi-line rewrite `find` strings
+  stopped matching CRLF sources; shared-plugin FAIL 09-29..10-01, fixed in the
+  staging repo by reading sources in git-blob form). Five LF exceptions had
+  already been carved out for the same reason (writer and checkout must agree).
+- why (2026-08-18): no write path available to an agent emits CRLF — only Edit preserves an
   existing ending. CRLF in the working tree was coming solely from
   `core.autocrlf=true` in `C:/Program Files/Git/etc/gitconfig`: per-MACHINE,
   invisible to the repo, and a heuristic. Moving it into a committed file makes
@@ -2426,18 +2914,21 @@ option B's trigger). Tier-B compliance meter:
   verified unchanged; only 8 files carry a real content diff.
   Report §5.2; `lessons.md` L-024.
 - history: implicit `core.autocrlf=true` (machine default) → declared
-  `.gitattributes` (2026-08-18)
-- review-when: a remote is added to this repo, or a POSIX clone appears — then
-  `eol=crlf` would impose Windows endings on that checkout and the default line
-  must drop to plain `* text=auto`. Verified 2026-08-18: no remote exists.
+  `.gitattributes` `eol=crlf` everywhere (2026-08-18) → by primary consumer,
+  LF default + human-read / Windows-loader CRLF classes (2026-10-01)
+- review-when: a new top-level folder of human-read documents appears (it needs
+  a CRLF line); the Write tool starts honouring `.gitattributes` (then the
+  post-commit realigner is redundant); a tool starts regenerating a file inside
+  a CRLF class with "\n" and comparing bytes (pin that file LF, as archdiag).
   Standing check after any bulk write or `.gitattributes` edit:
+  `python -X utf8 tools/eol-sync/eol_sync.py --all --check` (0 drift) and
   `python tools/shell-audit/invariants.py` (mixed-ending count must stay 0).
 > **Share note.** `tools/shell-audit/invariants.py` is source-only
-> (excluded-by-decision, `tools/share-manifest.toml`). Substitute:
-> `git diff --stat` after a bulk write, or `git grep -Il $'\r'` for a quick
-> CRLF-presence check, and confirm the count of touched files matches intent.
-- rollback: delete `.gitattributes`; `core.autocrlf=true` resumes governing.
-  Working-tree endings revert on the next checkout.
+> (excluded-by-decision, `tools/share-manifest.toml`); `tools/eol-sync/` is
+> the shipped half. Substitute for the mixed-ending count: `git grep -Il $'\r'`
+> after a bulk write, and confirm the set of touched files matches intent.
+- rollback: restore the previous default line (`git show 3bc8b57:.gitattributes`)
+  and run `eol_sync.py --all`; the index never changes, only working-tree bytes.
 
 ### graph rot watchdog — ops-health check 15 + daily task
 - current: `tools/graph-snapshot/gs_watchdog.py` rebuilds the graph, compares
@@ -2465,6 +2956,14 @@ option B's trigger). Tier-B compliance meter:
   a tracked file (user ruling: B/C/D rejected, see the design record
   `references/obsidian_Nathan-round4-design.md` §2.3). Task settings owed by
   the user (D-27): `StartWhenAvailable` + `ExecutionTimeLimit PT30M`.
+- round 6 (2026-09-23, user ruling: "any lag = FAIL" could not tell a defect
+  from derived work not yet processed): `evaluate()` GRADES each finding in
+  `graded` — `defect` (build failed, live-surface broken links, MOC absent →
+  check 15 SEV_ALARM → HMI fail) and `overdue` (MOC lag whose oldest
+  unregenerated commit is ≥ `MOC_OVERDUE_HOURS` = 24 h → SEV_BREACH → HMI
+  warn). A lag inside the window is `moc_state: pending`, reported in
+  `moc_note` only — no finding, lamp green. The processing step it waits for
+  is `MOC_CLOSEOUT` below. D-24 still holds: the scheduler writes nothing.
 - why: a knowledge graph rots by ADDITION. Every file added can break a link
   while every headline number stays plausible, so the rot is invisible both to
   the session that caused it and to the next one that reads the graph. Detection
@@ -2510,6 +3009,21 @@ option B's trigger). Tier-B compliance meter:
   Controls: 2 new cases in `check15_remedy_cases()` (both known-TRUE, both
   FAIL against the pre-fix hook — measured 63/65 — and the group's known-FALSE
   is unchanged). **65/65 on 2026-09-09.**
+- 2026-09-26 (**the named common cause is gone**): the `build` remedy's
+  sentence "the corpus changed under the build … another session editing
+  `~/.claude`" described an INSTRUMENT FAULT, not a cause to live with — the
+  zero-touch check blamed any hash change on the build. Measured: `moc_regen
+  --commit` build exit 1 at 22:55, the two changed files saved by a peer at
+  22:54:51 / 22:55:04 inside the 22:54:41–22:55:22 window. `gs_writes.py` now
+  attributes each change (CPython audit events + `out/runs/` records); a peer's
+  edit is listed as `changed by ANOTHER writer` and fails nothing, so the
+  remedy now says the failing step's own last line names the finding (gsnap
+  build prints `build: FAILED — <reason>` last for exactly these tail
+  readers). Controls: `tools/graph-snapshot/tests/test_inv2_attribution.py`
+  (positive: own write, same-bytes own write, writing child, verify after own
+  write; negative: sibling-process peer mid-build, mid-pipeline; reproduction:
+  the peer scenario FAILS on the pre-fix gsnap.py). Check-15 cases unchanged
+  (the `zero-touch` word they pin is still in the sentence), 106/106.
 - review-when: the graph-watchdog scheduled task's `ExecutionTimeLimit`
   changes (the 30-minute backstop is read off it); `gs_watchdog.evaluate()`
   gains a `remedy_kind` value (check 15 must gain the matching branch — the
@@ -2540,7 +3054,7 @@ option B's trigger). Tier-B compliance meter:
   the operator's Obsidian vault; the work tree excluded by the user 2026-09-09), each with
   a verdict (`guard` / `regenerate` / `guarded-elsewhere` / `frozen` / `mount` /
   `distinct`), a per-row equality predicate, and the detector that would fire.
-  Carrier `ClaudeCopyCensus-Daily` (13:10 daily **and** at logon) runs
+  Carrier: the daily copy-census scheduled task (13:10 daily **and** at logon) runs
   `version-census --refresh --write-note` first — regeneration is the fix,
   comparison is only for what cannot be regenerated (S-1) — then
   `copies.py --check --record`. Surfacing: `ops_health_nudge.py` check 18 reads
@@ -2560,6 +3074,12 @@ option B's trigger). Tier-B compliance meter:
   not: an uncalibrated copy detector reported 22 junction-mounted files as
   duplicated across both roots, consistently and wrongly. Hence the four silent
   verdicts: on this data, being SPECIFICALLY quiet is most of the work.
+- evidence: the measurements this entry rests on, both from the 2026-09-09
+  sweep — ONE diverging cross-root pair (the only script writing both roots),
+  against 22 junction-mounted files an uncalibrated detector reported as
+  duplicated (the false-positive side the four silent verdicts exist for); and
+  the cost of the retired R5 silence, a `drafts/` test copy byte-compiled 12
+  days after landing, 33 diff lines behind the live suite (detail below).
 - landed drafts hold no artifacts (user ruling 2026-09-09): asked what should
   happen to a proposal folder whose change has landed, the user answered with a
   criterion — 「重點在於未來沒有任何機會導致誤判或誤讀，做最乾淨的選擇」— and
@@ -2714,7 +3234,26 @@ option B's trigger). Tier-B compliance meter:
   2026-08-26 it agreed with `claude --version` while both read 2.1.246 — a
   one-sided calibration that cannot discriminate; the test to validate it is
   recorded in the stamp file.
+- feature-delta record (USER RULING 2026-09-27): every reconcile writes one
+  record in a per-reconcile folder under the source's `reports/` tree (not
+  shipped here; one file per reconcile, named by date and version pair). The record
+  holds only what matters on this machine: new mechanisms, new features,
+  conflicts with local settings/rules (with location and action), related
+  items, and a one-line count of what was left out. It is not a copy of the
+  changelog, and a Fixed item goes in only if it touches a local setting,
+  hook or rule. This is a property of the STAMP, not a step to remember:
+  `cc_delta.py --stamp` refuses (exit 2) unless `--record` names a file in
+  that folder with the five headings and the version range. The stamp stores
+  it as `feature_delta`, and check 16 reports a stamp whose record is missing
+  (LOSS band). `cc_delta.py --features` prepares the candidates. First run:
+  380 bullets became 75 candidates, then 31 entries. It drops out-of-scope
+  surfaces (`OUT_OF_SCOPE`; VS Code/JetBrains confirmed unused by the user 2026-09-27) and fixes that
+  name no term from `settings.json`. Spec: that
+  folder's own README (source-only). Controls:
+  `tools/cc-delta/test_cc_delta.py` 9/9, and ops-health
+  `check16_record_cases` 3/3 (suite 109/109).
 - history: born 2026-08-26, same round as the 2.1.200→2.1.246 reconciliation.
+  Feature-delta record added 2026-09-27.
 - review-when: the stamp is bumped WITHOUT a pass having been done (that turns
   the whole mechanism into a silent no-op — the exact failure it exists to
   prevent); `cache/changelog.md` stops being the changelog cache path; the CLI
@@ -2732,15 +3271,15 @@ option B's trigger). Tier-B compliance meter:
   CLAUDE.md engineering-judgement bullet (cited by its bold trigger phrase, never
   by position) resolves into asset properties `AP-nn`, each with a `detect:` line
   (`ops/references/principle-design-guide.md`). Enforced subset
-  `tools/entry-schema-lint/` ES-1..ES-8: legacy artifacts (first commit on or
+  `tools/entry-schema-lint/` ES-1..ES-9 (ES-9 `watched`, 2026-09-29: every
+  component under system-hmi's scan roots has a `subsystems.json` row or a
+  reasoned `ignore.json` row — the enumeration is `hmi/scan.py` imported, and
+  the HMI reads the lint's verdict, never re-decides; save-time twin
+  `golive_check.registry_gap()`): legacy artifacts (first commit on or
   before 2026-09-08) WARN with a count that must not rise, born-after FAIL, lost
   anchor exit 2; wired as integrity-sweep check 29 and `config-self-audit` §4
   (`--path`). No parser changed (INV-1); no new hook, no CLAUDE.md prose (INV-6);
   `AP`/`ES`/`PH` registered in `LABEL-REGISTRY.md` §2 the same commit (INV-7).
-> **Share note.** `tools/entry-schema-lint/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`); integrity-sweep check 29 cites it as a dead
-> pointer on this copy. `ops/references/entry-schema.md` (the adapter table
-> ES-1..ES-8 checks against) ships and stays useful as a manual checklist.
 - why: user 2026-09-08 — CLAUDE.md and PHILOSOPHY complement each other, but the
   principles are forgotten at the layer where the small artifact (skill, hook,
   rules file, project CLAUDE.md, routing row) is built, and every such surface
@@ -2830,10 +3369,6 @@ option B's trigger). Tier-B compliance meter:
   `tools/hook-proof-of-life/pol.py` + sweep check 31 EXECUTE each registered hook's
   declared suite, the declaration living in the hook's own docstring
   (`Proof-of-life: \`python …\``).
-> **Share note.** `tools/hook-proof-of-life/` and `tools/class-closure/` are
-> source-only (excluded-by-decision, `tools/share-manifest.toml`); checks 31
-> and 33 cite them as dead pointers on this copy. Each shipped hook's own test
-> file (named in its docstring, where one ships) still runs stand-alone.
   Coverage went 3 → 19 executable of 29 by
   backfilling declarations onto suites that ALREADY EXISTED — the sixteen were
   never untested, only unrun, which is the belief's whole claim in one number.
@@ -2889,7 +3424,9 @@ option B's trigger). Tier-B compliance meter:
   `Write|Edit|NotebookEdit|Bash|PowerShell`). In a linked worktree it prints the
   worktree, branch, canonical checkout, unmerged-commit count and the ignored state
   dirs present; in the canonical tree it prints the linked worktrees that still
-  exist with +unmerged / dirty / ignored-state. It DENIES a Write/Edit/NotebookEdit
+  exist with +unmerged / dirty / ignored-state / reparse-count (junctions and
+  symlinks to 3 levels, since 2026-09-24: a worktree holding one is not removed
+  until the link is dropped, L-120). It DENIES a Write/Edit/NotebookEdit
   whose target git ignores inside a linked worktree of `~/.claude` (names the
   canonical target; opt-in file `<gitdir>/worktree-scope-allow`), and a
   relative-path `gsnap.py build|verify|emit-moc|bench` / `xi.py emit|register|union`
@@ -3004,6 +3541,49 @@ option B's trigger). Tier-B compliance meter:
 - history: 2026-09-09 (F-8) its notice text gained the hook's self-identification
   and a receipt sentence — the notice surface is ruled on now (`AGENT_FACING_TEXT`
   below); no condition changed, `--selftest` still 32/32.
+  2026-09-23 (notice-hook audit, `ops/40-maintenance.md` §2a(4)): idiom-changing
+  notice, but born from ONE incident, so there is no pre-hook rate and (d)'s
+  incident form is its promotion trigger; kept as NOTICE and closed by user
+  ruling 2026-09-23 (live 51 notices / 14.5 days against 264 `pass-pathspec`).
+  Telemetry debt settled the same day: the 6 `decision: error` rows with session
+  `unknown` (2026-09-09 02:49–03:16) were the AP-62 undetermined-input probes of
+  the class-closure round run against the real hook before the writer redirect
+  existed; now listed as (`unknown`, this file) in
+  `tools/telemetry-framing/suite-sessions.json`, rows untouched. `--selftest`
+  32/32 leaves the production file's row count unchanged.
+
+### `BOUNDARY_CONTRACT_NOTICE` — the first code write of an L1/L2 main loop meets a recorded contract or waiver
+- current: `hooks/boundary_contract_notice.py` (PreToolUse `Write|Edit|NotebookEdit`,
+  once per session: a main-loop opus/fable session writing its first code file
+  outside memory/cache/telemetry/plans/scratchpad, with no `boundary-contract`
+  row in its process ledger and no `ExitPlanMode`, gets a NOTICE via
+  `additionalContext`). Never blocks. The carrier is a ledger row
+  (`ledger.py add --subject boundary-contract`, contract summary or `waived`),
+  stated in `ops/05-authority.md` §4 and the global CLAUDE.md `[main]` bullet.
+- why: `lessons.md` L-104 — three SSLD 0912 rounds (T06, T07, T10) opened as a
+  question/estimate, did implementation work and noticed the missing contract
+  only at close; the duty was recall-only, and the user ruled (2026-09-22) that
+  the project kit fix (SSLD `open_round.py` v1.1, commit `25ff90f`) be joined by
+  GLOBAL prevention. Omission → P1 at the substitute act (`40-maintenance.md`
+  §2a). NOTICE not DENY: the reader is the writing LLM (gate-severity-by-
+  consumer) and the Tier is not determinable from the call. Ledger, not chat
+  text: measured 2026-09-22 (a local session) — about half of that session's
+  visible text blocks, the contract among them, never reached the transcript.
+- evidence: backtest 2026-09-22 over 10 days (chat-text carrier, upper bound):
+  218 of 314 opus/fable main sessions that wrote a code file had no contract
+  text before it; all five L-104 sessions are in that set. `--selftest` 25/25
+  two-sided; real-transcript dry run 124 ms on a 1.5 MB transcript;
+  hook-deny-lint conforms.
+- review-when: (a) an L-104 recurrence (held=no) in a session whose telemetry
+  shows the notice fired → promote to DENY-once with a deny_receipt; (b) over
+  ≥30 notices, ≥80% answered by `waived` → narrow the trigger (new files
+  only), never widen the escape; (c) visible text reliably persisted in
+  transcripts → re-measure before accepting chat text as a carrier; (d) the
+  ledger path or the relaxation gate's model rule changes.
+  2026-09-23 (notice-hook audit): an OMISSION ask — the rate is not its ruler,
+  (a) is its promotion trigger; kept and closed by user ruling 2026-09-23.
+- rollback: remove the settings.json entry and the hook file; keep this entry
+  with `status: retired` and the §4 Trigger clause.
 
 ### `AGENT_FACING_TEXT` — two surfaces, and which requirement binds which
 - current: `rules/hook-deny-message.md` governs every string a hook sends into a
@@ -3014,9 +3594,6 @@ option B's trigger). Tier-B compliance meter:
   counts, checked on the situation text with the receipt sentence removed) and
   **R3n** (name the row this notice left). Enforced by
   `tools/hook-deny-lint/lint.py`, four fixtures, two per surface.
-> **Share note.** `tools/hook-deny-lint/` is source-only (excluded-by-decision,
-> `tools/share-manifest.toml`). `rules/hook-deny-message.md` still ships and is
-> readable as a manual checklist; there is no shipped `lint.py` to run it.
 - why: the contract is a property of the TEXT, and the text does not become safe
   by not blocking anything. Measured 2026-09-09: 12 notice messages in 8 hooks
   were emitting agent-facing text that nothing ruled on — the object-vocabulary
@@ -3050,8 +3627,10 @@ option B's trigger). Tier-B compliance meter:
   denies against 942 notices).
 - review-when: (a) a THIRD agent-facing text surface appears — a new hook-output
   key, or a new event whose stdout the harness injects. One is already measured
-  and NOT ruled on: bare stdout of `SessionStart`/`UserPromptSubmit` hooks, 7
-  entries in settings.json (F-9), named in the lint's summary line every run;
+  and NOT ruled on: bare stdout of `SessionStart`/`UserPromptSubmit` hooks
+  (F-9), whose entry count and names the lint's `not ruled on:` line reads
+  live from settings.json every run — no count is kept here (a hand-copied
+  "7" had rotted to 12 by 2026-09-23);
   (b) the harness stops delivering `additionalContext` or `systemMessage` to the
   model — the notice requirements were written for a reader that cannot
   authenticate them; (c) a notice misfire is reported and the rate is
@@ -3161,7 +3740,7 @@ option B's trigger). Tier-B compliance meter:
   line); a listed host changes side (new challenge, or a challenge that stops); a
   publisher exposes an official TDM API (row gains `tdm_api`); the FALSE-POSITIVE LOG
   in the hook's docstring reaches 3 (then the ROW is re-derived, never the hook
-  widened); `<browser_surfaces>` wording changes.
+  widened); `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) wording changes.
 - rollback: remove the matcher entry from `settings.json` (backup above); the table
   stays and the skill keeps refusing on its own.
 
@@ -3212,3 +3791,342 @@ option B's trigger). Tier-B compliance meter:
 - history: first entry 2026-09-10.
 - review-when: the external dispatch tier gains a mechanical route allowlist a
   prompt can cite by name (the clause then points at it).
+
+### `DELIVERABLE_FUNCTION_NAME` — a deliverable the user will ask for again is findable by what it DOES
+> **Share note.** The index this rule feeds (`tools/cross-index/`, read back
+> through `tools/recall/`) is source-only (excluded-by-decision,
+> `tools/share-manifest.toml`). The naming rule itself stands on its own; the
+> hook that nudges it ships separately.
+- current: two homes for the function name, read as a UNION by recall's `deliv`
+  leg: the central ledger `tools/cross-index/function-names.json` and the
+  travelling sidecar `<file>.xi.md`; both agent-proposed, user-approved, no tool
+  writes them. The edge into proposing one is `hooks/deliverable_birth_notice.py`
+  (PostToolUse `Bash|PowerShell`): when a `git commit` just ADDED a file inside a
+  registry store's `deliverables` globs that has neither, it injects one NOTICE
+  naming the paths. Never blocks. The reading edge is
+  `hooks/past_work_recall_inject.py`, which runs the `deliv` leg on past-work
+  prompts since the same day (Q-1); from that wiring on
+  `tools/recall/deliverable_probe.py` fails on any lost scored question.
+- why: the user asks by function ("個人記憶檢索 GUI"), files are named by task
+  (`navigator.html`), and machine-extracted index text holds only the file's own
+  words — real user questions hit 0/2 until a function name existed, 2/2 after
+  (finding F-1). The session that built the file is the only reader that still
+  knows what it is for; a prose reminder to propose a name is the recall-only
+  carrier the same audit measured at ~22% follow-through. The commit is the
+  birth because deliverables are mostly BUILT by scripts, not written with the
+  Write tool, and every landed item is committed by standing rule. NOTICE, not
+  DENY: the reader is the committing LLM, and whether a file is a keeper or an
+  intermediate version is not determinable from outside.
+- evidence: the retrieval-linkage audit's record 12 (順位4 design; under the
+  source's outputs/ tree, not shipped here) §9 and the hand-off's order-4 remainder (c)/(d); hook `--selftest` 18/18
+  two-sided (added/modified, named by path / sha / sidecar, store and
+  deliverables excludes, `git -C` / MSYS `cd` / `Set-Location` forms, CJK name,
+  list cap, stale HEAD, missing registry fail-open); hook-deny-lint `conforms`;
+  injection suite 26/26 incl. L2 (the user's own wording surfaces
+  `navigator.html` through `deliv` only); probe controls 10/10 incl. D6/D6w.
+- history: 2026-09-21 born (user ruling "補上" on the two gaps the order-4
+  session left: Q-1 and the birth-time reminder).
+- review-when: (a) the registry's `deliverables` field is renamed or moves;
+  (b) `no-repo` exceeds a third of `telemetry/deliverable-birth-notice.jsonl`
+  rows → extend the hook's `candidate_dirs`, do not lengthen `FRESH_S`;
+  (c) three observed misfires → notice only the last added file per folder;
+  (d) the harness stops delivering PostToolUse `additionalContext` to the model
+  (this is the first hook here on that surface); (e) a third home for function
+  names appears → `has_function_name()` plus a selftest case in the same commit.
+- rollback: remove the PostToolUse `Bash|PowerShell` entry from `settings.json`
+  (backup `backups/2026-09-21/settings.json.pre-deliverable-birth-notice`) and
+  drop `"deliv"` from the injection hook's `LEGS` — the probe relaxes itself in
+  the same edit because it reads that tuple.
+
+### `CORE_VIEW_ENTRY` — a core view page is reachable from ONE outer entry, for the human and for the session
+> **Share note.** The daily carrier (`tools/copy-census/run-daily.ps1`) and
+> the emitter it calls (`tools/cross-index/scheduled_emit.py`) are source-only
+> (excluded-by-decision, `tools/share-manifest.toml`); `tools/view-launcher/`
+> ships as a template, so the launcher page is rebuilt by hand here.
+- current: `tools/view-launcher/views.json` is the register of core view pages
+  (function name in the user's words, the question the page answers, where it
+  lives, how to regenerate it; agent proposes, user approves, 1–2 per project).
+  `tools/view-launcher/build.py` renders it to `All-View-Pages-Launcher.html` (the
+  desktop-shortcut target; the build ensures the shortcut; renamed from VIEWS.html
+  2026-09-25 by user ruling) and `All-View-Pages-Launcher.md` (the Obsidian window) at the ~/.claude root, both
+  gitignored and rebuilt by the daily carrier `tools/copy-census/run-daily.ps1`;
+  `hooks/view_launcher_gist.py` (SessionStart) injects the same list, one line
+  per page. Pages are never moved, copied or edited — they are the launcher's
+  profiles. A missing page stays on the list, greyed, with its refresh command.
+- why: the core overview pages sat inside the tools that make them, several
+  under an excluded, gitignored `out/` no index reaches (finding F-4). Asked for
+  "一頁看到所有專案目前狀態的畫面", the deliverables index returned five unrelated
+  pages; the user did not know the project dashboard page (under the source's
+  references/ tree, not shipped here) existed, and
+  named system-hmi as the nearest thing they knew. User's diagnosis of the unused
+  GUIs (2026-09-21): not only "not needed" — "there was no entry layer, so I
+  forgot"; a TUI would be seen even less. The remedy is a LAUNCHER in the game-
+  launcher sense, plus the list in every session before it searches, the way a
+  diagram gives a flow before the files are read.
+- evidence: probe row R2 and its note in `tools/recall/golden/deliverable-
+  questions.json`; builder `--selftest` 12/12 (missing page kept and not a link,
+  register text escaped, quoted commands survive the copy attribute, duplicate
+  id / unknown group / missing key refused); hook `--selftest` 7/7 (silent on an
+  empty, broken, absent or refused register); page-fill-gate PASS at 1280 / 1707
+  / 1920 as class `dashboard`. The PICTURE is unverified until the user opens it.
+- history: 2026-09-21 born as a flat card list; same day, user ruling after the
+  first look: sidebar of projects + dashboard, new items must arrive with nobody
+  registering them, and "the outermost launcher is decided FIRST" for every
+  subsystem and project (SSLD's growth in cases and rounds is the stated reason)
+  → `rules/naming-and-placement.md` PL-6. The builder now reads THREE sources:
+  the pinned register, xi's daily derived artifacts (auto items, grouped by
+  registered project — longest root wins — then by round folder; unregistered
+  folders shown and marked), and `references/PROJECTS.md`. The rebuild moved
+  from `run-daily.ps1` into `tools/cross-index/scheduled_emit.py`, right after
+  the emit it reads. Builder selftest 17/17 incl. V12 (a new round appears
+  unregistered) and V9 (hostile text cannot close the data script); current view
+  and filter live in the URL hash (`rules/web-navigation-state.md`).
+- review-when: a listed page moves (its card greys out → fix the path in the
+  register); the register passes ~15 entries (it is becoming a file browser →
+  prune); the user stops opening the launcher too (then the entry layer was not
+  the missing piece — reopen the question before adding features to it).
+- rollback: remove the `view_launcher_gist.py` entry from `settings.json` and the
+  `_rebuild_view_launcher()` call from `tools/cross-index/scheduled_emit.py`; the
+  two generated files can simply be deleted.
+
+### `SYSTEM_HMI_SUMMARY` — every session is told what system-hmi last saw as not healthy, how long it has stood, and where known-good stands
+- current: `hooks/system_hmi_summary.py` (SessionStart, after `ops_health_nudge.py`)
+  reads `tools/system-hmi/out/snapshot.json` + `out/known-good.json` and one
+  `git rev-list --count`; prints the counts, the known-good line, up to 6 alarming
+  subsystems with a `standing N d` age once an alarm is ≥1 day old, capped at 900
+  bytes. Never runs a probe, never blocks. Snapshot older than 36 h → age line only.
+  HMI-05 of the system-hmi design's record 04 (under the source's outputs/
+  tree, not shipped here), extended by design 17.
+- why: 2026-09-22 — the graph watchdog had failed two days running and an interop
+  alarm had stood since 2026-09-19, each shown every session and handled by none,
+  because each looked off-mainline. The missing fact was the AGE: nothing said
+  how long an alarm had stood. The text states facts and ages only; whether to
+  raise a standing alarm is not something a hook may direct (hook text rule P4).
+- evidence: `hooks/tests/test_system_hmi_summary.py` 16/16, two-sided (stale vs
+  fresh, standing vs new, cap hit vs not); first live render cut the known-good
+  line under the byte cap → moved to line 2, now a test; measured ~100 ms.
+- history: 2026-09-22 `RESERVED = ("feedback-pool",)` — the pool's `due` warn is
+  shown whenever it alarms, taking the last of the MAX_ITEMS slots (user ruling
+  「HMI加保留位」 after review round 1 A1 found a fresh warn queued behind five
+  standing ones; the total stays 6). Test `t_reserved_slot_survives_older_alarms`.
+- review-when: snapshot.json changes shape; the daily verdict schedule is added
+  or removed (STALE_HOURS assumes one run a day); the user stops acting on
+  standing alarms anyway (then the age was not the missing piece — ask).
+- rollback: remove the `system_hmi_summary.py` entry from `settings.json`.
+
+### `GOLIVE_CHECK` — a hook's proof-of-life runs at the moment it goes live (on save), not at merge
+- current: `hooks/golive_check.py` (PostToolUse `Write|Edit|MultiEdit`) maps an
+  edited code file in ~/.claude to the executable `Proof-of-life:` command of every
+  registered hook that IS it or NAMES it (or its `tools/<x>/` dir) — pol.py's
+  grammar, imported — and runs up to 3 suites, 60 s each, telemetry isolated.
+  Since 2026-09-23 also any file (any suffix) a hook lists on a `Live-reads:`
+  docstring line — the registers its suite checks live (user_profile_gist:
+  USER-PROFILE.md + PROJECTS.md; project_registry_gist: PROJECTS.md). A hook whose
+  suite reads live data declares it there; a hermetic suite declares nothing.
+  Silent on pass; a NOTICE (never a block) on fail/inconclusive; one row per run in
+  `telemetry/golive-check.jsonl`, pass included. Design 17 R-3. Since 2026-09-29
+  also `registry_gap()`: a save under a system-hmi scan root whose component has
+  no `subsystems.json` row (nor a reasoned ignore row) is named at the save —
+  `hmi/scan.py` imported; ES-9 is the sweep twin (12 UNREGISTERED components had
+  sat for two weeks with no runner but a hand-typed `hmi.py scan`).
+- why: a hook is live the moment it is saved — "test before merge" is already
+  late for it. AP-63's case: `unattended_run.py` raised NameError in every guard for
+  a day while its passing suite sat unrun. `Live-reads:` (L-121): a hook's live
+  check is broken by an edit to its DATA as well — PROJECTS.md gained rows three
+  times without an activity-map row and only the HMI noticed each time.
+- evidence: `hooks/tests/test_golive_check.py` 18/18 incl. an end-to-end positive
+  control on a fixture home with the real pol.py and a really failing suite
+  (notice fires) and its negative (suite passes → silent), and the same pair for
+  an edited `.md` register. In vivo 2026-09-23: deleting one activity-map row →
+  notice `unclassified … n8n-concept-survey`; restoring it → `all passed`, silent.
+- review-when: pol.py's declaration grammar changes; a mapped suite routinely
+  times out (then the notice becomes a timeout report — re-size or narrow); the
+  notice rate in the telemetry file shows edit-in-progress noise the user rejects.
+- rollback: remove the `golive_check.py` entry from `settings.json`.
+
+### `REGISTRY_ROW_GUARD` — a project row enters PROJECTS.md only after its activity-map row exists
+- current: `hooks/registry_row_guard.py` (PreToolUse `Write|Edit|MultiEdit`, DENY)
+  since 2026-09-29. A payload that adds a project name to a file ending in
+  `references/PROJECTS.md` — not already a row on disk, no VALID
+  `| map-project | activity | operand |` row in the `USER-PROFILE.md` BESIDE it
+  (sibling, so a worktree copy is gated against its own map) — is denied with
+  the rewritten call: write the map row first, then re-run. Parsers imported
+  from `user_profile_gist` / `project_registry_gist`, never copied. Rules on the
+  determinable FORM only (name present, enums valid), never on the
+  classification's truth. Undetermined (allow + row, no verdict): header drift
+  in the payload or on disk, no map table, unparsable payload. Fail-open on
+  error. Receipt rows in `telemetry/registry-row-guard.jsonl`; no unblock marker
+  (the equivalent call costs one Edit); misfire exit = `report_fp.py`.
+- why: L-121 hit 3 (2026-09-28 22:24): golive_check's save-time NOTICE named
+  the unclassified row and the session did not act; only the HMI found it the
+  next day. `40-maintenance.md` §2a clause 4 — a notice cannot change the call
+  it annotates; the damage lands during the call and a cost-free equivalent
+  exists → DENY carrying the rewritten call. User ruling 2026-09-29 (都要進行 on
+  the prior session's 請裁). The class rule stays in `gate-design.md`
+  «wired to the event»; this hook is its P1 instance for the registry.
+- evidence: `python hooks/registry_row_guard.py --selftest` 24/24 — positive
+  (Edit / Write / MultiEdit / invalid-enum map row / relative path / deny text),
+  negative (mapped first, existing-row edit, prose, other file, non-file tool,
+  the profile itself), undetermined ×5 + fail-open ×4 with a real-deny negative
+  control after them, end-to-end process deny + receipt row. `hook-deny-lint`
+  0 FAIL. In vivo 2026-09-29, same session as the settings.json entry (no
+  restart): an Edit adding `zz-delivery-probe` to the live registry was denied,
+  a receipt row in `telemetry/registry-row-guard.jsonl` — the PreToolUse
+  delivery evidence.
+- review-when: `DECLARED` / `DECLARED_MAP` move in their hooks (fixtures here
+  follow); FALSE-POSITIVE LOG reaches 3; a registry row written by a script
+  (the named residual) recurs as an L-121 event — then the P1 needs a
+  Bash/PowerShell surface too.
+- rollback: remove the `registry_row_guard.py` entry from `settings.json`; the
+  save-time notice (`GOLIVE_CHECK` Live-reads) and the HMI hook-suite point
+  keep catching the omission after the fact.
+
+### `FEEDBACK_POOL` — subsystem defects accumulate per target into one pool; the user is asked to review only past a threshold
+- current: since 2026-09-22 (design: the pool's design record under the source's
+  references/ tree, not shipped here; user
+  ruling: recommended values, built same round). A defect met mid-task in a
+  skill / tool / hook / rule is ONE process-ledger row
+  (`ledger.py feedback --target <prefix:name> --symptom --action
+  fixed-inline|left|worked-around|planned-work [--proposal]`), written by the
+  session that saw it; `hooks/feedback_notice.py` (PreToolUse, notice, once per
+  session×target) asks for it at the first edit of that subsystem's files.
+  `tools/feedback-pool/feedback.py collect` groups those rows with six
+  read-only sensors (hook false positives, HMI standing fail, lesson
+  `held=no` recurrence — folded ones charged to the fold target rule —, open
+  skill-gap rounds, LSE reflux corrections, go-live fails) per target; a target
+  with ≥ `DRAIN_THRESHOLD` events since its last `feedback-fold` row is `due`
+  and the ONE surface is system-hmi point `feedback-pool.due` (warn). A review
+  starts only when the user says 「檢視回授」 and closes with a `feedback-fold`
+  row (`adopted|rejected|deferred --trigger`), which consumes the events.
+  Sub-key `DRAIN_THRESHOLD` = 3 — PROVISIONAL, lives in `feedback.py`; the
+  registry names it, never restates it. Born-day pool on the real home: 7 due
+  targets (rule:CLAUDE.md, lesson:L-062/L-044, hook:dangerous_command_guard,
+  hook:intake_guard, skill:paper-story, skill:ux-walkthrough) — a positive
+  control the design did not plant.
+- why: the only formal feedback path was the close-out lesson; mid-task
+  patches and work-arounds left a diff and no row, and five folded-but-recurring
+  lessons had stood 3 days in the HMI summary with no mechanism turning them
+  into "ask the user". The pool is a projection over sources that already
+  exist (INV-3) so no second store rots; the user gate keeps the review spend
+  where the user put it.
+- evidence: `tools/feedback-pool/controls.py` 27/27 (every sensor positive +
+  negative, fold consumes by time, deferred stays visible, fail-soft on missing
+  sources, emit warn/pass); `hooks/feedback_notice.py --selftest` 11/11;
+  `hmi.py validate` ok, `conform feedback-pool` ok, point live in the first
+  collect.
+- review-when: `DRAIN_THRESHOLD` — a month with ≥3 due targets and zero folds
+  (lower it or the gate design is wrong), or due targets the user calls noise
+  three times (raise it); notice narrowing — over ≥30 notices ≥80 % answered
+  `planned-work` → restrict to sessions whose cwd is not `~/.claude`; any S-n
+  source renames its file (the sensor reports a missing source, which is the
+  detection); promotion of the HMI point above warn — never foreseen, the
+  reader decides whether to spend a round. `feedback_notice` itself is an
+  OMISSION ask (`ops/40-maintenance.md` §2a(4)): it is never promoted to a
+  deny — narrowing (above) or retirement are its only moves; closed as such by
+  user ruling 2026-09-23.
+- rollback: remove the `feedback_notice.py` entry from `settings.json`; delete
+  the `feedback-pool` subsystem/source/points from `tools/system-hmi/registry/`;
+  the ledger rows stay (records are never washed).
+
+### `MOC_CLOSEOUT` — the session that made the MOC lag regenerates it at close-out, prompted at the moment it writes its digest
+> **Share note.** `tools/graph-snapshot/` (`moc_regen.py` and its tests) is
+> source-only (excluded-by-decision, `tools/share-manifest.toml`); the hook
+> ships, the step it prompts for has nothing to run here.
+- current: since 2026-09-23 (user ruling the same day, amending how D-24's
+  "human step" is reached — not what it forbids). `hooks/moc_closeout_notice.py`
+  (PostToolUse `Write|Edit|MultiEdit`) fires when a
+  `references/*-session-digest.md` directly under ~/.claude is edited AND
+  commits exist since the last commit touching `references/_moc`; once per
+  session per HEAD; silent when `moc_regen.py` recorded a no-change run at that
+  HEAD. The step itself is `tools/graph-snapshot/moc_regen.py --commit`:
+  baseline/build/verify/emit-moc from the WORKING TREE, then
+  `git commit --only -- references/_moc` (a peer's staged paths never ride
+  along); refuses on a non-main branch of the main checkout (exit 2, MOC left
+  regenerated). A notice, never a block.
+- why: the MOC lags after nearly every commit, and until this the only prompt
+  for regenerating it was the watchdog alarm — the monitor as a required step
+  (L-121). The graded watchdog (`graph rot watchdog` round 6) now reads a lag
+  as `pending` for 24 h; this is what is supposed to clear it inside that
+  window. A HEAD-export build was measured and rejected: 282 vs 285 evidence
+  files, because the MOC deliberately covers gitignored machine-local files.
+- evidence: `hooks/tests/test_moc_closeout_notice.py` 15/15 (positive: 2
+  commits → notice; negatives: no commits, non-digest path, subfolder digest,
+  wrong tool, repeat in session, no-change record at HEAD; the record at an
+  older head does NOT silence). `tools/graph-snapshot/tests/test_moc_regen.py`
+  11/11 (the commit's path list is exactly the fixture's one MOC file while a
+  peer's unrelated file is staged; non-main → exit 2; failed step → exit 1).
+- review-when: session digests move or are renamed; the close-out step gets
+  automated (then the notice retires and `MOC_OVERDUE_HOURS` can shrink); a
+  digest-less committing session pattern shows up in `overdue` findings more
+  than once a week (the trigger event is then the wrong one).
+- rollback: remove the `moc_closeout_notice.py` entry from `settings.json`;
+  `moc_regen.py` is a plain command and can stay.
+
+### `TREE_NOISE` — a content-neutral uncommitted path is named as noise before the session reasons about the git snapshot
+- current: since 2026-09-23 (user request the same day: detect and report, cheaply,
+  outside the model). `tools/tree-noise/noise.py` classifies the session repo's
+  uncommitted paths with git alone into a closed set — `generated` (git attribute
+  `tool-appended`), `eol-only`, `format-only` (.base/.yaml/.yml/.json parse-equal;
+  never `.md`), `rename-only` (blob-identical move), `real`, `untracked`,
+  `undetermined`; noise is claimed only with a proof, the default is `real`.
+  `hooks/tree_noise_gist.py` (SessionStart) prints one line only when noise exists.
+  Report-only: it never stages or commits (auto-settle is out of scope until the
+  user rules otherwise).
+- why: the harness shows every session a `git status` snapshot in which an app's
+  re-serialisation, a tool's routine rewrite and a move without an edit look like
+  someone's unfinished work. obsidian_Nathan 2026-09-23: 4 dirty paths (3 `.base`
+  files Obsidian re-quoted, 1 census note regenerated), 0 of them work, and the
+  session carried them through two turns before they were diagnosed by reading
+  the diffs. Prior art: `.gitattributes` class `tool-appended` + system-hmi
+  `reconcile.py` (judges such paths by commit age, ~/.claude only) and
+  `ops_health_nudge.py` check 14 (time-based, ~/.claude only) — neither reads
+  content, neither reaches a project repo's session start.
+- evidence: `tools/tree-noise/controls.py` 24/24 — each noise class paired with the
+  nearest real change (quotes dropped vs value changed; CRLF-only vs CRLF+edit;
+  marked vs unmarked path; moved vs moved+edited), `.md` front-matter re-quoted
+  stays `real`, conflict → `undetermined`, hook silent on clean / real-only /
+  non-repo. Mutants: removing `--ignore-cr-at-eol` moves C3+ eol-only → real;
+  forcing parse-equality moves C1-/C5-/C5b real → format-only. Live replay of the
+  2026-09-23 vault state: 4/4 noise paths classified, the one real edit `real`.
+  ~0.3 s on ~/.claude.
+- review-when: the harness stops injecting a git-status snapshot, or SessionStart
+  payloads stop carrying `cwd`; git changes `status --porcelain=v1 -z` framing; a
+  `tool-appended` tool starts committing its own writes.
+- rollback: remove the `tree_noise_gist.py` entry from `settings.json`; the tool is
+  a plain command and can stay.
+
+### `HOOK_IF_GATING` — a shell hook whose trigger is a literal token is spawned only for commands containing that token
+- current: `settings.json` PreToolUse `Bash|PowerShell` handlers carry a harness
+  `if` field (permission-rule syntax, PreToolUse/PostToolUse only):
+  `branch_commit_guard.py` + `dispatch_commit_notice.py` → `Bash(*git*)`,
+  `PowerShell(*git*)`; `codex_dispatch_guard.py` → `*codex*`;
+  `extdispatch_entrypoint_guard.py` → `*opencode*`, `*api/session*` (one
+  handler per pattern per tool). The hook bodies are unchanged; the `if` only
+  decides whether the process starts.
+- why: user ask 2026-09-27 (「低命中的可以測試這個方法，記得比對前後差異跟有效性」).
+  These four hooks acted on 68 of ~6,100 shell calls in 7 days yet each spawned
+  a Python process (~34–68 ms) on every call.
+- evidence: E2E real-hook run, same 13 cases, pre-change settings (a local
+  session) vs post-change (a second local session): identical telemetry — branch 3/3
+  deny (incl. uppercase `GIT` in PowerShell), dispatch-commit 2/2 notice, codex
+  3/3 deny (incl. `Codex.exe`), extdispatch 4/4 deny (opencode + curl/IRM
+  `api/session`). Probe runs before that: `Bash(git *)` MISSES an absolute-path
+  `git.exe`, hence the `*git*` form; PowerShell splitting of `;`, `&`,
+  `$x = …`, `if {}` fires correctly; two handlers with the same command and a
+  different `if` are NOT deduplicated. 7-day corpus (6,092 calls, 870/day):
+  spawns 3,481/day → 490/day (−86%; case-insensitive substring, so a lower
+  bound). Saving is CPU/process churn; hooks already run in parallel, so
+  per-call latency moves less. Record: a dated
+  before/after report under the source's `reports/` tree, which this repo does
+  not ship.
+- history: 2026-09-27 born (a local session). Backup of the pre-change file:
+  `backups/2026-09-27/settings.json.pre-hook-if`.
+- review-when: (a) a hook's trigger stops being a literal token (e.g. branch
+  guard learns to block `gh pr merge`) → widen its `if` in the same commit;
+  (b) the harness changes `if` semantics (case, splitting, fail-open) — check the
+  feature-delta record each reconcile; (c) a known-positive command passes
+  without the hook's telemetry row → drop the `if` for that hook first, then
+  diagnose; (d) a new hook added to the `Bash|PowerShell` group with a literal
+  trigger → give it an `if` at birth.
+- rollback: copy the backup over `settings.json`, or delete the `if` keys and the
+  extra per-pattern handlers (keep one handler per hook).

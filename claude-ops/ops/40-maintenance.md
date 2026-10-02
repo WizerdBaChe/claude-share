@@ -32,13 +32,8 @@ lifetimes, and they go to different places:
    **Every path and count in `change` is read off `git show --stat` (or
    `git diff --cached --name-only` before committing — both verified by
    running them, which is the point), never off memory of what was edited**
-   — added 2026-09-06 after three of these in one session
-   (`ops/lessons.md` L-012 hit 4). The failure is not carelessness: the tool
-   prints at one grain and the sentence claims another (a COUNT "1 of 8 files
-   rewritten" becomes a NAME; a test TAIL becomes a TOTAL; the list of files
-   EDITED becomes the list COMMITTED, which differs whenever one is
-   gitignored). The wrong half always sits beside a true half, so re-reading
-   the message confirms it. A message that names a file the commit does not
+   (L-012 hit 4; the grain mismatch it names: `ops/references/maintenance-cases.md`
+   §audit-entry-schema). A message that names a file the commit does not
    contain is a defect in the record, not a typo — correct it in a FOLLOWING
    commit, never by amending: a trail that edits itself to look right is not
    a trail.
@@ -77,18 +72,14 @@ not its age.
   Fix the pattern (anchor it, narrow it) or add a negation that NAMES why, in
   the `.gitignore` itself. Detection: `git ls-files -ic --exclude-standard`
   must print nothing (integrity sweep check 28); it is the only view in which
-  a force-add is visible at all.
-  Evidence: the check was born RED on 2026-09-06 — five files, three distinct
-  causes (an unanchored pattern eating a test fixture, an archive subtree six
-  tracked files cite, and the archive NOTEs the blanket ignore was guaranteed
-  to drop). All three, with the fixes, are in check 28 itself.
+  a force-add is visible at all. Evidence (born RED 2026-09-06):
+  `ops/references/maintenance-cases.md` §vc-boundary.
 - **Settled, was an open tension**: top-level `references/` was gitignored by a
   2026-07-19 ruling and holds phase logs and decision journals — durable
   rationale by this test. Ruled 2026-08-11: TRACKED, except the two generated
   dashboard views. Standing reason + the leak-scan premise:
-  `ops/rule-registry.md` §`references/`. (The "flagged, unruled" wording stood
-  here for 26 days after the ruling — a rule text and its registry entry
-  disagreeing is exactly the rot `review-when` exists to stop.)
+  `ops/rule-registry.md` §`references/`. (Lag case: maintenance-cases.md
+  §vc-boundary.)
 
 ## §1 Tiering: who can change what
 
@@ -99,19 +90,17 @@ not its age.
 | 🟢 Change freely | tickets, drafts, handoff notes, `ops/lessons.md` entries, memory entries | per each type's own convention (lessons: mark superseded, don't delete; memory: check for duplicates first) |
 | ⛔ Subagents/workers | may NEVER write 🔴 or 🟡 files | worker output lands in drafts/scratch only; the main session reviews and performs the actual write |
 
-✅ A worker drafts an improved dispatch template → main session reviews the
-draft, makes the edit itself, backs up, logs it.
-❌ A batch-cleanup worker "helpfully" rewrites `OPS.md` while it's in the
-directory — a rule-tier write from a sandbox, unreviewed.
+✅/❌ example: `ops/references/maintenance-cases.md` §1.
 
 ## §2 One lesson, one destination (this is the anti-bloat mechanism)
 
 **Capture and enforcement are two different questions, and only the second is a
 routing choice.** Since the 2026-09-07 intake cutover EVERY lesson is captured
-the same way — one record born through a guarded intake process (source-only
-tooling, not shipped here) that also handles recurrence and supersession
-events; the index `ops/lessons.md` is generated — never hand-edit either path,
-the guard denies it. The table below routes the
+the same way — one record born through `python tools/closeout-intake/intake.py
+add --from <draft>`, whatever its type (recurs: `intake.py event L-nnn --kind
+recurrence --held yes|no`; replaced: `--kind supersede`; the index
+`ops/lessons.md` is generated — never hand-edit either path, the guard denies
+it; format: `tools/closeout-intake/README.md`). The table below routes the
 RULE: the durable text a future session must obey. A type whose rule lives
 outside `ops/lessons/` still gets its record; the record's `## Fix` NAMES the
 rule's home instead of restating it, which is how "one rule, one file" and
@@ -119,7 +108,7 @@ rule's home instead of restating it, which is how "one rule, one file" and
 
 | Lesson type | Where the RULE goes |
 |---|---|
-| One-off technical gotcha (command, API quirk, environment fact) | nowhere else — the record IS the rule, found by the pre-task grep (the source's tag-overlap match tool is source-only and not shipped here) |
+| One-off technical gotcha (command, API quirk, environment fact) | nowhere else — the record IS the rule, found by the pre-task grep and `intake.py match` |
 | Dispatch/scheduling lesson | one line in the matching section of `20-dispatch.md` (worked case: `ops/lessons.md` L-057 → §2's governed-record clause) |
 | Judgment lesson | a new ✅/❌ example under the matching R-rubric in `30-judgment.md` — NOT a new numbered rule (a genuinely new rule is a 🔴/🟡-tier change) |
 | Requester preference / ruling | global CLAUDE.md (🔴 — via confirmation; end-of-project batches go through the `project-retrospective` skill) |
@@ -138,10 +127,7 @@ config-self-audit red-team of the change checks this sync explicitly, and
 `hooks/ops_health_nudge.py` check 10 mechanically flags any local skill
 missing from `skill-trigger-dict.md` at session start (change the two together).
 
-✅ Discover a CLI needs a trust flag → one lesson card in `ops/lessons.md`,
-and `20-dispatch.md` §3 already covers the class — bump nothing else.
-❌ Paste the same pitfall paragraph into lessons.md, dispatch, AND CLAUDE.md —
-three copies that will drift apart and contradict each other.
+✅/❌ example: `ops/references/maintenance-cases.md` §2.
 
 ### §2a Where an ENFORCEMENT goes — by TRIGGER SHAPE, not by importance
 
@@ -157,6 +143,7 @@ line).
 |---|---|---|
 | a named tool call with inspectable input | PreToolUse hook — deny beats warn (a denial forces the corrected call at the cost of one retry) | the harness executes it; the model cannot skip it |
 | a task-shaped judgement ("when designing X…") | global CLAUDE.md conditional rule | always in context; fires on trigger-word match |
+| writing or editing a file of a class a glob can name (gate modules, test suites, figure builders) | path-scoped `rules/*.md` — its `paths:` must match the files the recorded instances ACTUALLY touched, checked at fold time; the CLAUDE.md path-scoped index keeps the one-line pointer for authoring a NEW file | loads on the files where the danger is; a global one-liner is abstract at that moment (L-044: folded into CLAUDE.md, recurred three times while the gate modules were written; `visual-gate-scope.md`'s CSS-only globs never loaded there) |
 | "someone is already investigating this topic" | `ops/lessons.md`, as the detail the shorter layers point AT | greppable, never self-firing |
 | an OMISSION — the violation is "the step never happened" | **P1** gate the SUBSTITUTE commission (PreToolUse on the substitute's tools) · **P2** make the ABSENCE greppable (a literal marker a sweep enumerates: `PROVISIONAL`, `hits:`, `DEVIATION:`) · **P3** an end-of-action gate (e.g. SubagentStop) | an absence fires no event; P1 when the substitute is a tool call, P2 when a durable artifact is read later, P3 when it is knowable only once the work is finished |
 
@@ -169,10 +156,7 @@ surfaces the decision to the user instead of taking it; (3) a hook that does
 not run is itself silent, so every P1/P3 hook ships, in the SAME commit, with a
 ``Proof-of-life: `python <suite>` `` line in its OWN module docstring — sweep check
 31 executes whatever that line names, so coverage grows by editing the hook and
-never by editing a list (rewritten 2026-09-08: the old wording said "a line in
-`ops/references/integrity-sweep.md`", which made the rule a POSITION in a file
-that grows, AP-45; ES-2 read it literally and flagged 11 hooks the sweep already
-runs while missing all 5 that declared nothing). Being NAMED in the sweep is not
+never by editing a list (AP-45; case: maintenance-cases.md §2a). Being NAMED in the sweep is not
 being RUN by it. **LAYER ≠ SURFACE**:
 before shipping any trigger, find the last recorded instance of the failure AS
 A TOOL CALL in the transcript corpus and confirm the trigger sees that shape —
@@ -182,22 +166,55 @@ all of them. And the table does not apply itself: a lessons card whose `hits:`
 reaches 2 is routed through this table before it is considered finished — that
 is the reading of §4.4 it was missing.
 
+(4) **A PreToolUse NOTICE cannot change the call it annotates.** The call runs;
+the note reaches the model with the result, and the next session that types the
+same idiom has never seen it. So NOTICE fits only when the damage is recoverable
+after reading. When the damage lands DURING the call and a cost-free equivalent
+exists, DENY with the rewritten call in the denial text: that rules only on the
+determinable FORM and forwards the undeterminable half (does it matter this
+time?) through the hook's escape marker — the gate-authority rule is kept, not
+bent. Every NOTICE hook carries its own promotion trigger in its registry row,
+measured on its telemetry, and the ruler follows what the notice is FOR (user
+ruling 2026-09-23): an IDIOM-CHANGING notice (it wants the call written
+differently) — a live fire rate not below the pre-hook backtest baseline after
+30 days means the text changes nothing → promote, per call when call volume
+moved; no baseline yet → backtest first. A READING-CONTEXT notice (the call is
+legitimate; the text says how to read its result) is never judged by rate —
+its trigger is misfire rows or an incident with the notice in the transcript.
+An OMISSION ask keeps an incident trigger. Worked case:
+`ps_pipeline_close_guard` (L-027), 1.79/day before, 2.82/day after 33 days.
+
+**Re-fold loop — a `held=no` recurrence on a FOLDED lesson re-enters this
+table** (2026-09-23; five lessons had stood in `intake.py report` (b) for days
+with no legal way out). `held=yes` (a rule or detection caught it before the
+output reached its consumer) is the fold working and needs nothing. For
+`held=no`, classify WHY the target did not stop it — the intake vocabulary
+`REFOLD_CAUSES`: `trigger-gap` (never fires in that situation), `inert-text`
+(fires, changes nothing), `wrong-layer` (wrong asset class for the trigger
+shape above), `different-pitfall` (a sibling mechanism: its OWNER is the rule
+that already names it, or a new lesson), `misattributed` (the note describes no
+fold failure). Then decide OWNERSHIP before editing: the new target is the
+asset whose trigger sees the recurrence's surface (the files, tool call or
+round it happened in), and a project's instance of a class rule stays in the
+project (e.g. SSLD's shared gate set) while the class rule stays here. Record
+it with `intake.py event L-nnn --kind fold --target … --cause … --note …` —
+the tool refuses a re-fold without an escaped recurrence, a cause, or a reason.
+
 Detail files (loaded on demand, never at session start): what each global
 principle requires of a SMALL artifact — hook, skill, `rules/*.md`, project
 CLAUDE.md, routing entry, registry row, page builder — written as asset
 properties with a `detect:` line: `ops/references/principle-design-guide.md`;
 the field set every classification/routing entry carries and the 14-surface
-adapter table: `ops/references/entry-schema.md`. Enforced subset: a
-source-only lint tool (not shipped here; integrity-sweep check 29;
-`config-self-audit` §4 `--path` mode). Registry key `ENTRY_SCHEMA`.
+adapter table: `ops/references/entry-schema.md`. Enforced subset:
+`tools/entry-schema-lint/` (integrity-sweep check 29; `config-self-audit` §4
+`--path` mode). Registry key `ENTRY_SCHEMA`.
 
 ## §3 Trim discipline (keeping this from becoming an unread constitution)
 
 - Triggers (defaults, mechanically nudged by `hooks/ops_health_nudge.py` —
   change the two together; **sweep check 7 catches a drifted UNIT and sweep
-  check 7b a drifted VALUE** — check 7 alone never covered the number, which
-  is how the two rows below sat at 15K and 20K while the hook enforced 19,968
-  and 28K, found 2026-08-27). **WHY each value is what it is lives in
+  check 7b a drifted VALUE** — case: maintenance-cases.md §3 cap-value
+  drift). **WHY each value is what it is lives in
   `ops/rule-registry.md` — do not restate it here** (§2).
   **Two classes, and they are not the same kind of rule:**
 
@@ -205,7 +222,7 @@ source-only lint tool (not shipped here; integrity-sweep check 29;
   IS the budget; a hard cap is correct here.**
   | trigger | value | unit as measured |
   |---|---|---|
-  | global `CLAUDE.md` (trim/merge, never append) | 23,040 (22.5K) | **bytes** (`getsize`) |
+  | global `CLAUDE.md` (trim/merge, never append) | 23,552 (23.0K) | **bytes** (`getsize`) |
   | skill frontmatter description (× every skill, plugins included) | ~800 | **chars** (`len`) |
 
   **(b) On demand — charged only when something routes to it. The cap is a
@@ -215,7 +232,7 @@ source-only lint tool (not shipped here; integrity-sweep check 29;
   | trigger | value | unit as measured |
   |---|---|---|
   | any `ops/*.md` — except `lessons.md`, `rule-registry.md`, `environment.md` | ~26K | **bytes** (`getsize`) |
-  | `skill-trigger-dict.md` | 49K | **bytes** (`getsize`) |
+  | `skill-trigger-dict.md` | 60K | **bytes** (`getsize`) |
   | any `SKILL.md` body | ~300 | lines |
   | entry file `OPS.md` | ~60 | lines (not hook-enforced) |
 
@@ -230,12 +247,9 @@ source-only lint tool (not shipped here; integrity-sweep check 29;
   `references/PatentsGrabber-context.md` and
   `outputs/skill-reviews/literature-search-extract-gaps-*.md`.
   **Why the basename and not the path:** a global search, a grep result list,
-  and an editor tab all show the basename alone. Measured 2026-08-27: 14 files
-  named `FUTURE-WORK.md` existed under `~/.claude` (2 live, 12 in worktrees,
-  archives and backups) and the user could not tell from a search which skill
-  any of them belonged to. Both live ones were renamed owner-first that day;
-  the frozen copies were left alone, because renaming inside `archive/` and
-  `backups/` falsifies a record of what the file was called at the time.
+  and an editor tab all show the basename alone. Measured case (14 ×
+  `FUTURE-WORK.md`), and why frozen copies in `archive/`/`backups/` are never
+  renamed: maintenance-cases.md §3 basename.
   **When renaming, a git path pinned to an OLD commit keeps the OLD name** —
   `git show <sha>:<old/path>` must not be "corrected", or the replay it
   supports stops resolving (see `ops/lessons.md` L-033's positive control).
@@ -282,11 +296,8 @@ source-only lint tool (not shipped here; integrity-sweep check 29;
   value): any threshold existing BOTH as rule text and in a mechanism states
   its unit at both sites and carries a drift check. Rule text is not a source
   of truth; the mechanism is. **The unit and the value need SEPARATE checks,
-  and naming only one leaves the other uncovered** — that is not a hypothesis:
-  this bullet named sweep check 7 (a `grep` for `getsize`/`len(...)`, which can
-  only see the unit) as *the* drift check, and under it three cap values drifted
-  across four sites for up to 12 days, including inside the enforcing hook's own
-  docstring (2026-08-27). Unit → sweep check 7. Value → sweep check 7b
+  and naming only one leaves the other uncovered** (case: maintenance-cases.md
+  §3 cap-value drift). Unit → sweep check 7. Value → sweep check 7b
   (`python tools/ops-health-test/check_cap_binding.py`, which reads the
   mechanism and compares every restating site). Case: `rule-registry.md` key
   `cap measurement unit`. **The stronger move, where it is available, is to
@@ -334,10 +345,7 @@ source-only lint tool (not shipped here; integrity-sweep check 29;
    climbing, harden it into a startup-time rule (a 🟡/🔴 change with the usual
    process) — that is the system remembering what sessions keep forgetting.
 
-✅ Quarterly check finds `30-judgment.md` uncited for months → investigate the
-routing table first; discover the trigger description is too vague to fire.
-❌ "Our red-team has passed everything clean five times running — quality must
-be excellent now."
+✅/❌ example: `ops/references/maintenance-cases.md` §4.
 
 ## §5 Integrity sweep (the gap between the two audit skills)
 

@@ -102,12 +102,41 @@ project property, and one recorded line replaces every future per-session ask
 `60-bootstrap.md` §A includes this as a first-session step. Re-ask only when
 the user changes it.
 
-## §3 Relation to the decision charter
+## §3 The decision charter, and its relation to this gate
 
-The decision charter (owner: global CLAUDE.md, engineering judgement) governs
-WHICH decisions the main session may take alone — it applies at every
-relaxation level and is not part of this gate. This gate only governs HOW MUCH
-process the main session must run while executing.
+The decision charter governs WHICH decisions the main session may take alone —
+it applies at every relaxation level and is not part of this gate. This gate
+only governs HOW MUCH process the main session must run while executing.
+Global CLAUDE.md carries the trigger and the ask-list; this section is the full
+text (moved here verbatim 2026-09-19 when CLAUDE.md went over its byte cap —
+user ruling, ops/40-maintenance.md §3 "extract, never compress").
+
+**Full text.** When a decision point arises mid-task: standing authority over
+implementation-layer decisions that are (a) reversible, (b) not a values fork
+(money vs time, privacy vs convenience, aesthetics the user owns), (c) not
+changing promised scope or UX/interaction semantics — decide, log choice+reason
+in one line AND append it to the process ledger at that moment
+(`tools/process-ledger/ledger.py add`, flags in its README; a user ruling
+spoken in chat is logged too, with `--origin user`; a scope narrowed for a
+TEMPORARY limit logs, on the same line, the event that lifts it — or it
+silently becomes permanent) — the ledger is what survives compaction and is
+re-injected after it, the chat line is not. Ask ONLY for: irreversible/outward
+actions without standing authorization, values forks, scope/direction changes
+to a promise, UX-semantic changes (see CLAUDE.md Interaction style), or an
+instruction contradicting an observed fact (surface it). Handing back a
+one-sane-answer decision exports decision cost — a miss, not caution. Applies
+at every ops-relaxation level.
+
+**Batch approval does not reach a named-authorization item (2026-09-22).** A
+recommendation list the user may answer with one word (「走建議」「全部走建議」)
+carries every item that needs a NAMED yes — a guardrail constant such as
+`DICT_CAP`/`CLAUDE_MD_CAP` (`ops/70-evolution.md` §1 invariant 1), a push to a
+public remote, a system setting — in its own labelled block (「需你點名」),
+never mixed into the batch; the one-word answer covers the batch only. Two
+incidents: 2026-09-08 DICT_CAP raised under "finish fixing these debts" and
+ratified afterwards; 2026-09-22 the same constant sat inside a 走建議 list and
+cost one extra round trip. The fault in both was the list's shape, not the
+reader's.
 
 ## §4 Boundary contract (the L1/L2 exchange: scaffolding out, specification in)
 
@@ -122,6 +151,21 @@ never a standing rule — it costs context only on the tasks that need it.
 task of Tier-2 weight (depth-tier triage, global CLAUDE.md). Analysis/
 evaluation answers route to `30-judgment.md` R8 instead — same tier words,
 different protocol. Emit the contract BEFORE method or design work starts.
+**Classify by what the round will PRODUCE, never by how the request is
+phrased** (`lessons.md` L-104, three rounds): a question or an estimate request
+("why is there no X?", "has this figure been drawn?", "estimate the loss
+items") that will end in new code, figures, numbers or claim scripts is an
+implementation task from the moment its first spec, premise list or script is
+written — emit the contract THEN, before the premises are drafted. The recall
+line alone did not hold; a project whose rounds run through a kit carries the
+omission gate there (P2 of `40-maintenance.md` §2a: a `boundary_contract`
+field in the round skeleton that the close check refuses empty — SSLD
+`open_round.py` v1.1). Everywhere else the contract, or a one-line waiver for a
+task that is not Tier-2, is also recorded as ONE process-ledger row
+(`ledger.py add --subject boundary-contract`): chat text does not reliably
+reach the transcript, the ledger does, and `hooks/boundary_contract_notice.py`
+notices the first code write of a session that has neither (registry
+`BOUNDARY_CONTRACT_NOTICE`).
 
 **Format** — 5 sections, HARD CAP 18 lines total; an empty section is the
 single word "none". The cap is load-bearing: a contract too long to read in

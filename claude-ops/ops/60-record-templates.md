@@ -26,6 +26,12 @@ Field ownership (reference, never redefine — one rule, one file):
   the surfaces the user rules on (manual-compare acceptance items,
   decision rationale). Do not let "it's a `.md` under `docs/`" default
   it to Chinese.
+- Objects that name a TEMPLATE, seed, sample or prior artifact as the source
+  of a MECHANISM carry, beside the name, the grep (feature type / function /
+  node name) that proved the artifact contains it; "it exists and is a real
+  file" is not that evidence (`ops/lessons.md` L-100: a named seed without the
+  mechanism cost nine probes). Executor side: three probes with no effect on
+  the mechanism → stop probing, grep the nearest artifacts' text first.
 - Severity scale: `code-review-deep-checklist` output contract.
 - Commit format: global CLAUDE.md git rule. (`~/.claude/COMMIT-TEMPLATES.md`
   is this config repo's own semantics — never apply it to target projects.)

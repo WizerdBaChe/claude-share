@@ -78,12 +78,38 @@ have come out differently for the specific thing I am claiming about?* No ⇒
 name the substitution in the sentence ("the pattern is proven, this file's
 registration is not"), never a hedge word — a hedge hides the proxy, naming it
 hands the reader the thing to attack.
+❌ Two "independent" methods agree to 1e-15 → "the chain is confirmed end to
+end". Agreement at machine precision is the signature of an algebraic identity
+(`P = n/q` is a reparametrisation of `q`), not of confirmation — an upstream
+sign error would be reproduced bit for bit and still print PASS (`lessons.md`
+L-073). Same test as above, applied to the checker: independence means *shares
+no assumption*, not *shares no code*; a recompute by the same script on both
+sides is the degenerate case.
+✅ Retract the rows as `algebra_only_NOT_independent`, build a method with
+different physics, and take its tolerance from a calibration case with a known
+answer — agreement then lands at the method's own discretisation error, and a
+case outside it is reported as data, not scored.
+❌ A reviewer BLOCKs a sentence; the fix edits exactly the cited line and the
+change log says "fixed". The same claim still stands in a heading, an index, a
+sibling JSON or the proposal that quoted the old number — the next round finds
+the twins (`lessons.md` L-105: ltm PIM round 11 heading + evidence index;
+SSLD T14 0.12→0.17 °/face corrected in its own record while
+`tolerance_windows.json` and the proposal kept 0.12). The object of a
+correction is the CLAIM, not the location it was reported at.
+✅ Before editing, grep the claim's keywords AND its number across the whole
+tree the claim can travel to — docs, headings, indexes, sibling artifacts,
+downstream documents that cite it — then handle or explain every hit; "fixed"
+is said of the claim only after that sweep, with the hit list as its evidence.
 
 **Absence claims** (2026-08-27 CPO incident): "no X here /
 無資料在手" is a universal claim over the environment and takes enumerable
 evidence — run EVERY noun the request itself names through the prior-art
-chain layer by layer (registry → xi query → skill-trigger-dict / domain
-manifests → vaults → session-find) and report which layers were checked; an
+chain layer by layer — the chain is the one in global CLAUDE.md's prior-art
+bullet (registry gist → the source's federated recall query tool (source-only, not shipped here), which sweeps every
+memory silo, PROJECTS, lessons, xi, gsnap and the digest cards in one call →
+vaults → session-find), plus skill-trigger-dict / domain manifests for a domain
+noun; the source's own memory-atlas record (under its references/ tree, not shipped here) is the human-readable map of the memory
+silos — and report which layers were checked; an
 index built for user-question routing doubles as an existence index.
 ❌ Asserted "no CPO data at hand" after prior-art queries for "diagram" only —
 the request's own named noun (CPO) was never queried anywhere, and the gap
@@ -186,6 +212,10 @@ extension lines) and check whether the clearance model has a word for each.
 It had only "text box" — the model, not the tuning, was the defect
 (`ops/lessons.md` L-044; fix = one obstacle map + a gate that reads the
 emitted file).
+
+For figure / slide layout the counted form lives in `rules/layout-convergence.md` §3: a
+cycle cap per symptom (2 conclusion-class, 4 presentation-class), then stop and declare the
+residue — changing approach is not an unlimited licence to keep trying.
 
 ## R5 — Minimum quality gates by deliverable type
 

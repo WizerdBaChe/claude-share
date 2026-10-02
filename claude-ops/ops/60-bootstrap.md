@@ -7,7 +7,12 @@ environment facts (step B) and a durable task ledger (step C). Without them,
 ## A. First-session-in-a-project checklist (run once, ~10 minutes)
 
 1. **Read what exists**: `~/.claude/references/PROJECTS.md` (global project index —
-   register this project's row if missing), project `CLAUDE.md`,
+   register this project's row if missing — its activity-map row in
+   `references/USER-PROFILE.md` first, `registry_row_guard` denies the registry
+   write without it — and fill its `predecessor` cell: the
+   project this one continues or was extracted from, whose deliverables,
+   conventions and review records then become mandatory inputs — L-039),
+   project `CLAUDE.md`,
    `references/<project>-phase-log.md` (if the `workflow-checkpoint` skill has been
    used), `references/<project>-tickets.md`, `references/<project>-context.md`
    (domain glossary, §E — if present), `references/<project>-decisions.md`

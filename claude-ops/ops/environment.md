@@ -28,6 +28,22 @@ sonnet only — never opus/fable-tier. Severity is expressed on two axes:
 model (haiku ↔ sonnet) × effort (low ↔ high). `sonnet + high effort` replaces
 what would otherwise go to opus.
 
+**Scope boundary — headless runs and project production models (user ruling
+2026-09-25, post-format-lab).** A headless `claude -p` process started by a
+main loop or by a project script is a dispatch like any other and sits under
+this cap by default (same reading as Codex CLI, a local
+memory note). The one exception class: a project may hold a
+**standing user authorization for its production generation model** — the
+model IS the product parameter (the output is judged by the user, the model is
+fixed per round), not a helper. Such an authorization is valid only when it is
+(1) written in that project's own `CLAUDE.md` under a "Model authorization"
+heading with the user's words and date, (2) scoped to named launchers, and
+(3) enforced by the launcher itself (a lock file the runner checks, stopping on
+mismatch). Helper subagents inside that project stay capped. Live instance:
+that project's own `CLAUDE.md` (post-format-lab, a separate local project tree; (claude-opus-5-5 medium,
+`harness/model_lock.json`). review-when: the user revokes it, or
+`model_cap_guard.py` gains a way to see headless launches.
+
 **Enforcement**: `hooks/model_cap_guard.py` (PreToolUse, matcher
 `Agent|Workflow`) denies blocked models. Exception mechanism: the orchestrator
 may include the literal marker `[user-approved-top-tier]` in the dispatch
@@ -69,9 +85,8 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
   as of 2.1.239: `ListAgents` to discover sessions on this machine, then
   `SendMessage`. Unlike a subagent it talks to a session that already has its
   own context; unlike external dispatch it stays inside Claude Code.
-  Versions, citations and the reconciliation that produced this block are
-  recorded in the source's own dispatch-semantics measurement notes (not
-  shipped here).
+  Versions, citations and the reconciliation that produced this block:
+  `ops/references/harness-measurements.md` §Dispatch semantics.
 - **Capability is set in the definition, not at dispatch** (verified
   2026-08-12): a definition that omits `tools:` inherits every tool a subagent
   may hold — including `Edit`/`Write` — so "read-only" written in a prompt
@@ -85,8 +100,7 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
   2026-08-26 against a live 2.1.246 session). Dynamic workflows and ultracode
   go with it. Kept on record because the choice is a live setting, not a fact
   about the product — flipping that key restores it. What it offers when
-  enabled is recorded in the source's own dispatch-semantics measurement notes
-  (not shipped here).
+  enabled: `harness-measurements.md` §Dispatch semantics.
 - **Effort is NOT settable per Agent-tool call** (verified 2026-08-12 against
   the live tool schema + `code.claude.com/docs/en/sub-agents`). Two setpoints
   only: the `effort:` frontmatter field in an `agents/*.md` file (overrides the
@@ -101,8 +115,7 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
 
 A cross-family reviewer NOW EXISTS (the 2026-07-07 entry said the opposite —
 true then, false now; why it is corrected rather than deleted, and the
-measurement, are recorded in the source's own harness measurement notes, not
-shipped here). Two options, in order:
+measurement: `ops/references/harness-measurements.md`). Two options, in order:
 
 1. **External dispatch** (`## External dispatch tier` below) — genuinely a
    different model family, free, no credential. Route red-team here first.
@@ -116,26 +129,69 @@ A SECOND DISPATCH PATH, disjoint from the Agent tool. Keep the two apart in your
 head: they take different work, carry different risk, and only one of them can
 be pointed at private material.
 
-- **Entry point, and the only one**: `python ~/.claude/tools/extdispatch/extdispatch.py`
+- **Entry point for the free tiers**: `python ~/.claude/tools/extdispatch/extdispatch.py`
   (`status` / `grant` / `run` / `probe`). `hooks/extdispatch_entrypoint_guard.py`
   denies direct `opencode` invocation and hand-rolled POSTs to the local serve
-  API on Bash|PowerShell, so there is no second route to find.
+  API on Bash|PowerShell. The Codex CLI below is the one other external route,
+  and it has its own guard.
 - **Transport**: `opencode serve` on `127.0.0.1:4096`, started on demand.
 - **Providers**: `opencode` (Zen) — NO API key, 7 models, `GET /config/providers`
   is the roster authority; and `nvidia` (NIM) — needs `NVIDIA_API_KEY`, carries a
-  (key, model) cooldown. Chains lead with Zen and end on NIM.
-- **Profiles**: `code`, `longctx`, `agentic`, `mechanical`, `review`.
+  (key, model) cooldown. Chains lead with Zen and end on NIM. Third, since
+  2026-09-15: `agy` (Antigravity CLI 1.2.3, `~/.local/agy/bin/agy.exe`)
+  on the user's Google subscription login, reached by subprocess with a
+  redirected home (the `_agy-worker\home` tree under the source's work root), used only by `query`.
+- **Profiles**: `code`, `longctx`, `agentic`, `mechanical`, `review`, `query`.
   `extdispatch.py status` prints the live chains and per-model health. Which
   PATH to use is `20-dispatch.md` §4a; profile/prompt/acceptance detail is
   `ops/references/external-dispatch.md`.
 - **Gates, all mechanical**: redline prefixes (exit 3), project allowlist
-  (3), single-use grant (4), daily cap 40 (6), concurrency lock 1 (7), and a
+  (3), single-use grant (4), daily cap 40 (6), concurrency lock 1 (7) — the
+  `agy` class has its own counter and slots (`PROVIDER_VOLUME`: 300/day, 3
+  concurrent, 50 uses per grant; user ruling 2026-09-15) — and a
   full-content audit of every dispatch under `tools/extdispatch/audit/`.
 - **Cost shape**: ~7.3–8.0 K input tokens of preamble per dispatch and $0,
   against ~49 K for one Claude `general-purpose` subagent. Wall-clock is the
   real currency here, not money.
 - **Redlines and disclosure**: `20-dispatch.md` §4b. The asymmetry is the point
   — the subagent path may see anything, this path may not.
+
+### Codex CLI tier (as-of 2026-09-23)
+
+A second external route, NOT through extdispatch: the Codex CLI (`codex-cli
+0.155.1`, `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`) on
+the user's own ChatGPT subscription login. Model and effort follow the same cap
+as subagents (a local memory note); which task shapes it wins is
+`ops/references/external-dispatch.md` §9.
+
+- **Entry point**: `codex exec` directly, prompt on stdin, from Bash or
+  PowerShell. House flag set — every one is load-bearing:
+  `codex exec -m gpt-6-luna -c model_reasoning_effort=low -s read-only
+  -c approval_policy="never" --skip-git-repo-check --ephemeral
+  -o <dir>\last.txt -C <project dir> - < prompt.txt`
+  (`-s read-only`: the worker cannot write the tree, `20-dispatch.md` §4a;
+  `approval_policy="never"`: a headless run cannot answer a prompt;
+  `--skip-git-repo-check`: non-git dirs, §3 item 4; `--ephemeral`: no session
+  files left behind; `-o`: the answer lands in a file, not only in stdout;
+  `-` reads the prompt from stdin, so it never rides in argv).
+- **Gate, mechanical**: `hooks/codex_dispatch_guard.py` (PreToolUse,
+  Bash|PowerShell) denies a codex call whose workspace (`-C`/`--cd`, the
+  effective cwd, `--add-dir`) or prompt/attachment source (`<` redirect, a file
+  piped in, a substitution, `-i`, `--output-schema`) lies under a redline
+  prefix. The prefix list is IMPORTED from extdispatch (`REDLINE_PREFIXES`), so
+  the two tiers cannot drift; if the import fails, every codex dispatch is
+  denied (fail-closed).
+- **Deliberately NOT gated** (user rulings 2026-09-23): no project allowlist on
+  this tier; a `-C` that merely CONTAINS a redline (the source's second-drive work root) passes and its
+  row says `contains_redline`; `-o` may write anywhere.
+- **Audit, lightweight**: one row per passed call in
+  `telemetry/codex-dispatch-audit.jsonl` — roots, model, sandbox, `-c`
+  overrides, flags, prompt source with sha256 and size, `-o` path, anything the
+  hook could not resolve (`undetermined`). Never the prompt body and never the
+  answer; there is no full-content audit and no grant on this tier.
+- **Not seen by the guard**: `npx @openai/codex`, `Start-Process codex`, a
+  prompt staged in a variable and piped later. The disclosure duty of §4b still
+  applies to every Codex call.
 
 > **Share note.** `tools/extdispatch/` ships `partial` (`tools/share-manifest.toml`):
 > only its `red-team/` acceptance scripts ship. The dispatcher above
@@ -193,7 +249,7 @@ default to the out-of-process route; pictures reach the user via
 `SendUserFile`/links. FLIP: only while the user explicitly says they are
 watching, for that stated scope (their words are the flip; this file does not
 change). Detail: `ops/references/browser-pane-pixel-route.md`. review-when:
-the pane gains an always-visible surface, or `<browser_surfaces>` wording
+the pane gains an always-visible surface, or `<browsers>`/`<built_in_browser>` (was `<browser_surfaces>`) wording
 changes.
 
 **Enforcement** (hooks, not recall): `hooks/ui_verify_guard.py` denies an
@@ -228,8 +284,8 @@ reproduce with `npm install @playwright/mcp@0.0.79` at user scope).
 ## Instruction-loading mechanics (as-of 2026-08-18, Claude Code 2.1.233 — re-verified after the 2.1.220 review trigger fired)
 
 Measured, not read off the docs (how each row was verified, the observability
-hook, `load_reason` values, trim effect sizes and the startup baseline —
-recorded in the source's own harness measurement notes, not shipped here).
+hook, `load_reason` values, trim effect sizes and the startup baseline:
+`ops/references/harness-measurements.md`).
 
 | Carrier | Charged at session start? |
 |---|---|
@@ -263,8 +319,8 @@ CONCATENATE, and the block is spliced into the classifier prompt on every
 auto-mode decision. Consequence: project-specific facts written there leak into
 every other project's auto-mode decisions — keep the block org/user-generic; a
 project-bound profile has no home other than per-invocation `--settings`.
-Evidence (docs + binary string probe) and the 2026-08-16 incident are
-recorded in the source's own harness measurement notes (not shipped here).
+Evidence (docs + binary string probe) and the 2026-08-16 incident:
+`ops/references/harness-measurements.md`.
 
 ## Local toolchain — measured, not assumed (as-of 2026-08-18)
 
@@ -287,6 +343,7 @@ message that does not name the cause.
 | OS / RAM | Windows 11 Home build 26200 / 31.2 GB | |
 | GPU | RTX 5070 Laptop, **8,151 MiB per `nvidia-smi`** (+ integrated Radeon 610M) | `Win32_VideoController.AdapterRAM` reports 4 GB — a 32-bit field overflow, NOT a smaller card. Do not "correct" the 8 GB figure from it |
 | CPU | Ryzen 9 8940HX, 16C/32T | |
+| OCR (measured 2026-09-13) | **tesseract / ocrmypdf / rapidocr / paddleocr NOT installed. Windows built-in `Windows.Media.Ocr` (WinRT) IS available: en-US, ja, zh-Hans-CN, zh-Hant-TW.** Probe: 3 scanned textbook pages rendered by pymupdf at 150 dpi → 0.2 s, 5,955 chars, running text readable, equations garbled | zero-install OCR route for scanned PDFs; load types with `ContentType=WindowsRuntime` incl. `Windows.Globalization.Language` (the first probe failed only on that missing load). Eval that measured it: a dated textbook-corpus positioning eval under the source's `references/` tree, which this repo does not ship §2 |
 
 ## Display & UI-build premise (as-of 2026-09-04; screen facts user-stated 2026-08-31, not measured)
 
@@ -352,9 +409,9 @@ The standing consequences:
   live view ends with the process; it is not a local record.
 
 **Every number behind those four — arm sizes, ratios, p-values, T0 counts, the
-E3 C2B cell, the exact record paths — is recorded in the source's own harness
-measurement notes (extracted 2026-08-27, `40-maintenance.md` §3; not shipped
-here). Quote from there with its staleness caveat, never from memory.**
+E3 C2B cell, the exact record paths — is in `references/harness-measurements.md`
+§Execution surface (extracted 2026-08-27, `40-maintenance.md` §3). Quote from
+there with its staleness caveat, never from memory.**
 
 **Routing (user ruling 2026-08-22):** unattended / batch / long / subagent
 fan-out / needs `--max-budget-usd`, `--output-format json` (note: `--max-turns`
@@ -374,6 +431,16 @@ Re-verify this block (move its `as-of`) when: the Desktop-bundled claude.exe or
 the CLI minor version changes; the auto-mode instruction or the Workflow tool
 schema changes; the bench is re-run, or a pending probe lands (those are
 tracked with the measurements, not here).
+
+**Scheduled tasks: a session can read and START the `Claude*` carriers but not
+MODIFY them** (measured 2026-09-22, Desktop session). `Get-ScheduledTask` and
+`Start-ScheduledTask` on the daily copy-census task work; `Set-ScheduledTask` returns
+`Access is denied` (0x80070005). So a settings change (time limit, trigger,
+principal) is handed to the user as ONE elevated PowerShell line on the first
+try — never retried through `schtasks` or another route. The declared values
+the instrument checks live in `tools/scheduled-carriers/carriers.json` (source-only, not shipped here)
+(`logon_type_expected`, `time_limit_expected`). Re-verify when a carrier is
+re-registered with a different principal or the Desktop app's sandbox changes.
 
 ## Computer use — desktop control (as-of 2026-09-07, FIRST record; grant PROBED)
 

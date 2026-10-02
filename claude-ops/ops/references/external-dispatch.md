@@ -17,6 +17,22 @@ that output as authoritative over this table, which can go stale.
 | `agentic` | multi-step work that uses tools | Zen ultra (1M) | `card-worker` |
 | `longctx` | multi-file / large reading surface | Zen ultra | `card-worker` |
 | `mechanical` | rename / reformat / extract | Zen lightning (262K) | `card-worker` |
+| `query` | data lookup / web-grounded fact finding, every claim with a source URL | `agy-flash` (`gemini-3.8-flash-low`) → `agy-flash-37` (`gemini-3.7-flash-low`); Antigravity CLI, Google subscription login; fallback stays inside agy | agy's own |
+
+`query` is the one profile NOT on `opencode serve`: `extdispatch` spawns
+`agy -p --output-format json` in the `_agy-worker\cwd` tree under the source's work root with
+`USERPROFILE` redirected to its sibling `home` tree (its own
+settings.json: shell/write/MCP denied, `read_url` allowed). Login is a one-time
+user action: `tools/extdispatch/agy_login.ps1` in the user's own PowerShell.
+Acceptance for a query answer is the source URL per claim, spot-checked by the
+dispatcher; an answer without sources is not accepted.
+
+Volume: `query` counts in its own class (`PROVIDER_VOLUME["agy"]` — 300/day, 3
+concurrent slots, 50 uses per grant), so it neither spends nor waits on the
+free tiers' 40/day and single lock. Live 2026-09-15: four simultaneous
+dispatches → three answered (8–53 s), the fourth refused `LOCK` exit 7 as
+designed. Measured cost: ~60 K input tokens per call (agy's own preamble).
+Exit path (credentials, data folders, PATH): the `_agy-worker\uninstall\` tree (same root).
 
 Every chain leads with a keyless Zen id and ENDS on a NIM id, so a Zen-wide
 outage degrades rather than stops. Pin one model with `--model <key>` only for
@@ -89,6 +105,14 @@ The interop view of that ledger is §8.
 | a config edit that changes nothing | `opencode serve` reads config at STARTUP and does not hot-reload. Restart it, then re-read `GET /api/agent` and confirm the resolved rules before believing the edit landed |
 | every `nvidia`-provider call fails auth while Zen works | the SERVER was started from a shell without `NVIDIA_API_KEY` and inherited that env. `ensure_server()` now recovers the key from `HKCU\Environment`, but a server started before that fix, or by hand, still carries the gap. `status` prints the key state of the CALLER, not of the server |
 | `STRUCTURE-FAIL` on a report whose JSON is visibly fine | a UTF-8 BOM. PowerShell's `Out-File -Encoding utf8` writes `EF BB BF`, which `.strip()` does not remove. Fixed in `extract_findings`; expect the same shape wherever a PowerShell redirect feeds a parser |
+| `query` fails with `upstream: auth` | the worker home has no live agy login. Run `agy_login.ps1` in the user's own shell; retrying cannot fix it |
+| `query` fails with `upstream: stall` after budget + 30 s | `agy -p` waited on a tool approval nobody can answer (agy issue #548); the tree was killed. Check which tool in the audit JSON and adjust the worker settings.json |
+| `query` trail shows `upstream: capacity` | agy's server had no room for that slug (503 "No capacity available for model"); the slug is quarantined 300 s and the chain moves to the next agy slug. Both slugs capacity → retry the spool later |
+| `query` trail shows `upstream: model` | agy could not resolve the pinned slug ("invalid model selection"). Seen once right after a 503 (2026-09-15), so check the neighbouring rows first; if it persists without a 503, the slug left the catalogue — re-pick from `agy models` and re-verify live |
+| `query` trail row with `stage: preflight` | the pinned slug is not in `agy models` (cached 1 h in `tools/extdispatch/agy-catalog.json`); the detail names same-family candidates. Nothing is swapped automatically: pick one, live-verify it, then change `MODELS`. An unreadable catalogue reads `undet` and never blocks. Manual check: `extdispatch.py probe --model agy-flash` (refreshes, spends no completion) or `status` |
+| capturing a grant token in a shell | use `grant ... --token-only`; the default output is multi-line JSON and `tail -1` yields `}` |
+| `query` fails `empty-answer` with `upstream: permission` | agy soft-denied a tool and produced no text; `denied_actions` in the trail names it |
+| `query` fails `context-reset` (before 2026-09-23: `ok:true` with a greeting, "I am ready to help…") | agy lost the task to its own error recovery. Root cause read from agy's transcript (`brain/<conversation_id>/.system_generated/logs/transcript_full.jsonl`) and reproduced on demand: `read_url_content` on a very large page (the full npm packument `registry.npmjs.org/next`, saved as 31 MB; `pypi.org/pypi/pandas/json`) → step CLEARED → empty model output → ERROR_MESSAGE → compaction whose summary is written from the error, not the request → greeting, status SUCCESS. 7 of 85 worker conversations, all publish-DATE checks; wording variants were never the cause. `attempt_agy` now flags the CHECKPOINT-after-ERROR signature (`agy_context_reset`). Fix in the prompt: name a small endpoint (`registry.npmjs.org/<pkg>/latest` for versions; `pypi.org/pypi/<pkg>/<ver>/json`, ~130 KB, carries `upload_time`). npm has NO small endpoint with publish dates (the per-version doc lacks `time`, checked 2026-09-23), so npm dates are read by our own code from the full packument, never by agy (§9). Acceptance still parses structure: `ok` never meant "answered" |
 | a call that runs far past its wall-clock budget without ever reporting `stall` | the prompt POST STREAMS, so the socket timeout re-arms on every byte and the polling loop that owns `HANG_S` / `HARD_S` is never reached. The timeout guards the poll, not the call. A slow model is therefore unbounded in practice — pin a fast model for experiments rather than trusting the budget |
 
 ## 5. Standing cautions
@@ -144,6 +168,36 @@ this tool got that wrong and reported two independently-proven-true findings as
 refuted, one of which the verifier had actually CONFIRMED in prose the parser
 could not read. Never read an inconclusive as a refutation.
 
+**Choosing the verifier — measured on claims, 2026-09-23** (26 claims, 13 false
+by date / number / attribution / inversion / fabrication, 2 reps per arm; §9
+carries the review-when trigger):
+
+| Verifier, format | detect false | accepted a false claim | false alarm | quotes verbatim on the page |
+|---|---|---|---|---|
+| codex `gpt-6-luna` effort low, anchored | 0.77 / 0.92 | 0 / 0 | 0 / 0.08 | 27 of 40 fetched; misses read as table cells joined across markup |
+| codex `gpt-6-luna` effort medium, anchored | 0.38 / 0.77 | 0 / 0 | 0.08 / 0.08 | 25 of 31 fetched; r1 gave up on 16 of 26 claims |
+| codex `gpt-6-luna` effort low, plain reason | 0.69 / 0.77 | 0.08 / 0.08 | 0.08 / 0.15 | — |
+| Claude Haiku 4.5, anchored | 0.77 / 0.77 | 0.08 / 0.08 | 0 / 0.08 | 4 of 39 fetched; 29 of the 35 misses share under 40 % of their words as one verbatim run (paraphrase) |
+| agy `query`, anchored | — | — | — | `context-reset` (§4): the date claims sent it to 31 MB registry pages; untested on a battery without them |
+
+- **Format**: the anchored report — `{"id","verdict","quote","source_url"}`,
+  quote verbatim or `SOURCE-NOT-FOUND` — is what kept accepted-false at zero for
+  luna; the plain `reason` format let one false date through in both reps. The
+  quote only binds a verifier that obeys it: Haiku returned paraphrase in the
+  quote field anyway, so a Haiku anchored report is not checkable by string
+  match. Check quotes mechanically against the fetched page before trusting a
+  `supported`.
+- **Strength**: higher reasoning effort did not buy accuracy; it bought
+  variance and an early give-up. Default luna effort low.
+- **What every verifier got wrong**: pages that show relative time ("published
+  11 hours ago" on npm) produced both unverifiable and false-alarm verdicts, and
+  a secondary source's CVSS 10.0 was accepted over the advisory's 9.9. Registry
+  facts (version, upload date) go to the registry API, not a verifier; security
+  facts are checked against the advisory itself (GitHub GHSA / NVD).
+- **Transport**: codex runs outside `extdispatch` — no redline refusal, no
+  allowlist, no audit row. The §4b redlines are the dispatcher's own duty on
+  that path; send only text you would send to any public tier.
+
 ## 8. Interop telemetry
 
 `telemetry.jsonl` is ours and free to grow. `telemetry-peer-v0.1.jsonl` is the
@@ -152,3 +206,27 @@ latency_s / evidence / note`), written alongside so a shared contract does not
 drift every time we add a field. `key_label` names the TIER on the keyless Zen
 path (`opencode-zen-keyless`) rather than inventing a key id — a fabricated label
 would silently corrupt the cross-key comparison the file exists for.
+
+## 9. Which fast tier for which task shape — measured 2026-09-23
+
+review-when: any of the three tiers changes model id (agy `gemini-3.8-flash`,
+codex `gpt-6-luna`, Claude Haiku 4.5), or a later run of the same battery
+disagrees. Evidence: the n8n-concept-survey project's `exp-fast-tasks\` folder (a separate local project tree; tasks,
+gold, scorer with two-sided controls, `results/summary.json`; claim-verifier
+quote check `results/v1_anchors.json`; report
+that project's `report-3-fast-task-fit.html`). 104 scored runs, 2 reps per family — a
+ranking at this sample size, not a rate to quote to two digits.
+
+| Task shape | Send to | Why |
+|---|---|---|
+| batch doc/web lookups, non-private, a minute of wait is fine | agy `query` | tied best on dated-fact lookup; free, 3 slots. Concept/trend topics misattribute — spot-check every source |
+| one interactive call, small code or extraction against a pinned spec | codex `gpt-6-luna`, effort low | fastest cloud single-call; medium effort helped one family and hurt another |
+| claim verification / third-party check | codex `gpt-6-luna` effort low, anchored format (§7 table) | only arm with zero accepted false claims |
+| CJK routing, and ANY input read from `~/.claude` | Claude Haiku (in-house) | redline: `~/.claude` never leaves; Haiku led on CJK routing |
+| "latest version" / release-date facts | the registry API (PyPI JSON, npm registry) | 12 of 17 wrong model answers had a gold version under 2 days old |
+| a hook slot (~1 s budget) | nothing cloud — cloud probe latency measured 6.7–12.0 s | a local resident model is the only fit; local LLMs are parked, see the n8n-concept-survey project's `handoff-local-llm-fast-tasks.md` |
+
+Two things that do NOT work as gates: a model's verbalized confidence (wrong
+answers came back at 0.80–1.00), and a tier's `ok` flag (§4 greeting row).
+Writing into a working tree is not on this table on purpose — §4a of
+`20-dispatch.md`.
