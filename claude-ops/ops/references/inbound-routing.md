@@ -109,3 +109,78 @@ Verified switch behaviour (each value from a real run): no flag → 15 entries;
 `OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1` → 1; `OPENCODE_DISABLE_EXTERNAL_SKILLS=1`
 → 1. opencode's built-in skill documents both as skipping "the external skill
 scans under `~/.claude/` and `~/.agents/`".
+
+## A fifth surface, found 2026-09-13: the plugin install cache
+
+Same class as the fourth, one difference that matters: **nobody created it by
+hand — the install path creates it.**
+
+Installing a plugin from a LOCAL directory writes a version-pinned physical copy
+to `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/`, while
+`known_marketplaces.json` records that marketplace's `installLocation` as **equal
+to the source path**. Both trees then exist and both can execute. Measured on one
+probe run: `${CLAUDE_PLUGIN_ROOT}` resolved to two different values inside 35
+seconds — the source dir 12 times, the cache 3 times — and `pluginUsage` recorded
+the same plugin under **two identities**, `<plugin>@<marketplace>` (4 uses) and
+`<plugin>@inline` (1 use), the second being the namespace the desktop app uses
+for its own bundled plugins.
+
+Three consequences, in the order they bite:
+
+1. **Editing the source takes effect without reinstalling**, so the cache copy
+   goes stale silently and which copy runs depends on which root resolved.
+2. **`ListPlugins` is not the instrument.** It returned `[]` while a 16-skill
+   plugin was loaded. Neither is a model's own account of what is loaded: in the
+   session whose model listed the local hooks and never mentioned the plugin, the
+   plugin's hook had fired. Use the filesystem or `claude plugin list`.
+3. **Uninstall does not fully undo it.** `claude plugin uninstall` cleared
+   `enabledPlugins` and `extraKnownMarketplaces`, but the `@inline` entry in
+   `pluginUsage` survived, and the cache tree survived carrying a platform
+   `.orphaned_at` marker (leave that one alone — `plugins/.last_inuse_sweep`
+   shows the platform GCs it).
+
+Rule: **never anchor durable state to `${CLAUDE_PLUGIN_ROOT}`** — not because it
+changes on update, but because it is *already not one value*. Drift check:
+per-file sha256 between cache and source must match; a difference is a finding
+(the `share_gate.py` check V shape with both ends swapped).
+
+**The migration direction bites too, and it already has.** When something moves
+the OTHER way — out of `~/.claude/skills/` and into a plugin — every path-based
+reference to it breaks silently. Found the same day: `skill-share-packaging` A5
+told the reader to run `skill-creator/scripts/quick_validate.py`, but there is no
+local `skill-creator` any more; it is a plugin skill, and the validator now sits
+under `plugins/marketplaces/.../skill-creator/skills/skill-creator/scripts/`
+(plus a second copy in the desktop app's bundled skills-plugin). Nothing reported
+the break — the instruction simply read as correct forever, the same shape as the
+write-to-a-frozen-file failure recorded in that skill's A6.
+
+Rule: **a reference to a skill's FILES is a reference to a location that can move
+out from under it.** Locate by search (`find ~/.claude/plugins -name <file>`), or
+cite the skill by name and let the reader resolve it.
+
+Evidence and the full calibration chain:
+the plugin-mechanism design's calibration record §6 and §6.2 (under the
+source's outputs/ tree, not shipped here).
+
+`review-when` **DISCHARGED 2026-09-17** — first `github`-source install measured
+(`WizerdBaChe/wizerd-app-residue-sweep`, marketplace `wizerd-plugins`). The
+answer: the two-root finding above **is specific to `directory` sources**, where
+`installLocation` equals the source path so no separate install exists. A
+`github` source behaves differently and makes **three** locations:
+
+| location | what it is |
+|---|---|
+| the upstream repo | not on this machine |
+| `~/.claude/plugins/marketplaces/<marketplace>/` | a clone; `installLocation` points here |
+| `~/.claude/plugins/cache/<marketplace>/<plugin>/<version>/` | the version-pinned copy |
+
+Measured: all 15 payload files byte-identical across the clone, the cache and
+the authoring tree. **But the version-pinned directory is not ours** — the
+platform writes `.in_use/<pid>` inside it. That is worth knowing twice over:
+it is a live counter-example to reading INV-3 ("no durable state under
+`${CLAUDE_PLUGIN_ROOT}`") as a claim about the platform rather than about our
+own code, and any drift check that diffs the two trees must skip `.in_use/`
+or it cries wolf on every healthy install (fixed in `plugin_gate.py` check D,
+control C11b).
+
+Still unmeasured: `git-subdir` and `url` sources.

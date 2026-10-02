@@ -24,6 +24,13 @@
 - `ops/`：權限、命令迴圈、任務派送、判斷、維護、教練、啟動與演進等作業規範。
 - `ops/environment.md`：擷取時的工具環境與模型成本上限紀錄。
 - `ops/OPS.md`：各規範文件的入口與使用索引。
+- `ops/references/`：規範背後的細節檔（integrity-sweep 檢查清單、entry-schema、
+  gate-design、maintenance-cases、harness-measurements 量測帳等，共 14 份；
+  `harness-measurements.md` 自 2026-10-02 起隨附，是 `environment.md` 各段
+  事實背後的量測紀錄）。
+- `ops/lessons.md`：踩坑索引（generated index）的快照，2026-10-02 對齊 source
+  的 134 筆；每筆 `Record:` 指向的 `ops/lessons/` 逐筆紀錄樹**不**隨附。
+- `ops/rule-registry.md`：規則登記簿；凡引用未隨附工具之處都附有 `Share note`。
 
 ## 路徑對照｜Path map (read before adoption)
 
@@ -40,7 +47,7 @@
 | `~/.claude/PHILOSOPHY.md` | [`../environment-guide/PHILOSOPHY.md`](../environment-guide/PHILOSOPHY.md) | 目標機器的 `~/.claude/PHILOSOPHY.md` |
 | `hooks/*.py` | [`../hooks/`](../hooks/)（歷次 refresh 已更新；目前掛載數與共用函式庫狀態以 [`../hooks/README.md`](../hooks/README.md) 為準） | 目標機器的 `~/.claude/hooks/` + 掛載設定 |
 | `agents/*.md` | [`../agents/`](../agents/)（目前 9 支，以該層 README 為準） | 目標機器的 `~/.claude/agents/` |
-| `~/.claude/references/PROJECTS.md` | [`references/PROJECTS.md`](references/PROJECTS.md)（只有格式，沒有資料列） | 目標機器的 `~/.claude/references/PROJECTS.md` |
+| `~/.claude/references/PROJECTS.md` | [`references/PROJECTS.md`](references/PROJECTS.md)（只有格式，沒有資料列；2026-10-02 起含 `predecessor` 欄與 USER-PROFILE 前置規則） | 目標機器的 `~/.claude/references/PROJECTS.md` |
 | `settings.json` | [`../hooks/settings.example.json`](../hooks/settings.example.json)（範本） | 併進你自己的 `settings.json` |
 
 **2026-08-14 更正**：這段原本寫「規則檔說『由 hook 機械強制』的地方，你拿到的是散文」。

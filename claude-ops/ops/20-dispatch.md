@@ -86,6 +86,12 @@ becomes "no mechanism used" (`lessons.md` L-011 P2; sweep check 12).
    ACCEPTANCE verification belongs to the dispatcher with fresh context
    (`10-command-loop.md` Step 6).
 3. **Report format** — the shape of the conclusion + where artifacts land.
+   Where artifacts land includes INCREMENTAL on-disk evidence: one numbered
+   log per attempt, outputs written as they are produced, probes with their
+   own logs — a worker can die mid-task on a transport/auth error (measured
+   2026-09-15: HTTP 403 mid-card, transient; `ops/lessons.md` L-099) and the
+   successor's brief then names the last log and says "resume", never "redo".
+   A worker whose only output is its final report has no resumable state.
 4. **Redlines** — the explicit do-not-touch list (rule-tier files, production,
    anything the project protects).
 5. **Self-sufficient materials** — copy specs/references the sandbox may not be
@@ -132,7 +138,13 @@ Worked ✅/❌ pair for this contract: `ops/references/dispatch-templates.md`.
 1. Background jobs: redirect stdin from `/dev/null`, or some CLIs hang waiting.
 2. Launch from a genuine scratch dir, not an OS-protected folder — some
    sandboxes silently fail to read protected paths and fabricate instead.
-3. Always wrap with an outer timeout — some agents hang silently.
+3. Always wrap with an outer timeout — some agents hang silently. The same
+   holds for any in-session background run or probe: cap it at ~10× a measured
+   baseline of the same job (floor 5 min); no new log line past the cap is a
+   hang, not a slow run — kill the worker AND its server child, log the kill in
+   the ledger, and keep the hung run's log under its own name, never reuse the
+   path for the retry (`ops/lessons.md` L-098: 45 min found by a process
+   listing, log then overwritten).
 4. Non-git working dirs may need an explicit "trust this directory" flag.
 
 ## §4 Model / effort assignment (two axes: model × effort)
@@ -180,6 +192,12 @@ dispatch tier".
   file that either compiles or does not. External output is accepted by
   verification, never by reading it and finding it plausible;
 - latency is not the binding constraint (an external run is minutes, and free);
+- the deliverable comes BACK as text — findings, lookups, verdicts, a proposed
+  patch — and the main loop integrates it. Work that writes into a project's
+  working tree stays in-house (user ruling 2026-09-23: tier environments differ
+  — shell, paths, installed tools — and edits made from a different environment
+  confuse the tree). The `code` / `agentic` / `mechanical` profiles run only
+  when the user asks for them by name;
 - **red-team / review: prefer external by default.** It is a genuinely
   different model family, which the subagent path cannot offer at all.
 
@@ -204,6 +222,15 @@ literature case and the 5-step ladder: `rules/literature-access.md`).
 
 - **Never externally**: `~/.claude` and its subtree, plus the operator's own
   share and publication trees — refused mechanically (exit 3).
+- **The redlines bind EVERY external tier, Codex included.** The Codex CLI is
+  reached directly, not through extdispatch: entry point `codex exec`, prompt on
+  stdin, house flags (the full line and why each flag is there: `environment.md`
+  "Codex CLI tier"). `hooks/codex_dispatch_guard.py`
+  denies a codex call whose `-C`/cwd/`--add-dir` or prompt/attachment file lies
+  under a redline, reading the same `REDLINE_PREFIXES` extdispatch enforces.
+  No allowlist and no grant on this tier (user ruling 2026-09-23) — so the
+  unlisted-project STOP below does not fire for Codex, and the disclosure line
+  above is its only per-call control besides the redline.
 - **Never as a TASK**: a project's own `.claude`-class internals. Not
   mechanical — a worker's `grep` cannot be gated by path, so the dispatcher
   owns this one. Authored in-house, verified by skills/subagents.
@@ -212,7 +239,8 @@ literature case and the 5-step ladder: `rules/literature-access.md`).
   disclosure, not approval.
 - **Shard the card** by real sub-need and stage, so one dispatch never carries
   a whole picture of a codebase.
-- **Unlisted or private project → STOP and ask**, every time.
+- **Unlisted or private project → STOP and ask**, every time (extdispatch
+  tiers; Codex: see the Codex bullet above).
 
 ## §5 Escalation and de-escalation
 
@@ -276,9 +304,8 @@ so only the OPENING user turn binds cleanly (measured 2026-08-21; evidence in
 used to be prose here, and prose is what this repo measured failing (L-011 hit
 3, L-023 hit 2). `hooks/session_board_register.py` writes the entry on
 PostToolUse of `spawn_task`, taking `task_id` from the response and `title`,
-`cwd` and `match` from the call — the only real dispatch surface (32
-spawn_task vs 0 Workflow; `Agent` calls are subagents the board does not scan;
-`tools/session-board/sweep-dispatch-surface.py` re-derives it).
+`cwd` and `match` from the call — the only real dispatch surface (measured
+counts and why `Agent` is not one: the source's own dispatch-surface sweep script under its session-board tooling, not shipped here).
 
 1. **Open the prompt with a sentence that appears nowhere else**, and never quote
    another ticket's opening sentence in a message. The hook copies that first
@@ -319,23 +346,18 @@ deliverable ABSENT` is a session to go and look at, not a finished one.
 
 **A tree with a peer in it shares HEAD, `.git/index` AND the working tree** —
 the rule lines, each measured on a real incident (2026-08-17, 2026-08-21 ×2):
-- Do not `git checkout -b` while a peer session is live — moving HEAD redirects
-  their next commit onto your branch. Additive, zero-behaviour-change work goes
-  straight onto the current branch; anything larger waits for the baton-pass.
+- Do not `git checkout -b` while a peer session is live (it moves their next
+  commit onto your branch); additive work goes onto the current branch.
 - A ref move (`git update-ref`, `git branch -f`) WITHOUT a following `checkout`
-  leaves the shared index stale, and the next commit in ANY session silently
-  records every path it does not know about as a DELETION (52 files, no error,
-  `merge-base --is-ancestor` still says yes — ANCESTRY AND CONTENT ARE
-  DIFFERENT QUESTIONS).
+  leaves the shared index stale: the next commit anywhere records unknown paths
+  as DELETIONS. Ancestry and content are different questions.
 - After ANY commit in a shared tree: **`git show --stat HEAD`, read for what you
-  did NOT write** — deletions are the loud case; ABSORPTION of a peer's
-  uncommitted edit into your commit (content correct, provenance gone, every
-  check green) is the quiet one. If you must commit a path a peer has dirty,
-  carry their provenance in the message and stage nothing else of theirs.
-- To verify SOMEONE ELSE'S publish, ask the content question — `git cat-file -e
-  <sha>:<path>` or a tracked-file count — not `--is-ancestor`.
-Routing by coupling class, the full commit ritual, attribution (by what a commit
-TOUCHES, never by which session looks busy) and the recovery recipes:
+  did NOT write** — deletions, and the quiet case, ABSORPTION of a peer's
+  uncommitted edit. A path a peer has dirty is committed with their provenance.
+- Verify SOMEONE ELSE'S publish by content (`git cat-file -e <sha>:<path>`),
+  not `--is-ancestor`.
+The measured incidents behind each line, routing by coupling class, the commit
+ritual, attribution (by what a commit TOUCHES) and the recovery recipes:
 `ops/references/shared-tree-git.md` (the canonical home of `lessons.md` L-023).
 
 ## §8 Token discipline (main-session hygiene)
@@ -387,7 +409,7 @@ L-014）。
 載入（把指名 skill 的全文放進 worker，是「規則到不了 worker」的直接解法，代價
 是每次派工付全額 token——要用先量成本）、sibling roster（`SendMessage` 互通的
 前提，且是啟動當下的快照，之後才命名的 agent 不會出現）。條件、限制與該不該用：
-記在 source 端的派工語意量測筆記中（未隨此 repo 收錄）。
+`references/harness-measurements.md` §Dispatch semantics。
 
 消歧（易混淆組）：
 - `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`：

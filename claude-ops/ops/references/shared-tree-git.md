@@ -117,10 +117,34 @@ during the 2026-09-09 drain, 17 suites across four worktrees, one writer.
 Exception: a register that is append-only through a CLI which serialises
 writes (`tools/closeout-intake/intake.py`) needs no single writer.
 
-`ExitWorktree` returns a session to the canonical tree. Preferred for
+**Ignored state cannot be edited from a Desktop-pooled worktree (measured
+2026-09-23).** The Desktop app's built-in `worktree-write-guard` refuses
+Write/Edit to any path under the canonical checkout, gitignored or not, and
+`worktree_scope_guard` refuses the worktree copy of an ignored path;
+`cache/handoff/` is in that class. `ExitWorktree` is a no-op for a worktree
+the app created. The route is a hand-off: the session puts the target and new
+text at the edge of its close-out reply, and a session started in the
+canonical tree applies it. Routing around the host guard through a shell write
+is not the route. **Memory is NOT in that class:** `projects/*/memory/*.md` is
+tracked (since 2026-09-06), so a memory edit is made on the worktree copy and
+reaches the canonical tree with the ff-merge, like any tracked file.
+
+`ExitWorktree` returns a session to the canonical tree only when the session
+itself created the worktree with `EnterWorktree`. Preferred for
 `~/.claude` work: start (or move) the session in the canonical tree unless the
 coupling class in §1 actually calls for a worktree. Cleanup of a finished
-worktree: merge, `git worktree remove`, `git branch -d`.
+worktree: merge, **reparse check**, `git worktree remove`, `git branch -d`.
+
+- **A linked worktree is never removed while it holds a junction or symlink**
+  (added 2026-09-24, from L-120). On Windows `git worktree remove` deletes
+  THROUGH a directory junction into its target: a shared checkout's `.venv`
+  and `node_modules` junctioned into a worktree came back as empty folders,
+  and git reported nothing because every damaged path was ignored. The
+  canonical announce prints `reparse N` per worktree (to 3 levels); the
+  removal ritual reads it, drops each link with `cmd /c rmdir "<link>"`
+  (never a recursive delete), confirms the target still has entries, and only
+  then removes. A worktree the announce has not listed is scanned by hand
+  first (`Get-ChildItem -Recurse -Force -Attributes ReparsePoint`).
 
 **Corrected 2026-09-09, measured rather than assumed.** This paragraph used to
 read: *"a directory that survives the remove with 'resource busy' is an empty
@@ -166,6 +190,15 @@ never something to ask the user to resolve.
    rest of the index is stale — run `git status --porcelain` UNSCOPED if you
    want the index's true state (a stale index shows the missing paths as staged
    deletions).
+   **A file that also carries a peer's uncommitted hunk** is staged hunk by hunk:
+   filter `git diff` output and feed the kept hunks to `git apply --cached`, with
+   the index empty first. Make that diff at `-U0` and apply with
+   `--unidiff-zero` — at the default `-U3`, an own edit within six lines of the
+   peer's merges into one hunk, which a foreign-text filter then drops whole or
+   takes whole. Check the staged result by counting changed lines that exclude
+   ONLY the `--- a/` / `+++ b/` headers: a `^-[^-]` pattern misses a removed
+   markdown bullet (`-- item`), and the guard reads an honest staging as wrong
+   (2026-09-14, a local session).
 3. `git commit -F <msgfile>`, never `-m` with a message that may contain `"`
    (L-021; PS 5.1 does not escape embedded quotes and the commit silently does
    not happen).

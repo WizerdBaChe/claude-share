@@ -85,6 +85,7 @@ applies but is empty).**
 | `review-when` | the entry rests on a fact outside this repo (harness default, vendor doc, an unmeasured rate); else the literal `none` | rule-registry `review-when:`; `rules/*.md` `## review-when` |
 | `rollback` | the entry is a mechanism (hook, scheduled task, guard, lint) | rule-registry `rollback:`; `70-evolution.md` §2 |
 | `since` | the entry can be legacy-vs-new (hooks, families) | xi `date:`; hook `since <date>` |
+| `watched` | the entry is a mechanism on disk under system-hmi's scan roots (hooks/*.py, tools/<x>, skills/<x>, rules/*.md, agents/*.md) | a `component_rules` row in `tools/system-hmi/registry/subsystems.json` (or a reasoned `ignore.json` row); place-ledger's P5 is the same field for places | ES-9 (system-hmi's own `hmi/scan.py`, imported); save-time twin `golive_check.registry_gap()` |
 | `aliases` | a human may search under another name | xi `aliases:` |
 | `fires` (skills) | `always-on` · `conditional` · `phase-gated` · `user-manual` · `sub-service` · `second-order` | `skill-trigger-classes.md` `class:` |
 | `zero-means` (skills) | free text printed beside an unexplained zero | `skill-trigger-classes.md` `zero-means:` |
@@ -140,12 +141,15 @@ column entry, 3 of them `none` by kind (7 defines the shapes; 4 and 11 rely on t
 
 ## §6 What the lint enforces today vs documented-only
 
-Enforced (ES-1..ES-8 — the docstring of `tools/entry-schema-lint/lint.py` is the owner of
+Enforced (ES-1..ES-9 — the docstring of `tools/entry-schema-lint/lint.py` is the owner of
 the numbering; this file names them, never restates their predicates): hook `STATUS:`
 (ES-1), hook proof-of-life (ES-2), rule-file frontmatter / index sync / review-when (ES-3),
 trigger-class value sets and ghost blocks (ES-4), owner and mechanism pointers + registry
 field presence (ES-5), guide citation integrity (ES-6), page-builder declarations and shared
-shell — project trees, heuristic (ES-7), tool-bound ruling sentences — heuristic (ES-8).
+shell — project trees, heuristic (ES-7), tool-bound ruling sentences — heuristic (ES-8),
+`watched` — every scanned component has a system-hmi subsystem row or a reasoned ignore
+row (ES-9, born 2026-09-29; the HMI reads this verdict through its
+`health-checks.entry-schema-lint` point rather than re-deciding it).
 
 Documented-only (no mechanical detection yet; the adapter table says so per row): OPS.md
 rows, inbound-routing rows, §2a rows, per-entry `evidence` on surfaces 1–7, and the hook
