@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "_note": "The list of CORE VIEW PAGES the launcher shows (user ruling 2026-09-21, retrieval-linkage audit finding F-4: core overview pages sat scattered inside their tools, so the user forgot they existed). This file is the only thing to edit: an entry points at a page where it already lives — pages are never moved or copied (they are the launcher's 'profiles'). Writers: an agent PROPOSES an entry, the user approves; build.py only reads. `title` is the FUNCTION name in the user's words (what the page is for), not the file's task name. `refresh` is the command that regenerates the page, shown with a copy button; empty when unknown — never guessed. At most 1-2 entries per project, so the launcher stays a front door and not a second file browser. Groups render in the order of `groups`.",
+  "_share_template": "SHARE TEMPLATE: the source environment's register is reduced to its schema plus one worked example row. Replace <CLAUDE_HOME> with your config directory, or delete the row and add your own pages. Until then the row reads as a missing file (greyed, with its refresh command) -- the designed behaviour for a pinned page that does not exist yet. Add groups, sidebar entries and families as your own projects need them.",
+  "groups": [
+    {"id": "system", "title": "AI 工作系統（~/.claude）"}
+  ],
+  "sidebar": {
+    "_note": "How the SIDEBAR groups projects (user ruling 2026-09-21: the flat recency-sorted list was the page's worst clutter; groups reuse the dashboard's `groups`, order is STABLE = the order written here, one nesting level for a project family, frozen/done/maintenance and unregistered projects collapse at the bottom). Order inside a group = list order below; a registered project not listed falls back by root (under ~/.claude -> fallback.under_home, else fallback.other) and sorts after the listed ones. Writers: agent proposes, user approves; build.py only reads.",
+    "project_groups": {
+      "system": ["system-hmi"]
+    },
+    "families": [
+      {"id": "example-family", "title": "Example family", "group": "system",
+       "members": {"example-project": "main line", "example-project-notes": "notes"}}
+    ],
+    "archive_status": ["frozen", "done", "maintenance", "dormant"],
+    "fallback": {"under_home": "system", "other": "system"}
+  },
+  "views": [
+    {
+      "id": "system-hmi-mimic",
+      "group": "system",
+      "title": "系統監看總覽",
+      "answers": "各個子系統現在正常嗎？哪一個點亮了黃燈或紅燈？",
+      "project": "system-hmi",
+      "path": "<CLAUDE_HOME>/tools/system-hmi/out/mimic.html",
+      "refresh": "python -X utf8 <CLAUDE_HOME>\\tools\\system-hmi\\hmi.py collect"
+    }
+  ]
+}

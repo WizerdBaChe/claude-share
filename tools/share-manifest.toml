@@ -5856,3 +5856,460 @@ proving the guard's second pattern (a non-Windows home directory) also denies
 inside a governed tree. A placeholder account name, not a real one."""
 
 # === lane W3 2026-09-12 END ===
+
+# === lane W5c-templates 2026-10-02 BEGIN ===
+#
+# instruments/system-hmi/ and instruments/view-launcher/ -- two source tools
+# (tools/system-hmi/, tools/view-launcher/) collected as TEMPLATE collections.
+#
+# USER RULING 2026-10-02: both ship as templates. Code and docs ship verbatim
+# or edited; the registry and data files (system-hmi/registry/*.json except the
+# two that are generic as written, view-launcher/views.json) are reduced to
+# their SCHEMA plus ONE worked example row; every generated output is withheld
+# under its own [[not_shipped]] entry below. Only files the source's git tracks
+# were collected (37 files: 34 under system-hmi, 3 under view-launcher); the
+# source's untracked or ignored files are not collected.
+#
+# [source_map] lines this lane NEEDS and does NOT add (the lead merges them;
+# this lane does not edit the top of the file):
+#   "tools/system-hmi/"    = "instruments/system-hmi/"
+#   "tools/view-launcher/" = "instruments/view-launcher/"
+# The shipped READMEs and docs cite their own tool by the source spelling
+# (`tools/system-hmi/hmi.py`, `tools/view-launcher/build.py`); without the two
+# lines check R reads those citations as undeclared dependencies. No new
+# placeholder token was introduced: `<CLAUDE_HOME>`, `<WORK_ROOT>` and
+# `<project-root>` are all already declared.
+#
+# Runtime layout the tools expect: they locate the config directory as two
+# levels above their own folder (hmi.py, build.py), i.e. they are meant to sit
+# at <CLAUDE_HOME>/tools/system-hmi/ and <CLAUDE_HOME>/tools/view-launcher/. In
+# this repo they sit under instruments/, so running them in place makes the
+# repo root the "home" and most probes report nothing; install by copying the
+# two folders to <CLAUDE_HOME>/tools/ (verified that way, see the verification
+# notes in each template entry).
+
+# --- system-hmi: verbatim (20 files) ----------------------------------------
+
+[[collected]]
+path = "instruments/system-hmi/.gitignore"
+source = "~/.claude/tools/system-hmi/.gitignore"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/PROTOCOL.md"
+source = "~/.claude/tools/system-hmi/PROTOCOL.md"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi.py"
+source = "~/.claude/tools/system-hmi/hmi.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/structure_view.py"
+source = "~/.claude/tools/system-hmi/structure_view.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/open-hmi.bat"
+source = "~/.claude/tools/system-hmi/open-hmi.bat"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/open_hmi.pyw"
+source = "~/.claude/tools/system-hmi/open_hmi.pyw"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/__init__.py"
+source = "~/.claude/tools/system-hmi/hmi/__init__.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/adapters.py"
+source = "~/.claude/tools/system-hmi/hmi/adapters.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/collector.py"
+source = "~/.claude/tools/system-hmi/hmi/collector.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/completeness.py"
+source = "~/.claude/tools/system-hmi/hmi/completeness.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/deferral.py"
+source = "~/.claude/tools/system-hmi/hmi/deferral.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/fingerprint.py"
+source = "~/.claude/tools/system-hmi/hmi/fingerprint.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/lock.py"
+source = "~/.claude/tools/system-hmi/hmi/lock.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/registry.py"
+source = "~/.claude/tools/system-hmi/hmi/registry.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/release.py"
+source = "~/.claude/tools/system-hmi/hmi/release.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/render_cli.py"
+source = "~/.claude/tools/system-hmi/hmi/render_cli.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/scan.py"
+source = "~/.claude/tools/system-hmi/hmi/scan.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/server.py"
+source = "~/.claude/tools/system-hmi/hmi/server.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/hmi/snapshot.py"
+source = "~/.claude/tools/system-hmi/hmi/snapshot.py"
+status = "verbatim"
+
+[[collected]]
+path = "instruments/system-hmi/registry/rubric.json"
+source = "~/.claude/tools/system-hmi/registry/rubric.json"
+status = "verbatim"
+# The completeness rubric C1-C5: tool-level data (how complete a subsystem's
+# coverage must be), not a record of this environment's subsystems.
+
+[[collected]]
+path = "instruments/system-hmi/registry/scan.json"
+source = "~/.claude/tools/system-hmi/registry/scan.json"
+status = "verbatim"
+# The disk-scan roots and scan tiers: describes the layout of the config
+# directory the tool is installed into, not any machine-specific location.
+
+# controls.py ships verbatim. It is the tool's own proof-of-life suite (108
+# checks). Measured on the template registry installed at a scratch config
+# directory: 104/108 pass, 4 FAIL. The four are live-registry checks that bind
+# the SOURCE environment's registry or tools, so they fail by construction on a
+# template and are reported, not patched (see the D5 note below):
+#   - reconcile grace is read from ops-health, never restated (INV-4): reads
+#     hooks/ops_health_nudge.py from the install directory, which a template
+#     install does not have unless the hooks lane is installed beside it;
+#   - live: fieldwork_threshold_notice.py retired, not unregistered, and
+#     live: deny_receipt.py kind hook-library: assert specific rows of the
+#     source's own subsystems registry, which the template does not carry;
+#   - deferral: hybrid-index trigger reads recall.py code, not comments: opens
+#     tools/memory-pipeline/index_freshness.py, a tool this share does not ship
+#     (raises FileNotFoundError inside the check, caught and reported as FAIL;
+#     no traceback escapes).
+# The other 104 checks (render, release verdict, deferral, server, launcher,
+# mimic, adapters, history) are tool-level and pass.
+
+[[collected]]
+path = "instruments/system-hmi/controls.py"
+source = "~/.claude/tools/system-hmi/controls.py"
+status = "verbatim"
+
+[[allow]]
+file = "instruments/system-hmi/controls.py"
+kind = "absolute local path (non-system drive)"
+match = "/ext"
+reason = """This file's own proof-of-life fixture (a completeness-rule case): a
+fabricated drive-rooted path on a non-system drive, used as a component id that
+must be treated as lying outside the config directory. The completeness rule's
+job is classifying paths by where they sit, so its own control suite must
+contain an instance of the shape. Not a real location."""
+
+[[allow]]
+file = "instruments/system-hmi/controls.py"
+kind = "absolute local path (non-system drive)"
+match = "definitely"
+reason = """Same control suite: a fabricated drive-rooted path that cannot exist,
+used as the probe target in the 'path that does not resolve' negative control (a
+missing target must read as an unprobeable point, never as a pass). Not a real
+location."""
+
+[[allow]]
+file = "instruments/view-launcher/build.py"
+kind = "absolute local path (non-system drive)"
+match = "a b"
+reason = """This file's own --selftest fixture (the Desktop-shortcut PowerShell
+quoting case): a fabricated drive-rooted path containing a space, used to prove
+the quoting helper keeps a space-bearing path in one argument. Not a real
+location."""
+
+# --- system-hmi: edited (6 files) -------------------------------------------
+
+[[collected]]
+path = "instruments/system-hmi/README.md"
+source = "~/.claude/tools/system-hmi/README.md"
+status = "edited"
+edits = [
+  "line 23 area, 1 place: a pointer into the source's outputs/ tree (design document 17, release boundary) rewritten to prose saying the design document stays in the source environment and is not shipped. Same class as the outputs/ pointers elsewhere in this repo: the reader cannot open the target.",
+  "line 50 area, 1 place: two work-folder paths written with a non-system-drive prefix -> the bare folder names (names kept, drive prefix dropped). They are named as examples of a footprint root, and a drive letter locates nothing for a reader.",
+  "line 111 area, 1 place: a pointer into the source's outputs/ tree (design document 08, awareness) rewritten to prose, same treatment as the first.",
+  "line 164 area, 1 place: a pointer into the source's outputs/ tree (probe-coverage record) rewritten to prose, same treatment.",
+  "inserted, after the Proof-of-life line: a 'SHARE EDITION' blockquote (5 lines) stating that registry/ is a template (schema + one worked example), that counts and subsystem names in the body describe the source's own registry, that sources depending on unshipped tools are absent, and that controls.py has 4 live-registry checks that fail on the template (104/108 pass) and why.",
+  "line 126, 1 place (usage fence): the placeholder `<source>` in the `conform` command -> the real source id `reconcile` (the one source the template registers), with the trailing comment saying to substitute an id from sources.json. A command a reader pastes must run as written.",
+  "Nothing else touched; the file keeps CRLF endings exactly as the source (172 lines, 172 CRLF).",
+]
+
+[[collected]]
+path = "instruments/system-hmi/BUILD-LOG.md"
+source = "~/.claude/tools/system-hmi/BUILD-LOG.md"
+status = "edited"
+edits = [
+  "header, 'Read in order' block (3 lines): pointed at the source's outputs/ design directory by a dated folder name and a numbered file. Replaced by (a) a SHARE EDITION note saying the log records the source's own build and its counts describe the source registry, and (b) the same reading order as a pointer-free list of the source environment's design documents (not shipped).",
+  "The log body is unchanged; it records HMI-01 through the last build step and names registry files that now ship as templates, which the SHARE EDITION note covers.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/mimic_view.py"
+source = "~/.claude/tools/system-hmi/mimic_view.py"
+status = "edited"
+edits = [
+  "module docstring, line 8: a citation of a dated audit file under tools/extdispatch/audit/ (a tool this share does not ship, a file that is not public) -> prose saying a dated external-model design audit is kept in the source environment and not shipped. Code untouched.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/emitters/reconcile.py"
+source = "~/.claude/tools/system-hmi/emitters/reconcile.py"
+status = "edited"
+edits = [
+  "module docstring, line 5: a pointer into the source's outputs/ design directory (design 06) -> 'design 06 in the source environment's design record, not shipped'. Code untouched.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/emitters/agents_census.py"
+source = "~/.claude/tools/system-hmi/emitters/agents_census.py"
+status = "edited"
+edits = [
+  "line 38, 1 place (the `remedy` string): a scheduled-task name, class scheduled-task-name, the same class declared for hooks/ops_health_nudge.py's check 18 and for the carrier task name elsewhere in this repo -> 'the daily copy-census scheduled task'. The rest of the remedy string (the census.py command the carrier runs) is untouched.",
+  "Dependency note: this emitter READS a snapshot that tools/version-census's agents partition writes (cache/version-census/agents/scheduled.json) and does not run any probe itself. version-census is not shipped, so on an adopter the emitter reports its two points as 'did not run' (never pass) -- by its own design. It is not registered in the template's sources.json either.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/emitters/awareness.py"
+source = "~/.claude/tools/system-hmi/emitters/awareness.py"
+status = "edited"
+edits = [
+  "build(), 1 place: the memory-closure point located the auto-memory folder with a hard-coded project-folder slug that is the config directory's own path with every non-alphanumeric character turned into a hyphen, which spells the account name. Replaced by a 3-line derivation of the same slug from `home` (`re.sub` over the string form of the path), with a comment saying why. Behaviour is identical on the source machine (the derived slug was compared to the literal and is equal); on any other machine it now names THAT machine's own slug instead of a foreign one, which is the class fix, not a value swap.",
+  "Dependency note: the check reads <CLAUDE_HOME>/projects/<slug>/memory/MEMORY.md; when that folder is absent the point reports 'did not run: memory-index-unreadable' (never pass). The emitter is not registered in the template's sources.json.",
+]
+
+# --- system-hmi: template registry (6 files) --------------------------------
+#
+# Rule applied to every registry file: keep the schema and the file's own
+# explanatory `_comment`/`_note`, keep ONE row, and where one row is enough to
+# show the shape choose the source's own generic row over an invented one. Each
+# row below is either a verbatim source row or says plainly that it is authored.
+# Verified at a scratch install: `hmi.py validate` -> ok (1 subsystems, 1 points,
+# 1 sources), exit 0; `hmi.py collect` ok (cheap tier, 0.14 s); `show`,
+# `show --summary`, `show --subsystem system-hmi` render without error;
+# `hmi.py scan` exits 1 and names 1 UNREGISTERED folder (tools/view-launcher,
+# a real finding on this install) and 1 MISSING path (the hook the subsystem
+# row names); `conform reconcile` ok (3 points); `conform nosuch` refuses and
+# lists the known sources. `hmi.py verdict` raises a RuntimeError traceback when
+# the install directory is not a git work tree (see the D5 note below).
+
+[[collected]]
+path = "instruments/system-hmi/registry/subsystems.json"
+source = "~/.claude/tools/system-hmi/registry/subsystems.json"
+status = "template"
+edits = [
+  "20 subsystem rows -> 1: the source's own row for `system-hmi` (order 20, two rules: the tool folder as kind tool, the SessionStart summary hook as kind hook), kept verbatim as the worked example because it describes the tool itself and nothing private. The other 19 rows describe the source environment's own subsystems and are not shipped.",
+  "Schema and field order kept. The `hooks/system_hmi_summary.py` rule resolves only when the hooks lane is installed beside the tool; otherwise `hmi.py scan` reports it MISSING, as designed.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/registry/points.json"
+source = "~/.claude/tools/system-hmi/registry/points.json"
+status = "template"
+edits = [
+  "all monitoring points -> 1 AUTHORED row (not a source row): `system-hmi.registry-valid`, adapter exit-code, class integrity, tier cheap, argv = the tool's own `hmi.py validate`, exit_map {0: pass, 1: fail}, remedy = that command. Authored because every source point watches a subsystem this share does not carry; this one watches the template itself and passes on a clean install. Its `why` field says it is a worked example.",
+  "Schema (field names, adapter vocabulary, disposition vocabulary) unchanged from the source.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/registry/groups.json"
+source = "~/.claude/tools/system-hmi/registry/groups.json"
+status = "template"
+edits = [
+  "capability groups reduced to the source's own first group `memory-index` with its four faces A-D kept verbatim (the faces are tool-level vocabulary: inventory, memory, retrieval, awareness); the other groups dropped. `subsystems` mapping reduced to {system-hmi: A}; `points` mapping emptied.",
+  "The file's own `_comment` kept verbatim.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/registry/ignore.json"
+source = "~/.claude/tools/system-hmi/registry/ignore.json"
+status = "template"
+edits = [
+  "ignore rows -> 1: the source's own row for the interpreter-cache folder under tools/ (reason 'build artifact', dated), kept verbatim as the worked example because it is generic. Every other row names a folder of the source environment and is not shipped.",
+]
+
+[[collected]]
+path = "instruments/system-hmi/registry/sources.json"
+source = "~/.claude/tools/system-hmi/registry/sources.json"
+status = "template"
+edits = [
+  "native sources (the 8-adapter registry's external `hmi-report/1` emitters) -> 1: `reconcile` (tier cheap, timeout 60 s, argv = the shipped emitters/reconcile.py), kept verbatim because it is the one source whose emitter ships in this folder and needs nothing else. Every other source reads a tool this share does not ship (pol.py, place-ledger, graph-snapshot, version-census, the hook-suite runner) and is dropped; `conform` therefore knows exactly one source.",
+  "The `controls` source row was NOT kept: it shells out to controls.py, whose live-registry checks cannot pass on a template (see the controls.py note above).",
+]
+
+[[collected]]
+path = "instruments/system-hmi/registry/reconcile.json"
+source = "~/.claude/tools/system-hmi/registry/reconcile.json"
+status = "template"
+edits = [
+  "`repos` list (the source's own git work folders the reconcile emitter checks for uncommitted work) -> 1 example row: slug `example-project`, path `<project-root>` (a declared placeholder). Slugs and paths of the source's real repos are not shipped. The file's own `_note` kept verbatim.",
+  "A reader replaces `<project-root>` with the folder of a git repository they want watched; with the placeholder left in, the emitter reports that repo as unreadable (did not run), never as clean.",
+]
+
+# --- view-launcher (3 files) ------------------------------------------------
+
+[[collected]]
+path = "instruments/view-launcher/build.py"
+source = "~/.claude/tools/view-launcher/build.py"
+status = "edited"
+edits = [
+  "module docstring, line 32: a non-system-drive work-folder root named in prose ('projects under <drive>:\\WORK') -> `<WORK_ROOT>` (declared placeholder). Prose position, not path position: the code does not read it.",
+  "module docstring, line 37: the same work-folder root inside a facet-layer folder path -> `<WORK_ROOT>` followed by the same sub-folder. Prose only.",
+  "All code bytes verbatim. `build.py --selftest` ran at a scratch install: ALL PASS 28/28 (V1-V28, including the Desktop-shortcut create/leave/repair cases, which run against a temporary folder).",
+  "Behaviour on a template install, checked by calling build.build() with temporary outputs (never the plain command, see the D5 note): 1 pinned page reported missing, 0 auto items, and one WARN line saying no derived index exists under tools/cross-index/out/stores and only pinned pages are shown. No traceback. `build.py --gist` prints the one pinned row with '(file missing)'.",
+]
+
+[[collected]]
+path = "instruments/view-launcher/README.md"
+source = "~/.claude/tools/view-launcher/README.md"
+status = "edited"
+edits = [
+  "5 places: the absolute home-directory path of the account (drive + Users + account name + the config folder) written before `All-View-Pages-Launcher.html`, `.md` and `tools\\cross-index\\xi.py` -> `~\\.claude\\`. Same class as every other home path in this repo: the reader's own config directory, written the way Claude Code docs write it.",
+  "2 fenced PowerShell blocks (build, build --selftest): the same home path -> `$HOME\\.claude\\...` so PowerShell expands it; the fence stays labelled powershell.",
+  "inserted, before the '怎麼用' section: a 'SHARE EDITION' blockquote (4 lines) saying views.json is a template (schema + one example row), what `<CLAUDE_HOME>` in the example row means, that the auto-collect half reads tools/cross-index (not shipped) so without it the launcher shows pinned pages and prints a WARN (designed degradation), and that a build writes the HTML/MD at the config root and ensures a Desktop shortcut.",
+  "CRLF endings preserved exactly as the source.",
+]
+
+[[collected]]
+path = "instruments/view-launcher/views.json"
+source = "~/.claude/tools/view-launcher/views.json"
+status = "template"
+edits = [
+  "pinned `views` rows -> 1 AUTHORED example row `system-hmi-mimic`: path `<CLAUDE_HOME>/tools/system-hmi/out/mimic.html` (the page system-hmi generates), refresh command `python -X utf8 <CLAUDE_HOME>\\tools\\system-hmi\\hmi.py collect`. Both tokens are declared placeholders; the path does not resolve until the reader substitutes it, so a build reports the row as missing, by design. All other rows point at pages of the source environment's own projects and are not shipped.",
+  "`groups` -> 1 (id `system`, the source's own first group title); `sidebar.project_groups` -> {system: [system-hmi]}; `sidebar.families` -> 1 example family (`example-family`, two example members); `sidebar.fallback` kept in shape (under_home / other -> system). The source's `archive_status` list is kept verbatim (a status vocabulary, not project data). The file's own `_note` kept verbatim; a `_share_template` note was added saying what to replace.",
+  "Not shipped: every project name, family and group of the source's own portfolio beyond the one example.",
+]
+
+# --- generated outputs: not shipped -----------------------------------------
+#
+# Each generated directory or file gets its own entry (user ruling 2026-10-02).
+# None of these is tracked at the source; all are regenerated by running the
+# tools.
+
+[[not_shipped]]
+path = "tools/system-hmi/out/"
+disposition = "excluded-by-decision"
+reason = """Everything the tool GENERATES, none of it tracked at the source
+(ignored by the tool's own .gitignore): the collected snapshot and its
+previous copy, the per-snapshot history, the release-verdict record and its
+history, the known-good marker (and one superseded marker kept beside it), the
+two generated pages (mimic.html, structure.html), the collector lock, and the
+local-server log. They record the state of the source environment on the day
+they were written -- subsystem names, probe results, a commit sha of a private
+repository -- so they carry no use for a reader and are the exact kind of
+value a template must not inherit."""
+fallback = """Run `python -X utf8 tools/system-hmi/hmi.py collect` from the
+installed folder: it creates out/ and writes the snapshot, history and both
+pages for the reader's own registry. `hmi.py show` reads the snapshot; the
+SessionStart hook reads it too and says nothing until it exists."""
+
+[[not_shipped]]
+path = "tools/system-hmi/archive/"
+disposition = "excluded-by-decision"
+reason = """A folder of one-off records kept beside the tool at the source
+(an index note and one JSON record). Ignored by the source's
+own .gitignore at the repository level, so it was never a tracked file; named
+here because the folder exists next to collected files and a reader of the
+source would otherwise wonder."""
+fallback = """None needed. Nothing in the tool reads it."""
+
+[[not_shipped]]
+path = "tools/system-hmi/__pycache__/"
+disposition = "excluded-by-decision"
+reason = """Interpreter byte-code cache (this folder and the two beside it,
+under emitters/ and hmi/). Generated, ignored by the tool's .gitignore, and
+machine-specific."""
+fallback = """Recreated by Python on first run."""
+
+[[not_shipped]]
+path = "tools/view-launcher/__pycache__/"
+disposition = "excluded-by-decision"
+reason = """Interpreter byte-code cache of build.py. Generated, ignored at the
+source, machine-specific."""
+fallback = """Recreated by Python on first run."""
+
+[[not_shipped]]
+path = "All-View-Pages-Launcher.html"
+disposition = "excluded-by-decision"
+reason = """The launcher page `build.py` writes at the config-directory root.
+Generated from the pinned list plus the cross-index output plus the project
+register, so it embeds the source environment's whole project portfolio (names,
+paths, recency). Ignored at the source by a root-level ignore rule."""
+fallback = """Run `python -X utf8 tools/view-launcher/build.py` from the installed
+folder: it writes the page (and the Markdown twin) for the reader's own
+pinned list. Tested on a template install: it builds, shows the pinned rows,
+and prints a WARN that the auto-collect index is absent."""
+
+[[not_shipped]]
+path = "All-View-Pages-Launcher.md"
+disposition = "excluded-by-decision"
+reason = """The Markdown twin of the launcher page, same generation path and same
+content class as All-View-Pages-Launcher.html above; ignored at the source by
+a root-level ignore rule."""
+fallback = """Written by the same build.py run as the HTML page."""
+
+# --- verification notes the lead needs (no D-class decision hidden here) -----
+#
+# D5 (defects found while verifying, REPORTED and NOT patched, per the lane
+# brief; none is a traceback on an empty or near-empty registry):
+#   1. view-launcher/build.py has no real argument parser: any argument it does
+#      not know, `--help` included, falls through to a FULL BUILD. A full build
+#      writes the two launcher files at the config root and creates or REPOINTS
+#      the Desktop shortcut to them. Running `build.py --help` from a worktree
+#      therefore repointed the operator's real shortcut at the worktree (found
+#      and repaired during this lane; the source tree was not modified).
+#   2. system-hmi/hmi.py verdict raises an uncaught RuntimeError('git rev-parse HEAD exit 128') when the
+#      install directory is not inside a git work tree. The release verdict is
+#      defined against a commit, so refusing is right; the traceback instead of
+#      a one-line refusal is the defect. Not hit on any template-registry path
+#      that has no git (validate, collect, show, static, scan, conform).
+#   3. controls.py live-registry coupling (4 of 108 checks fail on a template,
+#      see the controls.py note above).
+#
+# What the W3 hooks see with the template installed at <CLAUDE_HOME>/tools/:
+#   (run from a scratch install of the template with the three hooks copied in)
+#   - hooks/system_hmi_summary.py (SessionStart): with no snapshot it prints a
+#     header saying the snapshot is unavailable and nothing is blocked, plus a
+#     line saying no known-good commit is recorded; after one `hmi.py collect`
+#     the header reads "0 fail, 0 warn, 0 unwatched. Nothing needs doing" and the
+#     known-good line remains. Exit 0 both ways, no traceback.
+#   - hooks/view_launcher_gist.py (SessionStart): prints its header and ONE
+#     row, the example row, tagged "(file missing)" until the reader substitutes
+#     <CLAUDE_HOME> and runs collect. Exit 0.
+#   - hooks/golive_check.py (PostToolUse Write|Edit): fed an edit event for
+#     hmi.py it stays silent, exit 0 (it maps the edited file to registered
+#     hooks' Proof-of-life commands through pol.py's grammar; pol.py is not
+#     shipped). The template does not change its behaviour.
+
+# === lane W5c-templates 2026-10-02 END ===

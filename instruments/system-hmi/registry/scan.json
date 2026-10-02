@@ -1,0 +1,4 @@
+{
+  "_note": "Scan-class parameters. integrity_poll_days is the ONE number the HMI owns (user ruling 2026-09-19: 3 days): the longest a static point may go without actually being run, however unchanged its inputs. Everything else about staleness is derived or borrowed (INV-4).",
+  "integrity_poll_days": 3
+}

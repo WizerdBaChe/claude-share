@@ -1,0 +1,93 @@
+{
+ "evidence_ids": [
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+  "C5"
+ ],
+ "applicable_by_kind": {
+  "hook": [
+   "C1",
+   "C2",
+   "C3",
+   "C4",
+   "C5"
+  ],
+  "hook-library": [
+   "C2"
+  ],
+  "tool": [
+   "C1",
+   "C2",
+   "C3",
+   "C4",
+   "C5"
+  ],
+  "tool-utility": [
+   "C1",
+   "C2"
+  ],
+  "test-suite": [
+   "C1",
+   "C2",
+   "C3"
+  ],
+  "skill": [
+   "C1",
+   "C2",
+   "C3"
+  ],
+  "link": [
+   "C1",
+   "C2",
+   "C3",
+   "C5"
+  ],
+  "shared-edition": [
+   "C1",
+   "C2",
+   "C3",
+   "C5"
+  ],
+  "store": [
+   "C1",
+   "C2",
+   "C3",
+   "C5"
+  ],
+  "index": [
+   "C1",
+   "C2",
+   "C3",
+   "C5"
+  ],
+  "scheduled-task": [
+   "C1",
+   "C3",
+   "C5"
+  ],
+  "rule": [
+   "C1",
+   "C2"
+  ],
+  "agent-def": [
+   "C1",
+   "C2"
+  ]
+ },
+ "labels": {
+  "complete_when": "satisfied == applicable",
+  "bare_when": "satisfied <= 1",
+  "partial_when": "otherwise",
+  "na_when": "applicable is empty",
+  "undetermined_when": "any applicable item could not be detected"
+ },
+ "evidence_names": {
+  "C1": "registered",
+  "C2": "R-covered",
+  "C3": "I-covered",
+  "C4": "self-tested",
+  "C5": "watched"
+ }
+}
