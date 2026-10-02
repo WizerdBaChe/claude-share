@@ -133,7 +133,10 @@ def _name_pattern(value):
     """CJK: plain substring (no word boundaries exist), 2+ chars. Latin 4+:
     whole word, any case. Latin 2-3 (a given name like a two-letter one):
     whole word, exact case, and only where it ends a phrase — followed by CJK
-    (spaces allowed), or closing punctuation or a quote. The first
+    (spaces allowed), punctuation, a quote, or a FULL-WIDTH opening bracket
+    (`名（註）` is ordinary Chinese; an ASCII `(` stays out because English
+    writes "An (optional) step"). Drift point: the same rule lives in
+    ~/.claude/tools/pii-membrane/membrane.py `name_pattern`. The first
     calibration (2026-10-03) excluded only "followed by a lowercase word"
     and fired 30/30 false on the English article before a capital, quote or
     backtick (`An HTML`, `An "x"`); a second clause accepting the line end
@@ -147,7 +150,7 @@ def _name_pattern(value):
     if len(value) >= 2:
         return re.compile(r"(?<![A-Za-z0-9])" + re.escape(value)
                           + r"(?=[ \t]*[㐀-鿿豈-﫿]"
-                          r"|[)）」』\"'’,，.。、:：;；!?！？])")
+                          r"|[)）」』（「『\"'’,，.。、:：;；!?！？])")
     return None
 
 

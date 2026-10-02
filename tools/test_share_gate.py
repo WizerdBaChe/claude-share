@@ -495,7 +495,7 @@ def main():
                           "entry 2 of the known-names list", OVER_SCRUB_FILE],
         expect_absent=[cjk_name],
         mutate=with_names(saved + "\n\n<!-- planted by test_share_gate.py -->\n"
-                          f"客戶{cjk_name}的回覆，轉述自 human \"{short_name}\"。\n"),
+                          f"客戶{cjk_name}的回覆，轉述自 {short_name}（交換對象）。\n"),
         restore=without_names,
     ))
     results.append(case(
