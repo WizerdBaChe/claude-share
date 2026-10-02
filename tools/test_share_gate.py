@@ -47,8 +47,14 @@ Every case is a real incident, not a hypothetical:
  16  leak            a session id (a UUID). Its dashes keep every hex run
                      under 32, so the long-hex pattern never saw one; the
                      same 2026-09-12 round carried two into a shipped file.
+ 17  mount argument  two halves (2026-10-02): a CONTROL that a mount carrying
+                     an argument after the script is still read as that
+                     hook's mount, and the positive that the same shape on a
+                     file that does not ship is still reported by its real
+                     name. check S5 had read the command's last token as the
+                     hook name and reported one correct mount twice.
 
-Three of the sixteen assert that the gate stays QUIET. That ratio is deliberate: a
+Four of the eighteen cases assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -407,6 +413,42 @@ def main():
         expect_in_output=["UUID (session-id shape)", OVER_SCRUB_FILE],
         mutate=lambda: target.write_text(sid_plant, encoding="utf-8", newline=""),
         restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+    ))
+
+    # 17 — check S5 read the hook's name as the last token of the mount
+    #      command, so a mount that passes an ARGUMENT after the script
+    #      (`"…/hooks/x.py" scope`, the shape unattended_run.py arrived with on
+    #      2026-10-02) was read as `x.py" scope`: one correctly wired hook was
+    #      reported twice, as unmounted and as a mount of a file that does not
+    #      ship. Two halves. (a) CONTROL: give a shipped hook's mount a trailing
+    #      argument and the gate must stay quiet about it. (b) The extraction
+    #      must not have become a mute button: the same argument shape on a
+    #      file that truly does not ship is still reported, by its real name.
+    tmpl_arg = tmpl_saved.replace(
+        'hooks/context_runway_shadow.py\\""',
+        'hooks/context_runway_shadow.py\\" scope"', 1)
+    assert tmpl_arg != tmpl_saved, "mount-argument fixture no longer matches"
+    results.append(case(
+        "control: a mount with a trailing argument is still that hook's mount",
+        expect_fail=False,
+        expect_in_output=["share gate CLEAN"],
+        expect_absent=["context_runway_shadow.py ships but is not mounted",
+                       "which this repo does not ship"],
+        mutate=lambda: tmpl_path.write_text(tmpl_arg, encoding="utf-8", newline=""),
+        restore=lambda: tmpl_path.write_text(tmpl_saved, encoding="utf-8", newline=""),
+    ))
+    tmpl_ghost = tmpl_saved.replace(
+        'hooks/context_runway_shadow.py\\""',
+        'hooks/__ghost_for_test__.py\\" scope"', 1)
+    assert tmpl_ghost != tmpl_saved, "ghost-mount fixture no longer matches"
+    results.append(case(
+        "mount with an argument of a file that does not ship is named correctly",
+        expect_fail=True,
+        expect_in_output=["mounts __ghost_for_test__.py, which this repo does not ship",
+                          "context_runway_shadow.py ships but is not mounted"],
+        expect_absent=['__ghost_for_test__.py" scope'],
+        mutate=lambda: tmpl_path.write_text(tmpl_ghost, encoding="utf-8", newline=""),
+        restore=lambda: tmpl_path.write_text(tmpl_saved, encoding="utf-8", newline=""),
     ))
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")

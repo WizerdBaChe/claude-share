@@ -283,6 +283,26 @@ def _claims_source_env(raw, key, source_map, source_env_roots):
 FORBIDDEN_TRACKED = ("/.claude/", "__pycache__/", "/archive/")
 
 
+_HOOK_IN_COMMAND = re.compile(r"/hooks/([\w.-]+\.py)(?=[\"'\s]|$)")
+
+
+def _hook_name(command):
+    """The hook file a mount runs: the segment under hooks/ that ends in .py.
+
+    A mount is `"<PYTHON_EXE>" "<CLAUDE_HOME>/hooks/<name>.py"`, optionally
+    followed by arguments the hook dispatches on. The name is therefore not
+    the command's last token; it is the first path segment under `hooks/` that
+    ends in `.py`. Falls back to the old tail-of-command reading for a command
+    with no hooks/ segment at all, so a malformed mount still surfaces as
+    "mounts <tail>, which this repo does not ship" rather than vanishing.
+    """
+    cmd = command.replace("\\", "/")
+    m = _HOOK_IN_COMMAND.search(cmd)
+    if m:
+        return m.group(1)
+    return cmd.rsplit("/", 1)[-1].strip('"')
+
+
 def check_structure(manifest, files, f):
     tracked = set(files)
 
@@ -359,10 +379,18 @@ def check_structure(manifest, files, f):
         # by hand. A check that cannot tell a mount from a sentence about a
         # mount is measuring the wrong thing, and its first output was a false
         # positive about the file it was written to protect.
+        # The hook's NAME is the last path segment ending in .py, not the last
+        # token of the command. Corrected 2026-10-02 (lane W3 report), when
+        # `unattended_run.py` arrived with three mounts that pass a subcommand
+        # after the script (`"…/hooks/unattended_run.py" scope`): taking the
+        # tail of the whole command read as `unattended_run.py" scope`, which
+        # matched no shipped file, so one real hook was reported both as
+        # "ships but is not mounted" and as "mounts …, which this repo does
+        # not ship" — two findings, both false, about correct wiring. Case 17
+        # of test_share_gate.py is the positive control; a mount of a file
+        # that truly does not ship still fires through the same extraction.
         try:
-            sites = [(event, b.get("matcher", ""),
-                      h.get("command", "").replace("\\", "/")
-                       .rsplit("/", 1)[-1].strip('"'))
+            sites = [(event, b.get("matcher", ""), _hook_name(h.get("command", "")))
                      for event, blocks in json.loads(tmpl).get("hooks", {}).items()
                      for b in blocks for h in b.get("hooks", [])]
             mounted = [name for _, _, name in sites]
