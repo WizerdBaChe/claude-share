@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "closeout-intake/record@1",
+  "title": "Parsed intake record (output of intake_core.parse_record, post-birth)",
+  "type": "object",
+  "required": ["fm_raw", "record", "sections", "events"],
+  "properties": {
+    "fm_raw": {
+      "type": "object",
+      "required": ["xi", "what", "tags", "aliases", "date", "status"],
+      "properties": {
+        "xi": {"const": "1"},
+        "what": {"type": "string", "minLength": 3},
+        "tags": {"type": "string", "pattern": "^\\[.+\\]$"},
+        "aliases": {"type": "string", "pattern": "^\\[L-\\d{3,}\\]$"},
+        "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+        "status": {"type": "string", "pattern": "^(live|spent|superseded: L-\\d{3,})$"}
+      },
+      "additionalProperties": false
+    },
+    "record": {
+      "type": "object",
+      "required": ["id", "kind", "created", "session", "project", "locator", "digest", "imported_from"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^L-\\d{3,}$"},
+        "kind": {"enum": ["lesson"]},
+        "created": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"},
+        "session": {"type": "string", "minLength": 1},
+        "project": {"type": "string", "minLength": 1},
+        "locator": {"type": "string", "minLength": 1},
+        "digest": {"type": "string", "minLength": 1},
+        "imported_from": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "object",
+      "required": ["Context", "Pitfall", "Fix", "Events"],
+      "properties": {
+        "Context": {"type": "string", "minLength": 1},
+        "Pitfall": {"type": "string", "minLength": 1},
+        "Fix": {"type": "string", "minLength": 1},
+        "Detection": {"type": "string"},
+        "Narrative": {"type": "string"},
+        "Events": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["date", "kind"],
+        "properties": {
+          "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+          "kind": {"enum": ["born", "recurrence", "fold", "supersede", "retract", "match", "imported"]}
+        }
+      }
+    }
+  }
+}

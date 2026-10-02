@@ -1,0 +1,29 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>ui-state-probe fixture</title>
+<style>
+  body { margin: 0; font: 16px system-ui, sans-serif; background: #fff; }
+  .row { padding: 24px; }
+  /* Deliberately slow: a 5s curve makes "read mid-flight" reproducible in a
+     test instead of flaky, so both the failure and the fix are assertable. */
+  #slow {
+    background-color: rgb(238, 238, 238);
+    color: rgb(17, 17, 17);
+    border: 0;
+    padding: 12px 20px;
+    transition: background-color 5s linear, color 5s linear;
+  }
+  #slow:hover { background-color: rgb(0, 102, 204); color: rgb(255, 255, 255); }
+  #focusable {
+    opacity: 0.4;
+    transition: opacity 3s linear;
+    padding: 12px 20px;
+  }
+  #focusable:focus { opacity: 1; outline: 2px solid rgb(0, 102, 204); }
+  /* An infinite loop cannot be finish()ed — it is the stylesheet's job. */
+  @keyframes pulse { 0% { opacity: 0.2 } 50% { opacity: 1 } 100% { opacity: 0.2 } }
+  #forever { animation: pulse 1.2s linear infinite; padding: 12px 20px; }
+</style>
+<div class="row"><button type="button" id="slow">slow transition</button></div>
+<div class="row"><button type="button" id="focusable">focus target</button></div>
+<div class="row"><span id="forever">infinite pulse</span></div>

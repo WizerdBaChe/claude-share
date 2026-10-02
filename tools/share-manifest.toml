@@ -469,6 +469,96 @@ block. Nothing else under this root is affected: the rest of
 of the source machine's layout, a different thing from the drift checker
 that now ships) stays excluded-by-decision under this entry, unchanged, and
 so does every other path this entry names.
+PER-DIR RE-CHECK 2026-10-02 (lane W5b; refresh round aligning to source
+183c129). USER RULING 2026-10-02 PARTIALLY REVERSES the 2026-08-16 class
+ruling above ("serves records this share does not carry", "a separate product
+that merely lives here", "tests for hooks this repo ships"): the source's
+tools/ now opens to ONE class, METHOD TOOLS. A tool qualifies when its SUBJECT
+is this environment's own rules, hooks or record FORMATS and its data files can
+be emptied to a template or are absent. Hook test suites open with it (lane
+W5a) and so do two template dashboards (lane W5c). Still closed: a tool whose
+subject is a personal data store, a scheduled task on one machine, a dashboard
+over private projects, or another project's pipeline. The per-file FACTS the
+earlier re-checks recorded (what each file contains) are not retracted; only
+the class rule that sorted them is. Every shipped tool lands under
+`instruments/<same name>/`, with a [[collected]] entry in the lane W5b block
+at the end of this manifest. Tools are written to run from an installed home
+(<home>/tools/<name>/); several controls resolve their sibling tools and hooks
+through that layout, so they pass there and not in place inside this repo.
+Rows, one per directory (IN = ships; OUT = stays out, with the reason):
+  IN  process-ledger/ (5 files) — the decision-ledger record format, its
+      run audit and run report.
+  IN  closeout-intake/ (6) — the lesson-record format, intake gate, schema
+      and tag vocabulary. Imports xi_cards.py (see cross-index/ below).
+  IN  feedback-pool/ (4) — a projection over signals the environment already
+      writes; its out/ is gitignored and absent.
+  IN  tree-noise/ (3) — classifies uncommitted paths as noise or real.
+  IN  cc-delta/ (3) — Claude Code upgrade-delta tool; the reconciliation stamp
+      it reads (ops/cc-reconciled.json) is the user's own state and stays out.
+  IN  routing-loop/ (5) — the routing feedback loop over the dict. labels.jsonl
+      (the judgment store) is untracked at the source and absent; its cache
+      directory has its own entry. Needs skill-routing-audit.py (below).
+  IN  eol-sync/ (3) and git-hooks/ (1, the post-commit script its test loads).
+  IN  quote-evidence/ (4) — pointer evidence for copyrighted source pages,
+      cited by rules/source-quotation-evidence.md.
+  IN  audience-fit-gate/ (2) — the audience-fit gate; the skill's "source-only"
+      sentence about it is now stale (reported to the skills lane).
+  IN  compact-loss-audit/ (4) — audits what a compaction lost; the compact
+      hooks it reads ship under hooks/.
+  IN  rule-usage-census/ (partial: README.md + census.py of 4 tracked files).
+      loaders.py, zero_msg_probe.py and the untracked sessions.json stay out;
+      own entry above.
+  IN  shell-audit/ (5) — the instruments behind L-024 (shell transport).
+  IN  tracking-refs/ (3) — dangling-pointer check on committed instruction
+      files.
+  IN  status-line/ (1) — writes and cross-checks advisory status lines.
+  IN  ui-shot/ (6 tracked) — the out-of-process pixel route for UI checks;
+      node_modules is untracked at the source and absent, `npm ci` restores.
+  IN  glob-fitness.py (loose file, shipped as a FILE) — can a path-scoped
+      rule's globs reach its subject.
+  IN  pptx-edit-headroom/ (2), pptx-line-start/ (2), pptx-presentation-gate/
+      (2) — cited as "Gate:" by rules/office-deck-deliverables.md and
+      verification-ladder.md, the page-fill-gate precedent. Windows + PowerPoint
+      COM for the first two; the third reads the package only.
+  IN  skill-routing-audit.py (loose) + skill-routing-audit-test/ (1) — a
+      PER-FILE exception to the 2026-08-16 verdict that kept the loose script
+      out: routing-loop imports it as its one parser (INV-8) and cannot derive
+      without it.
+  OUT cross-index/ (16) EXCEPT xi_cards.py — the registry and the scheduled
+      emit are a live index over a private tree; own entry above (partial).
+  OUT index-continuity/ (4) — IN on the brief's expected list, adjudicated OUT:
+      it checks a case config of one private project against the cross-index
+      store (xi_scan, registry.json), i.e. its subject is a personal data
+      store, and it cannot import without the rest of cross-index.
+  OUT home-bundle/ (5) — a backup of the home directory and of a private vault,
+      carried by a scheduled task, onto this machine's second disk; subject is
+      personal data and a machine.
+  OUT scheduled-carriers/ (5) — declares this machine's Windows scheduled
+      tasks, one of them another project's.
+  OUT resident-heartbeat/ (4) — declares other projects' resident programs and
+      the files they rewrite.
+  OUT pptx-review/ (2) — the comment/cursor bridge for a live PowerPoint
+      session. The rule cites it as the review loop, not as enforcement, and
+      its skill (skills/pptx-review) does not ship.
+  OUT, verdict only, unchanged and NOT re-read this round (carried from the
+      round brief's expected-OUT list): recall/, graph-snapshot/,
+      session-board/ (and session-board-test/), place-ledger/, copy-census/,
+      version-census/, memory-pipeline/ (all but the already-shipped
+      preserve.py), lean-verify/, obsidian-tray-lite/, lab-skill-sync/,
+      app-residue-sweep/, post-brief/, playwright-mcp/, model-effort-audit/,
+      trigger-probe/, proc-picker/ (untracked, BRIEF D6), archdiag/ (already
+      shipped under architecture-diagramming/), page-fill-gate/ and
+      ops-health-test/ (already shipped), and the loose scripts
+      project-dashboard.py, usage-window.py, session-find.py, session-tail.py,
+      open-dashboard.bat, claude-session-transcript-mirror.ps1.
+  extdispatch/ — re-checked 2026-10-02, its own entry above stands unchanged
+      (partial; red-team/ already ships). The dispatcher is an external-provider
+      transport with key handling and an allowlist gate, and the rest is
+      telemetry of dispatched work: another tier's pipeline, class still
+      closed. Judged from the entry's own file inventory and the dispatcher's
+      docstring, not byte-read this round.
+  [W5a rows: main pastes lane W5a's per-directory rows here.]
+  [W5c rows: main pastes lane W5c's per-directory rows here.]
 Note: this repo's own `tools/` is a different thing, built here, not
 collected."""
 fallback = """None needed for the record-serving tools; the rules they support
@@ -495,7 +585,16 @@ own renamed `claude-ops/ops/` tree.
 `tools/test_share_gate.py` and `interop-layer/test_interop.py` are
 both here as patterns to copy — the second one is worth reading first, because
 running it against this repo's own gate is what exposed two missing leak
-patterns on 2026-08-16."""
+patterns on 2026-08-16.
+UPDATED 2026-10-02 (lane W5b): the method tools named in the PER-DIR RE-CHECK above now ship under
+`instruments/<same name>/` - process-ledger, closeout-intake, feedback-pool, tree-noise, cc-delta,
+routing-loop, eol-sync, git-hooks, quote-evidence, audience-fit-gate, compact-loss-audit,
+rule-usage-census (README + census.py), shell-audit, tracking-refs, status-line, ui-shot,
+glob-fitness.py, pptx-edit-headroom, pptx-line-start, pptx-presentation-gate, plus two dependency
+files (skill-routing-audit.py and cross-index/xi_cards.py). Install by copying a directory to
+`<home>/tools/<name>/`, as instruments/README.md says. What an adopter still does not get is the
+data those tools read (the transcript archive, the reconciliation stamp, the judgment store) and the
+tools whose subject is a personal store or a machine."""
 
 [[not_shipped]]
 path = "tools/extdispatch/"
@@ -5856,3 +5955,574 @@ proving the guard's second pattern (a non-Windows home directory) also denies
 inside a governed tree. A placeholder account name, not a real one."""
 
 # === lane W3 2026-09-12 END ===
+
+# === lane W5b 2026-10-02 BEGIN ===
+# Method tools + dependencies, collected under instruments/<same name>/ per the
+# USER RULING 2026-10-02 (see the `tools/` not_shipped entry's PER-DIR RE-CHECK
+# block). Every file was copied with `cp`, then read whole. `verbatim` entries
+# were checked with `diff` after normalising line endings; `edited` entries list
+# each change by CLASS and POSITION (never the removed value: this manifest is
+# published). The instruments are written to run from an installed home
+# (<home>/tools/<name>/), not in place inside this repo — see instruments/README.md.
+
+[[collected]]
+path = "instruments/audience-fit-gate/README.md"
+source = "~/.claude/tools/audience-fit-gate/README.md"
+status = "edited"
+edits = [
+  "four pointers into the source's private trees generalized, each keeping its sentence: a named owner-view HTML file (class: named artifact in a non-shipping tree) -> 'an owner view'; a named outputs/ subdirectory -> 'the source environment's diagram-authoring outputs'; two file paths inside another project's private tree (one build script, one verification script; class: other-project internal path) -> 'SSLD's audience-pack gates (INV17Gate, ParityGate) and a record-numbers check from the same project'; a named outputs/ deferral note -> 'a deferral note in the source environment'.",
+]
+
+[[collected]]
+path = "instruments/audience-fit-gate/afgate.py"
+source = "~/.claude/tools/audience-fit-gate/afgate.py"
+status = "edited"
+edits = [
+  "module docstring: the same two other-project internal paths removed from the provenance sentence (the two gate names kept).",
+  "one comment: the same named owner-view HTML file -> 'an owner view'.",
+]
+
+[[collected]]
+path = "instruments/cc-delta/cc_delta.py"
+source = "~/.claude/tools/cc-delta/cc_delta.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Reads the source's ops/cc-reconciled.json stamp (NOT shipped: it is the user's own reconciliation state, an adopter creates theirs with `--stamp`), and writes reports/cc-upgrade-delta/. HOME is resolved with expanduser, so the tool reads the real home it runs under.
+
+[[collected]]
+path = "instruments/cc-delta/extract_bundled_prompts.py"
+source = "~/.claude/tools/cc-delta/extract_bundled_prompts.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/cc-delta/test_cc_delta.py"
+source = "~/.claude/tools/cc-delta/test_cc_delta.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. 9 tests pass; the end-to-end case reads the stamp file at the real home (see cc_delta.py).
+
+[[collected]]
+path = "instruments/closeout-intake/README.md"
+source = "~/.claude/tools/closeout-intake/README.md"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/closeout-intake/controls.py"
+source = "~/.claude/tools/closeout-intake/controls.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Two planted UUID-shaped fixtures (lines 432-433, an event-id isolation test) are covered by [[allow]] entries below. KNOWN LIMIT: controls C-44b..g read CLAUDE.md and ops/40-maintenance.md at the home root, and C-80/C-81 import the source's legacy ops/lessons.md + ops/references/lessons-detail.md (not shipped), so in an adopter home the suite fails at C-80 and aborts at C-81; C-01..C-80b otherwise pass (measured in a scratch home: 56 pass).
+
+[[collected]]
+path = "instruments/closeout-intake/intake.py"
+source = "~/.claude/tools/closeout-intake/intake.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/closeout-intake/intake_core.py"
+source = "~/.claude/tools/closeout-intake/intake_core.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Imports `xi_cards.extract_card` from the sibling `../cross-index/` — the one shipped file of that directory (see the instruments/cross-index/xi_cards.py entry); without it the tool does not import.
+
+[[collected]]
+path = "instruments/closeout-intake/schemas/record.schema.json"
+source = "~/.claude/tools/closeout-intake/schemas/record.schema.json"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/closeout-intake/tags.txt"
+source = "~/.claude/tools/closeout-intake/tags.txt"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/compact-loss-audit/README.md"
+source = "~/.claude/tools/compact-loss-audit/README.md"
+status = "edited"
+edits = [
+  "two commands (audit and audit --all) that carried an absolute home path (class: account-bearing path) -> repo-relative `python tools/compact-loss-audit/audit.py` and `... --all`.",
+  "report-name token `<stamp>` (gate check P, undeclared) -> `<YYYY-MM-DD>-HHMM`, matching the file name audit.py actually writes.",
+]
+
+[[collected]]
+path = "instruments/compact-loss-audit/audit.py"
+source = "~/.claude/tools/compact-loss-audit/audit.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Reads the session transcripts and the compact telemetry of the home it runs in.
+
+[[collected]]
+path = "instruments/compact-loss-audit/hook_controls.py"
+source = "~/.claude/tools/compact-loss-audit/hook_controls.py"
+status = "edited"
+edits = [
+  "`HOOKS` constant: an absolute path under the source machine's home (class: account-bearing path) -> `Path(__file__).resolve().parents[2] / 'hooks'`, i.e. the hooks/ directory of the home this tool is installed into.",
+  "subprocess call to audit.py: absolute path -> `Path(__file__).resolve().parent / 'audit.py'`.",
+  "settings.json validity check (last control): absolute path -> `Path(__file__).resolve().parents[2] / 'settings.json'`, and the check is now CONDITIONAL — when no settings.json sits beside hooks/ it prints a SKIP line and does not run. A behaviour change forced by the path edit, not a scrub; the controls around it are untouched (33/33 pass).",
+  "the fabricated fixture paths (a made-up project folder with three files) used by the controls stay as planted test inputs; one [[allow]] entry below covers them.",
+]
+
+[[collected]]
+path = "instruments/compact-loss-audit/notice_compliance.py"
+source = "~/.claude/tools/compact-loss-audit/notice_compliance.py"
+status = "edited"
+edits = [
+  "docstring: an 8-hex short session id (class: session id) -> 'one recorded session, 2026-09-05'.",
+]
+
+[[collected]]
+path = "instruments/cross-index/xi_cards.py"
+source = "~/.claude/tools/cross-index/xi_cards.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. The ONE file shipped from tools/cross-index/ (per-file exception to that directory's verdict, which stands for every other file: the registry and the scheduled emit are a private index). It is the xi-card front-matter grammar, a record FORMAT, and closeout-intake / feedback-pool import it. Stdlib only, no machine-bound value. Its docstring cites references/cross-index-psm.md and cross-index-design.md, which do not ship.
+
+[[collected]]
+path = "instruments/eol-sync/README.md"
+source = "~/.claude/tools/eol-sync/README.md"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/eol-sync/eol_sync.py"
+source = "~/.claude/tools/eol-sync/eol_sync.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/eol-sync/test_eol_sync.py"
+source = "~/.claude/tools/eol-sync/test_eol_sync.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. One email-shaped literal (a git identity for a throwaway fixture repo) is covered by an [[allow]] entry below. The test loads `../git-hooks/post-commit` — shipped beside it in this same round. 13/13 pass.
+
+[[collected]]
+path = "instruments/feedback-pool/.gitignore"
+source = "~/.claude/tools/feedback-pool/.gitignore"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; ignores the tool's generated out/ directory.
+
+[[collected]]
+path = "instruments/feedback-pool/README.md"
+source = "~/.claude/tools/feedback-pool/README.md"
+status = "edited"
+edits = [
+  "one command line: the `<target>` placeholder (flagged by gate check P as an unpasteable command) replaced by a concrete example target `rule:ops/OPS.md`, with the example named in the trailing comment.",
+]
+
+[[collected]]
+path = "instruments/feedback-pool/controls.py"
+source = "~/.claude/tools/feedback-pool/controls.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Resolves tools/process-ledger/ledger.py through the home layout, so it passes only when installed at <home>/tools/ beside process-ledger (measured in a scratch home: 30/30).
+
+[[collected]]
+path = "instruments/feedback-pool/feedback.py"
+source = "~/.claude/tools/feedback-pool/feedback.py"
+status = "edited"
+edits = [
+  "`lse_home` default (1 line, in the LSE sensor): a literal absolute path on a non-system drive inside a private vault (class: non-system-drive path) -> `home / 'lse-evidence-runs'`, derived from the `home` variable already in scope. The LSE_RUN_HOME environment override and the missing-directory -> sensor-error flow are untouched, so without the vault the sensor reports a sensor error exactly as before.",
+]
+
+[[collected]]
+path = "instruments/git-hooks/post-commit"
+source = "~/.claude/tools/git-hooks/post-commit"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim (blob-identical to the source). A POSIX shell script with no extension; mode 100644 in both trees. Wired by `git config core.hooksPath tools/git-hooks` in the adopter's home.
+
+[[collected]]
+path = "instruments/glob-fitness.py"
+source = "~/.claude/tools/glob-fitness.py"
+status = "edited"
+edits = [
+  "docstring usage example: the `--root` value, an absolute path on a non-system drive (class: non-system-drive path) -> `<projects-root>`.",
+]
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Loose single-file tool, shipped as a FILE (see the [source_map] FILE key); cited by shell-audit's README.
+
+[[collected]]
+path = "instruments/pptx-edit-headroom/README.md"
+source = "~/.claude/tools/pptx-edit-headroom/README.md"
+status = "edited"
+edits = [
+  "two mentions of a private deliverable's file name (a deck in a private project; class: named artifact) -> 'an SSLD report deck' / 'One SSLD report deck'; the measurements beside them kept.",
+  "usage command: the `<deck.pptx>` placeholder (gate check P) -> `deck.pptx`.",
+]
+
+[[collected]]
+path = "instruments/pptx-edit-headroom/headroom.py"
+source = "~/.claude/tools/pptx-edit-headroom/headroom.py"
+status = "edited"
+edits = [
+  "docstring: the same private deck file name -> 'an SSLD report deck'.",
+]
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Windows + PowerPoint COM + pywin32 needed; `--selftest` verified live (3/3 known-true caught, 2/2 known-false clean). Cited as Gate by rules/office-deck-deliverables.md.
+
+[[collected]]
+path = "instruments/pptx-line-start/README.md"
+source = "~/.claude/tools/pptx-line-start/README.md"
+status = "edited"
+edits = [
+  "usage command: `<deck.pptx>` placeholder (gate check P) -> `deck.pptx`.",
+]
+
+[[collected]]
+path = "instruments/pptx-line-start/line_start.py"
+source = "~/.claude/tools/pptx-line-start/line_start.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Windows + PowerPoint COM + pywin32 + python-pptx; `--selftest` verified live (22 known-false hits, 0 known-true).
+
+[[collected]]
+path = "instruments/pptx-presentation-gate/README.md"
+source = "~/.claude/tools/pptx-presentation-gate/README.md"
+status = "edited"
+edits = [
+  "usage command: `<deck.pptx>` placeholder (gate check P) -> `deck.pptx`.",
+  "field-baseline table (2 rows): two decks' file/title names (class: named artifact) -> 'PaperSurvey Mu 2020 lab deck (user-final edition)' and 'SSLD report deck'; the slide, shape and colour counts kept.",
+]
+
+[[collected]]
+path = "instruments/pptx-presentation-gate/presentation_gate.py"
+source = "~/.claude/tools/pptx-presentation-gate/presentation_gate.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Reads the .pptx package only (stdlib); `--selftest` needs python-pptx + lxml, 8/8 pass.
+
+[[collected]]
+path = "instruments/process-ledger/README.md"
+source = "~/.claude/tools/process-ledger/README.md"
+status = "edited"
+edits = [
+  "retention paragraph, the sentence about the first unattended session: one 8-hex short session id (class: session id) removed, the sentence kept.",
+  "measured-sessions table (4 rows) and the two prose clauses that cite those sessions (one parenthetical pair, one 'rewrote N times' clause): every 8-hex short session id (class: session id) replaced by an ordinal label 場次 A-D, same label in the table and in the prose; every number kept.",
+  "operating command fence: two commands that carried an absolute home path (class: account-bearing path) rewritten to the repo-relative forms `python tools/process-ledger/run_audit.py` and `python tools/compact-loss-audit/notice_compliance.py`; two further commands that carried a full session UUID (class: session id) deleted, and the parenthetical that introduced them rewritten to say run_audit.py accepts an older session id for a historical re-run.",
+  "'run end' paragraph: a pointer to a source-environment hook file that this repo does not ship (the gate's check R) generalized to 'a container-write guard hook of the source environment'; the incident it illustrates is kept.",
+]
+
+[[collected]]
+path = "instruments/process-ledger/controls.py"
+source = "~/.claude/tools/process-ledger/controls.py"
+status = "edited"
+edits = [
+  "one comment: a parenthetical naming two 8-hex short session ids (class: session id) -> '(two sessions)'. The planted UUID-shaped fixtures (lines 200, 432, 433) are test inputs and stay, covered by [[allow]] entries below.",
+]
+
+[[collected]]
+path = "instruments/process-ledger/ledger.py"
+source = "~/.claude/tools/process-ledger/ledger.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Stdlib only. The register/manifest paths it writes resolve from the session's own transcript path, so nothing machine-bound is in the file.
+
+[[collected]]
+path = "instruments/process-ledger/report.py"
+source = "~/.claude/tools/process-ledger/report.py"
+status = "edited"
+edits = [
+  "one comment: an 8-hex short session id (class: session id) removed from a parenthetical; the date and the sentence kept.",
+]
+
+[[collected]]
+path = "instruments/process-ledger/run_audit.py"
+source = "~/.claude/tools/process-ledger/run_audit.py"
+status = "edited"
+edits = [
+  "two comments: an 8-hex short session id in 'session <id> refused a plant' -> 'a session refused a plant'; a parenthetical naming two short session ids removed (class: session id both times).",
+]
+
+[[collected]]
+path = "instruments/quote-evidence/README.md"
+source = "~/.claude/tools/quote-evidence/README.md"
+status = "edited"
+edits = [
+  "line 9 area: the parenthetical absolute path (class: non-system-drive path) of the source deck the first measurements were taken on removed; the deck name and the sentence kept.",
+  "backend-extension sentence: the `<text-dir>/<stem>.txt` tokens (gate check P, undeclared path-position placeholders) replaced by the declared tokens `<dir>/<name>.txt`.",
+]
+
+[[collected]]
+path = "instruments/quote-evidence/controls.py"
+source = "~/.claude/tools/quote-evidence/controls.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. 18/18 pass here, including the two end-to-end OCR controls (they need the Windows OCR runtime, through ocr.ps1).
+
+[[collected]]
+path = "instruments/quote-evidence/ocr.ps1"
+source = "~/.claude/tools/quote-evidence/ocr.ps1"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Windows-only (Windows.Media.Ocr).
+
+[[collected]]
+path = "instruments/quote-evidence/qe.py"
+source = "~/.claude/tools/quote-evidence/qe.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/routing-loop/README.md"
+source = "~/.claude/tools/routing-loop/README.md"
+status = "edited"
+edits = [
+  "four command lines in powershell fences that carried an absolute home path (class: account-bearing path) -> `python -X utf8 tools/routing-loop/loop.py run|status|queue|label ...`; the label example's group id and --why text kept.",
+]
+
+[[collected]]
+path = "instruments/routing-loop/events.py"
+source = "~/.claude/tools/routing-loop/events.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Imports the shared parser from skill-routing-audit.py (INV-8, one parser) — shipped this round as instruments/skill-routing-audit.py.
+
+[[collected]]
+path = "instruments/routing-loop/loop.py"
+source = "~/.claude/tools/routing-loop/loop.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. `run` also calls tools/trigger-probe/trigger_probe.py, which does NOT ship; use `run --no-probe`.
+
+[[collected]]
+path = "instruments/routing-loop/store.py"
+source = "~/.claude/tools/routing-loop/store.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Every path resolves from ROUTING_LOOP_HOME or ~/.claude; labels.jsonl (the judgment store, untracked at the source) is created on first `label`.
+
+[[collected]]
+path = "instruments/routing-loop/tests/test_loop.py"
+source = "~/.claude/tools/routing-loop/tests/test_loop.py"
+status = "edited"
+edits = [
+  "`AUDIT_SRC`: two lines added after the original assignment — if `<home>/tools/skill-routing-audit.py` does not exist (this repo's layout), fall back to the copy shipped beside the tool dirs (`instruments/skill-routing-audit.py`). The original path stays first, so inside an installed home the behaviour is unchanged.",
+]
+
+[[collected]]
+path = "instruments/rule-usage-census/README.md"
+source = "~/.claude/tools/rule-usage-census/README.md"
+status = "edited"
+edits = [
+  "data-source table, row 1: an absolute path on a non-system drive (a private session archive; class: non-system-drive path) -> `~/.claude/projects/<project>/<session>.jsonl` with a note that `--archive` can point at a mirror of the same layout.",
+  "usage fence (3 commands) and the closing report pointer: absolute home paths (class: account-bearing path) -> repo-relative forms (`python tools/rule-usage-census/census.py ...`, `reports/2026-09-10-rules-debt-audit.md`).",
+]
+
+[[collected]]
+path = "instruments/rule-usage-census/census.py"
+source = "~/.claude/tools/rule-usage-census/census.py"
+status = "edited"
+edits = [
+  "module docstring: the archive path on a non-system drive and the pointer to the transcript-mirror script (a script that does not ship) -> '<archive>/<project>/<session>.jsonl (default archive: ~/.claude/projects; a mirror directory of the same layout also works)'.",
+  "`ARCHIVE` default (1 line): the same non-system-drive path -> `os.path.join(HOME, 'projects')` (HOME is now defined first); the live projects directory has the identical <project>/<session>.jsonl layout, and `--archive` still overrides.",
+  "selftest fixture: a `cwd` literal flagged as a drive path -> `/work/x`; the cwd is only stored, no check reads it. The selftest's home-path fixture (a placeholder-account Windows path that exercises norm()) stays, covered by an [[allow]] entry below.",
+]
+
+[[collected]]
+path = "instruments/shell-audit/PROBES.md"
+source = "~/.claude/tools/shell-audit/PROBES.md"
+status = "edited"
+edits = [
+  "probes P1 and P2 (8 occurrences: two payload rows, five `ls` commands, one recorded-output string): the account name inside the Windows-path literals (class: account name) -> the placeholder name 'alice', chosen to be the same LENGTH as the original so the recorded byte counts still hold. The remaining home-path shape is the probe's subject and is covered by an [[allow]] entry below.",
+  "probe P5: the `<python.exe>` placeholder in a runnable line (gate check P) -> `python.exe` (resolved from PATH).",
+]
+
+[[collected]]
+path = "instruments/shell-audit/README.md"
+source = "~/.claude/tools/shell-audit/README.md"
+status = "edited"
+edits = [
+  "report pointer: a named file in the source's outputs/ tree (a non-shipping tree) -> 'the source environment's shell-command error audit (2026-08-18)'.",
+  "one prose mention of the transcript mirror root (a path on a non-system drive; class: non-system-drive path) -> `<mirror-dir>`.",
+]
+
+[[collected]]
+path = "instruments/shell-audit/controls.py"
+source = "~/.claude/tools/shell-audit/controls.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/shell-audit/invariants.py"
+source = "~/.claude/tools/shell-audit/invariants.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. One of its .gitattributes probes names a path under the memory-pipeline tree; it is skipped when absent.
+
+[[collected]]
+path = "instruments/shell-audit/sweep.py"
+source = "~/.claude/tools/shell-audit/sweep.py"
+status = "edited"
+edits = [
+  "module docstring: the same outputs/ report pointer generalized as in the README.",
+  "two usage mentions of the same mirror root (class: non-system-drive path) -> `<mirror-dir>`.",
+]
+
+[[collected]]
+path = "instruments/skill-routing-audit-test/test_skill_routing_audit.py"
+source = "~/.claude/tools/skill-routing-audit-test/test_skill_routing_audit.py"
+status = "edited"
+edits = [
+  "one fixture literal (1 line): an account name inside a Windows-path string (class: account name) -> the neutral name 'someone'. The control it feeds (a token inside a path is discarded) is path-shape based, so it is unaffected; the home-path shape that remains is covered by an [[allow]] entry below.",
+]
+
+[[collected]]
+path = "instruments/skill-routing-audit.py"
+source = "~/.claude/tools/skill-routing-audit.py"
+status = "edited"
+edits = [
+  "comment in the tokeniser section: a pointer to a named artifact in the source's outputs/ tree (a non-shipping tree) -> 'evidence: the source environment's dict-review round-2 output'.",
+]
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Dependency of routing-loop (INV-8: one parser); a per-file exception to the 2026-08-16 verdict that kept this loose script out.
+
+[[collected]]
+path = "instruments/status-line/status_line.py"
+source = "~/.claude/tools/status-line/status_line.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Stdlib only; `--selftest` 8/8.
+
+[[collected]]
+path = "instruments/tracking-refs/README.md"
+source = "~/.claude/tools/tracking-refs/README.md"
+status = "edited"
+edits = [
+  "three command lines (summary, --verbose, controls) that carried an absolute home path (class: account-bearing path) -> repo-relative `python tools/tracking-refs/refs.py|controls.py`.",
+]
+
+[[collected]]
+path = "instruments/tracking-refs/controls.py"
+source = "~/.claude/tools/tracking-refs/controls.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/tracking-refs/refs.py"
+source = "~/.claude/tools/tracking-refs/refs.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/tree-noise/README.md"
+source = "~/.claude/tools/tree-noise/README.md"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/tree-noise/controls.py"
+source = "~/.claude/tools/tree-noise/controls.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Controls H1-H6 drive hooks/tree_noise_gist.py (lane W3 ships it); until that hook is in place they fail with a missing-file error — measured in a scratch home holding the W3 hooks: 24/24 pass.
+
+[[collected]]
+path = "instruments/tree-noise/noise.py"
+source = "~/.claude/tools/tree-noise/noise.py"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/ui-shot/doctor.mjs"
+source = "~/.claude/tools/ui-shot/doctor.mjs"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/ui-shot/package-lock.json"
+source = "~/.claude/tools/ui-shot/package-lock.json"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/ui-shot/package.json"
+source = "~/.claude/tools/ui-shot/package.json"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Exact-pins playwright 1.62.1. node_modules/ is NOT shipped (untracked at the source); run `npm ci` in this directory, then `node doctor.mjs --repair` installs chromium. Verified in a scratch copy with the source's node_modules linked in: doctor.mjs 4/4.
+
+[[collected]]
+path = "instruments/ui-shot/scripts/fixture.html"
+source = "~/.claude/tools/ui-shot/scripts/fixture.html"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/ui-shot/scripts/ui-probe.mjs"
+source = "~/.claude/tools/ui-shot/scripts/ui-probe.mjs"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[collected]]
+path = "instruments/ui-shot/scripts/verify.mjs"
+source = "~/.claude/tools/ui-shot/scripts/verify.mjs"
+status = "verbatim"
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+
+[[allow]]
+file = "instruments/closeout-intake/controls.py"
+kind = "UUID (session-id shape)"
+match = "11111111-2222"
+reason = "Planted fixture: a made-up UUID-shaped session id (repeated digits) used by the event-isolation control. Not a real session."
+
+[[allow]]
+file = "instruments/closeout-intake/controls.py"
+kind = "UUID (session-id shape)"
+match = "99999999-8888"
+reason = "Planted fixture, same control as the entry above (the second made-up session id). Not a real session."
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "68cb6011-aaaa"
+reason = "Planted fixture: a made-up UUID-shaped session id (filler groups) for the transcript-pointer controls. Not a real session."
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "7a1c0e55-1111"
+reason = "Planted fixture: made-up UUID-shaped id (filler groups) for the short-prefix expansion control; its 8-hex prefix is the thing under test. Not a real session."
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "7a1c0e99-1111"
+reason = "Planted fixture: the second made-up UUID-shaped id of the same short-prefix control (the ambiguous-prefix case shares a prefix with the first). Not a real session."
+
+[[allow]]
+file = "instruments/compact-loss-audit/hook_controls.py"
+kind = "absolute local path (non-system drive)"
+match = ":/proj"
+reason = "Fabricated fixture paths (a made-up project folder with three files) fed to the compact hooks' controls as the 'files touched' list. The hooks' behaviour on a drive-rooted path is the thing under test; no real location."
+
+[[allow]]
+file = "instruments/eol-sync/test_eol_sync.py"
+kind = "email address"
+match = "example.invalid"
+reason = "A throwaway git identity configured inside the test's temporary fixture repo (reserved .invalid TLD). Not a real address."
+
+[[allow]]
+file = "instruments/rule-usage-census/census.py"
+kind = "absolute home path (any account)"
+match = "Users"
+reason = "--selftest fixture: a placeholder-account Windows home path in one synthetic Read tool_use, there to exercise norm(), which folds such a path to ~/. Not a real account."
+
+[[allow]]
+file = "instruments/shell-audit/PROBES.md"
+kind = "absolute home path (any account)"
+match = "alice"
+reason = "The subject of probes P1/P2: how the Bash tool transport treats backslashes in Windows-path spellings. The literals are placeholder-account paths (account name replaced during collection, same length), and the probe is worthless without the path SHAPE. Not a real account."
+
+[[allow]]
+file = "instruments/skill-routing-audit-test/test_skill_routing_audit.py"
+kind = "absolute home path (any account)"
+match = "someone"
+reason = "Control fixture: a placeholder-account Windows path inside one synthetic user turn, proving that a dict token appearing inside a path is discarded. The path shape is the input under test. Not a real account."
+
+[[allow]]
+file = "instruments/tracking-refs/controls.py"
+kind = "absolute home path (any account)"
+match = "someone"
+reason = "Control 4 fixture: a placeholder-account absolute Windows form of a pointer (the form the tool must fold to a repo path). The shape is the thing under test. Not a real account."
+
+[[not_shipped]]
+path = "tools/cross-index/"
+disposition = "partial"
+reason = """NARROWED 2026-10-02 (lane W5b, user ruling of the same day): exactly ONE file ships from this directory — `xi_cards.py`, the xi-card front-matter parser (pure functions, stdlib only, no machine-bound value), as `instruments/cross-index/xi_cards.py`. It is a record FORMAT, and `tools/closeout-intake/` and `tools/feedback-pool/` (both shipped this round) import it; without it neither runs. Every other file stays out for the reason the `tools/` entry recorded on 2026-09-02: `registry.json` and the scheduled emit ARE a live index over a private tree, and templating them would still leave an index over a tree the adopter does not have. Re-checked per file, not per root."""
+fallback = """Copy `instruments/cross-index/xi_cards.py` beside closeout-intake (the import is `../cross-index/` relative). If you want the index itself, build your own over your own records: the card grammar in that file's docstring is the whole contract."""
+
+[[not_shipped]]
+path = "tools/rule-usage-census/"
+disposition = "partial"
+reason = """NEW 2026-10-02 (lane W5b). `README.md` and `census.py` ship (subject: which of the environment's own rule surfaces are used, by which model). Three files stay out: `loaders.py` classifies the CLAUDE.md load rows of ONE machine's telemetry against a private transcript archive (a companion of a private audit, no use without that data); `zero_msg_probe.py` launches the desktop app's bundled CLI against a local listener and writes real rows into the telemetry (an experiment on one product build, with a side effect on the record); `sessions.json` is untracked at the source (per-session scan output, gitignored)."""
+fallback = """`census.py --selftest` and `census.py` over your own `~/.claude/projects` give the rule-usage tables; the probe table at the top of census.py is yours to edit to your own CLAUDE.md bullets."""
+
+[[not_shipped]]
+path = "cache/routing-loop/"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-02 (lane W5b). Generated runtime state of `tools/routing-loop/` (derived events.jsonl, last-run.json): rebuilt by `loop.py derive`/`run`, never authored. Named in instruments/routing-loop/README.md as a table of where the tool writes; no file here is a source of truth."""
+fallback = """None needed: run `python -X utf8 tools/routing-loop/loop.py run` in an installed home and the directory is created."""
+
+# === lane W5b 2026-10-02 END ===

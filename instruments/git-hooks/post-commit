@@ -1,0 +1,16 @@
+#!/bin/sh
+# post-commit -- realign the line endings of the files this commit just made tracked.
+#
+# The pin lives in .gitattributes (user ruling 2026-10-01: CRLF = human-read/copied text and
+# Windows-native script loaders, LF = machine-read). No agent write path honours it, so a new
+# file is born with whatever its writer emits; the commit is the event that turns it into an
+# asset, so the realignment is wired here. Only clean files are touched, and only with the
+# index blob's bytes (tools/eol-sync/eol_sync.py). A post-commit hook cannot undo a commit,
+# so this never fails: an error is printed and the commit stands.
+#
+# Wired by: git config core.hooksPath tools/git-hooks   (repo-local; ops/rule-registry.md
+# key `eol conformance`; HMI point uncommitted-work.eol-sync-wiring)
+top=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -f "$top/tools/eol-sync/eol_sync.py" ] || exit 0
+python -X utf8 "$top/tools/eol-sync/eol_sync.py" --repo "$top" --commit HEAD --quiet || true
+exit 0
