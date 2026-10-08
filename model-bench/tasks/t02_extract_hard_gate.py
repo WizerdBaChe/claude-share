@@ -2,6 +2,7 @@
 import json
 import random
 from _common import parse_json, verdict, write
+from pathlib import Path
 
 ID = "t02_extract_hard_gate"
 CATEGORY = "extraction-hard-gate"
@@ -23,8 +24,8 @@ MSGS = ["connection reset by peer", "upstream timeout after 30s", "schema mismat
         "an error-prone path was taken but recovered", "disk usage at 91 percent"]
 
 
-def _lines():
-    rng = random.Random(20261008)
+def _lines(seed=20261008):
+    rng = random.Random(seed)
     lines, gold = [], []
     t = 0
     for i in range(70):
@@ -48,10 +49,14 @@ LOG, GOLD = _lines()
 
 
 def setup(workdir):
-    write(workdir, "app.log", LOG)
+    from bench import seed_for  # per-rep seed; rep 1 == the base fixture above
+    log, gold = _lines(seed_for(Path(workdir), 20261008))
+    write(workdir, "app.log", log)
+    write(workdir, ".gold.json", json.dumps(gold))
 
 
 def check(result, workdir):
+    GOLD = json.loads((Path(workdir) / ".gold.json").read_text(encoding="utf-8"))
     try:
         got = parse_json(result)
     except ValueError:

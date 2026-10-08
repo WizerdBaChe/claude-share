@@ -43,6 +43,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 TASKS_DIR = HERE / "tasks"
 sys.path.insert(0, str(TASKS_DIR))  # tasks share `_common.py`
+sys.path.insert(0, str(HERE))       # tasks import `bench.seed_for`
 PRICING = json.loads((HERE / "pricing.json").read_text(encoding="utf-8"))
 
 ALIAS = {"haiku": "claude-haiku-5-5", "sonnet": "claude-sonnet-5-5",
@@ -147,9 +148,22 @@ class Row:
     rejudged: bool = False  # set by `rejudge`: the gate was re-run on the kept workdir after a gate fix
 
 
+def seed_for(workdir: Path, base: int) -> int:
+    """Per-repetition seed: rep 1 reproduces the base fixture (comparable across rounds),
+    rep 2+ regenerate it, so a pass is not a pass on one memorised instance. Tasks whose
+    fixtures come from a generator read this; static tasks ignore it."""
+    m = re.search(r"-r(\d+)-", workdir.name)
+    rep = int(m.group(1)) if m else 1
+    return base if rep == 1 else base * 1000 + rep
+
+
+def prompt_of(task, workdir: Path) -> str:
+    return task.PROMPT(workdir) if callable(task.PROMPT) else task.PROMPT
+
+
 def run_one(task, model_alias: str, effort: str, rep: int, scratch: Path,
             keep: bool) -> Row:
-    workdir = Path(tempfile.mkdtemp(prefix=f"{task.ID}-{model_alias}-r{rep}-", dir=scratch))
+    workdir = Path(tempfile.mkdtemp(prefix=f"{task.ID}-{model_alias}-{effort}-r{rep}-", dir=scratch))
     task.setup(workdir)
     cmd = ["claude", "-p", "--model", model_alias, "--effort", effort,
            "--output-format", "json", "--max-turns", str(task.MAX_TURNS),
@@ -163,7 +177,7 @@ def run_one(task, model_alias: str, effort: str, rep: int, scratch: Path,
         env.pop(k, None)
     t0 = time.time()
     try:
-        proc = subprocess.run(cmd, input=task.PROMPT, capture_output=True, text=True,
+        proc = subprocess.run(cmd, input=prompt_of(task, workdir), capture_output=True, text=True,
                               cwd=workdir, env=env, timeout=task.TIMEOUT_S)
         raw = proc.stdout
     except subprocess.TimeoutExpired:
@@ -242,7 +256,8 @@ def cmd_selftest(args):
                 t.setup(wd)
                 if ctl.get("mutate"):
                     ctl["mutate"](wd)
-                v = t.check(ctl["result"], wd)
+                res = ctl["result"](wd) if callable(ctl["result"]) else ctl["result"]
+                v = t.check(res, wd)
             finally:
                 shutil.rmtree(wd, ignore_errors=True)
             ok = bool(v["pass"]) == bool(ctl["expect"])
@@ -261,21 +276,24 @@ def cmd_selftest(args):
 
 def cmd_run(args):
     tasks = load_tasks(set(args.tasks.split(",")) if args.tasks else None)
-    models = args.models.split(",")
+    if args.arms:
+        arms = [tuple(a.split(":")) for a in args.arms.split(",")]
+    else:
+        arms = [(m, args.effort) for m in args.models.split(",")]
     scratch = Path(args.scratch) if args.scratch else Path(tempfile.mkdtemp(prefix="model-bench-"))
     scratch.mkdir(parents=True, exist_ok=True)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    jobs = [(t, m, r) for r in range(1, args.repeats + 1) for t in tasks for m in models]
+    jobs = [(t, m, e, r) for r in range(args.rep_start, args.rep_start + args.repeats) for t in tasks for (m, e) in arms]
     print(f"{len(jobs)} runs → {out}  (scratch {scratch.name}, parallel {args.parallel})", flush=True)
     done = 0
     # rep 1 for every (task, model) runs before any rep 2 so the first run of a
     # pair is the cold-cache one and the second is warm — the cache-hit
     # comparison the summary reports depends on this ordering.
     with out.open("a", encoding="utf-8") as fh, cf.ThreadPoolExecutor(args.parallel) as ex:
-        for rep in range(1, args.repeats + 1):
-            futs = {ex.submit(run_one, t, m, args.effort, rep, scratch, args.keep): (t, m)
-                    for (t, m, r) in jobs if r == rep}
+        for rep in range(args.rep_start, args.rep_start + args.repeats):
+            futs = {ex.submit(run_one, t, m, e, rep, scratch, args.keep): (t, m)
+                    for (t, m, e, r) in jobs if r == rep}
             for fut in cf.as_completed(futs):
                 row = fut.result()
                 fh.write(json.dumps(asdict(row), ensure_ascii=False) + "\n")
@@ -303,7 +321,7 @@ def cmd_rejudge(args):
         t = tasks.get(r["task"])
         if not t:
             continue
-        prefix = f"{t.ID}-{r['model_alias']}-r{r['rep']}-"
+        prefix = f"{t.ID}-{r['model_alias']}-{r['effort']}-r{r['rep']}-"
         wds = [d for d in scratch.iterdir() if d.is_dir() and d.name.startswith(prefix)]
         if len(wds) != 1:
             print(f"skip {r['run_id']}: {len(wds)} workdir(s) match {prefix}*")
@@ -324,85 +342,89 @@ def _med(xs):
     return statistics.median(xs) if xs else 0.0
 
 
+def _arm(r):
+    return f"{r['model'].replace('claude-', '')}@{r['effort']}"
+
+
+TIER = {"claude-haiku-5-5": 0, "claude-sonnet-5-5": 1, "claude-opus-5-5": 2}
+EFF = {"low": 0, "medium": 1, "high": 2, "xhigh": 3, "max": 4}
+
+
 def cmd_summarize(args):
     rows = [json.loads(l) for l in Path(args.runs).read_text(encoding="utf-8").splitlines() if l.strip()]
     if not rows:
         raise SystemExit("no rows")
-    models = sorted({r["model"] for r in rows})
+    for r in rows:
+        r["arm"] = _arm(r)
+    # arms ordered cheap→expensive: tier first, then effort
+    arms = sorted({r["arm"] for r in rows},
+                  key=lambda a: (TIER.get("claude-" + a.split("@")[0], 9), EFF.get(a.split("@")[1], 9)))
     tasks = sorted({r["task"] for r in rows})
     by = {}
     for r in rows:
-        by.setdefault((r["task"], r["model"]), []).append(r)
+        by.setdefault((r["task"], r["arm"]), []).append(r)
     meta = {r["task"]: r for r in rows}
-    L = []
-    L.append("# model-bench summary\n")
-    L.append(f"runs: {len(rows)} · models: {', '.join(models)} · effort: "
-             f"{', '.join(sorted({r['effort'] for r in rows}))} · generated from `{Path(args.runs).name}`\n")
-    L.append("Every verdict below is a MACHINE gate (`tasks/*.py` `check()`); no LLM judged anything. "
-             "`n` is the number of runs per cell — with n=2 a 50% is one failure, not a rate.\n")
-    # per-task table
-    L.append("## Per task\n")
-    hdr = "| task | dispatch row | expected | " + " | ".join(
-        f"{m.replace('claude-','')} pass | med s | mean $ | cache" for m in models) + " |"
-    L.append(hdr)
-    L.append("|" + "---|" * (3 + 4 * len(models)))
+    L = [f"# model-bench summary\n",
+         f"runs: {len(rows)} · arms (model@effort): {', '.join(arms)} · generated from `{Path(args.runs).name}`\n",
+         "Every verdict below is a MACHINE gate (`tasks/*.py` `check()`); no LLM judged anything. "
+         "`n` is runs per cell. Rep 1 uses the base fixture; rep 2+ regenerate seeded fixtures "
+         "where the task has a generator (t02, t04, t11).\n", "## Per task × arm — pass / median s / mean $\n"]
+    L.append("| task | expected | " + " | ".join(arms) + " |")
+    L.append("|" + "---|" * (2 + len(arms)))
     for t in tasks:
-        cells = [t, meta[t]["dispatch_row"], meta[t]["expected_tier"]]
-        for m in models:
-            rs = by.get((t, m), [])
-            if not rs:
-                cells += ["—", "—", "—", "—"]
-                continue
-            p = sum(r["passed"] for r in rs)
-            cells += [f"{p}/{len(rs)}", f"{_med([r['duration_ms'] for r in rs])/1000:.1f}",
-                      f"{statistics.mean(r['cost_usd'] for r in rs):.4f}",
-                      f"{statistics.mean(r['cache_hit_ratio'] for r in rs):.2f}"]
+        cells = [t, meta[t]["expected_tier"]]
+        for a in arms:
+            rs = by.get((t, a), [])
+            cells.append("—" if not rs else
+                         f"{sum(r['passed'] for r in rs)}/{len(rs)} · {_med([r['duration_ms'] for r in rs])/1000:.1f}s · ${statistics.mean(r['cost_usd'] for r in rs):.4f}")
         L.append("| " + " | ".join(cells) + " |")
-    # per-model totals
-    L.append("\n## Per model\n")
-    L.append("| model | runs | pass | med s | total $ | $ if uncached | cache tokens read | cache hit (mean) | rep1 hit | rep2+ hit |")
+    L.append("\n## Per arm\n")
+    L.append("| arm | runs | pass | med s | mean s | total $ | $ if uncached | mean thinking tok | mean output tok | cache hit |")
     L.append("|---|---|---|---|---|---|---|---|---|---|")
-    for m in models:
-        rs = [r for r in rows if r["model"] == m]
-        r1 = [r for r in rs if r["rep"] == 1]
-        r2 = [r for r in rs if r["rep"] > 1]
-        tot = sum(r["cost_usd"] for r in rs)
-        noc = sum(r["cost_nocache_usd"] or 0 for r in rs)
-        L.append(f"| {m} | {len(rs)} | {sum(r['passed'] for r in rs)}/{len(rs)} | "
-                 f"{_med([r['duration_ms'] for r in rs])/1000:.1f} | {tot:.4f} | {noc:.4f} | "
-                 f"{sum(r['cache_read_tokens'] for r in rs)} | "
-                 f"{statistics.mean(r['cache_hit_ratio'] for r in rs):.2f} | "
-                 f"{statistics.mean(r['cache_hit_ratio'] for r in r1) if r1 else 0:.2f} | "
-                 f"{statistics.mean(r['cache_hit_ratio'] for r in r2) if r2 else 0:.2f} |")
+    for a in arms:
+        rs = [r for r in rows if r["arm"] == a]
+        L.append(f"| {a} | {len(rs)} | {sum(r['passed'] for r in rs)}/{len(rs)} | "
+                 f"{_med([r['duration_ms'] for r in rs])/1000:.1f} | {statistics.mean(r['duration_ms'] for r in rs)/1000:.1f} | "
+                 f"{sum(r['cost_usd'] for r in rs):.4f} | {sum(r['cost_nocache_usd'] or 0 for r in rs):.4f} | "
+                 f"{statistics.mean(r['thinking_tokens'] for r in rs):.0f} | {statistics.mean(r['output_tokens'] for r in rs):.0f} | "
+                 f"{statistics.mean(r['cache_hit_ratio'] for r in rs):.2f} |")
+    # effort sweep within a model
+    for model in sorted({r["model"] for r in rows}):
+        marms = [a for a in arms if a.startswith(model.replace("claude-", "") + "@")]
+        if len(marms) < 2:
+            continue
+        L.append(f"\n## Effort sweep — {model}\n")
+        L.append("Same model, same tasks; only `--effort` differs. Thinking tokens are what effort buys; "
+                 "pass count is what it is for.\n")
+        L.append("| task | " + " | ".join(f"{a.split('@')[1]} pass · s · $ · think" for a in marms) + " |")
+        L.append("|" + "---|" * (1 + len(marms)))
+        for t in tasks:
+            cells = [t]
+            for a in marms:
+                rs = by.get((t, a), [])
+                cells.append("—" if not rs else
+                             f"{sum(r['passed'] for r in rs)}/{len(rs)} · {_med([r['duration_ms'] for r in rs])/1000:.1f} · "
+                             f"{statistics.mean(r['cost_usd'] for r in rs):.4f} · {statistics.mean(r['thinking_tokens'] for r in rs):.0f}")
+            L.append("| " + " | ".join(cells) + " |")
     # routing verdicts
     L.append("\n## Routing verdict per task (mechanical rule)\n")
-    L.append("Rule: the CHEAPEST model whose pass count is n/n takes the row; a model with any failure "
-             "is `not clean`. Where no model is clean the row is `escalate / redesign gate`. "
+    L.append("Rule: the CHEAPEST arm (tier, then effort) whose pass count is n/n takes the row. "
+             "`not clean` = at least one failure. No clean arm → `escalate / redesign gate`. "
              "A verdict with n<3 is a hypothesis to re-run, not a ruling.\n")
-    L.append("| task | expected | verdict | cheapest clean | sonnet/haiku cost × | sonnet/haiku time × |")
-    L.append("|---|---|---|---|---|---|")
-    order = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5"]
+    L.append("| task | expected | cheapest clean arm | verdict vs expected | all arms (pass) |")
+    L.append("|---|---|---|---|---|")
     for t in tasks:
-        clean = None
-        for m in order:
-            rs = by.get((t, m))
-            if rs and all(r["passed"] for r in rs):
-                clean = m
-                break
-        h = by.get((t, "claude-haiku-5-5"), [])
-        s = by.get((t, "claude-sonnet-5-5"), [])
-        cx = (statistics.mean(r["cost_usd"] for r in s) / max(statistics.mean(r["cost_usd"] for r in h), 1e-9)) if h and s else None
-        tx = (_med([r["duration_ms"] for r in s]) / max(_med([r["duration_ms"] for r in h]), 1)) if h and s else None
+        clean = next((a for a in arms if by.get((t, a)) and all(r["passed"] for r in by[(t, a)])), None)
         exp = meta[t]["expected_tier"]
         if clean is None:
             verdict = "escalate / redesign gate"
         else:
-            tier = {"claude-haiku-5-5": "cheap", "claude-sonnet-5-5": "mid", "claude-opus-5-5": "top"}[clean]
-            verdict = "as expected" if tier == exp else (f"DOWNGRADE candidate → {tier}" if order.index(clean) < ["cheap", "mid", "top"].index(exp) else f"UPGRADE needed → {tier}")
-        L.append(f"| {t} | {exp} | {verdict} | {clean.replace('claude-','') if clean else '—'} | "
-                 f"{cx:.1f} | {tx:.2f} |" if cx is not None else
-                 f"| {t} | {exp} | {verdict} | {clean or '—'} | — | — |")
-    # failures
+            tier = ["cheap", "mid", "top"][TIER["claude-" + clean.split("@")[0]]]
+            verdict = ("as expected" if tier == exp else
+                       f"DOWNGRADE candidate → {tier}" if ["cheap", "mid", "top"].index(tier) < ["cheap", "mid", "top"].index(exp)
+                       else f"UPGRADE needed → {tier}")
+        allc = ", ".join(f"{a}={sum(r['passed'] for r in by[(t, a)])}/{len(by[(t, a)])}" for a in arms if by.get((t, a)))
+        L.append(f"| {t} | {exp} | {clean or '—'} | {verdict} | {allc} |")
     fails = [r for r in rows if not r["passed"]]
     L.append(f"\n## Failures ({len(fails)})\n")
     for r in fails:
@@ -419,7 +441,9 @@ def main():
     r = sub.add_parser("run")
     r.add_argument("--models", default="haiku,sonnet")
     r.add_argument("--effort", default="medium")
+    r.add_argument("--arms", help="comma-separated model:effort pairs, e.g. haiku:medium,haiku:xhigh,sonnet:low (overrides --models/--effort)")
     r.add_argument("--repeats", type=int, default=2)
+    r.add_argument("--rep-start", type=int, default=1, help="first repetition index (continue a record at 3 to add a third run)")
     r.add_argument("--parallel", type=int, default=4)
     r.add_argument("--tasks", help="comma-separated task ids (default all)")
     r.add_argument("--out", default=str(HERE / "results" / "runs.jsonl"))

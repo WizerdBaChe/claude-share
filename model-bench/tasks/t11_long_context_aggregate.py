@@ -1,7 +1,8 @@
 """T11 — aggregate over a ~45k-token ledger given INLINE with no tools (long-context recall + arithmetic). New 5th-gen row."""
 import json
 import random
-from _common import parse_json, verdict
+from pathlib import Path
+from _common import parse_json, verdict, write
 
 ID = "t11_long_context_aggregate"
 CATEGORY = "long-context-aggregate"
@@ -15,8 +16,8 @@ N_LINES = 2600
 TARGET = "ACC-0472"
 
 
-def _ledger():
-    rng = random.Random(4242)
+def _ledger(seed=4242):
+    rng = random.Random(seed)
     accts = [f"ACC-{rng.randint(100, 999):04d}" for _ in range(40)] + [TARGET]
     lines, total, flagged = [], 0, 0
     for i in range(N_LINES):
@@ -37,7 +38,8 @@ def _ledger():
 
 LEDGER, GOLD_TOTAL, GOLD_FLAGGED = _ledger()
 
-PROMPT = f"""Below is a transaction ledger (one record per line: date | account | kind | amount | status | memo).
+def _prompt(ledger):
+    return f"""Below is a transaction ledger (one record per line: date | account | kind | amount | status | memo).
 Answer two questions and output ONLY a JSON object {{"total_debit": <number>, "flagged": <integer>}}:
 1. total_debit — the sum of `amount` over records where account is exactly {TARGET}, kind is `debit`,
    and the date is in March 2026 (2026-03-01 .. 2026-03-31). Round to 2 decimals.
@@ -45,16 +47,25 @@ Answer two questions and output ONLY a JSON object {{"total_debit": <number>, "f
 You have no tools; work from the text. No prose, no code fences.
 
 <ledger>
-{LEDGER}
+{ledger}
 </ledger>
 """
 
 
+def PROMPT(workdir):  # callable: the ledger is per-rep
+    return _prompt((Path(workdir) / ".ledger.txt").read_text(encoding="utf-8"))
+
+
 def setup(workdir):
-    pass
+    from bench import seed_for
+    ledger, total, flagged = _ledger(seed_for(Path(workdir), 4242))
+    write(workdir, ".ledger.txt", ledger)
+    write(workdir, ".gold.json", json.dumps({"total": total, "flagged": flagged}))
 
 
 def check(result, workdir):
+    g = json.loads((Path(workdir) / ".gold.json").read_text(encoding="utf-8"))
+    GOLD_TOTAL, GOLD_FLAGGED = g["total"], g["flagged"]
     try:
         got = parse_json(result)
     except ValueError:

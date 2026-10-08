@@ -1,5 +1,7 @@
 """T04 — find every definition of handle_* across a 30-file tree; exact set gate. Dispatch row: 'Search / inventory' (cheap–mid)."""
 import random
+import json
+from pathlib import Path
 from _common import strip_fences, verdict, write
 
 ID = "t04_search_inventory"
@@ -20,8 +22,8 @@ DIRS = ["src/api", "src/api/v2", "src/core", "src/core/jobs", "src/util", "src/c
 NAMES = ["load", "parse", "render", "flush", "rotate", "merge", "split", "index", "notify", "seed"]
 
 
-def _tree():
-    rng = random.Random(777)
+def _tree(seed=777):
+    rng = random.Random(seed)
     files, gold = {}, set()
     for i in range(30):
         d = DIRS[i % len(DIRS)]
@@ -51,11 +53,15 @@ FILES, GOLD = _tree()
 
 
 def setup(workdir):
-    for rel, content in FILES.items():
+    from bench import seed_for
+    files, gold = _tree(seed_for(Path(workdir), 777))
+    for rel, content in files.items():
         write(workdir, rel, content)
+    write(workdir, ".gold.json", json.dumps(sorted(gold)))
 
 
 def check(result, workdir):
+    GOLD = set(json.loads((Path(workdir) / ".gold.json").read_text(encoding="utf-8")))
     got = [l.strip().strip("`") for l in strip_fences(result).splitlines() if l.strip()]
     prose = [l for l in got if l.count(":") < 2 or not l.split(":")[0].endswith(".py")]
     if prose:
