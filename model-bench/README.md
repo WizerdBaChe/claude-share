@@ -153,8 +153,10 @@ sonnet 的 low 與 medium 無差別；多重格式契約題 haiku 9/9、sonnet 1
 模型 id 寫相對別名、CLI 更新後探一次實際解析；規則文字不帶數字（數字留在量測紀錄）；cheap 派工不帶使用者規則層；
 cheap 失敗先分「形狀錯／事實錯」再決定升不升級。`results/dispatch-proposal-2026-10-08.md` 是第一輪的提案原文，保留作對照。
 
-## 11. 通用講解版簡報｜Teaching deck
+## 11. 通用講解：番外貼文｜Explainer post
 
-`Haiku派工實測_通用講解.pptx`：給想把工作分給便宜模型的人看的 14 頁入門說明（為什麼要量、機器門檻、五個發現、
-派工前的五個問題、怎麼自己跑、限制）。建置來源與閘門在 `deck/`（`python deck/build_deck.py`）。
-它取代先前的單頁 HTML 報告（`report/`，已移除；歷史版本仍在 git 紀錄裡）。
+`post/`：給陌生讀者的 10 張圖卡貼文「Haiku 5.5現身，但是怎麼用最有CP值又安全？」（番外 EX1，2026-10-08）——
+Haiku 5.5 三檔 effort 與 Sonnet 5.5 兩檔在同一把尺上比較（36 題做對幾題、每題成本、時間）、哪些工作交給 Haiku 就夠、
+何時換 Sonnet、派給便宜模型時的安全面，最後是派工清單。`EX1-01.png`…`EX1-10.png` 是圖卡，`EX1.pptx` 是可編輯版，
+`caption.txt` 是貼文文字。數字取自本資料夾第二、三輪紀錄與 Anthropic 官方說明頁（2026-10-08 查證）。
+它取代先前的單頁 HTML 報告（`report/`）與一份過渡簡報；兩者都只留在 git 歷史裡。

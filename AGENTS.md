@@ -283,8 +283,7 @@ there; this folder is its share copy).
 | `pricing.json` | List prices used for the cross-check cost column, incl. Haiku's long-prompt tier. |
 | `tasks/` | One module per task: seeded fixture generator + gate. |
 | `results/` | Per-round run records (`*.jsonl`), machine summaries, reports, and the 2026-10-08 dispatch proposal. |
-| `Haiku派工實測_通用講解.pptx` | General-audience teaching deck (中文, 14 slides); replaced the round-2 HTML report on 2026-10-08. |
-| `deck/` | The deck's build source and gates (`build_deck.py`) over a shared python-pptx layout skeleton; `asset-choices.json` records where that skeleton came from and the deck's declared class/density. |
+| `post/` | General-audience explainer post (中文, 10 image cards + editable `EX1.pptx` + `caption.txt`): Haiku 5.5 effort levels vs Sonnet 5.5 on one ruler, what to hand Haiku, when to switch, safety, a dispatch checklist. Replaced the round-2 HTML report on 2026-10-08. |
 
 ## `agents/` — subagent definitions
 
