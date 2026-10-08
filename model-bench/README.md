@@ -41,7 +41,7 @@ Haiku 5.5 $0.10/$0.50 per MTok），接不住的列留在 sonnet；還有哪幾�
 
 ```
 python model-bench/bench.py list
-python model-bench/bench.py selftest          # 49 個雙側控制組，必須 0 problem
+python model-bench/bench.py selftest          # 51 個雙側控制組，必須 0 problem
 python model-bench/bench.py run --models haiku,sonnet --effort medium --repeats 2 --parallel 4
 python model-bench/bench.py summarize
 ```
@@ -129,3 +129,32 @@ candidate / UPGRADE needed；兩個都沒全過 → escalate / redesign gate。n
 
 一句話：**cheap 層用 haiku@high**（+15% 成本換掉 medium 四分之三的失誤，xhigh 零增益、時間 1.7×）；
 sonnet 的 low 與 medium 無差別；多重格式契約題 haiku 9/9、sonnet 1/6；長上下文計數題 haiku 任何 effort 都不穩。
+
+## 10. 第三輪（2026-10-08，擁有者本機）｜Round 3 on a real workstation
+
+完整：`results/round3-local-report.md`；機器摘要 `results/round3-local-summary.md`、`results/round3-agent-summary.md`；
+逐列 `results/round3-local-runs.jsonl`（`claude -p`，`variant` = `full`／`iso`）、`results/round3-agent-runs.jsonl`
+（Agent tool 路徑，由 `judge_agent.py` 從子代理 transcript 重算 usage 後交給 `bench.py judge`；需設 `MB_SESSION_DIR`）。
+`results/round3-pilot-haiku45-runs.jsonl` 是 CLI 更新前誤跑在 Haiku 4.5 上的 3 筆試跑，單獨存放、不進任何裁定。
+
+| 臂 | 通過 | 每次成本 | 中位秒 |
+|---|---|---|---|
+| haiku@medium / full | 34/36 | $0.019 | 13.3 |
+| haiku@high / full | 32/36 | $0.021 | 14.8 |
+| haiku@high / iso（`--setting-sources ""`） | 34/36 | $0.014 | 11.4 |
+| sonnet@low / full | 32/36 | $0.175 | 12.3 |
+| haiku / Agent tool（4 題） | 10/12 | $0.019（列價估） | 10.5 |
+
+三件雲端看不到的事：(1) 某一版 CLI 把 `--model haiku` 解析成 Haiku 4.5（約 10 倍價），更新後修正——別名是要驗證的事實；
+(2) 有工具的固定前綴本機 62–65k、雲端 34k，多出的是使用者層設定與注入，長上下文題因此跨過 Haiku 的 100k 計價門檻（5 倍）；
+(3) 第二輪「cheap 預設 effort 改 high」在本機不成立，失誤集中的兩類（排序、長上下文計數）effort 不治。
+
+**擁有者對提案的裁決（2026-10-08）**：cheap 層底線 effort medium、不用 low；程式撰寫類有明確驗證制度才用 haiku@high；
+模型 id 寫相對別名、CLI 更新後探一次實際解析；規則文字不帶數字（數字留在量測紀錄）；cheap 派工不帶使用者規則層；
+cheap 失敗先分「形狀錯／事實錯」再決定升不升級。`results/dispatch-proposal-2026-10-08.md` 是第一輪的提案原文，保留作對照。
+
+## 11. 通用講解版簡報｜Teaching deck
+
+`Haiku派工實測_通用講解.pptx`：給想把工作分給便宜模型的人看的 14 頁入門說明（為什麼要量、機器門檻、五個發現、
+派工前的五個問題、怎麼自己跑、限制）。建置來源與閘門在 `deck/`（`python deck/build_deck.py`）。
+它取代先前的單頁 HTML 報告（`report/`，已移除；歷史版本仍在 git 紀錄裡）。

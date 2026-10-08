@@ -266,6 +266,26 @@ here and what each needs.
 | `page-fill-gate/` | Six files. `fill_gate.py` measures whether a human-read HTML page uses the width it is given; the named defect is the left-anchored cap. How full a page must be is a row of `page_classes.json`, not a code branch. Every run first checks a known-bad and a known-good fixture and refuses a verdict if either control fails. Needs Playwright + Chromium; exit 2 means the instrument is absent, never a pass. |
 | `ops-health-test/check_cap_binding.py` | Sweep check 7b: each cap constant in `hooks/ops_health_nudge.py` must match the value the rule text states; reports drift or a lost anchor. `--selftest` runs one known-true and four known-false cases. Resolves paths relative to the INSTALLED `~/.claude` layout, so it does not run in place against this repo's renamed `claude-ops/ops/` tree — measured, and stated in the folder README. The rest of that source directory (the hook's own test suite) does not ship. |
 
+## `model-bench/` — tier-routing benchmark for the dispatch table
+
+New 2026-10-08. Measures which rows of `claude-ops/ops/20-dispatch.md` §4 a cheap
+tier can carry: twelve tasks, each with a MACHINE gate (no LLM judge), run through
+`claude -p` per (task, model, effort, repetition). Rounds 1–2 ran in a cloud
+container; round 3 on the owner's workstation (the canonical copy of the tool lives
+there; this folder is its share copy).
+
+| File | What it is |
+|---|---|
+| `README.md` | Operator manual (中文): question, task table, run commands, record fields, ruling rule, per-round results, the owner's rulings, the deck. |
+| `DESIGN.md` | How the bench was derived, what each task examines, comparison with public benchmarks. |
+| `bench.py` | The runner: `list` / `selftest` (two-sided controls per gate) / `run` / `summarize` / `rejudge` / `judge`. Stdlib only. |
+| `judge_agent.py` | Gates one Agent-tool run from its subagent transcript (`MB_SESSION_DIR`) by summing usage and calling `bench.py judge`. |
+| `pricing.json` | List prices used for the cross-check cost column, incl. Haiku's long-prompt tier. |
+| `tasks/` | One module per task: seeded fixture generator + gate. |
+| `results/` | Per-round run records (`*.jsonl`), machine summaries, reports, and the 2026-10-08 dispatch proposal. |
+| `Haiku派工實測_通用講解.pptx` | General-audience teaching deck (中文, 14 slides); replaced the round-2 HTML report on 2026-10-08. |
+| `deck/` | The deck's build source and gates (`build_deck.py`) over a shared python-pptx layout skeleton; `asset-choices.json` records where that skeleton came from and the deck's declared class/density. |
+
 ## `agents/` — subagent definitions
 
 Collected 2026-08-14, byte-verbatim. The nine agent types `claude-ops/ops/20-dispatch.md`

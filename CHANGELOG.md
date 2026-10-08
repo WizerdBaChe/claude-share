@@ -9,6 +9,20 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-10-08 — `model-bench/` round 3 synced from the source, HTML report replaced by a teaching deck
+
+Share-format pass over the source's canonical copy of the tier-routing bench
+(rounds 1–2 were authored here in a cloud session; round 3 ran on the source
+workstation). Synced: `bench.py` (Haiku long-prompt pricing tier),
+`pricing.json`, `DESIGN.md`, the new `judge_agent.py`, and the six round-3
+result files. Two share edits: `judge_agent.py` takes the transcript folder from
+`MB_SESSION_DIR` and finds `bench.py` beside itself (the source pinned a session
+id and an absolute path); `round3-local-report.md` names the residue directories
+by shape instead of by a path that carried the account name. `report/` (the
+round-2 single-page HTML report and its three shell assets) is removed in
+favour of `Haiku派工實測_通用講解.pptx`, a 14-slide general-audience deck built
+by `deck/build_deck.py`. Gate CLEAN at 505 tracked files.
+
 ## 2026-10-02 — the `tools/` tree opens, 33 hooks, and a pack-level status page in place of the packs
 
 Source `7c9867b` → `b6ccd3e`: 842 commits (the round began against `183c129`

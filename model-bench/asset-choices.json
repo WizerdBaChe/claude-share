@@ -1,0 +1,28 @@
+{
+  "assets": {
+    "pptx-deck-builder": {
+      "files": {
+        "deck_builder.py": {
+          "to": "deck/deck_builder.py",
+          "base": "1b0b3b708c"
+        },
+        "README.md": {
+          "to": "deck/README.md",
+          "base": "1b0b3b708c"
+        },
+        "deck_layout.py": {
+          "to": "deck/deck_layout.py",
+          "base": "1b0b3b708c"
+        }
+      },
+      "taken": "2026-10-08"
+    }
+  },
+  "decks": {
+    "Haiku派工實測_通用講解.pptx": {
+      "class": "presentation",
+      "density": "繁複",
+      "build": "deck/build_deck.py"
+    }
+  }
+}
