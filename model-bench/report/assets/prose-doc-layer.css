@@ -1,0 +1,69 @@
+/* prose-doc-layer — restraint layer for long explanatory HTML documents (page class document-long/short).
+   Load it LAST, after the host shell's own stylesheet. It changes type, emphasis and spacing only; it never
+   touches content, layout grid or behaviour (hover cards, rail, glossary keep working).
+
+   Host vocabulary it targets (the "textbook shell" lineage): #side nav, #rail, main, section.ch > h2 / .chsub,
+   h3, h4, p, .lead, .box.{def,ex,warn,ask,src,story} > .tag, table/th/td, .twrap, figure.tb > figcaption,
+   .eq > .num, .val, .chip, #refcard, #gloss, #hint, #backpill. A shell with other class names maps them
+   first (README "換別的殼"). Colours are read from the host's tokens with a literal fallback.
+
+   Four properties it enforces (why: README):
+   P1 one hierarchy axis, big steps — four tiers, h2 / h3 / body / meta, nothing between body and h3.
+   P2 emphasis budget — only .warn and .ask keep a filled box; the other callouts become a thin rule.
+   P3 one element, one meaning — monospace for literal values and code only; labels use the text face.
+   P4 whitespace separates — no heading bars; more space above a heading than below; real paragraph gaps.
+
+   NOT for node views (dashboard / tool / launcher): there a box IS the entity boundary and colour IS its
+   class. Applying this layer there flattens the hierarchy (measured 2026-09-21 on a launcher page). */
+
+:root{
+  --pdl-h2:30px;        /* chapter heading */
+  --pdl-h3:20px;        /* section heading */
+  --pdl-body:16px;      /* body text, tables, h4 (bold) */
+  --pdl-meta:14px;      /* captions, labels, nav, rail, table headers — the floor */
+  --pdl-eq:18px;        /* display equations */
+  --pdl-side-w:310px;   /* left nav width; 14px nav text needs ~310px to keep section titles on one line */
+  --pdl-gap:14px;       /* paragraph gap */
+}
+
+/* P1 — type scale */
+body{font-size:var(--pdl-body)}
+section.ch > h2{font-size:var(--pdl-h2)}
+h3{font-size:var(--pdl-h3)}
+h4{font-size:var(--pdl-body);color:var(--ink,#1c2733)}
+.lead{font-size:calc(var(--pdl-body) + 2px)}
+table{font-size:var(--pdl-body)}
+.eq{font-size:var(--pdl-eq)}
+#side,#rail,#rail .rs,#rail h3,#rail .gl-row,#rail a.rf,.gl-row,.small,.src,figure.tb figcaption,
+#refcard,#refcard .rt,#hint,#backpill,.eq .num{font-size:var(--pdl-meta)}
+#side h1{font-size:var(--pdl-body)}
+/* .val keeps the shell's .93em on purpose: optical compensation for the monospace face, same tier as its host */
+
+/* P3 — monospace only for literals */
+#side .sub,#rail .rt,section.ch > .chsub,.box .tag,th,figure.tb figcaption,#refcard .rj,#gloss h3,#hint,#backpill,.chip{
+  font-family:var(--sans,"Noto Sans TC","Microsoft JhengHei",sans-serif);letter-spacing:0;text-transform:none}
+#side .sub,#rail .rt,section.ch > .chsub,.box .tag,th,#refcard .rj,#gloss h3,.chip{font-size:var(--pdl-meta)}
+.box .tag{font-weight:700;margin-bottom:2px}
+th{font-weight:700;color:var(--ink,#1c2733)}
+
+/* P2 — emphasis budget: a filled box only for warning and for a question someone must rule on */
+.box{padding:6px 0 6px 16px;margin:16px 0}
+.def,.ex,.src,.story{background:transparent}
+.def{border-left:2px solid var(--glass,#3e7cab)}
+.ex{border-left:2px solid var(--pass,#1a7f4e)}
+.src{border-left:2px solid var(--line,#d5dde4)}
+.story{border-left:2px solid var(--gold,#a3720a)}
+.warn,.ask{padding:10px 16px}
+
+/* P4 — whitespace, not bars */
+h3{border-left:none;padding-left:0;margin:44px 0 10px}
+h4{margin:28px 0 6px}
+p{margin:0 0 var(--pdl-gap)}
+li{margin:4px 0}
+#rail h3{border-left:none;padding-left:0}
+
+/* nav width follows the meta tier */
+/* only when the page actually has the fixed #side nav before <main>; a page without it is left alone */
+#side{width:var(--pdl-side-w)}
+#side ~ main{margin-left:var(--pdl-side-w)}
+@media (max-width:920px){#side{width:auto} #side ~ main{margin-left:0}}
