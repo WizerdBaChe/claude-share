@@ -1,9 +1,10 @@
 {
   "_what": "List prices (USD per million tokens) used by bench.py to compute cost_list_usd as a cross-check of the CLI's own total_cost_usd. First-party Claude API rates.",
   "_as_of": "2026-10-06",
-  "_source": "claude-api skill model table (cached 2026-10-06); cache-read multiplier 0.10x input is the first-party ratio (Sonnet 5.5 cache read $0.20 confirms it). Cache WRITE is 2.0x input because Claude Code writes 1-HOUR ephemeral cache entries (usage.cache_creation.ephemeral_1h_input_tokens), which bill 2x; the 5-minute tier would be 1.25x. Measured 2026-10-08: with 2.0x the recomputed list cost matches the CLI total_cost_usd to the fourth decimal on all 48 runs; with 1.25x it was ~25% low. Haiku 5.5 prices apply to prompts up to 100K tokens; longer prompts bill $0.50/$2.50 and are NOT modelled here.",
+  "_source": "claude-api skill model table (cached 2026-10-06); cache-read multiplier 0.10x input is the first-party ratio (Sonnet 5.5 cache read $0.20 confirms it). Cache WRITE is 2.0x input because Claude Code writes 1-HOUR ephemeral cache entries (usage.cache_creation.ephemeral_1h_input_tokens), which bill 2x; the 5-minute tier would be 1.25x. Measured 2026-10-08: with 2.0x the recomputed list cost matches the CLI total_cost_usd to the fourth decimal on all 48 runs; with 1.25x it was ~25% low. Haiku 5.5 prices apply to prompts up to 100K tokens; longer prompts bill $0.50/$2.50 — modelled since 2026-10-08 as `long_prompt` (threshold on input+cache_read+cache_creation of the request; the whole request switches rate). Round 3 t11 (local prefix + 45k block = 119k) confirmed: CLI $0.142 vs flat list $0.028.",
   "models": {
-    "claude-haiku-5-5":  {"input": 0.10, "output": 0.50,  "cache_write_mult": 2.0, "cache_read_mult": 0.10},
+    "claude-haiku-5-5":  {"input": 0.10, "output": 0.50,  "cache_write_mult": 2.0, "cache_read_mult": 0.10,
+                          "long_prompt": {"threshold_tokens": 100000, "input": 0.50, "output": 2.50}},
     "claude-sonnet-5-5": {"input": 2.00, "output": 10.00, "cache_write_mult": 2.0, "cache_read_mult": 0.10},
     "claude-opus-5-5":   {"input": 4.00, "output": 20.00, "cache_write_mult": 2.0, "cache_read_mult": 0.05}
   }

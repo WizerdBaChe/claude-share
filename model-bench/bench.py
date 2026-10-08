@@ -30,6 +30,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import shutil
 import statistics
 import subprocess
@@ -92,8 +93,22 @@ def scrub(text: str, workdir: Path | None = None) -> str:
 # --------------------------------------------------------------------------
 # pricing cross-check
 # --------------------------------------------------------------------------
-def list_cost(model: str, inp: int, out: int, cread: int, cwrite: int) -> float | None:
+def _prices(model: str, prompt_tokens: int) -> dict | None:
+    """Per-MTok prices for this request; a model with a `long_prompt` tier (Haiku 5.5: a
+    higher rate once the prompt exceeds a threshold) switches rates on the WHOLE request.
+    Measured 2026-10-08 (round 3): the local prefix pushed t11 over that step and the CLI
+    self-report was 5x the flat list price."""
     p = PRICING["models"].get(model)
+    if not p:
+        return None
+    lp = p.get("long_prompt")
+    if lp and prompt_tokens > lp["threshold_tokens"]:
+        return {**p, "input": lp["input"], "output": lp["output"]}
+    return p
+
+
+def list_cost(model: str, inp: int, out: int, cread: int, cwrite: int) -> float | None:
+    p = _prices(model, inp + cread + cwrite)
     if not p:
         return None
     per = 1e-6
@@ -104,7 +119,7 @@ def list_cost(model: str, inp: int, out: int, cread: int, cwrite: int) -> float 
 
 def nocache_cost(model: str, inp: int, out: int, cread: int, cwrite: int) -> float | None:
     """What the same tokens would cost if every cached token were billed as plain input."""
-    p = PRICING["models"].get(model)
+    p = _prices(model, inp + cread + cwrite)
     if not p:
         return None
     return ((inp + cread + cwrite) * p["input"] + out * p["output"]) * 1e-6
@@ -146,6 +161,8 @@ class Row:
     result_chars: int
     result_head: str
     rejudged: bool = False  # set by `rejudge`: the gate was re-run on the kept workdir after a gate fix
+    variant: str = ""       # harness variant label (e.g. "full" = user settings+hooks+CLAUDE.md, "iso" = --setting-sources ""); "" = unlabeled (rounds 1–2)
+    path: str = "cli"       # dispatch path: "cli" = `claude -p`; "agent" = Agent tool inside a live session (rows written by `judge`)
 
 
 def seed_for(workdir: Path, base: int) -> int:
@@ -162,8 +179,9 @@ def prompt_of(task, workdir: Path) -> str:
 
 
 def run_one(task, model_alias: str, effort: str, rep: int, scratch: Path,
-            keep: bool) -> Row:
-    workdir = Path(tempfile.mkdtemp(prefix=f"{task.ID}-{model_alias}-{effort}-r{rep}-", dir=scratch))
+            keep: bool, variant: str = "", cli_extra: list[str] | None = None) -> Row:
+    tag = f"{model_alias}-{effort}" + (f"-{variant}" if variant else "")
+    workdir = Path(tempfile.mkdtemp(prefix=f"{task.ID}-{tag}-r{rep}-", dir=scratch))
     task.setup(workdir)
     cmd = ["claude", "-p", "--model", model_alias, "--effort", effort,
            "--output-format", "json", "--max-turns", str(task.MAX_TURNS),
@@ -171,6 +189,7 @@ def run_one(task, model_alias: str, effort: str, rep: int, scratch: Path,
            "--dangerously-skip-permissions"]
     if task.TOOLS == "none":
         cmd += ["--tools", ""]
+    cmd += list(cli_extra or [])
     env = dict(os.environ)
     # a child `claude -p` otherwise attaches itself to the parent session
     for k in ("CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_CHILD_SESSION", "CLAUDE_EFFORT"):
@@ -204,7 +223,7 @@ def run_one(task, model_alias: str, effort: str, rep: int, scratch: Path,
     except Exception as e:  # a gate that crashes is a gate failure, recorded as such
         verdict = {"pass": False, "score": 0.0, "details": f"GATE CRASH: {type(e).__name__}: {e}"}
     row = Row(
-        run_id=f"{task.ID}-{model_alias}-{effort}-r{rep}",
+        run_id=f"{task.ID}-{tag}-r{rep}", variant=variant, path="cli",
         ts=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t0)),
         task=task.ID, category=task.CATEGORY, dispatch_row=task.DISPATCH_ROW,
         expected_tier=task.EXPECTED_TIER,
@@ -285,14 +304,16 @@ def cmd_run(args):
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     jobs = [(t, m, e, r) for r in range(args.rep_start, args.rep_start + args.repeats) for t in tasks for (m, e) in arms]
-    print(f"{len(jobs)} runs → {out}  (scratch {scratch.name}, parallel {args.parallel})", flush=True)
+    cli_extra = shlex.split(args.cli_extra) if args.cli_extra else []
+    print(f"{len(jobs)} runs → {out}  (scratch {scratch.name}, parallel {args.parallel}, "
+          f"variant={args.variant or '-'}, cli_extra={cli_extra})", flush=True)
     done = 0
     # rep 1 for every (task, model) runs before any rep 2 so the first run of a
     # pair is the cold-cache one and the second is warm — the cache-hit
     # comparison the summary reports depends on this ordering.
     with out.open("a", encoding="utf-8") as fh, cf.ThreadPoolExecutor(args.parallel) as ex:
         for rep in range(args.rep_start, args.rep_start + args.repeats):
-            futs = {ex.submit(run_one, t, m, e, rep, scratch, args.keep): (t, m)
+            futs = {ex.submit(run_one, t, m, e, rep, scratch, args.keep, args.variant, cli_extra): (t, m)
                     for (t, m, e, r) in jobs if r == rep}
             for fut in cf.as_completed(futs):
                 row = fut.result()
@@ -302,6 +323,57 @@ def cmd_run(args):
                 print(f"[{done}/{len(jobs)}] {row.run_id:<34} {'PASS' if row.passed else 'fail'} "
                       f"{row.duration_ms/1000:6.1f}s  ${row.cost_usd:.4f}  turns={row.num_turns} "
                       f"cache={row.cache_hit_ratio:.2f}  {row.details[:70]}", flush=True)
+
+
+def cmd_prep(args):
+    """Create one task workdir for a runner bench.py cannot shell out to (the Agent tool
+    inside a live session) and print the prompt. The workdir name keeps the `-rN-`
+    pattern `seed_for` reads, so rep 2+ regenerate fixtures exactly as `run` does."""
+    task = {t.ID: t for t in load_tasks({args.task})}[args.task]
+    scratch = Path(args.scratch); scratch.mkdir(parents=True, exist_ok=True)
+    workdir = Path(tempfile.mkdtemp(prefix=f"{task.ID}-{args.label}-r{args.rep}-", dir=scratch))
+    task.setup(workdir)
+    print(json.dumps({"workdir": str(workdir), "tools": task.TOOLS, "max_turns": task.MAX_TURNS,
+                      "prompt": prompt_of(task, workdir)}, ensure_ascii=False))
+
+
+def cmd_judge(args):
+    """Gate a workdir that an out-of-process runner finished, and append a Row.
+    Usage numbers come from the caller (read from the subagent transcript); the
+    gate itself reads only the result text and the workdir, exactly as `run` does."""
+    task = {t.ID: t for t in load_tasks({args.task})}[args.task]
+    workdir = Path(args.workdir)
+    result = Path(args.result_file).read_text(encoding="utf-8")
+    try:
+        verdict = task.check(result, workdir)
+    except Exception as e:
+        verdict = {"pass": False, "score": 0.0, "details": f"GATE CRASH: {type(e).__name__}: {e}"}
+    u = json.loads(args.usage_json) if args.usage_json else {}
+    inp, out = int(u.get("input_tokens", 0)), int(u.get("output_tokens", 0))
+    cread, cwrite = int(u.get("cache_read_tokens", 0)), int(u.get("cache_creation_tokens", 0))
+    denom = inp + cread + cwrite
+    alias = {"claude-haiku-5-5": "haiku", "claude-sonnet-5-5": "sonnet"}.get(args.model, args.model)
+    tag = f"{alias}-{args.effort}-{args.variant}-{args.path}"
+    row = Row(
+        run_id=f"{task.ID}-{tag}-r{args.rep}", ts=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        task=task.ID, category=task.CATEGORY, dispatch_row=task.DISPATCH_ROW, expected_tier=task.EXPECTED_TIER,
+        model_alias=alias, model=args.model, effort=args.effort, rep=args.rep,
+        passed=bool(verdict["pass"]), score=float(verdict.get("score", 1.0 if verdict["pass"] else 0.0)),
+        details=scrub(str(verdict.get("details", ""))[:400], workdir),
+        is_error=False, stop_reason=None, terminal_reason=None,
+        num_turns=int(u.get("num_turns", 0)), duration_ms=int(u.get("duration_ms", 0)), duration_api_ms=0,
+        input_tokens=inp, output_tokens=out, thinking_tokens=int(u.get("thinking_tokens", 0)),
+        cache_read_tokens=cread, cache_creation_tokens=cwrite,
+        cache_hit_ratio=round(cread / denom, 4) if denom else 0.0,
+        cost_usd=list_cost(args.model, inp, out, cread, cwrite) or 0.0,  # no CLI self-report on this path: list price
+        cost_list_usd=list_cost(args.model, inp, out, cread, cwrite),
+        cost_nocache_usd=nocache_cost(args.model, inp, out, cread, cwrite),
+        result_chars=len(result), result_head=scrub(result[:160].replace("\n", "\\n"), workdir),
+        variant=args.variant, path=args.path,
+    )
+    with Path(args.out).open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(asdict(row), ensure_ascii=False) + "\n")
+    print(f"{row.run_id} {'PASS' if row.passed else 'fail'} :: {row.details[:120]}")
 
 
 def cmd_rejudge(args):
@@ -343,7 +415,16 @@ def _med(xs):
 
 
 def _arm(r):
-    return f"{r['model'].replace('claude-', '')}@{r['effort']}"
+    a = f"{r['model'].replace('claude-', '')}@{r['effort']}"
+    suffix = "/".join(x for x in (r.get("variant") or "", r.get("path") or "") if x and x != "cli")
+    return a + (f"/{suffix}" if suffix else "")
+
+
+def _arm_key(a: str):
+    """cheap→expensive: tier, then effort, then variant label (stable, alphabetical)."""
+    model, rest = a.split("@", 1)
+    effort = rest.split("/", 1)[0]
+    return (TIER.get("claude-" + model, 9), EFF.get(effort, 9), rest)
 
 
 TIER = {"claude-haiku-5-5": 0, "claude-sonnet-5-5": 1, "claude-opus-5-5": 2}
@@ -357,8 +438,7 @@ def cmd_summarize(args):
     for r in rows:
         r["arm"] = _arm(r)
     # arms ordered cheap→expensive: tier first, then effort
-    arms = sorted({r["arm"] for r in rows},
-                  key=lambda a: (TIER.get("claude-" + a.split("@")[0], 9), EFF.get(a.split("@")[1], 9)))
+    arms = sorted({r["arm"] for r in rows}, key=_arm_key)
     tasks = sorted({r["task"] for r in rows})
     by = {}
     for r in rows:
@@ -396,7 +476,7 @@ def cmd_summarize(args):
         L.append(f"\n## Effort sweep — {model}\n")
         L.append("Same model, same tasks; only `--effort` differs. Thinking tokens are what effort buys; "
                  "pass count is what it is for.\n")
-        L.append("| task | " + " | ".join(f"{a.split('@')[1]} pass · s · $ · think" for a in marms) + " |")
+        L.append("| task | " + " | ".join(f"{a.split('@', 1)[1]} pass · s · $ · think" for a in marms) + " |")
         L.append("|" + "---|" * (1 + len(marms)))
         for t in tasks:
             cells = [t]
@@ -449,7 +529,27 @@ def main():
     r.add_argument("--out", default=str(HERE / "results" / "runs.jsonl"))
     r.add_argument("--scratch", help="scratch dir for workdirs (default: a temp dir)")
     r.add_argument("--keep", action="store_true", help="keep workdirs with _result.txt/_cli.json")
+    r.add_argument("--variant", default="", help="harness variant label stored on every row (e.g. full, iso)")
+    r.add_argument("--cli-extra", default="", help="extra `claude -p` flags, one shell-quoted string (e.g. '--setting-sources \"\"')")
     r.set_defaults(fn=cmd_run)
+    p = sub.add_parser("prep", help="set up one task workdir for an out-of-process runner (Agent tool); prints the prompt")
+    p.add_argument("--task", required=True)
+    p.add_argument("--scratch", required=True)
+    p.add_argument("--label", required=True, help="arm label used in the workdir name, e.g. haiku-inherit-agent")
+    p.add_argument("--rep", type=int, default=1)
+    p.set_defaults(fn=cmd_prep)
+    g = sub.add_parser("judge", help="gate a workdir produced out of process and append one row")
+    g.add_argument("--task", required=True)
+    g.add_argument("--workdir", required=True)
+    g.add_argument("--result-file", required=True, help="file holding the worker's final text")
+    g.add_argument("--model", required=True, help="resolved model id, e.g. claude-haiku-5-5")
+    g.add_argument("--effort", default="inherit")
+    g.add_argument("--variant", default="full")
+    g.add_argument("--path", default="agent")
+    g.add_argument("--rep", type=int, default=1)
+    g.add_argument("--usage-json", help="JSON: input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens, thinking_tokens, duration_ms, num_turns")
+    g.add_argument("--out", required=True)
+    g.set_defaults(fn=cmd_judge)
     j = sub.add_parser("rejudge")
     j.add_argument("--tasks", required=True)
     j.add_argument("--scratch", required=True)
