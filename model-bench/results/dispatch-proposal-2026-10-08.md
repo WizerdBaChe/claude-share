@@ -1,5 +1,8 @@
 # 派工原則調整提案 — 2026-10-08｜Dispatch-rule adjustment proposal
 
+> **第二輪（n=3、seeded、effort 臂）之後的修訂見 `round2-report.md` §5**：cheap 預設 effort 改 high；
+> cheap 失敗先升 effort 再升層；格式契約題不派 sonnet；mid 預設 low。本檔其餘內容為第一輪原文。
+
 依據：`summary.md`（48 次，haiku 5.5 / sonnet 5.5，effort medium，機器門檻）。本檔是**提案**，
 `claude-ops/ops/20-dispatch.md` 本身未被修改；若採納，§2 的表格列可直接貼進 §4（該檔已 27.2KB，
 超過 ~26K 的 ops 大小上限，所以細節留在這裡，只貼列）。

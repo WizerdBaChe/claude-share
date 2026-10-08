@@ -114,3 +114,18 @@ candidate / UPGRADE needed；兩個都沒全過 → escalate / redesign gate。n
 **門檻本身的兩個缺陷（本輪抓到並修正，控制組已補）**：t10 的 sha256 把 `tests/__pycache__`
 算進去，跑測試就等於改測試；t07 的引文比對不吃硬換行。兩者都用 `bench.py rejudge` 對保留的
 工作目錄重判，列上標 `rejudged: true`，token／時間／成本數字不動。
+
+## 9. 第二輪（2026-10-08，n=3、seeded、effort 臂）｜Round 2
+
+完整：`results/round2-report.md`、`results/round2-summary.md`、`results/round2-runs.jsonl`（180 列）。
+
+| 臂 | 通過 | 每次成本 | 中位秒 |
+|---|---|---|---|
+| haiku@medium | 32/36 | $0.0043 | 7.8 |
+| haiku@high | 35/36 | $0.0050 | 9.0 |
+| haiku@xhigh | 35/36 | $0.0075 | 14.9 |
+| sonnet@low | 33/36 | $0.0771 | 7.7 |
+| sonnet@medium | 34/36 | $0.0780 | 8.6 |
+
+一句話：**cheap 層用 haiku@high**（+15% 成本換掉 medium 四分之三的失誤，xhigh 零增益、時間 1.7×）；
+sonnet 的 low 與 medium 無差別；多重格式契約題 haiku 9/9、sonnet 1/6；長上下文計數題 haiku 任何 effort 都不穩。
