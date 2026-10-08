@@ -121,7 +121,7 @@ candidate / UPGRADE needed；兩個都沒全過 → escalate / redesign gate。n
 
 | 臂 | 通過 | 每次成本 | 中位秒 |
 |---|---|---|---|
-| haiku@medium | 32/36 | $0.0043 | 7.8 |
+| haiku@medium | 32/36 | $0.0043 | 7.5 |
 | haiku@high | 35/36 | $0.0050 | 9.0 |
 | haiku@xhigh | 35/36 | $0.0075 | 14.9 |
 | sonnet@low | 33/36 | $0.0771 | 7.7 |
