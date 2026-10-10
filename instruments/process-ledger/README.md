@@ -12,7 +12,7 @@
 
 | 何時 | 誰 | 做什麼 | 落點 |
 |---|---|---|---|
-| 每次決策（含使用者口頭裁定） | 模型，依 CLAUDE.md 決策憲章 | `ledger.py add --subject … --choice … --reason … --reversible yes\|no --origin user\|model [--ref D-xxx] [--quote "<使用者原話>"]` | `projects/<proj>/<session>.ledger.jsonl`（transcript 旁，每日鏡像會複製） |
+| 每次決策（含使用者口頭裁定） | 模型，依 CLAUDE.md 決策憲章 | `ledger.py add --subject … --choice … --reason … --reversible yes\|no --origin user\|model [--ref D-xxx] [--quote-ref <編號>[@起-迄] \| --quote "<使用者原話>"]`（使用者裁決優先用 `--quote-ref`：`ledger.py inputs` 列出本 session 使用者輸入與編號，程式自己取原文並記 sha256，模型不重抄；`ledger.py quote <編號>` 回查原文） | `projects/<proj>/<session>.ledger.jsonl`（transcript 旁，每日鏡像會複製） |
 
 > **使用者原話核對 (quote check) 2026-10-06。** `--origin user` 的列一律帶 `quote_check`：
 > `--quote` 的文字（空白正規化後）若是本 session 對話記錄裡某則**使用者親手輸入**訊息的子字串 → `verified`（附 `quote_line`）；
@@ -20,6 +20,13 @@
 > 比對時排除 `<system-reminder>` 區段、工具輸出 (tool_result)、壓縮摘要與子代理訊息。
 > 列**照寫不擋**（先落地再標記）；只有 `verified` 代表「使用者原話」，其餘只代表「被模型記錄為使用者裁示」。
 > 對照組在 `controls.py` 的 `[user-origin quote check]`。
+>
+> **輸入通道 (quote_channel) 2026-10-11。** 實測 63 列 `not-found` 裡有 34 列其實是使用者的話，只是走了核對器沒讀的通道。現在 `verified` 的列多帶 `quote_channel`：
+> `typed`（親手輸入）／`queued`（工作中插話，平台記成 `attachment.queued_command`、`origin.kind=human`，不會變成 type=user 紀錄）／
+> `ask-typed`（選項介面裡自己打的文字）／`ask-option`（使用者**點選**了模型寫的選項標籤，原話其實是模型寫的）。選項答案讀平台寫的 `toolUseResult.answers`，不讀重述問題的 tool_result 文字。
+> 第五個通道 `sheet-reply`（使用者裁定 2026-10-11「同意你建議，確認正確就算」）：貼上區塊若是我方決策單模板產生的回覆格式，且末行 `【核對碼 KEY｜8 位十六進位】` 與上方各行的 FNV-1a 32 相符，該段算使用者本人的話；格式不符、被改過或沒有核對碼（舊單）一律照舊排除。契約在 `rules/decision-sheet.md`，對照組 `[decision-sheet paste-back]`。
+> 其餘 29 列的成因：決策單回貼 22（使用者自己的答案，但以貼上區塊送達；當時沒有核對碼，舊列不回寫）、模型改寫 5、把外部對方的話誤記成使用者 1（核對器正確擋下）、刻意負對照 1。
+> 既有列不回寫（append-only）。對照組在 `controls.py` 的 `[quote channels]`。
 | 每則 prompt | runway hook | 寫 `cache/handoff/current-session.json`，讓 Bash 端的 `ledger.py` 找得到 session | cache |
 
 > **已修補 (FIXED) 2026-09-07 — 原診斷是錯的：不是過期，是併發。**
