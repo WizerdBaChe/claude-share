@@ -70,5 +70,16 @@ to the two pages above through the manifest's source map.
   now `<user>`). The earlier "referenced only, not shipped" disposition for this
   file is reversed; the manifest keeps the superseded reasoning beside the new
   entry.
+- 2026-10-10 refresh (align to source `148e021e`): both `PHILOSOPHY.md` and
+  `OPERATOR-GUIDE.md` replaced hand-kept inventories (skill, hook and agent
+  counts, the hook-by-name list, the "two hook commands" settings count) with
+  pointers to live sources: the directory listing, `settings.json`'s `hooks`
+  block, each hook's `STATUS:` docstring line, and a `system-hmi` structure
+  page. Several of those pointers name a derived file that is generated on
+  the source machine and is not part of this repo (`tools/system-hmi/out/`);
+  `instruments/system-hmi/` ships the generator as a template, so the page
+  is reproducible but not present. Both files were re-copied with every earlier
+  edit re-applied; the two source-only citations in the new text were not
+  additional scrub targets. No new identifier found.
 - This is a point-in-time snapshot, not a synchronization target. It documents
   migration decisions; it does not perform migration or promise cross-host equivalence.
