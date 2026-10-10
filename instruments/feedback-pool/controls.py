@@ -185,6 +185,51 @@ def main() -> int:
         doc = fb.emit(pool)
         check("emit: pass when nothing is due", pool["totals"]["due"] == 0 and doc["points"][0]["state"] == "pass" and doc["points"][0]["remedy"] is None, json.dumps(pool["totals"]))
 
+        print("[S-8 observer (shadow) — FO-INV-6/7]")
+        obs = home / "projects" / "proj" / "obs-sess.observer.jsonl"
+        base = int(time.time()) - 3600
+
+        def finding(i, target="tool:beta", status="ok", ts=None):
+            return json.dumps({"kind": "finding", "id": f"obssess-1-{i}", "ts": ts or base + i, "session": "obs-sess", "check": 1,
+                               "trigger": "cadence", "window": [0, 9], "target": target, "target_status": status,
+                               "symptom": f"obs symptom {i}", "finding_kind": "bypass", "evidence": "x", "confidence": "high"})
+        (home / "ops").mkdir(exist_ok=True)
+        reg = home / "ops" / "rule-registry.md"
+        reg.write_text("### `FEEDBACK_OBSERVER` — x\n- current: shadow\n\n### `OTHER` — y\n- counted-from:2000-01-01 (must not leak)\n", encoding="utf-8")
+        obs.write_text(json.dumps({"kind": "run", "ts": base, "session": "obs-sess", "check": 1, "trigger": "cadence", "outcome": "ok", "n": 3}) + "\n"
+                       + finding(1) + "\n" + finding(2) + "\n" + "{not json\n" + finding(3) + "\n"
+                       + finding(4, target="agent:code-reviewer", status="undetermined") + "\n", encoding="utf-8")
+        pool = fb.collect(home)
+        beta = next((d for d in pool["targets"] if d["target"] == "tool:beta"), None)
+        check("shadow: 3 observer findings are listed (shadow_n 3, state shadow) and NOT counted (count 0, not due)",
+              beta is not None and beta["shadow_n"] == 3 and beta["count"] == 0 and not beta["due"] and beta["state"] == "shadow",
+              json.dumps(beta and {k: beta[k] for k in ("shadow_n", "count", "due", "state")}))
+        check("undetermined target: no event, no target, no S-8 sensor error; the malformed line is skipped; another key's counted-from does not leak",
+              all(d["target"] != "agent:code-reviewer" for d in pool["targets"]) and not any(e["sensor"] == "S-8" for e in pool["sensor_errors"])
+              and pool["observer"]["runs"] == 1 and pool["observer"]["mode"] == "shadow" and pool["totals"]["shadow"] == 3,
+              json.dumps(pool["sensor_errors"]) + json.dumps(pool["observer"]))
+        reg.write_text("### `FEEDBACK_OBSERVER` — x\n- current: counted-from:2000-01-02\n", encoding="utf-8")
+        beta = next(d for d in fb.collect(home)["targets"] if d["target"] == "tool:beta")
+        check("counted-from before the findings: the same 3 findings count 3 -> due (value pair 0 vs 3)",
+              beta["count"] == 3 and beta["shadow_n"] == 0 and beta["due"], json.dumps({k: beta[k] for k in ("shadow_n", "count", "due")}))
+        reg.write_text("### `FEEDBACK_OBSERVER` — x\n- current: counted-from:2099-01-01\n", encoding="utf-8")
+        beta = next(d for d in fb.collect(home)["targets"] if d["target"] == "tool:beta")
+        check("counted-from after the findings: back to shadow (count 0, shadow_n 3)", beta["count"] == 0 and beta["shadow_n"] == 3,
+              json.dumps({k: beta[k] for k in ("shadow_n", "count", "due")}))
+        reg.write_text("### `FEEDBACK_OBSERVER` — x\n- current: shadow\n", encoding="utf-8")
+        run([LEDGER, "feedback-fold", "--session", S, "--target", "tool:beta", "--outcome", "adopted", "--ref", "ctl"], env)
+        time.sleep(1.1)
+        with obs.open("a", encoding="utf-8") as fh:
+            fh.write(finding(9, ts=int(time.time()) + 5) + "\n")
+        beta = next((d for d in fb.collect(home)["targets"] if d["target"] == "tool:beta"), None)
+        check("folded target with a NEW shadow-only finding: state shadow (never 'deferred'), the old ones consumed by the fold",
+              beta is not None and beta["state"] == "shadow" and beta["shadow_n"] == 1 and beta["count"] == 0, json.dumps(beta and beta["state"]))
+        doc = fb.emit(fb.collect(home))
+        check("emit: shadow adds one info finding and no alarm", any(f["severity"] == "info" and f["label"] == "observer (shadow)" for f in doc["points"][0]["findings"])
+              and not any(f["severity"] == "alarm" and f["label"] == "tool:beta" for f in doc["points"][0]["findings"]), json.dumps(doc["points"][0]["findings"])[:300])
+        obs.unlink()
+        reg.unlink()
+
         print("[cli + target_of]")
         r = run([HERE / "feedback.py", "collect"], env)
         check("collect CLI: summary line + pool.json written", r.returncode == 0 and r.stdout.startswith("feedback-pool:") and (HERE / "out" / "pool.json").is_file(), r.stdout + r.stderr)

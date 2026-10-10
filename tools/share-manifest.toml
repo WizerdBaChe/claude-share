@@ -771,7 +771,8 @@ The 2026-08-16 reasoning was not wrong about what it examined — it was written
 for the dispatcher and its evidence, and then applied to a directory that also
 holds the acceptance layer. That is the `tools/` entry's own 2026-08-15 lesson
 recurring one level down: a disposition written for a root keeps applying
-itself to files it never examined."""
+itself to files it never examined.
+RE-CHECKED PER FILE 2026-10-10 (lane W5, source 148e021e): the source changed four files here since the last alignment. `extdispatch.py` grew by a reversible outbound PII membrane and slot/lock fixes — it is still the dispatcher itself (provider registry, key handling, the allowlist gate) and stays out for the original reason. `test_pii_membrane.py` (new) and `test_agy_volume.py` (extended) are offline suites that import that dispatcher and run only against it, so they go with it (read for the verdict only, not in full, since they are not published); a test without its subject is not a test. `telemetry-peer-v0.1.jsonl` is a per-row telemetry log with absolute home paths (the second disqualifying class above) and is modified-uncommitted at the source besides — not collected. No shipped file cites any of the four by name beyond the already-covered `extdispatch.py` mentions in the rules text."""
 fallback = """The DESIGN ships and is the transferable part:
 `claude-ops/ops/references/external-dispatch.md` carries the prompt shape
 (format-first, evidence anchors, licensing the empty answer), the acceptance
@@ -6015,7 +6016,8 @@ status = "edited"
 edits = [
   "line 3 (status/owner line): a pointer to a dated diagnosis note inside the source's outputs/ tree (a non-shipping tree per this manifest's scrub rules) -> generalized to 'a dated diagnosis note under the source environment's outputs/ tree, not shipped here' — the capability description (a user-ruled width-void diagnosis motivated this tool) is kept, the unresolvable pointer is dropped.",
   "usage block (2 command lines): both examples were written with the tool's absolute install path on the source machine (an absolute home path carrying the account name) -> replaced with the repo-relative invocation form (`tools/page-fill-gate/fill_gate.py`, `tools/page-fill-gate/tests/test_fill_gate.py`) already used, unedited, by every other citation of this tool in this repo (e.g. `claude-ops/ops/environment.md`) — same tail, same precedent already established for this exact tool in this manifest (see `claude-ops/ops/references/uat.md` entry's note).",
-  "no other change: the 2026-09-04 measurement tables, the class table, the wiring table and the review-when line are all kept verbatim — they are the evidentiary content this instrument's README depends on.",
+  "2026-09-18 (main, bilingual README round; declared late, in the 2026-10-10 refresh by lane W5, after the missing declaration was found): a Chinese/English summary block and a quick-guide table inserted after the title, and every H2 given a bilingual heading (Chinese / English); body text unchanged. A share-side reading aid, exempt from backflow — the source keeps the Chinese-only README. Re-applied unchanged on the 2026-10-10 refresh (anchored on the title line and the H2 lines).",
+  "no other change: the 2026-09-04 measurement tables, the class table, the wiring table and the review-when line are all kept verbatim — they are the evidentiary content this instrument's README depends on. REFRESHED 2026-10-10 (lane W5, source 148e021e): the source grew the class table by two columns/rows (content class, showcase), the backdrop-bands and inline-SVG paragraphs and the review-when text; all taken verbatim, the three edits above re-applied, diff against the source equals exactly the edit list. A pointer in the new text to the source's design-axes reference set under its references/ tree is kept as written: that tree has a [[not_shipped]] disposition below and the pointer is a repo-relative/`~/`-prefixed path, not a scrub target.",
 ]
 
 [[collected]]
@@ -6026,6 +6028,8 @@ status = "verbatim"
 # `urllib.parse`; no machine-bound value, no account name, no absolute path.
 # Diff against source empty (`diff <(tr -d '\r' < source) <(tr -d '\r' <
 # repo)`, normalising line endings).
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (355 lines); the
+# source added a backdrop-bands option and an upper-case tagName test; diff empty.
 
 [[collected]]
 path = "instruments/page-fill-gate/page_classes.json"
@@ -6035,6 +6039,9 @@ status = "verbatim"
 # pointer (`ops/environment.md`, resolves via [source_map]'s `ops/` ->
 # `claude-ops/ops/` mapping to a reader here) which is not a scrub target
 # (COLLECTION-RULES rule 2). Diff against source empty.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole; the source added the
+# showcase class and a content-class table, with two new repo-relative pointers to a
+# references/ subfolder (references/ is [[not_shipped]]); diff empty.
 
 [[collected]]
 path = "instruments/page-fill-gate/fixtures/known-bad-left-cap.html"
@@ -6057,6 +6064,8 @@ status = "verbatim"
 # First collection, 2026-09-12 (lane W8). Two-sided calibration suite (every
 # class row gets a PASS and a FAIL/WARN fixture); stdlib only. Diff against
 # source empty.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (two showcase cases
+# added); run in place, all classes two-sided and controls fired; diff empty.
 
 [[collected]]
 path = "instruments/ops-health-test/check_cap_binding.py"
@@ -7278,13 +7287,14 @@ source = "~/.claude/tools/feedback-pool/README.md"
 status = "edited"
 edits = [
   "one command line: the `<target>` placeholder (flagged by gate check P as an unpasteable command) replaced by a concrete example target `rule:ops/OPS.md`, with the example named in the trailing comment.",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the S-8 (feedback-observer) sensor to the sensor table row; taken verbatim. That row names the observer's per-project finding files and a registry key, both source-environment record shapes the tool reads defensively (absent = no observer). The one edit above was re-applied on the same command line; diff against the source equals it.",
 ]
 
 [[collected]]
 path = "instruments/feedback-pool/controls.py"
 source = "~/.claude/tools/feedback-pool/controls.py"
 status = "verbatim"
-# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Resolves tools/process-ledger/ledger.py through the home layout, so it passes only when installed at <home>/tools/ beside process-ledger (measured in a scratch home: 30/30).
+# First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Resolves tools/process-ledger/ledger.py through the home layout, so it passes only when installed at <home>/tools/ beside process-ledger (measured in a scratch home: 30/30). REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (the S-8 observer controls arrived); measured in a scratch home beside the shipped process-ledger and cross-index trees: 36/36.
 
 [[collected]]
 path = "instruments/feedback-pool/feedback.py"
@@ -7292,6 +7302,7 @@ source = "~/.claude/tools/feedback-pool/feedback.py"
 status = "edited"
 edits = [
   "`lse_home` default (1 line, in the LSE sensor): a literal absolute path on a non-system drive inside a private vault (class: non-system-drive path) -> `home / 'lse-evidence-runs'`, derived from the `home` variable already in scope. The LSE_RUN_HOME environment override and the missing-directory -> sensor-error flow are untouched, so without the vault the sensor reports a sensor error exactly as before.",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the S-8 observer sensor (about 140 lines: observer_mode, s8_observer, observer_summary, shadow bookkeeping in collect/report/emit). The new code mentions a mods/feedback-observer/ tree only as relative paths it reads when present and as a printed hint; no absolute path or private value. Copied verbatim, the one edit above re-applied on the unchanged `lse_home` line; diff against the source equals it.",
 ]
 
 [[collected]]
@@ -7365,6 +7376,7 @@ edits = [
   "measured-sessions table (4 rows) and the two prose clauses that cite those sessions (one parenthetical pair, one 'rewrote N times' clause): every 8-hex short session id (class: session id) replaced by an ordinal label 場次 A-D, same label in the table and in the prose; every number kept.",
   "operating command fence: two commands that carried an absolute home path (class: account-bearing path) rewritten to the repo-relative forms `python tools/process-ledger/run_audit.py` and `python tools/compact-loss-audit/notice_compliance.py`; two further commands that carried a full session UUID (class: session id) deleted, and the parenthetical that introduced them rewritten to say run_audit.py accepts an older session id for a historical re-run.",
   "'run end' paragraph: a pointer to a source-environment hook file that this repo does not ship (the gate's check R) generalized to 'a container-write guard hook of the source environment'; the incident it illustrates is kept.",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the `--quote` argument to the decision-row command and a block about the user-quote check (2026-10-06); taken verbatim, nothing private in it. The four edits above were re-applied on the unchanged text (the session-id ordinal labels A-D, the repo-relative commands, the generalized hook pointer); the diff against the source equals exactly them.",
 ]
 
 [[collected]]
@@ -7373,6 +7385,7 @@ source = "~/.claude/tools/process-ledger/controls.py"
 status = "edited"
 edits = [
   "one comment: a parenthetical naming two 8-hex short session ids (class: session id) -> '(two sessions)'. The planted UUID-shaped fixtures (lines 200, 432, 433) are test inputs and stay, covered by [[allow]] entries below.",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the quoted-tag and user-origin-quote-check control sections. One new section heading carries an 8-hex short session id in a parenthetical (class: session id, position: the heading of the quoted-tag section) -> removed, the date and the word 'misfire' kept. The new sections' other literals are synthetic ids (`ctl-session-NNNN`, short fixture ids) and stay. The earlier comment edit above was re-applied on the unchanged line; diff against the source equals the two edits.",
 ]
 
 [[collected]]
@@ -7380,6 +7393,7 @@ path = "instruments/process-ledger/ledger.py"
 source = "~/.claude/tools/process-ledger/ledger.py"
 status = "verbatim"
 # First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Stdlib only. The register/manifest paths it writes resolve from the session's own transcript path, so nothing machine-bound is in the file.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (the user-origin `--quote` check, about 90 lines); still verbatim, diff empty; the process-ledger controls pass in a scratch home (90 checks, 0 FAIL).
 
 [[collected]]
 path = "instruments/process-ledger/report.py"
@@ -7465,6 +7479,7 @@ status = "edited"
 edits = [
   "data-source table, row 1: an absolute path on a non-system drive (a private session archive; class: non-system-drive path) -> `~/.claude/projects/<project>/<session>.jsonl` with a note that `--archive` can point at a mirror of the same layout.",
   "usage fence (3 commands) and the closing report pointer: absolute home paths (class: account-bearing path) -> repo-relative forms (`python tools/rule-usage-census/census.py ...`, `reports/2026-09-10-rules-debt-audit.md`).",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the 'last use time (lastuse.py)' block at the top, which describes the new reading-use sensor and cites `dormant.json` and `lastuse.py --selftest`. Taken verbatim; both files it names now ship (see their entries below and the narrowed [[not_shipped]] entry for this directory). The two edits above were re-applied on unchanged text.",
 ]
 
 [[collected]]
@@ -7545,6 +7560,7 @@ source = "~/.claude/tools/tracking-refs/README.md"
 status = "edited"
 edits = [
   "three command lines (summary, --verbose, controls) that carried an absolute home path (class: account-bearing path) -> repo-relative `python tools/tracking-refs/refs.py|controls.py`.",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e; queued item Q-1 of the sync runbook): the source widened the instruction surface to every top-level *.md and rewrote the lead paragraph accordingly; taken verbatim, the three command edits re-applied on unchanged lines, diff equals them.",
 ]
 
 [[collected]]
@@ -7552,12 +7568,14 @@ path = "instruments/tracking-refs/controls.py"
 source = "~/.claude/tools/tracking-refs/controls.py"
 status = "verbatim"
 # First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (control 13, top-level docs); still verbatim; 24/24 in a scratch git repo.
 
 [[collected]]
 path = "instruments/tracking-refs/refs.py"
 source = "~/.claude/tools/tracking-refs/refs.py"
 status = "verbatim"
 # First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim; diff against source empty after line-ending normalisation.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (SURFACE now matches every top-level *.md, the Q-1 widening); still verbatim.
 
 [[collected]]
 path = "instruments/tree-noise/README.md"
@@ -7682,14 +7700,15 @@ reason = "Control 4 fixture: a placeholder-account absolute Windows form of a po
 [[not_shipped]]
 path = "tools/cross-index/"
 disposition = "partial"
-reason = """NARROWED 2026-10-02 (lane W5b, user ruling of the same day): exactly ONE file ships from this directory — `xi_cards.py`, the xi-card front-matter parser (pure functions, stdlib only, no machine-bound value), as `instruments/cross-index/xi_cards.py`. It is a record FORMAT, and `tools/closeout-intake/` and `tools/feedback-pool/` (both shipped this round) import it; without it neither runs. Every other file stays out for the reason the `tools/` entry recorded on 2026-09-02: `registry.json` and the scheduled emit ARE a live index over a private tree, and templating them would still leave an index over a tree the adopter does not have. Re-checked per file, not per root."""
+reason = """NARROWED 2026-10-02 (lane W5b, user ruling of the same day): exactly ONE file ships from this directory — `xi_cards.py`, the xi-card front-matter parser (pure functions, stdlib only, no machine-bound value), as `instruments/cross-index/xi_cards.py`. It is a record FORMAT, and `tools/closeout-intake/` and `tools/feedback-pool/` (both shipped this round) import it; without it neither runs. Every other file stays out for the reason the `tools/` entry recorded on 2026-09-02: `registry.json` and the scheduled emit ARE a live index over a private tree, and templating them would still leave an index over a tree the adopter does not have. Re-checked per file, not per root.
+RE-CHECKED PER FILE 2026-10-10 (lane W5, source 148e021e; the source's changes since the last alignment touch four files here): `xi_cards.py` is unchanged and its shipped copy still matches. `README.md` (one line extended for a new post-emit rebuild step) and `scheduled_emit.py` (the same step, as code) describe and run the nightly emit over the owner's private stores, so they stay out as before. `function-names.json` is a central ledger of the owner's own deliverables (a path, a content hash and a function description per entry, for the owner's private projects) — private records, stays out. `tests/test_scheduled_emit.py` tests the emit script and goes with it. The only shipped router is `claude-ops/ops/rule-registry.md`, which already cites the ledger and the emit script as source-only (its share note says so); no other shipped file routes to the four."""
 fallback = """Copy `instruments/cross-index/xi_cards.py` beside closeout-intake (the import is `../cross-index/` relative). If you want the index itself, build your own over your own records: the card grammar in that file's docstring is the whole contract."""
 
 [[not_shipped]]
 path = "tools/rule-usage-census/"
 disposition = "partial"
-reason = """NEW 2026-10-02 (lane W5b). `README.md` and `census.py` ship (subject: which of the environment's own rule surfaces are used, by which model). Three files stay out: `loaders.py` classifies the CLAUDE.md load rows of ONE machine's telemetry against a private transcript archive (a companion of a private audit, no use without that data); `zero_msg_probe.py` launches the desktop app's bundled CLI against a local listener and writes real rows into the telemetry (an experiment on one product build, with a side effect on the record); `sessions.json` is untracked at the source (per-session scan output, gitignored)."""
-fallback = """`census.py --selftest` and `census.py` over your own `~/.claude/projects` give the rule-usage tables; the probe table at the top of census.py is yours to edit to your own CLAUDE.md bullets."""
+reason = """NEW 2026-10-02 (lane W5b). `README.md` and `census.py` ship (subject: which of the environment's own rule surfaces are used, by which model). RE-CHECKED PER FILE 2026-10-10 (lane W5, source 148e021e): two files that arrived after that round ship too, because the shipped README now documents them — `lastuse.py` (edited: the transcript-archive default and three path mentions, see its entry) and `dormant.json` (a template: the source's one row is the owner's dormancy ruling on a subagent, so the copy is an empty object). The three files named next are re-verified and still stay out: `loaders.py` classifies the CLAUDE.md load rows of ONE machine's telemetry against a private transcript archive (a companion of a private audit, no use without that data); `zero_msg_probe.py` launches the desktop app's bundled CLI against a local listener and writes real rows into the telemetry (an experiment on one product build, with a side effect on the record); `sessions.json` is untracked at the source (per-session scan output, gitignored)."""
+fallback = """`census.py --selftest` and `census.py` over your own `~/.claude/projects` give the rule-usage tables; the probe table at the top of census.py is yours to edit to your own CLAUDE.md bullets. `lastuse.py --selftest` and `lastuse.py check` give the last-load table for your path rules, skills and agents; put a component you have ruled dormant into `dormant.json` with a reason and a review-when."""
 
 [[not_shipped]]
 path = "cache/routing-loop/"
@@ -7801,6 +7820,7 @@ status = "verbatim"
 path = "instruments/system-hmi/hmi/registry.py"
 source = "~/.claude/tools/system-hmi/hmi/registry.py"
 status = "verbatim"
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (the optional telemetry registry and its validation, about 140 lines); still verbatim, diff empty. The new code loads registry/telemetry.json only when present, so a template without it validates as before.
 
 [[collected]]
 path = "instruments/system-hmi/hmi/release.py"
@@ -7858,6 +7878,17 @@ status = "verbatim"
 #     no traceback escapes).
 # The other 104 checks (render, release verdict, deferral, server, launcher,
 # mimic, adapters, history) are tool-level and pass.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): controls.py grew from 108 to 125
+# checks and ships verbatim again. Measured on the template registry installed in a
+# scratch config directory (a git repo holding the source's hooks and ops trees beside
+# the shipped tool): 107/125 pass, 18 FAIL; with no hooks tree 106/125, 19 FAIL (the
+# reconcile-grace check needs the hook file). The FAIL set is the three checks above
+# that bind the source's own registry or tools (the two live-row checks and the
+# memory-pipeline deferral check; the grace check is the fourth only when no hooks tree
+# is installed) PLUS fifteen new ones that exercise two emitters this share does not
+# ship -- editions (9 checks) and telemetry-trend (6 checks); see the two
+# [[not_shipped]] entries for them. Failures by construction, reported not patched
+# (COLLECTION-RULES hard rule 4).
 
 [[collected]]
 path = "instruments/system-hmi/controls.py"
@@ -7884,6 +7915,12 @@ missing target must read as an unprobeable point, never as a pass). Not a real
 location."""
 
 [[allow]]
+file = "instruments/system-hmi/controls.py"
+kind = "absolute local path (non-system drive)"
+match = "nowhere"
+reason = """Same control suite, the editions section (added in the source after the first collection): a fabricated drive-rooted path on a drive letter that is guarded to be absent, used as the 'log path whose drive does not exist' case (an unreadable log must read as undetermined, never as a pass). The shape is the thing under test. Not a real location."""
+
+[[allow]]
 file = "instruments/view-launcher/build.py"
 kind = "absolute local path (non-system drive)"
 match = "a b"
@@ -7903,7 +7940,8 @@ edits = [
   "line 50 area, 1 place: two work-folder paths written with a non-system-drive prefix -> the bare folder names (names kept, drive prefix dropped). They are named as examples of a footprint root, and a drive letter locates nothing for a reader.",
   "line 111 area, 1 place: a pointer into the source's outputs/ tree (design document 08, awareness) rewritten to prose, same treatment as the first.",
   "line 164 area, 1 place: a pointer into the source's outputs/ tree (probe-coverage record) rewritten to prose, same treatment.",
-  "inserted, after the Proof-of-life line: a 'SHARE EDITION' blockquote (5 lines) stating that registry/ is a template (schema + one worked example), that counts and subsystem names in the body describe the source's own registry, that sources depending on unshipped tools are absent, and that controls.py has 4 live-registry checks that fail on the template (104/108 pass) and why.",
+  "inserted, after the Proof-of-life line: a 'SHARE EDITION' blockquote (5 lines) stating that registry/ is a template (schema + one worked example), that counts and subsystem names in the body describe the source's own registry, that sources depending on unshipped tools are absent, and that controls.py has live-registry checks that fail on the template and why. REFRESHED 2026-10-10 (lane W5): the blockquote's last sentence was rewritten for the source's 125-check suite (18 fail / 107 pass with a hooks tree, 19 / 106 without) and extended with the two emitters that do not ship (editions, telemetry-trend, with its registry file) so the README's later paragraphs about them read as describing the source environment.",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source appended two paragraphs after the probe-coverage list (telemetry trend; edition envelope). The second names the evolution-study workbench's edition log with an absolute path on a non-system drive (class: non-system-drive path, position: the one backticked path in the edition-envelope paragraph) -> the drive prefix dropped, the workbench folder name kept (the same treatment as the footprint-root names above; the tail names a file in a private project that does not ship). The remaining text of both paragraphs is kept; it describes emitters and a registry file that are not shipped (see their [[not_shipped]] entries) and the blockquote above says so. The six earlier edits were re-applied on unchanged anchors (line numbers below the insertion moved by 4 and then 6 lines); the diff against the source equals the edit list.",
   "line 126, 1 place (usage fence): the placeholder `<source>` in the `conform` command -> the real source id `reconcile` (the one source the template registers), with the trailing comment saying to substitute an id from sources.json. A command a reader pastes must run as written.",
   "Nothing else touched; the file keeps CRLF endings exactly as the source (172 lines, 172 CRLF).",
 ]
@@ -7965,6 +8003,18 @@ edits = [
 # row names); `conform reconcile` ok (3 points); `conform nosuch` refuses and
 # lists the known sources. `hmi.py verdict` raises a RuntimeError traceback when
 # the install directory is not a git work tree (see the D5 note below).
+
+# RE-CHECKED 2026-10-10 (lane W5, source 148e021e) for all six template registry
+# files: the source's registries grew (subsystems 20 -> 23 rows, points 110, ignore +1
+# row, sources 12, reconcile +2 repos, plus a new telemetry registry), but every
+# growth is a row about the source's own subsystems, projects or hooks. The worked
+# example row each template file keeps (the `system-hmi` subsystem row, the authored
+# `registry-valid` point, the interpreter-cache ignore row, the `reconcile` source,
+# the memory-index group, the example reconcile repo) was compared with the source's
+# current rows and is unchanged or authored, so no template file was rewritten.
+# Verified in a scratch config directory: `hmi.py validate` -> ok (1 subsystems, 1
+# points, 1 sources) and `hmi.py collect` ok. The new `registry/telemetry.json` is NOT
+# shipped (own [[not_shipped]] entry).
 
 [[collected]]
 path = "instruments/system-hmi/registry/subsystems.json"
@@ -8042,6 +8092,12 @@ edits = [
   "inserted, before the '怎麼用' section: a 'SHARE EDITION' blockquote (4 lines) saying views.json is a template (schema + one example row), what `<CLAUDE_HOME>` in the example row means, that the auto-collect half reads tools/cross-index (not shipped) so without it the launcher shows pinned pages and prints a WARN (designed degradation), and that a build writes the HTML/MD at the config root and ensures a Desktop shortcut.",
   "CRLF endings preserved exactly as the source.",
 ]
+
+# RE-CHECKED 2026-10-10 (lane W5, source 148e021e): the source's views.json gained two
+# pinned rows (a research overview page, a video-prompt page) and nothing else; both
+# are pages of the source's own projects. The template's authored example row, groups,
+# sidebar and note text were compared with the source and are unchanged; no rewrite.
+# `build.py --selftest` 28/28 in a scratch config directory.
 
 [[collected]]
 path = "instruments/view-launcher/views.json"
@@ -8298,6 +8354,7 @@ source = "~/.claude/tools/entry-schema-lint/README.md"
 status = "edited"
 edits = [
   "usage block, --project-root example: an absolute path on a non-system drive with a `<repo>` token -> a relative example path (also removes a placeholder token the placeholder check would have flagged in command position).",
+  "REFRESHED 2026-10-10 (lane W5, source 148e021e; queued item Q-1): the source rewrote the ES-5 table row (it now also reads every top-level *.md); taken verbatim, the one edit above re-applied on its unchanged line.",
 ]
 # First collection (lane W5a). Subject: the entry-schema record format
 # (claude-ops/ops/references/entry-schema.md ships). ES-9 reads the source's
@@ -8311,6 +8368,10 @@ status = "verbatim"
 # need a system-hmi tree beside it and FAIL without one; verified 43/46 without
 # it and 46/46 with the source's. Placeholder drive paths in fixtures are
 # declared by [[allow]] below.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (ES-5 over top-level docs, ES-9 row hint);
+# now 50 controls. Measured in a scratch home holding the source's hooks/ops/rules/agents/skills plus the
+# shipped hook-proof-of-life tree: 50/50 beside the shipped system-hmi TEMPLATE and 50/50 beside the source's
+# own system-hmi tree; with no system-hmi tree at all 46/50 (C-00, C-32, C-32b, C-35 fail, as designed).
 
 [[collected]]
 path = "instruments/entry-schema-lint/lint.py"
@@ -8318,6 +8379,7 @@ source = "~/.claude/tools/entry-schema-lint/lint.py"
 status = "verbatim"
 # First collection (lane W5a). Without a system-hmi tree it reports ES-9 as an
 # anchor loss and exits 2 (undetermined, never a clean pass) -- by design.
+# REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole; still verbatim, diff empty.
 
 [[collected]]
 path = "instruments/hook-deny-lint/fixtures/known_bad.txt"
@@ -9651,3 +9713,69 @@ edits = [
 ]
 
 # === lane W1 2026-10-10 END ===
+
+# === lane W5 2026-10-10 BEGIN ===
+#
+# Refresh round against source 148e021e (last aligned b6ccd3e). Lane W5 owns
+# entry-schema-lint, feedback-pool, page-fill-gate, process-ledger,
+# rule-usage-census, system-hmi, tracking-refs and view-launcher under
+# instruments/. In-place updates of the existing entries are above (search for
+# "REFRESHED 2026-10-10" and "RE-CHECKED 2026-10-10"); this block holds only the
+# new entries.
+
+[[collected]]
+path = "instruments/system-hmi/emitters/cli_auth.py"
+source = "~/.claude/tools/system-hmi/emitters/cli_auth.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W5, source 148e021e). Read whole (106 lines). A native hmi-report/1 emitter that asks the `claude` CLI whether it is logged in (`claude auth status`), never reads a credential file and prints no account detail (the email key is dropped from the finding text). Stdlib only; no machine-bound value. `--selftest` 5/5 pass in place (the live smoke is a no-verdict-possible call and passes with or without a CLI). Not registered in the template's sources.json, like the other emitters here that the template does not wire. Diff against the source empty.
+
+[[collected]]
+path = "instruments/rule-usage-census/lastuse.py"
+source = "~/.claude/tools/rule-usage-census/lastuse.py"
+status = "edited"
+edits = [
+  "module docstring, SOURCES block (1 line): the transcript-archive path, an absolute path on a non-system drive (class: non-system-drive path) -> 'default ~/.claude/projects; a mirror of the same layout also works', the same wording census.py's docstring uses.",
+  "`ARCHIVE` default (1 line): the same non-system-drive path -> `HOME / \"projects\"` (HOME is defined on the line above); the live projects directory has the identical <project>/<session>.jsonl layout and the LASTUSE_ARCHIVE override is untouched.",
+  "comment above AGENT_READ_RE (1 line): a parenthetical naming this share repo's own checkout by an absolute non-system-drive path (class: non-system-drive path) -> 'another repo's agents/*.md'; the 2026-09-07 observation it records is kept.",
+  "selftest fixture (1 line, a Read of a same-named agent file in another repo, the negative control for the `.claude`-anchored regex): the absolute non-system-drive path -> `/work/other-repo/agents/old-unused.md`. The control only needs a path with no `.claude` directory in it; selftest ALL PASS after the edit.",
+]
+# NEW 2026-10-10 (lane W5, source 148e021e). Read whole (about 500 lines). The system-hmi native source `reading-use` (path rules, skills, agents: last load date, WARN never FAIL). The shipped rule-usage-census README documents it, which is why it ships now. The selftest fixtures' home-path shapes use the one-character placeholder account and pass the gate. Reads telemetry/rule-loads.jsonl and the transcript archive; both absent -> state null / undetermined, never a pass.
+
+[[collected]]
+path = "instruments/rule-usage-census/dormant.json"
+source = "~/.claude/tools/rule-usage-census/dormant.json"
+status = "template"
+edits = [
+  "the source's one row (the owner's dormancy ruling on a subagent, with a quoted user remark, a dated dispatch fact and a review-when) -> an empty object `{}`. lastuse.py treats a missing or empty file as no dormant components; the row schema (`{\"rules/x.md\": {\"reason\", \"review_when\", \"ruled\"}}`) is documented in the shipped README and in lastuse.py's docstring.",
+]
+
+[[collected]]
+path = "instruments/feedback-pool/gate-overrides.json"
+source = "~/.claude/tools/feedback-pool/gate-overrides.json"
+status = "template"
+edits = [
+  "`overrides` rows 6 -> 3: the rows whose script ships under instruments/ (audience-fit-gate, page-fill-gate, closeout-intake) are kept verbatim; the three rows for tools and a skill script that do not ship (a skill-sync tool, the graph-snapshot tool, the paper-story renderer) are dropped, because the shipped hook's integrity selftest fails on a listed script that is missing.",
+  "`reviewed_not_overrides` 5 keys -> 2: the one row for a shipped tool (process-ledger report `--force`) and the `reviewed` note are kept; the three rows for unshipped tools are dropped.",
+  "inserted after `_doc`: a `_share_template` note saying what was reduced and why. The `_doc` array is kept verbatim, including its source-incident sentence (a skill-sync tool forced through four times; a dated incident, not a private value).",
+]
+# NEW 2026-10-10 (lane W5, source 148e021e). Reader: hooks/feedback_notice.py (refreshed by lane W3), whose own selftest asserts the live register has rows and that every listed script exists and maps to a target. Verified in a scratch config directory holding the source's feedback_notice.py and deny_receipt.py beside the shipped feedback-pool, process-ledger, page-fill-gate, audience-fit-gate, closeout-intake and cross-index trees (FBN_HOME pointing at it): ALL PASS 29/29 with this template; the same selftest against the source's own register is 32/32.
+
+[[not_shipped]]
+path = "tools/system-hmi/emitters/editions.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-10 (lane W5, source 148e021e), re-checked per file against the broad `tools/` entry. The edition-envelope emitter reads the append-only edition log of a private research workbench (the evolution study of the source environment itself) and compares its latest accepted edition with `~/.claude` HEAD. The workbench's log location and its edition-opening command are absolute paths on a non-system drive written into the code as constants, and the log is a private project's record; without that workbench the emitter can only report a missing log. Whole artifact meaningful only inside that private context (decision-procedure row 6), and the edit that would make it portable is a code rewrite, not a scrub. Cited by the shipped system-hmi README (one paragraph) and exercised by nine checks of the shipped controls.py; the README's SHARE EDITION note now says the emitter is not shipped, and the controls failures are recorded in the controls.py entry."""
+fallback = """None needed for the template: the tool runs without it and `hmi.py validate` is unaffected. To watch a lagging published edition of your own, write a small hmi-report/1 emitter that reads your edition log and register it in sources.json; `emitters/cli_auth.py` and `emitters/reconcile.py` show the report shape, and `PROTOCOL.md` the contract."""
+
+[[not_shipped]]
+path = "tools/system-hmi/emitters/telemetry_trend.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-10 (lane W5, source 148e021e), re-checked per file against the broad `tools/` entry. The telemetry-trend emitter is generic code (weekly row counts of hook telemetry files; sudden-zero and spike findings), but it is driven by `registry/telemetry.json` and the registry's own validation then requires one row per telemetry file of EVERY hook (an error for each producer without a row). A template registry cannot be one worked row without making `hmi.py validate` fail on any install that has the shipped hooks beside it, and a full registry is the source's inventory of its own hooks' files. Its docstring also cites the source's private design documents. The shipped controls.py exercises it with six checks, which fail by construction here (recorded in the controls.py entry); the README's SHARE EDITION note says the emitter and its registry are not shipped."""
+fallback = """None needed for the template. `hmi/registry.py` loads `registry/telemetry.json` only when it exists, so without it validation is unchanged. For a trend check over your own hooks' telemetry, write the registry rows (file, hook, ts_field, ts_format) and an emitter in the shape of `emitters/reconcile.py`; the finding rules (a quiet interceptor is the healthy state, so `sudden-zero` is a question to the hook's owner) are in the shipped README paragraph."""
+
+[[not_shipped]]
+path = "tools/system-hmi/registry/telemetry.json"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-10 (lane W5, source 148e021e), re-checked per file. The trend registry: one row per telemetry file of the source's hooks (about 50 rows) plus an `unowned` list, seeded from a private inventory file of the evolution workbench. It is the source environment's own record of which files its hooks write — rows about a machine, not structure — and a one-row template would make validation fail (see the telemetry_trend.py entry). Cited by the shipped README paragraph and by the shipped `hmi/registry.py` (which treats it as optional)."""
+fallback = """Create `registry/telemetry.json` as `{"rows": [...], "unowned": [...]}` with one row per telemetry file your own hooks write when you adopt the trend emitter; `hmi/registry.py` `telemetry_check()` documents the validation rules at the top of its telemetry section."""
+
+# === lane W5 2026-10-10 END ===

@@ -35,14 +35,26 @@ status: live 2026-09-04 · owner: 使用者裁決（寬度缺陷診斷筆記，�
 `<html data-page-class="…">` 宣告；沒宣告的頁面由結構推斷，判決降級（FAIL→WARN），因為閘門
 只能裁它判定得了的事。推斷升格為宣告的觸發條件寫在 `unknown_policy.promotion_trigger`。
 
-| class | 中文 | 規則 | 目前對應 |
-|---|---|---|---|
-| document-short | 短篇閱讀頁 | 置中、左右留白差 ≤ 8px、fill ≥ 45% | audience-fit 報告、owner-view |
-| document-long | 長篇參考文件 | reach ≥ 85%；`data-rail` 側欄算內容 | SSLD 教科書殼血脈（主文＋本節速查 rail） |
-| deck | 一頁一螢幕簡報 | 每張 `.slide` 各自量，reach ≥ 85% | deck-shell（vault、paper-story、paper-distill、SSLD 快照） |
-| tool | 操作型 GUI | reach ≥ 90%；> 1920px 的上限是 clamp 不是 cap | DIT、AssetVault GUI、HTMLToolsLobby 工具 |
-| diagram | 圖為主載體 | 置中對稱 **或** reach ≥ 85%；fill ≥ 60% | diagram-authoring 產物 |
-| dashboard | 卡片與表格儀表 | reach ≥ 85% | auto-fit 卡片格 |
+| class | 中文 | 內容類 | 規則 | 目前對應 |
+|---|---|---|---|---|
+| document-short | 短篇閱讀頁 | prose | 置中、左右留白差 ≤ 8px、fill ≥ 45% | audience-fit 報告、owner-view |
+| document-long | 長篇參考文件 | prose | reach ≥ 85%；`data-rail` 側欄算內容 | SSLD 教科書殼血脈（主文＋本節速查 rail） |
+| deck | 一頁一螢幕簡報 | figure-led | 每張 `.slide` 各自量，reach ≥ 85% | deck-shell（vault、paper-story、paper-distill、SSLD 快照） |
+| tool | 操作型 GUI | node | reach ≥ 90%；> 1920px 的上限是 clamp 不是 cap | DIT、AssetVault GUI、HTMLToolsLobby 工具 |
+| diagram | 圖為主載體 | diagram | 置中對稱 **或** reach ≥ 85%；fill ≥ 60% | diagram-authoring 產物 |
+| dashboard | 卡片與表格儀表 | node | reach ≥ 85% | auto-fit 卡片格；入口頁（VIEWS、啟動頁）也量這一類 |
+| showcase | 圖主展示頁 | figure-led | 置中對稱 **或** reach ≥ 85%；fill ≥ 60%；滿版色帶當背景不算內容 | 專案介紹、作品展示（2026-10-02） |
+
+**兩套分類合成一張表**（2026-10-02）：`class`（頁型）決定寬度怎麼量；「內容類」（`content`
+欄）決定樣式規則去哪裡讀，定義在 `page_classes.json` 的 `content_classes`。node 類是操作介面，
+不屬於 `~/.claude/references/design-axes/` 的呈現媒材。
+
+**滿版色帶（`backdrop_bands`）**：開了這個選項的類別，寬度 ≥ 98%、自己沒有文字的上色區塊
+當背景，不算內容，裡面的子元素照量。沒有這個選項時，色帶頁一律量到 reach 100%，色帶裡
+靠左被卡寬的內容欄看不見（測試的 showcase 負例以 dashboard 量會 PASS）。
+
+**內嵌 SVG**：HTML 裡內嵌 `<svg>` 的 `tagName` 是小寫，2026-10-02 前沒畫框線的 SVG 不被當
+成內容；已修正，修正前後對 6 頁已交付頁面的判定完全相同。
 
 **新類別怎麼加**：在 `page_classes.json` 加一列（`zh`、`mode`、門檻、`notes`），在
 `tests/test_fill_gate.py` 的 `CASES` 加一對正負 fixture，跑測試；少任一邊，測試會故意失敗
