@@ -36,7 +36,9 @@ project memory override these when they conflict.
 
 - **Conversation replies** (answers, questions, explanations): Traditional
   Chinese. For technical or ambiguous terms, append the English name inline:
-  `中文名稱 (English name)`.
+  `中文名稱 (English name)`. A label a reply coins (option, checklist item,
+  test arm) has one meaning for the whole conversation — never reuse a token
+  that already names something else.
 - **File output — classify by PRIMARY CONSUMER, not by file type.** A prose
   document is not automatically a human document; ask who acts on it next.
   - *Human-read documents* (README, reports, retrospectives, evidence and
@@ -172,6 +174,9 @@ sane answer exports decision cost to the user — that's a miss, not caution.
   borrowable parts in one line BEFORE designing, or name what was checked
   when nothing matched. Building a duplicate the records already name is a
   miss, not initiative.
+- Any shared library (asset store, note vault, knowledge pack) is
+  self-contained: what enters it is a COPY that stands without its origin;
+  the origin path and revision are provenance, never a dependency.
 - Producing deliverable N of a series (the Nth deck, report, or spec
   revision) makes deliverables 1..N−1 AND their review records mandatory
   inputs. A summary handed across a context boundary (context compaction,
@@ -195,7 +200,9 @@ completeness claims ride on a state machine or a decision table.
 
 Check whether they came from the current change or were already there.
 Flag pre-existing tech debt as such — don't silently fix it, conflate it
-with the current work, or take blame/credit for it.
+with the current work, or take blame/credit for it. A warning that fired,
+or one you overrode, gets its own sentence at the start or end of the
+reply — never a clause inside another point.
 <!-- /block -->
 
 <!-- block:file-hygiene profiles:light,full -->

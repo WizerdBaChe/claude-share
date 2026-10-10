@@ -151,3 +151,16 @@ absence, and a challenge from a 404. A wave that reports "no source found" for a
 target whose only host answered 403 has misreported a routing outcome as an
 evidentiary one; that is the same error class as a gate ruling on what it cannot
 determine, and it is caught the same way — by printing the ruler beside the rate.
+
+**`fetchsrc.py` is the one fetch command a wave's brief names** (`ops/20-dispatch.md`
+§4a): it consults the host policy before every request, keeps the per-host and
+per-run caps in its manifest, and prints `HAND-TO-USER:` itself. Measured
+2026-10-03: a brief saying "write ONLY under OUT" and "do not download PDFs; read
+pages in place" sent the worker past `fetchsrc.py --help` to a hand-written fetcher
+that skipped both caps across 38 hosts (`ops/lessons.md` L-075, mirror shape: the
+prompt excluded the checked route instead of naming an unchecked one). The caps
+are deliberately NOT in `literature_host_guard`: it has no run to count in, a
+command's URL literal is not a fetch, and a URL held in a file never reaches it.
+Promotion trigger: a third instance (L-075 `hits: 3`) moves this to the omission
+layer of `ops/40-maintenance.md` §2a — an end-of-subagent notice for an agent that
+invoked literature-search-extract, fetched, and ran no `fetchsrc.py fetch`.

@@ -1472,6 +1472,13 @@ status = "verbatim"
 # mention is the provenance line naming the global preferences file). `git diff
 # --numstat` at the source is empty. The diff with line endings normalised is
 # empty — still verbatim.
+# 2026-10-10 refresh (lane W2, align to source 148e021e): +9/-2 lines, three
+# prose additions mirroring CLAUDE.md (a coined reply label keeps one meaning;
+# a shared library is a self-contained copy, origin = provenance; a warning
+# that fired gets its own sentence). Re-copied whole and read in full: no path,
+# account name or private-tree pointer in the added text. The diff with line
+# endings normalised is empty — still verbatim. `interop-layer/test_interop.py`
+# run after: 16 passed, 0 failed.
 
 [[collected]]
 path = "interop-layer/acceptance-evals.md"
@@ -2290,6 +2297,18 @@ edits = [
   "agents count refreshed 8->9 to match this round's work-card-executor.md addition (see agents/README.md's own edit, same round).",
   "2026-09-18: updated the live migration guidance for the re-verified Codex AGENTS target, separated ChatGPT import/package flows from compiler output, and added the rule that dependent skills are not created or hand-carried.",
 ]
+# 2026-10-10 refresh (lane W2, align to source 148e021e, procedure B): the source
+# replaced its hand-kept inventories (ops/skills/hooks/agents counts and the hook
+# list, the "two hook commands" count in migration step 4 and the asset table)
+# with pointers to live sources (SYNC-RUNBOOK Q-1). Re-copied whole; the four
+# edits above re-applied on re-read text (the memory-path slug, the archive
+# folder clause, the interop-target and compiler-boundary wording) and the diff
+# holds exactly those hunks, nothing else. Pointers the new text adds and their
+# resolution in this repo: `ops/references/integrity-sweep.md` check 16 (ships,
+# resolves); `tools/system-hmi/hmi.py collect` (ships as a template under
+# instruments/system-hmi/); `tools/system-hmi/out/structure.html` (a derived
+# file the source's generator emits, never tracked there either — does not
+# resolve here, by nature; kept verbatim). No new scrub target in the added text.
 
 [[collected]]
 path = "environment-guide/PHILOSOPHY.md"
@@ -2323,6 +2342,18 @@ edits = [
 # the earlier round recorded; the current copy has the ASCII-tree annotation and
 # two prose annotations, each present and re-applied), diff holds exactly the
 # declared hunks. No new scrub target found in the new line.
+# 2026-10-10 refresh (lane W2, align to source 148e021e, procedure B): the source
+# replaced hand-kept counts (skills, hooks, agents) with pointers to live sources
+# at three sites (the system-map tree lines, the Tier-1 asset list, step-5 live
+# verification). Merged onto the fresh copy: all five edits above re-applied,
+# the share-version annotation on the Tier-1 `audit-archive/` bullet re-added
+# at its new position (one overlap resolved by keeping the source's new wording
+# of the neighbouring bullets). New pointers: `tools/hook-proof-of-life/pol.py`
+# (ships under instruments/, resolves through [source_map]) and
+# `tools/system-hmi/out/structure.html` (a derived file the source's generator
+# emits and the source itself does not track — does not resolve here, by
+# nature; kept verbatim). The diff with line endings normalised holds exactly
+# the five declared hunks.
 
 [[collected]]
 path = "global-claude-md/CLAUDE.md"
@@ -2368,8 +2399,22 @@ edits = [
   "RETIRED 2026-10-02 (was: 'Decision charter' bullet generalization of the `tools/process-ledger/ledger.py add` pointer): the process-ledger tool ships this round (lane W5b), so the source's own command text is restored verbatim. The bullet is now an unedited copy of the source's rewritten text.",
   "'[unattended-run]' bullet, 2026-10-02 re-anchor: (1) \"the kickoff hook writes the run manifest\" -> \"a kickoff mechanism (source-only, does not ship here) writes the run manifest\"; (2) \"scope and stop shape are hook-enforced\" -> \"scope and stop shape are enforced where the environment provides the matching hooks\". The closing \"Spec + audit: `tools/process-ledger/README.md`\" pointer is KEPT as written (the tool ships, lane W5b) — retiring the 2026-09-12 generalization of it. JUDGMENT CALL carried over, not drift-restoration: edit (2) keeps the softened claim because the enforcing hook (`hooks/unattended_run.py`) is `excluded-by-decision` in this manifest at the time of this lane, so the source's plain \"hook-enforced\" would be false for this repo. REVIEW-WHEN: the hooks lane ships `unattended_run.py` or the process-ledger report generator in this round — then restore both phrases verbatim and drop this edit. The 2026-09-12 edit that turned `reports/*-run-<slug>.md` into \"omitting a run report\" is retired: the source itself dropped that clause. REVIEW-WHEN FIRED 2026-10-02 (merge step): lane W3 ships `hooks/unattended_run.py` (three mounts) and lane W5b ships `tools/process-ledger/` with its report generator, so both phrases are restored verbatim and this bullet is now an unedited copy of the source's text.",
   "'Compact Instructions' section: `references/compaction-pipeline-design.md` generalized to \"the source environment's own compaction-pipeline design note, not shipped here\"; `cache/handoff/<session_id>.md` (cache/ excluded) generalized to \"a per-session handoff file (a source-only mechanism keyed by session id)\".",
-  "Path-scoped rules index line: taken verbatim from fresh source. 2026-09-12 it listed eleven files; 2026-10-02 it lists fifteen — the four additions (`layout-convergence`, `native-render-first`, `source-quotation-evidence`, `android-device-states`) all ship this round as NEW entries in this lane's 2026-10-02 block, so the index and `global-claude-md/rules/` agree again. `ops/references/principle-design-guide.md` is a shipped collected file (the 2026-09-12 cross-lane flag is closed).",
+  "Path-scoped rules index line: taken verbatim from fresh source. 2026-09-12 it listed eleven files; 2026-10-02 it lists fifteen — the four additions (`layout-convergence`, `native-render-first`, `source-quotation-evidence`, `android-device-states`) all ship this round as NEW entries in this lane's 2026-10-02 block, so the index and `global-claude-md/rules/` agree again. `ops/references/principle-design-guide.md` is a shipped collected file (the 2026-09-12 cross-lane flag is closed). [2026-10-10: superseded by the dated index-line edit at the end of this list.]",
+  "NEW 2026-10-10 (lane W2, align to source 148e021e): Path-scoped rules index line. The source index now names sixteen rules and drops `shader-failure-modes` (retired at the source on 2026-10-09 by user ruling). Two of the sixteen are NOT shipped in this share, by decision this round: `explainer-deliverables` and `decision-sheet` (see their [[not_shipped]] entries in the lane W2 2026-10-10 block). Edit: both names removed from the index, and the final item gets a parenthetical stating that the two source rules are not shipped, so the index lists exactly the rules that resolve in global-claude-md/rules/ (fourteen) — except the retired `shader-failure-modes.md`, whose repo copy is still present pending the maintainer's verdict (reported, not deleted). The index sentence also gained the source's new wording (a rule is read before AUTHORING a file of its kind; loaded on write from Claude Code 2.1.288), kept verbatim.",
+  "NEW 2026-10-10: Prior-art check bullet, re-applied on the source's rewritten text (it now adds a shared-self-contained-library clause and a `candidates/` shelf mention, both kept verbatim): (a) the recall-sweep command and the past-session search script generalized exactly as in the 2026-10-02 edit above, with the covered-silo parenthetical kept; (b) the notes-vault label (the account-holder's given name inside an Obsidian folder-naming convention) now occurs TWICE in the bullet — in the vault-index list and in the new self-contained-library clause — and both are generalized to 'the local Obsidian notes vault' (class: account-bound label; positions: the second item of the vault-index parenthetical, and the second item of the new clause's parenthetical list). `AssetVault`, `LexiconVault` (vault/project names) and the `candidates/` folder name are kept (hard rule 2).",
+  "NEW 2026-10-10: Volatile-external-fact bullet — the source added a sentence routing work outside this machine through a search command under its `tools/` tree (a private aggregator over community-forum platforms; not shipped by any lane) -> 'a source-only external-search command (does not ship here; query by 2-4 keywords)'. Capability description, the platform list, the `--wide` rule and the papers-stay-with-`literature-search-extract` clause are kept; only the pointer is dropped.",
+  "RE-APPLIED 2026-10-10 on unchanged source text: the Environment bullet (OS and shell names -> the three placeholders plus the placeholder comment), the browser-pane bullet's trailing pointer, and the two Compact Instructions pointers. The 'Route by task shape' bullet grew (a raw-string tail and a pathlib note became a hook-guard sentence) and is a verbatim copy; the new hook it names ships. Other new text (the coined-reply-label clause, the warning-gets-its-own-sentence clause, the shared-library clause, the hook-enforced-discipline wording) carries no scrub target.",
 ]
+# 2026-10-10 refresh (lane W2, align to source 148e021e, procedure B): +8/-8
+# lines at the source. Re-copied whole (line endings normalised), merged against
+# the previous source so each recorded edit lands on re-read text, and the
+# overlaps (Environment bullet, browser-pane bullet, Prior-art bullet, Compact
+# Instructions) were re-applied by hand; the diff against the source with line
+# endings normalised holds exactly the hunks the list above declares. New
+# citations: hooks/shell_transport_guard.py (ships), ops/references files (all
+# ship), tools/eol-sync and tools/process-ledger/ (ship under instruments/).
+# The two new rules the source index names were adjudicated (D3 candidates)
+# and are not shipped; see their [[not_shipped]] entries.
 
 [[collected]]
 path = "global-claude-md/rules/deliverable-doc-refs.md"
@@ -2394,7 +2439,11 @@ edits = [
   "'Width property' section: an SSLD-project internal private shell.html path generalized (SSLD the project name kept per hard rule 2; only the internal path segment dropped) — reference implementation pointer generalized to \"the SSLD project's own textbook shell ... (not shipped here)\".",
   "'Width property' section: a second AssetVault reference-implementation pointer (the deck reference implementation) generalized the same way as the earlier AssetVault edits.",
   "NEW 2026-10-02 (lane W2-global, align to source 183c129): the source grew two blocks — an audience-facing-HTML-deck paragraph pointing at `rules/office-deck-deliverables.md` (a shipped file, kept verbatim) and an 'Asset property — styling follows the CONTENT class' section. In that section: (a) the record pointer into the source's `outputs/` tree (a dated A/B record, non-shipping tree) -> \"recorded in a dated source-only note, does not ship here\"; (b) the AssetVault `prose-doc-layer` pointer together with its in-vault asset path -> \"the source environment's asset-library `prose-doc-layer` (not shipped here)\" — same class and same replacement family as the earlier AssetVault edits. The section's `tools/page-fill-gate/` citation is kept (the instrument ships, `[source_map]` resolves it), and the `VIEWS.html` evidence mention is a page name inside the measured instance, kept.",
+  "NEW 2026-10-10 (lane W2, align to source 148e021e; the file grew by 91 lines and lost 5: two source blocks (a focused-token key rule and a figure-led-page rule), a shell-template frontmatter glob and a P1-P5 mention). (a) Focused-token paragraph: an asset-library item name inside its evidence sentence -> a class description (the asset library deck shell); the paragraph gate command, a home-relative path under the source tools tree, is KEPT as written (the tool is source-only; the path is home-relative, not a private value). (b) The Do-not-reinvent and width-property reference-implementation sentences: asset-library item name plus in-library path -> the same replacement family as the 2026-09-12 edits above (re-applied). (c) Width-property reading-shell sentence: the candidate-shelf query command, which carried an absolute path on a non-system drive, is removed and the shelf is named by class (the source environment asset-library candidate shelf, source-only); the deck shell is named by class the same way; the SSLD textbook shell sentence is kept (project name). The candidate_shelf_notice hook name is kept (a hook of the source; its disposition is another lane). (d) Content-class section: the two pointers into the source output tree and the prose-doc-layer library item re-applied as in the 2026-10-02 edit above. The figure-led-page section (six properties) was read in full and carries no scrub target; its design-axes citation points into the source references tree (covered by that tree not_shipped entry) and is kept with its locator.",
 ]
+# 2026-10-10 (lane W2): refresh procedure B; the 2026-10-02 edits re-applied on
+# the fresh copy plus the NEW edit above; the diff against the source (line
+# endings normalised) holds every hunk declared, nothing else.
 # 2026-10-02 (lane W2-global): refresh procedure B — the 2026-09-12 edits
 # re-applied on the fresh copy plus the NEW 2026-10-02 edit above; the diff
 # against source (line endings normalised) holds 7 hunks, every one declared.
@@ -5765,6 +5814,12 @@ status = "verbatim"
 # NTU's campus network regulations (計中 101.4.24 修正) as the governing
 # texts read 2026-09-10. Read in full: no private path, no account name, no
 # credential. Empty diff against source.
+# 2026-10-10 refresh (lane W2, align to source 148e021e): +13 lines, one
+# paragraph naming `fetchsrc.py` as the one fetch command a wave's brief names
+# (it ships in the literature-search-extract skill's `verify/`), with the
+# 2026-10-03 measurement, a lesson id and a promotion trigger. Re-copied whole
+# and read in full: no path, account name or private-tree pointer. Empty diff
+# against source — still verbatim.
 
 [[collected]]
 path = "hooks/literature_host_guard.py"
@@ -9131,3 +9186,43 @@ the system drive) — a credential-shaped filename the guard must deny; the
 folder exists on no machine. The pattern cannot tell an invented system-drive
 folder from a private one, which is what [[allow]] is for."""
 # === merge step 2026-10-02 END ===
+
+# === lane W2 2026-10-10 BEGIN ===
+
+[[not_shipped]]
+path = "rules/explainer-deliverables.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-10, read in full (62 lines). The rule's property (an explanatory HTML page or deck is a
+BUILD OUTPUT generated from a content file, never hand-written in its carrier) is generic, but the rule is
+only operable through a carrier registry, a content schema, a build/check/scan CLI and per-carrier
+folders that live under the source's tools tree, none of which ships; its text also names a private
+asset library, a private user-profile record and a private memory entry. Shipping the rule without
+the machinery would hand an adopter an instruction they cannot follow, which is the failure the
+fallback exists to avoid. The two carrier rules it binds ship: deliverable-doc-refs.md (HTML) and
+office-deck-deliverables.md (PPTX). The router that pointed at it, the Path-scoped rules index line in
+global-claude-md/CLAUDE.md, no longer names it (declared edit on that entry)."""
+fallback = """An adopter who wants the property writes it themselves from the one-sentence form: keep the content
+of an explanatory page or deck in a data file, generate the carrier from it, and stamp the output so a
+hand edit is detectable. The rendering rules that bind the output ship as
+global-claude-md/rules/deliverable-doc-refs.md and global-claude-md/rules/office-deck-deliverables.md.
+Re-verify against the source when the carrier machinery is published; then the rule can ship as it is."""
+
+[[not_shipped]]
+path = "rules/decision-sheet.md"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-10, read in full (54 lines). The rule (three or more independent rulings waiting on the
+user in one turn go on ONE HTML sheet answered by one paste; named-authorization items are never
+batched) is generic in spirit, but it is defined by a canonical template that lives in the source's tools
+tree and is itself excluded there, and its text cites a private outputs record, a private references
+record, an outside share pack kept in a separate private tree, and another project's profile file by
+absolute path. The template is the rule's substance (a CONFIG block, an apply-all-star button that skips
+the named section, a paste-back format); without it the rule describes a tool the adopter does not have.
+The router that pointed at it, the Path-scoped rules index line in global-claude-md/CLAUDE.md, no longer
+names it (declared edit on that entry). The source's own file records that a separate outside pack of the
+same rule exists for another reader; that pack is out of this repo's scope."""
+fallback = """For three or more pending rulings: list them in one message, each with two to four mutually exclusive
+options and a default marked, and ask for one reply. Keep any item that needs a named authorization (a
+guardrail constant, a push to a public remote, a system or security setting, permanent deletion, spending)
+out of the batch and ask it alone. Re-verify when the template is published; then ship the rule with it."""
+
+# === lane W2 2026-10-10 END ===

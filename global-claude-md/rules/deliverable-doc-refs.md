@@ -8,6 +8,7 @@ paths:
   - "**/build_pack.py"
   - "**/build_textbook.py"
   - "**/*shell*.html"
+  - "**/*shell*.tpl"
 ---
 
 # Coded references and symbols in human-facing deliverables
@@ -25,7 +26,7 @@ do not expire. A date is not a trigger: this line replaced "review 2027-02" on
 2026-09-08 (ES-3).
 
 **An audience-facing HTML deck** (page class `deck`, not a paper-story practice copy) also carries the
-presentation-class content rules P1–P4 (figure-led, declared density, flat and clean, sample page first). They live
+presentation-class content rules P1–P5 (figure-led, declared density, flat and clean, sample page first, type tiers). They live
 in ONE place, `rules/office-deck-deliverables.md` §Presentation-class content, shared with PPTX. Read it before
 building the deck.
 
@@ -48,6 +49,19 @@ other two whenever the document has ≥ ~5 coded IDs or any symbol vocabulary:
    dotted noise.
 3. **Global glossary overlay** (G key): full listing incl. glossary-only
    entries, rows jumpable.
+
+**Asset property — a focused token yields every key except its own activation
+keys.** Tokens are `tabIndex=0`, so the click that jumps leaves focus on the
+token; a page keydown handler may intercept only Enter/Space there and must let
+Backspace, G, M and paging through. Sunk 2026-10-05: the SSLD textbook shell and
+the asset library's deck shell both returned for EVERY key on a focused token, so
+Backspace-return and G were dead right after the jump — no gate saw it, because
+every check dispatched keys at `document`, never at a clicked token. Gate:
+`python ~/.claude/tools/token-key-gate/token_key_gate.py run <built.html>`
+(click → Backspace must return, G must open; `static` for shells and builders;
+`selftest` = both directions). Copies built before the fix still carry it and
+are left as built (user ruling 2026-10-05); the derived list and the one-line
+fix are in that tool's README.
 
 **Do not reinvent:** a reference implementation lives in the source
 environment's asset library — CSS + chrome + mechanism JS verbatim from the UAT'd SSLD deck,
@@ -160,7 +174,9 @@ deliverable must not carry a left-anchored cap** — a container or a painted,
 row-alone block capped in width and hugging the left edge. Each page declares
 `<html data-page-class="…">`; the class rows (document-short centred &
 symmetric · document-long / deck / tool / dashboard fill ≥ 85–90 % · diagram
-centred-or-fill) and their thresholds are DATA in
+and showcase centred-or-fill, showcase's full-bleed bands measured as backdrop)
+and their thresholds, plus each class's content class (prose / node /
+figure-led / diagram — which styling rules below apply), are DATA in
 `tools/page-fill-gate/page_classes.json`, and the gate
 (`python tools/page-fill-gate/fill_gate.py <built html…>`) runs with two-sided
 controls at the measured reference viewports and may only WARN on a page whose
@@ -169,10 +185,19 @@ fit-gate and print the measured reach next to the fit result. The reading
 measure (~65 ch) is achieved by column structure — a fluid main column plus a
 `data-rail` aside, grids — never by capping one column; width is allocated in
 fr / % / cqw / clamp and pixels are reserved for intrinsic sizes. Reference
-implementations: long document = the SSLD project's own textbook shell
-(fluid main + a rail-style 本節速查 aside, hidden below 1500 px and in print;
-not shipped here); deck = the source environment's asset library reference
-implementation (text blocks uncapped, `data-page-class="deck"`).
+implementations: long document = the CURRENT candidate of class
+`reading-shell:document-long` on the source environment's asset-library
+candidate shelf (source-only, does not ship here)
+(2026-10-06: `research-site-shell`, fluid main + `#rail` 本節速查 hidden below
+1500 px and in print, drag-resizable and collapsible `#side`/`#rail`, pinnable
+previews; its card's `coupling` names the DOM/registry contract; it supersedes
+the SSLD textbook shell, which lacks the column controls). deck = the source
+environment's asset-library deck shell (text blocks uncapped, `data-page-class="deck"`). The
+shelf, not this line, says which shell is newest: a round whose accepted UX
+changes a reading shell shelves the new one with `supersedes` in the same
+close-out (L-142), and writing a `*shell*` file names the current one via the
+`candidate_shelf_notice` hook. review-when: the candidate is promoted into
+`assets/` (then name the asset here).
 
 **Asset property — styling follows the CONTENT class, prose or node** (user
 rulings 2026-09-21, from a Markdown→HTML→PDF reference and two A/B rounds;
@@ -202,6 +227,66 @@ filled-box-per-screen count to `tools/page-fill-gate/` as WARN for
 `document-*`, calibrated on the textbook A (13 tiers / 90 fills) and B
 (4 primary tiers / 23 fills) copies. review-when: `page_classes.json` gains a
 class that is neither prose nor node, or `prose-doc-layer` is deprecated.
+
+**Asset property — a figure-led page argues one claim per section** (user
+ruling 2026-10-02, from a dissection of an illustration-library landing page
+that runs on 「圖為主、文字只補充」; complements P1–P5 in
+`office-deck-deliverables.md`, which give the RATIO, with the STRUCTURE).
+Scope: an HTML page whose sections each show something with a picture —
+project/showcase pages, audience-facing overviews, the section layer of a
+`deck`. Not prose (above) and not node views (their boxes and per-class colour
+stay). Six properties:
+
+1. **One section = one assertion + one evidence figure.** The heading is a
+   complete declarative sentence (reading only the headings tells the story);
+   the figure TYPE is picked by what it proves — identity (whole subject),
+   behaviour (live or before/after), mechanism (annotated screenshot or
+   schematic), fidelity (crops / zoom-ins), procedure (numbered steps). A
+   text-led section is allowed only for procedure, and is the declared
+   exception, not the default.
+2. **One alignment line.** Every section's text block starts at the same x,
+   so the text stays in one column and rhythm comes from the figures (size,
+   bleed, band colour). A Z layout that swaps sides is allowed only with
+   exactly two fixed text edges, never a third. (The first wording asked for
+   both alternation and a fixed edge, which cannot hold at once; corrected
+   2026-10-02 while building the first showcase page.) The text column is the
+   narrow one (~4:6; ~1:2 when the figure is a wide, short strip such as a
+   table row) — this is how the reading measure is met by columns here.
+3. **Grid binds text, not figures.** Figures may bleed out of the content
+   container (hero, closing bookend); text never does. A floated subject gets
+   whitespace or a soft halo, not a frame.
+4. **One resident ground; sections are separated by space, not by colour.**
+   The page keeps ONE background colour from top to bottom; a section boundary
+   is whitespace (or at most a hairline), never a box and never a change of
+   ground. At most the opening and closing bookend may share one light tint
+   of the same hue — no dark band, no alternating tints. (User ruling
+   2026-10-02 on the first showcase trial: 「過度切背景色」 is the same
+   defect the film rules already ban — `references/design-axes/part-principles.md`
+   §6 — and the first wording of this item, which asked for alternating bands,
+   contradicted it.) Content stays centred while any tint spans the viewport;
+   a left-anchored cap is still the defect.
+5. **Annotation lives ON the figure.** Callouts, markers, coordinate read-outs
+   and a one-line micro-caption sit inside the figure; body text beside it is
+   at most one line. The text block is a fixed three-tier unit — eyebrow,
+   heading, one-line sub — plus at most one onward link, so the reader learns
+   the grammar once and reads only content.
+6. **Chrome is one hue; colour belongs to the figures.** UI tints come from a
+   single hue family plus neutrals; saturated colour appears only inside the
+   evidence. Scope limits ("demo only", "not yet released", source/credit) sit
+   as small type AT the claim they limit, never deferred to a footer.
+
+Carrier note: the page argues and hands off — one exit per section to the
+depth layer (docs, full deck, data), never the depth itself inline. A
+standalone figure-led page declares `data-page-class="showcase"` (bands are
+measured as backdrop, a right-bleeding figure counts as reach); a deck keeps
+`deck`. The gate reads width only, none of the six properties; promotion
+trigger: a second figure-led page ships with the user naming one of these six
+as violated → add a heading-is-sentence and text-edge-x check to
+`tools/page-fill-gate/` as WARN. The cross-medium forms of
+these properties are registered in `references/design-axes/part-principles.md`
+(abbreviation 「網頁 圖主頁 n」) — change both in the same commit. review-when: the
+`showcase` row in `page_classes.json` changes mode or loses `backdrop_bands`, or
+P1–P5 are revised.
 
 Interaction chrome standard carried by the same asset (user-accepted 2026-08-31):
 ←/→ paging, M TOC, counter + progress bar, print CSS, JS-dead degradation to a
