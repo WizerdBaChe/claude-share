@@ -117,7 +117,11 @@ implementation-layer decisions that are (a) reversible, (b) not a values fork
 changing promised scope or UX/interaction semantics — decide, log choice+reason
 in one line AND append it to the process ledger at that moment
 (`tools/process-ledger/ledger.py add`, flags in its README; a user ruling
-spoken in chat is logged too, with `--origin user`; a scope narrowed for a
+spoken in chat is logged too, with `--origin user --quote "<the user's words,
+copied exactly>"` — the tool checks the quote against what the user typed and
+labels the row `quote_check`; only `verified` counts as the user's own words,
+a paraphrase is the model's reading of a ruling, not the ruling (2026-10-06,
+outside critique 3a); a scope narrowed for a
 TEMPORARY limit logs, on the same line, the event that lifts it — or it
 silently becomes permanent) — the ledger is what survives compaction and is
 re-injected after it, the chat line is not. Ask ONLY for: irreversible/outward
@@ -178,7 +182,18 @@ seconds becomes a fake gate the user skims past.
        blast radius: <impact>]; origin marked (user)/(model) — overturn
        rules: `30-judgment.md` R2 overturn hierarchy
     1. Interpretation forks: <ambiguity> → chose <reading> because <why>;
-       isolation point: <module/param that flips the call if wrong>
+       isolation point: <module/param that flips the call if wrong>.
+       A deliverable that CREATES a new operational unit (tool, hook, store
+       tier, index leg, skill mode, gate) also states here: design-mode
+       verdict — `Mode B <tier>` (product-design-thinking) or `not Mode B:
+       <why>` — and build-here vs hand-off (heavy-round split). A unit born
+       as the REMEDY for a defect found mid-session is still Mode B; the fix
+       framing exempts nothing. The first question put to the user carries
+       the extend-vs-new fork (which existing store/mechanism this would
+       duplicate, and why not extend it) before any parameter question.
+       Recorded miss 2026-10-05 (AssetVault candidate shelf, L-143): a
+       two-repo increment designed in 3 min as a fix, four parameter asks,
+       built in the last 50 min of a content session after two compactions.
     2. Boundary inputs: <inputs/states that break it, trimmed to known env>
     3. Acceptance: <machine-checkable checks first; then human-eye items
        ranked `A 必驗` → `B 體驗` per `references/uat.md` (cap, rungs and

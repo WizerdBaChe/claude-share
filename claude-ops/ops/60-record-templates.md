@@ -32,6 +32,15 @@ Field ownership (reference, never redefine — one rule, one file):
   file" is not that evidence (`ops/lessons.md` L-100: a named seed without the
   mechanism cost nine probes). Executor side: three probes with no effect on
   the mechanism → stop probing, grep the nearest artifacts' text first.
+- A card's text never spells out credential-file NAME PATTERNS (dotfile
+  names, key/certificate extensions, token/secret file names) — not even in a
+  "never open …" prohibition. It says "credential file" in prose. The executor
+  copies a listed pattern into its own filter command, and
+  `hooks/secret_file_guard.py` matches the token in command text, so the card
+  manufactures the denial (FP-4/FP-5 in that hook's log, 2026-10-04: two
+  read-only inventory cards, two denied executors, nothing read). Narrowing
+  pass 2 clears negated filters, but a positive listing or the name in prose
+  still denies.
 - Severity scale: `code-review-deep-checklist` output contract.
 - Commit format: global CLAUDE.md git rule. (`~/.claude/COMMIT-TEMPLATES.md`
   is this config repo's own semantics — never apply it to target projects.)
@@ -146,3 +155,33 @@ Two rules the block itself must satisfy:
   quantity nobody computed (`rules/figure-self-read.md`; global CLAUDE.md —
   green tests prove the data path, not the picture). A block whose three lines
   are all "算過的" is either a fully computed artifact or an unread template.
+
+## §5 External review packet cover（外部審查包封面）— owner: this section (registered 2026-10-09)
+
+Born from the clean-room-rebuild external review (2026-10-09): the user handed
+another agent a raw zip of the skill folder; it read without executing, so one
+finding stayed an inference, and the machine-local dependencies it could not
+see came back as a finding. The cover makes the reviewer's run possible and its
+evidence classifiable. **Trigger:** anything of ours handed to a reviewer
+outside this machine's sessions (another person's agent, AgentExchange, a
+colleague) for review, not for adoption — adoption copies go through
+`skill-share-packaging` Mode A instead. Ships as `REVIEW-README.md` at the
+packet root, in the reviewer's language (default English).
+
+```
+# Review packet — <artifact> @ <sha> (<date>)
+1. What it promises, and its stated limits   <3–5 lines; quote the artifact's own limit line>
+2. Manifest   <every file in the packet, one line each>
+   Not included (machine-local, optional for the review): <path — what it does — what breaks without it>
+3. Safe to run   <exact commands, what they touch (network? writes?), expected output line,
+   e.g. `python -X utf8 scripts/controls.py` → `N/N controls hold`, no network, temp dir only>
+4. Worked example   <one real record/output the artifact produced, or "none yet">
+5. Questions we most want answered   <2–4; ALWAYS include "for each input class the artifact
+   promises, is there a control that exercises it?">
+6. How to report   one finding per item: severity · claim · evidence tag
+   EXECUTED (ran it, paste the output) | READ (cited file:line) | INFERRED (reasoning only)
+```
+
+Two rules the cover itself must satisfy: §2's "not included" list is generated
+by grepping the packet for paths outside it (never from memory), and §3 lists
+only commands that were run on the packed copy before it left.

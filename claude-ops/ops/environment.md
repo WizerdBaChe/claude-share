@@ -25,8 +25,21 @@ fact, see "Main-loop model" below; do not read this table as a session default.
 
 **Cap policy (owner: user, 2026-07-07)**: subagent dispatches use haiku or
 sonnet only — never opus/fable-tier. Severity is expressed on two axes:
-model (haiku ↔ sonnet) × effort (low ↔ high). `sonnet + high effort` replaces
-what would otherwise go to opus.
+model (haiku ↔ sonnet) × effort (medium ↔ high; the cheap floor is medium,
+user ruling 2026-10-08). `sonnet + high effort` replaces what would otherwise
+go to opus.
+
+**Model ids are RELATIVE aliases, never pinned (user ruling 2026-10-08).**
+`haiku` / `sonnet` point at the current generation; a full id rots the day the
+next generation ships, and on this CLI an id the build does not know still
+runs — with a wrong self-reported cost. The alias is a FACT to re-verify, not a
+convention: after every CLI update read `modelUsage.*.canonicalModel` from one
+`echo OK | claude -p --model haiku --output-format json --tools "" --max-turns 1`
+call (same for `sonnet`); the Agent path is logged by `mods/model-cap-mod`
+(`resolved` column). Incident 2026-10-08: one CLI build resolved `haiku` a
+generation back while the desktop harness resolved it correctly —
+`tools/model-bench/results/round3-local-report.md` §1. review-when: CLI
+version change (`tools/cc-delta`), a new Haiku/Sonnet generation.
 
 **Scope boundary — headless runs and project production models (user ruling
 2026-09-25, post-format-lab).** A headless `claude -p` process started by a
@@ -101,15 +114,20 @@ Details + evidence: `ops/lessons.md` L-001, hook header.
   go with it. Kept on record because the choice is a live setting, not a fact
   about the product — flipping that key restores it. What it offers when
   enabled: `harness-measurements.md` §Dispatch semantics.
-- **Effort is NOT settable per Agent-tool call** (verified 2026-08-12 against
-  the live tool schema + `code.claude.com/docs/en/sub-agents`). Two setpoints
-  only: the `effort:` frontmatter field in an `agents/*.md` file (overrides the
-  session level whenever that subagent is active), and Workflow's per-`agent()`
-  `opts.effort`. Global default: `effortLevel: medium` in settings.json;
-  omitting `effort:` from a definition means it inherits that. To dispatch one
-  role at a different intensity, edit its definition — there is no per-call
-  override. Rule of thumb: low for mechanical stages, high for
-  verification/judgment stages.
+- **Effort IS settable per Agent-tool call since 2.1.292** (`effort`:
+  low|medium|high|xhigh|max; superseded the 2026-08-12 "not per-call" fact,
+  reconciled 2026-10-10 in a dated CC-version reconciliation report under the
+  source's `reports/` tree, which this repo does not ship).
+  The tool's own description says to set it ONLY when the user or an
+  instruction explicitly asks; otherwise omit it. Setpoints: the per-call
+  `effort`, the `effort:` frontmatter field in an `agents/*.md` file
+  (overrides the session level whenever that subagent is active), and
+  Workflow's per-`agent()` `opts.effort`. Global default: `effortLevel: medium`
+  in settings.json; omitting `effort:` from a definition means it inherits
+  that. The cap ceiling (`sonnet + high`) binds the per-call value too —
+  `xhigh`/`max` on a subagent is over the cap; `hooks/model_cap_guard.py` does
+  NOT yet read `tool_input.effort` (open ruling in the record above). Rule of
+  thumb: medium for mechanical stages, high for verification/judgment stages.
 
 ## Red-team / reviewer separation (as-of 2026-08-16 — SUPERSEDES the 2026-07-07 entry)
 
@@ -337,6 +355,7 @@ message that does not name the cause.
 | `python3` | **`AppData\Local\Microsoft\WindowsApps\python3.exe` — the Store shim** | TRAP: always fails with "Python was not found; run without arguments to install from the Microsoft Store". 6 hits in the 10-day sweep. Use `python`, never `python3` |
 | `rg` | **not on PATH** | TRAP: the Grep TOOL ships its own ripgrep and works, but a bare `rg` inside a Bash command does not |
 | node / npm | v24.14.1 / 11.11.0 | |
+| `tsc` | TypeScript **7.0.2**, npm global (`AppData\Roaming\npm\tsc`), installed 2026-10-09 | type-checks a mod: `tsc -p` on the mod's own folder under `mods/` (each mod's `tsconfig.json` extends the engine-written `.claude-plugin/types/tsconfig.json`). Before this date no mod had ever been type-checked; the first run found 4 errors in model-cap-mod (fixed `c29f8f9`) and 8 pre-existing ones in feedback-observer |
 | dotnet SDK | 10.0.301 | |
 | git | 2.51.0.windows.2; `core.autocrlf=true` in the SYSTEM gitconfig | superseded for `~/.claude` by its committed `.gitattributes` (2026-08-18) |
 | ACP / OutputEncoding | **65001 both**; Culture zh-TW, UICulture en-US | why a missing `.ps1` BOM has no symptom on THIS machine while breaking any CP950 machine — `outputs/script-encoding-audit-2026-08-16.md` |
@@ -570,6 +589,13 @@ a host that changes side is edited THERE; this block is the measurement record.
   playwright-headless both got 418), `www.sciencedirect.com` (403),
   `onlinelibrary.wiley.com` (403), `www.mdpi.com` (403),
   `eprints.soton.ac.uk` (BotStopper/Anubis proof-of-work).
+- **2026-10-03 (claude-se-history literature run, one subagent report, not
+  re-measured)**: `link.springer.com` served a "Client Challenge" page — it has
+  CHANGED SIDE since the 2026-09-10 line above (surface and first-request status
+  not recorded); 403 from `direct.mit.edu`, `library.oapen.org`,
+  `nsuworks.nova.edu` (identified-UA script) and `www.tandfonline.com`,
+  `journals.sagepub.com`, `www.iso.org` (WebFetch). All seven are `agent_banned`
+  rows since 2026-10-04 (user ruling); re-measuring any of them is the user's act.
 - **Two hosts disagreed between probes the same day**: `opg.optica.org` and
   `iopscience.iop.org` answered 200 to a single article-URL probe from the main
   loop, then served a Radware CAPTCHA to a subagent doing repeated retrievals.
