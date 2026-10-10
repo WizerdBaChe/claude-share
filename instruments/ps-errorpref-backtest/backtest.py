@@ -20,6 +20,10 @@ PowerShell at all. So the report prints, per tool: total calls (the PreToolUse
 tax), PowerShell-language payloads (what the guard actually inspects), and
 fires. Quoting the middle column as the denominator would flatter the guard;
 quoting the first would hide that it does real work.
+
+The corpus walk, dedupe key, settings.json lookup and the per-call tax are the
+shared harness in `tools/hook-backtest/` (ported 2026-10-03 with zero output
+diff on a frozen corpus); this file keeps only what is specific to this guard.
 """
 import argparse
 import io
@@ -28,15 +32,13 @@ import os
 import sys
 from collections import Counter, defaultdict
 
-sys.path.insert(0, os.path.join(os.path.expanduser("~"), ".claude", "hooks"))
-import ps_errorpref_guard as guard  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                os.pardir, "hook-backtest"))
+import harness as hb  # noqa: E402
 
-# SHARE EDITION: the source also listed an offline session-archive directory on a
-# second drive here. It is machine-specific, so it is dropped; pass further
-# corpus roots with --root (repeatable).
-DEFAULT_ROOTS = [
-    os.path.join(os.path.expanduser("~"), ".claude", "projects"),
-]
+guard = hb.load_hook("ps_errorpref_guard")
+
+DEFAULT_ROOTS = hb.DEFAULT_ROOTS
 
 # Measured 2026-08-21 over live transcripts + the offline session archive, in the
 # state the corpus was in BEFORE this hook existed. A later run prints its own
@@ -65,91 +67,23 @@ BASELINE = {
 # fixes it.
 
 
-# Measured 2026-08-21 (median of 15 subprocess round-trips): 105 ms, essentially
-# all of it Python start-up -- a payload that FIRES is no slower than one that
-# exits on the first branch. Used only to price the tax in seconds/day.
-MS_PER_CALL = 105
+MS_PER_CALL = hb.MS_PER_CALL
 
 
 def registered_tools():
-    """Which tools settings.json actually wires this hook to -> (set, source).
-
-    DERIVED, never restated. A second mechanism holding its own copy of a value
-    the owner also holds is the defect class of integrity-sweep check 10 -- the
-    dashboard printed a breach that did not exist for 12 days that way. If the
-    parse fails, say so and fall back to the declared baseline rather than
-    silently reverting to it.
-    """
-    path = os.path.join(os.path.expanduser("~"), ".claude", "settings.json")
-    try:
-        d = json.load(io.open(path, encoding="utf-8"))
-        for entry in d.get("hooks", {}).get("PreToolUse", []):
-            for h in entry.get("hooks", []):
-                if "ps_errorpref_guard" in h.get("command", ""):
-                    m = str(entry.get("matcher", ""))
-                    return set(t for t in m.split("|") if t), "settings.json"
-        return set(), "settings.json (NOT REGISTERED)"
-    except Exception as e:
-        return set(BASELINE["registered"]), "declared fallback (settings.json unreadable: %s)" % e
+    """Which tools settings.json actually wires this hook to -> (set, source)."""
+    return hb.registered_tools("ps_errorpref_guard", BASELINE["registered"],
+                               "settings.json (NOT REGISTERED)")
 
 
 def collect(roots):
-    calls = Counter()
+    corpus = hb.Corpus()
     payloads = []            # (ts, tool, label, text, project)
-    seen = set()
-    days = set()
-    nfiles = 0
-    for root in roots:
-        if not os.path.isdir(root):
-            print("  (root not found, skipped: %s)" % root)
-            continue
-        for dp, dn, fn in os.walk(root):
-            for f in fn:
-                if not f.endswith(".jsonl"):
-                    continue
-                nfiles += 1
-                try:
-                    lines = io.open(os.path.join(dp, f), encoding="utf-8",
-                                    errors="replace").readlines()
-                except Exception:
-                    continue
-                for line in lines:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        d = json.loads(line)
-                    except Exception:
-                        continue
-                    if d.get("type") != "assistant":
-                        continue
-                    ts = d.get("timestamp", "")
-                    c = d.get("message", {}).get("content")
-                    if not isinstance(c, list):
-                        continue
-                    for b in c:
-                        if not (isinstance(b, dict) and b.get("type") == "tool_use"):
-                            continue
-                        tool = b.get("name")
-                        inp = b.get("input") or {}
-                        if not isinstance(inp, dict):
-                            continue
-                        fp = str(inp.get("file_path", "") or "")
-                        cmd = str(inp.get("command", "") or "")
-                        # Sidechain/compaction rewrites repeat a call verbatim
-                        # (up to 6x); dedupe or every rate is inflated.
-                        key = (ts, tool, (cmd or fp)[:400])
-                        if key in seen:
-                            continue
-                        seen.add(key)
-                        calls[tool] += 1
-                        if ts:
-                            days.add(ts[:10])
-                        text, label = guard.payload_for(tool, inp)
-                        if text:
-                            payloads.append((ts, tool, label, text,
-                                             os.path.basename(dp)))
-    return calls, payloads, days, nfiles
+    for call in hb.iter_calls(roots, dedupe=hb.key_ts_head, corpus=corpus):
+        text, label = guard.payload_for(call.tool, call.input)
+        if text:
+            payloads.append((call.ts, call.tool, label, text, call.project))
+    return corpus.calls, payloads, corpus.days, corpus.files
 
 
 def main():

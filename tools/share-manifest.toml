@@ -192,6 +192,10 @@ foreign_roots = [
 "tools/glob-fitness.py" = "instruments/glob-fitness.py"
 "tools/skill-routing-audit.py" = "instruments/skill-routing-audit.py"
 "tools/cross-index/xi_cards.py" = "instruments/cross-index/xi_cards.py"
+"tools/hook-backtest/" = "instruments/hook-backtest/"
+"tools/mod-review/" = "instruments/mod-review/"
+"tools/platform-search/" = "instruments/platform-search/"
+"tools/token-key-gate/" = "instruments/token-key-gate/"
 
 # ---------------------------------------------------------------------------
 # not_shipped — assets this repo NAMES but does not contain.
@@ -723,6 +727,7 @@ files (skill-routing-audit.py and cross-index/xi_cards.py). Install by copying a
 `<home>/tools/<name>/`, as instruments/README.md says. What an adopter still does not get is the
 data those tools read (the transcript archive, the reconciliation stamp, the judgment store) and the
 tools whose subject is a personal store or a machine."""
+# PER-FILE NARROWING 2026-10-10 (lane W8, source 148e021e; class and position only). An adjudication lane ruled these source directories ship under `instruments/<same name>/`, each with [[collected]] entries in the lane W8 2026-10-10 block: `tools/hook-backtest/` (all 5 files; the shared corpus-walk harness the two ps backtests now import), `tools/mod-review/` (2), `tools/platform-search/` (3 files; its `state/` directory is gitignored at the source and not collected) and `tools/token-key-gate/` (2). `tools/git-hooks/` gained 3 files shipped beside the post-commit hook already here (`pre-commit` and its two checkers). `instruments/ps-errorpref-backtest/` and `instruments/ps-pipeline-close-backtest/` are re-collected from the source in the same lane (their retained self-contained revisions are retired). STILL NOT SHIPPED, newly relevant: `tools/cred-sweep/`, the credential-pattern list that `instruments/hook-backtest/` imports to redact `--excerpt` text. It stays out under this entry's class (a sweep over the operator's own stores). Effect: `excerpt()` withholds text instead of printing it (fail-closed by design), and 3 of the suite's 28 cases (X1, X2, E4) fail without it; every other function of the harness is unaffected. Fallback: write a list of `(category, compiled regex with one capture group)` pairs in `cred_sweep.py` under a sibling `cred-sweep/` directory, as `harness._patterns()` documents. Also still not shipped, cited by the new files: `tools/extdispatch/` (the platform-search agy leg degrades to unavailable; own partial entry), `reports/` (mod-review writes its records there; the tree does not ship).
 
 [[not_shipped]]
 path = "tools/extdispatch/"
@@ -8350,7 +8355,10 @@ edits = [
 [[collected]]
 path = "instruments/entry-schema-lint/controls.py"
 source = "~/.claude/tools/entry-schema-lint/controls.py"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-10 (lane W8): one fixture string, the proof-of-life line of the synthetic hook `undet_guard` (a docstring the control writes into its temp home, line 64 of the source): a personal first name (class: a personal first name in a fixture string) -> the role word 'the owner'. The line still names a human to ask rather than a command, so the hook is still classified undetermined and every control keeps its expected value; no other line changed.",
+]
 # First collection (lane W5a). 46 controls. Three of them (C-00, C-32, C-35)
 # need a system-hmi tree beside it and FAIL without one; verified 43/46 without
 # it and 46/46 with the source's. Placeholder drive paths in fixtures are
@@ -8461,9 +8469,9 @@ path = "instruments/ps-errorpref-backtest/backtest.py"
 source = "~/.claude/tools/ps-errorpref-backtest/backtest.py"
 status = "edited"
 edits = [
-  "DEFAULT_ROOTS: the second corpus root was an offline session archive on a non-system drive -> dropped, with a SHARE EDITION comment; `--root` (already supported) takes extra roots.",
-  "BASELINE comment: the same archive named as a path -> 'the offline session archive'.",
-  "BASELINE comment: one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+  "BASELINE comment (line 43 of the source): the offline session archive, named as an absolute path on a non-system drive -> 'the offline session archive'.",
+  "BASELINE comment (line 48 of the source): one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+  "RE-COLLECTED 2026-10-10 (lane W8, source 148e021e): the source now imports the shared corpus-walk harness from the sibling tools/hook-backtest/, which ships under instruments/hook-backtest/ this round, so the retained self-contained revision (and its first edit, the dropped second DEFAULT_ROOTS entry) is retired: DEFAULT_ROOTS is `hb.DEFAULT_ROOTS` in this file and the same second root is dropped in the harness (see that entry). The two edits above re-applied on re-read text; diff against the source equals exactly this list.",
 ]
 # First collection (lane W5a). Reads real session transcripts; with none present
 # it prints 'no PowerShell-language payloads found' and exits 1.
@@ -8481,9 +8489,9 @@ path = "instruments/ps-pipeline-close-backtest/backtest.py"
 source = "~/.claude/tools/ps-pipeline-close-backtest/backtest.py"
 status = "edited"
 edits = [
-  "DEFAULT_ROOTS: the second corpus root was an offline session archive on a non-system drive -> dropped, with a SHARE EDITION comment; `--root` (already supported) takes extra roots.",
-  "BASELINE comment: the same archive named as a path -> 'the offline session archive'.",
-  "BASELINE comment: one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+  "BASELINE comment (line 50 of the source): the offline session archive, named as an absolute path on a non-system drive -> 'the offline session archive'.",
+  "BASELINE comment (line 59 of the source): one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+  "RE-COLLECTED 2026-10-10 (lane W8, source 148e021e): same as instruments/ps-errorpref-backtest/backtest.py: the source now imports the shared harness from the sibling tools/hook-backtest/ (ships this round), so the retained self-contained revision and its first edit (the dropped second DEFAULT_ROOTS entry) are retired; DEFAULT_ROOTS is `hb.DEFAULT_ROOTS` and the drop lives in the harness. Diff against the source equals exactly this list.",
 ]
 # First collection (lane W5a). Same needs as ps-errorpref-backtest.
 
@@ -9796,3 +9804,129 @@ fallback = """Write your own config-home `.gitignore`; the shipped rules say whi
 detection command for a tracked-but-ignored file."""
 
 # === main 2026-10-10 END ===
+
+# === lane W8 2026-10-10 BEGIN ===
+# Source 148e021e. An adjudication lane ruled five more source `tools/`
+# directories (hook-backtest, mod-review, platform-search, token-key-gate, and
+# the new files of git-hooks) ship under `instruments/<same name>/`; the
+# `[source_map]` lines and the dated narrowing note on the `tools/` entry were
+# made in place. Each file below was read whole before it was copied.
+
+[[collected]]
+path = "instruments/hook-backtest/README.md"
+source = "~/.claude/tools/hook-backtest/README.md"
+status = "edited"
+edits = [
+  "usage-flags bullet (line 35): the default-roots clause named the two corpus roots, the second an offline session archive as an absolute path on a non-system drive -> 'only ~/.claude/projects; the source also has an offline archive directory, removed here, add it with --root'.",
+  "frozen-snapshot sentence (line 73): the same archive named as a path -> 'the offline session archive (not part of this copy)'.",
+  "porting-comparison paragraph (line 84): a locator naming a project directory and a session-file prefix (a session id) with a line number -> 'one transcript record dated 2026-08-18, locator omitted'. The date and the rest of the sentence are kept.",
+  "known-limits bullet (line 92): the third-mirror note named a transcript-mirror tree under the home directory (a ~/ path into a tree that does not ship) -> a sentence that the source has two more record sources (an offline archive and a mirror carrying tool calls), this copy has neither, the default is `~/.claude/projects`, and `--root` adds more. The reason for leaving the mirror out of the default (comparability with the registered baseline) is kept.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Cites tools/cred-sweep/ (the credential-pattern list `--excerpt` redacts with), which does not ship: see the cred-sweep note on the `tools/` entry. The README's measurement table cites real transcript counts of the source machine as dated evidence; kept.
+
+[[collected]]
+path = "instruments/hook-backtest/harness.py"
+source = "~/.claude/tools/hook-backtest/harness.py"
+status = "edited"
+edits = [
+  "DEFAULT_ROOTS (line 37-40): the second corpus root, an offline session archive as an absolute path on a non-system drive -> dropped, with a two-line SHARE EDITION comment above the list. `--root` (repeatable, in hook_backtest.py and both ps backtests) takes extra roots. The two ps-*-backtest entries (retired self-contained revisions) carried the same drop before this harness shipped.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (321 lines). Imports hooks from the live ~/.claude/hooks tree and the credential pattern list from the sibling `cred-sweep` directory; the second is not shipped, so `excerpt()` fails closed to '<excerpt withheld: ...>' (the harness's documented behaviour) and the suite's X1, X2 and E4 cases fail without it (see instruments/README.md). No other machine-bound value.
+
+[[collected]]
+path = "instruments/hook-backtest/adapters.py"
+source = "~/.claude/tools/hook-backtest/adapters.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (80 lines). Verbatim; diff against the source empty. Adapters compose the exports of three shipped hooks (ps_errorpref_guard, ps_pipeline_close_guard, secret_file_guard).
+
+[[collected]]
+path = "instruments/hook-backtest/hook_backtest.py"
+source = "~/.claude/tools/hook-backtest/hook_backtest.py"
+status = "edited"
+edits = [
+  "module docstring usage example (line 6): the `--root` value, a snapshot directory on a non-system drive (class: non-system-drive path) -> the relative form `path/to/snapshot/projects`.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (106 lines). The default roots it prints come from harness.DEFAULT_ROOTS.
+
+[[collected]]
+path = "instruments/hook-backtest/tests/test_harness.py"
+source = "~/.claude/tools/hook-backtest/tests/test_harness.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (169 lines). Verbatim. The credential-shaped value in the fixtures is built by concatenating two literals at run time (the sibling credential-pattern list's own self-test shape), not a real value. Needs the live hooks tree and the unshipped cred-sweep list: 28/28 in a scratch home holding the source's hooks plus that list, 25/28 in this repo tree (X1, X2, E4 need the list). Installed layout: HOOKS_DIR is the home's hooks/.
+
+[[collected]]
+path = "instruments/git-hooks/pre-commit"
+source = "~/.claude/tools/git-hooks/pre-commit"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (14 lines). Verbatim; POSIX shell script with no extension. Runs the two checkers beside it; a missing python or checker passes the commit through. Wired by `git config core.hooksPath tools/git-hooks`.
+
+[[collected]]
+path = "instruments/git-hooks/check_budgets.py"
+source = "~/.claude/tools/git-hooks/check_budgets.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (126 lines). Verbatim. Reads the caps from `hooks/ops_health_nudge.py` at the repository top level (the installed layout) and rules on a staged CLAUDE.md and top-level ops/*.md; in this repo's renamed tree neither path matches, so it passes. Calibrated in a throwaway repo: a CLAUDE.md grown over its cap is refused, a clean commit passes.
+
+[[collected]]
+path = "instruments/git-hooks/check_py_escapes.py"
+source = "~/.claude/tools/git-hooks/check_py_escapes.py"
+status = "edited"
+edits = [
+  "module docstring, line 3: an invented drive-rooted example path inside a list of invalid-escape examples (class: invented non-system-drive path) -> the relative form `dir\\Sub`; the escape it illustrates (backslash then a capital S) is preserved.",
+  "module docstring, line 17: the same example repeated in the fix sentence (written with doubled backslashes) -> the same relative form with doubled backslashes.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (85 lines). The docstring is a raw string, so the example text is data. Calibrated in a throwaway repo: a staged file with an invalid escape is refused (exit 1), a clean one passes.
+
+[[collected]]
+path = "instruments/mod-review/mod_review.py"
+source = "~/.claude/tools/mod-review/mod_review.py"
+status = "edited"
+edits = [
+  "module docstring STATUS paragraph (lines 4-5): a pointer to a dated upgrade-delta addendum inside the source's reports/ tree (a tree that does not ship) -> 'a dated Claude Code upgrade-delta addendum under the source's reports/ tree, not shipped here'. The ruling date and 'pending item 1' are kept.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (222 lines). `reports/mod-reviews/` stays as written: it is the directory this tool WRITES its records to (a constant, created on first review), not a pointer to a record that exists. Its ops-health check lives in `hooks/ops_health_nudge.py`; see controls below.
+
+[[collected]]
+path = "instruments/mod-review/controls.py"
+source = "~/.claude/tools/mod-review/controls.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (136 lines). Verbatim. 9 cases; the last two run the home's `hooks/ops_health_nudge.py` against the fixture and need the source's version of that hook (the `mod-review` check): OK in a scratch home holding the source's hooks, 2 of 9 fail against the hook file this repo's tree held when the lane started (the hooks lane refreshes it).
+
+[[collected]]
+path = "instruments/platform-search/README.md"
+source = "~/.claude/tools/platform-search/README.md"
+status = "edited"
+edits = [
+  "usage block, civitai-hash example (line 20): the model-file argument, an invented absolute path on a non-system drive -> the relative form `path/to/model.safetensors`.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (67 lines). Cites ops/references/platform-source-registry.json (ships under claude-ops/ops/references/), tools/extdispatch/ (partial entry above; the dispatcher does not ship) and hooks/subagent_retrieval_brief.py (not shipped, own entry). `state/` is gitignored at the source and not collected; the tool creates state/hosts.json on first query.
+
+[[collected]]
+path = "instruments/platform-search/psearch.py"
+source = "~/.claude/tools/platform-search/psearch.py"
+status = "edited"
+edits = [
+  "AGY_DIR (line 381): the agy worker's working directory, an absolute path on a non-system drive -> `str(ROOT / 'tools' / 'extdispatch' / 'agy-cwd')`, with a three-line SHARE EDITION comment above it. The agy leg runs the external dispatcher under tools/extdispatch/, which does not ship, so in this repo the leg's subprocess fails and the leg reports itself unavailable (verified: it returns LegUnavailable('agy grant refused: ...')); it never reads as zero results. The `--wide` and reddit-fallback paths degrade the same way.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (651 lines). Network legs not exercised (outbound requests; offline controls only). ROOT is parents[2] of the file, so the registry resolves at ops/references/ in an installed home; in this repo's renamed tree `registry_status()` is empty.
+
+[[collected]]
+path = "instruments/platform-search/controls.py"
+source = "~/.claude/tools/platform-search/controls.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (114 lines). Verbatim. Offline, 24 cases: 24/24 in a scratch home where ops/references/platform-source-registry.json resolves, 23/24 in this repo tree (the 'every mapped registry id exists' wiring case, because the registry sits under claude-ops/ here).
+
+[[collected]]
+path = "instruments/token-key-gate/README.md"
+source = "~/.claude/tools/token-key-gate/README.md"
+status = "edited"
+edits = [
+  "usage block, 3 command lines (lines 18, 22, 26): each began with the tool's absolute install path on the source machine (an absolute home path carrying the account name) -> the repo-relative form `tools/token-key-gate/token_key_gate.py`, the same form every other citation of an instrument uses.",
+]
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (85 lines). KEPT AS WRITTEN, judgement call for main: the two tables near the end list the source owner's own project deliverables by project name and relative path (the already-fixed upstream shells, and the known-defective copies left unrebuilt by a user ruling of the same date). Project names and relative paths are not scrub targets under the rules; they are an evidence snapshot, but they are also named files in trees that do not ship. If the owner prefers, drop those two sections and keep the property, usage and fix.
+
+[[collected]]
+path = "instruments/token-key-gate/token_key_gate.py"
+source = "~/.claude/tools/token-key-gate/token_key_gate.py"
+status = "verbatim"
+# NEW 2026-10-10 (lane W8, source 148e021e). Read whole (240 lines). Verbatim; diff empty. Needs Playwright with Chromium for `run` and the dynamic half of `selftest` (exit 2 and a loud 'not checked' line when absent, like page-fill-gate); `static` is stdlib-only. selftest PASS in place (3 static + 3 dynamic cases).
+# === lane W8 2026-10-10 END ===
