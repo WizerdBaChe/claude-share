@@ -68,11 +68,12 @@ two queued gate fixes; merged `--no-ff`, hooks last.
   repo's own file), so triage will keep listing it as a candidate — it is not
   collected, by design. A third-party creator's handle kept in
   `rule-registry.md` as a public-source attribution.
-- **Deferred.** Pointers W2 generalised to "source-only" for `platform-search`
-  and `token-key-gate` in `global-claude-md/CLAUDE.md` and
-  `rules/deliverable-doc-refs.md` could be restored now that both tools ship
-  under `instruments/`; left for the next round so this one closes on a
-  verified tree.
+- **Follow-up, same day.** The external-search sentence in
+  `global-claude-md/CLAUDE.md`, generalised to "source-only" by W2, is restored
+  to the source's `tools/platform-search/psearch.py` command now that the tool
+  ships under `instruments/` (the manifest edit is marked retired). The
+  `token-key-gate` pointer in `rules/deliverable-doc-refs.md` had been kept in
+  the source's form all along; nothing to restore there.
 
 ## 2026-10-08 — `model-bench/` round 3 synced from the source, HTML report replaced by an explainer post
 
