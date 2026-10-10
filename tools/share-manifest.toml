@@ -81,6 +81,11 @@ collected_roots = [
     # folder's own README.md is repo-authored and name-exempt, same as this
     # list's other roots.
     "instruments/",
+    # 2026-10-10 (lane W6, refresh round): declared on creation day, same
+    # discipline as the roots above. Holds two Claude Code mods (model-cap-mod/,
+    # feedback-observer/) collected from the source's `mods/`; the folder's own
+    # README.md is repo-authored and name-exempt.
+    "mods/",
 ]
 
 # ---------------------------------------------------------------------------
@@ -9341,3 +9346,252 @@ and calibrating each pattern on a should-hit and a should-not-hit sample before
 trusting it is the part of the method that travels."""
 
 # === lane W4 2026-10-10 END ===
+
+# === lane W6 2026-10-10 BEGIN ===
+# New root `mods/` (declared in collected_roots above). Source: the source's
+# `mods/` tree, three Claude Code plugins, 36 tracked files at source HEAD
+# 148e021e; `git status --porcelain mods` was empty at collection (clean).
+# Seven-row verdicts, per plugin:
+#   model-cap-mod     SHIP (edited). Runs from a plugin directory on any
+#                     machine with Claude Code 2.1.287+; reads and writes only
+#                     under its own config home (derived from its plugin root);
+#                     the Python guard it mirrors, its test suite and the
+#                     deny-message rule all ship; cited by the refreshed
+#                     hooks/model_cap_guard.py (heartbeat file) and by shipped
+#                     ops prose, so row 2 forbids leaving it out silently.
+#   feedback-observer SHIP (edited), calibration DATA excluded. Runs the same
+#                     way; its sink (instruments/feedback-pool) ships; cited by
+#                     the refreshed feedback.py and rule-registry. The
+#                     calibration fixtures are verbatim excerpts of real
+#                     sessions (row 3/6) and do not ship; see the not_shipped
+#                     entry below.
+#   pending-items     NOT shipped: it shells out to a personal tool that stays
+#                     in the source's tools/ tree (row 6); see below.
+# Tests run in this repo with only the `claude` CLI (2.1.295 on the collecting
+# machine): `claude plugin test mods/model-cap-mod` 11 pass / 0 fail;
+# `claude plugin test mods/feedback-observer` 24 pass / 0 fail. judge.py
+# `--stats` and a py_compile of make_fixture.py also ran clean in place.
+
+[[collected]]
+path = "mods/model-cap-mod/.claude-plugin/plugin.json"
+source = "~/.claude/mods/model-cap-mod/.claude-plugin/plugin.json"
+status = "verbatim"
+# First collection (lane W6). Read in full; plugin name, version, one-line description.
+
+[[collected]]
+path = "mods/model-cap-mod/README.md"
+source = "~/.claude/mods/model-cap-mod/README.md"
+status = "edited"
+# First collection (lane W6). Read in full (76 lines). Diff against the source,
+# line endings normalised, equals the two edits below and nothing else.
+edits = [
+  "line 14 ('why this exists' paragraph): a parenthetical naming the session the 2026-10-02 incident happened in (a session id, 8 hex characters) removed; the sentence keeps the date, the round and the facts (eight parallel dispatches, two escaping on a hook timeout).",
+  "line 39 (live-probe paragraph): the closing sentence that pointed at the probe record, an absolute path on a non-system drive inside a private lab project, removed; the probe's date, CC version and findings stay in the sentences before it.",
+]
+
+[[collected]]
+path = "mods/model-cap-mod/hooks/hooks.json"
+source = "~/.claude/mods/model-cap-mod/hooks/hooks.json"
+status = "verbatim"
+# First collection (lane W6). One line: the module list.
+
+[[collected]]
+path = "mods/model-cap-mod/hooks/policy.ts"
+source = "~/.claude/mods/model-cap-mod/hooks/policy.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (202 lines): the pure policy -- tier
+# sets, spawn and step verdicts, effort-axis notice, deny/refusal text builders,
+# heartbeat map. Deny texts cite `tools/hook-deny-lint/report_fp.py`, which ships
+# under instruments/ (source_map resolves it). No private value.
+
+[[collected]]
+path = "mods/model-cap-mod/hooks/register.ts"
+source = "~/.claude/mods/model-cap-mod/hooks/register.ts"
+status = "edited"
+# First collection (lane W6). Read in full (184 lines): three hooks
+# (session.start heartbeat, agent.spawn, turn.step), both with fail-closed
+# .catch handlers; every path is derived from the plugin root.
+edits = [
+  "line 3 (file-header comment): the session id (8 hex characters) naming the 2026-10-02 incident's session replaced by the words 'one SHARE round'; the incident description and latencies on that line and the next are kept.",
+]
+
+[[collected]]
+path = "mods/model-cap-mod/tests/policy.test.ts"
+source = "~/.claude/mods/model-cap-mod/tests/policy.test.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (111 lines). Runs under
+# `claude plugin test`: 11 pass / 0 fail from this repo.
+
+[[collected]]
+path = "mods/feedback-observer/.claude-plugin/plugin.json"
+source = "~/.claude/mods/feedback-observer/.claude-plugin/plugin.json"
+status = "verbatim"
+# First collection (lane W6). Read in full.
+
+[[collected]]
+path = "mods/feedback-observer/README.md"
+source = "~/.claude/mods/feedback-observer/README.md"
+status = "edited"
+# First collection (lane W6). Read in full (54 lines). Its pointers to the
+# design document, build log and handoff note sit under the excluded
+# `references/` and `reports/` trees (directory entries below); they are kept as
+# provenance, and the mods/README.md of this repo says so.
+edits = [
+  "line 46 ('install and develop' section): an absolute home path, account name included, naming the plugin directory -> `~/.claude/mods/feedback-observer` followed by a parenthetical telling the reader to substitute their own home path.",
+]
+
+[[collected]]
+path = "mods/feedback-observer/calibration/make_fixture.py"
+source = "~/.claude/mods/feedback-observer/calibration/make_fixture.py"
+status = "verbatim"
+# First collection (lane W6). Read in full (107 lines): renders a slice of a
+# transcript into the observer's window format. Generic; the one piece of the
+# calibration directory that ships (see the not_shipped entry for the rest).
+
+[[collected]]
+path = "mods/feedback-observer/hooks/gate.ts"
+source = "~/.claude/mods/feedback-observer/hooks/gate.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (100 lines): when a check may start.
+# CLOSEOUT_RE holds the operator's own close-out words; they are also in the
+# shipped global CLAUDE.md template, so no new disclosure.
+
+[[collected]]
+path = "mods/feedback-observer/hooks/hooks.json"
+source = "~/.claude/mods/feedback-observer/hooks/hooks.json"
+status = "verbatim"
+# First collection (lane W6). One line: the module list.
+
+[[collected]]
+path = "mods/feedback-observer/hooks/io.ts"
+source = "~/.claude/mods/feedback-observer/hooks/io.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (37 lines): the engine-interface slice.
+
+[[collected]]
+path = "mods/feedback-observer/hooks/parse.ts"
+source = "~/.claude/mods/feedback-observer/hooks/parse.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (95 lines): reply -> validated findings.
+
+[[collected]]
+path = "mods/feedback-observer/hooks/record.ts"
+source = "~/.claude/mods/feedback-observer/hooks/record.ts"
+status = "edited"
+# First collection (lane W6). Read in full (47 lines): the per-session JSONL
+# recorder with its fail-silent buffer.
+edits = [
+  "line 44 (doc comment of projectDirName): the worked example of how a home path maps to a project folder name spelled the real account name in both the path form and the folder-name form -> the stand-in word `you` in both; the mapping rule it illustrates is unchanged.",
+]
+
+[[collected]]
+path = "mods/feedback-observer/hooks/register.ts"
+source = "~/.claude/mods/feedback-observer/hooks/register.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (388 lines): five event hooks, two
+# commands, the state store, the calibration runner. All paths derive from the
+# plugin root or CLAUDE_CONFIG_DIR / USERPROFILE. Comments cite the design
+# document and the build log under the excluded `references/` tree (kept).
+
+[[collected]]
+path = "mods/feedback-observer/hooks/window.ts"
+source = "~/.claude/mods/feedback-observer/hooks/window.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (92 lines): the transcript window.
+
+[[collected]]
+path = "mods/feedback-observer/judge.py"
+source = "~/.claude/mods/feedback-observer/judge.py"
+status = "verbatim"
+# First collection (lane W6). Read in full (124 lines). stdlib-only; HOME is
+# CLAUDE_CONFIG_DIR or two levels above the file. `--stats` ran clean in place.
+
+[[collected]]
+path = "mods/feedback-observer/prompt.md"
+source = "~/.claude/mods/feedback-observer/prompt.md"
+status = "verbatim"
+# First collection (lane W6). Read in full (41 lines): the system prompt. Its
+# target-vocabulary examples name source-side tools, skills and one project
+# (`project:` example); project names are not scrub targets (rule 2) and they
+# are examples of the closed prefix vocabulary, not instructions.
+
+[[collected]]
+path = "mods/feedback-observer/tests/gate.test.ts"
+source = "~/.claude/mods/feedback-observer/tests/gate.test.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (94 lines). Uses the one-letter
+# stand-in `x` as the account folder of invented example paths.
+
+[[collected]]
+path = "mods/feedback-observer/tests/parse.test.ts"
+source = "~/.claude/mods/feedback-observer/tests/parse.test.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (66 lines).
+
+[[collected]]
+path = "mods/feedback-observer/tests/presence.test.ts"
+source = "~/.claude/mods/feedback-observer/tests/presence.test.ts"
+status = "edited"
+# First collection (lane W6). Read in full (68 lines): activation-presence
+# scenarios against stubbed engine events.
+edits = [
+  "line 16 (the session.id stub): an invented session id in UUID shape -> `feedcafe-test-session`, a non-UUID shape. The test only feeds the id back to itself through stubs; `claude plugin test` still passes 24/24.",
+]
+
+[[collected]]
+path = "mods/feedback-observer/tests/window.test.ts"
+source = "~/.claude/mods/feedback-observer/tests/window.test.ts"
+status = "verbatim"
+# First collection (lane W6). Read in full (69 lines).
+
+[[not_shipped]]
+path = "mods/pending-items/"
+disposition = "excluded-by-decision"
+reason = """A side-pane mod (four files) that lists the operator's recorded
+continuation items by running one personal tool of the source (`pending.py`
+under the source's `tools/pending-items/`) and rendering its JSON. Two things
+make it unshippable as is: the register file hard-codes that tool's invocation
+as an absolute path under the operator's home directory (account name
+included), and the tool it runs reads the operator's own pending-item records
+and priority table, which is covered by the `tools/` entry above and does not
+ship. Without the tool the mod is an empty pane; with a scrubbed path it would
+still point at nothing. No shipped file cites this mod as a mod (grep over this
+worktree for the plugin and tool names: no hits outside this manifest), so
+excluding it needs no router edit.
+Re-verified 2026-10-10 (lane W6) against the source: four tracked files, read
+in full; the invocation sits at the top of the register file, no part of the
+logic besides the pane layout is portable."""
+fallback = """The pane is a ~100-line pattern: a `session.attach` hook that runs a
+bounded subprocess for a JSON list and opens a pane, a command that refreshes
+it, and a `ui.render` hook. An adopter who keeps their own pending-items list
+as JSON can write the same mod; the other two shipped mods under `mods/` show
+the hook, state-store and test shapes."""
+
+[[not_shipped]]
+path = "mods/feedback-observer/calibration/"
+disposition = "partial"
+reason = """Only `make_fixture.py` ships from this directory. The other five
+files are the FO-06 calibration material: two transcript-window fixtures, their
+two expectation files and the last calibration run's output. The windows are
+verbatim excerpts of real sessions, not synthetic data: the known-false one is
+a ~42 KB excerpt of a session on an unrelated product project (tool calls with
+absolute paths on a non-system drive and under the operator's home directory,
+the operator's downloads folder, a local server's id); the known-true one holds
+the operator's home paths, a path on a non-system drive and the handle of a
+third-party social-media account whose post the session was analysing; the
+expectation files point at the source transcript by its session-id file name;
+the run output records that session id and the model's replies. Scrubbing a
+transcript fixture would be rewriting evidence, and the replies recorded in the
+run output depend on the bytes of the windows.
+Re-verified 2026-10-10 (lane W6) by reading all five files in full."""
+fallback = """`make_fixture.py` ships: it cuts a slice of the adopter's own transcript
+into the observer's window format, and the adopter writes the matching
+`<name>.expect.json` by hand (`expect_target` for a known-true window,
+`expect_empty` for a known-false one; the script's docstring gives the shape).
+`/fo-calibrate` then runs the shipped `prompt.md` over whatever fixtures exist
+and writes the run output. With none, the command reports 0 of 0 passed
+(from reading register.ts; not run live) and every other feature is unaffected.
+What an adopter does not get is the source's prompt-tuning evidence: whether
+`prompt.md` stays quiet on a clean window and fires on a known defect is theirs
+to re-measure before they trust the observer's precision."""
+# === lane W6 2026-10-10 END ===
