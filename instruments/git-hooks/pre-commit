@@ -1,0 +1,14 @@
+#!/bin/sh
+# pre-commit -- two staged-blob checks, each ruling only on what it can determine:
+#   check_py_escapes.py  refuse staged Python holding an invalid escape sequence
+#   check_budgets.py     refuse a CLAUDE.md / ops/*.md GROWN past its budget
+# A missing python or checker is not a verdict, so either passes the commit through.
+#
+# Wired by: git config core.hooksPath tools/git-hooks   (repo-local)
+top=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+command -v python >/dev/null 2>&1 || exit 0
+for check in check_py_escapes.py check_budgets.py; do
+  [ -f "$top/tools/git-hooks/$check" ] || continue
+  python -X utf8 "$top/tools/git-hooks/$check" || exit 1
+done
+exit 0

@@ -61,7 +61,7 @@ def build_home(root: Path) -> Path:
     w(home / "hooks" / "manual_guard.py", '"""manual_guard.\n\nSTATUS: LIVE since 2026-09-08 (fixture).\n'
       'Proof-of-life: integrity-sweep check 13.\n"""\n')
     w(home / "hooks" / "undet_guard.py", '"""undet_guard.\n\nSTATUS: LIVE since 2026-09-08 (fixture).\n'
-      'Proof-of-life: ask Nathan whether it still fires.\n"""\n')
+      'Proof-of-life: ask the owner whether it still fires.\n"""\n')
     w(home / "ops" / "references" / "integrity-sweep.md",
       "# sweep\n```bash\npython hooks/good_guard.py --selftest\n# shadow_ok proof\n# shadow_bad proof\n"
       "# manual_guard and undet_guard are named HERE and nowhere else -- naming is not running\n```\n")
