@@ -59,8 +59,8 @@ ever classified into BLOCKED or WITHIN_CAP — at that point the vocabulary is
 demonstrably not keeping up with the fleet and the safe default has moved.
 
 Proof-of-life: `python tools/model-cap-test/test_model_cap_guard.py` (ALL PASS
-40/40 as of 2026-09-23, printed by the suite rather than typed: 14 must-deny /
-12 must-pass, each also asserted SILENT / 4 must-notice / 2 undetermined + 2
+46/46 as of 2026-10-10, printed by the suite rather than typed: 17 must-deny /
+15 must-pass, plus M-T1/M-T2 settings checks (timeout floor, onFailure block), each also asserted SILENT / 4 must-notice / 2 undetermined + 2
 twins / fail-open + 3 unclassifiable-shape / coverage / isolation). Three of the
 must-deny cases and one must-notice case run against a PLANTED agents/ corpus,
 because the classes "a local definition pins opus/fable" and "a local definition
@@ -72,6 +72,29 @@ unlisted blocked name leaks, an unlisted capped name announces itself on every
 ordinary dispatch until someone stops reading the notices. The two known gaps
 above (scriptPath, SendMessage resume) are printed by the suite and counted in
 no verdict — the guard cannot rule on them, so neither does its calibration.
+
+Known limitation — the command-hook timeout is a PASS (observed 2026-10-02,
+one session, a share-repo round): eight Agent dispatches without `model` went
+out within two minutes while eight worktrees and their agents were starting;
+this guard's deny reached the engine within 0.2–2.7 s on six of them and NOT
+within the 5 s `timeout` settings.json then gave it on two (W1-ops at 5.4 s,
+W4b at 6.5 s — the receipt rows were written, the stdout arrived too late).
+The official hooks docs (code.claude.com/docs/en/hooks, read 2026-10-02): "a
+timed-out command hook doesn't block the tool call … don't count on a stalled
+hook to act as a gate"; the default `timeout` is 600 s and this repo had set 5.
+Both escaped subagents ran on claude-fable-5-1 (177 and 138 turns). Fix: every
+deny-capable hook's timeout is 30 s (settings.json, 2026-10-02); the regression
+case M-T1 in the suite reads settings.json and fails when this hook's timeout
+drops under 30 again. What no timeout closed UNTIL 2.1.295: a command hook could only fail
+OPEN. Since 2.1.295 settings.json sets `onFailure: "block"` on this hook
+(2026-10-10, user ruling), so a crash, a missing interpreter or the 30 s
+timeout now BLOCKS the dispatch instead of passing it; the in-process route
+remains the stronger closure — the mods API's `agent.spawn`
+event carries `model` (rewritable) and `parentModel` and answers `{ deny }`
+synchronously; see a model-cap escape evaluation report. Rules-side
+corollary (ops/20-dispatch.md §4): a guard that did not answer is not an
+approval — a dispatch that went through with no `model` is stopped and
+re-dispatched, never "left".
 
 False-positive log (3 observed → loosen): none yet.
 
@@ -97,7 +120,29 @@ the ceiling itself (owner: user, 2026-07-07) — the hook cannot notice. (f)
 local_agent_model() would then return None for every type and every omitted
 `model` would deny.
 
-Fail-open by design: any parse error exits 0 so a guard bug never blocks work.
+Deferral to the mod (2026-10-09, user ruling): re-deriving which definition
+the engine resolves for a subagent_type drifts — the engine also reads plugin
+agents, --agents JSON and managed definitions, and two misses in one morning
+(lab r22) denied pinned haiku workers and steered the caller onto sonnet. When
+`model` is omitted AND no definition is found here AND mods/model-cap-mod wrote
+a heartbeat for this session_id (telemetry/model-cap-mod-alive.json), this
+guard exits 0: the mod's turn.step hook judges the model the engine actually
+resolved, before the first request. Without the heartbeat the old deny stands,
+so a session without the mod is never less capped than before. A definition
+found here that pins opus/fable still denies (deterministic). Cases M-H1..M-H3.
+
+Effort axis (2026-10-10, user ruling, reconciliation record
+a cc-upgrade-delta report): Agent gained a per-call
+`effort` in 2.1.292, so `sonnet` + `effort: max` passed a model-only check while
+being over the "sonnet + high" ceiling. `effort` in EFFORT_OVER_CAP denies on
+Agent (tool_input.effort) and on an inline Workflow script literal, with the same
+approval marker. Frontmatter `effort:` in agents/*.md is user-authored and not
+checked here. Cases M-E1..M-E3 (deny), M-E4..M-E6 (pass).
+
+Fail-open on malformed INPUT by design: any parse error exits 0 so a guard bug
+in reading the payload never blocks work. A crash, a missing interpreter or a
+timeout is different since 2.1.295: `onFailure: "block"` turns those into a
+block (settings.json).
 """
 import json
 import os
@@ -112,23 +157,37 @@ except Exception:           # a guard must not stop guarding if telemetry breaks
 
 BLOCKED = {"opus", "fable"}
 WITHIN_CAP = {"haiku", "sonnet"}
+# Effort axis (2026-10-10, user ruling): the ceiling is "sonnet + high", and since
+# 2.1.292 the Agent tool takes a per-call `effort`. Levels above `high` are over cap.
+EFFORT_OVER_CAP = {"xhigh", "max"}
 APPROVAL_MARKER = "[user-approved-top-tier]"
 AGENTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "agents")
+# Written by mods/model-cap-mod on session.start: {session_id: epoch}. A session listed here
+# runs the mod's turn.step judge, which sees the model the ENGINE resolved — so an omitted
+# `model` this guard cannot resolve from agent files is deferred to it instead of denied.
+MOD_HEARTBEAT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "telemetry", "model-cap-mod-alive.json")
 
 
-def local_agent_model(subagent_type: str) -> str | None:
-    """Return the `model:` pinned in agents/<subagent_type>.md frontmatter, or None.
-
-    Definitions are named by their `name:` frontmatter when present, else by file
-    stem; both are matched. None means: no local definition, or no `model:` key.
-    """
-    if not subagent_type:
-        return None
+def mod_judges(session_id: str) -> bool:
+    """True when the model-cap mod recorded a heartbeat for this session. Fail-closed toward
+    THIS guard's deny: unreadable, missing or unlisted means the mod is not known to be judging."""
+    if not session_id:
+        return False
     try:
-        for fn in os.listdir(AGENTS_DIR):
+        with open(MOD_HEARTBEAT, encoding="utf-8") as fh:
+            beats = json.load(fh)
+        return isinstance(beats, dict) and session_id in beats
+    except Exception:
+        return False
+
+
+def _pin_in(agents_dir: str, subagent_type: str) -> tuple[bool, str | None]:
+    """(found, model) for <agents_dir>/*.md matched by `name:` frontmatter or file stem."""
+    try:
+        for fn in os.listdir(agents_dir):
             if not fn.endswith(".md"):
                 continue
-            path = os.path.join(AGENTS_DIR, fn)
+            path = os.path.join(agents_dir, fn)
             with open(path, encoding="utf-8", errors="replace") as fh:
                 head = fh.read(4000)
             if not head.startswith("---"):
@@ -139,11 +198,29 @@ def local_agent_model(subagent_type: str) -> str | None:
             if subagent_type not in {stem, name.group(1) if name else stem}:
                 continue
             model = re.search(r"^model:\s*(\S+)", fm, re.MULTILINE)
-            return model.group(1).strip().strip("'\"").lower() if model else None
+            return True, (model.group(1).strip().strip("'\"").lower() if model else None)
     except Exception:
-        return None
-    return None
+        return False, None
+    return False, None
 
+
+def local_agent_model(subagent_type: str, cwd: str = "") -> str | None:
+    """Return the `model:` pinned in the definition the engine resolves, or None.
+
+    The project's <cwd>/.claude/agents is read first, then the user's agents/
+    (2026-10-09: a project-only definition read as "no pin" and was denied).
+    The caller passes CLAUDE_PROJECT_DIR first: the payload cwd moves with a
+    shell `cd`, the project root does not.
+    Definitions are named by their `name:` frontmatter when present, else by file
+    stem; both are matched. None means: no definition, or no `model:` key.
+    """
+    if not subagent_type:
+        return None
+    for d in ([os.path.join(cwd, ".claude", "agents")] if cwd else []) + [AGENTS_DIR]:
+        found, model = _pin_in(d, subagent_type)
+        if found:
+            return model
+    return None
 
 def tier_of(model: str) -> str:
     """-> 'blocked' | 'within-cap' | 'unrecognised'.
@@ -220,8 +297,21 @@ def main() -> None:
         model = str(tool_input.get("model") or "").lower()
         prompt = str(tool_input.get("prompt", ""))
         subagent_type = str(tool_input.get("subagent_type") or "")
+        effort = str(tool_input.get("effort") or "").strip().lower()
+        if effort in EFFORT_OVER_CAP and APPROVAL_MARKER not in prompt:
+            deny(
+                f"Effort cost cap: `effort: '{effort}'` is above the approved "
+                "subagent ceiling, which is sonnet + high effort. Re-dispatch "
+                "with effort: 'high' or omit `effort` (the definition or session "
+                "level applies). If the user explicitly approved a higher effort "
+                f"for THIS task, re-dispatch with {APPROVAL_MARKER} in the prompt."
+            )
         if not model:
-            pinned = local_agent_model(subagent_type)
+            pinned = local_agent_model(subagent_type, os.environ.get("CLAUDE_PROJECT_DIR") or str(payload.get("cwd") or ""))
+            if pinned is None and mod_judges(str(payload.get("session_id") or "")):
+                # 2026-10-09 ruling (user): the definition may live where this lookup never reads
+                # (plugin agents, --agents JSON, managed); the mod judges the resolved model.
+                sys.exit(0)
             if pinned is None:
                 deny(
                     "Model cost cap: `model` is required on Agent dispatch — "
@@ -229,7 +319,9 @@ def main() -> None:
                     "definition pinning a model, so omitting `model` inherits "
                     "the main loop's model (opus/fable on this machine) and "
                     "bypasses the cap. Re-dispatch with model: 'sonnet' "
-                    "(default) or 'haiku' (read/search-only)."
+                    "(default) or 'haiku' (read/search-only). If the model is "
+                    "itself the variable under test, do NOT swap it: stop and "
+                    "report this to the user instead."
                 )
             model = pinned  # frontmatter-pinned; checked below like an explicit arg
             route = f"the frontmatter of agents/{subagent_type}.md"
@@ -242,7 +334,8 @@ def main() -> None:
             deny(
                 f"Model cost cap: '{model}' is above the approved ceiling for "
                 "subagents — the ceiling is haiku/sonnet; use sonnet + high "
-                "effort instead. If the user explicitly approved a top-tier "
+                "effort instead, unless the model is itself the variable under "
+                "test (then stop and report). If the user explicitly approved a top-tier "
                 f"model for THIS task, re-dispatch with {APPROVAL_MARKER} in "
                 "the prompt."
             )
@@ -251,6 +344,17 @@ def main() -> None:
         script = str(tool_input.get("script", ""))
         if APPROVAL_MARKER in script:
             sys.exit(0)
+        over = re.search(
+            r"effort\s*[:=]\s*['\"](xhigh|max)['\"]", script, re.IGNORECASE
+        )
+        if over:
+            deny(
+                f"Effort cost cap: workflow script sets effort '{over.group(1)}', "
+                "above the approved subagent ceiling (sonnet + high effort). "
+                "Replace with effort: 'high', or include the marker "
+                f"{APPROVAL_MARKER} in the script if the user explicitly "
+                "approved it."
+            )
         hit = re.search(
             r"model\s*[:=]\s*['\"](opus|fable)['\"]", script, re.IGNORECASE
         )

@@ -26,9 +26,28 @@ WHAT IT RULES ON, and only this:
               (a landing-page host that grants webfetch but not a browser);
         or the host is in `unmeasured_publisher_hosts` and the surface is a browser
         (an unlisted publisher gets one plain fetch, never a browser — user ruling R2).
+        or (c) SESSION CAP (user ruling 2026-10-04): the row's class is `landing_page`
+              and its `max_per_run` is at most SESSION_CAP_MAX (2), and this session
+              already made `max_per_run` ALLOWED calls to that host on any surface.
+              Counted per session (the hook's nearest thing to a run; machine-wide
+              would let parallel sessions starve each other), NO time window (the
+              bot challenge reacts to repetition, and the measured overrun ran 12
+              calls over 132 min). The counter is the nav log below — every allow on
+              a listed host is written there before the call runs.
   ALLOW everything else, silently. An UNLISTED non-publisher host is ordinary web
-        reading and this hook has no opinion on it; per-run caps (`max_per_run`,
-        the three-unlisted-hosts cap) live in fetchsrc.py, which has a run to count in.
+        reading and this hook has no opinion on it; the other per-run caps (larger
+        `max_per_run`, the three-unlisted-hosts cap) live in fetchsrc.py, which has a
+        run to count in.
+
+  WHY (c). fetchsrc.py enforced `max_per_run` only on requests IT made; a WebFetch
+  never passes through it. Telemetry 2026-09-11..16: opg.optica.org (cap 1, Radware
+  CAPTCHA on repetition) was WebFetched 12, 8 and 6 times in three sessions, all
+  distinct URLs (so not WebFetch cache hits). Narrow by design: only the small-cap
+  landing rows (optica, iop, wiley storefront at 2026-10-04); a generous cap such as
+  patents.google.com's 20 is a courtesy limit, not an IP-block risk, and stays with
+  fetchsrc. Review-when: a landing row's cap is raised past 2 or a new row is added
+  with cap <= 2 (it is covered automatically — confirm that is wanted); the nav log
+  is rotated or renamed (the counter would reset).
 
 Surfaces, by tool:
   WebFetch                                  -> webfetch
@@ -52,7 +71,9 @@ because it only ever routes scholarly retrieval.
 
 Telemetry: `telemetry/literature-host-nav.jsonl` gets a row for every decision on
 a LISTED host or a publisher (allow and deny — low volume by construction: only
-scholarly hosts), plus the `policy_unreadable` row. Denies also write the receipt
+scholarly hosts; since the 2026-10-04 rows, `en.wikipedia.org` and `code.claude.com`
+are listed too and general sessions fetch both, so ALLOW rows now include ordinary
+traffic — deny rows stay scholarly), plus the `policy_unreadable` row. Denies also write the receipt
 row `deny_receipt` keeps in `telemetry/literature-host-guard.jsonl`. Unlisted
 hosts are never logged: WebFetch and Bash are high-volume tools.
 
@@ -63,8 +84,10 @@ through to unlisted; fixed the same day (host canonicalised, D-17/D-18).
 
 Proof-of-life: `python hooks/tests/test_literature_host_guard.py` — D-* deny cases
 per surface, A-* allow cases (arXiv on every surface, an unlisted host, a bare
-shell command), M-1 mutation (the same host with its row removed must be
-allowed, so D-* was reading the policy), FO-* fail-open incl. the unreadable
+shell command), C-* the session cap (per session, subdomain, class + cap
+gate, denies do not consume, no session id fails open), M-1 mutation (the same
+host with its row removed must be allowed, so D-* was reading the policy),
+M-3/M-4 (the cap is read from max_per_run), FO-* fail-open incl. the unreadable
 policy, R-* telemetry rows, L-* the live policy's own banned rows.
 review-when: a new browser MCP server is registered (its navigate tool needs a
 surface mapping here AND a matcher line in settings.json); the policy schema
@@ -90,6 +113,10 @@ POLICY_PATH = Path(os.environ.get("LSE_HOST_POLICY") or (CLAUDE_DIR / "hooks" / 
 LOG_PATH = Path(os.environ.get("CLAUDE_TELEMETRY_DIR") or (CLAUDE_DIR / "telemetry")) / "literature-host-nav.jsonl"
 
 NO_SURFACE_CLASSES = {"agent_banned", "institutional_only"}
+# Session cap (user ruling 2026-10-04): a row of this class whose max_per_run is at most this
+# value is counted per session, no time window. Guardrail constants — see the docstring.
+SESSION_CAP_CLASS = "landing_page"
+SESSION_CAP_MAX = 2
 BROWSER_SURFACES = {"browser_headless", "browser_user"}
 URL_RE = re.compile(r"https?://([A-Za-z0-9.\-]+(?::\d+)?)", re.I)
 MAX_URL_CHARS = 500
@@ -165,6 +192,39 @@ def judge(host: str, surface: str, policy: dict):
     if surface not in surfaces:
         return "deny", row, f"class {cls} grants {surfaces or 'no surface'}, not {surface}"
     return "allow", row, ""
+
+
+def session_cap(row: dict):
+    """-> the per-session cap this row carries, or None when the row is not session-counted."""
+    if str(row.get("class", "")) != SESSION_CAP_CLASS:
+        return None
+    try:
+        cap = int(row.get("max_per_run"))
+    except (TypeError, ValueError):
+        return None
+    return cap if 0 <= cap <= SESSION_CAP_MAX else None
+
+
+def allowed_so_far(session_id: str, listed: str) -> int:
+    """Allowed calls this session already made to `listed` (or a subdomain), read from the nav log.
+    The log is the counter: every allow on a listed host is recorded there before the call runs."""
+    n = 0
+    try:
+        with LOG_PATH.open(encoding="utf-8") as fh:
+            for line in fh:
+                if session_id not in line or listed not in line:
+                    continue                    # cheap prefilter; the parse below decides
+                try:
+                    e = json.loads(line)
+                except Exception:
+                    continue
+                h = str(e.get("host", ""))
+                if (e.get("session") == session_id and e.get("decision") == "allow"
+                        and (h == listed or h.endswith("." + listed))):
+                    n += 1
+    except Exception:
+        return 0                                # no log yet, or unreadable: nothing to count
+    return n
 
 
 def record(session_id: str, tool: str, url: str, host: str, surface: str, decision: str, row=None, loud=False) -> None:
@@ -284,6 +344,7 @@ def main() -> None:
         record(session_id, tool, targets[0][0], host_of(targets[0][0]), targets[0][1], "policy_unreadable", loud=True)
         sys.exit(0)
 
+    in_call: dict = {}                          # same capped host twice in one call counts twice
     for url, surface in targets:
         host = host_of(url)
         if not host or not surface:
@@ -291,6 +352,17 @@ def main() -> None:
         decision, row, why = judge(host, surface, policy)
         if decision == "unlisted":
             continue
+        cap = session_cap(row) if decision == "allow" and session_id else None
+        if cap is not None:
+            listed = str(row.get("host", "")).strip().lower().strip(".")
+            used = allowed_so_far(str(session_id)[:64], listed) + in_call.get(listed, 0)
+            if used >= cap:
+                decision = "deny"
+                why = (f"its cap is {cap} call(s) per session and this session has already made {used} "
+                       f"allowed call(s) to it; repeated retrieval is the behaviour this row records as the "
+                       f"trigger for the host's bot challenge")
+            else:
+                in_call[listed] = in_call.get(listed, 0) + 1
         record(session_id, tool, url, host, surface, decision, row, loud=(decision == "deny"))
         if decision == "deny":
             deny(deny_reason(tool, host, surface, row, why))

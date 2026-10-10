@@ -66,6 +66,54 @@ MUST_DENY = [
     ("Bash", {"command": "openssl x509 -in server.pem -text"}),
     ("Read", {"file_path": "C:/certs/client.p12"}),
     ("Bash", {"command": "strings token.json"}),
+    # PROPERTY 2 (2026-10-03): printing a credential value. The first two are
+    # the RECORDED shapes from the R05 B1 sweep (values never copied here).
+    ("PowerShell", {"command": "& python.exe -X utf8 -c @'\nimport psutil, os\np = psutil.Process(52768)\nenv = p.environ()\nprint(env)\n'@"}),
+    ("Bash", {"command": 'cd /d/WORK/COMSOL_Test; grep -niE "license|password|passwd|serial|token" 06_x/route-J/prefs_enable_off/comsol.prefs | cut -c1-200'}),
+    ("PowerShell", {"command": "Get-ChildItem env: | Sort-Object Name"}),
+    ("PowerShell", {"command": "gci env:"}),
+    ("PowerShell", {"command": "[Environment]::GetEnvironmentVariables()"}),
+    ("Bash", {"command": "printenv"}),
+    ("Bash", {"command": "env | sort"}),
+    ("Bash", {"command": "python -c \"import os; print(os.environ)\""}),
+    ("Bash", {"command": "node -e \"console.log(process.env)\""}),
+    ("Bash", {"command": "cat /proc/1234/environ"}),
+    ("Bash", {"command": "rg -n api_key config/settings.yaml"}),
+    ("PowerShell", {"command": "Select-String -Path app.config -Pattern password"}),
+    ("Grep", {"pattern": "password", "path": "<WORK_ROOT>/x/comsol.prefs", "output_mode": "content"}),
+    # Found by the pre-birth backtest: a FILTERED dump still prints values
+    # (2026-08-14, the filter matched the very variable holding the OAuth token).
+    ("Bash", {"command": 'cd ~/.claude && echo "=== vars ===" && env | grep -iE "^(anthropic|claude|ai_agent)" | sort'}),
+    # NARROWING PASS 2 (2026-10-04) regression twins. Each strip branch clears a
+    # credential name only where it cannot name the file the same statement
+    # reads; each case is one branch's shape turned into a read, and must deny.
+    ("Bash", {"command": r"find . -type f | grep -E '\.env|\.pem' | xargs cat"}),       # name stream -> reader
+    ("Bash", {"command": r"cat $(find . -type f | grep -iE '\.env$')"}),                 # ... inside a substitution
+    ("Bash", {"command": r"""find . | grep '\.env$' | while read f; do cat "$f"; done"""}),
+    ("Bash", {"command": r"grep -rv '\.env' ."}),                    # inverted but recursive: reads every file
+    ("Bash", {"command": "grep -vf .env list.txt"}),                 # -f: the operand IS a file
+    ("Bash", {"command": "find . -name .env -prune | xargs cat"}),   # -prune without -o still prints it
+    ("Bash", {"command": r"find . -name '.env' -exec cat {} \;"}),   # positive -name is not stripped
+    ("Bash", {"command": "grep -rn KEY --include=.env ."}),          # --include is the positive twin of --exclude
+    ("PowerShell", {"command": r"Get-ChildItem -Recurse | Where-Object { $_.Name -match '\.env$' } | Get-Content"}),
+    ("PowerShell", {"command": "Get-ChildItem -Recurse -Include server.pem | Get-Content"}),
+    ("PowerShell", {"command": r"$p = '<WORK_ROOT>\PatentsGrabber\.env'; Get-Content $p"}),   # live variable
+    ("PowerShell", {"command": r"$c = '\.env$'; Get-ChildItem -Recurse | Where-Object { $_.Name -match $c } | Get-Content"}),
+    ("PowerShell", {"command": "$env:CRED_FILE = '.env'; python run.py"}),   # env scope reaches the child
+    ("Bash", {"command": "CRED_FILE='.env' python run.py"}),                 # env prefix reaches the child
+    # PROPERTY 2 masking twins (2026-10-04). A sed after the search clears a
+    # credential-key grep only when it masks every value and nothing raw escapes
+    # around it; each case keeps the search and the sed but breaks one of those.
+    ("Bash", {"command": "grep -n password app.ini | sed -n 1,5p"}),               # sed that selects, not masks
+    ("Bash", {"command": "grep -n password app.ini | sed 's/foo/bar/'"}),          # sed that edits something else
+    ("Bash", {"command": "grep -n password app.ini | sed 's/=.*/=& <masked>/'"}),  # & re-inserts the value
+    ("Bash", {"command": "grep -n password app.ini | sed -e p -e 's/=.*/=<m>/'"}), # p prints the raw line first
+    ("Bash", {"command": "grep -n password app.ini | tee /dev/stderr | sed -E 's/([=:]).*/\\1 <masked>/'"}),
+    ("Bash", {"command": "grep -n password app.ini >&2 | sed 's/=.*/=<m>/'"}),     # raw lines redirected past the mask
+    ("Bash", {"command": "grep -n password app.ini 2>&1 | tee raw.txt | sed 's/=.*/=<REDACTED>/'; cat raw.txt"}),
+    ("Bash", {"command": "grep -n password app.ini | sed 's/=.*/=<m>/'; grep -n password app.ini"}),  # a second, raw search
+    ("Bash", {"command": "grep -n password app.ini; echo x | sed 's/=.*/=<m>/'"}), # mask in another statement
+    ("Bash", {"command": "grep -n password app.ini | sed 's/=.*/=<m>/' app.ini"}), # sed reads a file, not the stream
 ]
 
 MUST_PASS = [
@@ -90,11 +138,73 @@ MUST_PASS = [
     ("Bash", {"command": 'git commit -m "a connector 401s and cat .env is the tempting next move"'}),
     ("Bash", {"command": "git check-ignore -v skills/x/connectors/.env"}),
     ("Bash", {"command": 'python -c "for k,p in c.execute(q): print(i.key, a.path)"'}),
+    # Observed false positives folded 2026-10-04, VERBATIM from the transcripts
+    # (FP-4 / FP-5: sonnet work-card executors on read-only inventory cards told
+    # "never open credential-like files (<names>)"; FP-8: a report_fp row of
+    # 2026-10-03). In each, the credential name is a PATTERN over names or
+    # lines — a -notmatch exclusion plus a dead regex variable, a names-only
+    # find|grep listing, a grep -l — and nothing is read.
+    ("PowerShell", {"command": r"""$skip='\\(node_modules|\.venv|venv|dist|build|\.git|__pycache__|\.idea)(\\|$)'
+$cred='token|secret|\.pem$|\.key$|\\\.env'
+$roots=[ordered]@{ 'ArchLens'='<WORK_ROOT>\ArchLens'; 'P2C-copy1'='<WORK_ROOT>\Paper2ChatAPP - 複製'; 'P2C-copy2'='<WORK_ROOT>\Paper2ChatAPP - 複製 (2)'; 'ArchLens_Series'='<WORK_ROOT>\ArchLens_Series' }
+foreach($k in $roots.Keys){ $r=$roots[$k]; $f=Get-ChildItem -LiteralPath $r -Recurse -File -Force | Where-Object { $rel=$_.FullName.Substring($r.Length); ($rel -notmatch $skip) -and ($_.Name -notmatch 'token|secret|\.pem$|\.key$|^\.env') }
+ $mn=($f|Sort-Object LastWriteTimeUtc|Select-Object -First 1); $mx=($f|Sort-Object LastWriteTimeUtc -Descending|Select-Object -First 1)
+ $cn=($f|Sort-Object CreationTimeUtc|Select-Object -First 1); $cx=($f|Sort-Object CreationTimeUtc -Descending|Select-Object -First 1)
+ "{0}: n={1} mtime_min={2:yyyy-MM-ddTHH:mm:ssZ} mtime_max={3:yyyy-MM-ddTHH:mm:ssZ} ctime_min={4:yyyy-MM-ddTHH:mm:ssZ} ctime_max={5:yyyy-MM-ddTHH:mm:ssZ}" -f $k,$f.Count,$mn.LastWriteTimeUtc,$mx.LastWriteTimeUtc,$cn.CreationTimeUtc,$cx.CreationTimeUtc }
+"--- Series docs/ file count (names not read):"; (Get-ChildItem -LiteralPath '<WORK_ROOT>\ArchLens_Series\docs' -Recurse -File -Force | Measure-Object).Count"""}),
+    ("Bash", {"command": r"""cd "<WORK_ROOT>/AI_Skill" && find . -type f | grep -v -E 'node_modules|\.venv|__pycache__|\.git/' | wc -l; find . -type f | grep -i -E '\.env|token|secret|\.pem|\.key' ; find . -maxdepth 2 | head -150"""}),
+    ("Bash", {"command": r"""cd ~/.claude; grep -rn -i "rotate\|輪替\|revoke" rules ops/*.md hooks/secret_file_guard.py tools/memory-pipeline/README.md tools/pii-membrane/README.md 2>/dev/null | head -8; echo ===; grep -rln -i "secret\|api.key\|token" tools/memory-pipeline/*.py 2>/dev/null | head; echo ===; grep -n -i "telegram\|sendMessage\|status" /d/AIWork/GitHubTrendWatch/CLAUDE.md | head -10; echo ===; grep -n "video-prompt-shelf" references/PROJECTS.md | cut -c1-500"""}),
+    # Exclusion shapes named with that fold (constructed, not observed): a
+    # negated name filter removes the credential from the set, so whatever reads
+    # afterwards reads the rest. Each has a positive twin in MUST_DENY above.
+    # Concrete names, not globs: a glob like `*.pem` was never matched at all
+    # (`*` is not a boundary char), so a glob case would pass without testing
+    # the narrowing — a pre-existing gap, logged in the guard's docstring.
+    ("Bash", {"command": "find . -type f -not -name .env ! -name 'server.pem' | wc -l"}),
+    ("Bash", {"command": "find . -name .env -prune -o -type f -print"}),
+    ("PowerShell", {"command": "Get-ChildItem -Recurse -File -Exclude server.pem,'.env' | Measure-Object"}),
+    ("Bash", {"command": "grep -rn TODO --exclude=.env --exclude-dir=.git ."}),
+    ("Bash", {"command": r"find . -type f | grep -v -E '\.env$|\.pem$' | xargs wc -l"}),
+    ("PowerShell", {"command": r"$skip = '\.env$|\.pem$'; Get-ChildItem -Recurse -File | Where-Object { $_.Name -notmatch $skip } | Measure-Object"}),
     # Ordinary session traffic.
     ("Bash", {"command": "git status --short"}),
     ("Read", {"file_path": r"<CLAUDE_HOME>\skills\literature-search-extract\SKILL.md"}),
     ("Glob", {"pattern": "**/.env"}),          # names only, no content
     ("Write", {"file_path": ".gitignore", "content": ".env\n"}),
+    # PROPERTY 2 must-pass: names-only listings, one named variable, env used
+    # to RUN a command, count/list-only greps, and greps over code or prose.
+    ("PowerShell", {"command": "(Get-ChildItem env:).Name"}),
+    ("PowerShell", {"command": "Get-ChildItem env:PATH"}),
+    ("Bash", {"command": "env | cut -d= -f1 | sort"}),
+    ("Bash", {"command": "printenv HOME"}),
+    ("Bash", {"command": "env PYTHONIOENCODING=utf-8 python run.py"}),
+    ("Bash", {"command": "python -c \"import os; print(sorted(os.environ))\""}),
+    ("Bash", {"command": "python - <<'EOF'\nimport os, subprocess\nenv = os.environ.copy()\nsubprocess.run(['x'], env=env)\nEOF"}),
+    ("Bash", {"command": "python -c \"import os; print(os.environ['TEMP'])\""}),
+    ("Bash", {"command": "grep -l password config/*.ini"}),
+    ("Bash", {"command": "grep -c password settings.yaml"}),
+    ("Bash", {"command": "grep -n password src/auth.py"}),
+    ("Bash", {"command": "grep -rn \"secret_file_guard\" ops/*.md"}),
+    ("Bash", {"command": 'git commit -m "guard: block printenv and grep password over settings.yaml"'}),
+    ("Grep", {"pattern": "password", "path": "<WORK_ROOT>/x/comsol.prefs"}),
+    ("Grep", {"pattern": "password", "path": "<WORK_ROOT>/x/comsol.prefs", "output_mode": "count"}),
+    ("Grep", {"pattern": "password", "path": "<WORK_ROOT>/x/src", "output_mode": "content"}),
+    ("Bash", {"command": "python -X utf8 ~/.claude/tools/cred-sweep/cred_sweep.py --selftest"}),
+    # Backtest false positives fixed before birth (2026-10-03): masked dumps,
+    # `(env)` in commit subjects and Python, `env` inside a regex alternation,
+    # and greps that merely NAME secret-handling tools.
+    ("Bash", {"command": "env | grep -i '^claude' | sed 's/=.*$/=<set>/' | head"}),
+    ("Bash", {"command": "git commit -q -F - <<'EOF'\nfeat(env): add portable backend bootstrap\nEOF"}),
+    ("Bash", {"command": "python - <<'EOF'\nthr = float(np.median(env))\nEOF"}),
+    ("Bash", {"command": 'git ls-files | grep -iE "\\.(env|key|pem|p12)$|credentials"'}),
+    ("Bash", {"command": "grep -n 'secret_file_guard' tools/share-manifest.toml | cut -c1-200"}),
+    ("PowerShell", {"command": "Get-ChildItem env: | Where-Object { $_.Name -match '^CLAUDE' } | ForEach-Object { $_.Name }"}),
+    # PROPERTY 2 masking route (2026-10-04): the deny text's own third rewrite
+    # (GREP_PATH) was still denied. The first is that text's example verbatim;
+    # the second is the shape of a real denied call from that day's backtest.
+    ("Bash", {"command": "grep -n password app.ini | sed -E 's/([=:]).*/\\1 <masked>/'"}),
+    ("Bash", {"command": "grep -niE 'password|api_key' config/app.ini | sed 's/=.*/=<REDACTED>/'"}),
+    ("Bash", {"command": "cd /d/x; grep -niE 'password' a.prefs | cut -c1-200 | sed 's/=.*$/=<m>/' | head -20"}),
 ]
 
 # The credential path the undetermined cases and their twins share, so the only

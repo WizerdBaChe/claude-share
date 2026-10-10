@@ -1,13 +1,13 @@
 # hooks/ — 機械強制層｜Mechanical enforcement layer
 
-> **中文摘要｜Chinese summary**：目前的 mounting template 掛載 33 支 hook；另有
+> **中文摘要｜Chinese summary**：目前的 mounting template 掛載 35 支 hook；另有
 > `deny_receipt.py` 與 `handoff_snapshot.py` 這類不掛載的共用函式庫，以及兩支已
 > 退役但仍保留檔案的 probe（`fieldwork_threshold_notice.py`、
 > `delivery_gate_shadow.py`）。所有 shipped guards 都 fail-open；是否真的生效取決於
 > `settings.json` 的掛載，不是檔案存在本身。其中多支會呼叫 method tool（出貨在
 > `../instruments/<name>/`，要複製到 `<CLAUDE_HOME>/tools/<name>/` 才找得到）。
 >
-> **English summary**: The current mounting template wires 33 hooks. Shared libraries
+> **English summary**: The current mounting template wires 35 hooks. Shared libraries
 > such as `deny_receipt.py` and `handoff_snapshot.py` are shipped but not mounted, and
 > `fieldwork_threshold_notice.py` and `delivery_gate_shadow.py` are retained but retired.
 > All shipped guards fail open; presence on disk is not proof of activation—registration
@@ -19,7 +19,7 @@
 | 項目 | 中文 | English |
 |---|---|---|
 | 先看 | 先讀本 README 的採用前注意事項，再看 `settings.example.json` | Read the adoption notes, then inspect `settings.example.json` |
-| 目前狀態 | 33 支 mounted hooks；共用函式庫與 retired 檔案另標明，不列為掛載 hook | 33 mounted hooks; shared libraries and retired files are labelled separately |
+| 目前狀態 | 35 支 mounted hooks；共用函式庫與 retired 檔案另標明，不列為掛載 hook | 35 mounted hooks; shared libraries and retired files are labelled separately |
 | 驗收 | 逐支手動跑 fail-open self-test，並確認平台真的載入設定 | Run each available self-test and confirm the host registered the settings |
 | 不包含 | 不包含 Claude hook runner、外部 credentials、來源端未出貨 tools tree | No hook runner, external credentials, or excluded source tools tree is included |
 
@@ -101,6 +101,26 @@
 > `past_work_recall_inject.py`、`subagent_retrieval_brief.py`、`user_profile_gist.py`
 > 也都不出貨（理由與替代路徑見 `[[not_shipped]]`）。掛載數 21 − 1 + 13 = **33**。
 
+> **2026-10-10 refresh（source 183c129 -> 148e021e）：三十五支掛載 hook。**
+> +2 支新收：`offline_approval_notice.py`（UserPromptSubmit：使用者說「會離線／
+> 無法點選許可」時，提醒 `permissions.ask` 路徑在 bypass 模式下仍會停下等人，並現讀
+> settings 的 ask 清單，不抄寫死的副本）與 `stash_worktree_notice.py`（PreToolUse：
+> 在有 linked worktree 的 repo 裡跑會寫入的 `git stash`——`refs/stash` 是所有 worktree
+> 共用的同一個 ref，pop 會把別棵樹的 entry 拿走且 exit 0）。兩支都只提醒、不擋、
+> fail-open，也都沒有私有依賴。**刻意不收**三支新 hook 與一支測試：
+> `candidate_shelf_notice.py`（讀私人素材庫的索引與 CLI，沒有索引就是永遠靜默）、
+> `session_pid_registry.py` 與 `session_reaper_launch.py`（餵與啟動來源端未出貨的
+> process-picker 工具，後者會啟動回收閒置引擎的常駐程式），理由與替代路徑見
+> `[[not_shipped]]`。同輪最大的行為變動：**所有可 deny 的守衛 timeout 由 5 秒改為 30 秒**
+> （逾時的 command hook 等於放行該次呼叫，model-cap 守衛曾因此漏掉八次派工中的兩次），
+> `secret_file_guard` 與 `model_cap_guard` 另加 `onFailure: "block"`（需要 Claude Code
+> 2.1.295 以上，舊版請移除該鍵）；`literature_host_guard.py` 新增「小額度 landing_page
+> 列每 session 次數上限」；`model_cap_guard.py` 新增 effort 軸與 mod 心跳讓位；
+> `secret_file_guard.py` 新增第二性質（整份環境傾印、憑證鍵 grep）。
+> `instruments/ps-errorpref-backtest/` 與 `ps-pipeline-close-backtest/` 這輪**沒有**跟進：
+> 來源端把它們改成 import 未出貨的 `tools/hook-backtest/`，所以保留前一版自足的副本
+> （manifest 條目已宣告）。掛載數 33 + 2 = **35**。
+
 ## 為什麼是 hook，而不是規則文字｜Why a hook instead of prose
 
 規則層寫「請記得 X」，模型在自信的當下會讀過去。這幾支的共同判準（`ops/lessons.md`
@@ -152,6 +172,8 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | `view_launcher_gist.py` | SessionStart | **2026-10-02 新收**。把核心檢視頁（功能名 -> 路徑）清單注入每個 session，讀 `tools/view-launcher/views.json`；登錄檔缺席時靜默。依賴 `tools/view-launcher/`（出貨為樣板） |
 | `verbatim_dispatch_notice.py` | PreToolUse `Agent\|Workflow` | **2026-10-02 新收**。派工 prompt 要求逐字轉錄頁面／圖片時提醒（輸出過濾器會擋長篇受著作權保護的文字，整支 subagent 白跑）。只標註、永不 deny。依賴 `tools/quote-evidence/qe.py`，並執行 source-quotation-evidence 規則 |
 | `session_search_query_notice.py` | PreToolUse `mcp__.*__search_session_transcripts` | **2026-10-02 新收**。session 搜尋工具把整個 query 當單一字面子字串，多字 query 幾乎必定回「No matching sessions found」，與真正的 null 不可區分——多字 query 時提醒改用單一關鍵字。只標註 |
+| `offline_approval_notice.py` | UserPromptSubmit | **2026-10-10 新收**。prompt 含「離線／無法點選許可／offline／can't approve」等措辭時，提醒 `permissions.ask` 匹配的呼叫在 bypass 模式下仍會停下等人；現讀 `settings.json`／`settings.local.json` 的 ask 清單並給出三條路（先做 ask 以外的、把 ask 路徑內容寫成草稿卡、改用 `[unattended-run]`）。`<task-notification>` 回合與帶 `[unattended-run]` 的 prompt 排除。只提醒、不擋。測試套件讀**真實**的 home settings，要有那條 ask 規則才會全綠 |
+| `stash_worktree_notice.py` | PreToolUse `Bash\|PowerShell`（`if` 閘：`*stash*`） | **2026-10-10 新收**。有 linked worktree 的 repo 裡跑會寫入的 `git stash`（無子命令、push、save、pop、apply、drop、clear、branch）時提醒：`refs/stash` 是全部樹共用的同一個 ref。`list`／`show` 靜默。模板裡分兩個掛載（Bash 與 PowerShell 各一），原因同 git 閘的那一對。只提醒、不擋 |
 | `settings.example.json` | — | 掛載範本，見下 |
 | `tests/test_transcript_read_guard.py` | — | `transcript_read_guard.py` 的回歸矩陣（26 個案例，含 4 個 unclassifiable-input）。**手動跑，不是 hook**：`python hooks/tests/test_transcript_read_guard.py` |
 | `tests/test_browser_pane_scope_guard.py` | — | **2026-09-12 新收**。`browser_pane_scope_guard.py` 的回歸矩陣。手動跑，不是 hook |
@@ -162,6 +184,8 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
 | `tests/test_system_hmi_summary.py` | — | **2026-10-02 新收**。`system_hmi_summary.py` 的回歸矩陣（18 案例，含壞 JSON fail-open）。手動跑 |
 | `tests/test_verbatim_dispatch_notice.py` | — | **2026-10-02 新收**。`verbatim_dispatch_notice.py` 的雙向矩陣（16 案例，含四種 undetermined 輸入）。手動跑 |
 | `tests/test_session_search_query_notice.py` | — | **2026-10-02 新收**。`session_search_query_notice.py` 的雙向矩陣（17 案例：8 notice／9 silent）。手動跑 |
+| `tests/test_offline_approval_notice.py` | — | **2026-10-10 新收**。`offline_approval_notice.py` 的雙向矩陣（5 fire／5 silent，加 task-notification 排除、壞輸入、undetermined 型別）。手動跑 |
+| `tests/test_stash_worktree_notice.py` | — | **2026-10-10 新收**。`stash_worktree_notice.py` 的 17 個案例，在真實暫存 repo 上建出「有／無 linked worktree」兩邊。手動跑 |
 
 ## 安裝與啟用｜Install and activate
 
@@ -199,11 +223,11 @@ L-011）是：**觸發形狀如果是一個具名工具呼叫、且參數可檢�
   `tools/memory-pipeline/` 而非 hooks/，所以掛載範例放在那份 README 的安裝章——
   本目錄的範本維持「只掛 hooks/ 內檔案」的不變量。
 - **`environment-guide/` 裡寫「hooks/（7 個 .py + 1 資料檔）」的地方是 2026-08-14 的快照**，
-  當時確實只有七支。那些檔案作為快照保持原樣，正確數字（本輪起為**三十三支掛載 hook**；
+  當時確實只有七支。那些檔案作為快照保持原樣，正確數字（本輪起為**三十五支掛載 hook**；
   另有 `deny_receipt.py`／`handoff_snapshot.py` 兩支不掛載的共用函式庫，以及
   `fieldwork_threshold_notice.py`、`delivery_gate_shadow.py` 兩支已退役、檔案仍出貨但不掛載）以本目錄為準——這行
   本身在 2026-08-29 升到十六支、2026-09-07 升到十八支、2026-09-12 升到二十一支時都沒
-  跟著改過，是同一類「refresh 讓計數變假」的疏漏，此輪一併修正；2026-10-02 升到三十三支。
+  跟著改過，是同一類「refresh 讓計數變假」的疏漏，此輪一併修正；2026-10-02 升到三十三支，2026-10-10 升到三十五支。
 - **多支 hook 假設 method tool 在 `<CLAUDE_HOME>/tools/<name>/`。** 這些 tool 在本 repo
   出貨於 `../instruments/<name>/`（2026-10-02 起：`closeout-intake`、`process-ledger`、
   `feedback-pool`、`tree-noise`、`quote-evidence`、`hook-proof-of-life`、`class-closure`、
