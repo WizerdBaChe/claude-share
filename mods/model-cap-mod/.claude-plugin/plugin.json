@@ -1,0 +1,8 @@
+{
+  "name": "model-cap",
+  "version": "0.1.2",
+  "description": "In-process subagent model cost cap on agent.spawn: denies a dispatch whose effective model is opus/fable without [user-approved-top-tier]; logs the resolved model of every spawn. Same policy as hooks/model_cap_guard.py, without the command-hook timeout pass.",
+  "author": {
+    "name": "claude-config"
+  }
+}

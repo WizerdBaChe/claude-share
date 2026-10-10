@@ -1,0 +1,6 @@
+{
+  "name": "feedback-observer",
+  "version": "0.1.0",
+  "description": "Observe-only side check: after substantial turns and at close-out, sonnet (medium) reads the recent transcript window and records suspected subsystem defects for feedback-pool sensor S-8 (shadow).",
+  "author": { "name": "claude-config" }
+}
