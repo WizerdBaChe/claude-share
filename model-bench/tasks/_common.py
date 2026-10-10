@@ -40,4 +40,11 @@ def write(workdir: Path, rel: str, content: str) -> None:
     p.write_text(content, encoding="utf-8")
 
 
+def gold_path(workdir: Path) -> Path:
+    """Answer key as a SIBLING of workdir: the model under test works inside workdir and must
+    never be able to read the gate's gold (rounds 1-4 planted it inside; see round5-report)."""
+    w = Path(workdir)
+    return w.parent / (w.name + ".gold.json")
+
+
 CJK = re.compile(r"[㐀-鿿豈-﫿　-〿＀-￯]")

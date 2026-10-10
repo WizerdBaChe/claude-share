@@ -2,7 +2,7 @@
 import random
 import json
 from pathlib import Path
-from _common import strip_fences, verdict, write
+from _common import strip_fences, verdict, gold_path, write
 
 ID = "t04_search_inventory"
 CATEGORY = "search-inventory"
@@ -57,11 +57,11 @@ def setup(workdir):
     files, gold = _tree(seed_for(Path(workdir), 777))
     for rel, content in files.items():
         write(workdir, rel, content)
-    write(workdir, ".gold.json", json.dumps(sorted(gold)))
+    gold_path(workdir).write_text(json.dumps(sorted(gold)), encoding="utf-8")
 
 
 def check(result, workdir):
-    GOLD = set(json.loads((Path(workdir) / ".gold.json").read_text(encoding="utf-8")))
+    GOLD = set(json.loads(gold_path(workdir).read_text(encoding="utf-8")))
     got = [l.strip().strip("`") for l in strip_fences(result).splitlines() if l.strip()]
     prose = [l for l in got if l.count(":") < 2 or not l.split(":")[0].endswith(".py")]
     if prose:
