@@ -99,8 +99,10 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 | `../hooks/compact_pointer.py` | `<CLAUDE_HOME>/hooks/` | SessionStart("compact"):注入指標卡 |
 | `../hooks/transcript_read_guard.py` | `<CLAUDE_HOME>/hooks/` | PreToolUse(Read):視窗紀律硬強制 |
 | `../hooks/compact_loss_record.py` | `<CLAUDE_HOME>/hooks/` | PostCompact:每次壓縮寫一列紀錄(**不下判斷**) |
-| `../hooks/handoff_snapshot.py` | `<CLAUDE_HOME>/hooks/` | 共用函式庫,**不掛任何事件**;上面三支 import 它 |
+| `../hooks/context_runway_shadow.py` | `<CLAUDE_HOME>/hooks/` | UserPromptSubmit:context 已長且還沒寫過 checkpoint 時,提醒先寫交接快照(建議裝;`compact_bookmark.py` 的 deny 分支也 import 它,該分支目前關閉) |
+| `../hooks/handoff_snapshot.py` | `<CLAUDE_HOME>/hooks/` | 共用函式庫,**不掛任何事件**;上面四支 import 它 |
 | `preserve.py` | `<CLAUDE_HOME>/tools/memory-pipeline/` | 歸檔 + digest 卡產生器(零依賴、零模型、零網路) |
+| `../instruments/compact-loss-audit/` | `<CLAUDE_HOME>/tools/compact-loss-audit/` | 審計端:讀 `compact-loss.jsonl`,判斷壓縮摘要有沒有掉東西(2026-10-02 起出貨) |
 
 ### 交接快照與損失紀錄｜Handoff snapshot and loss record
 
@@ -115,11 +117,12 @@ session id、原檔在哪、什麼時候「可以」回去讀。結果是:摘要
 觸發方式、書籤區段、快照狀態、壓縮前被 Write/Edit 過的路徑清單),然後就結束——
 「摘要是否完整」「摘要是否誤導」這兩個判斷要等壓縮後的幾輪才有材料,當下判不了。
 
-**缺口(講在前面)**:下判斷的那一半是來源的 `tools/compact-loss-audit`,屬於本 repo
-整個排除的 `tools/` 樹,**不出貨**。所以你拿到的是一份**只會累積、沒有人讀**的
-`compact-loss.jsonl`,除非你自己寫審計端。它是可用的原始資料(欄位語意在該 hook 的
-docstring 裡寫得很完整),但別以為裝上去就有判決。每第 N 次自動壓縮它會回一句
-`additionalContext` 說「該審了」——在沒有審計工具的環境裡,那句話目前指向空無一物。
+**審計端**:下判斷的那一半是 `compact-loss-audit`,自 2026-10-02 起隨本 repo 出貨在
+`../instruments/compact-loss-audit/`(裝到 `<CLAUDE_HOME>/tools/compact-loss-audit/`)。
+在自然的停頓點跑 `python tools/compact-loss-audit/audit.py`(加 `--all` 連手動壓縮也審);
+每第 5 次自動壓縮,紀錄端會回一句 `additionalContext` 提醒該審了。沒裝審計端也不影響
+其餘幾支,只是 `compact-loss.jsonl` 會只累積、沒人讀。(2026-10-10 修正:這段原本寫
+「不出貨」,是 2026-10-02 收錄後沒跟著改的舊說法。)
 
 `compact_bookmark.py` 以 `<CLAUDE_HOME>/tools/memory-pipeline/preserve.py` 這個
 路徑呼叫 preserve——裝在別處它只會安靜跳過(fail-open),digest 那一階梯子退化為
@@ -127,9 +130,9 @@ docstring 裡寫得很完整),但別以為裝上去就有判決。每第 N 次�
 
 ## 安裝與驗收｜Install and verify
 
-1. 複製六個檔案到上表位置(`handoff_snapshot.py` 一定要跟著,它是另外三支的
-   import 對象;少了它那三支載入即失敗)。
-2. 把下面四個區塊**併進**你的 `settings.json`(`<PYTHON_EXE>`、`<CLAUDE_HOME>`
+1. 把上表的檔案複製到對應位置(`handoff_snapshot.py` 一定要跟著,它是其他四支的
+   import 對象;少了它那幾支載入即失敗)。
+2. 把下面五個區塊**併進**你的 `settings.json`(`<PYTHON_EXE>`、`<CLAUDE_HOME>`
    換成絕對路徑;Claude Code 不展開 `~` 與環境變數):
 
 ```json
@@ -161,7 +164,7 @@ docstring 裡寫得很完整),但別以為裝上去就有判決。每第 N 次�
 ]
 ```
 
-(這一支只寫紀錄檔;審計端不在本 repo,理由見上節。不掛它,其餘三支照常運作。)
+(這一支只寫紀錄檔;下判斷的是審計端 `compact-loss-audit`,見上節。不掛它,其餘三支照常運作。)
 
 ```json
 "PreToolUse": [
@@ -171,6 +174,18 @@ docstring 裡寫得很完整),但別以為裝上去就有判決。每第 N 次�
       "timeout": 5 } ] }
 ]
 ```
+
+```json
+"UserPromptSubmit": [
+  { "matcher": "",
+    "hooks": [ { "type": "command",
+      "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/context_runway_shadow.py\"",
+      "timeout": 5 } ] }
+]
+```
+
+(context 已長、這個 session 又還沒寫過 checkpoint 時,提醒先寫交接快照;只提醒、不擋。
+已有 `UserPromptSubmit` 陣列就追加進去。)
 
 3. **可選**——session 結束時也歸檔(這是 preserve 原生的觸發點;沒有它,digest
    只在每次壓縮時刷新):
