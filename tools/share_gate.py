@@ -204,7 +204,7 @@ def check_placeholder(manifest, files, f):
 
 BACKTICK_RE = re.compile(r"`([^`\n]{2,120})`")
 ASSET_RE = re.compile(r"^(?:~/\.claude/)?(?P<p>[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]+)*)$")
-INTERESTING_SUFFIX = (".py", ".json", ".md", ".toml", ".sh", ".ps1")
+INTERESTING_SUFFIX = (".py", ".json", ".md", ".toml", ".sh", ".ps1", ".html")
 
 
 def check_reference(manifest, files, f):
@@ -222,17 +222,29 @@ def check_reference(manifest, files, f):
         for i, line in enumerate(text.split("\n"), 1):
             for m in BACKTICK_RE.finditer(line):
                 raw = m.group(1).strip()
-                if raw.startswith(foreign) or "://" in raw or " " in raw:
+                if raw.startswith(foreign) or "://" in raw:
                     continue
+                if " " in raw:
+                    # A command: judge the script it runs, as any other token.
+                    raw = _command_script(raw)
+                    if raw is None or raw.startswith(foreign):
+                        continue
                 if not raw.endswith(INTERESTING_SUFFIX):
                     continue
-                am = ASSET_RE.match(raw.lstrip("./"))
+                is_glob = "*" in raw
+                am = (GLOB_RE if is_glob else ASSET_RE).match(raw.lstrip("./"))
                 if not am:
                     continue
                 key = raw[len("~/.claude/"):] if raw.startswith("~/.claude/") else raw
-                if key in declared or _declared_under(key, declared):
+                if is_glob:
+                    # A glob resolves when it matches a tracked file, or a
+                    # [[not_shipped]] entry covers its fixed prefix.
+                    if (_declared_under(_glob_prefix(key), declared)
+                            or _glob_resolves(key, source_map, tracked, rel)):
+                        continue
+                elif key in declared or _declared_under(key, declared):
                     continue
-                if _resolves(key, source_map, tracked, rel):
+                elif _resolves(key, source_map, tracked, rel):
                     continue
                 # Only assets that CLAIM to be part of the source environment
                 # are in scope; a bare word like `README.md` resolves locally
@@ -243,6 +255,76 @@ def check_reference(manifest, files, f):
                 f.add("R", rel, i, f"cites `{raw}`, which this repo does not ship",
                       "map it in [source_map], or add a [[not_shipped]] entry "
                       "with disposition + fallback")
+
+
+GLOB_RE = re.compile(
+    r"^(?:~/\.claude/)?(?P<p>[A-Za-z0-9_.\-*]+(?:/[A-Za-z0-9_.\-*]+)*)$")
+_RUNNERS = {"python", "python3", "py"}
+_OPT_WITH_VALUE = {"-X", "-W", "-c", "-m"}
+
+
+def _command_script(cmd):
+    """The script a `python <path> ...` command runs, else None.
+
+    Options are skipped (`-X utf8` consumes its value); `-m`/`-c` run no path.
+    Anything that is not a python/py invocation is not read: a command is only
+    in scope as far as its script path is, never as free prose.
+    """
+    toks = cmd.split()
+    if not toks or toks[0] not in _RUNNERS:
+        return None
+    i = 1
+    while i < len(toks) and toks[i].startswith("-"):
+        if toks[i] in ("-m", "-c"):
+            return None
+        i += 2 if toks[i] in _OPT_WITH_VALUE else 1
+    if i >= len(toks):
+        return None
+    return toks[i].strip("\"'")
+
+
+def _glob_prefix(key):
+    """Fixed leading directory of a glob: `skills/*/SKILL.md` -> `skills/`."""
+    head = key.split("*", 1)[0]
+    return head[: head.rfind("/") + 1]
+
+
+def _glob_regex(pattern):
+    out, i = [], 0
+    while i < len(pattern):
+        if pattern.startswith("**", i):
+            out.append(".*")
+            i += 2
+        elif pattern[i] == "*":
+            out.append("[^/]*")
+            i += 1
+        else:
+            out.append(re.escape(pattern[i]))
+            i += 1
+    return "".join(out)
+
+
+def _glob_resolves(key, source_map, tracked, citing_file):
+    """True when the glob matches at least one tracked file.
+
+    Same lookup order as _resolves (verbatim, through [source_map], relative to
+    the citing file, suffix anywhere), with `*` standing for one path segment's
+    characters. A glob over a mapped root (`skills/*/SKILL.md`) is therefore
+    judged against the mapped tree, not against the source layout.
+    """
+    patterns = [key]
+    for src, dst in source_map.items():
+        if key.startswith(src):
+            patterns.append(dst + key[len(src):])
+    here = citing_file.rsplit("/", 1)[0] if "/" in citing_file else ""
+    if here:
+        patterns.append(f"{here}/{key}")
+    for pat in patterns:
+        rx = re.compile(_glob_regex(pat) + r"\Z")
+        if any(rx.match(p) for p in tracked):
+            return True
+    rx = re.compile(r"(?:^|/)" + _glob_regex(key) + r"\Z")
+    return any(rx.search(p) for p in tracked)
 
 
 def _resolves(key, source_map, tracked, citing_file):
