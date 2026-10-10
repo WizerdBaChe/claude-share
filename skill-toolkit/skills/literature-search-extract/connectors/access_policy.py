@@ -226,7 +226,13 @@ def selftest() -> int:
             "eprints.soton.ac.uk", "opg.optica.org", "iopscience.iop.org", "arxiv.org", "osti.gov"}
     miss = sorted(need - listed)
     print(f"live policy: {len(listed)} rows; measured hosts missing: {miss or 'none'}")
-    return 1 if (bad or miss) else 0
+    # a host listed by a row is outside the distinct-unlisted run cap and carries its own max_per_run
+    # (rows added 2026-10-04 so a grey-literature run stops tripping the unlisted cap — FUTURE-WORK B9(3))
+    cap_ok = decide("sebokwiki.org", "webfetch", live, distinct_unlisted=3, used_on_host=4)[0]
+    cap_ctl = decide("unlisted.example", "webfetch", live, distinct_unlisted=3)[0]
+    print(f"{'ok' if cap_ok else 'BROKEN':9} live: listed sebokwiki.org passes with 3 unlisted hosts + 4 documents already")
+    print(f"{'ok' if not cap_ctl else 'BROKEN':9} live: an unlisted host is still refused at the same count (control)")
+    return 1 if (bad or miss or not cap_ok or cap_ctl) else 0
 
 
 def main() -> int:

@@ -50,7 +50,19 @@ layout per artifact; never transplant it.
   markers anchored ON the affected nodes (footnote style ①② with a
   caption list is fine). Truth markers may MERGE under aggregation, never
   disappear — an aggregated node is as unverified as its most-unverified
-  member.
+  member. **A marker carried by most nodes is not a marker**: when one
+  status value covers the majority of the view's nodes, it no longer
+  discriminates — mark only the exceptions and state the common status
+  once in the caption ("all other nodes: 未驗收"). If the common status
+  conflates two axes (built? vs. verified this run?), split the axes
+  before choosing what counts as an exception. *detect:* count nodes per
+  status value before rendering; any value on > 50 % of nodes → render it
+  as the caption default, not as per-node markers. Second incident
+  (external, 2026-10-04): an outside reader's AI cloned the layered
+  card-grid template rejected at the top of this file; 70–72 % of nodes on
+  each page carried the same 「部分／半套」 label and the reader could find
+  nothing to stop on (the session and the analysis page stay in the source
+  environment).
 - **R5 Aggregation carries its mapping**: a collapsed table (node →
   canonical elements → **cut**: what R12 removed at which rung, or 「—」)
   lives in the page. The presentational view carries NO completeness

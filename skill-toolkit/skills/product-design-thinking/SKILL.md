@@ -61,7 +61,18 @@ mid-task growths nobody asked for by name (速寫 Sketch minimum then).
 In-product 小型加功能 (no new unit) stays outside as before. The test is
 **persistence + consumers, never "工具大小"** — recorded miss: 2026-08
 capability rounds (reusable tools + 檢測項) bypassed design mode because
-increment phrasing read as excluded "small additions". Skill authoring
+increment phrasing read as excluded "small additions". Second recorded miss
+2026-10-05 (L-143): a unit born as the REMEDY for a defect found mid-session
+(AssetVault candidate shelf: new store tier + tool + hook + recall leg, two
+repos) never entered this skill — a 3-minute proposal, four PARAMETER
+questions in place of Phase 0 (one recommended default contradicted the
+host's nature and the user had to supply the principle), built inline in
+the last 50 minutes of a content session after two compactions, registration
+set (registry, dict, HMI, project row) discovered a day later. A remedy
+that creates a unit is Mode B; the first ask carries the extend-vs-new fork
+(three existing homes for the same knowledge were found and a fourth was
+added), and an increment reached at session end is handed off, not built
+(`ops/05-authority.md` §4 contract section 1 now asks both). Skill authoring
 splits: designing the CAPABILITY is Mode B here; authoring/optimizing the
 SKILL.md artifact is skill-creator — design first when complexity warrants,
 then hand off; a routine skill with a settled approach goes straight there.

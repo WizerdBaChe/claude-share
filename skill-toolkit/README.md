@@ -1,10 +1,10 @@
 # Skill Toolkit｜可攜式技能工具箱
 
-> **中文摘要｜Chinese summary**：本層收錄 21 顆可攜式 AI-agent skills 與觸發關鍵詞
+> **中文摘要｜Chinese summary**：本層收錄 22 顆可攜式 AI-agent skills 與觸發關鍵詞
 > 索引。每顆技能以 SKILL.md 定義用途與邊界，細節依需載入 references；這份 README
 > 先幫你選對技能、判斷缺件，再進入個別 SKILL.md。
 >
-> **English summary**: This directory contains 21 portable AI-agent skills and the
+> **English summary**: This directory contains 22 portable AI-agent skills and the
 > trigger dictionary. Each skill defines its scope in SKILL.md and loads supporting
 > references on demand. Use this README to select a skill and understand exclusions
 > before reading its implementation contract.
@@ -32,11 +32,14 @@
 
 - `skill-trigger-dict.md`：雙語觸發字典；用於在相近技能間消歧，並提供較能命中技能的提問句型。
 - 更新紀錄已於 2026-08-07 上移至 repo 根目錄的 `Global_skill_update.md`：它記錄的是整個來源環境的變更（`ops/`、全域 `CLAUDE.md`、hooks 都包含在內），不只此技能組，放在這一層屬於歸錯檔。
-- `skills/`：21 個可獨立閱讀及匯入的技能資料夾，以及它們所需的參考文件與評估資料。
+- `skills/`：22 個可獨立閱讀及匯入的技能資料夾，以及它們所需的參考文件與評估資料。
   2026-10-02 新收錄三顆：`case-library`（同類案例流的分類→蒐集→量測→模仿→workflow）、
   `comsol-agent-pipeline`（COMSOL 6.2 無頭管線：路由、API 陷阱表、模式卡、腳本骨架；
   產生陷阱表的同步腳本綁在來源端的測試區，不出貨）、`pptx-review`（PowerPoint 註解迴圈）。
-  來源環境共有 35 顆；未收錄的是十四顆——`asset-vault`，它操作一個寫死在本機磁碟路徑的
+  2026-10-10 再收錄一顆：`clean-room-rebuild`（把外部來源依概念重建成自己的版本：
+  讀寫分離、無表達的概念規格卡、S/I/A/D 逐項標記，附一個只說「無表面抄襲」而不說「乾淨」
+  的重疊閘門與其雙向校準控制）。
+  來源環境共有 37 顆；未收錄的是十五顆——`asset-vault`，它操作一個寫死在本機磁碟路徑的
   私有素材庫，並把權威委派給該素材庫自己的（非公開）`AGENTS.md`，拆掉耦合之後只會剩下
   一份在描述你沒有的東西的說明；兩個知識包 `render-perf`、`system-design`，2026-08-17
   因來源端尚未成型而暫緩（半成品的知識包只會輸出一個沒有內容支撐的觸發字）；兩個
@@ -62,14 +65,17 @@
   [`../environment-guide/KNOWLEDGE-PACKS.md`](../environment-guide/KNOWLEDGE-PACKS.md)
   記錄包的形狀、四條包層級判準（可登記／可依賴／可分享／拆包退役）與每個包的現況列；
   manifest 裡三個包條目的 review-when 都改指向該頁的「可分享」四條。`paper-distill`／
-  `paper-story` 這對同樣另以獨立分享包發行。理由記在
+  `paper-story` 這對同樣另以獨立分享包發行；第十五顆是 2026-10-10 新增的 `handoff-pack`
+  （給單一外部讀者的交接／教學包：它的流程綁在來源環境的 recall 工具、固定的成品落點
+  與使用者個人的裁定紀錄，拆掉之後只剩一份描述你沒有的工作樹的說明）。理由記在
   [`../tools/share-manifest.toml`](../tools/share-manifest.toml) 的 `[[not_shipped]]`，
-  寫在這裡是為了讓「少十四顆」是講明的，不是被發現的。
+  寫在這裡是為了讓「少十五顆」是講明的，不是被發現的。
 
 | Skill | 用途 | 亮點 |
 |---|---|---|
 | `ai-coding-guardrails` | 設計 AI 協作的防護、審查與復原流程。 | 風險分級＋事故轉測試案例＋改動上限，把「AI 改壞 repo」從事後補救變成事前預防。 |
 | `case-library` | **2026-10-02 新收錄。** 針對一「串」同類案例（影片、貼文、版面、UI 模式）建案例庫：分類→蒐集→特化分析→實測模仿→抽出可重複的 workflow。 | 八條不變量：受控詞彙＋驗證器自測、索引只能生成不能手改、未校準的儀器不准出數字、模仿是受控比較（≥3 次、區間不重疊才算效果）、「好不好看」只由使用者看片判定。參考實作是來源端的私有專案，SKILL.md 只以類別描述它。 |
+| `clean-room-rebuild` | **2026-10-10 新收錄。** 把外部來源（repo、文章、文件、資料集、prompt 集）依概念重建成自己的版本，而不是抄：讀寫分離、規格卡不含來源表達、成品逐項標記為來源概念／自己的詮釋／補充資訊／刻意偏離。 | 承諾與界線寫死——不含來源表達、過程留痕、新增處看得見，**不是**法律上的潔淨室；`overlap_check.py` 只裁定它判得出的（逐字重疊、規格內的程式碼與來源識別字），並附正反雙向校準控制。 |
 | `comsol-agent-pipeline` | **2026-10-02 新收錄。** 以 Python（MPh）無頭驅動 COMSOL 6.2：依觀測量選模式卡→建模／載入種子→求解→讀回→以解析解閘門＋對照裁定 PASS／FAIL／UNDET。 | 每個數字帶來源標籤、每道閘門必附「必須觸發的對照」、106 條實測 API 陷阱（`references/api-rules.md`，來源端生成的快照）、16 張模式卡與腳本骨架。測試區（rig）本體與產生陷阱表的同步腳本不出貨，檔內已明講。 |
 | `audience-fit` | 產出後的受眾調校：把工程口吻的成品改寫給非開發者讀者，或把 UI 文案從開發者視角換成使用者視角。 | 一份文件只服務一種主受眾＋改寫必須與原稿成對交付（前後對照），數據強度、因果語氣與限制不因改寫而變動。 |
 | `code-review-deep-checklist` | 執行深入的程式、架構與依賴適用性審查。 | 三種模式（快掃／深審／架構）＋嚴重度合約，審查結論有固定格式不會漂移。 |

@@ -13,7 +13,7 @@
   - Mode A：「幫我**深入 review** 這個 PR/檔案」("deep review")
   - Mode B：「幫**整個專案**做架構**健檢**」(whole-project health check)；稽核入口不帶「健檢」字的說法（外部語料 2026-09-02）：「這份架構說法跟 code 對得上嗎」/「找出文件跟實作不一致」/「重建現況，不要相信 README」/ "where has the architecture drifted?"——evidence 模式＝code、交付物＝漂移表，不是畫圖請求（→ diagram-authoring 只在其視圖稽核回呼時出場）；**覆蓋義務 (coverage obligation) 判別子（2026-09-05）**：本 skill 有——inventory-first `coverage.json`，沒審的單元進 `deferred`／`explicitExclusions`，標準層視圖集成員（C4／每個生命週期實體的 statechart／每個關鍵入口的 sequence pair／決策表）要有名字；要「整個系統沒漏看」的保證、或既有系統重構前的診斷 → 這裡（B focused），畫圖 skill 的 audit mode 只宣告不盤點
   - Mode C：「評估 X 套件**還適不適合**」("still the right fit")
-- 避免說法：「merge 前幫我看一下」（→ /code-review）、「盤點技術債列 backlog」（→ code-review-deep-checklist）
+- 避免說法：「merge 前幫我看一下」（→ /code-review）、「盤點技術債列 backlog」（→ code-review-deep-checklist）、「乾淨分析**別人的** repo，依概念重建成**我們的**版本」（做出自己的東西，不是描述它現況 → clean-room-rebuild）
 
 ### /code-review（內建快速抓蟲）
 - 關鍵詞：merge前、review this diff、有沒有bug、安全嗎 (is this safe)
@@ -80,7 +80,7 @@
 - 關鍵詞：design tokens、theme packs、產品套件 (product suite)、跨產品導航 (cross-app nav)
 - 精準句型：「把幾個 app 統一到共用 design tokens + 主題包」
 - 邊界：本 skill 的第 3 contract 管**跨產品**的導覽（suite nav manifest、產品之間怎麼互通）；**單一產品內部**的資訊架構、側邊導覽、URL 狀態與深層連結 → ux-walkthrough `references/navigation-ia-contract.md` ＋ `rules/web-navigation-state.md`（2026-09-09 劃界：把單一產品的 IA 規則放進本 skill 會讓它永遠選不到——本 skill 只在多產品套件時觸發）
-- 避免說法：單一 app 的樣式調整（不觸發）、單一 app 的選單怎麼排／網址要不要記狀態（→ ux-walkthrough）
+- 避免說法：單一 app 的樣式調整（不觸發）、單一 app 的選單怎麼排／網址要不要記狀態（→ ux-walkthrough）、單頁模板（待辦頁、課程入口頁這類「模板素材」：取用現成模板 → asset-vault Mode B；說明型頁面 → 由 `rules/explainer-deliverables.md` 觸發；2026-10-10 使用者裁定收窄，O3）
 
 ### diagram-authoring（精準圖示繪製與缺口檢測）
 - 關鍵詞：畫架構圖、方塊圖 (block diagram)、狀態機圖 (statechart)、FSM 圖、時序圖、序列圖、資料流圖 (DFD)、爆炸圖式方塊架構 (exploded block architecture)、關聯圖、把 X 畫成圖、從現有資料重建架構、找架構缺口 (gap report)、機制架構檢查、系統架構盤點、架構盤點、架構檢查項、圖要放進簡報、圖要放進 HTML、圖要放進 PPTX
@@ -176,10 +176,17 @@
 - 邊界：目前唯一實例是來源環境的 motion-video-lab 專案（非系統磁碟上的私有工作樹）；第二個領域開庫時依 SKILL.md §Review-when 重新抽出通用條款
 
 ### asset-vault（個人跨棧素材庫）
-- 關鍵詞：素材庫、元件庫、抽進素材庫 (extract to vault)、查素材庫 (check the vault)、有沒有現成的X、可重用素材 (reusable asset)、素材庫健檢
-- 精準句型：Mode A「把 X **抽進素材庫**」；Mode B「**查素材庫**有沒有現成的 loader/dialog/parser」；Mode C「**素材庫健檢**」→ validate.py。三模式都等明示要求，**不自觸發**
-- 避免說法：「設計素材庫新功能/改架構」（→ product-design-thinking）、「清理素材庫無關檔案」（→ env-cleanup）、「多產品**套件**統一 design tokens/theme packs」（→ design-system-suite；本 skill 只管單件素材入庫/取用）
+- 關鍵詞：素材庫、元件庫、抽進素材庫 (extract to vault)、查素材庫 (check the vault)、有沒有現成的X、可重用素材 (reusable asset)、素材庫健檢、放進候選架 (shelve a candidate)、先收一份到素材庫
+- 精準句型：Mode A「把 X **抽進素材庫**」；Mode B「**查素材庫**有沒有現成的 loader/dialog/parser」；Mode C「**素材庫健檢**」→ validate.py；Mode D「**放進候選架**／先收一份到素材庫」（還沒抽離的框架、CSS 層、腳本、閘門 → `candidates/` 自足副本，D-39；收工 digest 的 deposits 行點名共用元件升級也算明示）。四模式都等明示要求，**不自觸發**
+- 避免說法：「設計素材庫新功能/改架構」（→ product-design-thinking）、「清理素材庫無關檔案」（→ env-cleanup）、「多產品**套件**統一 design tokens/theme packs」（→ design-system-suite；本 skill 只管單件素材入庫/取用）、「授權不明但想要它的**概念**／依概念自己做一個」（Mode A 會 REJECT → clean-room-rebuild）
 - 邊界：GUI 接口鎖版（gui-contract.json；新增 kind 同步 AssetVault-GUI 的 FAMILIES 表）；素材永不刪除只 deprecated
+
+### clean-room-rebuild（潔淨重建：外部來源 → 依概念重建成我們自己的，2026-10-09 使用者裁定 R1–R5）
+- 觸發實態：設計成**像 config-self-audit 一樣容易觸發**——除了下列說法，**工作本身正要把外部來源（repo、文章、文件、資料集、prompt／skill 集）重做成我們的版本**時，不必聽到關鍵詞就觸發（artifact-context）
+- 關鍵詞：乾淨分析、潔淨開發、潔淨室 (clean room)、clean-room、依概念重建、重建成我們自己的資料、不要抄、用我們的話寫、參考這個 repo 做我們的版本、借鏡 X 自己做一個、自己詮釋加補充、重寫成我們的
+- 精準句型：「乾淨分析這個 REPO，依概念加上自己的詮釋重建成我們的資料」/「參考這篇做一份我們自己的版本，不要抄」/「這個 skill 集借鏡一下，自己做一個」
+- 避免說法：「重建**現況**／從 code 重建、不要相信 README」（描述它**現在是什麼** → code-review-deep-checklist Mode B）、「從資料**重建架構圖**」（→ diagram-authoring）、「把這個元件**抽進素材庫**」（授權允許、原樣拷貝加標註 → asset-vault Mode A；授權不明被 REJECT 的才回到這裡）、「這樣會不會侵權／能不能 FTO／授權相不相容」（法律意見，拒絕）
+- 邊界：上游「該拿什麼」= prior-art 掃描的 borrow ledger（B-n）；本 skill 管「拿了之後怎麼做成我們的」。輕重分級 LIGHT／STANDARD／STRICT（STRICT 只有設計草案，`references/strict-tier-design.md`）；承諾＝表達不外流＋過程留痕＋我們加的看得見，**不是法律上的潔淨室**
 
 ---
 
@@ -277,6 +284,7 @@
 | 打包 skill 分享給別人 / 網路抓的 skill 能不能安全裝 | skill-share-packaging (A/B) |
 | 找論文 / paper 重點・方法・限制 / 教科書定義 / 查文獻參數值 | literature-search-extract |
 | 簡報的「這頁／這個」指的是哪裡 / 我在 PowerPoint 留了註解幫我套用 | pptx-review (A cursor / B comments) |
+| 乾淨分析・依概念重建成我們的・參考 X 做我們的版本・不要抄 | clean-room-rebuild（描述既有系統「現在是什麼」→ code-review-deep-checklist B；授權允許原樣收 → asset-vault A） |
 | 幫我做某主題有引用來源的深度研究報告 | literature-search-extract (`depth: exhaustive`) |
 | 盤點技術債列 backlog | code-review-deep-checklist |
 | 該選 A 還是 B（新決策） | `software-architect` agent（ADR） |

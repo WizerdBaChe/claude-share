@@ -70,6 +70,16 @@ refresh of a share repo reverted six de-identification decisions that lived in
 commits and nowhere a check could read. Same shape, one directory over —
 a build product whose decisions have no home in the source they are built from.
 
+**How to do the diff (measured 2026-10-06, motion-video re-export).** Diffing or
+`patch`-ing against the PACKAGE fails: scrubbed context made all 14 canonical hunks
+reject. Diff the CANONICAL instead — `git diff <canonical sha in the notes> HEAD --
+<skill path>` — then re-apply each hunk to the package by hand under the carried-forward
+decisions, and re-run the A2/A3 greps on the result. The notes therefore MUST record the
+canonical commit (and the source commit of any bundled tooling); a notes file without
+them leaves nothing to diff from. Bundled tooling is recorded as an INCLUSION CRITERION
+plus the excluded list, not only a file list: a tool added since the last export has no
+verdict otherwise, and the re-exporter invents one.
+
 No previous export → this is a first export, continue at A1.
 
 ### A1. Scope the manifest
@@ -126,6 +136,10 @@ half-translate.
 - Re-run every A2/A3 grep on the copy — all must return zero (or documented keeps).
 - Check every path the copy references resolves INSIDE the package.
 - Confirm the canonical skill is untouched (`git status` / diff against canonical).
+
+**Showing what the skill makes (README clips, screenshots):** classes, measured sizes and
+the ffmpeg recipe are in `references/readme-showcase-media.md`; pick a class there, and
+when you build one marked NOT MADE, fill its row in the same change.
 
 ### A6. Package & record
 Zip the folder for transport. Write a share-notes file NEXT TO the package (not
