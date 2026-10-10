@@ -1833,6 +1833,747 @@ ALL.extend([
 ])
 
 
+# --- editions (WC-04) ---
+# Reader `emitters/editions.py` (snapshot-unification 02 sections 3, 5; INV-7, INV-10, INV-14).
+# Fixtures: a throwaway git repo that doubles as the "home" (so the live-view files sit under it),
+# and an event log written to a temp path. The real log path and the real repo are never touched.
+
+def _ed_mod():
+    sys.path.insert(0, str(TOOL_DIR / "emitters"))
+    import editions as ed
+    return ed
+
+
+def _ed_git(repo, *args):
+    import subprocess as _sp
+    p = _sp.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@t",
+                 "-c", "commit.gpgsign=false", *args],
+                capture_output=True, text=True, encoding="utf-8", stdin=_sp.DEVNULL)
+    assert p.returncode == 0, (args, p.stderr)
+    return p.stdout.strip()
+
+
+def _ed_repo(tmp, n=4):
+    """-> (repo, [sha of commit 0..n-1], orphan_sha). orphan = a real commit NOT reachable from HEAD."""
+    repo = Path(tmp) / "repo"
+    repo.mkdir()
+    _ed_git(repo, "init", "-q")
+    shas = []
+    for i in range(n):
+        (repo / "f.txt").write_text(str(i), encoding="utf-8")
+        _ed_git(repo, "add", "f.txt")
+        _ed_git(repo, "commit", "-q", "-m", f"c{i}")
+        shas.append(_ed_git(repo, "rev-parse", "HEAD"))
+    orphan = _ed_git(repo, "commit-tree", _ed_git(repo, "write-tree"), "-m", "orphan")
+    return repo, shas, orphan
+
+
+def _ed_line(event, n, **kw):
+    e = {"envelope": "edition-envelope/1", "kind": "log", "view": "evolution", "edition": n,
+         "event": event, "at": "2026-10-03T14:00:00Z"}
+    e.update(kw)
+    return json.dumps(e)
+
+
+def _ed_open(n, sha, cut_at="2026-10-05T00:00:00Z", event="backfilled"):
+    return _ed_line(event, n, label="2026-10-03", data_cut_at=cut_at, outward="blocked",
+                    object_ref={"repo": "~/.claude", "sha": sha, "sha_source": "cut", "dirty": False})
+
+
+def _ed_run(repo, lines, tmp, **kw):
+    """Write the log (text lines joined by newline, trailing newline unless lines is a str) and build."""
+    import datetime as dt
+    ed = _ed_mod()
+    log = Path(tmp) / "editions.jsonl"
+    if lines is not None:
+        log.write_text(lines if isinstance(lines, str) else "\n".join(lines) + "\n", encoding="utf-8")
+    kw.setdefault("now", dt.datetime(2026, 10, 6, tzinfo=dt.timezone.utc))
+    doc = ed.build(home=repo, log_path=log, **kw)
+    return {p["id"]: p for p in doc["points"]}
+
+
+def t_editions_decision_table_every_row():
+    """02 5.3 rows 1-8 each fire their state/quality; the boundary (commits_behind == LAG_COMMITS) is
+    'within', one more is 'warn'; every evolution finding prints both thresholds (E-4)."""
+    ed = _ed_mod()
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, shas, orphan = _ed_repo(tmp)
+        head2 = shas[-3]                                       # HEAD~2 -> commits_behind == 2
+        def ev(lines, **kw):
+            return _ed_run(repo, lines, tmp, **kw)["editions.evolution"]
+        p = ev(None)                                           # 1: no log file at all
+        assert (p["state"], p["quality"]) == (None, "undetermined") and p["ran"] is True, p
+        p = ev([_ed_open(1, head2), _ed_line("abandoned", 1)])
+        assert (p["state"], p["quality"]) == ("warn", "good") and "no accepted" in p["findings"][0]["label"], p   # 2
+        assert p["remedy"] == ed.OPEN_REMEDY, p
+        p = ev([_ed_open(1, head2, event="opened")])           # 3: no accepted, one open
+        assert p["state"] == "warn" and any("open since 2026-10-03" in f["text"] for f in p["findings"]), p
+        for bad in (shas[0][:6] + "0" * 34, None, "not-a-sha", orphan):   # 4: sha unknown / null / junk / not an ancestor
+            p = ev([_ed_open(1, bad)])
+            assert (p["state"], p["quality"]) == (None, "undetermined"), (bad, p)
+        p = ev([_ed_open(1, "0" * 40), _ed_open(2, "0" * 40, event="opened")])           # 4 + open edition, still U
+        assert p["state"] is None and any(f["label"] == "open edition" for f in p["findings"]), p
+        p5 = ev([_ed_open(1, head2)])                          # 5
+        assert (p5["state"], p5["quality"]) == ("pass", "good") and "commits_behind=2" in p5["findings"][0]["text"], p5
+        p6 = ev([_ed_open(1, head2), _ed_line("opened", 2, extends=1)])                  # 6: open edition changes nothing
+        assert p6["state"] == "pass" and any(f["label"] == "open edition" for f in p6["findings"]), p6
+        p7 = ev([_ed_open(1, head2)], lag_commits=1)           # 7: positive control, threshold injected
+        assert (p7["state"], p7["quality"]) == ("warn", "good") and p7["remedy"] == ed.OPEN_REMEDY, p7
+        assert ev([_ed_open(1, head2)], lag_commits=2)["state"] == "pass", "boundary: equal is within"
+        p7d = ev([_ed_open(1, head2, cut_at="2026-03-01T00:00:00Z")])                    # days side: >90 d
+        assert p7d["state"] == "warn" and "LAG_DAYS" in p7d["findings"][0]["text"], p7d
+        p8 = ev([_ed_open(1, head2), _ed_line("opened", 2, extends=1)], lag_commits=1)   # 8
+        assert p8["state"] == "warn" and any(f["label"] == "open edition" for f in p8["findings"]), p8
+        for pt in (p5, p6, p7, p7d, p8):
+            for f in pt["findings"]:
+                assert "LAG_DAYS=" in f["text"] and "LAG_COMMITS=" in f["text"], f
+        assert "LAG_COMMITS=1]" in p7["findings"][0]["text"], "the injected value is the one printed"
+
+
+def t_editions_unreadable_never_passes():
+    """INV-7: a log or cut the reader cannot trust is state null + quality undetermined on BOTH points,
+    never pass. Negative twin: the same log without the fault passes."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, shas, _orphan = _ed_repo(tmp)
+        good = [_ed_open(1, shas[-3]), _ed_line("opened", 2, extends=1)]
+        pts = _ed_run(repo, good, tmp)
+        assert pts["editions.evolution"]["state"] == "pass" and pts["editions.register"]["state"] == "pass", pts
+        faults = {
+            "garbage in the middle": [good[0], "{not json", good[1]],
+            "non-consecutive number": [good[0], _ed_line("opened", 3, extends=1)],
+            "non-monotonic number": [good[0], _ed_open(1, shas[-3], event="opened")],
+            "foreign envelope major": [json.dumps({**json.loads(good[0]), "envelope": "edition-envelope/2"})],
+        }
+        for name, lines in faults.items():
+            pts = _ed_run(repo, lines, tmp)
+            for pid in ("editions.evolution", "editions.register"):
+                assert (pts[pid]["state"], pts[pid]["quality"]) == (None, "undetermined"), (name, pid, pts[pid])
+        pts = _ed_run(repo, [good[0], _ed_line("opened", 3, extends=1)], tmp)
+        assert any(f["severity"] == "undeclared" and "line 2" in f["text"] for f in pts["editions.evolution"]["findings"]), pts
+        # a drive that is not there says so (fixture: a drive letter that cannot exist)
+        ed = _ed_mod()
+        lg = ed.read_log("Q:/nowhere/editions.jsonl") if not Path("Q:/").exists() else None
+        assert lg is None or (lg["readable"] is False and "drive" in lg["reason"]), lg
+
+
+def t_editions_torn_last_line_is_undeclared():
+    """INV-14: a torn last line is an `undeclared` finding, never an event; state comes from the earlier
+    events. Negative: a complete last line without a trailing newline is an event, not undeclared."""
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, shas, _o = _ed_repo(tmp)
+        first = _ed_open(1, shas[-3])
+        torn = _ed_line("opened", 2, extends=1)[:70]
+        pts = _ed_run(repo, first + "\n" + torn, tmp)
+        ev = pts["editions.evolution"]
+        assert ev["state"] == "pass" and ev["quality"] == "good", ev
+        und = [f for f in ev["findings"] if f["severity"] == "undeclared"]
+        assert und and "torn last line" in und[0]["text"] and "line 2" in und[0]["text"], ev
+        assert not any(f["label"] == "open edition" for f in ev["findings"]), "the torn line was not read as an opened event"
+        assert pts["editions.register"]["state"] == "pass", pts["editions.register"]
+        whole = _ed_run(repo, first + "\n" + _ed_line("opened", 2, extends=1), tmp)["editions.evolution"]
+        assert not [f for f in whole["findings"] if f["severity"] == "undeclared"], whole
+        assert any(f["label"] == "open edition" for f in whole["findings"]), whole
+
+
+def t_editions_state_is_derived_from_events():
+    """02 section 3: last state-changing event wins; `tagged` changes nothing; superseded is derived;
+    gated -> built returns to draft; an event for an edition never opened, or of an unknown kind, is
+    undeclared and ignored."""
+    ed = _ed_mod()
+    with tempfile.TemporaryDirectory() as tmp:
+        log = Path(tmp) / "l.jsonl"
+        lines = [_ed_open(1, "a" * 40), _ed_line("tagged", 1),
+                 _ed_open(2, "b" * 40, event="opened"), _ed_line("built", 2), _ed_line("gated", 2)]
+        log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        s = {n: e["state"] for n, e in ed.read_log(log)["editions"].items()}
+        assert s == {1: "accepted", 2: "gated"}, s                                   # tagged: no change
+        log.write_text("\n".join(lines + [_ed_line("built", 2)]) + "\n", encoding="utf-8")
+        assert ed.read_log(log)["editions"][2]["state"] == "draft"                   # a later built -> draft
+        log.write_text("\n".join(lines + [_ed_line("accepted", 2)]) + "\n", encoding="utf-8")
+        lg = ed.read_log(log)
+        assert {n: e["state"] for n, e in lg["editions"].items()} == {1: "superseded", 2: "accepted"}, lg
+        log.write_text("\n".join(lines + [_ed_line("abandoned", 2)]) + "\n", encoding="utf-8")
+        lg = ed.read_log(log)
+        assert {n: e["state"] for n, e in lg["editions"].items()} == {1: "accepted", 2: "abandoned"}, lg
+        stray = lines + [_ed_line("gated", 9), _ed_line("exploded", 1)]
+        log.write_text("\n".join(stray) + "\n", encoding="utf-8")
+        lg = ed.read_log(log)
+        assert lg["readable"] and len(lg["undeclared"]) == 2, lg
+        assert {n: e["state"] for n, e in lg["editions"].items()} == {1: "accepted", 2: "gated"}, lg
+
+
+def t_editions_register_rows_and_missing_views():
+    """The register is information: one row per view, normalized to UTC. A missing or unparseable live
+    view file is an `info` row 'not derived' and the state stays pass; only an unreadable evolution log
+    makes it null/undetermined. The graph stamp is naive LOCAL time (gsnap.py), converted with the zone."""
+    import datetime as dt
+    ed = _ed_mod()
+    tz8 = dt.timezone(dt.timedelta(hours=8))
+    with tempfile.TemporaryDirectory() as tmp:
+        repo, shas, _o = _ed_repo(tmp)
+        def put(rel, obj):
+            f = repo / rel
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text(obj if isinstance(obj, str) else json.dumps(obj), encoding="utf-8")
+        put("tools/system-hmi/out/snapshot.json", {"run": {"finished_at": "2026-10-08T16:21:58Z", "registry_sha256": "r" * 64}})
+        put("tools/graph-snapshot/out/graph.json", {"header": {"generated_at": "2026-10-09 01:34", "generated_from": shas[-1], "corpus_digest": "c" * 64}})
+        put("cache/version-census/work.json", {"collected_at": "2026-10-08T13:13:12+00:00", "payload": {}})
+        log = [_ed_open(1, shas[-3])]
+        reg = _ed_run(repo, log, tmp, local_tz=tz8)["editions.register"]
+        by = {f["label"]: f["text"] for f in reg["findings"]}
+        assert reg["state"] == "pass" and reg["quality"] == "good", reg
+        assert "data_cut_at=2026-10-08T16:21:58Z" in by["hmi"] and "sha=none" in by["hmi"], by
+        assert "data_cut_at=2026-10-08T17:34:00Z" in by["graph"] and shas[-1][:12] in by["graph"] and "(header)" in by["graph"], by
+        assert "data_cut_at=2026-10-08T13:13:12Z" in by["census"], by
+        assert "kind=log edition=1" in by["evolution"] and shas[-3][:12] in by["evolution"], by
+        (repo / "tools/graph-snapshot/out/graph.json").unlink()                      # missing graph.json
+        put("cache/version-census/work.json", "{broken")                              # unparseable census
+        reg = _ed_run(repo, log, tmp, local_tz=tz8)["editions.register"]
+        by = {f["label"]: (f["severity"], f["text"]) for f in reg["findings"]}
+        assert reg["state"] == "pass" and by["graph"][0] == "info" and "not derived" in by["graph"][1], reg
+        assert by["census"][0] == "info" and "not derived" in by["census"][1], reg
+        assert "kind=derived" in by["hmi"][1], "the other views are still read"
+        env, why = ed.derive("graph", repo, tz8)
+        assert env is None and why == "file missing", (env, why)
+        put("tools/graph-snapshot/out/graph.json", {"header": {"generated_at": "2026-10-09 01:34", "generated_from": "no-git"}})
+        env, _w = ed.derive("graph", repo, tz8)
+        assert env["object_ref"] == {"repo": "~/.claude", "sha": None, "sha_source": "none", "dirty": None}, env
+
+
+def t_editions_timestamp_normalisation():
+    """Z, +00:00, other offsets and naive local stamps all land on YYYY-MM-DDTHH:MM:SSZ; a naive stamp
+    follows the zone given (system zone by default); date-only and junk are None, never guessed."""
+    import datetime as dt
+    ed = _ed_mod()
+    tz8 = dt.timezone(dt.timedelta(hours=8))
+    n = ed.norm_utc
+    assert n("2026-10-08T16:21:58Z") == "2026-10-08T16:21:58Z"
+    assert n("2026-10-08T13:13:12+00:00") == "2026-10-08T13:13:12Z"
+    assert n("2026-10-03T21:43:47+08:00") == "2026-10-03T13:43:47Z"
+    assert n("2026-10-09 01:34", tz8) == "2026-10-08T17:34:00Z"                      # graph header form
+    assert n("2026-10-09 01:34", dt.timezone.utc) == "2026-10-09T01:34:00Z"
+    local_now = dt.datetime.now().strftime("%Y-%m-%d %H:%M")                         # default = system zone
+    got = dt.datetime.strptime(n(local_now), "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+    assert abs((dt.datetime.now(dt.timezone.utc) - got).total_seconds()) < 150, (local_now, n(local_now))
+    for junk in (None, "", "2026-10-08", "yesterday", 20261008, "2026-13-45 99:99"):
+        assert n(junk) is None, junk
+
+
+def t_editions_inv10_readonly_stdlib_no_tool_imports():
+    """INV-10: the emitter imports only the stdlib, none of the tools it reads, and has no write call.
+    The linter is calibrated on a planted violator (must fire) before it is trusted on the real file."""
+    import ast
+    import re
+    forbidden = re.compile(r"^(from|import) +(gsnap|gs_model|gs_freshness|version_census|lastuse|edition)\b", re.M)
+    writers = {"write_text", "write_bytes", "unlink", "rename", "mkdir", "rmdir", "remove", "write",
+               "writelines", "truncate", "touch"}
+
+    def problems(src):
+        out = []
+        if forbidden.search(src):
+            out.append("imports a tool it reads")
+        tree = ast.parse(src)
+        for node in ast.walk(tree):
+            mods = ([a.name for a in node.names] if isinstance(node, ast.Import)
+                    else [node.module or ""] if isinstance(node, ast.ImportFrom) else [])
+            for m in mods:
+                if m.split(".")[0] not in sys.stdlib_module_names:
+                    out.append(f"non-stdlib import {m}")
+            if isinstance(node, ast.Call):
+                f = node.func
+                name = f.attr if isinstance(f, ast.Attribute) else f.id if isinstance(f, ast.Name) else ""
+                on_fs_module = (isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name)
+                                and f.value.id in ("os", "shutil"))
+                # str/datetime .replace() is benign; os.replace()/Path.replace() and any shutil call are not
+                if name in writers or (name == "replace" and on_fs_module) or (on_fs_module and f.value.id == "shutil"):
+                    out.append(f"write-ish call {name}()")
+                if name == "open":
+                    mode = node.args[1].value if len(node.args) > 1 and isinstance(node.args[1], ast.Constant) else ""
+                    mode = mode or next((k.value.value for k in node.keywords if k.arg == "mode"
+                                         and isinstance(k.value, ast.Constant)), "")
+                    if any(c in str(mode) for c in "wax+"):
+                        out.append("open() for writing")
+        return out
+
+    planted = ("import gsnap\nimport requests\nimport os\nfrom pathlib import Path\n"
+               "Path('x').write_text('y')\nopen('f','w')\nos.replace('a','b')\n")
+    found = problems(planted)
+    assert len(found) >= 5, found                                                    # positive control
+    benign = "import datetime as dt\nt = dt.datetime.now()\nt = t.replace(tzinfo=None)\nopen('f', encoding='utf-8')\n"
+    assert problems(benign) == [], problems(benign)                                  # negative control
+    src = (TOOL_DIR / "emitters" / "editions.py").read_text(encoding="utf-8")
+    assert problems(src) == [], problems(src)                                        # negative: the real file
+
+
+def t_editions_live_run_conform_and_wall_time():
+    """The real emitter in a real subprocess against the real repo with a FIXTURE log: exits 0, one JSON
+    document, both declared points, `hmi.py conform editions` ok, under 5 s. Twin: log absent -> the
+    same run is conformant and reads null/undetermined on both points (never pass)."""
+    import os
+    import subprocess as _sp
+    import time as _t
+    head = _sp.run(["git", "-C", str(HOME), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    assert len(head) == 40, "cannot read HEAD of the real repo (undetermined)"
+    import datetime as dt
+    yesterday = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with tempfile.TemporaryDirectory() as tmp:
+        good = Path(tmp) / "editions.jsonl"
+        good.write_text(_ed_open(1, head, cut_at=yesterday) + "\n", encoding="utf-8")
+        absent = Path(tmp) / "no-such.jsonl"
+        for log, want_state, want_q in ((good, "pass", "good"), (absent, None, "undetermined")):
+            env = {**os.environ, "EDITIONS_LOG": str(log)}
+            t0 = _t.monotonic()
+            r = _sp.run([sys.executable, "-X", "utf8", str(TOOL_DIR / "emitters" / "editions.py")],
+                        capture_output=True, text=True, encoding="utf-8", cwd=str(HOME), env=env)
+            wall = _t.monotonic() - t0
+            assert r.returncode == 0 and wall < 5.0, (r.returncode, wall, r.stderr[-300:])
+            doc = json.loads(r.stdout)
+            pts = {p["id"]: p for p in doc["points"]}
+            assert doc["source"] == "editions" and set(pts) == {"editions.register", "editions.evolution"}, pts.keys()
+            assert (pts["editions.evolution"]["state"], pts["editions.evolution"]["quality"]) == (want_state, want_q), pts
+            c = _sp.run([sys.executable, "-X", "utf8", str(TOOL_DIR / "hmi.py"), "conform", "editions"],
+                        capture_output=True, text=True, encoding="utf-8", cwd=str(HOME), env=env)
+            assert c.returncode == 0 and "conform: ok (editions, 2 points" in c.stdout, (c.stdout, c.stderr[-300:])
+
+
+def t_editions_registry_closure():
+    """The declared points, the sources.json entry and the points.json entries agree (E-1, R-3 never
+    fires for this source). Positive control: a registry missing one point reads as a gap."""
+    ed = _ed_mod()
+    reg = registry.load_registry(TOOL_DIR / "registry")
+    src = [s for s in reg["sources"] if s["id"] == "editions"]
+    assert len(src) == 1 and src[0]["tier"] == "cheap" and src[0]["cwd"] == ".", src
+    assert src[0]["argv"][-1] == "tools/system-hmi/emitters/editions.py" and (HOME / src[0]["argv"][-1]).exists(), src
+    bound = lambda pts: {p["id"] for p in pts if p.get("adapter") == "native"
+                         and p.get("adapter_config", {}).get("source") == "editions"}
+    assert bound(reg["points"]) == set(ed.DECLARED), bound(reg["points"])
+    thin = [p for p in reg["points"] if p["id"] != "editions.evolution"]
+    assert bound(thin) != set(ed.DECLARED)                                           # positive control
+    ev = next(p for p in reg["points"] if p["id"] == "editions.evolution")
+    assert ev["class"] == "reconcile" and ev["subsystem"] == "system-hmi" and "edition.py open --cut HEAD" in ev["remedy"], ev
+
+
+ALL.extend([
+    ("editions: decision table rows 1-8, lag boundary and thresholds printed (both sides)", t_editions_decision_table_every_row),
+    ("editions: an unreadable log / cut sha is null+undetermined on both points, never pass (both sides)", t_editions_unreadable_never_passes),
+    ("editions: torn last line is undeclared and state comes from earlier events (both sides)", t_editions_torn_last_line_is_undeclared),
+    ("editions: state is derived from events; superseded by derivation; stray events undeclared", t_editions_state_is_derived_from_events),
+    ("editions: register rows normalised to UTC; missing/broken view file is an info row, state pass", t_editions_register_rows_and_missing_views),
+    ("editions: timestamp normalisation (Z, offsets, naive local; junk is None)", t_editions_timestamp_normalisation),
+    ("editions: INV-10 stdlib-only, no tool imports, no write call (linter calibrated both sides)", t_editions_inv10_readonly_stdlib_no_tool_imports),
+    ("editions: real run conforms, exits 0, under 5 s (fixture log + absent log)", t_editions_live_run_conform_and_wall_time),
+    ("editions: declared points = sources.json entry = points.json bindings (both sides)", t_editions_registry_closure),
+])
+
+
+# --- telemetry-trend (WC-05b) ---
+# Emitter `emitters/telemetry_trend.py` + validate rule `registry.telemetry_check` (snapshot-unification
+# 02 section 9.2, V-33, V-41, INV-10). Fixtures: a temp telemetry dir, a temp registry file, a fixed
+# `now` (Friday 2026-10-09 => week 1 of the window starts Monday 2026-08-10, week 8 ends 2026-10-04,
+# the current week 2026-10-05.. is incomplete) and local_tz=UTC. Nothing real is read except the live-run twin.
+
+def _tt_mod():
+    sys.path.insert(0, str(TOOL_DIR / "emitters"))
+    import telemetry_trend as tt
+    return tt
+
+
+def _tt_now():
+    import datetime as dt
+    return dt.datetime(2026, 10, 9, 12, 0, tzinfo=dt.timezone.utc)
+
+
+def _tt_when(week, k=0):
+    """A UTC instant inside window week `week` (1..8; 0 or less = before the window; 9 = the current,
+    incomplete week): Wednesday 12:00 plus k minutes."""
+    import datetime as dt
+    return dt.datetime(2026, 8, 10, 12, 0, tzinfo=dt.timezone.utc) + dt.timedelta(weeks=week - 1, days=2, minutes=k)
+
+
+def _tt_fmt(t, fmt, variant=0):
+    import datetime as dt
+    if fmt == "epoch":
+        return int(t.timestamp())
+    if fmt == "date":
+        return t.strftime("%Y-%m-%d")
+    form = (variant % 4)
+    if form == 0:
+        return t.strftime("%Y-%m-%dT%H:%M:%SZ")
+    if form == 1:
+        return t.strftime("%Y-%m-%dT%H:%M:%S") + "+00:00"
+    if form == 2:  # +0800 without a colon, same instant
+        return (t + dt.timedelta(hours=8)).strftime("%Y-%m-%dT%H:%M:%S") + "+0800"
+    return t.strftime("%Y-%m-%dT%H:%M:%S")  # naive; the fixture passes local_tz=UTC
+
+
+def _tt_rows(counts, fmt="epoch", field="ts", before=0, current=0):
+    """JSON lines for counts[0..7] rows in weeks 1..8, `before` rows in the week before the window and
+    `current` rows in the current incomplete week."""
+    out, n = [], 0
+    spec = [(0, before)] + [(i + 1, c) for i, c in enumerate(counts)] + [(9, current)]
+    for week, c in spec:
+        for k in range(c):
+            out.append(json.dumps({field: _tt_fmt(_tt_when(week, k), fmt, n), "x": n}))
+            n += 1
+    return out
+
+
+def _tt_point(tmp, files, rows_extra=None, **kw):
+    """files: {name: (lines, fmt)} -> the telemetry-trend.guards point. Writes tmp/t/<name>.jsonl and a
+    registry with one row per file (+ rows_extra for files that must stay absent)."""
+    tt = _tt_mod()
+    tdir = Path(tmp) / "t"
+    tdir.mkdir(exist_ok=True)
+    rows = []
+    for name, (lines, fmt) in files.items():
+        (tdir / f"{name}.jsonl").write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+        rows.append({"file": f"{name}.jsonl", "hook": f"hook_{name}", "ts_field": "ts", "ts_format": fmt})
+    rows.extend(rows_extra or [])
+    reg = Path(tmp) / "telemetry.json"
+    reg.write_text(json.dumps({"rows": rows, "unowned": []}), encoding="utf-8")
+    import datetime as dt
+    kw.setdefault("local_tz", dt.timezone.utc)
+    doc = tt.build(home=tmp, telemetry_dir=tdir, registry_path=reg, now=_tt_now(), **kw)
+    assert doc["protocol"] == "hmi-report/1" and doc["source"] == "telemetry-trend", doc
+    assert [p["id"] for p in doc["points"]] == [tt.POINT_ID], doc
+    return doc["points"][0]
+
+
+def _tt_labels(pt):
+    return {f["label"]: f for f in pt["findings"]}
+
+
+def t_telemetry_trend_rules_both_sides():
+    """sudden-zero / spike fire on their positive controls and stay silent on the known-good twins,
+    at the exact boundaries (>= MIN_RATE, strictly > SPIKE_X x median, >= SPIKE_MIN_ROWS); a finding
+    prints the 8 counts, the window and the thresholds (E-4); an injected threshold is the one printed."""
+    tt = _tt_mod()
+    with tempfile.TemporaryDirectory() as tmp:
+        run = lambda counts, **kw: _tt_point(tmp, {"f": (_tt_rows(counts), "epoch")}, **kw)
+        steady = run([4] * 8)
+        assert (steady["state"], steady["quality"], steady["remedy"]) == ("pass", "good", None), steady
+        assert not [f for f in steady["findings"] if f["severity"] == "warn"], steady
+        sz = run([4, 4, 4, 4, 4, 4, 0, 0])                                           # positive: went quiet
+        assert sz["state"] == "warn" and "f.jsonl: sudden-zero" in _tt_labels(sz), sz
+        txt = _tt_labels(sz)["f.jsonl: sudden-zero"]["text"]
+        assert "[4, 4, 4, 4, 4, 4, 0, 0]" in txt and "2026-08-10..2026-10-04" in txt, txt
+        assert "MIN_RATE=3" in txt and "SPIKE_X=5" in txt and "WEEKS=8" in txt and "hook hook_f" in txt, txt
+        assert run([3] * 6 + [0, 0])["state"] == "warn", "boundary: mean == MIN_RATE fires"
+        assert run([2] * 6 + [0, 0])["state"] == "pass", "mean below MIN_RATE is not a sudden zero"
+        assert run([4] * 7 + [0])["state"] == "pass", "only the last week empty is not a sudden zero"
+        assert run([4] * 6 + [4, 0])["state"] == "pass", "week 7 alive"
+        inj = run([3] * 6 + [0, 0], min_rate=4)                                       # injected threshold
+        assert inj["state"] == "pass" and "MIN_RATE=4," in inj["findings"][0]["text"], inj
+        sp = run([3] * 7 + [30])                                                     # positive: 10x last week
+        assert sp["state"] == "warn" and "f.jsonl: spike" in _tt_labels(sp), sp
+        assert "[3, 3, 3, 3, 3, 3, 3, 30]" in _tt_labels(sp)["f.jsonl: spike"]["text"], sp
+        assert run([3] * 7 + [16])["state"] == "warn", "16 > 5 x 3"
+        assert run([3] * 7 + [15])["state"] == "pass", "boundary: equal to SPIKE_X x median is not a spike"
+        assert run([1] * 7 + [9])["state"] == "pass", "9 rows is under the SPIKE_MIN_ROWS floor"
+        assert run([1] * 7 + [10])["state"] == "warn", "10 rows reaches the floor"
+        assert run([3] * 7 + [30], spike_x=10)["state"] == "pass", "30 is not > 10 x 3"
+        both = run([4, 4, 4, 4, 4, 4, 4, 0])
+        assert both["state"] == "pass", both
+
+
+def t_telemetry_trend_formats_are_parsed_not_guessed():
+    """epoch / iso (Z, +00:00, +0800, naive) / date all land on the right week (a quiet-then-silent
+    file reads sudden-zero in every format, never unreadable); junk is None; a file with no parseable
+    timestamp is `unreadable`, and torn lines among good rows do not make a file unreadable."""
+    import datetime as dt
+    tt = _tt_mod()
+    u = dt.timezone.utc
+    want = dt.datetime(2026, 10, 3, 1, 36, 29, tzinfo=u)
+    for s in ("2026-10-03T01:36:29Z", "2026-10-03T01:36:29+00:00", "2026-10-03T09:36:29+0800",
+              "2026-10-03T09:36:29+08:00"):
+        assert tt.parse_ts(s, "iso") == want, s
+    assert tt.parse_ts("2026-10-03T09:36:29", "iso", dt.timezone(dt.timedelta(hours=8))) == want   # naive = local
+    assert tt.parse_ts("2026-10-03", "date") == dt.datetime(2026, 10, 3, tzinfo=u)
+    assert tt.parse_ts(1791000000, "epoch") == dt.datetime.fromtimestamp(1791000000, u)
+    for junk, fmt in ((None, "epoch"), (True, "epoch"), ("1791000000", "epoch"), (float("nan"), "epoch"),
+                      ("yesterday", "iso"), (20261003, "iso"), ("2026-13-45", "date"), (None, "date"), (1, "bogus")):
+        assert tt.parse_ts(junk, fmt) is None, (junk, fmt)
+    with tempfile.TemporaryDirectory() as tmp:
+        quiet = [4, 4, 4, 4, 4, 4, 0, 0]
+        for fmt in ("epoch", "iso", "date"):
+            pt = _tt_point(tmp, {"q": (_tt_rows(quiet, fmt), fmt)})
+            assert "q.jsonl: sudden-zero" in _tt_labels(pt) and "q.jsonl: unreadable" not in _tt_labels(pt), (fmt, pt)
+            assert "[4, 4, 4, 4, 4, 4, 0, 0]" in _tt_labels(pt)["q.jsonl: sudden-zero"]["text"], (fmt, pt)
+        pt = _tt_point(tmp, {"q": ([json.dumps({"ts": "2026-08-12"})] + _tt_rows(quiet, "date"), "date")})
+        assert "q.jsonl: sudden-zero" in _tt_labels(pt), "date field read from a second ts_field"
+        none = _tt_point(tmp, {"n": ([json.dumps({"x": i}) for i in range(5)], "epoch")})        # positive: unreadable
+        assert none["state"] == "warn" and "n.jsonl: unreadable" in _tt_labels(none), none
+        assert "none of 5 lines" in _tt_labels(none)["n.jsonl: unreadable"]["text"], none
+        wrong = _tt_point(tmp, {"n": (_tt_rows([4] * 8, "epoch"), "iso")})                       # wrong ts_format: announces itself
+        assert "n.jsonl: unreadable" in _tt_labels(wrong), wrong
+        torn = _tt_point(tmp, {"n": (_tt_rows([4] * 8) + ['{"ts": 17', "not json"], "epoch")})
+        assert torn["state"] == "pass" and "n.jsonl: unreadable" not in _tt_labels(torn), torn   # negative twin
+
+
+def t_telemetry_trend_windows_history_guard_and_empty():
+    """Complete weeks only (the current week and the week before the window are ignored); the history
+    guard withholds judgement of a young file with an `info` note and no warn; an empty or missing
+    dir is warn 'no telemetry rows' (never pass on nothing); an unreadable registry, an exhausted
+    wall budget and a crash are never a pass."""
+    tt = _tt_mod()
+    with tempfile.TemporaryDirectory() as tmp:
+        pt = _tt_point(tmp, {"s": (_tt_rows([4] * 8, current=100), "epoch")})                    # 100 rows in the current week
+        assert pt["state"] == "pass", ("the incomplete current week must not make a spike", pt)
+        assert "judged" in _tt_labels(pt), pt
+        pt = _tt_point(tmp, {"s": (_tt_rows([4] * 8, before=500), "epoch")})                     # rows before the window
+        assert pt["state"] == "pass", pt
+        pt = _tt_point(tmp, {"s": (_tt_rows([4, 4, 4, 4, 4, 4, 0, 0], current=50), "epoch")})    # current week does not rescue
+        assert "s.jsonl: sudden-zero" in _tt_labels(pt), pt
+        pt = _tt_point(tmp, {"s": (_tt_rows([0, 0, 5, 5, 5, 5, 5, 40]), "epoch")})               # young: first row in week 3
+        assert pt["state"] == "pass" and not [f for f in pt["findings"] if f["severity"] == "warn"], pt
+        young = _tt_labels(pt)["young"]
+        assert young["severity"] == "info" and "s.jsonl" in young["text"] and "history guard" in young["text"], young
+        pt = _tt_point(tmp, {"s": (_tt_rows([1, 0, 5, 5, 5, 5, 5, 40]), "epoch")})               # twin: first row in week 1
+        assert pt["state"] == "warn" and "s.jsonl: spike" in _tt_labels(pt) and "young" not in _tt_labels(pt), pt
+        pt = _tt_point(tmp, {"s": (_tt_rows([0, 4, 4, 4, 4, 0, 0, 0]), "epoch")})                # young AND quiet: no finding
+        assert pt["state"] == "pass", pt
+        assert tt.eligible(_tt_when(1), tt.window_start(_tt_now())) and not tt.eligible(_tt_when(2), tt.window_start(_tt_now()))
+        assert not tt.judge([0, 0, 5, 5, 5, 5, 5, 40], _tt_when(3), 40, tt.window_start(_tt_now()))[0]
+        assert tt.judge([0, 0, 5, 5, 5, 5, 5, 40], _tt_when(3), 40, tt.window_start(_tt_now()), guard=False)[0] == ["spike"]
+    with tempfile.TemporaryDirectory() as tmp:
+        absent = [{"file": "ghost.jsonl", "hook": "ghost", "ts_field": "ts", "ts_format": "epoch", "not_yet_fired": True}]
+        pt = _tt_point(tmp, {}, rows_extra=absent)                                               # empty dir
+        assert pt["state"] == "warn" and "no telemetry rows" in _tt_labels(pt), pt
+        assert "not yet fired" in _tt_labels(pt)["absent"]["text"], pt
+        pt = _tt_point(tmp, {}, rows_extra=None)                                                 # no rows at all
+        assert pt["state"] == "warn" and "no telemetry rows" in _tt_labels(pt), pt
+        pt = _tt_point(tmp, {"s": (_tt_rows([4] * 8), "epoch")}, rows_extra=absent)              # twin: data present
+        assert pt["state"] == "pass" and "no telemetry rows" not in _tt_labels(pt), pt
+        assert _tt_labels(pt)["absent"]["severity"] == "info", pt
+        doc = tt.build(home=tmp, telemetry_dir=Path(tmp) / "no-such-dir", registry_path=Path(tmp) / "telemetry.json",
+                       now=_tt_now())                                                            # missing dir
+        assert doc["points"][0]["state"] == "warn" and "no telemetry rows" in _tt_labels(doc["points"][0]), doc
+        for bad in (Path(tmp) / "none.json", Path(tmp) / "bad.json", Path(tmp) / "norows.json"):
+            if bad.name == "bad.json":
+                bad.write_text("{broken", encoding="utf-8")
+            elif bad.name == "norows.json":
+                bad.write_text('{"rows": "x"}', encoding="utf-8")
+            doc = tt.build(home=tmp, telemetry_dir=tmp, registry_path=bad, now=_tt_now())
+            p = doc["points"][0]
+            assert (p["state"], p["quality"]) == (None, "undetermined") and p["ran"] is True, (bad.name, p)
+        pt = _tt_point(tmp, {"s": (_tt_rows([4] * 8), "epoch")}, wall_budget=-1.0)               # budget exhausted
+        assert (pt["state"], pt["quality"]) == (None, "undetermined") and "wall budget" in pt["findings"][0]["label"], pt
+        orig = tt.guards_point
+        try:
+            tt.guards_point = lambda *a, **k: 1 / 0
+            doc = tt.build(home=tmp, telemetry_dir=tmp, registry_path=Path(tmp) / "telemetry.json", now=_tt_now())
+        finally:
+            tt.guards_point = orig
+        p = doc["points"][0]
+        assert p["ran"] is False and p["state"] is None and p["skip_reason"] == "exception-ZeroDivisionError", p
+
+
+def _tt_hook_home(tmp):
+    home = Path(tmp) / "home"
+    (home / "hooks" / "tests").mkdir(parents=True)
+    (home / "telemetry").mkdir()
+    hooks = {
+        "alias_guard": 'try:\n    from deny_receipt import clause as _receipt, fp_clause as _fp\n'
+                       'except Exception:\n    def _receipt(hook, **f): return ""\nHOOK = "alias_guard"\n'
+                       'def deny():\n    return _receipt(HOOK, x=1)\n',
+        "mod_guard": 'import deny_receipt as dr\n\ndef deny():\n    return dr.clause("mod_guard")\n',
+        "notice_only": 'from deny_receipt import notice_clause\n\ndef note():\n    return notice_clause("notice_only")\n',
+        "path_only": 'import deny_receipt\nLOG = deny_receipt.log_path("path_only")\n',
+        "lit_hook": 'LOG = "~/.claude/telemetry/lit-log.jsonl"\n',
+    }
+    for name, src in hooks.items():
+        (home / "hooks" / f"{name}.py").write_text(src, encoding="utf-8")
+    (home / "hooks" / "tests" / "test_x.py").write_text('P = "telemetry/tests-only.jsonl"\n', encoding="utf-8")
+    return home
+
+
+def _tt_touch(home, *names):
+    for n in names:
+        (home / "telemetry" / n).write_text('{"ts": 1}\n', encoding="utf-8")
+
+
+def _tt_row(f, hook, **kw):
+    return {"file": f, "hook": hook, "ts_field": "ts", "ts_format": "epoch", **kw}
+
+
+def t_telemetry_registry_validate_producers_both_sides():
+    """validate rule (V-33, V-41, rulings 2026-10-09): a hook that CALLS deny_receipt.clause()/receipt()
+    (alias-aware, argument resolved through a module constant) or holds a literal telemetry/<name>.jsonl
+    needs a row; a hook that only imports notice_clause / log_path writes no row and needs none; tests/
+    subdirs are not hooks."""
+    with tempfile.TemporaryDirectory() as tmp:
+        home = _tt_hook_home(tmp)
+        prod = registry.telemetry_producers(home / "hooks")
+        assert prod["b"] == {("alias_guard", "alias-guard.jsonl"), ("mod_guard", "mod-guard.jsonl")}, prod
+        assert prod["a"] == {("lit_hook", "lit-log.jsonl")}, prod
+        assert prod["unparsed"] == [], prod
+        errs, warns = registry.telemetry_check({"rows": [], "unowned": []}, home)                # positive: nothing registered
+        assert sorted(errs) == [
+            "telemetry file without a trend row: alias_guard -> alias-guard.jsonl",
+            "telemetry file without a trend row: lit_hook -> lit-log.jsonl",
+            "telemetry file without a trend row: mod_guard -> mod-guard.jsonl"], errs
+        assert not any("notice_only" in e or "path_only" in e or "tests-only" in e for e in errs), errs   # negative
+        _tt_touch(home, "alias-guard.jsonl", "mod-guard.jsonl", "lit-log.jsonl", "notice-only.jsonl")
+        full = {"rows": [_tt_row("alias-guard.jsonl", "alias_guard"), _tt_row("mod-guard.jsonl", "mod_guard"),
+                         _tt_row("lit-log.jsonl", "lit_hook")],
+                "unowned": [{"file": "notice-only.jsonl", "reason": "fixture"}]}
+        assert registry.telemetry_check(full, home) == ([], []), registry.telemetry_check(full, home)   # negative: closed
+        full["rows"].pop()
+        full["unowned"].append("lit-log.jsonl")                                                   # a pair satisfied by unowned
+        assert registry.telemetry_check(full, home) == ([], []), registry.telemetry_check(full, home)
+        full["rows"].append(_tt_row("lit-log.jsonl", "lit_hook"))                                 # both a row and unowned
+        assert any("both a trend row and unowned" in e for e in registry.telemetry_check(full, home)[0])
+
+
+def t_telemetry_registry_validate_files_rows_and_staleness():
+    """An existing telemetry/*.jsonl must be a row's file or unowned (error); a row's file must exist
+    (error, unless not_yet_fired -- whose stale flag is a warning); a row whose hook no longer
+    qualifies is a WARNING unless path_built; bad schema is an error; a registry without a telemetry
+    key is not checked at all (older fixtures); the warnings channel of validate() is optional."""
+    with tempfile.TemporaryDirectory() as tmp:
+        home = _tt_hook_home(tmp)
+        _tt_touch(home, "alias-guard.jsonl", "mod-guard.jsonl", "lit-log.jsonl", "stray.jsonl", "built.jsonl")
+        base = [_tt_row("alias-guard.jsonl", "alias_guard"), _tt_row("mod-guard.jsonl", "mod_guard"),
+                _tt_row("lit-log.jsonl", "lit_hook")]
+        errs, warns = registry.telemetry_check({"rows": base, "unowned": []}, home)
+        assert sorted(e.split(" (")[0] for e in errs) == ["telemetry file not registered: built.jsonl",
+                                                          "telemetry file not registered: stray.jsonl"], errs
+        assert warns == [], warns
+        reg = {"rows": base + [_tt_row("built.jsonl", "builder", path_built=True)], "unowned": ["stray.jsonl"]}
+        assert registry.telemetry_check(reg, home) == ([], []), registry.telemetry_check(reg, home)   # negative: path_built, unowned str
+        reg["rows"][-1].pop("path_built")                                                         # stale row, not path_built
+        errs, warns = registry.telemetry_check(reg, home)
+        assert errs == [] and len(warns) == 1 and "no longer qualifies" in warns[0] and "built.jsonl" in warns[0], (errs, warns)
+        reg["rows"][-1]["hook"] = "lit_hook"                                                      # a hook that exists but never wrote it
+        assert len(registry.telemetry_check(reg, home)[1]) == 1
+        gone = {"rows": base + [_tt_row("gone.jsonl", "alias_guard")], "unowned": ["stray.jsonl", "built.jsonl"]}
+        errs, _w = registry.telemetry_check(gone, home)
+        assert any("row's file does not exist: gone.jsonl" in e for e in errs), errs
+        gone["rows"][-1]["not_yet_fired"] = True                                                  # twin: declared not yet fired
+        assert not any("gone.jsonl" in e for e in registry.telemetry_check(gone, home)[0])
+        gone["rows"][-1]["file"] = "alias-guard.jsonl"                                            # duplicate file
+        assert any("duplicated" in e for e in registry.telemetry_check(gone, home)[0])
+        flag = {"rows": [dict(r, not_yet_fired=True) if r["file"] == "lit-log.jsonl" else r for r in base],
+                "unowned": ["stray.jsonl", "built.jsonl"]}
+        errs, warns = registry.telemetry_check(flag, home)                                        # flag set, file exists
+        assert errs == [] and len(warns) == 1 and "stale flag" in warns[0], (errs, warns)
+        bad = {"rows": base + [{"file": "x.jsonl", "hook": "h", "ts_field": "ts", "ts_format": "unix"},
+                               {"file": "y.jsonl", "hook": "h"}], "unowned": []}
+        errs, _w = registry.telemetry_check(bad, home)
+        assert any("ts_format 'unix'" in e for e in errs) and any("missing field" in e and "y.jsonl" in e for e in errs), errs
+        assert registry.telemetry_check({"unowned": []}, home)[0], "no rows list is an error"
+        rub = json.loads((TOOL_DIR / "registry" / "rubric.json").read_text(encoding="utf-8"))
+        shell = {"subsystems": [], "points": [], "rubric": rub, "ignore": [], "sources": []}
+        assert registry.validate(shell, home=str(home)) == [], "no telemetry key: unchecked"
+        shell["telemetry"] = {"rows": [], "unowned": []}                                          # the same shell, telemetry on
+        w = []
+        errs = registry.validate(shell, home=str(home), warnings=w)
+        assert any("without a trend row" in e for e in errs) and w == [], (errs, w)
+        assert registry.validate(shell, home=str(home)) == errs                                   # warnings arg is optional
+
+
+def t_telemetry_trend_inv10_readonly_stdlib_no_tool_imports():
+    """INV-10: the emitter imports only the stdlib, none of the tools it reads, and has no write call.
+    The linter is calibrated on a planted violator (must fire) before it is trusted on the real file."""
+    import ast
+    import re
+    forbidden = re.compile(r"^(from|import) +(gsnap|gs_model|version_census|lastuse|edition|editions|deny_receipt|hmi)\b", re.M)
+    writers = {"write_text", "write_bytes", "unlink", "rename", "mkdir", "rmdir", "remove", "write",
+               "writelines", "truncate", "touch"}
+
+    def problems(src):
+        out = []
+        if forbidden.search(src):
+            out.append("imports a tool it reads")
+        for node in ast.walk(ast.parse(src)):
+            mods = ([a.name for a in node.names] if isinstance(node, ast.Import)
+                    else [node.module or ""] if isinstance(node, ast.ImportFrom) else [])
+            out += [f"non-stdlib import {m}" for m in mods if m.split(".")[0] not in sys.stdlib_module_names]
+            if isinstance(node, ast.Call):
+                f = node.func
+                name = f.attr if isinstance(f, ast.Attribute) else f.id if isinstance(f, ast.Name) else ""
+                on_fs = isinstance(f, ast.Attribute) and isinstance(f.value, ast.Name) and f.value.id in ("os", "shutil")
+                if name in writers or (name == "replace" and on_fs) or (on_fs and f.value.id == "shutil"):
+                    out.append(f"write-ish call {name}()")
+                if name == "open":
+                    mode = node.args[1].value if len(node.args) > 1 and isinstance(node.args[1], ast.Constant) else ""
+                    if any(c in str(mode) for c in "wax+"):
+                        out.append("open() for writing")
+        return out
+
+    planted = "import editions\nimport requests\nimport os\nfrom pathlib import Path\nPath('x').write_text('y')\nopen('f','w')\n"
+    assert len(problems(planted)) >= 4, problems(planted)                                        # positive control
+    benign = "import datetime as dt\nt = dt.datetime.now().replace(tzinfo=None)\nopen('f', encoding='utf-8')\n"
+    assert problems(benign) == [], problems(benign)                                              # negative control
+    src = (TOOL_DIR / "emitters" / "telemetry_trend.py").read_text(encoding="utf-8")
+    assert problems(src) == [], problems(src)                                                    # negative: the real file
+
+
+def t_telemetry_trend_live_run_conform_and_wall_time():
+    """The real emitter in a real subprocess over the REAL telemetry/ and registry: exits 0, one JSON
+    document with the declared point, never pass-with-nothing, under 5 s, `hmi.py conform` ok. Twin:
+    CLAUDE_TELEMETRY_DIR pointing at an empty dir is a conformant 'warn / no telemetry rows'."""
+    import os
+    import subprocess as _sp
+    import time as _t
+    with tempfile.TemporaryDirectory() as tmp:
+        for tdir, want in ((None, None), (tmp, "no telemetry rows")):
+            env = dict(os.environ)
+            env.pop("CLAUDE_TELEMETRY_DIR", None)
+            if tdir:
+                env["CLAUDE_TELEMETRY_DIR"] = tdir
+            t0 = _t.monotonic()
+            r = _sp.run([sys.executable, "-X", "utf8", str(TOOL_DIR / "emitters" / "telemetry_trend.py")],
+                        capture_output=True, text=True, encoding="utf-8", cwd=str(HOME), env=env)
+            wall = _t.monotonic() - t0
+            assert r.returncode == 0 and wall < 5.0, (r.returncode, wall, r.stderr[-300:])
+            doc = json.loads(r.stdout)
+            pt = doc["points"][0]
+            assert doc["source"] == "telemetry-trend" and pt["id"] == "telemetry-trend.guards" and pt["ran"] is True, doc
+            assert pt["state"] in ("pass", "warn") and pt["quality"] == "good", pt
+            if want:
+                assert pt["state"] == "warn" and any(f["label"] == want for f in pt["findings"]), pt
+            else:
+                assert any(f["label"] == "judged" for f in pt["findings"]), pt                   # the real files were read
+            c = _sp.run([sys.executable, "-X", "utf8", str(TOOL_DIR / "hmi.py"), "conform", "telemetry-trend"],
+                        capture_output=True, text=True, encoding="utf-8", cwd=str(HOME), env=env)
+            assert c.returncode == 0 and "conform: ok (telemetry-trend, 1 points" in c.stdout, (c.stdout, c.stderr[-300:])
+
+
+def t_telemetry_trend_registry_closure():
+    """The declared point, the sources.json entry, the points.json binding and the telemetry.json seed
+    agree: subsystem hook-guards exists, class integrity, cheap tier; every row names a ts_format in
+    the closed set. Positive control: a registry missing the point reads as a gap."""
+    tt = _tt_mod()
+    reg = registry.load_registry(TOOL_DIR / "registry")
+    src = [s for s in reg["sources"] if s["id"] == "telemetry-trend"]
+    assert len(src) == 1 and src[0]["tier"] == "cheap" and src[0]["timeout_s"] == 30 and src[0]["cwd"] == ".", src
+    assert src[0]["argv"][-1] == "tools/system-hmi/emitters/telemetry_trend.py" and (HOME / src[0]["argv"][-1]).exists(), src
+    bound = lambda pts: {p["id"] for p in pts if p.get("adapter") == "native"
+                         and p.get("adapter_config", {}).get("source") == "telemetry-trend"}
+    assert bound(reg["points"]) == {tt.POINT_ID}, bound(reg["points"])
+    assert bound([p for p in reg["points"] if p["id"] != tt.POINT_ID]) != {tt.POINT_ID}          # positive control
+    pt = next(p for p in reg["points"] if p["id"] == tt.POINT_ID)
+    assert pt["subsystem"] == "hook-guards" and pt["class"] == "integrity" and pt["tier"] == "cheap", pt
+    assert pt["disposition"]["value"] == "active" and pt["alias"] == tt.ALIAS and pt["why"], pt
+    assert pt["subsystem"] in {s["id"] for s in reg["subsystems"]}
+    t = reg["telemetry"]
+    assert t and t["rows"] and all(r["ts_format"] in registry.TS_FORMATS for r in t["rows"]), t
+    assert not ({r["file"] for r in t["rows"]} & registry._unowned_files(t))
+
+
+ALL.extend([
+    ("telemetry-trend: sudden-zero / spike fire and stay silent at the exact boundaries; counts + thresholds printed (both sides)", t_telemetry_trend_rules_both_sides),
+    ("telemetry-trend: epoch / iso (Z, +00:00, +0800, naive) / date parsed; no timestamp is unreadable (both sides)", t_telemetry_trend_formats_are_parsed_not_guessed),
+    ("telemetry-trend: current week ignored, history guard withholds young files, empty/unreadable/budget/crash never pass", t_telemetry_trend_windows_history_guard_and_empty),
+    ("telemetry-trend: validate producers = literal path + deny_receipt clause/receipt callers, notice_clause-only needs no row (both sides)", t_telemetry_registry_validate_producers_both_sides),
+    ("telemetry-trend: validate files/rows -- unregistered file, missing row file, stale row warning, schema (both sides)", t_telemetry_registry_validate_files_rows_and_staleness),
+    ("telemetry-trend: INV-10 stdlib-only, no tool imports, no write call (linter calibrated both sides)", t_telemetry_trend_inv10_readonly_stdlib_no_tool_imports),
+    ("telemetry-trend: real run conforms, exits 0, under 5 s over real telemetry/ (and an empty dir warns)", t_telemetry_trend_live_run_conform_and_wall_time),
+    ("telemetry-trend: declared point = sources.json entry = points.json binding = telemetry.json seed (both sides)", t_telemetry_trend_registry_closure),
+])
+
+
 def main():
     for name, fn in ALL:
         check(name, fn)

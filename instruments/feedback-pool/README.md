@@ -23,7 +23,7 @@ Proof-of-life: `python tools/feedback-pool/controls.py`
 | 部件 | 在哪 | 誰寫 |
 |---|---|---|
 | 手寫入口 | `python -X utf8 tools/process-ledger/ledger.py feedback --target <t> --symptom "…" --action fixed-inline\|left\|worked-around\|planned-work [--proposal "…"]` | 主迴圈，在**發現當下**（write-at-origin）；`hooks/feedback_notice.py` 在你第一次動某個子系統的檔案時提醒一次 |
-| 機器感測 | S-2 hook 誤擋 `telemetry/hook-false-positives.jsonl`・S-3 HMI 長駐 fail・S-4 教訓 `held=no` 再發（已 fold 的歸到 fold 目標規則）・S-5 skill-co-upgrade 有 gap report 沒 disposition 的回合・S-6 LSE `reflux.jsonl` correction・S-7 `golive-check` fail | 各來源自己；本工具**只讀** |
+| 機器感測 | S-2 hook 誤擋 `telemetry/hook-false-positives.jsonl`・S-3 HMI 長駐 fail・S-4 教訓 `held=no` 再發（已 fold 的歸到 fold 目標規則）・S-5 skill-co-upgrade 有 gap report 沒 disposition 的回合・S-6 LSE `reflux.jsonl` correction・S-7 `golive-check` fail・S-8 feedback-observer mod 的 finding（`projects/*/*.observer.jsonl`；登錄值 `FEEDBACK_OBSERVER` 是 `shadow` 時只列出、不計數） | 各來源自己；本工具**只讀** |
 | 比較器 | `feedback.py collect`：同一 target 自上次 fold 起的事件數 ≥ 3（registry `FEEDBACK_POOL`）→ due | 本工具；產物 `out/pool.json` 是可重算的投影 |
 | 排空 | 你說「檢視回授」→ `feedback.py review <target>` 列證據 → 檢視輪（改規則／skill-co-upgrade／開 ticket）→ `ledger.py feedback-fold --target <t> --outcome adopted\|rejected\|deferred --ref … [--trigger …]` 歸零 | 主迴圈，使用者同意後 |
 

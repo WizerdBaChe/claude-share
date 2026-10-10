@@ -27,7 +27,9 @@ Checks (ES-n; the numbering is owned by this docstring and registered in LABEL-R
   ES-4 trigger class skill-trigger-classes.md blocks: the skill exists, class/source/on-fire
                      are inside the value sets, zero-means present.              AP-36
   ES-5 pointers      owner/mechanism paths resolve: rules-usage-dict §7 owner column,
-                     LABEL-REGISTRY §2 owner column, `tools/`/`hooks/` paths named in rules/*.md
+                     LABEL-REGISTRY §2 owner column, `tools/`/`hooks/` paths named in rules/*.md,
+                     every backticked capability path in a top-level *.md (globs must match;
+                     placeholders skipped; skill-relative paths resolve under skills/<x>/)
                      (FAIL); rule-registry entries carry current/why/evidence (WARN). AP-11 AP-33
   ES-6 guide cites   principle-design-guide.md citations resolve: `CLAUDE.md «phrase»` verbatim
                      in CLAUDE.md, `PHILOSOPHY §一.n` heading present (FAIL).
@@ -235,6 +237,34 @@ def resolve(home: Path, tok: str) -> bool:
             tok = tok[len(pre):]
     tok = tok.rstrip("/").split(" ")[0]
     return (home / tok).exists()
+
+
+# A template path asserts no file: `references/<project>-context.md`, `ops/lessons/L-nnn.md`.
+PLACEHOLDER_TOKEN = re.compile(r"[<>{}]|(?<![a-z])n{3,}(?![a-z])|\.\.\.|…")
+
+
+def pointer_state(home: Path, tok: str) -> str:
+    """ok | placeholder | glob-empty | missing, for one backticked path in a top-level doc.
+
+    Classes measured on the corpus before the check was wired (2026-10-03): placeholders
+    (4) are skipped -- they name a shape, not a file; a glob (`skills/*/SKILL.md`, 5)
+    must match at least once; a path absent at the root may be SKILL-RELATIVE (the
+    trigger dict cites `references/modes.md` of the skill it routes to, 4) and resolves
+    under any skills/<x>/. Without those three classes the first run was 13 findings,
+    all false -- the shape PHILOSOPHY §一 records for the graph's placeholder-blind resolver.
+    """
+    for pre in ("~/.claude/", ".claude/"):
+        if tok.startswith(pre):
+            tok = tok[len(pre):]
+    tok = tok.rstrip("/").split(" ")[0]
+    if PLACEHOLDER_TOKEN.search(tok):
+        return "placeholder"
+    if "*" in tok:
+        hit = any(home.glob(tok)) or any(home.glob("skills/*/" + tok))
+        return "ok" if hit else "glob-empty"
+    if (home / tok).exists() or any(home.glob("skills/*/" + tok)):
+        return "ok"
+    return "missing"
 
 
 def registered_hooks(home: Path):
@@ -458,6 +488,7 @@ def check_pointers(home: Path) -> list[Finding]:
     else:
         out.append(Finding("ANCHOR", "LOST", "ops/rules-usage-dict.md", "missing -- ES-5 cannot run"))
     # LABEL-REGISTRY §2: owner = 4th cell
+    label_flagged: set[str] = set()
     f = home / "LABEL-REGISTRY.md"
     if f.is_file():
         for row in table_rows(read(f), r"^## 2\."):
@@ -467,8 +498,25 @@ def check_pointers(home: Path) -> list[Finding]:
             toks = PATH_IN_TICK.findall(cells[3]) + ["ops/" + t for t in OPS_BASENAME.findall(cells[3])]
             for tok in toks:
                 if not resolve(home, tok):
+                    label_flagged.add(tok)
                     out.append(Finding("ES-5", "FAIL", "LABEL-REGISTRY.md §2",
                                        f"owner path `{tok}` does not exist (family `{cells[0][:40]}`)"))
+    # top-level *.md (operator guide, philosophy, registries, the trigger dict): every
+    # backticked capability path names something that exists. A count of hooks/skills in
+    # those docs rotted for weeks with nothing to read it; a POINTER can be checked, so
+    # the counts became pointers (2026-10-03) and the pointers get this check.
+    # tracking-refs owns the other half (the target is in git, so it survives a clone).
+    for p in sorted(home.glob("*.md")):
+        for tok in sorted(set(PATH_IN_TICK.findall(read(p)))):
+            if p.name == "LABEL-REGISTRY.md" and tok in label_flagged:
+                continue
+            st = pointer_state(home, tok)
+            if st == "missing":
+                out.append(Finding("ES-5", "FAIL", rel(home, p),
+                                   f"names `{tok}`, which exists neither at the root nor under any "
+                                   "skills/<x>/ (fix the pointer; a template path needs a <placeholder>)"))
+            elif st == "glob-empty":
+                out.append(Finding("ES-5", "FAIL", rel(home, p), f"glob `{tok}` matches nothing"))
     # rules/*.md: a mechanism the text names must exist
     for p in sorted((home / "rules").glob("*.md")):
         for tok in set(PATH_IN_TICK.findall(read(p))):
@@ -627,7 +675,8 @@ def check_watched(home: Path) -> list[Finding]:
         out.append(Finding("ES-9", severity_for(home, home / r, "ES-9"), r,
                            "no row in tools/system-hmi/registry/subsystems.json and none in "
                            "ignore.json -- nothing watches it; add a component_rules row under "
-                           "the subsystem its function belongs to (or an ignore row with a reason)"))
+                           "the subsystem its function belongs to (or an ignore row with a reason): "
+                           + json.dumps({"glob": r, "kind": entry.get("kind") or "tool"})))
     for ov in result.get("overlaps", []):
         out.append(Finding("ES-9", "FAIL", ov["path"],
                            "matched by more than one subsystem: " + ", ".join(ov["subsystems"])

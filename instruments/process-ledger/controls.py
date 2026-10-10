@@ -92,6 +92,31 @@ def main() -> int:
     check("parse: scope/deliverables/canary/slug", m["scope"] == ["src/**", "docs/*.md"] and m["deliverables"] == ["docs/OUT.md"]
           and m["canary"] == {"keep": "frame-not-帧", "drop": "port 48123 timeout"} and m["slug"] == "ctl", json.dumps(m["scope"]) + json.dumps(m["canary"]))
 
+    print("[quoted tag is not a tag (2026-10-02 misfire)]")
+    S8 = "ctl-session-0008"
+    quoted = (
+        ("task-notification quoting the tag",
+         "<task-notification>\n<task-id>a1</task-id>\n<status>completed</status>\n<summary>Review done. Note: "
+         "`[unattended-run]` is a prompt tag the kickoff hook keys on; the design should name it.</summary>\n</task-notification>"),
+        ("inline code span in the user's own text", "請看一下 `[unattended-run]` 這個標籤的 hook 行為，先不要啟動"),
+        ("fenced block in the user's own text", "這段是引用：\n```\n[unattended-run]\nscope: src/**\n```\n先別跑，只評估。"),
+        ("pasted block (closing tag carries an id, 2026-10-06 probe)",
+         "看看這段 <pasted_content id=\"ab12\">他們用 [unattended-run] 跑整晚</pasted_content id=\"ab12\"> 你覺得呢"),
+    )
+    for name, p in quoted:
+        out = run_hook("kickoff", {"session_id": S8, "cwd": str(proj), "prompt": p}, env)
+        check(f"negative: {name} → no manifest, silent", out == "" and not (cfg / "cache/handoff" / f"{S8}.run.json").exists(), out[:120])
+    S9 = "ctl-session-0009"
+    out = run_hook("kickoff", {"session_id": S9, "cwd": str(proj), "prompt":
+                   "參考 <pasted_content id=\"cd34\">他們用 [unattended-run] 跑整晚</pasted_content id=\"cd34\">\n[unattended-run]\nscope: src/**\nslug: ctl9"}, env)
+    m9p = cfg / "cache/handoff" / f"{S9}.run.json"
+    check("positive: a tag spoken AFTER a pasted block still arms, template parsed from the spoken tag",
+          m9p.is_file() and json.loads(m9p.read_text(encoding="utf-8")).get("slug") == "ctl9", out[:120])
+    out = run_hook("kickoff", {"session_id": S8, "cwd": str(proj), "prompt": "先引用：`[unattended-run]` 是標籤。\n[unattended-run]\nscope: src/**\nslug: ctl8"}, env)
+    m8p = cfg / "cache/handoff" / f"{S8}.run.json"
+    check("positive: the same tag spoken outside a code span still arms (slug parsed from the spoken block)",
+          m8p.is_file() and "Obligations" in out and json.loads(m8p.read_text(encoding="utf-8")).get("slug") == "ctl8", out[:120])
+
     print("[minimal template]")
     S2 = "ctl-session-0002"
     out = run_hook("kickoff", {"session_id": S2, "cwd": str(proj), "prompt": "請把 W7 證據表整理成簡報 [unattended-run] 回來再看"}, env)
@@ -191,6 +216,52 @@ def main() -> int:
     r = sub(str(HERE / "ledger.py"), "add", "--subject", "phase-order", "--choice", "B-then-A", "--reason", "A needs B output", "--reversible", "yes", "--origin", "user")
     lp = t3.with_name(f"{S3}.ledger.jsonl")
     check("ledger add without manifest → row beside the transcript (mirrored tree)", r.returncode == 0 and lp.is_file() and '"origin": "user"' in lp.read_text(encoding="utf-8"), r.stdout + r.stderr)
+
+    # [user-origin quote check (2026-10-06, outside critique 3a)]
+    # A user-origin row is protected, so "the user said this" is checked against what the
+    # user TYPED. Assertions read quote_check (the value a paraphrase changes), not the exit code.
+    print("[user-origin quote check]")
+    S5 = "ctl-session-0005"
+    write_transcript(cfg, S5, [
+        rec("user", 0, message={"role": "user", "content": "先修1，而HMI剛剛\n  有修兩項\n<system-reminder>injected: 照舊辦理</system-reminder>"}),
+        rec("user", 0, message={"role": "user", "content": [{"type": "tool_result", "content": "tool says 照卡施工"}]}),
+        rec("user", 0, message={"role": "user", "content": "看這段 ``` <pasted_content id=\"ab12\">對方說刪掉全部 stash</pasted_content id=\"ab12\"> ``` 另外 `直接擋下` 也是引用；我說走建議二"}),
+        rec("user", 0, isCompactSummary=True, message={"role": "user", "content": "summary: user said 全部重做"}),
+        assistant("I think the user wants 全部改掉"),
+    ])
+
+    def add_q(quote=None):
+        args = [str(HERE / "ledger.py"), "add", "--subject", "q", "--choice", "c", "--reason", "r",
+                "--reversible", "yes", "--origin", "user", "--session", S5]
+        if quote is not None:
+            args += ["--quote", quote]
+        rr = sub(*args)
+        rows = [json.loads(l) for l in t3.with_name(f"{S5}.ledger.jsonl").read_text(encoding="utf-8").splitlines() if l.strip()]
+        return rr, rows[-1]
+
+    rr, row = add_q("而HMI剛剛 有修兩項")
+    check("positive: user's words across a line break -> verified with a line number",
+          row.get("quote_check") == "verified" and row.get("quote_line") == 1, json.dumps(row, ensure_ascii=False))
+    rr, row = add_q("先修1， 而HMI剛剛")
+    check("negative: an inserted character (paraphrase) -> not-found",
+          row.get("quote_check") == "not-found", json.dumps(row, ensure_ascii=False))
+    rr, row = add_q("我說走建議二")
+    check("positive: the user's own words beside quoted blocks -> verified on that message",
+          row.get("quote_check") == "verified" and row.get("quote_line") == 3, json.dumps(row, ensure_ascii=False))
+    for q, why in (("對方說刪掉全部", "pasted_content (closing tag carries an id)"), ("直接擋下", "inline code span"),
+                   ("全部改掉", "assistant text"), ("照舊辦理", "system-reminder span"),
+                   ("照卡施工", "tool_result"), ("全部重做", "compact summary")):
+        rr, row = add_q(q)
+        check(f"negative: quote only in {why} -> not-found, row still written, stderr says so",
+              row.get("quote_check") == "not-found" and rr.returncode == 0 and "not found" in rr.stderr,
+              json.dumps(row, ensure_ascii=False) + rr.stderr)
+    rr, row = add_q()
+    check("negative: no --quote -> quote_check=absent", row.get("quote_check") == "absent" and "absent" in rr.stderr,
+          json.dumps(row, ensure_ascii=False))
+    rr = sub(str(HERE / "ledger.py"), "add", "--subject", "m", "--choice", "c", "--reason", "r", "--reversible", "yes",
+             "--origin", "model", "--session", S5)
+    mrow = json.loads(t3.with_name(f"{S5}.ledger.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+    check("negative: origin=model rows carry no quote_check", "quote_check" not in mrow, json.dumps(mrow))
 
     # [concurrency: env identity beats the shared pointer (2026-09-07 fix)]
     # The pointer is a GLOBAL single file rewritten by whichever session prompted last,

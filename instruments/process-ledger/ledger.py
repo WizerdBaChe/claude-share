@@ -40,7 +40,11 @@ Subcommands
              target (adopted | rejected | deferred + --trigger); it consumes every
              pool event of that target dated before it (design INV-5).
 
-Row: {ts, subject, choice, reason, reversible, origin, register_ref?}
+Row: {ts, subject, choice, reason, reversible, origin, register_ref?, quote?, quote_check?, quote_line?}
+     origin=user rows always carry quote_check: verified (the --quote is a substring of a
+     message the user typed, reminders and tool output excluded) | not-found | no-transcript
+     | absent (no --quote). Only `verified` means "the user's own words"; the rest mean
+     "recorded as a user ruling by the model" (2026-10-06, outside critique 3a).
 Feedback row: {ts, kind: feedback, id, target, symptom, action, proposal?, origin, session}
 Fold row:     {ts, kind: feedback-fold, target, outcome, ref, trigger?, session}
 Legacy decision rows carry no `kind`.
@@ -189,12 +193,93 @@ def read_canary(session: str) -> dict | None:
         return None
 
 
+REMINDER_RE = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
+# Text the user QUOTED rather than spoke (L-138 principle; outside feedback 2026-10-06):
+# pasted blocks — the harness writes the closing tag WITH its id attribute, so a
+# `</\1>` backreference never matches it — and fenced blocks / inline code spans.
+PASTED_RE = re.compile(r"<pasted_content\b[^>]*>.*?</pasted_content\b[^>]*>", re.S)
+CODE_SPAN_RE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+
+
+def _norm(s: str) -> str:
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def human_messages(transcript: Path):
+    """(line, text) for every message the USER typed in the main loop.
+
+    Kept: type=user records outside a sidechain that are not a compact summary or
+    meta record, string content or `text` blocks only. Dropped: tool_result blocks
+    (tool output is data, not a ruling), <system-reminder> spans (harness and
+    hook injections ride inside user records), and quoted text — <pasted_content>
+    blocks, fenced blocks and inline code spans (someone else's words, L-138).
+    """
+    out = []
+    with transcript.open("r", encoding="utf-8", errors="replace") as fh:
+        for i, line in enumerate(fh, 1):
+            if '"user"' not in line:
+                continue
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            if (rec.get("type") != "user" or rec.get("isSidechain") or rec.get("isCompactSummary")
+                    or rec.get("isMeta")):
+                continue
+            c = (rec.get("message") or {}).get("content")
+            if isinstance(c, str):
+                parts = [c]
+            elif isinstance(c, list):
+                parts = [b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text"]
+            else:
+                parts = []
+            text = REMINDER_RE.sub(" ", "\n".join(parts))
+            text = CODE_SPAN_RE.sub(" ", PASTED_RE.sub(" ", text))
+            if text.strip():
+                out.append((i, text))
+    return out
+
+
+def quote_check(session: str, quote: str) -> tuple[str, int | None]:
+    """verified | not-found | no-transcript — whether `quote` is a substring of a
+    message the user typed (whitespace-normalised). Mechanical: the model's own
+    paraphrase of a ruling does not pass, which is the point (2026-10-06)."""
+    t = find_transcript(session)
+    if not t:
+        return "no-transcript", None
+    q = _norm(quote)
+    for line, text in human_messages(t):
+        if q and q in _norm(text):
+            return "verified", line
+    return "not-found", None
+
+
 def cmd_add(a) -> None:
     session = current_session(a.session)
     row = {"ts": int(time.time()), "subject": a.subject, "choice": a.choice, "reason": a.reason,
            "reversible": a.reversible, "origin": a.origin}
     if a.ref:
         row["register_ref"] = a.ref
+    if a.quote is not None:
+        row["quote"] = a.quote
+    if a.origin == "user":
+        # User-origin rows are protected (05-authority §4: changed only via question +
+        # evidence), so the claim "the user said this" is checked against the transcript
+        # rather than taken from the writer. The row is written whatever the result —
+        # persist first, label second; only `verified` counts as the user's own words.
+        if a.quote is None:
+            row["quote_check"] = "absent"
+            print("ledger: --origin user without --quote — row labelled quote_check=absent "
+                  "(not mechanically the user's words)", file=sys.stderr)
+        else:
+            state, line = quote_check(session, a.quote)
+            row["quote_check"] = state
+            if line:
+                row["quote_line"] = line
+            if state != "verified":
+                print(f"ledger: --quote not found in any user message of this session's transcript "
+                      f"(quote_check={state}) — copy the user's words exactly, or log --origin model",
+                      file=sys.stderr)
     p = ledger_path(session)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a", encoding="utf-8", newline="\n") as fh:
@@ -332,6 +417,8 @@ def main() -> None:
     p.add_argument("--reversible", choices=("yes", "no"), required=True)
     p.add_argument("--origin", choices=("model", "user"), required=True)
     p.add_argument("--ref", help="register id this row points at (D-xxx, T-xxx), if any")
+    p.add_argument("--quote", help="with --origin user: the user's words copied exactly from their message; "
+                                   "checked against the transcript -> quote_check verified|not-found|no-transcript")
     p.add_argument("--session")
     p.set_defaults(fn=cmd_add)
     p = sub.add_parser("registers")
