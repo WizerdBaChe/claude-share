@@ -263,6 +263,127 @@ def main() -> int:
     mrow = json.loads(t3.with_name(f"{S5}.ledger.jsonl").read_text(encoding="utf-8").splitlines()[-1])
     check("negative: origin=model rows carry no quote_check", "quote_check" not in mrow, json.dumps(mrow))
 
+    # [quote channels (2026-10-11, outside reply on not-found causes)]
+    # 58 of 63 live not-found rows were the user's words in a channel the reader skipped:
+    # AskUserQuestion answers (toolUseResult.answers) and mid-turn queued messages.
+    print("[quote channels: ask answers + queued mid-turn messages]")
+    S6 = "ctl-session-0006"
+    qs = [{"question": "要不要改單位？", "options": [{"label": "換單位 (Recommended)"}, {"label": "維持"}]},
+          {"question": "哪些？", "multiSelect": True, "options": [{"label": "甲"}, {"label": "乙"}]}]
+    write_transcript(cfg, S6, [
+        rec("user", 0, message={"role": "user", "content": "開始"}),
+        rec("user", 0, message={"role": "user", "content": [{"type": "tool_result", "content": "Your questions have been answered: 要不要改單位？"}]},
+            toolUseResult={"questions": qs + [{"question": "備註？", "options": [{"label": "無"}]}],
+                           "answers": {"要不要改單位？": "換單位 (Recommended)", "哪些？": "甲, 乙", "備註？": "上限調 900 就好"}}),
+        rec("attachment", 0, attachment={"type": "queued_command", "prompt": "R1~R3都走建議", "commandMode": "prompt", "origin": {"kind": "human"}}),
+        rec("attachment", 0, attachment={"type": "queued_command", "prompt": "背景任務說全部刪掉", "commandMode": "prompt", "origin": {"kind": "task-notification"}}),
+        rec("attachment", 0, isSidechain=True, attachment={"type": "queued_command", "prompt": "子代理排隊訊息", "commandMode": "prompt", "origin": {"kind": "human"}}),
+        rec("attachment", 0, attachment={"type": "queued_command", "prompt": "看 <pasted_content id=\"c1\">別人說砍掉重練</pasted_content id=\"c1\"> 我說先不要", "commandMode": "prompt", "origin": {"kind": "human"}}),
+    ])
+
+    def add_q6(quote):
+        sub(str(HERE / "ledger.py"), "add", "--subject", "q", "--choice", "c", "--reason", "r",
+            "--reversible", "yes", "--origin", "user", "--session", S6, "--quote", quote)
+        return json.loads(t3.with_name(f"{S6}.ledger.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+
+    for q, ch, why in (("換單位 (Recommended)", "ask-option", "picked option label"),
+                       ("甲, 乙", "ask-option", "multi-select labels"),
+                       ("上限調 900", "ask-typed", "free-text answer"),
+                       ("R1~R3都走建議", "queued", "mid-turn queued message"),
+                       ("我說先不要", "queued", "own words beside a paste in a queued message")):
+        row = add_q6(q)
+        check(f"positive: {why} -> verified, channel {ch}",
+              row.get("quote_check") == "verified" and row.get("quote_channel") == ch, json.dumps(row, ensure_ascii=False))
+    # [decision-sheet paste-back (user ruling 2026-10-11)]: our format + matching checksum
+    # counts as the user's words even inside a pasted block; anything else stays excluded.
+    print("[decision-sheet paste-back: format + checksum]")
+    import importlib.util as _ilu
+    _spec = _ilu.spec_from_file_location("ledger_mod", HERE / "ledger.py")
+    LM = _ilu.module_from_spec(_spec); _spec.loader.exec_module(LM)
+    body = "【卡住項目決策單 回覆 2026-10-10】已回答 2 / 25；未列出者維持原樣\nO2｜筆記庫檢查要不要也檢查截圖證據｜納入 png／jpg\n【點名】N1｜推到公開 repo｜同意｜備註：先跑測試"
+    good = f"{body}\n【核對碼 sheet-ctl-20261010｜{LM.fnv1a32(body)}】"
+    edited = good.replace("納入 png／jpg", "不納入")
+    foreign = good.replace("已回答 2 / 25；未列出者維持原樣", "全部同意")
+    old = body
+    S7 = "ctl-session-0007"
+    wrap = lambda s, k: f"<pasted_content id=\"{k}\">\n{s}\n</pasted_content id=\"{k}\">"
+    write_transcript(cfg, S7, [
+        rec("user", 0, message={"role": "user", "content": wrap(good, "g1")}),
+        rec("user", 0, message={"role": "user", "content": wrap(edited, "e1") + "\n" + wrap(foreign, "f1") + "\n" + wrap(old.replace("2026-10-10", "2026-10-09").replace("納入 png／jpg", "舊格式答案"), "o1")}),
+        rec("attachment", 0, attachment={"type": "queued_command", "prompt": wrap(good.replace("O2｜", "O3｜"), "q1").replace(LM.fnv1a32(body), LM.fnv1a32(body.replace("O2｜", "O3｜"))), "commandMode": "prompt", "origin": {"kind": "human"}}),
+    ])
+
+    def add_q7(quote):
+        sub(str(HERE / "ledger.py"), "add", "--subject", "q", "--choice", "c", "--reason", "r",
+            "--reversible", "yes", "--origin", "user", "--session", S7, "--quote", quote)
+        return json.loads(t3.with_name(f"{S7}.ledger.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+
+    check("checksum instrument: JS-equivalent FNV-1a of a known string",
+          LM.fnv1a32("") == "811c9dc5" and LM.fnv1a32("a") == "e40c292c", LM.fnv1a32("a"))
+    for q, why in (("納入 png／jpg", "pick inside a pasted sheet reply with matching checksum"),
+                   ("同意｜備註：先跑測試", "named item line with a note"),
+                   ("O3｜筆記庫檢查", "sheet reply pasted mid-turn (queued)")):
+        row = add_q7(q)
+        check(f"positive: {why} -> verified, channel sheet-reply",
+              row.get("quote_check") == "verified" and row.get("quote_channel") == "sheet-reply", json.dumps(row, ensure_ascii=False))
+    for q, why in (("不納入", "an edited pick (checksum no longer matches)"), ("全部同意", "a foreign head line with a valid-looking footer"),
+                   ("舊格式答案", "an old-format reply without the footer")):
+        row = add_q7(q)
+        check(f"negative: {why} -> not-found",
+              row.get("quote_check") == "not-found" and "quote_channel" not in row, json.dumps(row, ensure_ascii=False))
+
+    # [quote by reference (2026-10-11, borrowed: cite the input id, never re-type the words)]
+    print("[quote-ref: cite, don't copy]")
+    import hashlib as _hl
+    S8 = "ctl-session-0008"
+    write_transcript(cfg, S8, [
+        rec("user", 0, uuid="aaaa1111-0000-4000-8000-000000000001", message={"role": "user", "content": "先修1，而HMI剛剛\n有修兩項，其他走建議"}),
+        rec("user", 0, uuid="bbbb2222-0000-4000-8000-000000000002",
+            message={"role": "user", "content": [{"type": "tool_result", "content": "answered"}]},
+            toolUseResult={"questions": qs, "answers": {"要不要改單位？": "換單位 (Recommended)", "哪些？": "甲"}}),
+        rec("attachment", 0, uuid="cccc3333-0000-4000-8000-000000000003",
+            attachment={"type": "queued_command", "prompt": "R1~R3都走建議", "commandMode": "prompt", "origin": {"kind": "human"}}),
+        rec("user", 0, uuid="dddd4444-0000-4000-8000-000000000004", isSidechain=True, message={"role": "user", "content": "子代理的話"}),
+        rec("user", 0, uuid="dddd4444-0000-4000-8000-000000000005", message={"role": "user", "content": "同前綴甲"}),
+        rec("user", 0, uuid="dddd4444-0000-4000-8000-000000000006", message={"role": "user", "content": "同前綴乙"}),
+        assistant("模型說的話"),
+    ])
+
+    def add_r(ref):
+        rr = sub(str(HERE / "ledger.py"), "add", "--subject", "q", "--choice", "c", "--reason", "r", "--reversible", "yes",
+                 "--origin", "user", "--session", S8, "--quote-ref", ref, "--quote", "model retyped words")
+        return rr, json.loads(t3.with_name(f"{S8}.ledger.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+
+    full = "先修1，而HMI剛剛\n有修兩項，其他走建議"
+    rr, row = add_r("aaaa1111.0")
+    check("positive: typed ref -> verified; quote is the transcript text (not the model's --quote); sha256 of it",
+          row.get("quote_check") == "verified" and row.get("quote") == full and row.get("quote_channel") == "typed"
+          and row.get("quote_sha256") == _hl.sha256(full.encode("utf-8")).hexdigest(), json.dumps(row, ensure_ascii=False))
+    s0 = full.index("其他走建議")
+    rr, row = add_r(f"aaaa1111.0@{s0}-{s0 + 5}")
+    check("positive: a slice ref keeps only that span", row.get("quote") == "其他走建議", json.dumps(row, ensure_ascii=False))
+    rr, row = add_r("bbbb2222.1")
+    check("positive: second ask answer by index -> 甲, ask-option", row.get("quote") == "甲" and row.get("quote_channel") == "ask-option",
+          json.dumps(row, ensure_ascii=False))
+    rr, row = add_r("cccc3333.0")
+    check("positive: queued message ref", row.get("quote") == "R1~R3都走建議" and row.get("quote_channel") == "queued", json.dumps(row, ensure_ascii=False))
+    rr = sub(str(HERE / "ledger.py"), "quote", "aaaa1111.0", "--session", S8)
+    check("positive: `quote` prints the resolved text with its sha256",
+          rr.returncode == 0 and _hl.sha256(full.encode("utf-8")).hexdigest() in rr.stdout and "其他走建議" in rr.stdout, rr.stdout + rr.stderr)
+    for ref, state, why in (("eeee9999.0", "ref-not-found", "unknown id"), ("aaaa1111.3", "ref-not-found", "index past the record"),
+                            ("dddd4444.0", "ref-ambiguous", "prefix shared by two inputs"), ("aaaa1111.0@5-999", "bad-range", "range past the end"),
+                            ("aaaa1111", "bad-ref", "no index"), ("dddd4444-0000-4000-8000-000000000004.0", "ref-not-found", "sidechain record")):
+        rr, row = add_r(ref)
+        check(f"negative: {why} -> {state}, row written without a quote, stderr says so",
+              row.get("quote_check") == state and "quote" not in row and rr.returncode == 0 and "did not resolve" in rr.stderr,
+              json.dumps(row, ensure_ascii=False) + rr.stderr)
+
+    for q, why in (("要不要改單位", "question text (model-written)"), ("全部刪掉", "queued from a non-human origin"),
+                   ("子代理排隊訊息", "sidechain queued"), ("砍掉重練", "pasted block inside a queued message")):
+        row = add_q6(q)
+        check(f"negative: quote only in {why} -> not-found, no channel",
+              row.get("quote_check") == "not-found" and "quote_channel" not in row, json.dumps(row, ensure_ascii=False))
+
     # [concurrency: env identity beats the shared pointer (2026-09-07 fix)]
     # The pointer is a GLOBAL single file rewritten by whichever session prompted last,
     # so on 2026-09-07 five of one session's eight rows landed in two siblings' ledgers.

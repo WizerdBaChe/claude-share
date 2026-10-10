@@ -117,11 +117,14 @@ implementation-layer decisions that are (a) reversible, (b) not a values fork
 changing promised scope or UX/interaction semantics — decide, log choice+reason
 in one line AND append it to the process ledger at that moment
 (`tools/process-ledger/ledger.py add`, flags in its README; a user ruling
-spoken in chat is logged too, with `--origin user --quote "<the user's words,
-copied exactly>"` — the tool checks the quote against what the user typed and
-labels the row `quote_check`; only `verified` counts as the user's own words,
-a paraphrase is the model's reading of a ruling, not the ruling (2026-10-06,
-outside critique 3a); a scope narrowed for a
+spoken in chat is logged too, with `--origin user --quote-ref <ref>` — cite,
+don't copy: `ledger.py inputs` lists the user's inputs (typed, queued, ask
+answers, decision-sheet replies) with refs, and the tool fetches the words and
+their sha256 itself (2026-10-11); `--quote "<copied exactly>"` remains the
+fallback and is checked against what the user gave. Either way the row carries
+`quote_check`; only `verified` counts as the user's own words, a paraphrase is
+the model's reading of a ruling, not the ruling (2026-10-06, outside critique
+3a); a scope narrowed for a
 TEMPORARY limit logs, on the same line, the event that lifts it — or it
 silently becomes permanent) — the ledger is what survives compaction and is
 re-injected after it, the chat line is not. Ask ONLY for: irreversible/outward

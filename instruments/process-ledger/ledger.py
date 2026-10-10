@@ -40,17 +40,22 @@ Subcommands
              target (adopted | rejected | deferred + --trigger); it consumes every
              pool event of that target dated before it (design INV-5).
 
-Row: {ts, subject, choice, reason, reversible, origin, register_ref?, quote?, quote_check?, quote_line?}
-     origin=user rows always carry quote_check: verified (the --quote is a substring of a
-     message the user typed, reminders and tool output excluded) | not-found | no-transcript
-     | absent (no --quote). Only `verified` means "the user's own words"; the rest mean
-     "recorded as a user ruling by the model" (2026-10-06, outside critique 3a).
-Feedback row: {ts, kind: feedback, id, target, symptom, action, proposal?, origin, session}
+Row: {ts, subject, choice, reason, reversible, origin, register_ref?, quote?, quote_check?, quote_line?,
+      quote_channel?, quote_ref?, quote_sha256?}
+     origin=user rows always carry quote_check: verified (the --quote is a substring of an
+     input the user gave — typed | queued | ask-typed | ask-option | sheet-reply; reminders,
+     tool output and foreign pastes excluded) | not-found | no-transcript | absent (no quote).
+     With --quote-ref the PROGRAM fetches the words by ref and stores their sha256 (cite,
+     don't copy, 2026-10-11); its failures are ref-not-found | ref-ambiguous | bad-ref |
+     bad-range. Only `verified` means "the user's own words"; the rest mean "recorded as a
+     user ruling by the model" (2026-10-06, outside critique 3a).
+Feedback row: {ts, kind: feedback, id, target, symptom, action, proposal?, resolves?[ids], origin, session}
 Fold row:     {ts, kind: feedback-fold, target, outcome, ref, trigger?, session}
 Legacy decision rows carry no `kind`.
 Severity: none — a recorder; it judges nothing.
 """
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -205,53 +210,174 @@ def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
-def human_messages(transcript: Path):
-    """(line, text) for every message the USER typed in the main loop.
+# Decision-sheet paste-back (user ruling 2026-10-11): the user's own answers arrive as a
+# paste, so the pasted-block rule would drop them. They count only when the block is in
+# the format OUR template emits and its footer checksum matches the lines above it
+# (tools/decision-sheet template `output()`; contract in rules/decision-sheet.md).
+SHEET_HEAD_RE = re.compile(r"^【[^】]+ 回覆 [^】]+】已回答 \d+ / \d+；未列出者維持原樣$")
+SHEET_FOOT_RE = re.compile(r"^【核對碼 ([^｜】]+)｜([0-9a-f]{8})】$")
 
-    Kept: type=user records outside a sidechain that are not a compact summary or
-    meta record, string content or `text` blocks only. Dropped: tool_result blocks
-    (tool output is data, not a ruling), <system-reminder> spans (harness and
-    hook injections ride inside user records), and quoted text — <pasted_content>
-    blocks, fenced blocks and inline code spans (someone else's words, L-138).
-    """
+
+def fnv1a32(s: str) -> str:
+    h = 0x811C9DC5
+    for b in s.encode("utf-8"):
+        h = ((h ^ b) * 0x01000193) & 0xFFFFFFFF
+    return f"{h:08x}"
+
+
+def sheet_replies(text: str) -> list[str]:
+    """Bodies of decision-sheet replies in `text` whose footer checksum matches."""
+    lines = [l.rstrip() for l in text.replace("\r\n", "\n").split("\n")]
     out = []
+    for i, l in enumerate(lines):
+        if not SHEET_HEAD_RE.match(l.strip()):
+            continue
+        for j in range(i + 1, len(lines)):
+            m = SHEET_FOOT_RE.match(lines[j].strip())
+            if m:
+                body = "\n".join(x.strip() for x in lines[i:j])
+                if fnv1a32(body) == m.group(2):
+                    out.append(body)
+                break
+            if SHEET_HEAD_RE.match(lines[j].strip()):
+                break
+    return out
+
+
+def _strip_quoted(text: str) -> str:
+    text = REMINDER_RE.sub(" ", text)
+    return CODE_SPAN_RE.sub(" ", PASTED_RE.sub(" ", text))
+
+
+def _ask_channel(answer: str, questions: list) -> str:
+    """ask-option when every part of the answer is an option label the MODEL wrote
+    (the user only picked it); ask-typed when the user wrote free text ("Other")."""
+    labels = {o.get("label", "") for q in questions if isinstance(q, dict)
+              for o in (q.get("options") or []) if isinstance(o, dict)}
+    parts = [p.strip() for p in answer.split(",")] if answer not in labels else [answer]
+    return "ask-option" if parts and all(p in labels for p in parts) else "ask-typed"
+
+
+def human_messages(transcript: Path):
+    """(line, text, channel) for every input the USER gave in the main loop."""
+    return [(d["line"], d["text"], d["channel"]) for d in user_inputs(transcript)]
+
+
+def user_inputs(transcript: Path) -> list[dict]:
+    """Every input the USER gave in the main loop, as {line, uuid, ref, channel, text}.
+
+    `ref` = <first 8 of the record uuid>.<k>, k counting the inputs one record yields
+    (an AskUserQuestion record yields one per answer). It is what `add --quote-ref`
+    cites so the model never re-types the user's words (borrowed 2026-10-11 from an
+    outside setup that logs prompts before the model reads them and cites ids only).
+
+    Channels (2026-10-11: 58 of 63 not-found rows were the user's words arriving
+    through a channel this reader skipped, not model paraphrase):
+    - typed: type=user records outside a sidechain that are not a compact summary
+      or meta record, string content or `text` blocks only;
+    - queued: a message sent mid-turn, recorded as an `attachment` of type
+      `queued_command` with origin.kind=human (it never becomes a type=user record);
+    - ask-option / ask-typed: AskUserQuestion answers from the platform-written
+      `toolUseResult.answers` (not the tool_result prose, which repeats the question).
+    Dropped everywhere: tool_result prose (tool output is data, not a ruling),
+    <system-reminder> spans, and quoted text — <pasted_content> blocks, fenced blocks
+    and inline code spans (someone else's words, L-138).
+    """
+    items = []
     with transcript.open("r", encoding="utf-8", errors="replace") as fh:
         for i, line in enumerate(fh, 1):
-            if '"user"' not in line:
+            if '"user"' not in line and '"queued_command"' not in line:
                 continue
             try:
                 rec = json.loads(line)
             except Exception:
                 continue
-            if (rec.get("type") != "user" or rec.get("isSidechain") or rec.get("isCompactSummary")
-                    or rec.get("isMeta")):
+            if rec.get("isSidechain") or rec.get("isCompactSummary") or rec.get("isMeta"):
                 continue
-            c = (rec.get("message") or {}).get("content")
-            if isinstance(c, str):
-                parts = [c]
-            elif isinstance(c, list):
-                parts = [b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text"]
-            else:
-                parts = []
-            text = REMINDER_RE.sub(" ", "\n".join(parts))
-            text = CODE_SPAN_RE.sub(" ", PASTED_RE.sub(" ", text))
+            out = []
+            _record_inputs(rec, i, out)
+            uid = str(rec.get("uuid") or "")
+            for k, (_, text, channel) in enumerate(out):
+                items.append({"line": i, "uuid": uid, "ref": f"{uid[:8] or 'L' + str(i)}.{k}",
+                              "channel": channel, "text": text})
+    return items
+
+
+def _record_inputs(rec: dict, i: int, out: list) -> None:
+    att = rec.get("attachment")
+    if rec.get("type") == "attachment" and isinstance(att, dict):
+        if (att.get("type") == "queued_command" and att.get("commandMode", "prompt") == "prompt"
+                and (att.get("origin") or {}).get("kind") == "human"):
+            raw = str(att.get("prompt") or "")
+            out.extend((i, b, "sheet-reply") for b in sheet_replies(REMINDER_RE.sub(" ", raw)))
+            text = _strip_quoted(raw)
             if text.strip():
-                out.append((i, text))
-    return out
+                out.append((i, text, "queued"))
+        return
+    if rec.get("type") != "user":
+        return
+    tur = rec.get("toolUseResult")
+    if isinstance(tur, dict) and isinstance(tur.get("answers"), dict):
+        for ans in tur["answers"].values():
+            if isinstance(ans, str) and ans.strip():
+                out.append((i, ans, _ask_channel(ans, tur.get("questions") or [])))
+    c = (rec.get("message") or {}).get("content")
+    if isinstance(c, str):
+        parts = [c]
+    elif isinstance(c, list):
+        parts = [b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text"]
+    else:
+        parts = []
+    raw = "\n".join(parts)
+    out.extend((i, b, "sheet-reply") for b in sheet_replies(REMINDER_RE.sub(" ", raw)))
+    text = _strip_quoted(raw)
+    if text.strip():
+        out.append((i, text, "typed"))
 
 
-def quote_check(session: str, quote: str) -> tuple[str, int | None]:
-    """verified | not-found | no-transcript — whether `quote` is a substring of a
-    message the user typed (whitespace-normalised). Mechanical: the model's own
-    paraphrase of a ruling does not pass, which is the point (2026-10-06)."""
+REF_RE = re.compile(r"^([0-9A-Za-z-]+\.\d+)(?:@(\d+)-(\d+))?$")
+
+
+def resolve_ref(session: str, ref: str) -> tuple[str, dict | None, str | None]:
+    """(state, input, slice) for `<ref>[@start-end]`. state: verified | ref-not-found |
+    ref-ambiguous | bad-ref | bad-range | no-transcript. A full uuid prefix is accepted."""
+    m = REF_RE.match(ref.strip())
+    if not m:
+        return "bad-ref", None, None
     t = find_transcript(session)
     if not t:
-        return "no-transcript", None
+        return "no-transcript", None, None
+    head, k = m.group(1).rsplit(".", 1)
+    hits = [d for d in user_inputs(t)
+            if (d["uuid"].startswith(head) if d["uuid"] else d["ref"].split(".")[0] == head)
+            and d["ref"].endswith(f".{k}")]
+    if len({d["uuid"] for d in hits}) > 1:
+        return "ref-ambiguous", None, None
+    if not hits:
+        return "ref-not-found", None, None
+    d = hits[0]
+    text = d["text"]
+    if m.group(2) is not None:
+        a, b = int(m.group(2)), int(m.group(3))
+        if not (0 <= a < b <= len(text)):
+            return "bad-range", d, None
+        text = text[a:b]
+    return "verified", d, text
+
+
+def quote_check(session: str, quote: str) -> tuple[str, int | None, str | None]:
+    """(verified | not-found | no-transcript, line, channel) — whether `quote` is a
+    substring of something the user gave (whitespace-normalised). Mechanical: the
+    model's own paraphrase of a ruling does not pass, which is the point (2026-10-06).
+    The channel says HOW: `ask-option` means the user picked a label the model wrote."""
+    t = find_transcript(session)
+    if not t:
+        return "no-transcript", None, None
     q = _norm(quote)
-    for line, text in human_messages(t):
+    for line, text, channel in human_messages(t):
         if q and q in _norm(text):
-            return "verified", line
-    return "not-found", None
+            return "verified", line, channel
+    return "not-found", None, None
 
 
 def cmd_add(a) -> None:
@@ -260,22 +386,38 @@ def cmd_add(a) -> None:
            "reversible": a.reversible, "origin": a.origin}
     if a.ref:
         row["register_ref"] = a.ref
-    if a.quote is not None:
+    if a.quote is not None and not a.quote_ref:
         row["quote"] = a.quote
     if a.origin == "user":
         # User-origin rows are protected (05-authority §4: changed only via question +
         # evidence), so the claim "the user said this" is checked against the transcript
         # rather than taken from the writer. The row is written whatever the result —
         # persist first, label second; only `verified` counts as the user's own words.
-        if a.quote is None:
+        if a.quote_ref:
+            # Cite, don't copy: the program fetches the words from the transcript, the
+            # model never re-types them; sha256 pins what the ref resolved to.
+            state, d, text = resolve_ref(session, a.quote_ref)
+            row["quote_ref"] = a.quote_ref.strip()
+            row["quote_check"] = state
+            if state == "verified":
+                row["quote"] = text if len(text) <= QUOTE_KEEP else text[:QUOTE_KEEP] + "…"
+                row["quote_sha256"] = hashlib.sha256(text.encode("utf-8")).hexdigest()
+                row["quote_line"] = d["line"]
+                row["quote_channel"] = d["channel"]
+            else:
+                print(f"ledger: --quote-ref {a.quote_ref} did not resolve (quote_check={state}) — "
+                      f"list this session's inputs with `ledger.py inputs`", file=sys.stderr)
+        elif a.quote is None:
             row["quote_check"] = "absent"
             print("ledger: --origin user without --quote — row labelled quote_check=absent "
                   "(not mechanically the user's words)", file=sys.stderr)
         else:
-            state, line = quote_check(session, a.quote)
+            state, line, channel = quote_check(session, a.quote)
             row["quote_check"] = state
             if line:
                 row["quote_line"] = line
+            if channel:
+                row["quote_channel"] = channel
             if state != "verified":
                 print(f"ledger: --quote not found in any user message of this session's transcript "
                       f"(quote_check={state}) — copy the user's words exactly, or log --origin model",
@@ -285,6 +427,33 @@ def cmd_add(a) -> None:
     with p.open("a", encoding="utf-8", newline="\n") as fh:
         fh.write(json.dumps(row, ensure_ascii=False) + "\n")
     print(f"ledger +1 -> {p} ({len(read_appendix(session))} rows)")
+
+
+QUOTE_KEEP = 300  # chars of a ref-resolved quote copied into the row; sha256 covers the whole
+
+
+def cmd_inputs(a) -> None:
+    """List this session's user inputs with the ref `add --quote-ref` cites."""
+    session = current_session(a.session)
+    t = find_transcript(session)
+    if not t:
+        sys.exit("ledger: no transcript for this session")
+    items = user_inputs(t)
+    if a.grep:
+        items = [d for d in items if a.grep in d["text"]]
+    for d in items[-a.last:]:
+        one = re.sub(r"\s+", " ", d["text"]).strip()
+        print(f"{d['ref']:<12} {d['channel']:<11} L{d['line']:<6} {len(d['text']):>5}c  {one[:110]}")
+
+
+def cmd_quote(a) -> None:
+    """Print what a ref resolves to, with its sha256 (for readers and authorization checks)."""
+    state, d, text = resolve_ref(current_session(a.session), a.ref)
+    if state != "verified":
+        sys.exit(f"ledger: {a.ref} -> {state}")
+    print(f"# {a.ref}  channel={d['channel']}  line={d['line']}  "
+          f"sha256={hashlib.sha256(text.encode('utf-8')).hexdigest()}")
+    print(text)
 
 
 TARGET_PREFIXES = ("hook:", "skill:", "tool:", "rule:", "subsystem:", "lesson:", "project:")
@@ -320,6 +489,8 @@ def cmd_feedback(a) -> None:
            "origin": a.origin, "session": session}
     if a.proposal:
         row["proposal"] = a.proposal.strip()
+    if a.resolves:
+        row["resolves"] = [x.strip() for x in a.resolves.split(",") if x.strip()]
     p = _append(session, row)
     print(f"ledger feedback +1 [{row['id']}] {target} ({a.action}) -> {p}")
 
@@ -419,8 +590,20 @@ def main() -> None:
     p.add_argument("--ref", help="register id this row points at (D-xxx, T-xxx), if any")
     p.add_argument("--quote", help="with --origin user: the user's words copied exactly from their message; "
                                    "checked against the transcript -> quote_check verified|not-found|no-transcript")
+    p.add_argument("--quote-ref", help="with --origin user (preferred over --quote): cite the user's input by the ref "
+                                       "`ledger.py inputs` prints, optionally <ref>@<start>-<end> for a slice; the program "
+                                       "copies the words and their sha256, the model never re-types them")
     p.add_argument("--session")
     p.set_defaults(fn=cmd_add)
+    p = sub.add_parser("inputs", help="list this session's user inputs (typed, queued, ask answers, sheet replies) with refs")
+    p.add_argument("--last", type=int, default=20)
+    p.add_argument("--grep")
+    p.add_argument("--session")
+    p.set_defaults(fn=cmd_inputs)
+    p = sub.add_parser("quote", help="print the text a quote ref resolves to, with its sha256")
+    p.add_argument("ref")
+    p.add_argument("--session")
+    p.set_defaults(fn=cmd_quote)
     p = sub.add_parser("registers")
     p.add_argument("--session")
     p.add_argument("--json", action="store_true")
@@ -441,6 +624,7 @@ def main() -> None:
     p.add_argument("--action", choices=FEEDBACK_ACTIONS, required=True,
                    help="fixed-inline: patched on the spot | left: still broken | worked-around | planned-work: this edit IS the task")
     p.add_argument("--proposal", help="the rule/skill/tool adjustment you would propose, if any")
+    p.add_argument("--resolves", help="comma-separated ids of earlier feedback rows this row closes (feedback.py open lists the unresolved ones)")
     p.add_argument("--origin", choices=("model", "user"), default="model")
     p.add_argument("--session")
     p.set_defaults(fn=cmd_feedback)

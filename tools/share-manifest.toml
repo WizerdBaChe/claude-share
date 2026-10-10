@@ -1679,6 +1679,7 @@ status = "verbatim"
 path = "claude-ops/ops/05-authority.md"
 source = "~/.claude/ops/05-authority.md"
 status = "verbatim"
+# 2026-10-11 (targeted sync, source f33c28ad): §3 decision-charter sentence now prefers `--quote-ref` (cite, don't copy) with `--quote` as fallback; byte-identical to the source, status stays verbatim.
 # 2026-10-10 (lane W1, refresh to the 2026-10-10 source; 17/2 numstat): procedure B. Copied over and diffed: byte-identical to the source, status stays verbatim.
 # New text read in full (the `--quote` option on user-origin ledger rows; the design-mode verdict line in the boundary contract): repo-relative names and bare ruling/lesson ids only, no scrub target.
 # 2026-10-02 (lane W1-ops): refreshed to 183c129 (50/6 numstat); new text read
@@ -7390,6 +7391,7 @@ edits = [
   "operating command fence: two commands that carried an absolute home path (class: account-bearing path) rewritten to the repo-relative forms `python tools/process-ledger/run_audit.py` and `python tools/compact-loss-audit/notice_compliance.py`; two further commands that carried a full session UUID (class: session id) deleted, and the parenthetical that introduced them rewritten to say run_audit.py accepts an older session id for a historical re-run.",
   "'run end' paragraph: a pointer to a source-environment hook file that this repo does not ship (the gate's check R) generalized to 'a container-write guard hook of the source environment'; the incident it illustrates is kept.",
   "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the `--quote` argument to the decision-row command and a block about the user-quote check (2026-10-06); taken verbatim, nothing private in it. The four edits above were re-applied on the unchanged text (the session-id ordinal labels A-D, the repo-relative commands, the generalized hook pointer); the diff against the source equals exactly them.",
+  "REFRESHED 2026-10-11 (targeted sync, source f33c28ad, procedure B): the source's 46cad1f..f33c28ad diff applied as a patch onto this copy; it adds the `--quote-ref` row-command form and two quote-check paragraphs (input channels incl. decision-sheet replies, with the 63-row cause count). New text read in full: counts, dates and repo-relative names only; it cites `rules/decision-sheet.md`, which this share does not ship (rules lane [[not_shipped]], same precedent as the 2026-10-10 DEPENDS note). The four edits above untouched; diff against the source equals exactly them.",
 ]
 
 [[collected]]
@@ -7399,6 +7401,7 @@ status = "edited"
 edits = [
   "one comment: a parenthetical naming two 8-hex short session ids (class: session id) -> '(two sessions)'. The planted UUID-shaped fixtures (lines 200, 432, 433) are test inputs and stay, covered by [[allow]] entries below.",
   "REFRESHED 2026-10-10 (lane W5, source 148e021e): the source added the quoted-tag and user-origin-quote-check control sections. One new section heading carries an 8-hex short session id in a parenthetical (class: session id, position: the heading of the quoted-tag section) -> removed, the date and the word 'misfire' kept. The new sections' other literals are synthetic ids (`ctl-session-NNNN`, short fixture ids) and stay. The earlier comment edit above was re-applied on the unchanged line; diff against the source equals the two edits.",
+  "REFRESHED 2026-10-11 (targeted sync, source f33c28ad): the source added three control sections (quote channels, decision-sheet paste-back, quote-ref). Their literals are synthetic: `ctl-session-NNNN` ids and UUID-shaped fixture ids with filler groups (`aaaa1111-0000-4000-8000-…`), covered by the [[allow]] entries in the 2026-10-11 block at the end of this file. The two edits above untouched; diff against the source equals them.",
 ]
 
 [[collected]]
@@ -7407,6 +7410,7 @@ source = "~/.claude/tools/process-ledger/ledger.py"
 status = "verbatim"
 # First collection 2026-10-02 (lane W5b, refresh round against source 183c129). Verbatim. Stdlib only. The register/manifest paths it writes resolve from the session's own transcript path, so nothing machine-bound is in the file.
 # REFRESHED 2026-10-10 (lane W5, source 148e021e): re-copied whole (the user-origin `--quote` check, about 90 lines); still verbatim, diff empty; the process-ledger controls pass in a scratch home (90 checks, 0 FAIL).
+# REFRESHED 2026-10-11 (targeted sync, source f33c28ad): input channels (queued, ask answers, decision-sheet replies with a checksum footer), `--quote-ref` + `inputs` + `quote`; still verbatim, diff empty. No machine-bound text added.
 
 [[collected]]
 path = "instruments/process-ledger/report.py"
@@ -10044,3 +10048,31 @@ kind of behaviour an adopter must opt into knowingly."""
 fallback = """None needed; the settings template's _README names the omission and the tool it depends on."""
 
 # === lane W3 2026-10-10 END ===
+
+# === targeted sync 2026-10-11 (process-ledger quote channels + quote-ref) BEGIN ===
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "aaaa1111-0000"
+reason = "Planted fixture: a made-up record uuid (filler groups) that the quote-ref controls cite by its 8-hex prefix. Not a real session or record."
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "bbbb2222-0000"
+reason = "Planted fixture: a made-up record uuid for the AskUserQuestion answer-by-index control. Not a real session or record."
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "cccc3333-0000"
+reason = "Planted fixture: a made-up record uuid for the queued-message ref control. Not a real session or record."
+
+[[allow]]
+file = "instruments/process-ledger/controls.py"
+kind = "UUID (session-id shape)"
+match = "dddd4444-0000"
+reason = "Planted fixture: made-up record uuids sharing one 8-hex prefix, for the ambiguous-ref and sidechain-ref negative controls. Not a real session or record."
+
+# === targeted sync 2026-10-11 END ===

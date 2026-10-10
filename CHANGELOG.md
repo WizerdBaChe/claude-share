@@ -9,6 +9,31 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-10-11 — targeted sync: the process ledger's user-quote check reads every input channel and cites by ref
+
+Source `46cad1f` → `f33c28ad`, four files only (`source_aligned` stays `46cad1f`;
+the next full round still starts from there). Prompted by an outside exchange
+that asked why user-origin ledger rows came back `not-found`: of 63 such rows,
+5 were the model re-typing the user's words badly; 34 were the user's words in
+a channel the check never read.
+
+- **`instruments/process-ledger/ledger.py`** (verbatim). The quote check now
+  reads queued mid-turn messages (`attachment` / `queued_command`, origin human),
+  AskUserQuestion answers from the platform-written `toolUseResult.answers`
+  (`ask-option` when the user picked a label the model wrote, `ask-typed` for
+  free text), and decision-sheet replies whose checksum footer matches
+  (`sheet-reply`; the sheet template itself is source-only). Verified rows carry
+  `quote_channel`. New `add --quote-ref <ref>[@start-end]`: the program fetches
+  the words by ref and stores them with their sha256, so the model never
+  re-types them; `ledger.py inputs` lists refs, `ledger.py quote <ref>` resolves one.
+- **`instruments/process-ledger/controls.py`** (edited, two existing edits kept):
+  three new two-sided control sections; four UUID-shaped fixture ids allowed.
+- **`instruments/process-ledger/README.md`** (edited, four existing edits kept)
+  and **`claude-ops/ops/05-authority.md`** (verbatim): the decision charter now
+  prefers `--quote-ref`.
+- Checks: `share_gate.py` clean (580 files), `test_share_gate.py` 27/27,
+  `test_triage.py` 17/17, the shipped process-ledger controls ALL PASS in a scratch home.
+
 ## 2026-10-10 — refresh round: two mods, four instruments, `clean-room-rebuild`, 35 hooks, and the gate learns three pointer shapes
 
 Source `b6ccd3e` → `46cad1f`: 416 commits (the round began against `148e021e`
