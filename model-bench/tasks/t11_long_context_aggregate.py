@@ -2,7 +2,7 @@
 import json
 import random
 from pathlib import Path
-from _common import parse_json, verdict, write
+from _common import parse_json, verdict, gold_path, write
 
 ID = "t11_long_context_aggregate"
 CATEGORY = "long-context-aggregate"
@@ -60,11 +60,11 @@ def setup(workdir):
     from bench import seed_for
     ledger, total, flagged = _ledger(seed_for(Path(workdir), 4242))
     write(workdir, ".ledger.txt", ledger)
-    write(workdir, ".gold.json", json.dumps({"total": total, "flagged": flagged}))
+    gold_path(workdir).write_text(json.dumps({"total": total, "flagged": flagged}), encoding="utf-8")
 
 
 def check(result, workdir):
-    g = json.loads((Path(workdir) / ".gold.json").read_text(encoding="utf-8"))
+    g = json.loads(gold_path(workdir).read_text(encoding="utf-8"))
     GOLD_TOTAL, GOLD_FLAGGED = g["total"], g["flagged"]
     try:
         got = parse_json(result)
