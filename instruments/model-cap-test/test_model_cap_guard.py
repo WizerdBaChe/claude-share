@@ -82,6 +82,39 @@ from pathlib import Path
 HOME = Path(__file__).resolve().parents[2]
 HOOK = HOME / "hooks" / "model_cap_guard.py"
 REAL_RECEIPTS = HOME / "telemetry" / "model-cap-guard.jsonl"
+SETTINGS = HOME / "settings.json"
+TIMEOUT_FLOOR = 30          # seconds; see M-T1 in main() and the hook's docstring
+
+
+def hook_timeouts(settings_text: str, hook_stem: str) -> list[int]:
+    """Every `timeout` settings.json gives a command hook whose script is
+    hooks/<hook_stem>.py, in file order. An entry with no `timeout` key counts
+    as the engine default (600); an unparsable file yields [] so M-T1 FAILS
+    rather than passing on nothing."""
+    try:
+        s = json.loads(settings_text)
+    except Exception:
+        return []
+    found: list[int] = []
+    for groups in (s.get("hooks") or {}).values():
+        for g in groups or []:
+            for h in g.get("hooks", []) or []:
+                if f"hooks/{hook_stem}.py" in str(h.get("command", "")):
+                    found.append(int(h.get("timeout", 600)))
+    return found
+
+
+def hook_on_failure(settings_text: str, hook_stem: str) -> list[str]:
+    """Every `onFailure` settings.json gives hooks/<hook_stem>.py, in file order;
+    a missing key reads as the engine default 'continue'. Unparsable -> []."""
+    try:
+        s = json.loads(settings_text)
+    except Exception:
+        return []
+    return [str(h.get("onFailure", "continue"))
+            for groups in (s.get("hooks") or {}).values()
+            for g in groups or [] for h in g.get("hooks", []) or []
+            if f"hooks/{hook_stem}.py" in str(h.get("command", ""))]
 MARKER = "[user-approved-top-tier]"
 
 # (id, tool, tool_input, note) — run against the LIVE hook and LIVE agents/.
@@ -105,6 +138,14 @@ MUST_DENY = [
      "workflow script sets fable, = spelling"),
     ("M-14", "Agent", {"model": "opus", "prompt": f"approved {MARKER[1:]}"},
      "a marker missing its opening bracket is not the marker"),
+    # Effort axis (2026-10-10, user ruling): ceiling is sonnet + high; Agent took a
+    # per-call `effort` in 2.1.292. A model-only check passed all three before the fix.
+    ("M-E1", "Agent", {"model": "sonnet", "effort": "max", "prompt": "x"},
+     "within-cap model, effort above the ceiling"),
+    ("M-E2", "Agent", {"subagent_type": "code-reviewer", "effort": "XHigh", "prompt": "x"},
+     "pinned definition, per-call xhigh, case-insensitive"),
+    ("M-E3", "Workflow", {"script": "stage(model: 'sonnet', effort: 'max')"},
+     "workflow script sets effort above the ceiling"),
 ]
 
 MUST_PASS = [
@@ -128,6 +169,12 @@ MUST_PASS = [
      "not a dispatch surface -- out of scope"),
     ("M-31", "Agent", {"model": "", "subagent_type": "api-tester", "prompt": "x"},
      "empty model string falls through to the frontmatter, which pins sonnet"),
+    ("M-E4", "Agent", {"model": "sonnet", "effort": "high", "prompt": "x"},
+     "the ceiling itself: sonnet + high"),
+    ("M-E5", "Agent", {"model": "sonnet", "effort": "max", "prompt": f"{MARKER} approved"},
+     "the escape, effort axis"),
+    ("M-E6", "Workflow", {"script": "stage(model: 'sonnet', effort: 'medium')"},
+     "workflow effort within cap"),
 ]
 
 # MUST-NOTICE — a model name in NEITHER set. The guard must say so and let the
@@ -201,15 +248,21 @@ def announced(hook: Path, tool: str, ti: dict, expect: str,
     return ok, spoke, rc
 
 
-def raw_of(hook: Path, tool: str, tool_input: dict, env: dict) -> tuple[str, int]:
+def raw_of(hook: Path, tool: str, tool_input: dict, env: dict,
+           cwd: str = "", session_id: str = "") -> tuple[str, int]:
     """-> (stdout, returncode). Cases assert on THIS, not only on the decision.
 
     An unrecognised tier and a within-cap one both end in rc 0 with no
     permissionDecision, so a case that asserted only the decision label could
-    not fail on the fold M-40..M-43 exist for."""
+    not fail on the fold M-40..M-43 exist for. `cwd` goes into the payload as
+    the engine sends it (project .claude/agents lookup, M-P1/M-P2)."""
+    payload = {"tool_name": tool, "tool_input": tool_input}
+    if cwd:
+        payload["cwd"] = cwd
+    if session_id:
+        payload["session_id"] = session_id
     proc = subprocess.run([sys.executable, str(hook)],
-                          input=json.dumps({"tool_name": tool,
-                                            "tool_input": tool_input}),
+                          input=json.dumps(payload),
                           capture_output=True, text=True, env=env, timeout=20)
     return (proc.stdout or "").strip(), proc.returncode
 
@@ -324,6 +377,86 @@ def main() -> int:
                     f"the frontmatter route resolves a model the same way the "
                     f"`model` argument does, so it must classify it the same way.")
 
+        # --- project definitions: <cwd>/.claude/agents is read first --------
+        # 2026-10-09: a haiku worker defined only in an isolated workspace's
+        # .claude/agents read as "no pin" and was denied (lab r22 pilot); cases M-P1/M-P2.
+        # Values per case: the decision with cwd, and without it (the defect's
+        # view, where the project file is invisible).
+        proj = tmp / "proj"
+        (proj / ".claude" / "agents").mkdir(parents=True)
+        for name, model in (("proj-haiku", "claude-haiku-5-5"), ("proj-opus", "claude-opus-5-5")):
+            (proj / ".claude" / "agents" / f"{name}.md").write_text(
+                f"---\nname: {name}\nmodel: {model}\n---\nx\n", encoding="utf-8")
+        for cid, typ, want_with, want_without in (("M-P1", "proj-opus", "deny", "deny"),
+                                                  ("M-P2", "proj-haiku", None, "deny")):
+            ti = {"subagent_type": typ, "prompt": "x"}
+            bare = {k: v for k, v in env.items() if k != "CLAUDE_PROJECT_DIR"}   # the payload cwd alone
+            out_with, rc = raw_of(copy, "Agent", ti, bare, cwd=str(proj))
+            out_without, _ = raw_of(copy, "Agent", ti, bare)
+            got = (decision_of(out_with), decision_of(out_without))
+            ok = rc == 0 and got == (want_with, want_without) and (want_with or not out_with)
+            print(f"{cid:6} {'PROJECT':10} {'ok' if ok else 'WRONG!!':8} "
+                  f"{label('Agent', ti)[:52]:52}  with cwd {got[0]} / without {got[1]}")
+            if not ok:
+                failures.append(f"{cid} project-definition lookup: {typ} gave {got}, "
+                                f"want {(want_with, want_without)} (with cwd / without)")
+
+        # M-P3: after a shell `cd`, the payload cwd is a sub-folder; the project root
+        # (CLAUDE_PROJECT_DIR) still resolves the pin. Values: decision with the root
+        # in env vs with the moved cwd alone (the second is the r22 rerun defect).
+        ti = {"subagent_type": "proj-haiku", "prompt": "x"}
+        (proj / "build").mkdir()
+        out_root, rc = raw_of(copy, "Agent", ti, dict(env, CLAUDE_PROJECT_DIR=str(proj)), cwd=str(proj / "build"))
+        out_moved, _ = raw_of(copy, "Agent", ti, {k: v for k, v in env.items() if k != "CLAUDE_PROJECT_DIR"},
+                              cwd=str(proj / "build"))
+        got = (decision_of(out_root), decision_of(out_moved))
+        ok = rc == 0 and got == (None, "deny") and not out_root
+        print(f"{'M-P3':6} {'PROJECT':10} {'ok' if ok else 'WRONG!!':8} "
+              f"{label('Agent', ti)[:52]:52}  root in env {got[0]} / moved cwd only {got[1]}")
+        if not ok:
+            failures.append(f"M-P3 project root after cd: got {got}, want (None, 'deny')")
+
+        # --- deferral to the mod's resolved-model judge (2026-10-09 ruling) ---
+        # An omitted `model` with no definition found here is deferred ONLY for a
+        # session the mod wrote a heartbeat for; the copy's MOD_HEARTBEAT is
+        # tmp/telemetry/model-cap-mod-alive.json. Each case pairs the deferral with
+        # its control: the same call from an unlisted session must still deny (the
+        # 2026-10-02 escape shape when the mod is not running).
+        beat = tmp / "telemetry" / "model-cap-mod-alive.json"
+        beat.parent.mkdir(parents=True, exist_ok=True)
+        beat.write_text(json.dumps({"sess-live": 1}), encoding="utf-8")
+        bare = {k: v for k, v in env.items() if k != "CLAUDE_PROJECT_DIR"}
+        omitted = {"subagent_type": "plugin-only-worker", "prompt": "x"}
+        hcases = [
+            ("M-H1", omitted, bare, "sess-live", None,
+             "omitted, no definition here, mod heartbeat for this session -> deferred (silent)"),
+            ("M-H1n", omitted, bare, "sess-other", "deny",
+             "same call, session without a heartbeat -> deny stands"),
+            ("M-H1z", omitted, bare, "", "deny",
+             "same call, no session_id in payload -> deny stands"),
+            ("M-H2", {"subagent_type": "proj-opus", "prompt": "x"},
+             dict(env, CLAUDE_PROJECT_DIR=str(proj)), "sess-live", "deny",
+             "definition found here pins opus -> deny even with the mod alive"),
+            ("M-H3", {"subagent_type": "general-purpose", "model": "opus", "prompt": "x"},
+             bare, "sess-live", "deny", "explicit opus -> deny even with the mod alive"),
+        ]
+        for cid, ti, cenv, sid, want, note in hcases:
+            out, rc = raw_of(copy, "Agent", ti, cenv, session_id=sid)
+            got = decision_of(out)
+            ok = rc == 0 and got == want and (want or not out)
+            print(f"{cid:6} {'MOD-DEFER':10} {'ok' if ok else 'WRONG!!':8} "
+                  f"{label('Agent', ti)[:52]:52}  {note}: {got}")
+            if not ok:
+                failures.append(f"{cid} mod deferral: got {got!r} (out {out[:80]!r}), want {want!r} -- {note}")
+        beat.write_text("{not json", encoding="utf-8")
+        out, rc = raw_of(copy, "Agent", omitted, bare, session_id="sess-live")
+        ok = rc == 0 and decision_of(out) == "deny"
+        print(f"{'M-H4':6} {'MOD-DEFER':10} {'ok' if ok else 'WRONG!!':8} "
+              f"{label('Agent', omitted)[:52]:52}  unreadable heartbeat -> deny stands: {decision_of(out)}")
+        if not ok:
+            failures.append("M-H4 unreadable heartbeat deferred the dispatch; it must fail toward the deny")
+        beat.unlink()
+
         # --- fail-open ------------------------------------------------------
         proc = subprocess.run([sys.executable, str(HOOK)], input="not json {{{",
                               capture_output=True, text=True, env=env, timeout=20)
@@ -390,6 +523,62 @@ def main() -> int:
         for set_name, u, where in uncovered:
             failures.append(f"M-COV: '{u}' is in the hook's {set_name} set with "
                             f"no specimen in {where} -- add one to this file")
+
+        # --- timeout floor: a gate whose timeout is a PASS (2026-10-02) -----
+        # One session: eight parallel no-`model` dispatches, this hook
+        # answered deny on all eight, the engine honoured six. The two it did
+        # not honour arrived after the 5 s `timeout` settings.json gave the
+        # hook, and the hooks docs say a timed-out command hook does not block
+        # the call. Both subagents ran on claude-fable-5-1. The floor is 30 s,
+        # 4.6x the worst latency measured (6.5 s). Two-sided: the live
+        # settings.json must satisfy it, and a planted settings text with the
+        # old 5 s must FAIL the same reader -- a floor check that cannot fail
+        # on the old value proves nothing.
+        live_timeouts = hook_timeouts(SETTINGS.read_text(encoding="utf-8"),
+                                      "model_cap_guard")
+        planted = ('{"hooks":{"PreToolUse":[{"matcher":"Agent|Workflow","hooks":['
+                   '{"type":"command","command":"\\"py\\" \\"<CLAUDE_HOME>/hooks/model_cap_guard.py\\"",'
+                   '"timeout":5}]}]}}')
+        planted_timeouts = hook_timeouts(planted, "model_cap_guard")
+        ok_live = bool(live_timeouts) and min(live_timeouts) >= TIMEOUT_FLOOR
+        ok_planted = bool(planted_timeouts) and min(planted_timeouts) < TIMEOUT_FLOOR
+        print(f"{'ok  ' if ok_live else 'FAIL'} M-T1 settings.json gives this hook "
+              f"timeout {live_timeouts} (floor {TIMEOUT_FLOOR} s; a timed-out "
+              f"command hook is a pass)")
+        print(f"{'ok  ' if ok_planted else 'FAIL'} M-T1c planted 5 s settings is "
+              f"read as {planted_timeouts} and would fail the floor")
+        if not ok_live:
+            failures.append(
+                f"M-T1: settings.json timeout for model_cap_guard is "
+                f"{live_timeouts}, under the {TIMEOUT_FLOOR} s floor (or the "
+                f"entry was not found). Under load this hook has needed 6.5 s; "
+                f"a command hook that times out does not block the call "
+                f"(hooks docs), so a short timeout turns the cap into a pass.")
+        if not ok_planted:
+            failures.append(
+                "M-T1c: the planted 5 s settings text did not read as under the "
+                "floor -- the reader is blind, so M-T1 passing means nothing.")
+
+        # --- M-T2: onFailure "block" (2.1.295; user ruling 2026-10-10) -------
+        # A crash, missing interpreter or timeout used to PASS the dispatch.
+        live_of = hook_on_failure(SETTINGS.read_text(encoding="utf-8"),
+                                  "model_cap_guard")
+        planted_of = hook_on_failure(json.dumps({"hooks": {"PreToolUse": [{"hooks": [
+            {"type": "command", "command": "python hooks/model_cap_guard.py"}]}]}}),
+            "model_cap_guard")
+        ok_of = bool(live_of) and all(v == "block" for v in live_of)
+        ok_ofc = planted_of == ["continue"]
+        print(f"{'ok  ' if ok_of else 'FAIL'} M-T2 settings.json gives this hook "
+              f"onFailure {live_of} (must be 'block' on every entry)")
+        print(f"{'ok  ' if ok_ofc else 'FAIL'} M-T2c planted entry without the key "
+              f"reads as {planted_of} (engine default) and would fail M-T2")
+        if not ok_of:
+            failures.append(
+                f"M-T2: settings.json onFailure for model_cap_guard is {live_of}; "
+                f"without 'block' a crashed or timed-out guard lets the dispatch through.")
+        if not ok_ofc:
+            failures.append("M-T2c: the reader did not see a missing key as "
+                            "'continue' -- M-T2 passing means nothing.")
 
         # --- undetermined: asserted, counted in no verdict (AP-62) ----------
         for cid, tool, ti, (twin_tool, twin_ti), escapes in UNDETERMINED:

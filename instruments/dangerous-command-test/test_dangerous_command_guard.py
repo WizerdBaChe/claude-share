@@ -94,6 +94,8 @@ MUST_DENY = [
     # history-destroying git
     ("Bash", "git push --force origin main", "force push"),
     ("Bash", "git push -f", "force push, short flag"),
+    ("Bash", "git push origin main -f && echo ok", "force flag before a separator"),
+    ("Bash", "git status; git push -f", "force push after a separator"),
     ("Bash", "git reset --hard HEAD~1", "reset --hard"),
     ("Bash", "git clean -fd", "clean -f"),
     ("Bash", "git checkout -- .", "whole-tree discard"),
@@ -143,6 +145,8 @@ MUST_PASS = [
     # git shapes that are safe by construction
     ("Bash", "git push --force-with-lease origin main", "the approved spelling"),
     ("Bash", "git push origin main", "ordinary push"),
+    ("Bash", "git push origin v1.2 --tags && git branch -f release v1.2",
+     "observed 2026-09-27: a later local `branch -f` is not a forced push"),
     ("Bash", "git reset --soft HEAD~1", "reset --soft keeps the worktree"),
     ("Bash", "git reset HEAD~1", "mixed reset keeps the worktree"),
     ("Bash", "git clean -n", "dry run is the recommended first step"),
@@ -200,6 +204,8 @@ UNDETERMINED = [
 OVERMATCH = [
     ("Bash", 'git commit -m "note: never rm -rf / on this box"',
      "a commit message naming the shape"),
+    ("Bash", "python pb.py save <<'EOF'\nnever run rm -rf / here\nEOF",
+     "observed 1x 2026-10-02: prose in a heredoc body (not narrowed, trigger 3)"),
     # the machine-state specimen moved to MUST_PASS on 2026-09-22 (observed 4x, narrowed)
 ]
 

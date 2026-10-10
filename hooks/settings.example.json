@@ -39,6 +39,12 @@
     "    to a source-only index tree or graph snapshot;",
     "  · xi_card_guard.py — a shadow probe for a cross-index pipeline this",
     "    share does not carry; it is unmounted at the source too;",
+    "  · candidate_shelf_notice.py — names the current candidate of a shelved",
+    "    class from a private asset library's index, which does not ship;",
+    "  · session_pid_registry.py and session_reaper_launch.py — a SessionStart",
+    "    pair that feeds and launches a source-only process-picker tool (the",
+    "    reaper daemon reclaims idle engines); neither does anything without",
+    "    it, and the first needs a third-party package;",
     "  · the SessionEnd memory-pipeline mount — its script ships as",
     "    compact-recovery/preserve.py, but the mount still points outside",
     "    hooks/ and this template mounts hooks/ and nothing else; the optional",
@@ -70,6 +76,13 @@
     "this template mirrors that. The regression suites under hooks/tests/ are run",
     "by hand (`python hooks/tests/<name>.py`), not hooks — mounting a test as a",
     "hook would put a test harness on every matched tool call.",
+    "",
+    "Timeouts. Every deny-capable guard here carries timeout 30, not a short",
+    "one: a timed-out command hook PASSES the tool call (the model-cap guard",
+    "lost two of eight dispatches to a 5 s limit, see its docstring). The",
+    "secret-file and model-cap guards also set onFailure \"block\", which needs",
+    "Claude Code 2.1.295 or later; on an older build drop that key and the",
+    "guard fails open as before.",
     "",
     "Verify after wiring: run each hook by hand with empty stdin and check it",
     "exits 0 (they are all fail-open), then confirm the matcher fires on a real",
@@ -114,7 +127,8 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/secret_file_guard.py\"",
-            "timeout": 5
+            "timeout": 30,
+            "onFailure": "block"
           }
         ]
       },
@@ -124,18 +138,24 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/dangerous_command_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/shell_transport_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/branch_commit_guard.py\"",
-            "timeout": 5,
+            "timeout": 30,
             "if": "Bash(*git*)"
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/stash_worktree_notice.py\"",
+            "timeout": 15,
+            "if": "Bash(*stash*)"
           },
           {
             "type": "command",
@@ -155,8 +175,14 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/branch_commit_guard.py\"",
-            "timeout": 5,
+            "timeout": 30,
             "if": "PowerShell(*git*)"
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/stash_worktree_notice.py\"",
+            "timeout": 15,
+            "if": "PowerShell(*stash*)"
           },
           {
             "type": "command",
@@ -172,7 +198,8 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/model_cap_guard.py\"",
-            "timeout": 5
+            "timeout": 30,
+            "onFailure": "block"
           },
           {
             "type": "command",
@@ -192,7 +219,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ui_verify_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -202,7 +229,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/browser_pane_scope_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -212,7 +239,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/literature_host_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -232,7 +259,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ps_pipeline_close_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -242,7 +269,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/unattended_run.py\" scope",
-            "timeout": 5
+            "timeout": 30
           },
           {
             "type": "command",
@@ -262,7 +289,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/transcript_read_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -272,7 +299,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/intake_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -282,7 +309,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/published_record_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -292,7 +319,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/worktree_scope_guard.py\"",
-            "timeout": 6
+            "timeout": 30
           }
         ]
       },
@@ -309,12 +336,22 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/feedback_notice.py\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "mcp__(Claude_Browser|claude-in-chrome)__javascript_tool",
         "hooks": [
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/ui_verify_guard.py\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -375,7 +412,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/worktree_scope_guard.py\"",
-            "timeout": 8
+            "timeout": 30
           },
           {
             "type": "command",
@@ -436,11 +473,16 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/unattended_run.py\" kickoff",
-            "timeout": 5
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/intake_match_shadow.py\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/offline_approval_notice.py\"",
             "timeout": 5
           }
         ]
@@ -453,7 +495,7 @@
           {
             "type": "command",
             "command": "\"<PYTHON_EXE>\" \"<CLAUDE_HOME>/hooks/unattended_run.py\" stop",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }

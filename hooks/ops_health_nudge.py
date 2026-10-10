@@ -293,6 +293,15 @@ TRACKING_REFS_PY = os.path.join(os.path.dirname(os.path.dirname(
 TRACKING_REFS_TARGET_DIRS = ("skills/", "tools/", "hooks/", "rules/",
                              "agents/", "commands/")
 TRACKING_REFS_GIT_TIMEOUT = 1.0
+
+# Check 22 (born 2026-10-02). A Claude Code mod (2.1.287+) runs in-process,
+# unsandboxed, and its `tool.check` hook can approve a call a PreToolUse hook
+# here blocked. Property: every mod ON DISK has a review record. Loaded from
+# this hook's own repo like check 18; it judges the HOME it is given, so a
+# fixture home is judged by the real scanner. Pure os.walk over four small
+# roots, no subprocess. ops/rule-registry.md key `MOD_REVIEW`.
+MOD_REVIEW_PY = os.path.join(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))), "tools", "mod-review", "mod_review.py")
 # Check 15. Days the graph rot watchdog's status file may age before its
 # carrier (the daily scheduled task) is presumed dead. PROVISIONAL, declared
 # guess: the task is daily, so 3 tolerates two missed days (machine off)
@@ -615,6 +624,7 @@ HMI_CHECKS = (
     ("home-bundle", "ops-health 19", True),
     ("vault-junctions", "ops-health 20", True),
     ("eol-conformance", "ops-health 21", True),
+    ("mod-review", "ops-health 22", False),
     ("ops-file-size", "ops-health 2", False),
     ("rule-registry-idle", "ops-health 3", False),
     ("routed-files-exist", "ops-health 4", False),
@@ -1465,6 +1475,30 @@ def main():
                         SEV_BREACH, f"{len(drift)} file(s) off the pinned line ending")
         except Exception:
             pass
+
+    msgs.begin("mod-review")
+    # 22. every Claude Code mod on disk has a review record (born 2026-10-02,
+    #     MOD_REVIEW_PY above). Runs in every cwd: a mod loads in every session.
+    #     Fail-open on a scanner error (prints nothing).
+    try:
+        import importlib.util as _ilu
+        _spec = _ilu.spec_from_file_location("mod_review", MOD_REVIEW_PY)
+        _mr = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mr)
+        _res = _mr.scan(HOME)
+        if _res["unreviewed"]:
+            names = [f"{m['name']}@{m['version']}" for m in _res["unreviewed"]]
+            msgs.add(
+                f"{len(names)} mod(s) on disk without a review record: "
+                + ", ".join(names[:3])
+                + " — a mod runs inside Claude Code unsandboxed and can approve "
+                "a call a PreToolUse hook here blocked; run `python -X utf8 "
+                "tools/mod-review/mod_review.py review <plugin-dir>` for each "
+                "(roots: `mod_review.py scan`) and read the flagged lines "
+                "before it stays enabled",
+                SEV_ALARM, f"{len(names)} unreviewed mod(s)")
+    except Exception:
+        pass
 
     msgs.begin("ops-file-size")
     # 2. oversized ops files -- ONE message for all of them: the remedy is

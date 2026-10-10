@@ -1170,8 +1170,8 @@ def hmi_json_cases():
                 errs.append(f"exit {rc}, must be 0 whenever a document was produced")
             if d.get("protocol") != "hmi-report/1":
                 errs.append(f"protocol {d.get('protocol')!r}")
-            if len(pts) != 19:
-                errs.append(f"{len(pts)} declared points, expected 19")
+            if len(pts) != 20:
+                errs.append(f"{len(pts)} declared points, expected 20")
             errs += [f"{i} did not run at home" for i in sorted(home_only)
                      if i in pts and not pts[i]["ran"]]
             errs += [f"{i}: ran:false but state {p['state']!r}"
@@ -1179,7 +1179,7 @@ def hmi_json_cases():
             gate = pts.get("ops-health.relaxation-gate", {})
             if gate.get("ran") or gate.get("skip_reason") != "cwd-is-home":
                 errs.append("relaxation-gate must be skipped (cwd-is-home) at home")
-        results.append(("hmi-json at home: 19 points, home-only ones ran", errs))
+        results.append(("hmi-json at home: 20 points, home-only ones ran", errs))
 
         bad = {"OPS_NUDGE_MIRROR_MARKER": os.path.join(tmp, "no-such-marker.txt")}
         rc, d, err = doc(home, cc, env_extra=bad)

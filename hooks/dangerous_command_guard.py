@@ -44,6 +44,17 @@ and a synthetic hit is not one. When a real session hits one, the shape is
 already named and those two cases are the regression floor for the narrowing.
 
 FALSE-POSITIVE LOG:
+- 2026-10-03 fold (feedback pool, user ruling 走建議), 2 observed:
+  (a) 2026-09-27 ts 1790524668: `git push ... --tags && git branch -f ...` denied as
+  a forced push — the push rule's `.*` crossed the `&&`. A matching DEFECT, not a
+  loosening: the push rule now reads one statement. Regression: that chain is
+  MUST-PASS; `git push origin main -f && echo ok` and `git push -f; git status`
+  stay MUST-DENY. (b) 2026-10-02 ts 1790946837: `rm -rf` as prose inside a heredoc
+  body piped to pb.py — the FIRST real hit of the pinned rm -rf OVERMATCH case.
+  NOT narrowed (1 observed; this rule's trigger is 3); a deny is the safe side.
+  (c) 2026-10-03, during this very fold: a Python heredoc holding the push-rule
+  test strings was denied — the same quoted/heredoc-body class as (b), other rule.
+  Class count 2 (b+c); at 3 the narrowing is heredoc-body exclusion for every rule.
 - 2026-09-22, 4 observed, one session (receipt rows c52979, 858980, 8f6b91,
   87d0a1): the machine-state rule denied read-only work that NAMED the word — two
   grep patterns (`...\|shutdown\|...`), a report_fp.py `--why` text, and a Python
@@ -107,7 +118,9 @@ TEMP_ROOT_PATTERNS = [
 
 # (tool-scope, compiled pattern, reason) — tool-scope: 'any', 'bash', 'ps'
 RULES = [
-    ("any", re.compile(r"\bgit\s+push\b(?!.*--force-with-lease).*(--force\b|\s-f\b)", re.I),
+    # One STATEMENT only (2026-10-03, FALSE-POSITIVE LOG): `.*` crossed `&&` and read
+    # the `-f` of a later `git branch -f` as a forced push.
+    ("any", re.compile(r"\bgit\s+push\b(?![^|;&\n]*--force-with-lease)[^|;&\n]*(--force\b|\s-f\b)", re.I),
      "git push --force rewrites remote history; use --force-with-lease after user approval, or ask the user."),
     ("any", re.compile(r"\bgit\s+reset\s+--hard\b", re.I),
      "git reset --hard discards uncommitted work irrecoverably; prefer git stash, or get explicit user approval."),

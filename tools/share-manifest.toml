@@ -1142,6 +1142,7 @@ edits = [
   "2026-10-02 (lane W3-hooks, align to 183c129): docstring, receipt-rows paragraph: a session-id reference (class: session id) -> 'one session'. The receipt rows, dates and telemetry file name stay.",
   "2026-10-02: docstring, false-positive-log paragraph: a second session-id reference (class: session id) -> 'another session'. The telemetry/hook-false-positives.jsonl pointer stays.",
   "2026-10-02: docstring: the example of a path the guard saw, an absolute path on a non-system drive (class: absolute local path) -> the class name 'an absolute path on a non-system drive'. The behaviour described is unchanged.",
+  "2026-10-10 (lane W3, align to 148e021e): refreshed from the fresh source and the three edits above re-applied on re-read text (the two session-id references and the example absolute path, same false-positive-log paragraph). The source added a 2026-10-03 false-positive-log entry (the push rule now reads one statement) and the matching regex change; both carried verbatim, no new scrub target. Verified: diff against the fresh source = the three declared edits (6 diff lines).",
 ]
 # 2026-09-12 (lane W3, align to 7c9867b): byte-identical, status verbatim.
 # CHANGED 2026-10-02: the source grew a false-positive-log entry citing two
@@ -1159,6 +1160,7 @@ edits = [
   "2026-09-07 (this round): source RETIRED the LESSON_CAP unfolded-entry counter entirely (ops/lessons.md is now a generated index of ops/lessons/, per tools/closeout-intake) and rewrote check 1 to subprocess `tools/closeout-intake/intake.py report --nudge`. That tool is excluded-by-decision this round (see hooks/intake_guard.py's not_shipped entry) and ops/lessons/ itself does not ship either (only the generated ops/lessons.md index does, per this repo's directory exclusions) -- so check 1's subprocess call always raises FileNotFoundError in this share, caught by the existing `except Exception: pass`. This is NOT a new failure mode: the check's own comment already documents 'a missing tool ... prints nothing' as an anticipated, legitimate fail-open branch (same treatment check 16 already gives a missing ops/cc-reconciled.json), so no functional edit was made -- a one-line SHARE EDITION comment was added immediately above the try block naming why this check is a permanent no-op in this repo, so a reader does not mistake silence for a bug. SIZE_CAP (22K->26K), CLAUDE_MD_CAP (19,968->23,040) and DICT_CAP (28K->42K) config-value bumps carried verbatim (pure numbers, no privacy content). Check 15's remedy_kind branch-selection logic (2026-09-06) and the graph-rot finding text carried verbatim (repo-relative tools/graph-snapshot and references/_moc pointers kept per the established precedent).",
   "2026-09-07 NEW FINDING (pre-existing gap from an earlier round, corrected here): the docstring/comment for check 1 named an 8-hex-char spawn_task ticket id (pointing into tools/session-board/tickets.json -- a tree this repo already excludes, see hooks/session_board_register.py's not_shipped entry) -> dropped, leaving 'the stale-path attribution ticket'. Also NEW FINDING: check 15's two msgs.add() strings named a second scheduled task verbatim, unscrubbed since at least the 2026-08-29 collection (same scrub class already applied to the mirror task's name in check 17, just never applied to this one) -> both occurrences replaced with 'your graph-watchdog task's scheduler entry', matching the wording already used for the mirror task. Re-verified: no scheduled-task name or ticket id remains anywhere in the file (grep-checked post-edit) -- and note for the manifest maintainer: this entry itself now deliberately does NOT quote either removed literal (the prior round's entry for check 17 quoted the mirror task's name in this very edits list, which republishes in the manifest's own prose exactly what the code-level edit removed; not corrected here since it is outside this file's scope, but flagged in this worker's final report).",
   "2026-09-12 (lane W3, align to 7c9867b): source grew a NEW carrier task name, class scheduled-task-name, at check 18 (copy-census) -- 3 occurrences (one comment, two msgs.add() strings) -> same treatment as check 17's mirror task, replaced with 'your copy-census scheduled task' / 'your copy-census task's scheduler entry'. Check 15/16's graph-watchdog task name grew a THIRD occurrence this round (a new review-when comment beside WATCHDOG_RUN_LIMIT_MIN) beyond the two already-declared msgs.add() occurrences -> same class, same replacement wording ('your graph-watchdog task's scheduler entry' / \"...task's ExecutionTimeLimit changes\" for the review-when form). Check 13's widened comment (2026-09-10) named an artifact filed under outputs/ (class: a named artifact inside a non-shipping tree) -> capability description ('a deferred-extraction record filed under outputs/'), no filename kept. The check-11 ops-layer gate and the check-1 closeout-intake SHARE EDITION comment (both declared in the first entry above) were re-applied against the freshly re-copied source unchanged -- their anchors still exist verbatim upstream. Verified via diff against fresh source: only the declared+new edits differ; `python hooks/ops_health_nudge.py` smoke-tested directly (this hook's HOME resolves via `os.path.expanduser('~/.claude')`, not CLAUDE_CONFIG_DIR, so the run read real machine state; it is read-only -- no writes anywhere in the hook -- so nothing outside this worktree was touched), exit 0, sensible output. No in-repo test suite ships for this hook -- tools/ops-health-test/ stays excluded per the 2026-08-16 ruling.",  "2026-10-02 (lane W3-hooks, align to 183c129): re-copied from the fresh source and every edit above re-applied by a clean 3-way merge (old source, this copy, new source); the diff against the new source equals the edits above plus the following. NEW this round, 8 edits by class and position: (1) a comment in check 13 naming a record under outputs/ (class: named artifact in a non-shipping tree) -> 'a dict-review round record'; (2) check 18's comment citing a design file under references/ (class: named artifact) -> 'design record under references/'; (3) a comment naming a scheduled task (class: scheduled-task name) -> 'your home-bundle scheduled task'; (4) the same scheduled task's name inside one msgs.add() string -> 'your home-bundle scheduled task'; (5) BUNDLE_STATUS default, an absolute path on a non-system drive (class: absolute local path, a private backup root) -> no default (env var only) plus a SHARE EDITION comment, the same treatment as MIRROR_MARKER; (6) VAULT_ROOT default, an absolute path on a non-system drive (class: absolute local path, a private notes vault) -> no default (env var only) plus a SHARE EDITION comment; (7) a comment in the cc-delta check pointing at a README under reports/ (class: named artifact) -> 'the cc-upgrade-delta report folder's README'; (8) the check-1 SHARE EDITION comment rewritten: it said tools/closeout-intake/ does not ship, which stopped being true this round (it ships under instruments/closeout-intake/); the new text says copy it to tools/ to enable the check and that the store ops/lessons/ stays source-only, so the silent no-op branch remains the documented fail-open path. Verified: diff against fresh source = declared edits only; `python hooks/ops_health_nudge.py` exits 0 with an empty home. No in-repo test suite ships for this hook.",
+  "2026-10-10 (lane W3, align to 148e021e): re-copied (34/0 numstat: a new mod-review check with its docstring) and every edit above re-applied by a 3-way merge; the new lines carry no scrub target (a registry key id and a mod name only). Verified: diff against the fresh source = the declared edits only. The sentence above that says tools/ops-health-test stays excluded is historical: its suite ships under instruments/ops-health-test/ since 2026-10-02.",
 ]
 
 # --- PART 1: settings template (procedure B, dirty source) ------------------
@@ -1220,6 +1222,7 @@ edits = [
   "2026-09-07 refresh: source closed an inheritance-bypass gap (2026-09-05 user ruling): an Agent call omitting `model` now requires either an explicit `model` or a `subagent_type` naming a LOCAL agents/*.md definition whose frontmatter pins a capped model (read via the new local_agent_model() helper, path-resolved off __file__/../agents — portable, no machine-bound value, and directly exercisable against this repo's own shipped agents/*.md files). Docstring session id re-applied per the existing edit above ('session b66f6a9b' -> 'in a local transcript', same wording already used in the sentence). New docstring paragraph cites reports/2026-09-05-model-effort-inventory.md — kept verbatim as a repo-relative filename (reports/ does not ship in this repo, but the path itself names no account, host or session and is not a scrub target under COLLECTION-RULES rule 2; same treatment as ui_verify_guard.py's kept ops/references/browser-pane-pixel-route.md citation).",
   "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edit above already covers. Re-applied the same session-id edit unchanged. Verified via diff against fresh source: only that one edit differs.",
   "2026-10-02 (lane W3-hooks, align to 183c129): the first edit's session id re-applied (the source's known-limitation line still carries it, class: session id, position: the resume-path docstring paragraph) -> 'in a local transcript'. NEW: a docstring pointer to a named report under reports/ (class: named artifact in a non-shipping tree) -> 'a model/effort inventory report'. Verified: diff against fresh source = those two edits; python hooks/model_cap_guard.py exits 0.",
+  "2026-10-10 (lane W3, align to 148e021e): refreshed (121/17 numstat) and the edits above re-applied. NEW in the source, three more scrub targets, by class and position: (1) the known-limitation-timeout paragraph named a session id and a work-root absolute path on a non-system drive (class: session id; class: absolute local path) -> 'one session, a share-repo round'; (2) a pointer to a named report under reports/ (class: named artifact in a non-shipping tree) -> 'a model-cap escape evaluation report'; (3) a second named report pointer, under reports/cc-upgrade-delta/, in the effort-axis paragraph -> 'a cc-upgrade-delta report'. The new onFailure/timeout prose, the mod-heartbeat deferral paragraph and the effort axis (cases M-H1..M-H3, M-E1..M-E6) carried verbatim. Verified: diff against the fresh source = the declared edits (12 diff lines).",
 ]
 
 [[collected]]
@@ -1283,6 +1286,7 @@ edits = [
   "2026-09-07 self-caught gap, fixed before delivery: the _README's mount-invariant paragraph ('Every hook in hooks/ IS mounted here ... The one .py under hooks/ that is deliberately NOT mounted is hooks/tests/test_transcript_read_guard.py') was stale the moment handoff_snapshot.py joined hooks/ this round -- it is also correctly unmounted (shared library, no event to mount at), making TWO deliberately-unmounted .py files, not one. Rewrote the paragraph to name both and say why each is not a defect. Verified by direct count: `find hooks -name '*.py'` = 20 files, mounted-hook regex extraction against the file = 18, difference = exactly {tests/test_transcript_read_guard.py, handoff_snapshot.py}. Re-validated `python -c \"import json; json.load(open('hooks/settings.example.json'))\"` OK after the edit.",
   "2026-09-12 (lane W3, align to 7c9867b): source `git status --porcelain settings.json` is now clean (the 2026-09-07 dirty delta landed in a commit) -- source_dirty_ack dropped per its own review-when. Re-derived the whole hooks block against the fresh source, reading it end to end (374 lines): added dispatch_commit_notice.py to the Bash|PowerShell and Agent|Workflow PreToolUse matchers and to SubagentStop (3 mounts, matching the source's own 3 mount points for this new D3 hook, all timeout 5); added published_record_guard.py to a new PreToolUse Write|Edit matcher (timeout 5, 1 mount, matching source); added worktree_scope_guard.py to a new PreToolUse Write|Edit|NotebookEdit|Bash|PowerShell matcher (timeout 6) and to SessionStart's \"\" matcher (timeout 8) -- 2 mounts, matching source exactly. REMOVED the PreToolUse Read|Grep|Glob matcher (fieldwork_threshold_notice.py's mount) -- source commit bd834ea retired this hook and dropped the mount entirely (see hooks/fieldwork_threshold_notice.py's own entry, D4 disposition: file+telemetry kept, mount not). Did NOT add literature_host_guard.py's mount (its Bash|PowerShell|WebFetch|mcp(...)navigate matcher in the source) -- that hook and its data file are lane W5's, not this worker's; main resolves that merge. Re-verified the two other omitted mounts (extdispatch_entrypoint_guard.py, extdispatch_route_shadow.py) and the four excluded-by-decision groups (intake_guard.py+intake_match_shadow.py, unattended_run.py's three mounts, session_board_register.py, xi_card_guard.py, secret_file_guard.py, project_registry_gist.py) are still absent from the source-derived template, unchanged this round. Added a new _README bullet naming fieldwork_threshold_notice.py's retirement and rewrote the mount-invariant paragraph: 20 unique hook files are mounted (recount after this round's additions/removal), 3 top-level hooks/*.py files are deliberately not mounted (deny_receipt.py + handoff_snapshot.py, shared libraries; fieldwork_threshold_notice.py, retired), and the 4 files under hooks/tests/ (one more than before -- test_browser_pane_scope_guard.py, test_fieldwork_threshold_notice.py, test_instructions_loaded_logger.py all new this round) are named as regression matrices, not hooks. Verified: `python -c \"import json; json.load(open('hooks/settings.example.json'))\"` OK; printed the full hooks-block structure and cross-checked every matcher/hook pair against the fresh source by hand.",
   "2026-10-02 (lane W3-hooks, align to 183c129): re-derived the hooks block against the fresh source and mounted every hook that ships after this lane: 33 files. Added the mounts for boundary_contract_notice, feedback_notice, intake_guard, intake_match_shadow, unattended_run (three mounts: PreToolUse scope, UserPromptSubmit kickoff, Stop stop), tree_noise_gist, secret_file_guard, project_registry_gist, golive_check, system_hmi_summary, view_launcher_gist, verbatim_dispatch_notice and session_search_query_notice, each with the source's own event, matcher, if and timeout. REMOVED delivery_gate_shadow's SubagentStop mount (the source retired it, commit ef0d0eb 2026-09-27) and declared the file an [[unmounted_hook]]. The source gained `if`-gated mounts (Bash(*git*) / PowerShell(*git*)) for branch_commit_guard and dispatch_commit_notice; the template carries them but moves the PowerShell-gated entries into their own PowerShell matcher block, because the share gate counts one mount per hook per event+matcher and the two are otherwise one hook twice on 'Bash|PowerShell'. The split is behaviour-identical: each if-rule already names its tool. Dropped from the source's mount set, as before: the SessionEnd preserve mount and every not-shipped hook's mount (extdispatch_entrypoint_guard, extdispatch_route_shadow, codex_dispatch_guard, session_board_register, moc_closeout_notice, deliverable_birth_notice, user_profile_gist, subagent_retrieval_brief, past_work_recall_inject, registry_row_guard). Also dropped the machine keys claudeMdExcludes, enabledPlugins, extraKnownMarketplaces, autoUpdatesChannel, theme, agentPushNotifEnabled. New top-level key kept: switchModelsOnFlag (false, added at the source in 8389c2e5; I could not verify its documented meaning, so it is carried as the source has it). The _README was rewritten: omissions list, tool-backed-hooks paragraph (tools ship under instruments/ and are copied to tools/), and the mount-invariant paragraph (33 mounted, 4 deliberately unmounted: deny_receipt, handoff_snapshot, fieldwork_threshold_notice, delivery_gate_shadow). Verified: json loads; mounted-file set equals the set of hooks/*.py minus those four.",
+  "2026-10-10 (lane W3, align to 148e021e): re-derived the hooks block against the fresh source, reading the 85/45 numstat diff. (1) Every deny-capable guard's timeout 5/6/8/10 -> 30 where the source has 30, matched mount by mount on (event, hook, argument, if); secret_file_guard and model_cap_guard also get onFailure block, as at the source. A new _README paragraph explains why (a timed-out command hook passes the call) and that onFailure needs Claude Code 2.1.295 or later. (2) NEW mounts for the two new shipped hooks: offline_approval_notice (UserPromptSubmit, timeout 5) and stash_worktree_notice (two if-gated mounts, Bash(*stash*) in the Bash|PowerShell matcher and PowerShell(*stash*) in the PowerShell-only matcher, timeout 15; split for the same reason as the git-gated pair). (3) feedback_notice gained its second source mount, a PostToolUse Bash|PowerShell matcher (timeout 5), added as its own block because the source shares that block with deliverable_birth_notice, which does not ship. (4) Did NOT mount candidate_shelf_notice, session_pid_registry or session_reaper_launch (excluded-by-decision, see their entries); three bullets added to the _README omissions list. (5) Dropped from the source's set, as before: claudeMdExcludes, the machine keys, and the new env.CLAUDE_CODE_PLUGIN_DIRS (it lists three mods by absolute path; the mods are not this lane's and no hook here depends on them). Mounted-file set = hooks/*.py minus the four declared unmounted, now 35 hooks. Verified: json loads; gate check S5 mounts match the shipped set.",
 ]
 
 # --- PART 2: new files this round, shipped -----------------------------------
@@ -5770,6 +5774,7 @@ status = "verbatim"
 path = "hooks/literature_host_guard.py"
 source = "~/.claude/hooks/literature_host_guard.py"
 status = "verbatim"
+# 2026-10-10 (lane W3, align to 148e021e): refreshed, still byte-identical (77/5 numstat: a per-session cap on small-cap landing rows, user ruling 2026-10-04). Read the new code and docstring: no scrub target.
 # NEW 2026-09-12 (lane W5). PreToolUse hook enforcing rules/literature-access.md's
 # policy at the tool-call boundary. Portable: CLAUDE_DIR resolves via
 # Path.home() or CLAUDE_CONFIG_DIR, POLICY_PATH via LSE_HOST_POLICY or
@@ -5787,6 +5792,7 @@ status = "verbatim"
 path = "hooks/literature-host-policy.json"
 source = "~/.claude/hooks/literature-host-policy.json"
 status = "verbatim"
+# 2026-10-10 (lane W3, align to 148e021e): refreshed, still byte-identical (30/3 numstat). Read in full: about 25 new host rows and one moved row, each a public host with a licence basis and a dated measurement; the notes cite a literature run by project name only. No scrub target.
 # NEW 2026-09-12 (lane W5). The per-host policy data table
 # literature_host_guard.py enforces and access_policy.py reads. Read in
 # full: its `institution` field names "National Taiwan University (the only
@@ -5802,6 +5808,7 @@ status = "verbatim"
 path = "hooks/tests/test_literature_host_guard.py"
 source = "~/.claude/hooks/tests/test_literature_host_guard.py"
 status = "verbatim"
+# 2026-10-10 (lane W3, align to 148e021e): refreshed, still byte-identical (94/5 numstat: the session-cap cases C-1..C-8 and live-row cases L-7). All fixture hosts and session ids are synthetic.
 # NEW 2026-09-12 (lane W5). All fixture hosts are synthetic `.example`
 # domains. Empty diff against source. NOT fully green in this repo as
 # shipped: assertions D-01c/D-01d check substrings ("Recorded as row",
@@ -8140,6 +8147,7 @@ edits = [
 path = "instruments/dangerous-command-test/test_dangerous_command_guard.py"
 source = "~/.claude/tools/dangerous-command-test/test_dangerous_command_guard.py"
 status = "edited"
+# 2026-10-10 (lane W3, align to 148e021e): refreshed (6/0 numstat: regression cases for the one-statement push rule). The one declared edit re-applied by merge; the four fixture sites keep their substitution. Diff against the fresh source = that edit only.
 edits = [
   "4 fixture strings (2 must-deny commands, 1 out-of-scope-tool case, 1 undetermined-class twin): the account segment of a home-path argument -> `x`. The guard classifies the delete TARGET by shape, so the verdicts are unchanged (suite 80/80 before and after, run against the source hooks in an installed-layout scratch tree).",
 ]
@@ -8280,7 +8288,10 @@ status = "verbatim"
 [[collected]]
 path = "instruments/model-cap-test/test_model_cap_guard.py"
 source = "~/.claude/tools/model-cap-test/test_model_cap_guard.py"
-status = "verbatim"
+status = "edited"
+edits = [
+  "2026-10-10 (lane W3, align to 148e021e): status verbatim -> edited. The refreshed suite (193/4 numstat) gained a settings-timeout case that cites a session id (class: session id, position: the comment above that case) -> 'One session'; and a planted settings snippet whose hook path was a drive-rooted fixture (class: absolute local path) -> `<CLAUDE_HOME>/hooks/model_cap_guard.py` (declared substitution token; the case parses the timeout, not the path). Run in place from a scratch installed-layout copy: see the lane report.",
+]
 # First collection (lane W5a). Subject: hooks/model_cap_guard.py (ships).
 # Diff against source empty; no machine-bound value.
 
@@ -8288,6 +8299,7 @@ status = "verbatim"
 path = "instruments/ops-health-test/test_ops_health_nudge.py"
 source = "~/.claude/tools/ops-health-test/test_ops_health_nudge.py"
 status = "edited"
+# 2026-10-10 (lane W3, align to 148e021e): refreshed (3/3 numstat), the three declared edits re-applied by merge; diff against the fresh source = those edits only.
 edits = [
   "one comment (the exemption fixture's rationale): a pointer to a named proposal note inside the source's non-shipping drafts/ tree -> 'the 2026-09-08 exemption proposal's step 6 (a private note)'.",
   "check 15 fixture record, `carrier` field: a scheduled-task name (a private literal) -> the generic string 'graph-watchdog-task'. No case asserts on it.",
@@ -8306,6 +8318,7 @@ edits = [
   "DEFAULT_ROOTS: the second corpus root was an offline session archive on a non-system drive -> dropped, with a SHARE EDITION comment; `--root` (already supported) takes extra roots.",
   "BASELINE comment: the same archive named as a path -> 'the offline session archive'.",
   "BASELINE comment: one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+  "2026-10-10 (lane W3, align to 148e021e): NOT re-collected. The source rewrote this file to import a shared corpus-walk harness from tools/hook-backtest/ (excluded under the tools/ directory entry), so the fresh copy would fail at import here. The previous revision, self-contained and carrying the three edits above, is kept. This is a decision NOT to take the source text, declared so the next round does not read it as a miss. Review-when: tools/hook-backtest/ ships (then re-collect this file and the sibling backtest, dropping the first edit above, since the default roots move into the harness).",
 ]
 # First collection (lane W5a). Reads real session transcripts; with none present
 # it prints 'no PowerShell-language payloads found' and exits 1.
@@ -8326,6 +8339,7 @@ edits = [
   "DEFAULT_ROOTS: the second corpus root was an offline session archive on a non-system drive -> dropped, with a SHARE EDITION comment; `--root` (already supported) takes extra roots.",
   "BASELINE comment: the same archive named as a path -> 'the offline session archive'.",
   "BASELINE comment: one live-session id naming the proof-of-life probe's session -> 'a local session'. Date and the rest of the sentence kept.",
+  "2026-10-10 (lane W3, align to 148e021e): NOT re-collected, same reason as instruments/ps-errorpref-backtest/backtest.py: the source file now imports the shared harness from tools/hook-backtest/, which does not ship. Previous self-contained revision kept with its three edits above.",
 ]
 # First collection (lane W5a). Same needs as ps-errorpref-backtest.
 
@@ -8544,6 +8558,7 @@ reason = "Planted data for a hook test: an invented notebook path in a NotebookE
 path = "hooks/secret_file_guard.py"
 source = "~/.claude/hooks/secret_file_guard.py"
 status = "verbatim"
+# 2026-10-10 (lane W3, align to 148e021e): refreshed, still byte-identical (327/4 numstat: narrowing pass 2 and property 2, the whole-environment-dump and credential-grep guard). Read the added code and false-positive log: only card ids and short row hashes, no scrub target. Its suite instruments/secret-guard-test/ was refreshed in the same step.
 # 2026-10-02: shipped verbatim (ruling above; the hook's matcher is a generic credential-
 # filename shape, not a personal file list, and its own CONFIG block names the single
 # edit point). Read in full: no scrub target. The deny text's pointer
@@ -8755,6 +8770,7 @@ status = "edited"
 edits = [
   "docstring Design line: a named design document under references/ (class: named artifact in a non-shipping tree) -> 'a long-run probe design note'. The section ids stay.",
   "docstring, user-return paragraph: a session id (class: session id) -> 'one session'. The 2h42m figure and the failure narrative stay.",
+  "2026-10-10 (lane W3, align to 148e021e): a new comment above the code-span regex cited a session id (class: session id, position: the paragraph that explains why quoted tags are ignored) -> 'one session'. The date and the failure narrative stay. Rest of the 31/2 delta (30 s timeouts in the docs, the quoted-text rule) carried verbatim. Verified: diff against the fresh source = three declared edits.",
 ]
 # 2026-10-02: shipped edited. Three entry points (kickoff / scope / stop) over one run manifest.
 # The Stop guard blocks the end of a session only while a manifest is armed and no run
@@ -8809,6 +8825,7 @@ source = "~/.claude/hooks/feedback_notice.py"
 status = "edited"
 edits = [
   "docstring STATUS: a named design document under references/ (class: named artifact in a non-shipping tree) -> 'a feedback-pool design note'. The section id 3.4 stays.",
+  "2026-10-10 (lane W3, align to 148e021e): refreshed (136/10 numstat: the second, override trigger and its gate-overrides register). The one edit above re-applied; the new text names tools/feedback-pool/gate-overrides.json and a tool script that both ship or are tools-path citations only, no scrub target. Verified: diff against the fresh source = the one declared edit.",
 ]
 # 2026-10-02: NEW, procedure A. Read in full. Imports `feedback` from tools/feedback-pool/ and cites
 # tools/process-ledger/ledger.py (cross-lane: both ship under instruments/). Without the
@@ -8975,14 +8992,16 @@ reason = """NEW 2026-09-20. A UserPromptSubmit hook that, on a past-work phrase,
 `tools/recall/recall.py query ... --legs mem,proj,les,deliv` and injects the candidates. The recall tool
 reads the operator's personal memory silos, the project registry and the deliverables index; the
 method-tools ruling left it out as a borderline store tool, and the hook is a no-op without it.
-RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README."""
+RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README.
+RE-CHECK 2026-10-10: still mounted; the source added a fifth recall leg (an asset-library candidate shelf), which deepens the dependency on private stores. Disposition holds."""
 fallback = """The prior-art check it automates is a prose rule in global-claude-md/CLAUDE.md; hooks/project_registry_gist.py
 ships the registry card that rule consults first."""
 
 [[not_shipped]]
 path = "hooks/tests/test_past_work_recall_inject.py"
 disposition = "excluded-by-decision"
-reason = """The suite of hooks/past_work_recall_inject.py (excluded above). RE-CHECK 2026-10-02: unchanged."""
+reason = """The suite of hooks/past_work_recall_inject.py (excluded above). RE-CHECK 2026-10-02: unchanged.
+RE-CHECK 2026-10-10: the suite grew a stub for the new leg; still tied to the excluded hook."""
 fallback = """None needed; see the hooks/past_work_recall_inject.py entry."""
 
 [[not_shipped]]
@@ -8991,7 +9010,8 @@ disposition = "excluded-by-decision"
 reason = """NEW 2026-09-20. A SubagentStart hook that hands every subagent the one retrieval entry point
 (tools/recall/) its context lacks. Same dependency as hooks/past_work_recall_inject.py: the recall tool
 over personal memory silos is excluded, so the brief would point every subagent at a tool that is
-absent. RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README."""
+absent. RE-CHECK 2026-10-02: still mounted at the source; named in the template's _README.
+RE-CHECK 2026-10-10: unchanged in substance (3/1 numstat); the recall tool it points at is still excluded under the tools/ directory entry."""
 fallback = """Name the retrieval entry you do have in the dispatch prompt by hand; claude-ops/ops/20-dispatch.md
 carries the brief template."""
 
@@ -9120,6 +9140,7 @@ status = "edited"
 edits = [
   "MUST_DENY / MUST_PASS / LIVE_ENV fixtures, 6 sites in three spellings (raw, backslash-escaped, forward-slash): the operator's own project tree for a credential-file path — an absolute path on a non-system drive, project name PatentsGrabber kept (rule 2) — -> `<WORK_ROOT>\\PatentsGrabber` / `<WORK_ROOT>/PatentsGrabber` (declared substitution token). The guard keys on the FILENAME shape, so the fixtures still exercise the same branches; verified by the in-place run.",
   "MUST_PASS 'ordinary session traffic' row: a Read of a shipped skill file by its absolute home path (account name + home directory) -> `<CLAUDE_HOME>\\skills\\literature-search-extract\\SKILL.md`.",
+  "2026-10-10 (lane W3, align to 148e021e): the suite grew 110 lines of fixtures. NEW scrub targets by class: invented-looking fixture roots on a non-system drive (class: absolute local path) in 3 property-2 grep fixtures, 1 PowerShell live-variable fixture, one multi-root PowerShell inventory fixture (4 roots, project names kept) and one Bash inventory fixture whose root folder name was a personal Chinese-named directory (class: private folder name, project subfolder kept) -> `<WORK_ROOT>` (declared substitution token). The guard keys on the filename shape, so every fixture still exercises the same branch. Earlier edits re-applied by 3-way merge. Verified: failures counted by the in-place run, see the lane report.",
 ]
 
 [[allow]]
@@ -9131,3 +9152,97 @@ the system drive) — a credential-shaped filename the guard must deny; the
 folder exists on no machine. The pattern cannot tell an invented system-drive
 folder from a private one, which is what [[allow]] is for."""
 # === merge step 2026-10-02 END ===
+
+# === lane W3 2026-10-10 BEGIN ===
+
+[[collected]]
+path = "hooks/offline_approval_notice.py"
+source = "~/.claude/hooks/offline_approval_notice.py"
+status = "edited"
+edits = [
+  "docstring, WHY A HOOK paragraph: a session id (class: session id) -> 'one session'. The incident date, the closeout-card section number and the lesson id stay.",
+  "docstring, FALSE-POSITIVE LOG: a second session id (class: session id) -> 'one session'. The date, the fire count and the fix stay.",
+]
+# 2026-10-10: NEW, procedure A (D3 row 7: ship). Read in full. UserPromptSubmit notice: a prompt
+# announcing absence or an inability to approve gets the live permissions.ask list read from
+# settings.json / settings.local.json plus the route around it. Reads only the adopter's own
+# settings; no private dependency; fail-open; never blocks. Mounted in hooks/settings.example.json.
+# Its suite asserts the live ask list contains the rules-edit pattern, which the template carries.
+# The suite reads the REAL home settings.json, so it passes only where that list exists.
+
+[[collected]]
+path = "hooks/stash_worktree_notice.py"
+source = "~/.claude/hooks/stash_worktree_notice.py"
+status = "verbatim"
+# 2026-10-10: NEW, procedure A. Read in full. PreToolUse notice when a stash-writing git command
+# runs in a repository with linked worktrees (refs/stash is one ref for all of them). Needs only
+# git; imports deny_receipt with a fallback. No scrub target. Mounted twice in the template
+# (Bash(*stash*) and PowerShell(*stash*)). Suite ran in place: 17/17.
+
+[[collected]]
+path = "hooks/tests/test_offline_approval_notice.py"
+source = "~/.claude/hooks/tests/test_offline_approval_notice.py"
+status = "verbatim"
+# 2026-10-10: NEW. Read in full: two-sided controls (5 fire, 5 silent, the task-notification
+# exclusion, garbage and undetermined inputs). Ran in place: 6 tests OK.
+
+[[collected]]
+path = "hooks/tests/test_stash_worktree_notice.py"
+source = "~/.claude/hooks/tests/test_stash_worktree_notice.py"
+status = "verbatim"
+# 2026-10-10: NEW. Read in full: builds real temp repositories, with and without a linked worktree.
+# Ran in place: 17/17.
+
+[[collected]]
+path = "agents/cheap-worker.md"
+source = "~/.claude/agents/cheap-worker.md"
+status = "verbatim"
+# 2026-10-10: NEW, procedure A (D3 row 3 -> ship verbatim). Read in full: a haiku-tier mechanical
+# worker that omits the user instruction layer (omitClaudeMd, Claude Code 2.1.271 or later). No
+# account, host or path. The HTML comment cites the model-bench round-3 report under its source
+# path tools/model-bench/results/; the same file ships here as model-bench/results/round3-local-report.md,
+# and a path that resolves in the source is kept (rule 2). Written natively at the source on the date
+# in its own comment, not through the third-party package the other agents descend from.
+
+[[not_shipped]]
+path = "hooks/candidate_shelf_notice.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-06 (mounted at the source on Write|Edit|NotebookEdit). On writing a file of a
+shelved CLASS it names that class's current candidate, read from an index.json in the operator's
+private asset library (AssetVault's candidates/ shelf) and pointing at that library's candidates
+CLI. Both defaults are absolute paths on a non-system drive, and the library does not ship; with the
+index absent the hook is a permanent silent no-op (its own F-1 case). Decision table row 6: the
+whole artifact is meaningful only inside that private context. The env override CSN_INDEX exists,
+but an adopter has no index in that format and no shelf CLI, so a copy would only ever be inert."""
+fallback = """global-claude-md/CLAUDE.md carries the prior-art check in prose (consult the vault indexes and
+the candidates shelf before building something new); without a shelf that check is a by-hand sweep of
+the adopter's own library. The settings template's _README names the omission."""
+
+[[not_shipped]]
+path = "hooks/tests/test_candidate_shelf_notice.py"
+disposition = "excluded-by-decision"
+reason = """The proof-of-life wrapper of hooks/candidate_shelf_notice.py (excluded above): it runs that
+hook's selftest and asserts two undetermined cases."""
+fallback = """None needed; see the hooks/candidate_shelf_notice.py entry."""
+
+[[not_shipped]]
+path = "hooks/session_pid_registry.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-03 (mounted at the source on SessionStart). Writes a session-to-engine-process map
+to telemetry for the source's process-picker tool; its proof-of-life is that tool's own test suite.
+tools/proc-picker/ is untracked at the source and excluded under the tools/ entry, so the map would
+have no reader here, and the hook needs a third-party process library that no shipped file requires."""
+fallback = """None: the map is only an input to the process-picker tool. An adopter who needs to attribute an
+orphaned engine process to a session writes the same map from their own SessionStart payload."""
+
+[[not_shipped]]
+path = "hooks/session_reaper_launch.py"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-03 (mounted at the source on SessionStart). Starts the idle-session reaper daemon
+of the process-picker tool (tools/proc-picker/reaper.py, untracked at the source, excluded under the
+tools/ entry) through a Win32 process-create call. Without that tool it does nothing; with a different
+tool at the same path it would launch a process that reclaims running engines, which is exactly the
+kind of behaviour an adopter must opt into knowingly."""
+fallback = """None needed; the settings template's _README names the omission and the tool it depends on."""
+
+# === lane W3 2026-10-10 END ===

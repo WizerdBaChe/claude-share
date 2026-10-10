@@ -231,6 +231,34 @@ def human_text(prompt: str) -> str:
     return t.strip()
 
 
+# A fenced block or an inline code span: text QUOTED, not spoken. 2026-10-02 (one
+# session): a code-reviewer subagent's report quoted "`[unattended-run]` is a prompt
+# tag…" inside its <task-notification>; the kickoff tested the RAW prompt, so a run
+# started mid-task with stop-block obligations nobody had asked for. The tag counts
+# only in the user's own text (harness blocks removed) and outside code spans.
+CODE_SPAN = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+# A pasted block is quoted too. HARNESS_BLOCK's `</\1>` never strips it because the
+# harness writes the closing tag WITH its id (`</pasted_content id="…">`); probe
+# 2026-10-06: a tag inside a paste armed. The tag is blanked to equal-length spaces
+# on the RAW prompt (HARNESS_EMPTY strips the opening tag first, so the block is no
+# longer whole inside human_text; equal length keeps the returned offset valid for
+# human_text(prompt)). human_text itself keeps pastes: a paste-only prompt still
+# counts as the user being back.
+PASTED = re.compile(r"<pasted_content\b[^>]*>.*?</pasted_content\b[^>]*>", re.S)
+
+
+def tag_index(prompt: str) -> int:
+    """Offset of the first [unattended-run] in human_text(prompt) that is not inside a
+    code span or a pasted block; -1 when the prompt carries no such tag."""
+    blank = PASTED.sub(lambda m: m.group(0).replace(TAG, " " * len(TAG)), prompt or "")
+    t = human_text(blank)
+    spans = [(m.start(), m.end()) for m in CODE_SPAN.finditer(t)]
+    for m in re.finditer(re.escape(TAG), t):
+        if not any(a <= m.start() < b for a, b in spans):
+            return m.start()
+    return -1
+
+
 def in_scope(path: str, m: dict) -> bool:
     p = norm(path)
     cwd = norm(m.get("cwd", ""))
@@ -330,8 +358,9 @@ def end_run(session: str, m: dict, by: str, payload: dict | None = None) -> None
 def mode_kickoff(payload: dict) -> None:
     prompt = payload.get("prompt") or ""
     session = str(payload.get("session_id", "unknown"))
-    if TAG in prompt:
-        m = parse_template(prompt, payload.get("cwd", ""))
+    at = tag_index(prompt)
+    if at >= 0:
+        m = parse_template(human_text(prompt)[at:], payload.get("cwd", ""))
         live = active_manifest(session)
         if live:
             # Re-tag while the run still governs: the run keeps its identity (Q4,
