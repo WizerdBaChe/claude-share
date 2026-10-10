@@ -193,6 +193,10 @@ foreign_roots = [
 "tools/skill-routing-audit.py" = "instruments/skill-routing-audit.py"
 "tools/cross-index/xi_cards.py" = "instruments/cross-index/xi_cards.py"
 "tools/hook-backtest/" = "instruments/hook-backtest/"
+# 2026-10-10 (main): the source's canonical tier-routing bench; this repo keeps
+# its hand-made share copy at the root (not a collected root, see CHANGELOG),
+# so source citations of tools/model-bench/... resolve to it.
+"tools/model-bench/" = "model-bench/"
 "tools/mod-review/" = "instruments/mod-review/"
 "tools/platform-search/" = "instruments/platform-search/"
 "tools/token-key-gate/" = "instruments/token-key-gate/"
@@ -1239,6 +1243,7 @@ edits = [
   "2026-09-12 (lane W3, align to 7c9867b): re-diffed against the fresh source; no new content beyond what the declared edit above already covers. Re-applied the same session-id edit unchanged. Verified via diff against fresh source: only that one edit differs.",
   "2026-10-02 (lane W3-hooks, align to 183c129): the first edit's session id re-applied (the source's known-limitation line still carries it, class: session id, position: the resume-path docstring paragraph) -> 'in a local transcript'. NEW: a docstring pointer to a named report under reports/ (class: named artifact in a non-shipping tree) -> 'a model/effort inventory report'. Verified: diff against fresh source = those two edits; python hooks/model_cap_guard.py exits 0.",
   "2026-10-10 (lane W3, align to 148e021e): refreshed (121/17 numstat) and the edits above re-applied. NEW in the source, three more scrub targets, by class and position: (1) the known-limitation-timeout paragraph named a session id and a work-root absolute path on a non-system drive (class: session id; class: absolute local path) -> 'one session, a share-repo round'; (2) a pointer to a named report under reports/ (class: named artifact in a non-shipping tree) -> 'a model-cap escape evaluation report'; (3) a second named report pointer, under reports/cc-upgrade-delta/, in the effort-axis paragraph -> 'a cc-upgrade-delta report'. The new onFailure/timeout prose, the mod-heartbeat deferral paragraph and the effort axis (cases M-H1..M-H3, M-E1..M-E6) carried verbatim. Verified: diff against the fresh source = the declared edits (12 diff lines).",
+  "2026-10-10 (main, re-align to ca91c37b): the source added three lines to the effort-axis paragraph (inherited effort is invisible to this hook; the mod records it as a notice). They carry verbatim except one pointer to a dated handoff under reports/ (class: named artifact in a non-shipping tree) -> 'a dated handoff under the source's reports/ tree, not shipped'.",
 ]
 
 [[collected]]
@@ -4209,6 +4214,9 @@ literal = [
     # the two current tag names beside the old one ("was <browser_surfaces>")
     # at every site. Same class — a tag the harness emits, not a value.
     "<browsers>", "<built_in_browser>",
+    # 2026-10-10: archdiag/MAINTENANCE.md names the HTML root element itself
+    # (`data-page-class` on the <html> tag) — an element name, not a value.
+    "<html>",
 ]
 
 # The adopter substitutes these with their own environment's values.
@@ -4375,6 +4383,10 @@ path_position_ok = [
 # Tokens allowed on a runnable line — the reader is expected to fill them in.
 command_position_ok = [
     "<dir>", "<copy-dir>", "<username>", "<email>", "<hooks path>",
+    # 2026-10-10, clean-room-rebuild SKILL.md: the overlap gate's command
+    # templates — the source being rebuilt, its spec card and the rebuilt result
+    # are the reader's own files; no real value would run in their tree.
+    "<src>", "<spec.md>", "<result>",
     # 2026-08-29, shared-tree-git.md's recovery recipes: `git cat-file -e
     # <sha>:<path>` — both are the reader's own, and no real value could be
     # printed here that would work in their tree.
@@ -9809,18 +9821,6 @@ example) and read correctly without the file."""
 fallback = """None needed for a reader: the retirement is recorded in `claude-ops/ops/rule-registry.md`. An
 adopter with a GLSL/WGSL project who wants the content can recover it from this repo's git history before
 2026-10-10."""
-
-[[not_shipped]]
-path = ".gitignore"
-disposition = "excluded-by-decision"
-reason = """NEW 2026-10-10 (first sorted this round as a candidate; it had never carried an entry). The source
-environment's root ignore list is a record of one machine's config home: which of its private stores,
-caches, app-state files and harness residue stay untracked. Shipped files mention `.gitignore` as a concept
-(rollback steps, a sweep check, an env-cleanup tier list), and those mentions resolve to this repo's own
-`.gitignore`, which is authored here for this repo."""
-fallback = """Write your own config-home `.gitignore`; the shipped rules say which classes must stay untracked
-(session records, caches, telemetry, raw dispatch output) and `claude-ops/ops/40-maintenance.md` has the
-detection command for a tracked-but-ignored file."""
 
 # === main 2026-10-10 END ===
 

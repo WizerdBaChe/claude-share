@@ -367,6 +367,8 @@ Incidents, routing by coupling class, recovery: `ops/references/shared-tree-git.
 Dispatch mechanisms）：下表「強度」欄是各定義檔 frontmatter **已經釘住**的值；
 per-call `effort` 依工具說明只在使用者或指令明確要求時才填，且上限仍是 `high`
 （`xhigh`／`max` 屬超出上限）。`model` 仍可 per-call 覆寫。
+per-call effort 實測見 tools/model-bench/results/round4-report.md §2 與 round5-report.md
+§2（haiku t04 的失誤是排序，high 不會修好）；表格數字待使用者裁決後再回寫。
 
 | 任務形狀 (task shape) | agentType | model × effort（定義檔已釘） | 能力邊界 |
 |---|---|---|---|

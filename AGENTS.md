@@ -46,7 +46,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | `rule-registry.md` | **New 2026-08-11.** Keyed by RULE, not by date: why each size cap, standing ruling, and mechanism holds its current value, plus its value history. Replaces the old chronological-rotation model. |
 | `rules-usage-dict.md` | Index: which layer owns what, record-schema registry. Agent-roster routing itself moved to `20-dispatch.md` — this file keeps only a pointer. |
 | `../references/PROJECTS.md` | **New 2026-08-14.** The project-index format the ops layer and two skills cite — header and column semantics only; the source environment's rows are its own inventory and do not ship. |
-| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), `project-map.md` (the read-time layer behind `60-bootstrap.md` §H), and **new 2026-08-16** `external-dispatch.md` (the detail behind `20-dispatch.md` §4a — measured prompt shape, acceptance layers, failure signatures; the dispatcher itself is not shipped, but since 2026-08-17 its acceptance layers ship as running code in `red-team/`) and `skill-trigger-classes.md` (why a skill's zero fire count is or is not a defect). **New 2026-08-29**, both because the same round's refresh replaced shipped prose with pointers to them: `dispatch-templates.md` (the worked ✅/❌ contract pair and the five task-template field lists that used to sit inline in `20-dispatch.md`) and `shared-tree-git.md` (the concurrency discipline behind L-023 — the routing ruling by coupling class, the commit ritual in full, and what each kind of shared-state damage looks like, including the mitigation that turned a LOUD failure into a silent one). Also here, each named by the rule that loads it: `uat.md` (the user-acceptance procedure behind `30-judgment.md`), `entry-schema.md` (the field schema every registry entry conforms to; `instruments/entry-schema-lint/` checks it), `principle-design-guide.md` (how a principle becomes an asset property, PH-1..PH-11), `computer-use-probe-2026-09-07.md` (a dated measurement of the desktop-automation surface), and **new 2026-10-02** `gate-design.md` (the clauses behind `CLAUDE.md`'s automated-gate rule: determinable-only, two-sided calibration, emitted-artifact reads), `harness-measurements.md` (measured facts about the Claude Code harness the rules rest on — context budgets, tool shapes, injected blocks — two machine paths generalized) and `maintenance-cases.md` (the worked cases behind `40-maintenance.md`). |
+| `references/` | Detail files for the rule above them, loaded on demand and never at session start — the landing zone when a rule file hits its size cap. `inbound-routing.md` (what arrives from outside, and which procedure it gets), `integrity-sweep.md` (the executable grep checks behind `40-maintenance.md` §5), `project-map.md` (the read-time layer behind `60-bootstrap.md` §H), and **new 2026-08-16** `external-dispatch.md` (the detail behind `20-dispatch.md` §4a — measured prompt shape, acceptance layers, failure signatures; the dispatcher itself is not shipped, but since 2026-08-17 its acceptance layers ship as running code in `red-team/`) and `skill-trigger-classes.md` (why a skill's zero fire count is or is not a defect). **New 2026-08-29**, both because the same round's refresh replaced shipped prose with pointers to them: `dispatch-templates.md` (the worked ✅/❌ contract pair and the five task-template field lists that used to sit inline in `20-dispatch.md`) and `shared-tree-git.md` (the concurrency discipline behind L-023 — the routing ruling by coupling class, the commit ritual in full, and what each kind of shared-state damage looks like, including the mitigation that turned a LOUD failure into a silent one). Also here, each named by the rule that loads it: `uat.md` (the user-acceptance procedure behind `30-judgment.md`), `entry-schema.md` (the field schema every registry entry conforms to; `instruments/entry-schema-lint/` checks it), `principle-design-guide.md` (how a principle becomes an asset property, PH-1..PH-11), `computer-use-probe-2026-09-07.md` (a dated measurement of the desktop-automation surface), and **new 2026-10-02** `gate-design.md` (the clauses behind `CLAUDE.md`'s automated-gate rule: determinable-only, two-sided calibration, emitted-artifact reads), `harness-measurements.md` (measured facts about the Claude Code harness the rules rest on — context budgets, tool shapes, injected blocks — two machine paths generalized) and `maintenance-cases.md` (the worked cases behind `40-maintenance.md`). **New 2026-10-10:** `ticket-supervision.md` (the field-by-field detail behind `20-dispatch.md` §7a: registration fields, board authority, shared-tree lines) and `platform-source-registry.json` (the platform list behind `30-judgment.md` R7, read by `instruments/platform-search/`). |
 | `README.md` | Folder note. |
 
 ## `global-claude-md/` — the always-loaded preferences file
@@ -54,7 +54,7 @@ Read in this order; `OPS.md` is the entry point and routing table.
 | File | What it is |
 |---|---|
 | `CLAUDE.md` | The global preferences the ops layer hangs off. Machine-specific values are `<PLACEHOLDER>`s — substitute your own. Opens with a "Path-scoped rules" index pointing at `rules/`. |
-| `rules/` (fifteen files) | Path-scoped rules: each loads only when a matching file is read, and `CLAUDE.md`'s opening index names all fifteen. **New 2026-10-02:** `source-quotation-evidence.md` (copyrighted page: locator + a short quote + local OCR, never a transcript; its instrument `quote-evidence` ships under `instruments/`), `layout-convergence.md` (figure/slide crowding: tiers and a stop rule), `native-render-first.md` (a tool result's figure: the tool's own render first) and `android-device-states.md` (every window/config state an Android app is accepted on). `frontend-layering.md` and `shader-failure-modes.md` were the first two sunk out of CLAUDE.md's body (2026-08-11): FSD module layering, GLSL silent-failure modes. `deliverable-doc-refs.md` (human-facing HTML: define before use, hover cards, the page-class width registry), `office-deck-deliverables.md` (programmatic PPTX), `visual-gate-scope.md` (measure the glyph, gate the class), `verification-ladder.md` (evidence rungs 0–5, plus the verification record a durable claim ships with). **New 2026-09-12:** `web-navigation-state.md`, `hook-deny-message.md`, `naming-and-placement.md`, `figure-self-read.md`, and `literature-access.md`, which ships with its enforcing hook `hooks/literature_host_guard.py`. (This row named two files until 2026-09-12; four had arrived since without it changing.) |
+| `rules/` (fourteen files) | Path-scoped rules: each loads only when a matching file is read (or, on 2.1.288+, written), and `CLAUDE.md`'s opening index names all fourteen. **2026-10-10:** `shader-failure-modes.md` left — the source retired it on 2026-10-09 (one load in 1,094+ sessions; its project is finished); and two new source rules, `decision-sheet.md` and `explainer-deliverables.md`, are withheld because each is defined by a source-only tool (manifest `[[not_shipped]]`, and the index line says so). **New 2026-10-02:** `source-quotation-evidence.md` (copyrighted page: locator + a short quote + local OCR, never a transcript; its instrument `quote-evidence` ships under `instruments/`), `layout-convergence.md` (figure/slide crowding: tiers and a stop rule), `native-render-first.md` (a tool result's figure: the tool's own render first) and `android-device-states.md` (every window/config state an Android app is accepted on). `frontend-layering.md` was one of the first two sunk out of CLAUDE.md's body (2026-08-11): FSD module layering. `deliverable-doc-refs.md` (human-facing HTML: define before use, hover cards, the page-class width registry), `office-deck-deliverables.md` (programmatic PPTX), `visual-gate-scope.md` (measure the glyph, gate the class), `verification-ladder.md` (evidence rungs 0–5, plus the verification record a durable claim ships with). **New 2026-09-12:** `web-navigation-state.md`, `hook-deny-message.md`, `naming-and-placement.md`, `figure-self-read.md`, and `literature-access.md`, which ships with its enforcing hook `hooks/literature_host_guard.py`. (This row named two files until 2026-09-12; four had arrived since without it changing.) |
 | `README.md` | Cross-reference map back into `claude-ops/`. |
 
 ## `skill-toolkit/` — installable skills
@@ -67,6 +67,7 @@ self-contained, with detail in its own `references/` loaded on demand.
 | `ai-coding-guardrails` | Designing the guardrail *system* around AI coding agents (5 references). |
 | `audience-fit` | **New 2026-09-02.** Post-production audience tuning: rewriting an engineer-voiced deliverable for a non-developer reader, or moving UI copy from the builder's view to the user's. One document serves one primary audience, and the rewrite ships paired with the original — evidence strength, causal register and stated limits may not shift in the retelling. |
 | `case-library` | **New 2026-10-02.** Building a case library over a run of same-kind examples (videos, posts, layouts, UI patterns): classify → collect → specialised analysis → controlled imitation → extract the repeatable workflow. Eight invariants, among them a controlled vocabulary with a self-testing validator, generated-only indexes, no numbers from an uncalibrated instrument, and "looks good" decided only by the user watching. The reference implementation is a private project at the source; the skill stands without it. |
+| `clean-room-rebuild` | **New 2026-10-10.** Rebuilding an external source (repo, article, dataset, prompt set) as our own version by concept, not copy: reading and writing kept apart, an expression-free spec card, every unit tagged source concept / our interpretation / added info / deviation. Ships the surface-overlap gate `scripts/overlap_check.py` with its two-sided controls (`controls.py`, 38 controls). Promises no source expression, a process on record and visible additions — not a legal clean room. |
 | `code-review-deep-checklist` | Deep/holistic code review: single review, project health, dependency fitness. |
 | `comsol-agent-pipeline` | **New 2026-10-02.** Driving COMSOL 6.2 headless from Python (MPh): pick a mode card by observable → build or load a seed → solve → read back → rule PASS/FAIL/UNDET against an analytic gate with its control. Every number carries a source tag; 106 measured API pitfalls in `references/api-rules.md` (a generated snapshot — the rig and its generator stay at the source); 16 mode cards and script skeletons. |
 | `config-self-audit` | Auditing one config artifact — a skill, hook, or rule — cheaply. |
@@ -89,7 +90,7 @@ self-contained, with detail in its own `references/` loaded on demand.
 ## `hooks/` — the mechanical enforcement layer
 
 Collected 2026-08-14, extended on 2026-08-16, 2026-08-29, 2026-09-07,
-2026-09-12 and 2026-10-02. **Thirty-three mounted hooks** across PreToolUse /
+2026-09-12, 2026-10-02 and 2026-10-10. **Thirty-five mounted hooks** across PreToolUse /
 PostToolUse / UserPromptSubmit / SessionStart / Stop / PreCompact /
 PostCompact / InstructionsLoaded — the enforcement
 layer the ops rules had been citing without ever shipping it; all fail-open,
@@ -146,9 +147,11 @@ nobody wired up.
 | `unattended_run.py` | **New 2026-09-07, collected 2026-10-02.** One file, three mounts (`scope` on Write/Edit, `kickoff` on UserPromptSubmit, `stop` on Stop): the carrier of the `[unattended-run]` mode. Armed only when a prompt carries the tag; then the scope guard denies writes outside the run's declared list and the Stop guard blocks until the report `instruments/process-ledger/report.py` generates exists. The mounts pass a subcommand after the script — the shape that gate check S5 learned to read this round. |
 | `secret_file_guard.py` | **New 2026-09-07, collected 2026-10-02.** Denies reads of credential-shaped filenames (`.env`, `*.pem`, `*.key`, `credentials.json`, `id_rsa`, …) on Read/Grep/Bash/PowerShell after stripping commit-message bodies and metadata-only git subcommands; templates (`.env.example`) pass; escape hatch `[user-approved-secret-read]`. Its two-sided suite ships as `instruments/secret-guard-test/`. The earlier "one operator's own file list" reading was wrong: the pattern is generic. |
 | `project_registry_gist.py` | **New 2026-09-07, collected 2026-10-02.** SessionStart: compresses `references/PROJECTS.md` into one injected card, anchored on the declared columns — says so when they drift rather than injecting garbage; silent when the registry is absent (this repo ships the registry as a template). |
+| `offline_approval_notice.py` | **New 2026-10-10.** UserPromptSubmit: when a prompt says the user will be away or cannot approve dialogs, it prints the `permissions.ask` patterns read live from the settings files, with the route (build outside them, put ask-path content on a card as drafts, or use the `[unattended-run]` tag) — because an ask-path write waits for a human even in bypass mode (one recorded wait: 2.9 h). A notice, never a block; suite `tests/test_offline_approval_notice.py` reads the installed `settings.json`. |
+| `stash_worktree_notice.py` | **New 2026-10-10.** PreToolUse: `refs/stash` is one ref shared by the canonical tree and every linked worktree, so a stash pushed in one can be popped by a peer in another with exit 0. Notices a stash-writing `git stash` in a repository that has linked worktrees; a notice, not a deny, until a first loss incident. Needs only git; suite `tests/test_stash_worktree_notice.py` (17 cases). |
 
-Eighteen of the source's sixty-five hook-layer files are deliberately **not** here
-(eleven hooks and seven of their tests),
+Twenty-two of the source's seventy-three hook-layer files are deliberately **not** here
+(fourteen hooks and eight of their tests),
 and `tools/share-manifest.toml` carries a disposition for every one. Two gate an
 external-dispatch entry point this repo does not ship, and `codex_dispatch_guard.py`
 gates a second dispatcher the same way; `session_board_register.py` is one half of
@@ -160,7 +163,10 @@ tests) serve a cross-index pipeline this share does not carry;
 query the recall store that stays out with it; `user_profile_gist.py` (with its
 test) injects one person's profile, and `registry_row_guard.py` imports it, so a
 copy here could never run; `deliverable_birth_notice.py` registers deliverables
-into the same private index. **Reversed 2026-10-02:** five hooks excluded on
+into the same private index. **New 2026-10-10:** `candidate_shelf_notice.py` (with its
+test) reads a private asset library's index and CLI; `session_pid_registry.py` and
+`session_reaper_launch.py` feed and launch a one-machine process reaper that does not
+ship. **Reversed 2026-10-02:** five hooks excluded on
 2026-09-07 and 2026-09-12 because their only private dependency was a tool under
 `tools/` — `intake_guard.py`, `intake_match_shadow.py`, `unattended_run.py`,
 `secret_file_guard.py`, `project_registry_gist.py` — ship now that those tools
@@ -227,28 +233,34 @@ rather than three skills separately.
 
 ## `instruments/` — verification tools the shipped rules name as their enforcement
 
-New 2026-09-12, widened 2026-10-02. It began as the two tools shipped rule
+New 2026-09-12, widened 2026-10-02 and 2026-10-10. It began as the two tools shipped rule
 files literally invoke: `claude-ops/ops/environment.md` names `page-fill-gate`
 as the "Enforcement:" of its display rule, and
 `claude-ops/ops/references/integrity-sweep.md` check 7b imports
 `check_cap_binding`. The owner's 2026-10-02 ruling opened the source's `tools/`
-tree to method tools and hook test suites, so the folder now holds forty-three
-directories (150 files besides its README) in four groups, each a table in
+tree to method tools and hook test suites, so the folder now holds forty-seven
+directories (169 files besides its README) in four groups, each a table in
 `instruments/README.md`: **A** the original two; **B** every hook's hand-run
 test suite (`branch-guard-test`, `dangerous-command-test`, `model-cap-test`,
 `ps-errorpref-test`, `ps-pipeline-close-test`, `shell-transport-test`,
 `ui-verify-test`, `e2-gate-test`, `ops-health-test`, `secret-guard-test`, the
-two `*-backtest` corpora); **C** rule, record-format and proof-of-life
+two `*-backtest` corpora, which since 2026-10-10 import the shared corpus-walk
+harness `hook-backtest`); **C** rule, record-format and proof-of-life
 instruments (`hook-deny-lint`, `entry-schema-lint`, `class-closure`,
 `hook-proof-of-life`, `telemetry-framing`, `context-budget`); **D** the method
 tools the rules name as their procedure or gate (`process-ledger`,
 `closeout-intake`, `feedback-pool`, `tree-noise`, `cc-delta`, `routing-loop`,
-`eol-sync` + `git-hooks`, `quote-evidence`, `audience-fit-gate`,
+`eol-sync` + `git-hooks` (with a pre-commit budget and escape check since
+2026-10-10), `quote-evidence`, `audience-fit-gate`,
 `compact-loss-audit`, `rule-usage-census`, `shell-audit`, `tracking-refs`,
 `status-line`, `ui-shot`, the three PPTX gates `pptx-edit-headroom` /
 `pptx-line-start` / `pptx-presentation-gate`, `pptx-review`,
 `skill-routing-audit.py` with its test, `glob-fitness.py`, the one shipped
-file of `cross-index`) and two monitoring tools as **templates** — `system-hmi`
+file of `cross-index`, and — new 2026-10-10 — `mod-review` (the review gate
+`hooks/ops_health_nudge.py` names for a mod change), `platform-search` (the
+external-discussion search `CLAUDE.md` routes to; its dispatcher leg degrades
+to unavailable here) and `token-key-gate` (cited by
+`rules/deliverable-doc-refs.md`; needs Playwright, exits 2 without it)) and two monitoring tools as **templates** — `system-hmi`
 and `view-launcher`, whose registries carry a schema and one worked row.
 The sub-paths match the source's, so an adopter copies `instruments/<x>/` to
 `~/.claude/tools/<x>/` and every citation resolves unedited; `[source_map]`
@@ -271,8 +283,11 @@ here and what each needs.
 New 2026-10-08. Measures which rows of `claude-ops/ops/20-dispatch.md` §4 a cheap
 tier can carry: twelve tasks, each with a MACHINE gate (no LLM judge), run through
 `claude -p` per (task, model, effort, repetition). Rounds 1–2 ran in a cloud
-container; round 3 on the owner's workstation (the canonical copy of the tool lives
-there; this folder is its share copy).
+container; rounds 3–5 on the owner's workstation (the canonical copy of the tool lives
+there; this folder is its share copy, not a collected root — `[source_map]` maps
+`tools/model-bench/` here so source citations resolve). Round 5 (2026-10-10)
+re-measured three tasks after the source fixed a fixture that wrote the answer
+file into the model's workdir.
 
 | File | What it is |
 |---|---|
@@ -282,17 +297,35 @@ there; this folder is its share copy).
 | `judge_agent.py` | Gates one Agent-tool run from its subagent transcript (`MB_SESSION_DIR`) by summing usage and calling `bench.py judge`. |
 | `pricing.json` | List prices used for the cross-check cost column, incl. Haiku's long-prompt tier. |
 | `tasks/` | One module per task: seeded fixture generator + gate. |
-| `results/` | Per-round run records (`*.jsonl`), machine summaries, reports, and the 2026-10-08 dispatch proposal. |
+| `results/` | Per-round run records (`*.jsonl`, rounds 2–5), machine summaries, reports, the 2026-10-08 dispatch proposal, and the one-off Agent-path judge scripts of rounds 4–5 (they read `MB_SESSION_DIR`). |
 | `post/` | General-audience explainer post (中文, 10 image cards + editable `EX1.pptx` + `caption.txt`): Haiku 5.5 effort levels vs Sonnet 5.5 on one ruler, what to hand Haiku, when to switch, safety, a dispatch checklist. Replaced the round-2 HTML report on 2026-10-08. |
+
+## `mods/` — Claude Code mods (in-process plugins)
+
+New 2026-10-10. Two TypeScript mods that Claude Code 2.1.287+ loads in-process,
+collected as code. The reason to have them beside the Python hooks: an in-process
+hook is awaited by the engine, so a timeout cannot turn into a pass. Both come with
+tests that run under `claude plugin test`. A third source mod, `pending-items`, does
+not ship (it reads one operator's session digests); nor do `feedback-observer`'s
+calibration fixtures, which are excerpts of real sessions — `make_fixture.py` ships
+so an adopter can build their own.
+
+| File | What it is |
+|---|---|
+| `README.md` | Folder note (中文): what is here, install via `CLAUDE_CODE_PLUGIN_DIRS`, and what stays out. |
+| `model-cap-mod/` | The subagent model cost cap as a mod: `agent.spawn` denies an explicit top-tier dispatch, `turn.step` judges the model the engine actually resolved and refuses before a request is sent. Mirrors `hooks/model_cap_guard.py`; its README has the split of duties. `tests/policy.test.ts`, 11 cases. |
+| `feedback-observer/` | An observe-only side check that reads the recent transcript window with a mid-tier model and records suspected subsystem defects for the feedback pool, in shadow (not counted). `hooks/` holds the gate, window, parser and recorder, `prompt.md` the system prompt, `judge.py` the user's per-finding verdict, `tests/` 24 cases. |
 
 ## `agents/` — subagent definitions
 
-Collected 2026-08-14, byte-verbatim. The nine agent types `claude-ops/ops/20-dispatch.md`
+Collected 2026-08-14, byte-verbatim. The ten agent types `claude-ops/ops/20-dispatch.md`
 routes to: `backend-architect`, `frontend-developer`, `software-architect`,
 `code-reviewer`, `security-engineer`, `testing-qa-engineer`, `api-tester`,
 `testing-bug-fixer`, and — **new 2026-09-07** — `work-card-executor`, which
 executes ONE build-ready work card to its machine-checkable acceptance and stops
-at any interpretation fork the card does not settle. Each carries a `tools:`
+at any interpretation fork the card does not settle; and — **new 2026-10-10** —
+`cheap-worker`, a cheap-tier mechanical worker for tasks with a hard
+machine-checkable gate that deliberately carries no user instruction layer. Each carries a `tools:`
 capability allowlist (so "read-only"
 is a fact, not a request), always includes `Skill`, and defines its output format
 with evidence and attribution grading. Lineage and licence reasoning: `agents/README.md`.
@@ -352,7 +385,7 @@ exit 0 is the release condition.
 | `COLLECTION-RULES.md` | The decision procedure the gate enforces: what may be collected from the source environment, in which of five verdicts, and the mandatory copy → diff → declare → verify steps. Read it before adding or refreshing anything collected. |
 | `sharelib.py` | The leak patterns, defined once. Imported by both `share_gate.py` and `interop-layer/interop.py`, so the two gates cannot drift apart — a claim that was false from 2026-08-11 to 2026-08-16 and is recorded as such in the manifest. Now also catches absolute paths on a non-system drive, the class that let nine private pointers through a single refresh. **2026-10-03:** a known-personal-names class read at run time from a private list kept beside the repo (never in it); findings name the entry number, never the name, and the CLEAN line says whether the list was loaded. |
 | `share-manifest.toml` | The only way past a finding: `[[allow]]` leak exceptions, `[[not_shipped]]` dependency dispositions + fallbacks, the `[placeholders]` position vocabulary, and the source-environment → repo path map. |
-| `test_share_gate.py` | Twenty cases (case 18, 2026-10-03, in two halves: a listed name fires, and the same short name used as an English word stays quiet; eighteen before it, sixteen until 2026-10-02, when case 17 arrived in two halves: a mount that passes an argument after the hook script is still that hook's mount, and the same shape on a file that does not ship is still named correctly — check S5 had read the command's last token as the hook name), every one a real incident: the `<URL>` over-scrub, an undeclared hook, planted personal data, an unrecorded edit, a second-drive private path, an unmounted hook, a dead permission, a declared edit reverted by a refresh, a hooks/tests matrix that is not a hook, an expired unmounted-hook declaration, an inventory table behind the tree, and — new 2026-09-12 — the two private-id shapes the leak scan could not see: this machine's account name outside a home path (SKIP, not PASS, where the account name is stock or short) and a session-id UUID. **Five of the twenty assert the gate stays quiet** — a gate calibrated only on what it should catch scores 100% by rejecting everything. (This row said "ten" until 2026-09-12; the suite had grown to fourteen on 2026-09-07.) |
+| `test_share_gate.py` | Twenty-seven cases (2026-10-10: six for the three pointer shapes check R learned to read — an `.html` path, a glob, the script argument of a `python` command — each with a positive and a negative half, and one asserting a full run leaves the fixtures it touches byte-identical in `git status`; before that, twenty: case 18, 2026-10-03, in two halves: a listed name fires, and the same short name used as an English word stays quiet; eighteen before it, sixteen until 2026-10-02, when case 17 arrived in two halves: a mount that passes an argument after the hook script is still that hook's mount, and the same shape on a file that does not ship is still named correctly — check S5 had read the command's last token as the hook name), every one a real incident: the `<URL>` over-scrub, an undeclared hook, planted personal data, an unrecorded edit, a second-drive private path, an unmounted hook, a dead permission, a declared edit reverted by a refresh, a hooks/tests matrix that is not a hook, an expired unmounted-hook declaration, an inventory table behind the tree, and — new 2026-09-12 — the two private-id shapes the leak scan could not see: this machine's account name outside a home path (SKIP, not PASS, where the account name is stock or short) and a session-id UUID. **Five of the twenty assert the gate stays quiet** — a gate calibrated only on what it should catch scores 100% by rejecting everything. (This row said "ten" until 2026-09-12; the suite had grown to fourteen on 2026-09-07.) |
 | `triage.py` | **New 2026-09-12.** Sorts a source delta (`source_aligned`..HEAD, plus uncommitted state) into the procedure each path needs — `refresh`, `candidate`, `recheck`, `never`, `uncommitted`, `source-gone`, `deleted` — using only what the manifest already declares. A sort, not a verdict: it never decides whether anything ships. A `[[collected]]` entry beats a `[[not_shipped]]` directory, which is how the archdiag files under the excluded `tools/` tree stay on procedure B. |
 | `test_triage.py` | **New 2026-09-12.** Seventeen cases: one per bucket and per precedence edge (collected-beats-directory, segment boundary, `archive` as a directory not a filename, a rename whose old path an entry still names), plus a positive control that removes a branch and must be noticed. |
 | `SYNC-RUNBOOK.md` | **New 2026-09-12.** The orchestration around `COLLECTION-RULES.md` for a multi-worker round: Step 0 and triage, splitting lanes by coupling, one brief template for every lane (Appendix A), the manifest-editing protocol that makes lanes merge mechanically, the merge-time cross-lane race check, and close-out. |

@@ -179,3 +179,13 @@ Agent 列多一個 `gold_seen` 欄）；執行 log `round4-local-full.log`、`ro
 兩件要記住的事：(1) t02、t04、t11 的 `setup()` 會把標準答案 `.gold.json` 寫進受測模型的工作目錄，Agent 路徑 t04 唯一一次通過就是讀到它的那一次——
 這三題在各輪的通過率都要加上這個但書（儀器缺陷；來源已在 e640c76a 修正，標準答案改放受測工作目錄之外，第一到四輪的紀錄都早於這次修正）；(2) Agent tool 自 2.1.292 起可以每次呼叫指定 `effort`，
 第三輪「Agent 路徑沒有 effort 旋鈕」不再成立，但 high 在 Agent 路徑沒有修好 t04 的排序失誤。報告裡指向的交接單與遙測檔屬於來源環境，不隨本資料夾出貨。
+
+## 13. 第五輪（2026-10-10）｜Round 5: t02 / t04 / t11 without the gold leak
+
+修正標準答案外洩（e640c76a）後只重跑這三題。完整：`results/round5-report.md`；機器摘要
+`results/round5-local-summary.md`、`results/round5-agent-summary.md`；逐列 `results/round5-local-runs.jsonl`（27 列）、
+`results/round5-agent-runs.jsonl`（6 列）；判分腳本 `results/round5-agent-judge.py`（同第四輪，從 `MB_SESSION_DIR` 讀 transcript 資料夾）。
+
+結論（都是 n=3，目前看來）：`claude -p` 路徑修正前後差距在雜訊範圍內，外洩沒有明顯灌水；Agent 路徑 t04 兩種 effort 都升到 2/3，
+六次都沒讀到答案，失誤仍只有「排序錯」一種，high 依然沒修好；t11 長上下文計數仍是 haiku 的弱點（haiku@high 0/3）；t02 不受影響。
+`ops/20-dispatch.md` §4 表格數字是否回寫，仍待擁有者裁決。

@@ -137,7 +137,10 @@ a cc-upgrade-delta report): Agent gained a per-call
 being over the "sonnet + high" ceiling. `effort` in EFFORT_OVER_CAP denies on
 Agent (tool_input.effort) and on an inline Workflow script literal, with the same
 approval marker. Frontmatter `effort:` in agents/*.md is user-authored and not
-checked here. Cases M-E1..M-E3 (deny), M-E4..M-E6 (pass).
+checked here. Cases M-E1..M-E3 (deny), M-E4..M-E6 (pass). An effort inherited
+from the parent session (no per-call value) is not visible here; mods/model-cap-mod
+0.1.2 records it as a notice on turn.step (ruling R2, a dated handoff under the
+source's reports/ tree, not shipped).
 
 Fail-open on malformed INPUT by design: any parse error exits 0 so a guard bug
 in reading the payload never blocks work. A crash, a missing interpreter or a
