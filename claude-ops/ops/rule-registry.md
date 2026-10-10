@@ -1117,8 +1117,11 @@
   (cases M-E1..M-E6, positive control: the pre-fix hook passed M-E1/M-E3 with no
   decision); `settings.json` sets `onFailure: "block"` on this hook (2.1.295), so
   the timeout-is-a-pass escape of 2026-10-02 is closed at the engine too (M-T2).
-  The mod (`policy.ts`) does not judge effort yet — second drift point.
-  Haiku 5.5 became the `haiku` alias in 2.1.293: the review-when below fired.
+  The mod (0.1.2, `9de0eab4`) judges the RESOLVED effort on turn.step as a NOTICE only
+  (agent.spawn carries no effort; per-call vs inherited is indistinguishable) — ruling R2 of
+  a dated handoff under the source's `reports/` tree (not shipped). The review-when below fired on the CLI
+  version change (2.1.294 -> 2.1.295; rounds 1-3 already ran Haiku 5.5): round 4 ran 2026-10-10,
+  tools/model-bench/results/round4-report.md; its t02/t04/t11 numbers carry the gold-leak caveat.
 - review-when (added 2026-10-08): a new model generation; a CLI version change
   (`tools/cc-delta`); dispatch prefix grows beyond the last
   `harness-measurements.md` figure by more than a fifth; the process ledger
