@@ -200,10 +200,62 @@ surface values against a snapshot of themselves.
   `architecture-diagramming/capability-set.html`, was rebuilt in the same
   commit as the original fix; its sha256 still starts `b86bc0ae382f` — this
   round (2026-09-12) re-ran the build against the unchanged library and
-  reproduced the identical bytes.
+  reproduced the identical bytes. Share-copy note 2026-10-10: the library
+  has since gained the `data-page-class` line (log below), so a rebuild of that
+  page against it differs by exactly that one `<html>` line and the receipt
+  prefix above is the pre-change one; re-freeze the shipped page when you
+  re-collect.
 - **Generalised**: a file whose header says "derived from X" is making a claim,
   and the only thing that tests it is a control that changes X. This one was
   half-true for two days inside the file that exists to enforce M5.
+
+## Log — 2026-10-10: `<html>` declares its page class; receipts re-issued
+
+- **Changed**: `pageHtml` emits `data-page-class="${esc(doc.pageClass || 'diagram')}"`
+  on `<html>`. The global width rule (`rules/deliverable-doc-refs.md`) requires
+  every human-facing page to declare its class; without it `page-fill-gate`
+  only inferred one. Found as gap G7 while building `mvlab-sync-audit-f1.html`
+  (gated then with `--class diagram` as a workaround). `doc.pageClass` is the
+  override and, unlike the other `doc` strings, is escaped (it lands in an
+  attribute).
+- **Controls**: default → `diagram`; `pageClass: 'showcase'` → `showcase`; a
+  value carrying `"` → `&quot;` (attribute stays closed).
+- **M1**: baseline on HEAD e6f4df7 before the edit was a byte no-op. After it,
+  8 of 11 builds changed by exactly one line each, `<html lang="zh-Hant">` →
+  `<html lang="zh-Hant" data-page-class="diagram">` (+26 bytes); nothing drawn
+  changed. Unchanged: the two owner-view builds (they already write their own
+  `<html data-page-class="diagram" …>`) and `archdiag-capability-set-v1` (not
+  on the library). In-page §4: 8/8 PASS, 0 diagnostics. `fill_gate.py`
+  without `--class`: 24/24 rows PASS, class read from the page, controls fired.
+  `tokens.mjs --check`: 0 fail (the `edge absent` 3:1 WARN predates this).
+  M6 not triggered (no layout change). Receipts re-issued (bump requested by
+  the user in the task that ordered this edit):
+
+| artifact | bytes before → after |
+|---|---|
+| ccfg-retrieval-audit-f1 | 46816 → 46842 |
+| claude-home-audit-f1 | 122099 → 122125 |
+| dit-audit-f1 | 71505 → 71531 |
+| mfp-audit-f3 | 106396 → 106422 |
+| mfp-audit-f4 | 44533 → 44559 |
+| mfp-audit-f5 | 72658 → 72684 |
+| mvlab-sync-audit-f1 | 38477 → 38503 |
+| prism-audit-f2 | 81755 → 81781 |
+
+The before/after sha256 pair for each row was recorded at the source, against
+the commit named above. As with the 2026-09-05 table, it is not reproduced
+here: these pages live in the source environment's own output tree and do not
+ship with this copy, so the receipts would be sixteen hashes a reader has
+nothing to check them against. The portable half is the rule above them: an
+emitted-attribute change re-issues receipts, and the growth column (26 bytes
+per artifact here) shows the change was one line and not a drawing.
+
+- **capability-set**: `archdiag-capability-set-v1` writes its own page instead
+  of calling `pageHtml`, so the library fix did not reach it; its build script
+  got the same attribute by hand (user ruling, same day). Rebuilt diff = the
+  one `<html>` line; in-page §4 PASS 0 diagnostics; `fill_gate.py` 3/3 PASS as
+  `diagram`. Receipt re-issued (32868 → 32894 bytes; the sha256 pair is not reproduced, as above). Now all 11 built pages declare a class. The dated measurement records in the source
+  environment (an outputs/ tree not shipped in this copy) keep their historical receipts.
 
 ## Review-when
 

@@ -235,3 +235,7 @@ guardrail — three of the five above stay unmeasurable and stay yours.
   Load in Mode B.
 - `references/de-ai-flavor.md` — sepia-derived (MIT, attributed) slop
   checks + borrow ledger. Load on AI-flavor symptoms, any mode.
+- A design-axes principles note under the source's `references/` tree (not
+  shipped in this repo), §1 — the cross-medium audience rules (one named
+  audience, only what it needs).
+  Step 1's audience table is this skill's domain form of them.

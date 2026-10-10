@@ -97,6 +97,6 @@ transcript-cleanup stamp, unrelated to this skill).
 | config-self-audit | That skill audits content of ONE named artifact; this skill audits existence/staleness of MANY files and never reads deeply. A finding like "this hook file is unsafe" → route there. |
 | ops/40-maintenance.md §3 trim | Oversized rule files are reported as route-outs, never trimmed here. |
 | ops/40-maintenance.md §4 ghost checks | Mode A's orphan detection (see manifest §4) is the file-existence half of §4; content-level "rule exists but is never used" stays with §4 at retrospectives. |
-| Claude Code built-in transcript cleanup | `projects/` is protected; this skill never duplicates the CLI's transcript pruning. |
+| Claude Code built-in transcript cleanup | `projects/` is protected; this skill never duplicates the CLI's transcript pruning. ONE carve-out (2026-10-08): a `projects/<slug>/` directory that holds no transcript at all — only an empty `memory/` — is auto-memory residue of a headless `claude -p` run (a scratch cwd becomes a project slug), not a session record; Mode A lists these as `CANDIDATE (empty-memory residue)` and archives them on consent. |
 | workflow-checkpoint / project-retrospective | Those archive knowledge (phase logs, lessons); this skill archives files. A finished project wanting lessons → retrospective, not cleanup. |
 | code-review-deep-checklist (incl. debt backlog) | Never judge code quality here; "ugly but referenced" = KEEP. |

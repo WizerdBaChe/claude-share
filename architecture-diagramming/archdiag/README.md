@@ -83,7 +83,8 @@ import { table } from '../../tools/archdiag/tables.mjs';
 build({
   outPath,            // absolute output path
   grid: 8,            // grid unit (asserts + in-page GRIDU)
-  doc: { lang, title, h1, legendbar, footerNote },  // trusted raw text/HTML
+  doc: { lang, title, h1, legendbar, footerNote, pageClass },  // trusted raw text/HTML;
+  // pageClass → <html data-page-class>, default 'diagram' (rules/deliverable-doc-refs.md)
   views,              // the structural model (IS the diagram; SVG is a projection)
   sections: [{ h2, html }],  // tables between the panes and the geo report
   selfcheckNotes: { precond2, check8 },  // OPTIONAL provenance comments —

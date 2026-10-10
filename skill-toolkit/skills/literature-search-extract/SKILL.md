@@ -112,8 +112,8 @@ chasing: `references/search-sources.md` — read it before any `standard`/`exhau
 **Host access policy before any fetch.** `connectors/access_policy.py --url <u> --check`
 says which surface may touch which host (`~/.claude/hooks/literature-host-policy.json`); a
 refused or challenged host is handed to the user as a named DOI/URL + query pack, never
-retried through another User-Agent, browser or profile. Text that will be cited is retrieved
-with `verify/fetchsrc.py`, which records route, status and sha256 per source.
+retried through another User-Agent, browser or profile. Cited text comes ONLY through `verify/fetchsrc.py`
+(manifest + per-host/run caps; `--run` may sit in the caller's folder; PDFs stay in memory).
 Core principles:
 - Build queries from a **vocabulary ledger**: core terms + synonyms + the three keyword
   layers a database exposes (author / controlled / index terms, harvested from the seeds);

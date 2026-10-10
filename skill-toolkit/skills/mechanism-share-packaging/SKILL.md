@@ -34,6 +34,10 @@ checklist held, with one refinement to the counts item.
 
 ## Delivery routes — this skill currently knows ONE, and there is a second
 
+(Not a route of this skill: a private hand-off where the bundle IS the publication —
+an explanation plus originals sent by chat to one reader, no repo law to delegate
+to. That is a different, hand-delivered job outside this skill; do not force a repo procedure onto it.)
+
 This skill's whole procedure targets a **share repo**: files land in a governed
 tree, the recipient reads `ADOPTERS.md` and copies what they want out. That route
 ships FILES. It does not ship **triggers** — the repo's own `ADOPTERS.md` states

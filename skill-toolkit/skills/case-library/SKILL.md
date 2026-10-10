@@ -58,11 +58,31 @@ and adapt its tools rather than re-deriving them.
   material / material source (added 2026-10-01: who supplied the material and how it must
   be used - none / model-made / model-sourced / supplied-free / -required / -transform;
   the one axis labelled from the author's statement, not the frames, so `unknown` is its
-  honest default) / audio / camera (camera added 2026-09-30) / hype register / presentation
+  honest default) / research ask (added 2026-10-05, user: "a different thing from supplied
+  material": what the prompt sends the model OUT to look up to make decisions - content /
+  method / reference search - never in the frame; same author-statement basis, `unknown`
+  default; untestable in offline isolated arms) / audio / camera (camera added 2026-09-30) / hype register / presentation
   (paged vs continuous-stage, added 2026-10-01 from an imitation pair the user told
-  apart by form, not content); a layout library would use grid,
+  apart by form, not content) / mv form (added 2026-10-04: a sub-axis meaningful for one
+  purpose only, `none` elsewhere; values borrowed from the domain's own folk taxonomy
+  - MAD form classes - and opened only for forms a case already has) / mv story (added
+  2026-10-04 with five real MADs: lyric-image / story / reinterpretation; a folk taxonomy
+  that mixes several axes - MAD's tone, narrative and editing classes - is split across
+  axes, never copied as one list); a layout library would use grid,
   hierarchy device, type system. Add values when a case needs them; never widen an
   axis to "other".
+- **Words in records follow the tags: one naming table** (user 2026-10-04, motion-video-lab
+  MAD vs MV: "naming is the first, often only, classification clue"). Every domain term a
+  record, card, report or skill write-back uses (a folk term such as MAD, an umbrella such as
+  music PV) is bound to a tag combination in ONE table in the taxonomy doc, with the cases it
+  covers and what it must not name. A borrowed folk term never becomes the umbrella; a
+  finding names the class it was measured on, and applying it to a neighbour class is
+  written as a transfer; one glyph form per term (CJK variants split search); an
+  abbreviation that collides with a domain term is spelled out; a folk term follows the community's own
+  wording (video: 静止画MAD / 動画MAD from Niconico titles, user 2026-10-05), never a coined
+  label that collides with another folk class (系 = tone/narrative classes there). Classify by the
+  record's levels, but SEARCH with the community's mixed forms and glyph variants (or the bare
+  root): titles mix levels and suffixes, so a single canonical term under-retrieves.
 - **A case one value cannot hold gets parts + a named combination, not a "mixed"
   value** (user 2026-10-02, video `presentation`). A sequential mix carries optional
   per-section `parts` (t0/t1/value/what) and the case tag must be the majority by
@@ -88,6 +108,12 @@ and adapt its tools rather than re-deriving them.
   case or round is checked against every criterion the same way (`--open`). A validator
   with selftest checks refs to cases/rounds and `mentions` paths; the human view is
   generated. A parked question lives there, never only in case notes or the plan.
+- **An instrument that fails is labelled, not patched forever** (motion-video-lab 2026-10-04,
+  lyric timing). A tool that fails its selftest after one fix is `PROVISIONAL` (numbers to case
+  notes only); one that passes but scores modestly on its real control is `PARTIAL`
+  (candidates only). The next step is a different representation (speech recognition on
+  singing → on-screen text), and where no instrument can tell the classes apart, a model
+  frame read labelled "model, not human" serves as the control, never as ground truth.
 - **Specialise by technique first** (one instrument + one technique card per
   technique), unless the user names a target format.
 - **Technique card** (`techniques/Tnn-<name>.md`, human-read, Traditional Chinese):
@@ -98,6 +124,11 @@ and adapt its tools rather than re-deriving them.
   Synthetic inputs first (e.g. a beat track with known beat times), real inputs later.
   Interleave arms (A2, B2, A3, B3). Launch long runs as a detached process and stream
   the child's stdout to a file, so a killed runner leaves a salvageable transcript.
+- **Instrument difference is not a perceived difference** (motion-video-lab r20): a disjoint
+  instrument count can sit under films the user calls identical; a card "works" only on the
+  viewing. **Every outcome off the round's designed target is traced to a cause** (user rule
+  2026-10-04) and filed as prompt confound / instrument blind spot / partial failure in the
+  REPORT; an untraced one is not a finding.
 - **Reading an imitation round** (motion-video-lab r10–r12): log the prediction in the
   process ledger before any result; a reader's judgement is made on randomly coded
   sheets and committed before the key is opened; in a multi-arm contest keep ONE free
@@ -105,17 +136,19 @@ and adapt its tools rather than re-deriving them.
   one winner, then ask what each pick is liked FOR (a device, not the words, is often
   the answer). An input the lab fabricates (a mock site, a dataset) carries only the
   content the target audience should see, or it becomes a confound.
-- **Whole-film decisions precede devices** for any promo/product imitation: audience,
-  tone, locked background first (a transition is never a ground change); show only what
-  that audience needs (how the film or its data was made is noise); every device carries
-  its own tone and is dropped when it clashes, never the tone; a stock device (particle
-  burst, tunnel, floating cards, glitch) needs a written motion intent tying it to the
-  content (claim, adopted 2026-10-01). The library's pairing doc (`docs/axes-and-pairing.md` in
-  the reference) is where these live and where a device's tone is proposed by the model
-  during later rounds.
+- **Whole-film decisions precede devices** for any promo/product imitation. The rules
+  are NOT restated here: they are born in the library's pairing doc
+  (`docs/axes-and-pairing.md` in the reference; lab first), written back to
+  the whole-film-rules reference of the source's motion-video skill (operating copy; that
+  skill is not shipped in this repo), and their cross-medium forms are in a design-axes
+  note set under the source's `references/` tree (also not shipped). The pairing doc is
+  also where a device's tone is proposed by the model during later rounds.
 - **Round folder** `experiments/<round>/`: config, per-arm outputs and measures,
   generated compare/variance tables, `REPORT.md` (Chinese; setup, numbers, reading,
-  frame-level defects for the user to judge, run anomalies).
+  frame-level defects for the user to judge, run anomalies). Per-arm outputs are the
+  WHOLE top level of the arm's `build/` (a page split into several scripts is useless
+  without them; reference: r19), and a time-driven page gets a human preview player
+  beside it (reference: `tools/preview.py`) — a page frozen at t=0 is not viewable.
 - **New session per case or per round.** The repo's `CLAUDE.md` + `docs/workflow.md` +
   the session digest carry continuity; a long session loses detail at compaction.
 
@@ -158,5 +191,5 @@ contracts). Commit per landed item, staged by path.
 - The reference implementation's tool layout changes: update the paths in §Starting.
 - The reference implementation's axes or its pairing-doc rulings change: update the
   axis list and the §Scaffolding reading/whole-film bullets in the same change.
-  lab-sync: `bb2f60b` — watched by `~/.claude/tools/lab-skill-sync` (pair `case-library`);
+  lab-sync: `813e413` — watched by `~/.claude/tools/lab-skill-sync` (pair `case-library`);
   after writing back, `python -X utf8 tools/lab-skill-sync/sync.py mark case-library`.
