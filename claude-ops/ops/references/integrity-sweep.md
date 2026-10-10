@@ -652,7 +652,7 @@ git ls-files -ic --exclude-standard -x 'projects/'
 #     a mechanical detection. An OMISSION fires no event (40-maintenance §2a
 #     P2), so the absence is enumerated here. Legacy artifacts (first commit on
 #     or before 2026-09-08) WARN with a count that must not rise; born-after FAIL.
-python -X utf8 tools/entry-schema-lint/controls.py | tail -1   # ALL PASS 46/46 — two-sided; read this line BEFORE trusting the next (ES-9 system-hmi registry coverage added 2026-09-29, C-32..C-36)
+python -X utf8 tools/entry-schema-lint/controls.py | tail -1   # ALL PASS 49/49 — two-sided; read this line BEFORE trusting the next (ES-9 system-hmi registry coverage added 2026-09-29, C-32..C-36; ES-5 top-level *.md pointer pass 2026-10-03, C-37..C-39)
 python -X utf8 tools/entry-schema-lint/lint.py                  # exit 0; last line `entry-schema-lint: 0 FAIL / 0 WARN / anchors ok`
 #     Born-RED baseline 2026-09-08 = 0 FAIL / 59 WARN; same day after R2 (user
 #     ruling, STATUS backfilled from first-commit dates) and R3 (model3d ruling
@@ -837,8 +837,10 @@ python tools/class-closure/exercise.py                  # RUN-TIME half (2026-09
 #     pipeline/` never added (4 days), and the committed CLAUDE.md indexing an
 #     untracked `rules/layout-convergence.md` by bare name. Reads PATH refs and
 #     NAME refs (backticked rule name → rules/<n>.md; dict `### <skill>` →
-#     skills/<n>) from CLAUDE.md, settings.json, the dict, skills/ hooks/ rules/
-#     ops/ agents/ commands/, references/*.md and tools/*/README.md.
+#     skills/<n>) from every top-level *.md (2026-10-03: OPERATOR-GUIDE and
+#     PHILOSOPHY joined when their counts became pointers), settings.json,
+#     skills/ hooks/ rules/ ops/ agents/ commands/, references/*.md and
+#     tools/*/README.md.
 python tools/tracking-refs/refs.py                      # exit 1 on any `dangling` row; `--verbose` for the REPORT classes
 python tools/tracking-refs/controls.py | tail -1        # ALL PASS n/n — the instrument itself
 #     Act on: FAIL → commit each named target by path, or fix the pointer if the

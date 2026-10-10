@@ -3,7 +3,10 @@
 Detail file for `20-dispatch.md` §6. Fill the brackets; the five contract parts
 (`20-dispatch.md` §2 — goal+motivation, machine-checkable acceptance +
 output-format contract, report format, redlines, self-sufficient materials) are
-non-negotiable whichever template is used. Loaded on demand.
+non-negotiable whichever template is used. Every "reply"/"output" line below
+also carries the §7 report contract (honesty clause, weakest point, brief
+gaps) — a worker sees only the brief, so a field left out of it is never
+returned. Loaded on demand.
 
 **T1 Search/inventory** (read-only): task / motivation / scope (explicit globs)
 / match criteria + one worked example / output path + format (count →
@@ -55,10 +58,28 @@ the edit removed, published as widely as the file it was removed from.
 
 Rules of thumb: long spec → file first, then dispatch; acceptance is written
 for the worker but the dispatcher still spot-checks (never a substitute); on
-re-dispatch, put the previous failure output in "read first". Which agentType
-carries each shape: `20-dispatch.md` Agent roster routing. Which PATH
+re-dispatch, put the previous failure output in "read first" and close the
+previous report's brief gaps (`20-dispatch.md` §7) in the new brief. Which
+agentType carries each shape: `20-dispatch.md` Agent roster routing. Which PATH
 (subagent vs external tier): `20-dispatch.md` §4a; external-tier prompt shape
 and failure signatures: `ops/references/external-dispatch.md`.
+
+## Fan-out decision procedure — measured instance (20-dispatch.md §2)
+
+When N workers get slices of ONE class of work, contract part 2 is a decision
+procedure, exhaustive down to the "this is not mine" branch. Live instance,
+2026-09-09 (17 control suites across four dispatched sessions,
+a dated class-closure-drain report under the source's `reports/` tree, which
+this repo does not ship): every brief carried the same
+three branches — **S1** the instrument already has a named outcome for the
+input → feed it and assert by name; **S3** the fold IS the instrument's
+declared degradation → assert the declared outcome and name the class in the
+case text; **S2** a silent fold into a substantive class → a real defect: fix
+it if the instrument is `tools/`-owned, REPORT it if it is rule-tier. S2's
+report-don't-fix half is the branch that makes the procedure exhaustive; drop
+it and a worker meeting a redline finding will act on it instead of handing it
+back. Pair this with §7's report contract: a worker that reports a finding must
+be told what a report LOOKS like, or it fixes.
 
 Worked example of the §2 contract (the shape every template must reduce to):
 ✅ "Goal: unify date formats (downstream parser needs ISO-8601 — that's why).

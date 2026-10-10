@@ -124,6 +124,14 @@ zero-means: expected — user ruling 2026-08-15: ALL THREE MODES wait for an
   expectation of an automatic fire, a check that never ran is not a failure, and
   the greppable-marker mechanism L-011 P2 would have built is not needed.
 
+## clean-room-rebuild
+class: conditional
+source: artifact-context
+on-fire: execute      # user ruling 2026-10-09: easily triggered, like config-self-audit
+zero-means: no external source was rebuilt as our own version in the window — count
+  borrow reviews and "參考 X 做我們的" turns before calling it a defect; a rebuild that
+  happened without a clean-room-record.md beside it IS the defect.
+
 ## code-review-deep-checklist
 class: user-manual
 source: utterance

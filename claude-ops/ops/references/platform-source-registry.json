@@ -1,0 +1,261 @@
+{
+  "schema": "platform-source-registry/v1",
+  "what": "Where a question about EXTERNAL existing work goes, per platform: what each platform answers, the verified access route, auth, limits, and the robots/ToS stance. Consumer: the agent choosing a lookup route (ops/30-judgment.md R7 points here). Scholarly sources (papers, preprints, citation graphs) are NOT here: class `scholarly` points to literature-search-extract, which owns them. Executor: tools/platform-search/psearch.py reads this file for each leg's status.",
+  "written": "2026-10-04",
+  "probe_method": "one unauthenticated request per endpoint with a descriptive User-Agent, from this machine, on the date in each row; docs read where reachable. A row without a probe is labelled UNVERIFIED in that field.",
+  "status_values": {
+    "open": "anonymous programmatic access works and robots/ToS do not object; use freely at low volume",
+    "key": "works, but a free key/token or the existing login is the sane route",
+    "gray": "reachable, but robots.txt or ToS objects to automated access; low volume, user-initiated questions only, never a scheduled crawler",
+    "gated": "agent access is blocked by the platform; only the routes listed in the row, several of which need the USER to act",
+    "html-only": "no API; read single pages, never crawl search"
+  },
+  "review_when": [
+    "any row's route returns a status different from its probe field (re-probe the row, update it, note the date)",
+    "Reddit approves or denies the user's Data API request, or publishes a new Public Content / Responsible Builder policy",
+    "a platform is added to or removed from hooks/literature-host-policy.json (keep the two files disjoint)",
+    "180 days after the 'written' date with no re-probe",
+    "literature-search-extract gains or drops a connector that overlaps a row here (keep the two route tables disjoint)"
+  ],
+  "platforms": [
+    {
+      "id": "github",
+      "class": "code",
+      "answers": [
+        "has someone built X (repos)",
+        "is this a known bug / workaround (issues)",
+        "current state of a release or repo"
+      ],
+      "route": "gh search repos|code|issues \"<q>\"; gh api (REST); gh api graphql for Discussions (gh search does not cover Discussions)",
+      "auth": "existing gh login (keyring)",
+      "limit": "UNVERIFIED (search API has its own lower limit than core API)",
+      "probe": "2026-10-04: gh 2.95.0 logged in; `gh search issues --help` confirmed; not run live",
+      "robots_tos": "official API, no concern",
+      "status": "key",
+      "related": "the private project GitHubTrendWatch monitors trending boards daily -- a watcher, not a query route"
+    },
+    {
+      "id": "huggingface",
+      "class": "model-hub",
+      "answers": [
+        "which model/dataset/space exists for task X",
+        "model card facts (license, size, base model)"
+      ],
+      "route": "https://huggingface.co/api/models?search=<q> (also /api/datasets, /api/spaces -- pattern not probed); local `hf` CLI and huggingface_hub 0.36.2 for downloads/metadata",
+      "auth": "none for public data",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: models 200, daily_papers 200, papers/search 200",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "reddit",
+      "class": "community",
+      "answers": [
+        "practitioner experience and workarounds (r/LocalLLaMA, r/StableDiffusion, r/comfyui, r/ClaudeAI, r/Photonics, r/ECE)",
+        "what the English-speaking community recommends right now"
+      ],
+      "route": "DISCOVERY: extdispatch --profile query (agy / Gemini with Google Search grounding) returned real thread URLs with dates (2026-10-04, spot-checked 1/3). SINGLE-THREAD CHECK: https://www.reddit.com/r/<sub>/comments/<id>/.rss returns title/body/comments as Atom -- see robots_tos before using. FULL API: Data API via OAuth app, needs the USER to request access.",
+      "auth": "Data API: OAuth app approved under the Responsible Builder Policy; self-service app creation at /prefs/apps is closed (redirects to the policy page; r/redditdev reports 2026-05..06)",
+      "limit": "Data API: 100 QPM per OAuth client id, 10-min average (third-party summaries citing the Data API Wiki; official wiki not readable from here). RSS anonymous: x-ratelimit-remaining reached 0 after ONE request on 2026-10-04 (reset ~40-60 s) -- budget about one query per minute; psearch.py stops on remaining<1 and on 429",
+      "probe": "2026-10-04: www/old .json -> 403 'blocked by network security'; oauth.reddit.com unauth -> 403; .rss -> 200 Atom; Claude WebFetch and WebSearch(allowed_domains=reddit.com) -> refused for Anthropic's user agent; support.reddithelp.com -> Cloudflare challenge (not bypassed)",
+      "robots_tos": "robots.txt is `User-agent: * / Disallow: /` and points to the Public Content Policy and r/reddit4researchers. Reddit blocks agent access ON PURPOSE (licensing deals); it is reachable to humans and to licensed search partners, not to crawlers. RSS fetching is therefore gray.",
+      "status": "gated",
+      "open_ruling": "whether RSS single-thread reads are allowed at low, user-initiated volume (pending user ruling 2026-10-04)"
+    },
+    {
+      "id": "civitai",
+      "class": "model-hub",
+      "answers": [
+        "which LoRA/checkpoint fits a ComfyUI workflow",
+        "WHERE a local model file came from (hash lookup)",
+        "base model / trigger words of a LoRA"
+      ],
+      "route": "https://civitai.com/api/v1/models?query=<q>&nsfw=false ; provenance: /api/v1/model-versions/by-hash/<sha256>",
+      "auth": "none for public SFW models; key likely for NSFW/authenticated actions (UNVERIFIED)",
+      "limit": "UNVERIFIED (developer docs are a JS app, no text)",
+      "probe": "2026-10-04: models search 200 with nsfw=false; by-hash on local loras/add_detail.safetensors -> 200 'Detail Tweaker LoRA', SD 1.5, modelId 58390",
+      "robots_tos": "robots.txt `Disallow: /api/*` -> gray; always pass nsfw=false",
+      "status": "gray",
+      "scope_note": "relevant ONLY to the operator's local ComfyUI asset side (video-prompt-shelf, motion-video-lab); not a knowledge/discussion source"
+    },
+    {
+      "id": "hackernews",
+      "class": "community",
+      "answers": [
+        "how engineers received a tool/paper/launch",
+        "prior discussions of an idea"
+      ],
+      "route": "https://hn.algolia.com/api/v1/search?query=<q>&tags=story (search_by_date for recency); item/comments via Firebase https://hacker-news.firebaseio.com/v0/",
+      "auth": "none",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: Algolia 200, Firebase 200",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "stackexchange",
+      "class": "community",
+      "answers": [
+        "canonical answers: Stack Overflow, Physics SE (site=physics), Electrical Engineering SE (site=electronics)"
+      ],
+      "route": "https://api.stackexchange.com/2.3/search/advanced?q=<q>&site=<site> (gzip: curl --compressed)",
+      "auth": "none; free app key raises quota",
+      "limit": "300 req/day per IP anonymous (quota_max in response), 10,000/day with key, 30 req/s throttle",
+      "probe": "2026-10-04: 200",
+      "robots_tos": "API terms require attribution (UNVERIFIED)",
+      "status": "open"
+    },
+    {
+      "id": "discourse-forums",
+      "class": "community",
+      "answers": [
+        "framework-specific Q&A: discuss.huggingface.co, discuss.pytorch.org, other Discourse forums"
+      ],
+      "route": "https://<host>/search.json?q=<q>",
+      "auth": "none",
+      "limit": "per-site, UNVERIFIED",
+      "probe": "2026-10-04: discuss.huggingface.co 200, discuss.pytorch.org 200",
+      "robots_tos": "per host, UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "qiita",
+      "class": "community",
+      "answers": [
+        "Japanese practitioner write-ups (often first for niche tools)"
+      ],
+      "route": "https://qiita.com/api/v2/items?query=<q>&per_page=<n>",
+      "auth": "none (token optional)",
+      "limit": "60 req/hour per IP anonymous, 1000/hour with token",
+      "probe": "2026-10-04: 200, Rate-Limit: 60",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "zenn",
+      "class": "community",
+      "answers": [
+        "Japanese dev articles by topic"
+      ],
+      "route": "https://zenn.dev/api/articles?topicname=<topic>&order=latest (unofficial, undocumented)",
+      "auth": "none",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: 200",
+      "robots_tos": "robots disallows /search; API unofficial",
+      "status": "gray"
+    },
+    {
+      "id": "hatena-bookmark",
+      "class": "community",
+      "answers": [
+        "what the Japanese tech community is bookmarking"
+      ],
+      "route": "https://b.hatena.ne.jp/hotentry/it.rss",
+      "auth": "none",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: 200 RDF",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "v2ex",
+      "class": "community",
+      "answers": [
+        "Chinese-language developer discussion"
+      ],
+      "route": "https://www.v2ex.com/api/topics/hot.json (v1); v2 needs a personal token",
+      "auth": "none for v1",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: v1 200, v2 401",
+      "robots_tos": "only account paths disallowed",
+      "status": "open"
+    },
+    {
+      "id": "lobsters",
+      "class": "community",
+      "answers": [
+        "curated systems/programming discussion"
+      ],
+      "route": "https://lobste.rs/hottest.json, /newest.json, /t/<tag>.json (no JSON search: search.json -> 400)",
+      "auth": "none",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: hottest.json 200",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "fediverse",
+      "class": "community",
+      "answers": [
+        "researcher/dev chatter: Bluesky, Mastodon, Lemmy"
+      ],
+      "route": "Bluesky https://api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=<q> (public.api.bsky.app searchPosts -> 403); Mastodon /api/v1/timelines/tag/<tag>; Lemmy /api/v3/search?q=<q>&type_=Posts",
+      "auth": "none observed",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: bsky api 200, mastodon.social tag 200, lemmy.world 200",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "devto",
+      "class": "community",
+      "answers": [
+        "practitioner AI-tooling posts"
+      ],
+      "route": "https://dev.to/api/articles?tag=<tag>",
+      "auth": "none",
+      "limit": "UNVERIFIED",
+      "probe": "2026-10-04: 200",
+      "robots_tos": "UNVERIFIED",
+      "status": "open"
+    },
+    {
+      "id": "eevblog",
+      "class": "community",
+      "answers": [
+        "hands-on electronics / instrumentation experience"
+      ],
+      "route": "single thread pages only; search page https://www.eevblog.com/forum/search2/?search=<q> by a human",
+      "auth": "none",
+      "limit": "robots Crawl-delay: 10",
+      "probe": "2026-10-04: 200 HTML",
+      "robots_tos": "named AI crawlers blocked, * allowed",
+      "status": "html-only"
+    },
+    {
+      "id": "physicsforums",
+      "class": "community",
+      "answers": [
+        "physics Q&A -- prefer Physics SE"
+      ],
+      "route": "single thread pages only",
+      "auth": "none",
+      "limit": "none stated",
+      "probe": "2026-10-04: /search/ -> 303",
+      "robots_tos": "robots disallows /search/",
+      "status": "html-only"
+    },
+    {
+      "id": "agy-grounded",
+      "class": "meta",
+      "answers": [
+        "broadest discovery across platforms (psearch --wide)",
+        "Reddit threads when direct Reddit access is refused (automatic fallback)"
+      ],
+      "route": "tools/extdispatch/extdispatch.py run --profile query (Antigravity / Gemini + Google Search grounding)",
+      "auth": "user's Antigravity subscription login",
+      "limit": "metered per day by extdispatch (daily-count-agy.json); ~1-3 min per call",
+      "probe": "2026-10-04: returned 3 real r/StableDiffusion + r/comfyui thread URLs with dates; 1/3 spot-checked via RSS (title matched)",
+      "robots_tos": "Google indexes Reddit under licence; agy's claim to have read page HTML itself is unverified",
+      "status": "key"
+    }
+  ],
+  "classes": {
+    "code": "repositories, issues, discussions -- leads on existing implementations",
+    "model-hub": "models, datasets, LoRAs/checkpoints -- asset discovery and provenance",
+    "community": "practitioner discussion and Q&A -- leads and lived experience, never citable evidence on its own",
+    "scholarly": "NOT routed here. Owner: skills/literature-search-extract (connectors/registry.json + references/connectors.md + hooks/literature-host-policy.json). arXiv, OpenAlex, Semantic Scholar, OpenReview, Crossref, HF papers live there; a scholarly link found through this registry is a lead handed to that skill.",
+    "meta": "a search-engine-grounded agent that finds pages ACROSS platforms; its URLs are leads that still need opening"
+  }
+}

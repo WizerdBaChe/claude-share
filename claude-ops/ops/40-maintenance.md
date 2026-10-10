@@ -178,7 +178,7 @@ measured on its telemetry, and the ruler follows what the notice is FOR (user
 ruling 2026-09-23): an IDIOM-CHANGING notice (it wants the call written
 differently) — a live fire rate not below the pre-hook backtest baseline after
 30 days means the text changes nothing → promote, per call when call volume
-moved; no baseline yet → backtest first. A READING-CONTEXT notice (the call is
+moved; no baseline yet → backtest first (`tools/hook-backtest/`). A READING-CONTEXT notice (the call is
 legitimate; the text says how to read its result) is never judged by rate —
 its trigger is misfire rows or an incident with the notice in the transcript.
 An OMISSION ask keeps an incident trigger. Worked case:

@@ -85,7 +85,8 @@ becomes "no mechanism used" (`lessons.md` L-011 P2; sweep check 12).
    self-verification loop. The worker self-checks FORMAT compliance only;
    ACCEPTANCE verification belongs to the dispatcher with fresh context
    (`10-command-loop.md` Step 6).
-3. **Report format** — the shape of the conclusion + where artifacts land.
+3. **Report format** (§7's fields included) — the shape of the conclusion +
+   where artifacts land.
    Where artifacts land includes INCREMENTAL on-disk evidence: one numbered
    log per attempt, outputs written as they are produced, probes with their
    own logs — a worker can die mid-task on a transport/auth error (measured
@@ -117,21 +118,11 @@ the same ambiguous shape each invent a different resolution, and the dispatcher
 cannot align them afterwards — the outputs are no longer comparable, and the
 one thing a fan-out was supposed to buy (uniform treatment of a class) is
 exactly what is lost. A task list says WHAT to produce; a decision procedure
-says HOW TO DECIDE, so only the decisions differ per slice, never the method.
-Live instance, 2026-09-09 (17 control suites across four dispatched sessions,
-per a dated class-closure-drain report under the source's `reports/` tree,
-which this repo does not ship): every brief carried the same
-three branches — **S1** the instrument already has a named outcome for the
-input → feed it and assert by name; **S3** the fold IS the instrument's
-declared degradation → assert the declared outcome and name the class in the
-case text; **S2** a silent fold into a substantive class → a real defect: fix
-it if the instrument is `tools/`-owned, REPORT it if it is rule-tier. S2's
-report-don't-fix half is the branch that makes the procedure exhaustive; drop
-it and a worker meeting a redline finding will act on it instead of handing it
-back. Pair this with §7's report contract: a worker that reports a finding must
-be told what a report LOOKS like, or it fixes.
-
-Worked ✅/❌ pair for this contract: `ops/references/dispatch-templates.md`.
+says HOW TO DECIDE, so only the decisions differ per slice, never the method —
+and the "report, don't fix" branch is what makes it exhaustive, paired with §7
+so a worker knows what a report LOOKS like. Measured instance (S1/S2/S3
+branches, 17 suites, 2026-09-09): `ops/references/dispatch-templates.md`
+"Fan-out decision procedure".
 
 ## §3 Gotchas when dispatching to an external CLI agent (verify in your env)
 
@@ -149,22 +140,42 @@ Worked ✅/❌ pair for this contract: `ops/references/dispatch-templates.md`.
 
 ## §4 Model / effort assignment (two axes: model × effort)
 
-Strength has two axes: model tier AND effort/thinking level. The current
-environment's tier→model-id mapping, cost cap, and
+The current environment's tier→model-id mapping, cost cap, and
 enforcement mechanism live in `ops/environment.md`; this table stays in role
 terms. **Cap rule**: everything above "mid tier + high effort" requires
 explicit per-instance user approval (mechanically enforced where the
-environment supports it — see `environment.md`).
+environment supports it — see `environment.md`). **A guard that did not answer
+is not an approval**: a command hook that times out is a PASS to the engine
+(default `onFailure: "continue"`; since 2.1.295 a hook may set
+`onFailure: "block"` to turn timeout/crash/exit≠0,2 into a block — not yet
+set on any local guard, see a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship), so
+a dispatch that went out with no `model` (or an over-cap one) runs on the
+parent's model — stop it (TaskStop) and re-dispatch with `model` set; record
+the escape as a `feedback` row (`hook:model_cap_guard`). Never "left"
+(2026-10-02, a local session: two of eight parallel dispatches escaped this way).
 
 | Task shape / severity | Model tier | Effort |
 |---|---|---|
-| Summarize / reformat / dictionary-style lookups | cheap | low |
-| Translation / extraction / small to-spec scripts — anything with a hard machine-checkable gate | cheap + explicit output-format contract (a hard gate substitutes for tier quality on internal work; outward-facing "always top-tier" project rules still win) | low |
-| Search / inventory / read-many-files | cheap–mid, search-oriented subagent | medium |
-| Write a script/module | mid; always review the result | medium |
-| Red-team / review | a different model family/tool than the author if one exists; else fresh-context mid tier. **Reviewer ≠ author, always** | high |
-| Research / multi-source verification | mid, research-oriented subagent | high |
+| Summarize / reformat / dictionary-style lookups | cheap | medium |
+| Translation / extraction / to-spec outputs — anything with a hard machine-checkable gate | cheap + explicit output-format contract (a hard gate substitutes for tier quality on internal work; outward-facing "always top-tier" project rules still win) | medium |
+| Multi-constraint format contract | cheap — not mid (mid adds punctuation and length by habit) | medium |
+| Search / inventory / read-many-files | cheap, dispatcher POST-SORTS the output mechanically (cheap keeps the set exact and orders by natural line number); mid only when order is contractual and no post-processor exists | medium |
+| Write a script/module; agentic repair against an immutable test gate | cheap when the verification regime is explicit (hidden tests, hashed tests + suite run by the gate); mid otherwise; always review | high |
+| Red-team / review | a different model family/tool than the author if one exists; else fresh-context mid — cheap is clean when the acceptance layer is ANCHORED (`red-team/` layers 2–4). **Reviewer ≠ author, always** | high |
+| Research / multi-source verification | mid; cheap when the sources are LOCAL and every citation is machine-checked verbatim | high |
+| Aggregation over a large context block INLINE | mid; never inline it into a cheap dispatch — the prefix pushes the prompt over the cheap tier's long-prompt pricing step; file + Read, or one session | medium |
+| Summarising UNTRUSTED content (injection present) | cheap; the gate checks the file system AND the output for the planted token | medium |
 | Taste, ambiguous judgment, policy wording | main session — not delegable, see `30-judgment.md` R6 | — |
+
+The table SUMMARISES the latest `tools/model-bench` round (cheapest arm that
+passes every repetition, per row) and changes when that register does, never
+by hand. Cheap effort floor is medium (user ruling 2026-10-08): no `low`;
+`high` only for code rows with an explicit verification regime; `xhigh` buys
+thinking time, not passes. **A cheap dispatch carries no user instruction
+layer** — CLAUDE.md, rules and session injections are noise to mechanical
+work: route it to `cheap-worker` (roster below) or `Explore`; `general-purpose`
+loads the whole layer (`references/harness-measurements.md` "Dispatch
+prefix") and is for tasks that need it.
 
 Where the dispatch mechanism supports a machine-enforced output schema (see
 `environment.md`), use it instead of prompt-side format instructions — format
@@ -218,6 +229,16 @@ executing it. Keep the licensed empty answer reachable: a worker that stops at
 a barred route and reports the gap has succeeded (`ops/lessons.md` L-075;
 literature case and the 5-step ladder: `rules/literature-access.md`).
 
+**The one fetch command a literature wave DOES name is `fetchsrc.py`** — it is the
+routing table in executable form: it consults the host policy before every request,
+keeps the per-host and per-run caps in its manifest, and prints `HAND-TO-USER:`
+itself, so the licensed empty answer stays reachable. Name it as the only route for
+text that will be cited, put its `--run` folder under the brief's output folder, and
+write no brief rule that reads as excluding it — it writes text only (PDFs are parsed
+in memory) and its scratch moves with `LSE_FETCH_SCRATCH`. The measured 2026-10-03
+exclusion (L-075 mirror shape), why the caps live in `fetchsrc.py` and not the host
+guard, and the promotion trigger: `rules/literature-access.md` "The instrument side".
+
 ## §4b Redlines and disclosure for external dispatch
 
 - **Never externally**: `~/.claude` and its subtree, plus the operator's own
@@ -240,12 +261,16 @@ literature case and the 5-step ladder: `rules/literature-access.md`).
 - **Shard the card** by real sub-need and stage, so one dispatch never carries
   a whole picture of a codebase.
 - **Unlisted or private project → STOP and ask**, every time (extdispatch
-  tiers; Codex: see the Codex bullet above).
+  tiers).
 
 ## §5 Escalation and de-escalation
 
-- Cheap-tier fails once → re-dispatch one tier up. Same-tier retries usually
-  reproduce the same failure.
+- Cheap-tier fails once → CLASSIFY before escalating. (a) Format / order /
+  contract drift (the set or the facts are right, the shape is not): add the
+  contract line or a mechanical post-processor and re-dispatch the SAME tier
+  (measured 2026-10-08: every cheap miss on search was order, every one on
+  format was punctuation). (b) Wrong facts, miscounts, arithmetic drift over a
+  large context: one tier up — same-tier retries reproduce the failure.
 - Same subtask fails twice → diagnose the reasons first (`30-judgment.md` R1):
   the SAME reason twice = an environment problem → fix the environment, don't
   escalate; two DIFFERENT reasons = the task exceeds the tier → top tier or
@@ -270,104 +295,62 @@ Five shapes — **T1 search/inventory** (read-only), **T2 implementation**
 do-not-touch list outranks the change list; ambiguous cases → "needs a human",
 never guessed), **T4 research** (read-only + one report; live search, every
 claim cited), **T5 review/red-team** (read-only, never the author; PASS/FAIL
-first line + ranked WARNING list + ≥3 specific challenges). Field lists and
-the worked §2 example: `ops/references/dispatch-templates.md`. Rules of thumb:
-long spec → file first, then dispatch; acceptance is written for the worker but
-the dispatcher still spot-checks; on re-dispatch, put the previous failure
-output in "read first".
+first line + ranked WARNING list + ≥3 specific challenges). Field lists, the
+worked §2 ✅/❌ example, rules of thumb: `ops/references/dispatch-templates.md`.
 
 ## §7 The report contract (what a worker hands back)
 
 - Conclusions + `file:line` refs only; large artifacts to disk, path returned.
 - Delivery summary: what was done (≤5 lines) + what was verified (commands +
   key output lines) + honesty clause (what couldn't be reached, what was
-  skipped, and why).
+  skipped, and why) + **weakest point** (the ONE delivered item most likely
+  to be wrong, with its location) + **brief gaps** (where the brief forced a
+  guess, and the reading taken). Free text, never schema (§2 class C); "none"
+  needs a reason; anchored verdict reports are exempt. Why: registry
+  `DISPATCH_REPORT_WEAKEST_POINT`.
 - Any numeric or factual claim carries a source; no source → label
   "unverified". Never fabricate.
 
 ## §7a Supervising a dispatched ticket (do the registration AT dispatch time)
 
-A dispatched session cannot be identified after the fact — two id namespaces
-nothing on disk joins, and transcripts contaminated by cross-session messages
-so only the OPENING user turn binds cleanly (measured 2026-08-21; evidence in
-`tools/session-board/README.md`).
+A dispatched session cannot be identified after the fact (only the OPENING
+user turn binds; measured 2026-08-21), so registration happens AT dispatch:
+`hooks/session_board_register.py` writes the board entry on `spawn_task`.
+**You still owe three things** — a distinctive opening sentence (it becomes
+`match`), the `deliverables` field (`[]` = decided none, `null` = nobody
+decided), and the real cwd when the ticket starts in a worktree. `UNBOUND`
+right after dispatch means the hook did not run: find the cause, never re-add
+by hand. Field detail, the board/`list_sessions` authority split and the
+shared-tree rule lines: `ops/references/ticket-supervision.md`.
 
 > **Share note.** Neither half of that mechanism ships here: the registering
 > hook (`hooks/session_board_register.py`) and the ticket board it writes into
 > (`tools/session-board/`) are both declared in `tools/share-manifest.toml`
-> under `[[not_shipped]]`. In this share the three steps below are done BY
-> HAND — which is what the source did before 2026-08-21, and what the steps
-> already describe. Only the question of who writes the row changes; every
-> field, and the reason each one exists, is unchanged.
+> under `[[not_shipped]]`. In this share the registration steps (detailed in
+> `ops/references/ticket-supervision.md`) are done BY HAND — which is what the
+> source did before 2026-08-21, and what those steps already describe. Only
+> the question of who writes the row changes; every field, and the reason each
+> one exists, is unchanged.
 
-**Registration is mechanised — you owe exactly one field.** Steps 2 and 3 below
-used to be prose here, and prose is what this repo measured failing (L-011 hit
-3, L-023 hit 2). `hooks/session_board_register.py` writes the entry on
-PostToolUse of `spawn_task`, taking `task_id` from the response and `title`,
-`cwd` and `match` from the call — the only real dispatch surface (measured
-counts and why `Agent` is not one: the source's own dispatch-surface sweep script under its session-board tooling, not shipped here).
+**Never read completion from silence.** Quiet cannot be told from stuck,
+waiting-on-permission or thinking; judge by the deliverable (`lessons.md`
+L-025). `QUIET + deliverable ABSENT` is a session to go and look at.
 
-1. **Open the prompt with a sentence that appears nowhere else**, and never quote
-   another ticket's opening sentence in a message. The hook copies that first
-   line verbatim into `match`; it is still yours to make distinctive. (It cuts
-   the phrase before any character JSON escapes, and writes `match: null` rather
-   than a weak one — the board then says UNBOUND, which is correct.)
-2. **Fill in `deliverables` — the one field a machine cannot infer.** The hook
-   writes `null`, which the board prints as `NOT DECLARED` in magenta with the
-   edit to make. Replace it with the paths the ticket must produce, or with `[]`
-   if it deliberately has none (e.g. "commit these paths") and put the
-   verification command in `note`. `[]` and `null` are different states on
-   purpose: `[]` says you decided, `null` says nobody has. Inventing a path to
-   watch is still worse than watching nothing.
-3. **Check the cwd if the ticket is started in a worktree.** The hook records
-   the cwd passed to `spawn_task`, or the dispatching session's if none was
-   passed; a worktree session's real cwd differs and the board will report
-   UNBOUND until you correct it.
-
-Nothing else is owed. If the board says `UNBOUND` for a ticket you just
-dispatched, the hook did not run — check `telemetry/session-board-register.jsonl`
-and `ops/references/integrity-sweep.md` check 22, do not re-add the entry by
-hand and leave the cause in place.
-
-Then supervise with `tools/session-board/session-board.ps1 -TicketFile ...`, run
-twice a few minutes apart. Division of authority, because neither side can
-answer the other's half:
-
-| question | authority |
-|---|---|
-| is it still running? title? `local_` id? | `ccd_session_mgmt list_sessions` |
-| which transcript is which ticket? quiet for how long? what did it produce? | the board |
-
-**Never read completion from silence.** A quiet transcript cannot be told apart
-from stuck, waiting-on-permission, or thinking; raising the threshold only moves
-the misjudgement later. Judge by the deliverable — `ops/lessons.md` L-025 (B4),
-where a monitor that trusted silence harvested an empty deliverable. `QUIET +
-deliverable ABSENT` is a session to go and look at, not a finished one.
-
-**A tree with a peer in it shares HEAD, `.git/index` AND the working tree** —
-the rule lines, each measured on a real incident (2026-08-17, 2026-08-21 ×2):
-- Do not `git checkout -b` while a peer session is live (it moves their next
-  commit onto your branch); additive work goes onto the current branch.
-- A ref move (`git update-ref`, `git branch -f`) WITHOUT a following `checkout`
-  leaves the shared index stale: the next commit anywhere records unknown paths
-  as DELETIONS. Ancestry and content are different questions.
-- After ANY commit in a shared tree: **`git show --stat HEAD`, read for what you
-  did NOT write** — deletions, and the quiet case, ABSORPTION of a peer's
-  uncommitted edit. A path a peer has dirty is committed with their provenance.
-- Verify SOMEONE ELSE'S publish by content (`git cat-file -e <sha>:<path>`),
-  not `--is-ancestor`.
-The measured incidents behind each line, routing by coupling class, the commit
-ritual, attribution (by what a commit TOUCHES) and the recovery recipes:
-`ops/references/shared-tree-git.md` (the canonical home of `lessons.md` L-023).
+**A tree with a peer in it shares HEAD, `.git/index` AND the working tree:**
+no `checkout -b` while a peer is live; a ref move without `checkout` leaves
+the index stale (next commit records DELETIONS); after any commit `git show
+--stat HEAD` for what you did NOT write; verify a peer's publish by content.
+Incidents, routing by coupling class, recovery: `ops/references/shared-tree-git.md`.
 
 ## §8 Token discipline (main-session hygiene)
 
-- Batch micro-tasks: each dispatch has fixed overhead — ~49K tokens of preamble
-  per `general-purpose` worker (`rule-registry.md` → subagent instruction
-  surface). Don't send sub-minute tasks one at a time; one worker, several
-  items, each verified individually. The currency §1 buys is MAIN-CONTEXT
-  preservation, not total tokens: below roughly that size, reading it yourself
-  is cheaper both ways.
+- Batch micro-tasks: each dispatch pays a fixed prefix (harness + tool schemas,
+  plus the whole user instruction layer for a `general-purpose` worker —
+  sizes in `references/harness-measurements.md` "Dispatch prefix"). Don't send
+  sub-minute tasks one at a time; one worker, several items, each verified
+  individually. The currency §1 buys is MAIN-CONTEXT preservation, not total
+  tokens: below roughly the prefix size, reading it yourself is cheaper both
+  ways. Never inline a large context block into a cheap dispatch (§4 table).
 - Small reference material: pass a path anyway (keeps the prompt short and the
   material updatable).
 - Large tool output: check size first; read tail/summary before deciding to
@@ -380,14 +363,15 @@ ritual, attribution (by what a commit TOUCHES) and the recovery recipes:
 `skill-trigger-dict.md`、層級歸一~四節）。模型上限與 tier 映射見
 `ops/environment.md`。該表只管 subagent，不是 main-loop model 的預設。
 
-**effort 不是 per-call**（`environment.md` Dispatch mechanisms）：下表「強度」欄
-是各定義檔 frontmatter **已經釘住**的值，不是 dispatcher 可填的參數；要改就改
-定義檔。`model` 仍可 per-call 覆寫。
+**effort 自 2.1.292 起可 per-call**（Agent 工具的 `effort` 參數；`environment.md`
+Dispatch mechanisms）：下表「強度」欄是各定義檔 frontmatter **已經釘住**的值；
+per-call `effort` 依工具說明只在使用者或指令明確要求時才填，且上限仍是 `high`
+（`xhigh`／`max` 屬超出上限）。`model` 仍可 per-call 覆寫。
 
 | 任務形狀 (task shape) | agentType | model × effort（定義檔已釘） | 能力邊界 |
 |---|---|---|---|
 | 搜尋/盤點/read-many-files | `Explore`（內建，唯讀） | 繼承 × 繼承 | 唯讀；**不載入 CLAUDE.md** |
-| 機械性、有硬驗收閘（轉檔/翻譯/照規格腳本） | `general-purpose` | haiku × 繼承 | 全繼承 |
+| 機械性、有硬驗收閘（轉檔/翻譯/照規格腳本/盤點/錨定審查/鎖測試修復） | `cheap-worker`（2026-10-08） | haiku × **medium**（`omitClaudeMd: true`，無 MCP） | 可寫 + Bash/PowerShell；**不載 CLAUDE.md／rules**；要規則層才用 `general-purpose`（haiku × 繼承） |
 | 後端/API 實作 | `backend-architect` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
 | 前端實作 | `frontend-developer` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
 | 寫測試、QA 驗證 | `testing-qa-engineer` / `api-tester` | sonnet × 繼承(medium) | 可寫 + Bash/PowerShell |
@@ -406,10 +390,8 @@ ritual, attribution (by what a commit TOUCHES) and the recovery recipes:
 L-014）。
 
 兩個**目前未使用**的載入面（2026-09-06 對 2.1.257 調和補記）：`skills:` 前置
-載入（把指名 skill 的全文放進 worker，是「規則到不了 worker」的直接解法，代價
-是每次派工付全額 token——要用先量成本）、sibling roster（`SendMessage` 互通的
-前提，且是啟動當下的快照，之後才命名的 agent 不會出現）。條件、限制與該不該用：
-`references/harness-measurements.md` §Dispatch semantics。
+載入（每次派工付全額 token，要用先量成本）、sibling roster（啟動當下的快照）。
+條件、限制與該不該用：`references/harness-measurements.md` §Dispatch semantics。
 
 消歧（易混淆組）：
 - `code-reviewer` agent vs `/code-review` skill vs `code-review-deep-checklist`：

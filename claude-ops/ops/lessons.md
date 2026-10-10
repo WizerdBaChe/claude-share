@@ -15,7 +15,7 @@ then `intake.py event L-nnn --kind recurrence --held yes|no --note "..."`. A car
 hits reaches 2 is routed through `ops/40-maintenance.md` §2a (fold: `--kind fold --target
 "<file §anchor>"`). Full text, recurrences and provenance: the `Record:` path on each card (at the source).
 Rules and semantics: the intake design record under the source's references/ tree (not shipped).
-generated-at: 2026-10-02T15:36:47+08:00   records: 135
+generated-at: 2026-10-10T00:39:36+08:00   records: 149
 
 ## L-001 2026-07-10 tags: dispatch|cost-cap|hooks hits: 1 state: folded→hooks/model_cap_guard.py
 what: L-001 舊帳本搬入 (legacy import, folded): a cost cap enforced at DISPATCH time does not survive a `SendMessage` resume: th
@@ -582,7 +582,7 @@ Fix: 設計參數一律從設計紀錄讀，函式簽名不給預設值，或給
 Detection: 落差在不同條件下都很大但比例不固定時，先對兩邊逐一列出模型參數，不要先量落差。問：這個參數我是讀來的還是預設的？預設值是不是該參數的合法值？
 Record: ops/lessons/L-074.md
 
-## L-075 2026-09-10 tags: dispatch|subagent-dispatch|retrieval|enforcement hits: 1 state: folded→ops/20-dispatch.md §4a
+## L-075 2026-09-10 tags: dispatch|subagent-dispatch|retrieval|enforcement hits: 2 state: folded→ops/20-dispatch.md §4a
 what: 派工提示指名了工具，違規就已經由派工端犯下，子代理只是執行 (a dispatch prompt that names the surface has already committed the violation; the subagent merely executes it)
 Context: 機構 VPN 開通後派三路文獻波次。其中一路對一個明文禁止機器代理存取的出版平台，一路從 curl 升級到 WebFetch、再到 headless 瀏覽器、再到使用者真實登入的瀏覽器。
 Pitfall: 回頭讀自己的派工提示：**裡面指名了瀏覽器**。子代理沒有越界，它照著做了。升級鏈看起來像四次獨立嘗試，實際上是同一個被禁止的行為換四套衣服，而且最後一級（真實登入 profile）是最被禁止的一級，不是最正當的一級。**約束若只寫在規則檔而沒寫進提示，派工端就是那個繞過它的人。**
@@ -1022,7 +1022,7 @@ Fix: Not applied -- user review (feedback pool, tool:graph-snapshot). Proposal: 
 Detection: A test green in the canonical tree and red only in a worktree; FOREIGN_ROOTS containing an ancestor of home.
 Record: ops/lessons/L-129.md
 
-## L-130 2026-09-26 tags: git|concurrency|shared-worktree|worktree hits: 1 state: live
+## L-130 2026-09-26 tags: git|concurrency|shared-worktree|worktree hits: 1 state: folded→ops/references/shared-tree-git.md
 what: git stash 在所有 worktree 間共用同一個 refs/stash，worktree 裡 stash 的東西會被正典樹的 git stash pop 拿走 (refs/stash is one ref for every worktree: a stash pushed in a worktree is popped by a peer's git stash pop in the canonical tree)
 Context: 2026-09-26. Inside worktree inv2-attribution this session ran `git stash -q -- moc_regen.py` then `git stash pop` to run a test against the pre-fix file, while peer sessions committed in the canonical tree every few minutes. Nothing was lost (status read after the pop).
 Pitfall: HEAD and the index are per-worktree; refs/stash is not. Probe W3 (temp repo): a stash pushed in the linked worktree shows in the canonical tree's `git stash list`, and `git stash pop` there exits 0 and writes the worktree's edit into the CANONICAL working tree; the worktree's own later pop then takes another entry or fails. shared-tree-git.md §0 lists HEAD, index and working tree and says nothing of stash, so a worktree reads as a safe place to stash.
@@ -1069,3 +1069,115 @@ Pitfall: The scan printed 8 findings and a calibration line; the screening prose
 Fix: Derive the screening section from the scan's own output: findings count and classes, the calibration pair, the exclusion list with a reason per excluded file, and a limits line naming what was NOT read end to end. Before shipping, read every "已/confirmed/excluded" sentence against a tool call in this session.
 Detection: For each verb of completion in a screening or verification section, point at the tool call that did it. No call means the sentence goes, or it becomes a limit.
 Record: ops/lessons/L-135.md
+
+## L-136 2026-10-02 tags: harness|hooks|security|verify hits: 1 state: live
+what: 新機制只憑 changelog 一句話判斷會判輕 (a new harness mechanism judged from its changelog line alone is under-judged)
+Context: The 2.1.284-2.1.287 upgrade-delta record judged "Claude Mods" as know-only and "You should know" as do-not-enable, from the changelog one-liners matched against settings.json. The user asked whether the diff had missed them.
+Pitfall: The changelog line ("plugins may now modify deeper behavior") hid a whole new docs section. Reading it showed what the line did not say: a mod's tool.check can approve a call a PreToolUse hook here blocked, built-in mods ignore disableAllHooks/--safe-mode/--bare, the AGENTS.md loader is itself a mod, and Claude-written mods land inside the ~/.claude repo (dev-mods/). Evidence tier "changelog vs local settings" cannot see any of that.
+Fix: cc-delta README step 4: a new-mechanism line that opens a new docs section is read in full before its disposition. Addendum record: a mods addendum under the source's reports/ tree (not shipped); mod-review gate (ops-health 22, registry MOD_REVIEW); .gitignore /dev-mods/.
+Detection: A delta record whose 新機制 row says 知道即可 for a feature with its own docs pages, and whose evidence line says changelog only.
+Record: ops/lessons/L-136.md
+
+## L-137 2026-10-02 tags: hooks|harness|dispatch|cost|gate-design hits: 1 state: live
+what: command hook 的 timeout 是放行，不是阻擋 (a command hook's timeout is a pass, so a deny guard's timeout must outlast its worst latency)
+Context: 2026-10-02 share round: eight Agent dispatches without `model` in two minutes while eight worktrees and their agents started. model_cap_guard wrote a deny receipt for all eight; two subagents (W1-ops, W4b) still launched and ran 177 and 138 turns on claude-fable-5-1.
+Pitfall: settings.json gave every hook `timeout: 5` (the docs default is 600). Under load the guard's stdout reached the engine after 5.4 s and 6.5 s on the two escapes, 0.2-2.7 s on the six it caught. The hooks docs: a timed-out command hook does not block the tool call. A command hook can only fail OPEN, so a short timeout on a deny guard silently converts "slow" into "approved". (Superseded in part 2026-10-10: since 2.1.295 `onFailure: "block"` makes a timed-out or crashed hook block; set on `model_cap_guard` and `secret_file_guard` — `ops/references/harness-measurements.md` §Hook failure semantics.) The orchestrator saw the escape and recorded it as `left` instead of stopping and re-dispatching.
+Fix: Every deny- or block-capable hook's timeout is 30 s (26 entries, settings.json); notice-only hooks keep 5 s. Regression case M-T1/M-T1c in tools/model-cap-test reads settings.json (planted 5 s must fail). ops/20-dispatch.md §4: a guard that did not answer is not an approval — TaskStop and re-dispatch. Real closure is in-process: the mods API `agent.spawn` event (model rewritable, parentModel, synchronous deny) — a dated evaluation under the source's reports/ tree (not shipped).
+Detection: A deny guard's receipt row exists but the tool_result shows the call went through; or tool_use → tool_result latency on a guarded tool exceeds the hook's timeout while the guard's receipt is present.
+Record: ops/lessons/L-137.md
+
+## L-138 2026-10-02 tags: hooks|unattended-run|harness|prompt-injection|gate-design|dispatch hits: 1 state: live
+what: 被引用的觸發字不是觸發 (a tag quoted inside a code span or a subagent's report is text, not a command — a kickoff tests the user's spoken text only)
+Context: During the feedback-observer build a code-reviewer subagent reported on the design document. Its report quoted "`[unattended-run]` is a prompt tag …" as prose about a hook. The task-notification carrying that report reached hooks/unattended_run.py's kickoff as a UserPromptSubmit prompt.
+Pitfall: `mode_kickoff` tested `if TAG in prompt` on the RAW prompt. The harness-block stripper (`human_text`) existed but was only applied on the end-run branch. So a quoted tag inside a subagent's notification armed a full unattended run mid-task: a manifest with scope deny + stop-block obligations nobody had asked for, a spurious run-id canary, and a Stop hook that would block the turn end until a run report was produced. The same shape fires for a user who merely MENTIONS the tag in backticks.
+Fix: `tag_index()` in hooks/unattended_run.py: the tag counts only inside `human_text(prompt)` (harness blocks removed) and outside fenced blocks / inline code spans; the template is parsed from the spoken tag onward. Regression block in tools/process-ledger/controls.py (task-notification quote, inline code span, fenced block → silent; the same tag spoken outside a code span still arms). The misfired manifest was marked `ended.by = misfire-corrected` with a ledger correction row instead of producing a report of nothing.
+Detection: A run manifest whose `started` is mid-task with no user prompt carrying the tag at that time; or `telemetry/unattended-run.jsonl` kickoff rows whose session's last human prompt has the tag only inside backticks.
+Record: ops/lessons/L-138.md
+
+## L-139 2026-10-03 tags: isolation|false-green|invariants|consumers hits: 1 state: live
+what: 跨工具 import 會撞同名頂層模組，且等值 fallback 會把失敗藏起來 (a cross-tool import collides on a shared top-level module name, and a fallback equal to the expected value hides it)
+Context: A source-only work card: tools/copy-census/scan.py had to read the harness skip rows through version-census's own `load_declarations` (tools/version-census/partitions/agents.py), not a second TOML parse.
+Pitfall: Both tools put their own folder on sys.path and ship a flat top-level `judge.py`. Inside a copy-census process `judge` is already bound to copy-census's module, so agents.py's `import judge as judge_mod` gets the wrong one and its import dies (`judge_mod.SEV_WARN` is read at def time). The card's own fallback (unreadable declarations → the frozen pre-change set + one UNDET line) then returns exactly the set the derivation was supposed to produce, so `--check` stays `clean -- 20 rows` and every count matches: a broken derivation looks identical to a working one except for one stderr line.
+Fix: `_version_census_loader()` in scan.py lends `judge`/`probes`/`partitions` out of sys.modules, puts version-census first on sys.path for the import, then restores every name. Test `test_the_real_declarations_load_without_fallback` asserts `undet is None` on the real declarations AND that `sys.modules["judge"]` is still copy-census's judge afterwards. Verified also by a positive control (dev-mods flipped to "scan" → 11 UNKNOWN-COPY), which a silently-falling-back scanner would not have produced.
+Detection: Any `~/.claude/tools/*` module importing another tool's module: check for shared flat names (`judge`, `scan`, `probes`, `core`). Any fallback whose value equals the expected output: the acceptance must assert the fallback was NOT taken (an undet/None field), never the output alone.
+Record: ops/lessons/L-139.md
+
+## L-140 2026-10-05 tags: gate-design|hooks|false-green|invariants hits: 1 state: live
+what: 以 commit 歷史反推「上次動作」當基準，會吞掉同一個 commit 裡的改動；而 gate 被強制放行時沒有回報管道 (a baseline re-derived from commit history swallows changes bundled into the same commit, and gate overrides never reached the feedback pool)
+Context: tools/lab-skill-sync `mark` refuses to move a skill's `lab-sync:` marker while lab commits owe a write-back and the skill is unchanged since the last marker. A local session (2026-10-04/05) committed real case-library write-backs and was still refused 4 times, forcing each mark with `--no-writeback`.
+Pitfall: The baseline was `git log -1 -G lab-sync: -- <marker file>`: the last commit that touched the marker line. But `mark` rewrites the marker only in the working tree, so that rewrite rides in the next skill commit — which is usually the write-back for the next drift. The baseline commit already held the write-back, so the diff was empty. The sibling pair was the mirror image: its dirty marker line counted as a write-back (false pass). Second gap: four overrides blaming the tool produced zero feedback rows — `feedback_notice` fired only on EDITS, never on overriding a gate.
+Fix: Baseline = a content snapshot (per-file hash, CRLF folded, marker sha blanked) logged by each allowed `mark`; the next mark compares the working tree against the snapshot logged for the current marker sha. Git fallback only when no snapshot row matches, and even then the marker line never counts. Selftest: the incident (write-back bundled with the previous marker → written-back; FAILED on the old code), negative control (only the marker differs → refused), fallback case. Upper layer: gate-design.md clause "event baseline"; `hooks/feedback_notice.py` notices a shell call carrying a flag listed in `tools/feedback-pool/gate-overrides.json`.
+Detection: A "changed since my last action" gate whose baseline is re-found in git history (`git log -1 -- <path>`) while its own write is not committed atomically. Its own write inside the compared set. Repeated overrides of one gate blaming the tool.
+Record: ops/lessons/L-140.md
+
+## L-141 2026-10-05 tags: retrospective|dispatch|pipeline|docs hits: 1 state: live
+what: 檢討提案只在下一輪派工時「記得套用」而沒寫回規格，會一輪輪部分遺失 (retrospective proposals applied per run from memory, never written into the spec, decay run by run)
+Context: The obsidian_Nathan resource area runs batch analyses (R01…R07). Each run ends with a 問題彙整 whose last table lists proposals for the next spec version. R05 wrote twelve (P1–P12) and said "apply them when R06 starts"; R06 added Q1–Q6; R07 wrote T1–T12. The spec files stayed at v3 throughout.
+Pitfall: Each run's dispatcher re-applied "the proposals" from memory inside a per-run addendum. The addendum NAMED P12 (probe embedded web data first) as adopted, but the probe actually written only counted JSON-LD and told 12 agents "there is no other embedded data" — the Next.js payload held figure descriptions and hidden interactive states, found by one agent mid-run, costing four mid-run corrections and a rendering pass. A proposal living only in a roll-up has no single reader-facing text, so each application is a re-interpretation, and a partial one is indistinguishable from a full one ("adopted: P12").
+Fix: A proposal register (`tools/resource-specs/proposals.md`) is the only status copy: every proposal id in any roll-up has one row; `adopted` names the spec section that now carries the text. The spec bump and the register move in the same commit; a run's roll-up adds its rows in the same commit as the roll-up. The vault's AGENTS.md says a proposal absent from the register is not in force. The specs went to v4 carrying P/Q/T and the R07 fix rules; web prep moved from scratchpad scripts to tracked tools with tests.
+Detection: A roll-up that says "apply at the start of the next run" with no target file; a per-run addendum listing proposal ids as "adopted" while the spec version did not change; the same failure class reappearing one run later under a proposal that was already written.
+Record: ops/lessons/L-141.md
+
+## L-142 2026-10-06 tags: closeout|reuse|html|deliverable|registry hits: 1 state: folded→ops/rule-registry.md
+what: 共用元件在專案內升級並通過驗收，卻沒回寫參考指標，下一個交付物照舊指標抄到舊版 (an accepted upgrade of a shared component stayed project-local; the reference pointer still named the old copy, so the next deliverable copied the old one)
+Context: Long-document HTML deliverables are built from a reading shell (side nav, 本節速查 rail, registry hover cards). The rule that governs them names one reference implementation per page class. The claude-se-history round copied that reference, then upgraded it under user UX rulings (resizable and collapsible columns, pinned previews); accepted 2026-10-04.
+Pitfall: The round's close-out recorded the rulings and the project deposits, but not that a SHARED component had changed: the rule's reference line, the only place a later builder looks, kept naming the older SSLD shell, and nothing was deposited in AssetVault. The next long-document deliverable (R07 intro page) did a prior-art step that consisted of following that pointer, so it shipped without the accepted column controls and with the old keydown trap. The user had to notice the regression by eye. The upgrade was real and accepted; it was simply invisible from the place a reuser starts.
+Fix: The reference line now names the newest accepted shell, says why the predecessor must not be copied, and carries a review-when; the rule also auto-loads on `*shell*.tpl`. The session-digest entry format's `deposits:` line now asks, for any shared component upgraded and accepted in the session, which pointer or AssetVault entry was updated (or "pointer: none"). The R07 page was rebuilt on the vendored se-history shell.
+Detection: A close-out whose rulings mention UX of a reusable piece (shell, CSS layer, gate) while its deposits list only project paths; a rule or registry "reference implementation" older than the newest accepted deliverable of that class; a user remark that a new deliverable "uses the old frame".
+Record: ops/lessons/L-142.md
+
+## L-143 2026-10-06 tags: capability|design-mode|closeout|coverage-blind-spot|registry hits: 1 state: live
+what: 增能以「修缺陷」的名義在內容 session 尾端用參數式提問代替設計模式，當晚建完、隔天補七處註冊 (a capability increment framed as a defect remedy skipped design mode: parameter asks replaced Phase 0, built at session end, registration set found a day later)
+Context: R07 (12 claude.dev posts filed into obsidian_Nathan) hit a regression: the intro page copied an older reading shell. The interim fix (pointer + L-142) landed at 16:01Z; at 16:04Z the user asked whether a shared-tool buffer with metadata should be designed. The session was 95 min in, had compacted twice, and its cwd was the vault, not AssetVault or ~/.claude.
+Pitfall: The ask was a textbook Mode B increment (new store tier + tool + hook + recall leg, two repos, other sessions as consumers) but arrived as a remedy, so design mode never fired: a full proposal in 3 minutes, then four PARAMETER questions (location, snapshot, admission, reminder) standing in for Phase 0 — one recommended default ("copy small, point at large") contradicted the host's nature and the user had to supply the vault principle. Prior art found three existing homes for the same knowledge (extraction queues, PROGRESS rejections, G-18) and a fourth was added without an extend-vs-new verdict. Built inline in the last 50 min.
+Fix: Rule tier, not here: `ops/05-authority.md` §4 contract section 1 now asks the design-mode verdict + build-here vs hand-off for any deliverable that creates a unit, remedy framing exempting nothing, extend-vs-new fork before parameter asks; product-design-thinking Mode B entry records this as its second miss. AssetVault DESIGN v4.3.1 names the vault-side gaps and hands off a Mode B sketch rerun (queue/G-18 disposition, sidebar-resizer card, derived reference line).
+Detection: A proposal produced within minutes of a defect report that names a new tool/hook/tier; an AskUserQuestion whose every item is a parameter of one presupposed design; a boundary contract written after the design text; a registration backfill commit the next day.
+Record: ops/lessons/L-143.md
+
+## L-144 2026-10-10 tags: pptx|test-design|false-green hits: 1 state: live
+what: python-pptx 每個 core property 上限 255 字元，印記寫進 comments 首次真實建置就爆 (python-pptx caps every core property at 255 chars; a stamp in comments failed on the first real build)
+Context: A generator stamp (JSON with two sha256 values) was written into `core_properties.comments` of the pptx carrier output.
+Pitfall: python-pptx raises `ValueError: exceeded 255 char limit` on any core property longer than 255 chars. Unit tests ran the renderer without the stamp step, so they stayed green while the first end-to-end build failed.
+Fix: Split the stamp over several core properties (`identifier` = content sha, `category` = body sha, `comments` = the rest), full-length hashes. `tools/carriers/common/stamp.py`.
+Detection: Any metadata write into a pptx core property longer than 255 chars; an end-to-end test must run the stamp, not only the renderer.
+Record: ops/lessons/L-144.md
+
+## L-145 2026-10-10 tags: line-endings|test-design|false-positive hits: 1 state: live
+what: 對 vendored 文字檔做原始位元組雜湊的完整性測試，在 ~/.claude 第一次提交後就因換行正規化而壞 (raw-byte hash tests of vendored text break on the first commit under eol-sync)
+Context: Carrier tests compared raw sha256 of vendored CSS/JS/py copies with the recorded value and with the upstream asset.
+Pitfall: The post-commit eol-sync rewrote working-tree endings to the pinned LF; both hash tests failed although no content changed. A raw `read_bytes()` hash measures line endings, not content, in a repo with `.gitattributes` + eol-sync.
+Fix: Hash line-ending-normalised bytes for text files and record that hash (commit d5c4c28).
+Detection: An integrity test over text files that hashes `read_bytes()` raw in a repo with pinned endings.
+Record: ops/lessons/L-145.md
+
+## L-146 2026-10-10 tags: gate-design|width|coverage-blind-spot hits: 1 state: live
+what: page-fill-gate 看不到被限寬的 main，只要側欄或提示列貼到右緣就算滿版 (page-fill-gate misses a capped main when side chrome reaches the right edge)
+Context: On the research-site reading shell, `main{max-width:640px}` still read reach ~100 % in fill_gate.
+Pitfall: The right rail (>=1500 px) or the hint bar's text spans sit at the right edge and count as content, so the page-level reach metric cannot see that the primary reading column is capped.
+Fix: The html-explainer carrier added its own `main_fill` gate (main width vs width left beside nav and rail; known-bad 57/49/66 %). Proposal: fill_gate gets a per-class primary-column selector so `document-long` rules on `main`, with this page as regression case.
+Detection: A capped `<main>` on a page whose fill_gate reach is near 100 %.
+Record: ops/lessons/L-146.md
+
+## L-147 2026-10-10 tags: identifiers|design|spec-drift hits: 1 state: live
+what: 依列位置編號的 id 跨版次不穩定，設計卻宣稱證據 id 可延續到下一版 (ids minted from row position are not stable across editions)
+Context: The SE-history evidence base numbers events `EV-nnnn` by position; the snapshot design (02 §7.0) claimed an evidence id survives into the next edition.
+Pitfall: Any inserted or re-ordered row shifts every later id, so the cross-edition stability promise is false for ids produced by `enumerate()`.
+Fix: Pending (WC-02 re-cut): content-derived ids (hash of source + key) or a carried id map before edition 2.
+Detection: A design that promises cross-version id stability over ids generated by `enumerate()`.
+Record: ops/lessons/L-147.md
+
+## L-148 2026-10-10 tags: git|gitignore|gate-design hits: 1 state: live
+what: 「切點時有 git 物件才算存在」的規則表達不了 gitignore 的儲存區，改來源後計數歸零 (a git-object-at-cut existence rule cannot represent gitignored stores)
+Context: Every evidence check was re-pointed to `git show <cut>:path` for the snapshot cut.
+Pitfall: The genesis existence check returned held == 0: `backups/`, `sessions/` and similar stores are gitignored by construction and have no git object at any cut.
+Fix: Hybrid rule: a path under ~/.claude exists iff it is a git object at the cut, or it is gitignored and on disk; `events.csv` stayed byte-identical on edition 1's cut.
+Detection: A zero count from a check that used to be non-zero right after switching its source of truth.
+Record: ops/lessons/L-148.md
+
+## L-149 2026-10-10 tags: settings-json|scope-gating|execution-mode hits: 1 state: live
+what: 使用者說「會離線、無法點選許可」涵蓋所有 ask 路徑的寫入，不只附帶那句的任務；規則檔寫入卡了 2.9 小時 (an offline / cannot-approve statement covers every ask-path write; a rule-file write waited 2.9 h)
+Context: The user asked for a global setting, then a close-out "only on a card, because I will be offline and cannot click approvals".
+Pitfall: The offline constraint was applied only to the close-out clause. `Write rules/...` and `Edit CLAUDE.md` are on settings.json `permissions.ask`, which prompts even in bypass mode; the rule-file write waited 10,296 s. The ask list was one local read away and was not checked; the bypass banner was read as "no prompts".
+Fix: When the user declares they cannot approve: read `permissions.ask` first, build everything outside it, put ask-path content on the card as drafts (or suggest `[unattended-run]`). Mechanism CO-9: a UserPromptSubmit notice on offline phrasing that injects the ask list.
+Detection: A tool_use -> tool_result gap of minutes on an ask path in a session where the user announced absence.
+Record: ops/lessons/L-149.md

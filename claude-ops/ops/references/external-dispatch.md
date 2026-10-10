@@ -209,6 +209,8 @@ would silently corrupt the cross-key comparison the file exists for.
 
 ## 9. Which fast tier for which task shape — measured 2026-09-23
 
+> **Review-when FIRED 2026-10-10:** CC 2.1.293 made Claude Haiku 5.5 (`claude-haiku-5-5`, 1M context) the `haiku` alias, so the "Claude Haiku 4.5" rows below no longer describe what `cheap-worker` runs. They stay as the 4.5 record; re-run the battery on 5.5 before quoting a Haiku number (a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship).
+
 review-when: any of the three tiers changes model id (agy `gemini-3.8-flash`,
 codex `gpt-6-luna`, Claude Haiku 4.5), or a later run of the same battery
 disagrees. Evidence: the n8n-concept-survey project's `exp-fast-tasks\` folder (a separate local project tree; tasks,
