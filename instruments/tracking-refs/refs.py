@@ -62,8 +62,13 @@ DEFAULT_ROOT = os.path.expanduser("~/.claude")
 
 # Instruction surfaces: files a session READS and acts on. Records under
 # outputs/ drafts/ reports/ are history, where a dead pointer can be correct.
+# Every top-level *.md counts (2026-10-03): OPERATOR-GUIDE's migration steps and
+# PHILOSOPHY's tier-1 list are followed on a NEW machine, where a target git never
+# held is exactly the file the clone does not bring. Their hook/skill counts were
+# replaced by pointers that day, and a pointer is only worth more than a count if
+# something reads it.
 SURFACE = re.compile(
-    r"^(CLAUDE\.md|settings\.json|skill-trigger-dict\.md"
+    r"^([^/]+\.md|settings\.json"
     r"|skills/.+\.(md|py|json)"
     r"|hooks/.+\.(py|json|md)"
     r"|rules/.+\.md|ops/.+\.md|agents/.+\.md|commands/.+\.md"

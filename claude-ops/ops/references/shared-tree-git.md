@@ -17,6 +17,13 @@ them; the damage is visible only in a later commit's branch name or file list.
 | HEAD | `git checkout -b` / `checkout` | its next commits land on the peer's branch | loud — the branch name in the commit's output line (hit 1, hit 2) |
 | `.git/index` | `git update-ref` / `git branch -f` WITHOUT a following checkout | its next commit serializes the stale index: every path HEAD has and the index does not is recorded as a DELETION — 52 files, no error, ancestry checks still pass (hit 3) | silent |
 | working tree | leaves an edit uncommitted | whoever stages that path next ABSORBS the edit under their own commit message — content correct, provenance gone, every check green | silent |
+| `refs/stash` — ONE ref for the canonical tree AND every linked worktree (HEAD and the index are per-worktree; the stash is not) | `git stash push` in a worktree | a peer's `git stash pop` in the canonical tree exits 0 and writes the worktree's edit into the CANONICAL working tree; the worktree's own later pop takes another entry or fails (L-130, probe W3) | silent |
+
+Stash is therefore never a scratch area in a tree that has peers or worktrees. To
+run something against the pre-change version of a file, read it out instead:
+`git show <rev>:<path>` and redirect the output into your session's scratch folder (user ruling 2026-10-06). Carrier: `hooks/stash_worktree_notice.py`
+(notice when the repository has linked worktrees; registry `stash_worktree_notice`). Tell: a
+`git stash list` entry `On <branch>:` naming a branch nobody in this tree works on.
 
 The general form of hit 3 is worth more than the git detail: hit 2's fix
 removed a LOUD failure (wrong branch) and replaced it with a SILENT one

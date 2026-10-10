@@ -7,7 +7,10 @@ description: >-
   contract, cross-app navigation. Trigger when the user mentions design tokens,
   theme packs／主題包, 產品套件統一, product suite/hub, or anti-silo cross-product
   needs（「把幾個 app 統一到共用 design tokens ＋ 主題包」）. NOT for ordinary single-app
-  development or one-off styling. Full disambiguation: ~/.claude/skill-trigger-dict.md.
+  development or one-off styling, and NOT for single-page templates such as a to-do
+  sheet or a course entry page (reuse a template → asset-vault Mode B; an explanatory
+  page → per rules/explainer-deliverables.md). Full disambiguation:
+  ~/.claude/skill-trigger-dict.md.
 ---
 
 # Design-system suite — contract-first

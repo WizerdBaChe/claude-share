@@ -77,7 +77,9 @@ MEASURE_JS = r"""(opts) => {
   const painted = s => (s.backgroundColor !== 'rgba(0, 0, 0, 0)' && s.backgroundColor !== 'transparent')
                        || parseFloat(s.borderLeftWidth) > 0 || parseFloat(s.borderRightWidth) > 0;
   const ownText = el => Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
-  const media = el => /^(IMG|SVG|CANVAS|VIDEO|TABLE|PRE|FIGURE|IFRAME)$/.test(el.tagName);
+  // tagName of an inline <svg> in an HTML document is lower-case 'svg' (SVG namespace), so the
+  // test upper-cases it — before 2026-10-02 an unbordered inline SVG never counted as content.
+  const media = el => /^(IMG|SVG|CANVAS|VIDEO|TABLE|PRE|FIGURE|IFRAME)$/.test(el.tagName.toUpperCase());
   const skip = el => el.closest('script,style,nav,#side,[hidden],[data-fill-ignore]') || cs(el).position === 'fixed';
   // ---- one measurement over one area (the page, or one slide) ----
   const measure = (root, L, R, limitTop) => {
@@ -89,6 +91,10 @@ MEASURE_JS = r"""(opts) => {
       if (limitTop != null && r.top > limitTop) continue;
       const isPainted = painted(s), isText = ownText(el), isMedia = media(el);
       if (!(isPainted || isText || isMedia)) continue;           // pure wrappers do not count
+      // A full-bleed painted band with no text of its own is a backdrop, not content: in a class
+      // that declares `backdrop_bands` it would otherwise report reach 100 % and hide a capped,
+      // left-hugging content column inside it. Its children are still measured.
+      if (opts.backdrop && isPainted && !isText && !isMedia && r.width >= (R - L) * 0.98) continue;
       minL = Math.min(minL, r.left); maxR = Math.max(maxR, r.right); n++;
       // Block findings are about WIDE TEXT CONTAINERS capped by their own CSS. Media, controls,
       // chips/badges (intrinsic sizes) and children of grid / row-flex parents (the PARENT
@@ -270,7 +276,8 @@ def gate_paths(targets, viewports=None, forced_class=None, reg=None, controls=Tr
                     cls_for_scope = cls_hint or probe
                     rule = reg["classes"].get(cls_for_scope or "", {})
                     opts = {"asym": reg["defect_left_anchored_cap"]["asymmetry_frac"],
-                            "scope": rule.get("scope"), "maxScopes": rule.get("max_scopes", 8)}
+                            "scope": rule.get("scope"), "maxScopes": rule.get("max_scopes", 8),
+                            "backdrop": bool(rule.get("backdrop_bands"))}
                     meas = page.evaluate(MEASURE_JS, opts)
                     if not cls_for_scope and reg["classes"].get(meas["cls"], {}).get("scope"):
                         opts["scope"] = reg["classes"][meas["cls"]]["scope"]; meas = page.evaluate(MEASURE_JS, opts)

@@ -66,6 +66,15 @@ Exactly two sections, in this order, with these literal markers:
   `… --json | Select-String -Pattern "domains|lexicon"` returned the user
   straight to the prompt, and their report was the honest one: 「跑完沒反應，
   不知道怎麼驗，應該是通過」.
+- **P10** A visible item never prints a rung CODE (`A1`…`B3`). The reader
+  points at items by their P2 number, and a letter-digit tag beside it reads
+  as a second item label: measured 2026-10-03, the user wrote 「B1 (9.)」 to
+  say which item they meant, and in motion-video-lab `A1`/`B1` also name test
+  arms. Write the rung's WORD instead — 資料與不可逆 · 運作與使用 · 失敗看得見 ·
+  換環境 · 看得懂 · 順手 · 觀感. Rung codes stay the internal vocabulary of §2/§3
+  and of carriers that map findings to rungs. This is the checklist case of
+  the global CLAUDE.md clause "a label a reply coins has one meaning per
+  conversation" (user ruling 2026-10-03, option 1 of three).
 
 ## §2 Rank axis for `A. 必驗` — by what breaks, highest first
 
@@ -149,21 +158,21 @@ Before (12 items, grouped by surface — the shape this rule bans):
 After:
 
     A. 必驗（沒過就不能交）
-    1. 匯入 500 筆的檔案 → 中途按取消 → 重開程式，資料庫筆數與匯入前相同（A1，不可逆）
-    2. 雙擊 exe 三次 → 工作管理員只有一個行程，視窗被叫到前景（A2，常走的路）
-    3. 拔網路 5 分鐘 → 期間送出一筆 → 插回網路 → 恰好收到一則，不重不漏（A1＋中斷路徑）
-    4. 故意填錯的設定 → 存檔 → 畫面出現具體錯誤與欄位名，log 有一行 ERROR（A3，靜默失敗）
-    5. 重開機 → 自動啟動，托盤圖示是「正常」不是「停止」（A4）
+    1. 匯入 500 筆的檔案 → 中途按取消 → 重開程式，資料庫筆數與匯入前相同（資料與不可逆）
+    2. 雙擊 exe 三次 → 工作管理員只有一個行程，視窗被叫到前景（運作與使用，常走的路）
+    3. 拔網路 5 分鐘 → 期間送出一筆 → 插回網路 → 恰好收到一則，不重不漏（資料與不可逆＋中斷路徑）
+    4. 故意填錯的設定 → 存檔 → 畫面出現具體錯誤與欄位名，log 有一行 ERROR（失敗看得見，靜默失敗）
+    5. 重開機 → 自動啟動，托盤圖示是「正常」不是「停止」（換環境）
     B. 體驗（過了會更好）
-    6. 第一次開啟、還沒有任何資料 → 畫面說明下一步要做什麼，不是空白（B1）
-    7. 只在特定條件出現的視窗：用 --preview-dialog 直接叫出來看排版（B3；P7 的免破壞入口）
+    6. 第一次開啟、還沒有任何資料 → 畫面說明下一步要做什麼，不是空白（看得懂）
+    7. 只在特定條件出現的視窗：用 --preview-dialog 直接叫出來看排版（觀感；P7 的免破壞入口）
 
 Twelve items became seven because four were already covered by automated tests
 (§4 Q1) and two merged (§4 merge rule) — not because coverage was cut.
 
 ## §8 One owner, and what every other file may hold
 
-**This file is the sole owner of the properties P1–P9, the two rank axes, the
+**This file is the sole owner of the §1 properties (P1 onward), the two rank axes, the
 admission gate and the budget.** Consolidated 2026-09-09 on the user's ruling
 (「UAT.md 先處理乾淨到一個單一文件」) after P8/P9 landed in three places and had
 to be tracked by hand.

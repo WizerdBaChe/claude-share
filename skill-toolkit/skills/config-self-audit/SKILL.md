@@ -86,7 +86,10 @@ labelled two busy skills "rare" from that same report — one fresh run voids it
 ### 1. Claims vs implementation
 For every behavioural claim the artifact makes about itself ("no X", "automatically Y",
 "protected Z", "lightweight", "read-only"), grep the implementation for X/Y/Z and quote
-line numbers before accepting it. A docstring is not evidence.
+line numbers before accepting it. A docstring is not evidence. For a gate or checker: list
+every input class the artifact promises (file types, scripts, sizes, sources) and name the
+control that exercises each; a promised class with no control is a finding
+(`ops/references/gate-design.md` «input-class coverage»).
 
 ### 2. Existence & integrity (GATE — run first)
 Every path, interpreter, command, event name, and file referenced: `Test-Path` /

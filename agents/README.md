@@ -1,11 +1,11 @@
 # agents/ — subagent 定義｜Subagent definitions
 
-> **中文摘要｜Chinese summary**：本層收錄 `20-dispatch.md` 會派出的 9 種
+> **中文摘要｜Chinese summary**：本層收錄 `20-dispatch.md` 會派出的 10 種
 > subagent 定義。每份定義都把能力白名單、工作邊界、Skill 路由與輸出證據格式
 > 寫在同一份檔案裡；這些檔案是 Claude-oriented dispatch assets，不是跨平台
 > agent runtime。
 >
-> **English summary**: This directory contains the nine subagent definitions routed by
+> **English summary**: This directory contains the ten subagent definitions routed by
 > `20-dispatch.md`. Each definition makes its tool boundary, role boundary, skill
 > routing, and evidence-shaped output contract explicit. The files are Claude-oriented
 > dispatch assets, not a portable agent runtime.
@@ -32,6 +32,7 @@
 | `testing-api-tester.md` | `api-tester` | 從外部測契約；**不**改實作去讓測試過 |
 | `testing-bug-fixer.md` | `testing-bug-fixer` | 修因不修症；根因沒命名就不算修好；執行施工卡不算修 bug，交給 `work-card-executor` |
 | `work-card-executor.md` | `work-card-executor` | 照一張已定案的施工卡機械化施工到驗收；卡沒解的解讀分歧就停下回報，**不**擴大範圍；規則層檔案（CLAUDE.md、`~/.claude/ops/`、skills/、hooks/、settings.json、agents/）永不寫入 |
+| `cheap-worker.md` | `cheap-worker` | 便宜層（haiku）機械工：只接有硬性機器驗收閘的任務（抽取、改格式、照規格寫腳本、搜尋盤點後排序、有不可變測試的修復、摘要不可信內容）；**不帶**使用者指令層（`omitClaudeMd`），判斷、品味或需要規則層的工作交給 `general-purpose` 或 sonnet 角色 |
 
 ## 共通契約｜Shared contracts
 
@@ -45,12 +46,16 @@
 
 ## 來源與授權｜Lineage and licensing
 
-上述 8 支（`work-card-executor.md` 除外）第一行 HTML 註解都留著出處：2026-07-06
+上述 8 支（`work-card-executor.md` 與 `cheap-worker.md` 除外）第一行 HTML 註解都留著出處：2026-07-06
 由第三方套件 **ai-team-os** 一次帶入 22 個定義，2026-08-12 其中 8 個 body
 **整份重寫**（行為不變量改為源自 CLAUDE.md 與 `ops/`，並補上 `tools:` 白名單），
 其餘 14 個封存退役。`work-card-executor.md` 血緣不同：2026-09-04 由 main session 為 SSLD
 remediation round 直接原生撰寫，不經 ai-team-os，第一行註解記的是登記債
 （誰欠補哪些索引列），不是第三方出處。
+
+`cheap-worker.md` 也是原生撰寫（2026-10-08，由 `model-bench` 第三輪的結果而來：便宜層在每個有硬閘的列上都過，
+它付出的代價是 prefix，所以這支定義不載入使用者指令層）。它的 `omitClaudeMd` 欄位需要 Claude Code 2.1.271 以上；
+`effort: medium` 是來源端使用者的裁示下限，不是通用建議。
 
 因此本目錄的內文是本環境自撰，不含第三方文字；`adopted-from` 註解保留，是為了讓
 血緣可追溯，不是授權聲明。前身套件的授權狀態未經查證——若你要回頭找原始 22 個
@@ -64,5 +69,5 @@ remediation round 直接原生撰寫，不經 ai-team-os，第一行註解記的
 複製到你的 `~/.claude/agents/`。檔名不影響路由，`name:` 才是；派工時用的是
 `backend-architect` 這種 `name`，不是檔名。
 
-`model: sonnet` 與 `effort: high` 是來源環境的成本政策（配合
+`model: sonnet`／`haiku` 與 `effort: high`／`medium` 是來源環境的成本政策（配合
 `hooks/model_cap_guard.py` 的上限），不是通用建議——自己的成本結構自己定。

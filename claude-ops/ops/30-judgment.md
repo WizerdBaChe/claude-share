@@ -222,7 +222,7 @@ residue — changing approach is not an unlimited licence to keep trying.
 | Deliverable | Minimum gates |
 |---|---|
 | Shell script | linter clean + syntax check + one real dry-run |
-| Dynamic-language script | parses clean + one run against REAL data (not only fixtures) |
+| Dynamic-language script | parses clean + one run against REAL data (not only fixtures). "Parses clean" means warnings fail it: Python = `python -X utf8 -W error::SyntaxWarning -m py_compile <file>` — plain `py_compile` exits 0 on an invalid escape |
 | Rules/policy document | grep existing rules for contradictions + red-team pass + read-back after write |
 | Unattended automation | all of the above + zero-side-effect proof (before/after snapshot) + evidence of one successful real run |
 | A subagent's deliverable | spot-check one critical section (anti-gaming) + fresh-context sign-off |
@@ -231,6 +231,14 @@ residue — changing approach is not an unlimited licence to keep trying.
 ✅ Tests green, but the manual spot-check of the hardest case finds the fix
 special-cased that exact input → rejected. Green tests are the reason to
 spot-check, not a reason to skip it.
+
+❌ `hooks/model_cap_guard.py` as committed in `afbb856` held an absolute path
+(a share-tree root on a non-system drive, whose `\S` is an invalid escape) in its
+docstring; plain `python -m py_compile` on it prints the `\S` SyntaxWarning to
+stderr and exits 0 (calibrated 2026-10-03), so a "parses clean" gate read off
+the exit code passes a file Python has announced it will eventually refuse
+(fixed `d16016a`). ✅ The same check with `-W error::SyntaxWarning` exits 1 on
+it — a parse gate is only as strict as its exit code.
 
 ## R6 — Taste calls and genuine ambiguity (the honest exit)
 
@@ -284,6 +292,21 @@ Granularity ladder — match the tool to the question:
 3. Decision-grade CITED report the requester will act on → `literature-search-extract`
    at `depth: exhaustive` (PRISMA record, per-claim evidence ledger). The `deep-research`
    skill this rung once named never existed on this machine (verified 2026-09-03).
+
+**Which platform answers it.** A question about existing EXTERNAL work
+(repos, models, LoRAs, practitioner threads, forum Q&A) picks its platform and
+route from `ops/references/platform-source-registry.json` — one row per platform
+with a probed route, auth, limit and robots/ToS status (`open`/`key`/`gray`/
+`gated`/`html-only`). Never route by memory: a `gated` row (Reddit) is
+unreachable to WebFetch/WebSearch from here, and an empty result through a
+refused route is NOT absence of discussion. A route that answers differently
+from its row's `probe` field → re-probe and update the row first. Executor:
+`tools/platform-search/psearch.py query "<2-4 keywords>"` (keyword APIs AND-match
+every word; a longer query is retried once on its first 3 words, labelled; one block per platform, blocked
+legs named; a refused Reddit leg retries through agy automatically; the user
+asking for as broad a search as possible → `--wide`, which adds Qiita + agy). Papers/preprints/citation graphs are class `scholarly` and belong
+to `literature-search-extract`, never to this registry: it yields LEADS, that
+skill yields citable evidence.
 
 ❌ Quoting an API parameter list from training memory for a library that
 releases monthly — plausible, outdated.

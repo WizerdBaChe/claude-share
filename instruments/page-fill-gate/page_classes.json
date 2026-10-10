@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "as_of": "2026-09-04",
+  "as_of": "2026-10-02",
   "owner": "user ruling 2026-09-04 (width-void diagnosis) — classes are DATA: add a row + a fixture, never a code branch",
   "declaration": {
     "attribute": "data-page-class",
@@ -9,8 +9,22 @@
     "rail_marker": "data-rail (optional: a fixed right column that COUNTS AS CONTENT, not chrome)"
   },
   "reference_viewports": {
-    "gating": [[1707, 830], [1920, 950]],
-    "advisory": [[1280, 610]],
+    "gating": [
+      [
+        1707,
+        830
+      ],
+      [
+        1920,
+        950
+      ]
+    ],
+    "advisory": [
+      [
+        1280,
+        610
+      ]
+    ],
     "source": "ops/environment.md § Display & UI-build premise — 2560x1440 @150% maximised Chrome, external FHD; re-measure when the screen or scaling changes"
   },
   "unknown_policy": {
@@ -32,13 +46,15 @@
       "mode": "centered",
       "symmetry_px": 8,
       "min_fill": 0.35,
-      "notes": "one centred column with symmetric margins; the reading measure is the point, so a wide viewport shows equal void on both sides (an 820px report column is 43% of 1920 — still a deliberate measure, hence the low floor)"
+      "notes": "one centred column with symmetric margins; the reading measure is the point, so a wide viewport shows equal void on both sides (an 820px report column is 43% of 1920 — still a deliberate measure, hence the low floor)",
+      "content": "prose"
     },
     "document-long": {
       "zh": "長篇參考文件（教科書、案卷、討論包）",
       "mode": "fill",
       "min_fill": 0.85,
-      "notes": "fluid main column plus a right rail (data-rail) that carries figures / notes / registry cards; the rail counts as content"
+      "notes": "fluid main column plus a right rail (data-rail) that carries figures / notes / registry cards; the rail counts as content",
+      "content": "prose"
     },
     "deck": {
       "zh": "一頁一螢幕簡報",
@@ -46,26 +62,45 @@
       "min_fill": 0.85,
       "scope": ".slide",
       "max_scopes": 8,
-      "notes": "each slide is its own area; a text block may not sit narrower than the slide while alone in its row"
+      "notes": "each slide is its own area; a text block may not sit narrower than the slide while alone in its row",
+      "content": "figure-led"
     },
     "tool": {
       "zh": "操作型 GUI（Chromium 開啟的 web tool、lobby 工具）",
       "mode": "fill",
-      "min_fill": 0.90,
-      "notes": "no page-level cap below the reference viewports; panels allocated proportionally (fr / % / cqw / minmax) and clamped in px only for intrinsic sizes; a cap above 1920px is a clamp, not a cap"
+      "min_fill": 0.9,
+      "notes": "no page-level cap below the reference viewports; panels allocated proportionally (fr / % / cqw / minmax) and clamped in px only for intrinsic sizes; a cap above 1920px is a clamp, not a cap",
+      "content": "node"
     },
     "diagram": {
       "zh": "圖為主載體（SVG 佔第一屏 ≥ 40%）",
       "mode": "centered-or-fill",
       "symmetry_px": 8,
-      "min_fill": 0.60,
-      "notes": "the SVG scales to its container; a centred container with symmetric margins is fine, an off-centre one is not"
+      "min_fill": 0.6,
+      "notes": "the SVG scales to its container; a centred container with symmetric margins is fine, an off-centre one is not",
+      "content": "diagram"
     },
     "dashboard": {
       "zh": "卡片與表格儀表",
       "mode": "fill",
       "min_fill": 0.85,
-      "notes": "auto-fit card grids; content sets row height, column count fills the width"
+      "notes": "auto-fit card grids; content sets row height, column count fills the width; a portal / launcher page (design-style-testbed T6 VIEWS, 5/5 PASS) is measured here",
+      "content": "node"
+    },
+    "showcase": {
+      "zh": "圖主展示頁（專案介紹、作品展示：滿版色帶＋置中內容，圖可出格）",
+      "content": "figure-led",
+      "mode": "centered-or-fill",
+      "symmetry_px": 8,
+      "min_fill": 0.6,
+      "backdrop_bands": true,
+      "notes": "full-bleed painted bands without own text are backdrops and do not count as content (else every band page reads reach 100% and a left-capped column inside hides); content must be centred or reach >= 85% (a figure bleeding to the right edge reaches it); added 2026-10-02 with the figure-led page rule"
     }
+  },
+  "content_classes": {
+    "prose": "read top to bottom; styling = AssetVault prose-doc-layer (rules/deliverable-doc-refs.md, prose bullet)",
+    "node": "scan and compare entities; a box per entity, colour per entity class (same rule, node bullet); NOT a presentation medium, outside references/design-axes",
+    "figure-led": "one claim + one evidence figure per unit (rules/deliverable-doc-refs.md figure-led page; decks add office-deck-deliverables P1-P5); cross-medium forms in references/design-axes",
+    "diagram": "the figure IS the page; representation chosen per diagram-authoring"
   }
 }

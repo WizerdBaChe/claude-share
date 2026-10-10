@@ -141,7 +141,7 @@ export function pageHtml({ grid = 8, doc, views, sections, selfcheckNotes }) {
   const sectionHtml = sections.map((s) => `  <h2>${s.h2}</h2>${s.html}`).join('\n');
   const script = inPageScript({ grid, viewCount: views.length, notes: selfcheckNotes });
   return `<!doctype html>
-<html lang="${doc.lang || 'zh-Hant'}">
+<html lang="${doc.lang || 'zh-Hant'}" data-page-class="${esc(doc.pageClass || 'diagram')}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

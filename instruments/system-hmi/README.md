@@ -23,7 +23,7 @@ Proof-of-life: `python tools/system-hmi/controls.py`
 > 清單，在這裡都縮減成「資料結構 (schema) ＋ 一列示範」；下文提到的數量與子系統名稱描述的是來源環境自己的登錄表，
 > 不是這份範本的內容。來源環境的其他工具（`pol.py`、`place-ledger`、`graph-snapshot` 等）沒有一起出貨，所以依賴它們的
 > 來源（`sources.json`）與 hook 套件監看點在這裡不存在。`controls.py` 內有幾項「活登錄表」檢查綁著來源環境的登錄表與
-> 工具，換上範本登錄表後有 4 項失敗（其餘 104 項通過）：兩項斷言來源登錄表裡的特定列，一項讀來源環境的 hook 檔，一項讀來源環境的記憶管線工具；失敗是預期的，不是壞掉。
+> 工具；另外兩個發報器 `emitters/editions.py`（讀來源環境一個私有工作台的版次紀錄）與 `emitters/telemetry_trend.py`（連同它的登錄表 `registry/telemetry.json`）沒有出貨，下文講到它們的段落描述的是來源環境。`controls.py` 共 125 項檢查，換上範本登錄表後有 18 項失敗（其餘 107 項通過；沒有 hook 目錄時是 19 項）：兩項斷言來源登錄表裡的特定列，一項讀來源環境的記憶管線工具，另 15 項（版次 9、遙測趨勢 6）要載入上述兩個沒出貨的發報器；失敗是預期的，不是壞掉。
 
 **定位（使用者裁示 2026-09-22）**：system-hmi 是本機的 SCADA。CI/CD（自動化整合監控）屬於它，
 不另起一套——見下方「發布邊界」一節（設計文件留在來源環境，未出貨）。
@@ -170,3 +170,7 @@ HMI ＋ Siemens PCS 7 APL Style Guide ＋單線圖母線畫法）。點面板彈
   來源環境的探針覆蓋紀錄（未出貨）。
 - `hook-suite.*`（HMI-04）點只在 `--full` 執行後才有真讀值；平時的 `collect`（cheap）之下它們是
   `undetermined`（第一次跑）或 `stale`（`tier-not-run`，沿用上次 `--full` 的結果）。
+
+**遙測趨勢 (telemetry-trend)** — `telemetry-trend.guards`（`emitters/telemetry_trend.py`，登錄表 `registry/telemetry.json`；快照統一設計 02 §9.2）只做一件事：把每個守門 hook 的 `telemetry/*.jsonl` 依列內的時間戳（不看檔案 mtime）按「完整 ISO 週」數列數，近 8 個完整週（本週不算）裡，前 6 週平均至少 3 列、最後 2 週卻都是 0 → `sudden-zero`；最後一週超過前 7 週中位數的 5 倍且至少 10 列 → `spike`；整個檔案讀不出任何時間戳 → `unreadable`。它**能判斷的只有「列數的週變化」**：每條 finding 都印出 8 個週計數和閾值；歷史不到 8 週（第一列落在視窗第 1 週之後）的檔案不評判，只在 `young` 備註裡列名；空的 telemetry 目錄是 `warn`「no telemetry rows」，絕不報 pass。它**不能判斷**的有三件：一，攔截型 hook（只在擋下或提醒時才寫列）安靜是因為沒有東西撞上它，那是健康狀態，所以「安靜 ≠ 壞掉」，`sudden-zero` 只是問該 hook 的負責人一句話，不是判決；二，它不判「N 天沒動作」，也不讀列的內容；三，登錄表 `unowned` 裡的檔案（多寫入者、工具寫的、來源不明）完全不評判。閾值 `MIN_RATE=3`、`SPIKE_X=5` 是探索值（重放校準只有 6 個有資格的檔案），重新校準的觸發條件寫在發報器 docstring：累積到 20 組以上有資格的 (檔案, 視窗)。`hmi.py validate` 另外守住登錄表完整性：呼叫 `deny_receipt.clause()`／`receipt()` 或寫了字面 `telemetry/<name>.jsonl` 的 hook 必須有一列，只用 `notice_clause` 的 hook 不算寫入者，現存的 telemetry 檔案必須是某列的檔案或列在 `unowned`，列的檔案必須存在；已不符合條件的列只是警告（`validate()` 的 `warnings` 參數，`hmi.py` 目前不印）。
+
+**版次信封 (edition-envelope/1)** — `emitters/editions.py`（快照統一設計 02 §2、§6，2026-10-09）把四個快照視圖（HMI、graph-snapshot、version-census、演進研究）各自的「描述到哪一刻」正規化成同一個信封：`view`、`repo`、`sha`（加 `sha_source` 說明 sha 從哪讀到）、`dirty`、`cut`、產生它的 `tool` 與參照。兩個點：`editions.register` 列出四個視圖各描述到何時（讀不到的視圖照實標 `undeclared`，不猜）；`editions.evolution` 讀演進研究的版次紀錄 `claude-se-history-workbench/out/editions.jsonl`（只追加，事件 opened／built／gated／accepted／tagged／abandoned／backfilled；狀態由事件推導），算出最新已接受版次落後 `~/.claude` HEAD 幾個 commit、幾天，超過 `LAG_DAYS=90` 或 `LAG_COMMITS=3000` 任一個就 `warn`，每條 finding 印出兩個數與閾值。它**只提醒、不出版**：開新版次一律由人跑 `edition.py`，沒有任何排程會替你開（INV-9）。它不讀工作台程式碼，視圖一律當純 JSON 檔讀。

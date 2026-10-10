@@ -1,7 +1,7 @@
 """T02 — extract ERROR records from a log into JSON; exact-match gate. Dispatch row: 'Translation / extraction' (cheap)."""
 import json
 import random
-from _common import parse_json, verdict, write
+from _common import parse_json, verdict, gold_path, write
 from pathlib import Path
 
 ID = "t02_extract_hard_gate"
@@ -52,11 +52,11 @@ def setup(workdir):
     from bench import seed_for  # per-rep seed; rep 1 == the base fixture above
     log, gold = _lines(seed_for(Path(workdir), 20261008))
     write(workdir, "app.log", log)
-    write(workdir, ".gold.json", json.dumps(gold))
+    gold_path(workdir).write_text(json.dumps(gold), encoding="utf-8")
 
 
 def check(result, workdir):
-    GOLD = json.loads((Path(workdir) / ".gold.json").read_text(encoding="utf-8"))
+    GOLD = json.loads(gold_path(workdir).read_text(encoding="utf-8"))
     try:
         got = parse_json(result)
     except ValueError:

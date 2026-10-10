@@ -116,7 +116,9 @@ the worker invents conventions that look right and aren't.
 Gates in order; acceptance criteria are read as originally written — never
 relaxed at execution time.
 
-1. **Spot-check** (anti-gaming): personally pull 1–2 critical sections. Look for
+1. **Spot-check** (anti-gaming): personally pull 1–2 critical sections,
+   starting with the worker's named weakest point (`20-dispatch.md` §7; one
+   with no location is a fake limitation). Look for
    hardcoded fixtures and fake limitations. **Real limitation** = verifiable
    evidence of why + what a fix would take. **Fake limitation** = one
    unsupported sentence, no root cause, no path forward → strip and re-verify.

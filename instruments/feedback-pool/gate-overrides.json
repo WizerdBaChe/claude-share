@@ -1,0 +1,29 @@
+{
+  "_doc": [
+    "Register of override flags: every flag of this machine's own tools that sets aside a gate verdict,",
+    "a refusal, or the gate's own controls is listed here. Reader: hooks/feedback_notice.py, which",
+    "notices a shell call carrying one of these flags in a session whose ledger has no feedback row for",
+    "that tool. Why: 2026-10-04/05 lab-skill-sync was forced through 4 times with --no-writeback because",
+    "the tool itself was wrong, and nothing reached the feedback pool (feedback_notice then fired only on",
+    "EDITS to a subsystem, never on overriding its gate).",
+    "script = path under ~/.claude; a command matches when it names <parent>/<basename> of it (either",
+    "slash) and carries the flag as a whole token (`--flag`, `--flag=x`).",
+    "Integrity: `python hooks/feedback_notice.py --selftest` fails when a listed script is missing, the",
+    "flag no longer appears in its source, or feedback.target_of() cannot map it.",
+    "review-when: a tool under ~/.claude gains a flag that bypasses its own check (add a row), or one",
+    "listed here drops it (the selftest names it)."
+  ],
+  "_share_template": "SHARE TEMPLATE: the source environment's register lists its own tools' override flags; this copy keeps only the rows whose script ships under instruments/ (so the integrity selftest can resolve every row) and the one shipped reviewed-not-override row. Add a row for each gate-bypassing flag of YOUR tools.",
+  "overrides": [
+    {"script": "tools/audience-fit-gate/afgate.py", "flags": ["--allow"],
+     "sets_aside": "a companion number absent from the original fails the values check"},
+    {"script": "tools/page-fill-gate/fill_gate.py", "flags": ["--no-controls", "--class"],
+     "sets_aside": "the gate's own calibration controls / the page's declared class"},
+    {"script": "tools/closeout-intake/intake.py", "flags": ["--force"],
+     "sets_aside": "import refuses a non-empty store (STORE-NOT-EMPTY)"}
+  ],
+  "reviewed_not_overrides": {
+    "tools/process-ledger/report.py --force": "writes a new report skeleton beside the old one",
+    "reviewed": "2026-10-05, grep of argparse --force/--no-*/--skip*/--allow*/--override/--ignore*/--accept*/--waive* under tools hooks interop skills"
+  }
+}

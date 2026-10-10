@@ -60,8 +60,17 @@ Every case is a real incident, not a hypothetical:
                      quote or backtick stays quiet (the first calibration of
                      the class fired 30/30 false on that shape). The list is
                      synthetic and handed over through SHARE_KNOWN_NAMES.
+ 19-24 reference     (2026-10-03, Q-1) the three pointer shapes check R could
+                     not see — a derived `.html` page, a glob, a `python <path>`
+                     command — each as a positive (an unresolvable pointer of
+                     that shape is a finding) and a negative (resolving,
+                     declared, or non-claiming pointers of the same shape
+                     stay quiet).
+ 25  hygiene         (Q-2) a full run leaves `git status --porcelain` unchanged
+                     for the files it borrows; fixtures are saved and restored
+                     as bytes, because a text round-trip folded CRLF to LF.
 
-Five of the twenty cases assert that the gate stays QUIET. That ratio is deliberate: a
+Eight of the twenty-seven cases assert that the gate stays QUIET. That ratio is deliberate: a
 gate calibrated only on things it should catch scores 100% by rejecting
 everything, which is the reasoning `global-claude-md/CLAUDE.md` states and this
 file has to live up to.
@@ -82,6 +91,13 @@ def gate(*args):
     p = subprocess.run(GATE + list(args), capture_output=True, text=True,
                        cwd=str(ROOT))
     return p.returncode, p.stdout + p.stderr
+
+
+def porcelain(paths):
+    """`git status --porcelain` restricted to `paths`, as a comparable string."""
+    p = subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain", "--"]
+                       + list(paths), capture_output=True, text=True)
+    return p.stdout
 
 
 def case(name, expect_fail, expect_in_output, mutate, restore,
@@ -154,8 +170,16 @@ def case_v(src):
 def main():
     results = []
     target = ROOT / OVER_SCRUB_FILE
-    saved = target.read_text(encoding="utf-8")
-    old = subprocess.run(["git", "-C", str(ROOT), "show",
+    fixture_paths = [OVER_SCRUB_FILE, "tools/share-manifest.toml",
+                     "hooks/settings.example.json", "AGENTS.md"]
+    status_before = porcelain(fixture_paths)
+    # Fixtures are saved and restored as BYTES (Q-2, 2026-10-03): a text
+    # round-trip folds CRLF to LF, so every run left the three CRLF files
+    # modified on disk with no content change. `saved` etc. are the LF-folded
+    # text the mutations are built from; `*_raw` is what goes back.
+    saved_raw = target.read_bytes()
+    saved = saved_raw.decode("utf-8").replace("\r\n", "\n")
+    old =subprocess.run(["git", "-C", str(ROOT), "show",
                           f"{OVER_SCRUB_COMMIT}:{OVER_SCRUB_FILE}"],
                          capture_output=True, text=True)
     if old.returncode != 0:
@@ -168,11 +192,12 @@ def main():
         expect_fail=True,
         expect_in_output=["<URL>", OVER_SCRUB_FILE],
         mutate=lambda: target.write_text(old.stdout, encoding="utf-8", newline=""),
-        restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+        restore=lambda: target.write_bytes(saved_raw),
     ))
 
     # 2 — removing a disposition must resurface the dependency.
-    man_saved = MANIFEST.read_text(encoding="utf-8")
+    man_raw = MANIFEST.read_bytes()
+    man_saved = man_raw.decode("utf-8").replace("\r\n", "\n")
     man_cut = man_saved.replace('path = "settings.json"',
                                 'path = "__removed_for_test__.json"')
     assert man_cut != man_saved, "manifest fixture no longer matches"
@@ -181,7 +206,7 @@ def main():
         expect_fail=True,
         expect_in_output=["settings.json", "does not ship"],
         mutate=lambda: MANIFEST.write_text(man_cut, encoding="utf-8", newline=""),
-        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_bytes(man_raw),
     ))
 
     # 3 — planted personal data, one of each shape.
@@ -194,7 +219,7 @@ def main():
         expect_fail=True,
         expect_in_output=["email address", "absolute home path"],
         mutate=lambda: target.write_text(plant, encoding="utf-8", newline=""),
-        restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+        restore=lambda: target.write_bytes(saved_raw),
     ))
 
     # 4 — a collected file whose edits were never written down.
@@ -207,7 +232,7 @@ def main():
         expect_fail=True,
         expect_in_output=["model_cap_guard.py", "no recorded edits"],
         mutate=lambda: MANIFEST.write_text(man_unrecorded, encoding="utf-8", newline=""),
-        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_bytes(man_raw),
     ))
 
     # 5 — a private path on a non-system drive. The class that let nine
@@ -221,7 +246,7 @@ def main():
         expect_fail=True,
         expect_in_output=["absolute local path", "SomePrivateTree"],
         mutate=lambda: target.write_text(drive_plant, encoding="utf-8", newline=""),
-        restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+        restore=lambda: target.write_bytes(saved_raw),
     ))
 
     # 6 — a system path on the same drive letter must NOT fire. The negative
@@ -237,13 +262,14 @@ def main():
         expect_fail=False,
         expect_in_output=["share gate CLEAN"],
         mutate=lambda: target.write_text(system_plant, encoding="utf-8", newline=""),
-        restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+        restore=lambda: target.write_bytes(saved_raw),
     ))
 
     # 7 — check S5: a hook that ships with no way to turn it on. The template
     #     was mounting 7 of 9 and nothing noticed.
     tmpl_path = ROOT / "hooks" / "settings.example.json"
-    tmpl_saved = tmpl_path.read_text(encoding="utf-8")
+    tmpl_raw = tmpl_path.read_bytes()
+    tmpl_saved = tmpl_raw.decode("utf-8").replace("\r\n", "\n")
     tmpl_cut = tmpl_saved.replace("hooks/context_runway_shadow.py",
                                   "hooks/__unmounted_for_test__.py")
     assert tmpl_cut != tmpl_saved, "mount fixture no longer matches"
@@ -252,7 +278,7 @@ def main():
         expect_fail=True,
         expect_in_output=["context_runway_shadow.py", "ships but is not mounted"],
         mutate=lambda: tmpl_path.write_text(tmpl_cut, encoding="utf-8", newline=""),
-        restore=lambda: tmpl_path.write_text(tmpl_saved, encoding="utf-8", newline=""),
+        restore=lambda: tmpl_path.write_bytes(tmpl_raw),
     ))
 
     # 8 — check D: a standing permission for a finding that no longer exists.
@@ -265,7 +291,7 @@ def main():
         expect_fail=True,
         expect_in_output=["matches nothing there any more"],
         mutate=lambda: MANIFEST.write_text(man_dead, encoding="utf-8", newline=""),
-        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_bytes(man_raw),
     ))
 
     # 9 — control: the tree as it stands must pass.
@@ -359,7 +385,7 @@ def main():
         expect_in_output=["[[unmounted_hook]] declares context_runway_shadow.py",
                           "mounted or does not ship"],
         mutate=lambda: MANIFEST.write_text(man_stale, encoding="utf-8", newline=""),
-        restore=lambda: MANIFEST.write_text(man_saved, encoding="utf-8", newline=""),
+        restore=lambda: MANIFEST.write_bytes(man_raw),
     ))
 
     # 14 — check S4 was widened 2026-09-07 to read AGENTS.md's skill table as
@@ -402,7 +428,7 @@ def main():
             expect_fail=True,
             expect_in_output=["account name (bare)", OVER_SCRUB_FILE],
             mutate=lambda: target.write_text(slug_plant, encoding="utf-8", newline=""),
-            restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+            restore=lambda: target.write_bytes(saved_raw),
         ))
     else:
         print("[SKIP] account name outside a home path: the pattern is off on "
@@ -419,7 +445,7 @@ def main():
         expect_fail=True,
         expect_in_output=["UUID (session-id shape)", OVER_SCRUB_FILE],
         mutate=lambda: target.write_text(sid_plant, encoding="utf-8", newline=""),
-        restore=lambda: target.write_text(saved, encoding="utf-8", newline=""),
+        restore=lambda: target.write_bytes(saved_raw),
     ))
 
     # 17 — check S5 read the hook's name as the last token of the mount
@@ -442,7 +468,7 @@ def main():
         expect_absent=["context_runway_shadow.py ships but is not mounted",
                        "which this repo does not ship"],
         mutate=lambda: tmpl_path.write_text(tmpl_arg, encoding="utf-8", newline=""),
-        restore=lambda: tmpl_path.write_text(tmpl_saved, encoding="utf-8", newline=""),
+        restore=lambda: tmpl_path.write_bytes(tmpl_raw),
     ))
     tmpl_ghost = tmpl_saved.replace(
         'hooks/context_runway_shadow.py\\""',
@@ -455,7 +481,7 @@ def main():
                           "context_runway_shadow.py ships but is not mounted"],
         expect_absent=['__ghost_for_test__.py" scope'],
         mutate=lambda: tmpl_path.write_text(tmpl_ghost, encoding="utf-8", newline=""),
-        restore=lambda: tmpl_path.write_text(tmpl_saved, encoding="utf-8", newline=""),
+        restore=lambda: tmpl_path.write_bytes(tmpl_raw),
     ))
 
     # 18 — known personal names (2026-10-03). A name has no shape, so the
@@ -486,7 +512,7 @@ def main():
             os.environ.pop("SHARE_KNOWN_NAMES", None)
         else:
             os.environ["SHARE_KNOWN_NAMES"] = prior_env
-        target.write_text(saved, encoding="utf-8", newline="")
+        target.write_bytes(saved_raw)
 
     results.append(case(
         "leak: a listed personal name (CJK, and a short name ending a phrase)",
@@ -507,6 +533,80 @@ def main():
                           f"{short_name} `x` here. {short_name} **bold**.\n"),
         restore=without_names,
     ))
+
+    # 19-24 — Q-1 (2026-10-03): three pointer shapes check R could not see.
+    #      The source's guides replaced hand-kept counts with pointers of these
+    #      shapes and check R skipped all of them. Each shape gets a positive
+    #      (an unresolvable pointer of that shape is a finding, named by the
+    #      path) and a negative (the same shape, resolving or out of scope,
+    #      stays quiet). The negatives are the calibration that matters: a
+    #      shape that floods with false findings is a missing class, not a
+    #      reason to widen the net.
+    def plant_md(body):
+        marker = "\n\n<!-- planted by test_share_gate.py -->\n"
+        return lambda: target.write_text(saved + marker + body, encoding="utf-8",
+                                         newline="")
+
+    results.append(case(
+        "reference: a derived .html page that does not exist",
+        expect_fail=True,
+        expect_in_output=["cites `ops/__nope__/page.html`", OVER_SCRUB_FILE],
+        mutate=plant_md("see `ops/__nope__/page.html` for the map\n"),
+        restore=lambda: target.write_bytes(saved_raw),
+    ))
+    results.append(case(
+        "control: .html pointers that resolve, or claim nothing, stay quiet",
+        expect_fail=False,
+        expect_in_output=["share gate CLEAN"],
+        mutate=plant_md("see `~/.claude/architecture-diagramming/capability-set.html`, "
+                        "`index.html` and `tools/system-hmi/out/structure.html`\n"),
+        restore=lambda: target.write_bytes(saved_raw),
+    ))
+    results.append(case(
+        "reference: a glob that matches no tracked file",
+        expect_fail=True,
+        expect_in_output=["cites `skills/*/__NOPE__.md`", OVER_SCRUB_FILE],
+        mutate=plant_md("each skill has `skills/*/__NOPE__.md`\n"),
+        restore=lambda: target.write_bytes(saved_raw),
+    ))
+    results.append(case(
+        "control: globs that match, are declared, or claim nothing stay quiet",
+        expect_fail=False,
+        expect_in_output=["share gate CLEAN"],
+        mutate=plant_md("see `skills/*/SKILL.md`, `agents/*.md`, "
+                        "`tools/*/nothing-here.md` and `*.md`\n"),
+        restore=lambda: target.write_bytes(saved_raw),
+    ))
+    results.append(case(
+        "reference: a python command whose script does not exist",
+        expect_fail=True,
+        expect_in_output=["cites `ops/__nope__/run.py`", OVER_SCRUB_FILE],
+        mutate=plant_md("run `python -X utf8 ops/__nope__/run.py collect`\n"),
+        restore=lambda: target.write_bytes(saved_raw),
+    ))
+    results.append(case(
+        "control: commands that resolve, are declared, or are not python stay quiet",
+        expect_fail=False,
+        expect_in_output=["share gate CLEAN"],
+        mutate=plant_md("run `python tools/share_gate.py`, `py -3 tools/triage.py --all`, "
+                        "`python tools/system-hmi/hmi.py collect`, "
+                        "`python -m pytest ops/__nope__/x.py` and "
+                        "`git add ops/__nope__/x.py`\n"),
+        restore=lambda: target.write_bytes(saved_raw),
+    ))
+
+    # 25 — Q-2: a full run must leave the fixtures it borrowed exactly as it
+    #      found them. Compared by `git status --porcelain` on those paths
+    #      before and after the whole run (an absolute "clean" would fail on a
+    #      round that legitimately edits the manifest). The previous text
+    #      round-trip turned CRLF into LF and showed up here as a new `M`.
+    status_after = porcelain(fixture_paths)
+    ok = status_after == status_before
+    print(f"[{'PASS' if ok else 'FAIL'}] fixtures restored: a full run leaves "
+          f"git status unchanged for the files it borrowed")
+    if not ok:
+        print(f"         before: {status_before!r}\n         after:  {status_after!r}")
+    results.append(ok)
 
     print(f"\n{sum(results)}/{len(results)} cases behaved as specified")
     return 0 if all(results) else 1

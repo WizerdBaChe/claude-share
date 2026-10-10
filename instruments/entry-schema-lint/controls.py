@@ -61,7 +61,7 @@ def build_home(root: Path) -> Path:
     w(home / "hooks" / "manual_guard.py", '"""manual_guard.\n\nSTATUS: LIVE since 2026-09-08 (fixture).\n'
       'Proof-of-life: integrity-sweep check 13.\n"""\n')
     w(home / "hooks" / "undet_guard.py", '"""undet_guard.\n\nSTATUS: LIVE since 2026-09-08 (fixture).\n'
-      'Proof-of-life: ask Nathan whether it still fires.\n"""\n')
+      'Proof-of-life: ask the owner whether it still fires.\n"""\n')
     w(home / "ops" / "references" / "integrity-sweep.md",
       "# sweep\n```bash\npython hooks/good_guard.py --selftest\n# shadow_ok proof\n# shadow_bad proof\n"
       "# manual_guard and undet_guard are named HERE and nowhere else -- naming is not running\n```\n")
@@ -126,6 +126,16 @@ def build_home(root: Path) -> Path:
     w(home / "tools" / "system-hmi" / "registry" / "ignore.json", json.dumps([
         {"path_glob": "hooks/shadow_ok.py", "reason": "fixture: deliberately unwatched", "added": "2026-09-29"}]))
     w(home / "PHILOSOPHY.md", "# p\n## 一\n### 1. first\ntext\n")
+    # ES-5 top-level docs: two dead pointers (a missing tool, a glob over a folder the
+    # fixture lacks) beside the four classes that must stay silent -- an existing file, a
+    # matching glob, a placeholder template, and a skill-relative path that only resolves
+    # under skills/real-skill/ (the trigger-dict shape; 4/4 false positives without it).
+    w(home / "skills" / "real-skill" / "references" / "only-in-skill.md", "# r\n")
+    w(home / "OPERATOR-GUIDE.md",
+      "# guide\n| `hooks/` | wiring in settings.json; state in `hooks/good_guard.py` |\n"
+      "| `skills/` | see `skills/*/SKILL.md` |\n| `agents/` | see `agents/*.md` |\n"
+      "Run `tools/ghost-tool/run.py`. Digest: `references/<project>-session-digest.md`.\n"
+      "Mode table: `references/only-in-skill.md`.\n")
     w(home / "ops" / "references" / "principle-design-guide.md",
       "# guide\nsource: CLAUDE.md \u00abWhen authoring an invariant, checklist item, gate or ops rule\u00bb\n"
       "source: CLAUDE.md \u00abNot a phrase in the fixture\u00bb\nsource: PHILOSOPHY §一.1\nsource: PHILOSOPHY §一.9\n")
@@ -274,6 +284,16 @@ def main() -> int:
         check("C-22", has(p5, "ES-5", "thin entry", "why", "FAIL") and not has(p5, "ES-5", "good entry"),
               "rule-registry: entry lacking why/evidence -> FAIL (ES-5 promoted 2026-09-08, the "
               "container's legacy count having reached 0); complete entry passes")
+        check("C-37", has(p5, "ES-5", "OPERATOR-GUIDE.md", "tools/ghost-tool/run.py", "FAIL")
+              and has(p5, "ES-5", "OPERATOR-GUIDE.md", "glob `agents/*.md` matches nothing", "FAIL"),
+              "known-bad: top-level doc names a missing tool, and a glob over an absent folder -> FAIL")
+        guide = [f for f in p5 if f.path == "OPERATOR-GUIDE.md"]
+        check("C-38", len(guide) == 2,
+              "known-good: existing file, matching glob, <placeholder> and skill-relative path stay silent "
+              f"(guide findings = {len(guide)}, expected exactly the two of C-37)")
+        label = [f for f in p5 if "skills/missing/SKILL.md" in f.msg]
+        check("C-39", len(label) == 1 and label[0].path == "LABEL-REGISTRY.md §2",
+              f"a dead LABEL-REGISTRY §2 owner is reported once, by §2, not again by the top-level pass (got {len(label)})")
 
         # ES-6 guide citations
         g6 = lint.check_guide_citations(home)
@@ -306,6 +326,8 @@ def main() -> int:
         e9 = lint.check_watched(home)
         check("C-32", has(e9, "ES-9", "hooks/bad_guard.py", "no row", "FAIL") and has(e9, "ES-9", "skills/bad-enum", "no row"),
               "known-bad: hook and skill dir with no subsystems.json row -> FAIL (untracked = born after schema)")
+        check("C-32b", has(e9, "ES-9", "hooks/bad_guard.py", '{"glob": "hooks/bad_guard.py", "kind": "') and not has(e9, "ES-9", "hooks/good_guard.py", '"glob"'),
+              "the FAIL text carries the exact row to add for the failing path (positive), and a registered path gets none (negative)")
         check("C-33", not has(e9, "ES-9", "hooks/good_guard.py") and not has(e9, "ES-9", "skills/real-skill"),
               "known-good: registered hook and skill pass")
         check("C-34", not has(e9, "ES-9", "hooks/shadow_ok.py"), "known-good: reasoned ignore.json row passes")

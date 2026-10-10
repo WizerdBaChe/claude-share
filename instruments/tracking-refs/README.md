@@ -8,8 +8,11 @@ status: live
 ---
 # tracking-refs
 
-**問的只有一件事：** 某個已經進 git 的指令檔（CLAUDE.md、skill、hook、rule、ops、路由表……）
-提到了一個檔案，而那個檔案存在、卻沒被 git 收進去嗎？
+**問的只有一件事：** 某個已經進 git 的指令檔（CLAUDE.md、skill、hook、rule、ops、路由表、
+所有頂層 *.md——操作手冊、PHILOSOPHY 等）提到了一個檔案，而那個檔案存在、卻沒被 git 收進去嗎？
+頂層文件自 2026-10-03 起納入：它們的 hook／skill 數量改成指向活來源的指標，而搬移步驟是在
+**新機器**上照著做的——沒進 git 的目標正是 clone 帶不過去的那個檔。指標「存不存在」由
+`tools/entry-schema-lint` 的 ES-5 管，兩者互補。
 
 這種狀態叫 **懸空指標 (dangling pointer)**。它的風險在於：回滾 (rollback) 到那段期間任何一個
 commit，會把「指標」還原回來，卻沒有「目標」。

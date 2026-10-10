@@ -20,6 +20,8 @@ is in `environment.md`; how each row was verified:
 | `~/.claude/rules/<name>.md` **without** `paths:` charged at start | probe `_probe-always.md`, 2 runs |
 | `~/.claude/rules/<name>.md` **with** `paths:` NOT charged at start | same 2 runs — absent from startup |
 | …the same file loaded when a matching file is read | probe `_probe-match.md`, `load_reason: path_glob_match`, content observed in context |
+| …also when a matching file is created/modified by Write/Edit (2.1.288) | changelog only, not probed (record: a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship) |
+| …also when a matching file is viewed by a single-file `cat`/`head`/`tail`/`sed -n`/`grep` in Bash (2.1.293) | changelog only, not probed (record: a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship) |
 | skill loaded only when invoked/judged relevant | official docs |
 
 **Observability**: `hooks/instructions_loaded_logger.py` (InstructionsLoaded,
@@ -47,6 +49,23 @@ inventory, not by a token delta.
 startup prompt MIN 36,742 / MEDIAN 58,891 tokens; always-loaded instruction
 files 17,139 B. CLAUDE.md is therefore ~11% of the floor (estimate) — the
 dominant startup cost is the tool/MCP/skill roster, not the rules.
+
+## Hook failure semantics — `onFailure` (read 2026-10-10 off code.claude.com/docs/en/hooks, CLI 2.1.295)
+
+Until 2.1.295 a command hook could only fail OPEN: a crash, a missing
+interpreter, an exit code other than 0/2, unparsable JSON or a `timeout` let
+the action through (L-137). Since 2.1.295 a `command` or `http` hook may set
+`"onFailure": "block"` (default `"continue"`); each of those failures then does
+what exit 2 does on that event (PreToolUse: the call is blocked;
+PermissionRequest: denied). No effect on Stop / SubagentStop / TaskCompleted /
+TeammateIdle, nor on `async`/`asyncRewake` hooks; not documented for
+prompt/agent/mcp_tool hooks. Exit 1 with `onFailure: "block"` BLOCKS even if
+the hook printed an allow decision — a hook that sets it must exit only 0 or 2.
+A hook's own fail-open on malformed input (exit 0) is untouched by the field.
+Live on this machine (user ruling 2026-10-10): `model_cap_guard`,
+`secret_file_guard`; regression `M-T2` in `tools/model-cap-test/`.
+Recovery if a blocked guard is itself broken: remove the key from that entry
+in `settings.json`.
 
 ## Bash tool results carry no exit code (measured 2026-08-11)
 
@@ -223,3 +242,29 @@ section and move the owner block's `as-of`.
   Anthropic's data policy, not on disk here); its live view ends with the CLI
   process. Desktop transcript view: Summary / Normal / Verbose (`Ctrl+O`);
   Verbose ≙ `--verbose`.
+
+## Dispatch prefix — what one cheap dispatch pays before the task starts (measured 2026-10-08, CLI 2.1.294 / Desktop harness 2.1.293)
+
+Cold `cache_creation_input_tokens` of a one-word reply, haiku; full record and
+method in `tools/model-bench/results/round3-local-report.md` §1. These are the
+numbers `20-dispatch.md` §4/§8 point at instead of quoting; re-measure with
+the same probe when a CLI version changes (`tools/cc-delta`).
+
+| Path | Prefix | What is in it |
+|---|---|---|
+| `claude -p`, tools on, user settings | ≈62k | harness ≈7.5k + tool schemas (incl. MCP) ≈33k + user CLAUDE.md ≈9k + rules/SessionStart injections ≈10–13k |
+| `claude -p`, `--tools ""` | ≈27k | same minus tool schemas |
+| `claude -p --setting-sources ""`, tools on | ≈40k | drops hooks, plugins AND user CLAUDE.md (not a hooks-only switch); `--bare` is unusable here (OAuth) |
+| Agent tool `general-purpose` | ≈65k | loads CLAUDE.md hierarchy + injections + every tool incl. MCP (docs: sub-agents "What loads at startup") |
+| Agent tool `Explore` (built-in) | ≈43k | skips CLAUDE.md and git snapshot (docs) |
+| Agent tool custom definition, 8 tools, sonnet | ≈32k | no MCP schema; CLAUDE.md still loads unless `omitClaudeMd: true` (frontmatter, 2.1.271+) |
+| bare cloud container `claude -p` (rounds 1–2) | ≈34k | harness + tool schemas only |
+| Agent tool `cheap-worker` (haiku × medium, `omitClaudeMd`, no MCP) — measured 2026-10-10, Desktop, fresh session | ≤27.7k | upper bound: the Agent result's `subagent_tokens` for a whole 1-tool task (prefix + task + one tool result + reply), not a cold `cache_creation` probe; model self-reported `claude-haiku-5-5`, answer verified against `ls hooks/*.py` (52) |
+
+Reference points: 2026-08-23 the same `claude -p` haiku probe read 37.9k
+(Playwright row in `rule-registry.md`); 2026-08-22 Desktop T0 58–66k
+(bench-claude-arms). Consequences recorded as rules: cheap dispatches go
+through `agents/cheap-worker.md` (no instruction layer, no MCP); a large
+context block is never inlined into a cheap dispatch — on this prefix a ~45k
+block crossed Haiku 5.5's long-prompt pricing step (CLI self-report 5× the
+flat list price; `tools/model-bench/pricing.json` models the step).

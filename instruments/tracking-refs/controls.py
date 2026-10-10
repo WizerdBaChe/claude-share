@@ -157,6 +157,19 @@ def main() -> int:
         roots.append(r)
         check("12 dict heading -> dangling skills/<name>",
               list(refs.scan(r)["dangling"]), ["skills/new-skill"])
+
+        # 13 any top-level doc is a surface (2026-10-03): the operator guide's migration
+        # step names a tool the clone would not bring. Under the pre-widening SURFACE this
+        # case returned {} -- the regression it pins.
+        r = repo({"OPERATOR-GUIDE.md": "4. verify: run `tools/pol/pol.py`\n", "tools/pol/pol.py": "\n",
+                  "PHILOSOPHY.md": "tier 1: `hooks/` (state in `hooks/g.py`)\n", "hooks/g.py": "\n"},
+                 ["OPERATOR-GUIDE.md", "PHILOSOPHY.md", "hooks/g.py"])
+        roots.append(r)
+        res = refs.scan(r)
+        check("13 top-level guide -> untracked tool is dangling", res["dangling"],
+              {"tools/pol/pol.py": ["OPERATOR-GUIDE.md"]})
+        check("13 top-level doc -> committed hook stays silent", "hooks/g.py" in str(res), False)
+        check("13 CLI exits 1", run_cli(r), 1)
     finally:
         for r in roots:
             shutil.rmtree(r, ignore_errors=True)

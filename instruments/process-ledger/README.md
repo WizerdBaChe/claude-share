@@ -12,7 +12,14 @@
 
 | 何時 | 誰 | 做什麼 | 落點 |
 |---|---|---|---|
-| 每次決策（含使用者口頭裁定） | 模型，依 CLAUDE.md 決策憲章 | `ledger.py add --subject … --choice … --reason … --reversible yes\|no --origin user\|model [--ref D-xxx]` | `projects/<proj>/<session>.ledger.jsonl`（transcript 旁，每日鏡像會複製） |
+| 每次決策（含使用者口頭裁定） | 模型，依 CLAUDE.md 決策憲章 | `ledger.py add --subject … --choice … --reason … --reversible yes\|no --origin user\|model [--ref D-xxx] [--quote "<使用者原話>"]` | `projects/<proj>/<session>.ledger.jsonl`（transcript 旁，每日鏡像會複製） |
+
+> **使用者原話核對 (quote check) 2026-10-06。** `--origin user` 的列一律帶 `quote_check`：
+> `--quote` 的文字（空白正規化後）若是本 session 對話記錄裡某則**使用者親手輸入**訊息的子字串 → `verified`（附 `quote_line`）；
+> 找不到 → `not-found`；找不到對話記錄 → `no-transcript`；沒給 `--quote` → `absent`。
+> 比對時排除 `<system-reminder>` 區段、工具輸出 (tool_result)、壓縮摘要與子代理訊息。
+> 列**照寫不擋**（先落地再標記）；只有 `verified` 代表「使用者原話」，其餘只代表「被模型記錄為使用者裁示」。
+> 對照組在 `controls.py` 的 `[user-origin quote check]`。
 | 每則 prompt | runway hook | 寫 `cache/handoff/current-session.json`，讓 Bash 端的 `ledger.py` 找得到 session | cache |
 
 > **已修補 (FIXED) 2026-09-07 — 原診斷是錯的：不是過期，是併發。**

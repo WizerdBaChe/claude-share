@@ -88,10 +88,10 @@ status: live
 | `skill-trigger-dict.md` | skill 路由消歧義表 |
 | `audit-archive/` | **已凍結 2026-08-11** 的歷史事件日誌，唯讀。現行分流：事件→commit message、規則現行理由→`ops/rule-registry.md`、踩到的坑→`ops/lessons.md` |
 | `PHILOSOPHY.md` | 整套環境背後的世界觀（人讀） |
-| `ops/`（12 檔） | 專案作業規則層 |
-| `skills/`（52 檔） | 自製 skills 本體 |
-| `hooks/`（7 個 .py + 1 資料檔） | `model_cap_guard.py`（subagent 模型上限）、`ops_health_nudge.py`（健康提醒 + 放寬等級提醒）、`dangerous_command_guard.py`（危險 shell 指令）、`ui_verify_guard.py`（瀏覽器窗格量測紀律 L-009/L-010）、`browser_pane_scope_guard.py`（窗格導航記錄 + 已知崩潰站點封鎖 L-013，配 `browser-pane-blocklist.json`）、`instructions_loaded_logger.py`（規則載入遙測）、`delivery_gate_shadow.py`（交付閘門，shadow）— 皆以 `~/.claude` 解析路徑，可攜 |
-| `agents/`（9 檔） | 自訂 subagent 定義。8 檔於 2026-08-12 依本環境重寫（前身是第三方 ai-team-os 套件的 22 個定義，其餘已封存）；`work-card-executor.md` 於 2026-09-04 新增（高強度照卡施工者，effort high；SSLD T41 首用）。每個都帶 `tools:` 能力白名單且必含 `Skill`；路由表 `ops/20-dispatch.md`，政策 `ops/rule-registry.md`。注意：新定義檔不會立即出現在 Agent 工具，harness 稍後才重新載入（L-046） |
+| `ops/` | 專案作業規則層（入口與路由表 `ops/OPS.md`；有哪些檔以目錄為準） |
+| `skills/` | 自製 skills 本體（一個 skill 一個子目錄；現有哪些看 `skills/*/SKILL.md`，觸發路由看 `skill-trigger-dict.md`） |
+| `hooks/` | 機械強制層：guard／notice／logger 類 hook 腳本、少數共用函式庫、它們讀的資料檔（`*.json`）與 `tests/`。此處刻意不列清單與數量（會過時）——現況以活的來源為準：**掛了哪些**看 `settings.json` 的 `hooks` 區塊；**每支做什麼、是否還在用**看該檔模組 docstring 與其 `STATUS:` 行（LIVE／SHADOW／RETIRED；函式庫無此行）；**全貌**看 system-hmi 結構圖 `tools/system-hmi/out/structure.html`（衍生檔、不進 git，`python tools/system-hmi/hmi.py collect` 重生） |
+| `agents/` | 自訂 subagent 定義（現有哪些看 `agents/*.md`）。8 檔於 2026-08-12 依本環境重寫（前身是第三方 ai-team-os 套件的 22 個定義，其餘已封存）；`work-card-executor.md` 於 2026-09-04 新增（高強度照卡施工者，effort high；SSLD T41 首用）。每個都帶 `tools:` 能力白名單且必含 `Skill`；路由表 `ops/20-dispatch.md`，政策 `ops/rule-registry.md`。注意：新定義檔不會立即出現在 Agent 工具，harness 稍後才重新載入（L-046） |
 | `interop/` | 跨 agent 同步層（編譯器 + 地圖 + 驗收） |
 | `thinking-notes/` | 設計思考筆記（編號系列） |
 | `reports/`（部分） | 少數被追蹤的報告 |
@@ -144,12 +144,13 @@ status: live
    `~/.claude/` 與 `.credentials.json`）。
 3. **植入正典**：把新生成的 `~/.claude` 改名備份 → `git clone` 到
    `~/.claude` → 從備份把 `.credentials.json` 放回去。
-4. **⚠️ 修 `settings.json` 的機器綁定路徑**（目前唯一寫死絕對路徑的
-   追蹤檔，共兩處 hook command）：Python 直譯器路徑 + hook 腳本路徑
+4. **⚠️ 修 `settings.json` 的機器綁定路徑**（`hooks` 區塊**每一筆** hook
+   command 都寫死絕對路徑，筆數以檔案為準）：Python 直譯器路徑 + hook 腳本路徑
    改成新機器的實際位置。跨 OS（Windows→macOS/Linux）時直譯器通常是
    `python3`，路徑分隔與引號格式也要跟著改。
    驗證：`python <hooks path>/ops_health_nudge.py < /dev/null; echo $?`
-   → 輸出 0。
+   → 輸出 0。全部掛載的路徑都要存在：跑 `ops/references/integrity-sweep.md`
+   檢查 16（hook chain integrity），不應印出任何 `DEAD INTERPRETER`／`DEAD HOOK TARGET`。
 5. **對記憶的 slug**：記憶已隨 clone 到位（2.2），只要算出新機器的 slug
    （新專案路徑，非字母數字轉 `-`），把 clone 下來的
    `projects/<舊slug>/memory/` 移到 `~/.claude/projects/<新slug>/memory/`。
@@ -173,7 +174,7 @@ status: live
 
 | 位置 | 綁定內容 | 處置 |
 |---|---|---|
-| `settings.json` hooks ×2 | Python 絕對路徑 + hook 絕對路徑 | 步驟 4 手改 |
+| `settings.json` 每一筆 hook command | Python 絕對路徑 + hook 絕對路徑（筆數以檔案為準） | 步驟 4 手改 |
 | `projects/<slug>/` | slug = 路徑衍生 | 步驟 5 換目錄名 |
 | `.credentials.json` | 帳號綁定 | 不搬，重登入 |
 | `ops/environment.md` | 環境事實（模型層級、機制） | 到新環境後重新查證更新 |

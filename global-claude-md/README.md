@@ -83,14 +83,16 @@
 3. 把「Environment」小節的 `<OS_NAME>` / `<DEFAULT_SHELL_NAME>` / `<SECONDARY_SHELL_NAME>` 三個佔位符換成該機器實際的 OS/shell；沒有需要區分的次要 shell 就把那一句刪掉。
 4. 「Language」小節按自己的回覆語言偏好調整或刪除（這條反映的是原作者個人偏好，不是通用建議）。
 5. 若也想要 `skill-toolkit/` 裡實際的技能檔案（`~/.claude/skills/`），另外參考 `skill-toolkit/README.md` 的安裝說明。
-6. 把 `rules/` 下十五份檔案（`frontend-layering.md`、`shader-failure-modes.md`、
+6. 把 `rules/` 下十四份檔案（`frontend-layering.md`、
    `deliverable-doc-refs.md`、`office-deck-deliverables.md`、`visual-gate-scope.md`、
    `verification-ladder.md`、`web-navigation-state.md`、`hook-deny-message.md`、
    `naming-and-placement.md`、`figure-self-read.md`、`literature-access.md`、
    `layout-convergence.md`、`native-render-first.md`、`source-quotation-evidence.md`、
    `android-device-states.md`）複製到目標機器的
    `~/.claude/rules/`。這是 path-scoped 規則機制實際運作所需的檔案，與 `CLAUDE.md` 開頭的
-   path-scoped 索引行列出的十五條一一對應。`literature-access.md` 的強制那一半在
+   path-scoped 索引行（2026-10-10 起）列出的正是這十四條。原本的第十五條
+   `shader-failure-modes.md` 已由來源端在 2026-10-09 依使用者裁定退役（索引行同步移除），
+   本 repo 於 2026-10-10 一併移除副本（manifest `[[not_shipped]]` 有紀錄）。`literature-access.md` 的強制那一半在
    `hooks/literature_host_guard.py`，要一併掛上才有效。若目標環境沒有等效機制，直接把這些檔案的規則內容併回 `CLAUDE.md` 也可以。
 7. 其餘規則（Git 工作流程、互動風格、工程判斷準則、檔案整理慣例）與機器/帳號無關，可直接沿用。
 
@@ -151,6 +153,17 @@
   `figure-self-read.md`、`visual-gate-scope.md` 的新增內容無私有指標。本輪另外收錄的
   `environment-guide/KNOWLEDGE-PACKS.md`、`environment-guide/LABEL-REGISTRY.md` 見該資料夾的
   README。無其餘新增個資。
+- 2026-10-10 refresh（對齊來源 `148e021e`）：`CLAUDE.md` 以 procedure B 重新對齊，三處
+  既有的泛化（Environment 佔位符、瀏覽器窗格那條的來源私有寫法指標、Compact Instructions
+  兩處）原樣重施；Prior-art check 一條新增兩處來源私有指標（召回掃描指令、過去 session
+  搜尋工具）與新出現的外部搜尋指令（`tools/` 底下、不隨 repo 出貨）按同一作法只留能力描述，
+  筆記庫標籤在該條裡出現第二次，同樣泛化。path-scoped 索引行：來源端新列了
+  `explainer-deliverables` 與 `decision-sheet` 兩條，本輪判定不出貨（兩者的產生器與樣板
+  都在不隨 repo 出貨的 `tools/` 之下，規則本文又指向私有路徑），索引行因此刪去這兩個名字
+  並加一句說明；`shader-failure-modes` 已不在來源索引行內。`rules/` 內
+  `deliverable-doc-refs.md` 新增「焦點 token 不吞掉非啟動鍵」與「圖主頁一節一主張」兩段
+  （資產庫指標與一處非系統碟絕對指令按類別泛化）；`literature-access.md` 逐字重收。
+  無其餘新增個資。
 - 這是時間點快照，不是自動同步目標。
 
 ## 授權｜License

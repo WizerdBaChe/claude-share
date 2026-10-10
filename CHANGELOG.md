@@ -9,6 +9,71 @@ For the source environment's own evolution log — the rule-by-rule narrative be
 these snapshots — see `Global_skill_update.md` at this repo's root (frozen 2026-08-11;
 standing rationale moved to `claude-ops/ops/rule-registry.md`).
 
+## 2026-10-10 — refresh round: two mods, four instruments, `clean-room-rebuild`, 35 hooks, and the gate learns three pointer shapes
+
+Source `b6ccd3e` → `46cad1f`: 416 commits (the round began against `148e021e`
+and re-aligned twice as the source moved under it — a rule-registry correction,
+the model-bench gold-file fix and round 5, and the rounds 4–5 write-back into
+`ops/20-dispatch.md` §4 — each re-collected rather than acknowledged as dirty).
+165 files changed here (70 added, 1 removed, 95 modified); tracked files 511 →
+580. The manifest goes 435 → 488 `[[collected]]` (285 verbatim, 182 edited, 21
+template), 75 → 88 `[[not_shipped]]`, 68 → 69 `[[allow]]`, and `[source_map]`
+60 → 65 keys. Nine lanes in their own worktrees (W1 ops, W2 CLAUDE.md + rules +
+guides + interop, W3 hooks + settings + hook suites + agents, W4 skills +
+archdiag, W5 instruments, W6 mods, W7 a read-only adjudication of the source
+`tools/` delta, W8 the instruments W7 cleared, W9 model-bench), plus WT for the
+two queued gate fixes; merged `--no-ff`, hooks last.
+
+- **Came in.** `mods/` (new root): `model-cap-mod` and `feedback-observer`,
+  TypeScript mods with 11 and 24 tests under `claude plugin test`. Hooks
+  `offline_approval_notice.py` and `stash_worktree_notice.py` with their suites
+  (33 → 35 mounted). Agent `cheap-worker` (9 → 10). Skill `clean-room-rebuild`
+  (21 → 22) and `skill-share-packaging/references/readme-showcase-media.md`.
+  `ops/references/ticket-supervision.md` and `platform-source-registry.json`.
+  Instruments `hook-backtest` (the shared harness the two ps backtests now
+  import; both re-collected), `mod-review`, `platform-search`,
+  `token-key-gate`, three `git-hooks` files, `rule-usage-census/lastuse.py`,
+  `system-hmi/emitters/cli_auth.py`, and two templates (`dormant.json`,
+  `feedback-pool/gate-overrides.json`) — 43 → 47 directories. `model-bench/`
+  rounds 4 and 5 (the one-off Agent-path judge scripts read `MB_SESSION_DIR`;
+  the source's gold-file fix and its four task files).
+- **Refreshed.** 82 collected files, every declared edit re-applied on re-read
+  anchors; new scrub targets were session ids, report pointers into `reports/`,
+  non-system-drive paths and one personal first name in an older fixture
+  string (`instruments/entry-schema-lint/controls.py`, shipped since
+  2026-10-02 and not caught then — the known-names list did not carry it).
+  `capability-set.html` rebuilt after the `emit.mjs` refresh (new receipt in
+  `architecture-diagramming/ACCEPTANCE.md`).
+- **Excluded, with fallbacks.** Rules `decision-sheet.md` and
+  `explainer-deliverables.md` (each defined by a source-only tool; the
+  CLAUDE.md index line says so); skill `handoff-pack`; hooks
+  `candidate_shelf_notice.py`, `session_pid_registry.py`,
+  `session_reaper_launch.py`; mod `pending-items` and `feedback-observer`'s
+  calibration fixtures (real session excerpts); `system-hmi` emitters
+  `editions.py`, `telemetry_trend.py` and `registry/telemetry.json`; source
+  tools `carriers`, `pii-membrane`, `lab-skill-sync`, `proc-picker`,
+  `pending-items`, `decision-sheet` (adjudicated per directory by W7; the
+  `tools/` entry carries the per-file re-check note).
+- **Retired.** `global-claude-md/rules/shader-failure-modes.md` — the source
+  deleted it on 2026-10-09; the copy moved to the local `archive/` and the entry
+  became `upstream-absent` (rules 15 → 14).
+- **Gate.** Queue items Q-1 and Q-2 closed: check R now reads `.html` paths,
+  globs (resolved when they match a tracked file or a `[[not_shipped]]` prefix)
+  and the script argument of a `python` command; the test suite restores its
+  fixtures byte-for-byte and asserts `git status` is unchanged after a full run
+  (20 → 27 cases). Calibration before keeping each fix: 0 new findings on this
+  repo, with and without `--source`.
+- **Audit disproved / judgment calls.** The source `.gitignore` was first given a
+  `[[not_shipped]]` entry and check D refused it (the path resolves to this
+  repo's own file), so triage will keep listing it as a candidate — it is not
+  collected, by design. A third-party creator's handle kept in
+  `rule-registry.md` as a public-source attribution.
+- **Deferred.** Pointers W2 generalised to "source-only" for `platform-search`
+  and `token-key-gate` in `global-claude-md/CLAUDE.md` and
+  `rules/deliverable-doc-refs.md` could be restored now that both tools ship
+  under `instruments/`; left for the next round so this one closes on a
+  verified tree.
+
 ## 2026-10-08 — `model-bench/` round 3 synced from the source, HTML report replaced by an explainer post
 
 Share-format pass over the source's canonical copy of the tier-routing bench

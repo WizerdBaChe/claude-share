@@ -67,6 +67,21 @@ CASES = {
     "dashboard capped left": ("dashboard",
         ".cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px;max-width:900px}",
         "<div class='cards'>" + "".join(f"<div class='box'>card {i}</div>" for i in range(8)) + "</div>", "FAIL"),
+    # showcase (2026-10-02): full-bleed bands are backdrops. The bad case is the one the
+    # backdrop option exists for -- measured without it, the bands read reach 100 % and PASS.
+    "showcase bands + centred grid + bleed": ("showcase",
+        "body{overflow-x:hidden} .band{padding:40px 0} .b1{background:#1e6fb8} .b2{background:#eef5fb} "
+        ".wrap{width:min(1200px,84vw);margin:0 auto;display:grid;grid-template-columns:2fr 3fr;gap:32px;align-items:center} "
+        ".bleed{display:block;width:calc(100% + (100vw - min(1200px,84vw)) / 2);height:auto}",
+        "<section class='band b1'><div class='wrap'><div><h1>一句主張。</h1><p>一行說明。</p></div>"
+        "<svg class='bleed' viewBox='0 0 800 400'><rect width='800' height='400' fill='#9cc'/></svg></div></section>"
+        f"<section class='band b2'><div class='wrap'><svg viewBox='0 0 600 300'><rect width='600' height='300' fill='#cde'/></svg><div><h2>第二個主張。</h2>{TEXT}</div></div></section>", "PASS"),
+    "showcase bands + left-capped column": ("showcase",
+        ".band{padding:40px 0} .b1{background:#1e6fb8} .b2{background:#eef5fb} "
+        ".wrap{max-width:800px;margin:0;padding:0 16px;display:grid;grid-template-columns:2fr 3fr;gap:32px}",
+        "<section class='band b1'><div class='wrap'><div><h1>一句主張。</h1><p>一行說明。</p></div>"
+        "<svg viewBox='0 0 800 400'><rect width='800' height='400' fill='#9cc'/></svg></div></section>"
+        f"<section class='band b2'><div class='wrap'><svg viewBox='0 0 600 300'><rect width='600' height='300' fill='#cde'/></svg><div><h2>第二個主張。</h2>{TEXT}</div></div></section>", "FAIL"),
     "undeclared left cap -> inferred, WARN only": (None,
         "#side{position:fixed;left:0;top:0;bottom:0;width:280px;background:#eee} main{margin-left:280px;padding:36px 72px;max-width:1060px}",
         f"<nav id='side'>TOC</nav><main><h1>標題</h1>{TEXT}{TEXT}</main>", "WARN"),

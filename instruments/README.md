@@ -17,7 +17,7 @@
 
 | 項目 | 中文 | English |
 |---|---|---|
-| 收錄 | 43 個資料夾、150 個檔案（本 README 之外）：A 原有兩支、B hook 測試套件、C 規則／紀錄格式／存活證明工具、D 方法工具與兩個模板 | 43 directories, 150 files besides this README: A the original two, B hook test suites, C rule / record-format / proof-of-life instruments, D method tools and two templates |
+| 收錄 | 47 個資料夾、169 個檔案（本 README 之外；2026-10-10 刷新：W5 區段新增 4 個檔案，W8 區段新增 4 個資料夾與 15 個檔案——`hook-backtest`、`mod-review`、`platform-search`、`token-key-gate`，加上 `git-hooks` 的 3 個新檔）：A 原有兩支、B hook 測試套件、C 規則／紀錄格式／存活證明工具、D 方法工具與兩個模板 | 47 directories, 169 files besides this README (the 2026-10-10 refresh: the W5 tools added 4 files; lane W8 added 4 directories and 15 files — `hook-backtest`, `mod-review`, `platform-search`, `token-key-gate`, plus 3 new files in `git-hooks`): A the original two, B hook test suites, C rule / record-format / proof-of-life instruments, D method tools and two templates |
 | 先讀 | 收錄標準，再看「每支工具」表的「需要什麼」欄 | Read the admission criterion, then the "needs" column |
 | 驗證 | 每個套件雙側校準（known-TRUE 與 known-FALSE）；數字見「本輪實測」 | Every suite is two-sided; measured counts are under "Measured this round" |
 | 不包含 | 來源環境的 tools tree 其餘部分、操作者私有檔案清單的守衛測試、私有索引工具 | The rest of the source tools tree, suites of guards that gate one operator's private files, private-index tools |
@@ -84,10 +84,11 @@
 | `hook-deny-lint` | 每個 hook 送進工具結果的字串（deny 與 notice 兩個面）是否合 `global-claude-md/rules/hook-deny-message.md`；`report_fp.py` 是每則合格 deny 訊息都點名的誤擋回報出口 | `python tools/hook-deny-lint/lint.py [--controls]` | 裝好（讀 `hooks/`、`settings.json`、`rules/`）；`--controls` 不需要樹 | 靜態 AST 抽取，FAIL 只做結構判斷，語意層一律 WARN |
 | `hook-proof-of-life` | 執行每個已註冊 hook 在自己 docstring 宣告的存活證明套件（AP-63） | `python tools/hook-proof-of-life/pol.py [--list]`；`controls.py` 校準 | 裝好；每個被宣告的套件都要在 | 約 3 至 5 分鐘。宣告了但本機沒有的套件，照實報 FAIL，不隱藏；本輪量測見下 |
 | `class-closure` | 每個控制套件是否帶著一個它必須判為 `undetermined` 的案例（AP-62）：`closure.py` 靜態檢查，`exercise.py` 實際執行並用 `probe/` 探針確認那條分支真的被走到 | `python tools/class-closure/closure.py`；`exercise.py`；`controls.py` | 裝好（讀 hook 與已宣告的套件） | 讀不到或宣告了卻不存在的套件列為 undetermined、不算進任何計數。來源的 golive_check hook（若本 repo 出貨它）會 import `closure.py` |
-| `entry-schema-lint` | 規則條目格式（`claude-ops/ops/references/entry-schema.md`）與 `principle-design-guide.md` 的資產屬性中有機械偵測的那幾條 | `python -X utf8 tools/entry-schema-lint/lint.py`；`controls.py` | 裝好；**ES-9 需要來源的 `tools/system-hmi/` 登記簿** | 少了 system-hmi：`lint.py` 報 ES-9 錨點遺失並以 2 結束（不可判定，絕不當成通過），`controls.py` 有 3 個控制（C-00、C-32、C-35）會 FAIL。詳見「本輪實測」 |
+| `entry-schema-lint` | 規則條目格式（`claude-ops/ops/references/entry-schema.md`）與 `principle-design-guide.md` 的資產屬性中有機械偵測的那幾條 | `python -X utf8 tools/entry-schema-lint/lint.py`；`controls.py` | 裝好；**ES-9 需要來源的 `tools/system-hmi/` 登記簿** | 少了 system-hmi：`lint.py` 報 ES-9 錨點遺失並以 2 結束（不可判定，絕不當成通過），`controls.py` 有 4 個控制（C-00、C-32、C-32b、C-35）會 FAIL；有出貨的 system-hmi 樣板加上同樣出貨的 `hook-proof-of-life` 時是 50/50（2026-10-10 實測）。用樣板登錄表對一個有很多 hook 的家目錄跑 `lint.py` 會報大量 ES-9：那是「沒有東西在看它」的如實回報，要補列到自己的登錄表。詳見「本輪實測」 |
 | `telemetry-framing` | `telemetry/*.jsonl` 裡不可解析的列數（損壞框架），對照有日期的基線 | `python tools/telemetry-framing/framing.py`；`controls.py` | 裝好 | `framing.py` 的 BASELINE（16，2026-09-08）是來源機器的量測，採用者要依檔內 review-when 自己重錄。`suite-sessions.json` 出貨成**空模板**（`session_files` 為空），缺檔或為空都不跳過任何列 |
 | `context-budget` | 啟動時付出多少 context：`startup_baseline.py` 讀逐字稿算第一則助理訊息的 token 與常駐指令檔大小；`rule_loads.py` 拆解 InstructionsLoaded 遙測；`ACCEPTANCE.md` 是人工驗收程序 | `python tools/context-budget/startup_baseline.py [--project DIR]` | 裝好；有逐字稿與遙測才有輸出 | 沒有 `telemetry/rule-loads.jsonl` 時 `rule_loads.py` 以 2 結束。沒有自帶校準套件（量測腳本加人工程序） |
-| `ps-errorpref-backtest`、`ps-pipeline-close-backtest` | 把對應 hook 的 `analyze()` 放到真實逐字稿語料上，印觸發率 | `python tools/ps-errorpref-backtest/backtest.py [--root DIR] [--sample N]` | 逐字稿語料（預設只有設定家目錄的 `projects/`；來源版另有一個離線封存目錄，已移除，用 `--root` 補） | 沒有語料時印「no PowerShell-language payloads found」並以 1 結束。內嵌的 BASELINE 是來源機器的量測，不是你的 |
+| `ps-errorpref-backtest`、`ps-pipeline-close-backtest` | 把對應 hook 的 `analyze()` 放到真實逐字稿語料上，印觸發率 | `python tools/ps-errorpref-backtest/backtest.py [--root DIR] [--sample N]` | 逐字稿語料（預設只有設定家目錄的 `projects/`；來源版另有一個離線封存目錄，已移除，用 `--root` 補）；**同層的 `hook-backtest/`**（共用的語料走訪 harness，2026-10-10 起一併出貨，兩支都從 `../hook-backtest` 匯入） | 沒有語料時印「no PowerShell-language payloads found」並以 1 結束。內嵌的 BASELINE 是來源機器的量測，不是你的 |
+| `hook-backtest` | 共用的 hook 回測 harness：把一個 `(工具名稱, 工具輸入) -> 判斷` 函式重播到每一筆記錄過的 tool_use 上，印觸發率與定位，預設絕不印指令內容；`adapters.py` 把三個 hook 轉成這種函式 | `python -X utf8 tools/hook-backtest/hook_backtest.py adapters:secret_print [--root DIR]`；`python -X utf8 tools/hook-backtest/tests/test_harness.py` | 裝好（hook 一律從家目錄的 `hooks/` 匯入，不是從本 repo 的 `hooks/`）；`--excerpt` 的遮罩要同層的 `cred-sweep/`（**不出貨**） | 缺 `cred-sweep/` 時 `--excerpt` 失敗即關閉（印「excerpt withheld」，絕不退回原文），自帶 28 個案例有 3 個失敗（X1、X2、E4）；補上來源的 `cred-sweep/` 後 28/28（2026-10-10 實測）。無語料時以 2 結束，不當成「0 次觸發」 |
 
 ## 安裝｜Install
 
@@ -117,7 +118,7 @@
 | class-closure `controls.py` | 62/62 |
 | hook-proof-of-life `controls.py` | 29/29 |
 | telemetry-framing `controls.py` | 25/25 |
-| entry-schema-lint `controls.py` | 46/46 有 system-hmi；43/46 沒有 |
+| entry-schema-lint `controls.py` | 46/46 有 system-hmi；43/46 沒有（2026-10-02 當時的 46 項；2026-10-10 的重測見下方「2026-10-10 刷新後的量測」） |
 | hook-deny-lint | 四個控制行為正確；對來源 30 個 hook 掃描，FAIL 0 |
 | hook-proof-of-life `pol.py` | 43 個已註冊 hook、39 個不同套件，19 個 FAIL 且以 1 結束；19 個都是不在本資料夾的工具或需要來源私有資料的 hook 自測，本資料夾出貨的每個套件在那一輪裡都通過。來源樹自己跑同一支掃描另有 1 個 FAIL（ui-verify-test 25/26，原因未釐清，見上表該列的限制） |
 
@@ -126,6 +127,42 @@
 dangerous-command-test、branch-guard-test、model-cap-test 在一份 `hooks/` 取自 hooks 管線、
 `agents/` 取自本 repo 的暫存「repo 版面」樹裡，同樣是 80/80、25/25、40/40。ops-health-test 在
 路徑含 `CLAUDE_SHARE` 的暫存樹、對 hooks 管線的 hook 版本（含 `tools/tracking-refs/`）跑，是 112/112。
+
+### 2026-10-10 刷新後的量測｜Measured after the 2026-10-10 refresh（來源 HEAD 148e021e；只含 W5 區段的工具）
+
+方法同上：一個暫存家目錄（來源的 `hooks/`、`ops/`、`rules/`、`agents/`、`skills/`、`references/` 加上本資料夾的副本，
+`CLAUDE_CONFIG_DIR` 指向它），每個套件從暫存家目錄跑；page-fill-gate 與 rule-usage-census 的自測在本 repo 樹內原地跑。
+
+| 套件 | 結果 |
+|---|---|
+| entry-schema-lint `controls.py` | 50/50（同層有出貨的 system-hmi 樣板與 `hook-proof-of-life`）；換成來源自己的 system-hmi 樹也是 50/50；完全沒有 system-hmi 是 46/50（C-00、C-32、C-32b、C-35 失敗，設計如此） |
+| feedback-pool `controls.py` | 36/36（同層 process-ledger 與 cross-index） |
+| process-ledger `controls.py` | ALL PASS，0 FAIL（需要家目錄的 `hooks/unattended_run.py`） |
+| tracking-refs `controls.py` | 24/24 |
+| page-fill-gate `tests/test_fill_gate.py` | PASS（每類正負各一，controls 觸發）；在地可跑，需 Playwright 與 chromium |
+| rule-usage-census | `census.py --selftest` 7/7；`lastuse.py --selftest` ALL PASS（在地） |
+| system-hmi `controls.py` | 107/125（hooks 在場）／106/125（無 hooks）；失敗的 18 或 19 項見上方 D 節那一列 |
+| system-hmi `emitters/cli_auth.py --selftest` | ALL PASS（含一次真的 `claude auth status` 煙霧測，結果只可能是通過／失敗／略過，絕不變成判決） |
+| view-launcher `build.py --selftest` | 28/28 |
+| `hooks/feedback_notice.py --selftest` 讀樣板 `gate-overrides.json` | 29/29（讀來源自己的登記簿是 32/32）；該 hook 由 hooks 區段的刷新出貨，這裡用來源的 hook 檔驗證 |
+
+### 2026-10-10 刷新後的量測，W8 區段｜Measured after the 2026-10-10 refresh, lane W8 tools（來源 HEAD 148e021e）
+
+方法：一個暫存家目錄（來源的 `hooks/` 與 `settings.json`、來源的 `tools/cred-sweep/`、本資料夾的副本放在 `tools/`、
+本 repo 的 `platform-source-registry.json` 放在 `ops/references/`，`USERPROFILE` 與 `HOME` 指向它），從暫存家目錄跑；
+「在地」欄是直接在本 repo 樹內跑。
+
+| 套件 | 暫存家目錄 | 在地（本 repo 樹） |
+|---|---|---|
+| hook-backtest `tests/test_harness.py` | 28/28 | 25/28（X1、X2、E4：缺 `cred-sweep/`，失敗即關閉，設計如此） |
+| mod-review `controls.py` | OK（9 個案例） | 7/9（最後兩個要含 `mod-review` 檢查的 `hooks/ops_health_nudge.py`；本 repo 的 hook 檔由 hooks 區段刷新） |
+| platform-search `controls.py` | 24/24 | 23/24（登錄表在 `claude-ops/ops/references/`，不在 `ops/references/`） |
+| token-key-gate `selftest` | PASS（靜態 3、動態 3，Playwright 在場） | PASS（同） |
+| git-hooks 兩支檢查 | 拋棄式 repo：乾淨提交放行；無效跳脫被拒（1）；CLAUDE.md 超限增長被拒（1） | 不適用（需要裝好的版面） |
+| ps-errorpref／ps-pipeline-close 回測、`hook_backtest.py` | 空語料：前兩者印「no PowerShell-language payloads found」，通用 CLI 印「NO CALLS matched」並以 2 結束 | 同 |
+| platform-search 的 agy 腿 | 回傳 LegUnavailable（找不到 `tools/extdispatch/extdispatch.py`），不是 0 筆 | 同 |
+
+沒有在出貨時實跑：platform-search 的網路各腿（會對外發請求）、`mod_review.py review`（要跑 `claude plugin validate`）。
 
 ## 已知限制｜Known limits
 
@@ -176,16 +213,19 @@ docstring 是權威說明；這裡只記「它是什麼、哪個已出貨檔案�
 |---|---|---|---|
 | `process-ledger` | 決策／回授／邊界契約的過程帳本：決定當下落盤，之後每個續接點機械地讀回；`report.py` 產 `[unattended-run]` 的收尾報告 | `global-claude-md/CLAUDE.md`（Decision charter、unattended-run）、`hooks/unattended_run.py`、`boundary_contract_notice.py`、`feedback_notice.py`、`dispatch_commit_notice.py` | `python tools/process-ledger/ledger.py add …`；`controls.py` 自測；stdlib |
 | `closeout-intake` | 教訓紀錄（`ops/lessons/`）的無損寫入器：`add`／`event` fail-closed，`check`／`report` 只警告 | `claude-ops/ops/lessons.md` 頁首、`hooks/intake_guard.py`、`intake_match_shadow.py`、`integrity-sweep.md` check 5 | `python tools/closeout-intake/intake.py add --from draft.md`；`controls.py`；本 repo 不出 `ops/lessons/` 紀錄樹，所以在地只能跑自測 |
-| `feedback-pool` | 子系統回授池：把 ledger 的 feedback 列與機器產生的缺陷訊號依 target 計數，到門檻在 HMI 亮 warn | `hooks/feedback_notice.py`、`rules/hook-deny-message.md` | `python tools/feedback-pool/feedback.py`；`controls.py`；讀 process-ledger |
+| `feedback-pool` | 子系統回授池：把 ledger 的 feedback 列與機器產生的缺陷訊號依 target 計數，到門檻在 HMI 亮 warn | `hooks/feedback_notice.py`、`rules/hook-deny-message.md` | `python tools/feedback-pool/feedback.py`；`controls.py`（36/36，2026-10-10）；讀 process-ledger。`gate-overrides.json` 是樣板登記簿（只留腳本有出貨的三列），`hooks/feedback_notice.py --selftest` 讀它 |
 | `tree-noise` | 純 git 把髒檔分成「雜訊」與「真工作」 | `hooks/tree_noise_gist.py`、`rule-registry.md` TREE_NOISE | `python tools/tree-noise/noise.py`；`controls.py`；git |
 | `cc-delta` | Claude Code 版本差異報告：自上次對齊以來哪些變動可能讓 ops 寫下的東西失效 | `rule-registry.md`、`claude-ops/ops/environment.md` | `python tools/cc-delta/cc_delta.py`；`test_cc_delta.py` |
 | `routing-loop` | skill 路由與模型路由的回饋迴圈（事件、儲存、迴圈三件）與一頁講解 | `rule-registry.md`、`skill-toolkit/skill-trigger-dict.md` | `python tools/routing-loop/loop.py`；`tests/` |
 | `eol-sync` | 把已追蹤檔案的工作樹行尾對齊 `.gitattributes`，commit 時由 `git-hooks/post-commit` 呼叫 | `global-claude-md/CLAUDE.md`（Line endings）、`rule-registry.md` | `python tools/eol-sync/eol_sync.py`；`test_eol_sync.py`；git |
-| `git-hooks` | 來源環境的 `post-commit`（呼叫 eol-sync） | 上列 | 複製進 `.git/hooks/` 才生效；本 repo 不代裝 |
+| `git-hooks` | 來源環境的 git hook 三件：`post-commit`（呼叫 eol-sync）、`pre-commit`（依序跑兩支檢查）、`check_py_escapes.py`（暫存的 Python 含無效跳脫序列就拒絕提交）與 `check_budgets.py`（CLAUDE.md 或頂層 `ops/*.md` 長過 `hooks/ops_health_nudge.py` 宣告的上限就拒絕提交；縮小或不動都放行）。2026-10-10 新增後三者 | 上列；`ops_health_nudge.py` 的上限常數 | `git config core.hooksPath tools/git-hooks` 才生效；本 repo 不代裝。兩支檢查在拋棄式 repo 裡雙向驗過（乾淨提交放行、無效跳脫與超限增長被拒，結束碼 1）；`check_budgets.py` 在本 repo 的 `claude-ops/ops/` 改名樹裡比對不到路徑，所以只在裝好的版面有作用 |
+| `mod-review` | 每個磁碟上的 Claude Code mod（plugin 的 `hooks/hooks.json` 有 `modules`）都要有一份審查紀錄：`scan` 列出缺紀錄的，`review` 跑 `claude plugin validate` 並寫紀錄 | `hooks/ops_health_nudge.py`（`mod-review` 檢查）、`rule-registry.md` 的 `MOD_REVIEW` 鍵 | `python -X utf8 tools/mod-review/mod_review.py scan`；`controls.py`（9 個案例，最後兩個跑家目錄的 `hooks/ops_health_nudge.py`，需要含 `mod-review` 檢查的版本）；紀錄寫到家目錄的 `reports/mod-reviews/`（該目錄不出貨，首次 `review` 時建立） |
+| `platform-search` | 一次查多個外部平台（程式碼、模型庫、實務社群）的線索，每個平台各列一區；`unavailable` 就是沒問到，不是沒人討論 | `claude-ops/ops/30-judgment.md` R7、`claude-ops/ops/references/platform-source-registry.json`、`hooks/subagent_retrieval_brief.py`（不出貨） | `python -X utf8 tools/platform-search/psearch.py query "<關鍵字>"`；`controls.py` 離線 24 個案例（裝好的版面 24/24；本 repo 樹內 23/24，因為登錄表在 `claude-ops/ops/references/`）。**agy 那條腿需要外部派工器 `tools/extdispatch/`，本 repo 不出貨**：它的子程序會失敗，該腿回報 `unavailable`（已實測回傳 LegUnavailable），`--wide` 與 reddit 備援同樣降級，絕不當成 0 筆。`state/hosts.json`（節流狀態）首次查詢時建立，來源端不進 git。網路各腿沒有在出貨時實跑 |
+| `token-key-gate` | 定義卡代號被點過之後，鍵盤快捷鍵（⌫、G）不能被代號吃掉：`run` 用無頭 Chromium 驗建好的頁面，`static` 掃殼與建置腳本的缺陷簽名 | `rules/deliverable-doc-refs.md` | `python -X utf8 tools/token-key-gate/token_key_gate.py selftest`／`run PAGE.html`／`static PATH`；`run` 與 selftest 的動態半需要 Playwright 加 chromium，沒裝時結束碼 2 並明說沒檢查（同 page-fill-gate）；`static` 只用標準庫。README 後半列的是來源機器上的專案產出清單（證據快照），在你的環境不會解析 |
 | `quote-evidence` | 受著作權保護頁面的指標證據：locator ＋ ≤15 CJK 單位的引文，靠本機 OCR 證明在頁上，絕不印 OCR 全文 | `rules/source-quotation-evidence.md`、`hooks/verbatim_dispatch_notice.py` | `python tools/quote-evidence/qe.py`；`ocr.ps1` 用 Windows OCR；`controls.py` |
 | `audience-fit-gate` | audience-fit skill 的兩條可判定規則做成閘門，第三條明說判不了 | `skills/audience-fit/SKILL.md` §Gate | `python tools/audience-fit-gate/afgate.py all original companion`；`--selftest` |
 | `compact-loss-audit` | 讀 `compact_loss_record.py` 寫的 JSONL，判 handoff 完整度與誤導性；`hook_controls.py` 校準那支 hook | `compact-recovery/README.md`、`hooks/compact_loss_record.py`、`rule-registry.md` | `python tools/compact-loss-audit/audit.py`；要有 `telemetry/compact-loss.jsonl` |
-| `rule-usage-census` | 規則使用率普查（哪些規則面在真實 session 被用到、主迴圈是哪個模型）；只出 README 與 `census.py` | `claude-ops/ops/40-maintenance.md` §3、`rule-registry.md` | `python tools/rule-usage-census/census.py`；讀本機 session 逐字稿，離開來源環境只能跑自測 |
+| `rule-usage-census` | 規則使用率普查（哪些規則面在真實 session 被用到、主迴圈是哪個模型）；出 README、`census.py`、`lastuse.py`（最後載入時間，system-hmi 的 `reading-use` 來源）與 `dormant.json`（樣板：空物件，休眠裁示由你自己寫） | `claude-ops/ops/40-maintenance.md` §3、`rule-registry.md` | `python tools/rule-usage-census/census.py`、`python tools/rule-usage-census/lastuse.py check`；讀本機 session 逐字稿，離開來源環境只能跑自測（`census.py --selftest` 7/7、`lastuse.py --selftest` ALL PASS） |
 | `shell-audit` | L-024 背後的儀器：Bash 傳輸缺陷的探針、不變式與掃描 | `rule-registry.md`（多處）、`global-claude-md/CLAUDE.md`（Environment）、`hooks/shell_transport_guard.py` | `python tools/shell-audit/sweep.py`／`invariants.py`；`controls.py`；`PROBES.md` 記錄量測 |
 | `tracking-refs` | 已提交的指令檔指向 git 沒收的檔案（懸空指標）檢查 | `integrity-sweep.md` check 34、`hooks/ops_health_nudge.py` check 18 | `python tools/tracking-refs/refs.py`；`controls.py`；git |
 | `status-line` | 寫入並交叉核對 advisory 狀態列（rules-usage-dict S7） | `claude-ops/ops/rules-usage-dict.md` §S7 | `python tools/status-line/status_line.py` |
@@ -197,6 +237,6 @@ docstring 是權威說明；這裡只記「它是什麼、哪個已出貨檔案�
 | `skill-routing-audit.py`＋`skill-routing-audit-test/` | `skill-trigger-dict.md` 的機械路由稽核與它的合成逐字稿測試 | `integrity-sweep.md` check 18、`rule-registry.md` | `python tools/skill-routing-audit.py`；測試 `python tools/skill-routing-audit-test/test_skill_routing_audit.py` |
 | `glob-fitness.py` | 路徑範圍規則的 glob 到底搆不搆得到它講的程式碼 | `rule-registry.md`、`claude-ops/ops/40-maintenance.md` | `python tools/glob-fitness.py` |
 | `cross-index/xi_cards.py` | cross-index 管線裡唯一出貨的一支：讀 xi 卡片 front matter | `instruments/entry-schema-lint`、`instruments/system-hmi`（import） | 只作為依賴出貨；管線其餘部分不出貨 |
-| `system-hmi`（樣板） | 唯讀的系統級監控中介層：把每一種既有檢查正規化成 state × quality 讀值 | `hooks/system_hmi_summary.py`、`golive_check.py`、`feedback-pool`、`entry-schema-lint` ES-9 | `python tools/system-hmi/hmi.py validate／collect／show／scan`；`controls.py` 104/108（4 項綁來源登錄檔，照實回報）；`registry/*.json` 只留 schema ＋ 一列示範，照自己的子系統填 |
+| `system-hmi`（樣板） | 唯讀的系統級監控中介層：把每一種既有檢查正規化成 state × quality 讀值 | `hooks/system_hmi_summary.py`、`golive_check.py`、`feedback-pool`、`entry-schema-lint` ES-9 | `python tools/system-hmi/hmi.py validate／collect／show／scan`；`controls.py` 107/125（2026-10-10 實測，hooks 在場；沒有 hooks 目錄是 106/125）：18 項失敗是照實回報的，3 項綁來源登錄檔與工具、15 項要載入沒出貨的 `editions.py` 與 `telemetry_trend.py` 發報器；`emitters/cli_auth.py` 隨附（`--selftest` 通過）；`registry/*.json` 只留 schema ＋ 一列示範，照自己的子系統填 |
 | `view-launcher`（樣板） | 最外層檢視入口（側邊欄＋儀表）的產生器；`views.json` 只留結構與一列示範頁 | `hooks/view_launcher_gist.py`、`rules/naming-and-placement.md` PL-6 | `python tools/view-launcher/build.py --selftest` 28/28；**注意**：不帶參數會整頁重建並改寫桌面捷徑（來源端缺陷，本輪回報） |
 | `secret-guard-test` | `hooks/secret_file_guard.py` 的雙側校準（12 must-deny、18 must-pass、3 undetermined 另計） | `hooks/secret_file_guard.py` | `python tools/secret-guard-test/test_secret_file_guard.py`；本輪在本 repo 樹內跑：failures 0；夾具裡的專案路徑改成 `<WORK_ROOT>`、家目錄改成 `<CLAUDE_HOME>`（manifest 登記） |

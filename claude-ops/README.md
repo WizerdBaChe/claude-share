@@ -25,11 +25,13 @@
 - `ops/environment.md`：擷取時的工具環境與模型成本上限紀錄。
 - `ops/OPS.md`：各規範文件的入口與使用索引。
 - `ops/references/`：規範背後的細節檔（integrity-sweep 檢查清單、entry-schema、
-  gate-design、maintenance-cases、harness-measurements 量測帳等，共 14 份；
+  gate-design、maintenance-cases、harness-measurements 量測帳等，共 16 份；
   `harness-measurements.md` 自 2026-10-02 起隨附，是 `environment.md` 各段
-  事實背後的量測紀錄）。
-- `ops/lessons.md`：踩坑索引（generated index）的快照，2026-10-02 對齊 source
-  的 134 筆；每筆 `Record:` 指向的 `ops/lessons/` 逐筆紀錄樹**不**隨附。
+  事實背後的量測紀錄；2026-10-10 起另附 `ticket-supervision.md`（派工後登記與
+  監督的欄位細節）與 `platform-source-registry.json`（外部既有作品各平台的
+  已探測路由表，其執行器 `psearch.py` 不隨附）。
+- `ops/lessons.md`：踩坑索引（generated index）的快照，2026-10-10 對齊 source
+  的 149 筆；每筆 `Record:` 指向的 `ops/lessons/` 逐筆紀錄樹**不**隨附。
 - `ops/rule-registry.md`：規則登記簿；凡引用未隨附工具之處都附有 `Share note`。
 
 ## 路徑對照｜Path map (read before adoption)

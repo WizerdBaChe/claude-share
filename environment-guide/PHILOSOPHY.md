@@ -129,8 +129,8 @@ PH-11 的 AP-61…AP-64）。
 │   ├── 10~70-*.md             指令迴圈/派工/判斷/維護/教練/引導/演化
 │   ├── environment.md         ⚠️ 環境事實（模型對映、機制盤點）——遷移後必須重建
 │   └── lessons.md             一次性教訓卡（有 hit-count 與封存機制）
-├── skills/                    自製能力模組（11 個），描述極簡 + references/ 按需
-├── hooks/                     機械強制層：model_cap_guard、ops_health_nudge
+├── skills/                    自製能力模組（現有哪些看 skills/*/SKILL.md），描述極簡 + references/ 按需
+├── hooks/                     機械強制層（掛載看 settings.json，各支狀態看檔內 STATUS: 行）
 ├── backups/<date>/            改動前快照（gitignored——git 本身已是歷史）
 ├── archive/                   退役內容（gitignored，磁碟保留）
 └── projects/<slug>/memory/    自動記憶——2026-09-06 起納入版控（同層的
@@ -147,9 +147,10 @@ ops/ > skill 內文。字典與索引永遠只是索引，本體以各自的檔�
 **Tier 1 —— 不可再生，遺失即重寫**（全部已在 git repo 內）：
 - `CLAUDE.md`（全域偏好——多次專案回顧萃取的裁決紀錄）
 - `ops/` 全部（除 `environment.md` 外都可跨環境攜帶）
-- `skills/` 自製 14 個（含 references/、evals/）
-- `hooks/` 7 支 Python 腳本 + `browser-pane-blocklist.json`
-- `agents/` 自訂 subagent 定義 8 個（能力白名單 + 路由表 `ops/20-dispatch.md`）
+- `skills/` 自製的全部（含 references/、evals/；現有哪些看 `skills/*/SKILL.md`）
+- `hooks/` 全部（hook 腳本、共用函式庫、資料檔；現況不在此列舉——掛載看 `settings.json`，
+  各支狀態看檔內 docstring 的 `STATUS:` 行，全貌看 `tools/system-hmi/out/structure.html`）
+- `agents/` 自訂 subagent 定義全部（能力白名單 + 路由表 `ops/20-dispatch.md`；現有哪些看 `agents/*.md`）
 - `skill-trigger-dict.md`、`audit-archive/`（凍結，歷史；本分享版即根目錄的
   `Global_skill_update.md`）、`.gitignore`、本文件
 - `interop/`(跨 agent 同步層:可攜規則唯一源 + 編譯器 + 遷移地圖;
@@ -192,7 +193,8 @@ sessions/telemetry/cache 等執行期狀態、任何 credentials。
    `projects/<新slug>/memory/`，否則 Claude Code 讀不到。
 4. **重建 `ops/environment.md`**：模型層級對映、可用派工機制、成本上限
    政策都是環境事實，不能從記憶假設——照 `ops/20-dispatch.md` §0 重新確認。
-5. **活體驗證**：手動跑一次兩支 hook（healthy 應靜默；用壓低門檻確認會觸發）、
+5. **活體驗證**：跑 `tools/hook-proof-of-life/pol.py`（執行每支已掛載 hook 在自己
+   docstring 宣告的存活證明，不寫死是哪幾支）、
    開一個 session 確認 skill 描述正常載入、ops 路由目標無缺檔
    （ops_health_nudge 的 ghost-rule 檢查會自動告訴你）。
 6. **平台端重接**：plugins / MCP connectors 在 claude.ai 或桌面 app 的

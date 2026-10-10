@@ -1,6 +1,15 @@
 # rule-usage-census — 規則使用率普查 (rule usage census)
 
-> status: advisory — WARN-only；讀者是人或 LLM，沒有任何下游工具消費它的輸出。
+> status: advisory — WARN-only；census.py 的讀者是人或 LLM，沒有任何下游工具消費它的輸出（lastuse.py 例外，見下）。
+
+> **最後使用時間 (lastuse.py) 2026-10-06。** `lastuse.py emit` 是 system-hmi 原生來源 `reading-use`（慢層，每日完整重整），
+> 三個讀值：`reading-use.path-rules`（`telemetry/rule-loads.jsonl` 的 path_glob_match）、`reading-use.skills`
+> （對話歸檔中的 Skill 呼叫、使用者 `/指令`、讀取 `skills/<x>/SKILL.md`；依 mtime+size 增量快取在 `cache/rule-usage-census/`），
+> 與 `reading-use.agents`（2026-10-09 起：`Agent` 派工的 `subagent_type` 等於 `agents/*.md` 前言 `name`，或讀取 `~/.claude/agents/<檔名>.md`；
+> 內建代理人類型沒有檔案，不列入；另存 `lastuse-agents-cache.json`，不動 skills 快取）。
+> 「載入就是使用」：30 天沒用 → warn「待檢視」，永不 fail；建立未滿 30 天記為 young；刻意休眠的元件寫進
+> `dormant.json`（`{"rules/x.md": {"reason": "…", "review_when": "…"}}`）就只報不警示。它判斷不了「死了沒」，只判斷「多久沒載入」。
+> 自我測試：`python -X utf8 tools/rule-usage-census/lastuse.py --selftest`。
 
 **回答的問題**：哪些規則面（全域 `CLAUDE.md` 的條文、`ops/*`、`rules/*`、skill）在真實 session 裡
 真的被用到，以及用到它們的主迴圈模型 (main-loop model) 是誰。這是 `ops/40-maintenance.md` §3

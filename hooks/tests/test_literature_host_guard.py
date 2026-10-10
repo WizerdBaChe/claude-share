@@ -60,6 +60,9 @@ POLICY = {
         {"host": "banned.example", "class": "agent_banned", "agent_surfaces": [], "max_per_run": 0,
          "licence_basis": "Terms of Use forbid robots or intelligent agents (read 2026-09-10)"},
         {"host": "inst.example", "class": "institutional_only", "agent_surfaces": [], "max_per_run": 0},
+        {"host": "landing2.example", "class": "landing_page", "agent_surfaces": ["webfetch"], "max_per_run": 2},
+        {"host": "landing5.example", "class": "landing_page", "agent_surfaces": ["webfetch"], "max_per_run": 5},
+        {"host": "opencap.example", "class": "open", "agent_surfaces": ["webfetch"], "max_per_run": 1},
     ],
 }
 
@@ -85,9 +88,9 @@ class Box:
         return subprocess.run([sys.executable, "-X", "utf8", str(HOOK)], input=raw,
                               capture_output=True, text=True, env=self.env, timeout=60)
 
-    def run(self, tool: str, ti: dict):
+    def run(self, tool: str, ti: dict, session: str = "test-session"):
         """-> (denied, reason, returncode)."""
-        p = self.run_raw(json.dumps({"tool_name": tool, "tool_input": ti, "session_id": "test-session"}))
+        p = self.run_raw(json.dumps({"tool_name": tool, "tool_input": ti, "session_id": session}))
         out = (p.stdout or "").strip()
         if not out:
             return False, "", p.returncode
@@ -173,6 +176,42 @@ for cid, tool, ti, why in [
     denied, reason, rc = box.run(tool, ti)
     check_that(f"{cid} allow: {why}", not denied and rc == 0, f"rc={rc} reason={reason[:120]!r}")
 
+# ------------------------------------------------------------- session cap
+print("\n-- C: the per-session cap on small-cap landing rows (user ruling 2026-10-04)")
+cbox = Box()
+
+
+def WF(url, session="s-cap"):
+    return cbox.run(WEBFETCH, {"url": url}, session)
+
+
+d1, _r, _ = WF("https://landing.example/a/1")
+d2, reason, _ = WF("https://landing.example/a/2")
+check_that("C-1 cap 1: the first WebFetch of the session is allowed, the second (another URL) denied",
+           not d1 and d2, f"{d1} {d2}")
+check_that("C-1b the cap deny names the hook, the per-session cap and the count, and carries the receipt",
+           reason.startswith("Call denied by literature_host_guard (a local PreToolUse hook")
+           and "per session" in reason and "already made 1" in reason and "Recorded as row" in reason
+           and "report_fp.py" in reason, reason[:300])
+d, _r, _ = WF("https://landing.example/a/3", "s-other")
+check_that("C-2 the count is per session: another session still gets its one call", not d)
+d, _r, _ = WF("https://www.landing.example/a/4")
+check_that("C-3 a subdomain counts against the same row", d)
+res = [WF(f"https://landing2.example/p/{i}", "s-two")[0] for i in range(3)]
+check_that("C-4 cap 2: two allowed, the third denied", res == [False, False, True], res)
+res = [WF(f"https://landing5.example/p/{i}", "s-five")[0] for i in range(7)]
+check_that("C-5 a landing row with cap 5 (> SESSION_CAP_MAX) is not session-counted", not any(res), res)
+res = [WF(f"https://opencap.example/p/{i}", "s-open")[0] for i in range(3)]
+check_that("C-6 an open row with cap 1 is not session-counted (class gate)", not any(res), res)
+dsh, _r, _ = cbox.run("Bash", {"command": "curl https://landing.example/x"}, "s-deny-first")
+dwf, _r, _ = WF("https://landing.example/x", "s-deny-first")
+check_that("C-7 a DENIED call does not consume the cap (only allows are counted)", dsh and not dwf, f"{dsh} {dwf}")
+res = [WF(f"https://landing.example/n/{i}", "")[0] for i in range(2)]
+check_that("C-8 no session id: nothing to count against, fail-open", not any(res), res)
+check_that("C-9 the cap deny is logged as a loud deny row on the capped host",
+           any(r["decision"] == "deny" and r.get("loud") and r["host"] == "landing.example"
+               and r["session"] == "s-cap" for r in cbox.rows()), cbox.rows()[-3:])
+
 # ------------------------------------------------ the mutation that tests D-01
 print("\n-- M: mutations that keep the deny side honest")
 mut = Box(policy={**POLICY, "hosts": [r for r in POLICY["hosts"] if r["host"] != "banned.example"]})
@@ -184,6 +223,15 @@ mut2 = Box(policy={**POLICY, "hosts": [{**r, "agent_surfaces": ["webfetch", "bro
 denied, _r, _rc = mut2.run(PW, {"url": "https://landing.example/article/1"})
 check_that("M-2 granting browser_headless on the landing row flips D-10 to allow "
            "(the surface check reads agent_surfaces)", not denied)
+mut3 = Box(policy={**POLICY, "hosts": [{**r, "max_per_run": 3} if r["host"] == "landing.example" else r
+                                       for r in POLICY["hosts"]]})
+res = [mut3.run(WEBFETCH, {"url": f"https://landing.example/m/{i}"}, "s-m3")[0] for i in range(4)]
+check_that("M-3 raising the landing row's cap to 3 (> SESSION_CAP_MAX) leaves it uncounted "
+           "(so C-1 was reading max_per_run, not a baked 1)", not any(res), res)
+mut4 = Box(policy={**POLICY, "hosts": [{**r, "max_per_run": 2} if r["host"] == "landing.example" else r
+                                       for r in POLICY["hosts"]]})
+res = [mut4.run(WEBFETCH, {"url": f"https://landing.example/m/{i}"}, "s-m4")[0] for i in range(3)]
+check_that("M-4 the same row at cap 2 denies the THIRD call, not the second", res == [False, False, True], res)
 
 # ------------------------------------------------------------------ recording
 print("\n-- R: telemetry rows")
@@ -247,10 +295,51 @@ if live:
     for h in ("arxiv.org", "api.crossref.org", "api.semanticscholar.org"):
         denied, _r, _rc = lbox.run(WEBFETCH, {"url": f"https://{h}/x"})
         check_that(f"L-4 live open/API row allows WebFetch: {h}", not denied)
-    denied, _r, _rc = lbox.run(CHROME, {"url": "https://link.springer.com/article/10.1007/x"})
-    check_that("L-5 live landing row (link.springer.com) refuses the user's Chrome", denied)
-    denied, _r, _rc = lbox.run(WEBFETCH, {"url": "https://link.springer.com/article/10.1007/x"})
+    # was link.springer.com until that row went agent_banned (user ruling 2026-10-04)
+    denied, _r, _rc = lbox.run(CHROME, {"url": "https://www.spiedigitallibrary.org/journals/x"})
+    check_that("L-5 live landing row (www.spiedigitallibrary.org) refuses the user's Chrome", denied)
+    denied, _r, _rc = lbox.run(WEBFETCH, {"url": "https://www.spiedigitallibrary.org/journals/x"})
     check_that("L-5b but grants WebFetch", not denied)
+
+    # L-6: the rows added by user ruling 2026-10-04 (claude-se-history literature run). Each case
+    # asserts the CLASS the hook logged, not only allow/deny: before the edit sebokwiki.org and
+    # www.tandfonline.com were allowed as UNLISTED (no row logged) and link.springer.com was
+    # allowed as landing_page, so a verdict-only check could not tell the edit happened.
+    def logged(tool, ti):
+        b = Box(policy=live)
+        denied, _r, _rc = b.run(tool, ti)
+        rows = b.rows()
+        return denied, (rows[-1].get("class") if rows else None)
+
+    for cid, tool, url, want_denied, want_class, why in [
+        ("L-6a", WEBFETCH, "https://sebokwiki.org/wiki/Life_Cycle_Stages", False, "open", "a new open row allows WebFetch"),
+        ("L-6b", "Bash", "https://www.nasa.gov/reference/4-0/", False, "open", "a new open row allows a script"),
+        ("L-6c", CHROME, "https://sebokwiki.org/wiki/x", True, "open", "a new open row grants no browser (R2)"),
+        ("L-6d", WEBFETCH, "https://www.wiley.com/x", False, "landing_page", "the storefront row grants WebFetch"),
+        ("L-6e", "Bash", "https://www.wiley.com/x", True, "landing_page", "but not a script (unmeasured surface)"),
+        ("L-6f", WEBFETCH, "https://link.springer.com/article/10.1007/x", True, "agent_banned",
+         "link.springer.com moved landing_page -> agent_banned"),
+        ("L-6g", WEBFETCH, "https://www.tandfonline.com/doi/abs/10.1/x", True, "agent_banned",
+         "tandfonline promoted from unmeasured to a banned row"),
+        ("L-6h", WEBFETCH, "https://platform.claude.com/x", False, None,
+         "claude.com stays unlisted: the code.claude.com row does not reach a sibling subdomain"),
+    ]:
+        ti = {"command": f"curl -s {url}"} if tool == "Bash" else {"url": url}
+        denied, cls = logged(tool, ti)
+        check_that(f"{cid} {why}", denied == want_denied and cls == want_class,
+                   f"denied={denied} class={cls!r} (want {want_denied}, {want_class!r})")
+    for cid, host, cap in (("L-7a", "opg.optica.org", 1), ("L-7b", "iopscience.iop.org", 1),
+                           ("L-7c", "www.wiley.com", 2)):
+        b = Box(policy=live)
+        res = [b.run(WEBFETCH, {"url": f"https://{host}/x/{i}"}, "s-live")[0] for i in range(cap + 1)]
+        check_that(f"{cid} live small-cap landing row {host}: {cap} allowed per session, then denied",
+                   res == [False] * cap + [True], res)
+    b = Box(policy=live)
+    res = [b.run(WEBFETCH, {"url": f"https://books.google.com/x/{i}"}, "s-live")[0] for i in range(2)]
+    check_that("L-7d a live landing row with a larger cap (books.google.com) is not session-counted", not any(res), res)
+    check_that("L-6i a promoted publisher left unmeasured_publisher_hosts (moved, not duplicated)",
+               not {"www.tandfonline.com", "journals.sagepub.com"} & set(live.get("unmeasured_publisher_hosts") or []),
+               live.get("unmeasured_publisher_hosts"))
 
 before = (LIVE_LOG.stat().st_size if LIVE_LOG.exists() else -1, LIVE_RECEIPTS.stat().st_size if LIVE_RECEIPTS.exists() else -1)
 Box().run(WEBFETCH, {"url": "https://banned.example/x"})

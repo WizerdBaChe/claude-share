@@ -170,6 +170,25 @@
   direct user-facing output, so "name a standing alarm at the reply's edge"
   had to be a CLAUDE.md clause) merged into the pre-existing-issues bullet
   (+106 B) → **23,510 B (headroom 42 B)**. The next addition needs a sink.
+- 2026-10-03 pass, no raise (user 「兩條寫進 CLAUDE.md，先確認衝突或重複」, after
+  a 10-session reply-legibility audit against ASD-STE100: 2 of 44 user turns
+  showed confusion caused by wording). Two clauses MERGED, none appended:
+  (1) a fired/overridden warning gets its own sentence at a reply edge — into
+  the pre-existing-issues bullet, generalising its `[system-hmi]` clause
+  (evidence: a lab-skill-sync warning silenced with `mark` surfaced only as a
+  sub-clause, user 「你說有警報但沒有和我說明」); (2) a label a reply coins has
+  one meaning per conversation — into the conversation-replies bullet, the
+  reply-side twin of `rules/naming-and-placement.md` NM-2 (evidence: user wrote
+  「B1 (9.)」 to disambiguate a checklist number; "A1" named both a checklist
+  item and a test arm). Sinks, all rationale or restatement with a canonical
+  copy: recall.py's leg list (→ `tools/recall/README.md`), the wrong-mental-
+  model rationale (→ `ops/50-coach.md`), the relative-path rationale
+  (→ `ops/references/uat.md` P8), "don't pick unilaterally" and "(answers,
+  questions, explanations)" (both restate their own sentence). 23,547 →
+  **23,539 B (headroom 13 B)**. The conflict this surfaced — `uat.md` P2
+  continuous numbering beside printed rung tags `(A1)…(B3)` — was settled in
+  the owner file by user ruling (option 1): P2 kept, new `uat.md` P10 bans
+  rung codes in visible items (rung words instead).
 - 2026-09-10's pass (rules-debt audit, `reports/2026-09-10-rules-debt-audit.md`
   §5; user-confirmed): the file had crept to 23,522 B (+1,508 since the
   09-06 pass, three rules and a CJK clause). Sinks found, in the order this
@@ -792,6 +811,33 @@
   §4; build contract `references/closeout-capture-r3-psm-2026-09-07.md`; usage
   and record format `tools/closeout-intake/README.md` (rules-usage-dict §7).
 
+### `MOD_REVIEW` — every Claude Code mod on disk carries a review record
+- current: since 2026-10-02 every plugin on disk whose `<plugin>/hooks/hooks.json`
+  names a hooks module (`"modules"`, Claude Code ≥ 2.1.287) — under
+  `plugins/cache`, `plugins/synced`, `skills/*` (skills-dir plugins) or
+  `dev-mods/` — has `reports/mod-reviews/<name>@<version>.md`, written by
+  `python tools/mod-review/mod_review.py review <plugin-dir>` from
+  `claude plugin validate` (its `hooks:` / `calls:` lines, the ones that
+  reach past observing flagged). Enabled or not: `/plugin` enables without a
+  tool call any hook could see, so on-disk is the last checkable point.
+  Measured by ops-health check 22 `mod-review`, ALARM grade (a determinable
+  closure). The record informs; enabling stays the user's decision.
+- why: a mod runs in-process, unsandboxed, and a `tool.check` hook can approve
+  a call a PreToolUse hook here blocked (docs plugins/mods/events, "The order
+  mods run in"); `disableAllHooks` / `--safe-mode` / `--bare` do not stop
+  built-in mods. Every hook-enforced invariant on this machine assumes nothing
+  approves past a hook. User ruling 2026-10-02 「走建議」 on
+  a dated CC-version addendum under the source's `reports/` tree (not shipped), item 1.
+- evidence: `tools/mod-review/controls.py` (finite fixture: two unreviewed,
+  one reviewed, five non-mods incl. two undetermined hooks.json, a catalog
+  copy; the real hook prints the finding on the positive home and not on the
+  repaired one); `review` run against a sample mod through the real
+  `claude plugin validate` 2.1.287 flagged `tool.call, tool.check`.
+- review-when: Claude Code renames `modules` or moves its plugin cache; a
+  plugin source outside those four roots starts loading here; the first mod
+  is actually installed (then read its record against this property once by
+  hand — the first real input of a new gate).
+
 ### `PUBLISHED_RECORD` — a record of a removal must not carry the removed value
 - current: two layers, one rule. (1) A dispatch brief that sends a worker into a
   governed record carries that record's own record-writing rule
@@ -1041,8 +1087,50 @@
   reading-context notice; its promotion triggers (i)/(ii) live in the hook's
   own docstring and read `telemetry/model-cap-guard.jsonl` — 0 such rows as of
   2026-09-23; closed by user ruling 2026-09-23.
-- history: unchanged since birth
-- rollback: `ops/environment.md` "Subagent cost cap"
+- history: unchanged since birth; 2026-10-02 escape under load (a local
+  session: 2 of 8 parallel no-`model` dispatches passed because the hook's
+  5 s `timeout` elapsed — a timed-out command hook is a pass) → every
+  deny-capable hook's timeout raised to 30 s, regression case M-T1, rules
+  clause "a guard that did not answer is not an approval" (`20-dispatch.md`
+  §4), in-process `agent.spawn` mod evaluated in
+  a dated evaluation under the source's `reports/` tree (not shipped); same day, user ruling
+  "deny, no rewrite" → `mods/model-cap-mod` (mod `model-cap`, installed via
+  `settings.json` env `CLAUDE_CODE_PLUGIN_DIRS`): the engine AWAITS it, so no
+  timeout pass; it also judges forks on `parentModel` (the engine ignores
+  `model` for forks — a hole the Python hook cannot see) and logs the resolved
+  model of every spawn to `telemetry/model-cap-mod.jsonl`. Two enforcers, one
+  policy: `BLOCKED`/`WITHIN_CAP` live in both `hooks/model_cap_guard.py` and
+  `mods/model-cap-mod/hooks/policy.ts` (drift point, README names it).
+  `claude plugin test mods/model-cap-mod` 6/6; its review record
+  under the source's `reports/` tree (not shipped).
+  2026-10-08 model-bench rounds 1–3 (`tools/model-bench/results/`; cloud
+  rounds 1–2, local round 3 on both dispatch paths, machine gates only):
+  `20-dispatch.md` §4 rows re-derived from the cheapest clean arm per row —
+  cheap effort floor medium, code rows with an explicit verification regime
+  cheap@high, format-contract and untrusted-summary rows never mid, large
+  inline context never cheap; `environment.md` gained the relative-alias
+  property after one CLI build resolved `haiku` a generation back; the cap
+  FLOATS: the table is a summary of the bench register, not a hand-held fact.
+  2026-10-10 (user ruling, CC 2.1.288→2.1.295 reconciliation): Agent gained a
+  per-call `effort` (2.1.292), so `sonnet` + `effort: max` passed the model-only
+  check → `EFFORT_OVER_CAP` {xhigh, max} denies on Agent and inline Workflow
+  (cases M-E1..M-E6, positive control: the pre-fix hook passed M-E1/M-E3 with no
+  decision); `settings.json` sets `onFailure: "block"` on this hook (2.1.295), so
+  the timeout-is-a-pass escape of 2026-10-02 is closed at the engine too (M-T2).
+  The mod (0.1.2, `9de0eab4`) judges the RESOLVED effort on turn.step as a NOTICE only
+  (agent.spawn carries no effort; per-call vs inherited is indistinguishable) — ruling R2 of
+  a dated handoff under the source's `reports/` tree (not shipped). The review-when below fired on the CLI
+  version change (2.1.294 -> 2.1.295; rounds 1-3 already ran Haiku 5.5): round 4 ran 2026-10-10,
+  tools/model-bench/results/round4-report.md; its t02/t04/t11 numbers carry the gold-leak caveat.
+- review-when (added 2026-10-08): a new model generation; a CLI version change
+  (`tools/cc-delta`); dispatch prefix grows beyond the last
+  `harness-measurements.md` figure by more than a fifth; the process ledger
+  shows cheap-tier failures above one in ten over three weeks. Any trigger →
+  `python tools/model-bench/bench.py run --repeats 3` on both paths, then the
+  §4 table follows the summary. Monitoring hook for the ledger-failure trigger
+  is filed in a source-only handoff note (not built).
+- rollback: `ops/environment.md` "Subagent cost cap"; the mod: remove its
+  path from `CLAUDE_CODE_PLUGIN_DIRS` (the Python hook stays)
 
 ### `~/.claude/AGENTS.md` — SUPERSEDED 2026-09-05: archived with the Codex cleanup
 - current: file no longer exists on disk. USER ruling 2026-09-05 (clean slate
@@ -1123,6 +1211,47 @@
   tracked directory: re-run the leak scan and re-decide BEFORE the first push;
   (b) the harness starts writing a non-`.md` artifact into `memory/` that is
   worth keeping (the rule would then be excluding it silently).
+
+### `DECISION_SHEET` — 3+ simultaneous rulings go on one HTML sheet, answered by one paste
+- current: `rules/decision-sheet.md` (path-scoped; stem in the CLAUDE.md Path-scoped rules line) + `tools/decision-sheet/decision-sheet.template.html` (the one canonical template; only its `CONFIG` block is edited per sheet). Default judged and named, doubt asked once at the reply edge, explicit user instruction (a forced template version, sample sheet or carrier) overrides and is ledgered. Named-authorization items sit in the template's `named` section and are skipped by "apply all ★" (`ops/05-authority.md` §3). An outside copy for another person exists (a copy, not a dependency). (2026-10-09)
+- why: user ruling 2026-10-09 (ledger, quote-checked) 「沒特別講就判定預設，但有疑慮要詢問，且可以被明確覆蓋」; the 2026-10-09 pending triage answered 46 items in one paste (record `references/pending-triage-2026-10-09.md`). Same default/ask/override skeleton as `EXPLAINER_DELIVERABLES` and the SE-history edition profile, different axis (delivery form vs generation pipeline vs output edition); unlike the edition profile, the sheet-over-chat default may be taken on the model's own judgement.
+- evidence: template DOM-checked 2026-10-09 (4 cards, 3 groups, "apply ★" fills no `named` item, output starts `【`, no `.fatal`); `fill_gate.py` PASS at 3 viewports. NOT verified: browser-memory persistence (localStorage disabled in the preview), real clipboard copy, a real paste-back round.
+- review-when: see the rule file frontmatter.
+
+### `EXPLAINER_DELIVERABLES` — explanatory HTML / decks are built from a content file by a registered carrier
+- current: `rules/explainer-deliverables.md` (path-scoped; stem in the CLAUDE.md
+  Path-scoped rules line). Any explanatory deliverable (說明頁、報告頁、介紹頁、
+  簡報) is a build output: content in `<name>.explainer.json` (schema
+  `explainer/1`), carrier produced by `tools/carriers/build.py build`, output
+  stamped; hand-written carrier text is a defect unless the user names another
+  way for that deliverable. The place: `tools/carriers/` — one folder per
+  carrier, carriers import only `common/`, version bump + change-log line +
+  `build.py selftest` on every change. Carriers v1: `html-explainer` (vendored
+  research-site reading shell), `pptx-explainer` (vendored AssetVault
+  pptx-deck-builder helpers). (2026-10-09)
+- why: user ruling 2026-10-09 (process ledger, quote-checked) — 「如果沒有特別指定，
+  就必須是"從設計過的產出資料格式中，機械性的抽取並放到當下指定的載體後自動產出"」,
+  with the carriers in an independent, maintainable, rule-bound place because the
+  target carrier changes. Same failure family as naming-and-placement PR-3 (two
+  hand-written carriers drifted in 24 h at SSLD T00) and L-142 (an accepted shell
+  upgrade invisible to the next deliverable).
+- evidence: `build.py selftest` ALL PASS on 2026-10-09 — registry↔folders both
+  ways, golden sample through both carriers (html: content, fill_gate, main_fill,
+  structure, stamp; pptx: content, type_audit, structure, geometry, stamp),
+  hand-edit control → `edited`, wrong-content control → `stale`, validator
+  rejects an unresolved `[[g:]]`; carrier unit tests 14/14 and 26/26 with
+  negative controls. The pptx stamp is split over three core properties
+  (python-pptx caps each at 255 chars — caught by the first pptx build).
+  Enforcement is FAIL inside the pipeline (no stamp without passing gates) and
+  `prose-only` outside it: no hook stops a hand-written page.
+- history: born 2026-10-09. Supersedes the 2026-09-29 judgement "a cross-carrier
+  layer is premature" (a local memory note) by the ruling.
+- rollback: remove the stem from CLAUDE.md, archive the rule file; `tools/carriers`
+  stays usable as a tool.
+- review-when: the user changes the ruling or asks for a carrier this layer
+  cannot make; a second content schema is needed; `build.py scan` finds a
+  hand-written explanatory deliverable born after 2026-10-09 with no user
+  exception → build a PostToolUse notice (promotion trigger).
 
 ## Harness defaults — where the local layer narrows within them
 
@@ -2002,6 +2131,14 @@ option B's trigger). Tier-B compliance meter:
   --root <WORK_ROOT> --content "gl_FragColor|gl_Position|uniform sampler2D"`
   (2026-08-19: recall 94.1%, precision on files actually opened 100%; the one
   unreached file is a third-party ComfyUI Python extension).
+  **Retired 2026-10-09 (user ruling, pending triage O2: 淘汰，封存不刪).** The
+  falsifier above had effectively fired: one load in 1,094+ sessions, and its
+  source project (3D-photo-engine) is `done`. The file left `rules/` (index line
+  in CLAUDE.md and the system-hmi row removed in the same commit); the content is
+  kept at `git show 51b7f4ef:rules/shader-failure-modes.md` and as an untracked
+  archive copy (not shipped). If GLSL work
+  returns, restore it from that commit instead of rewriting it. The re-check
+  sentence two paragraphs above is closed by this retirement.
   Also: an extension-glob-dispatched rule's fire rate may be read as accuracy
   ONLY after checking the rule against its own source project — if the globs
   cannot see that project, the low rate is blindness, not accuracy.
@@ -2083,6 +2220,59 @@ option B's trigger). Tier-B compliance meter:
   deliberately keeps LF (then scope it to `w/mixed` only).
 - rollback: remove the check-21 block and its `HMI_CHECKS` row, and the point.
 
+### python escape gate — git pre-commit
+- current: `tools/git-hooks/pre-commit` → `tools/git-hooks/check_py_escapes.py`
+  compiles the STAGED blob of every added/modified `*.py` and refuses the commit
+  on an invalid-escape SyntaxWarning (`"\S"` in a non-raw literal). A genuine
+  SyntaxError and the checker's own failures are notices, never a veto. Active
+  only while `core.hooksPath` points at `tools/git-hooks` (same wiring as
+  `eol conformance`). This repo only.
+- why: plain `python -m py_compile` exits 0 on such a file (calibrated
+  2026-10-03 on the pre-`d16016a` model_cap_guard.py), so "py_compile clean"
+  acceptances were blind to the class while it recurred in hooks
+  (dangerous_command_guard `\|`; model_cap_guard a share-tree path, `afbb856` →
+  `d16016a`). A deny-capable hook that fails to import fails OPEN once Python
+  makes the escape an error. Commit time, because every landing here is
+  committed; repo sweep at birth: 798 `.py`, 0 hits. Rule-text companion
+  (2026-10-03, user authorization): `30-judgment.md` R5 defines "parses clean"
+  as warnings-fail (`-W error::SyntaxWarning -m py_compile`) with a ❌/✅ pair,
+  so a manual acceptance outside a commit (another repo, a worker's report)
+  holds the same bar as this gate.
+- evidence: `drafts/2026-10-03-py-escape-precommit/APPLY.md` — throwaway-repo
+  calibration 7/7 (3 must-refuse, 4 must-pass); live: the commit that added the
+  gate ran it over its own checker.
+- review-when: Python turns invalid escapes into a SyntaxError (compile raises;
+  the SyntaxError branch must become the blocking one); `core.hooksPath` changes.
+- rollback: delete `tools/git-hooks/pre-commit` (the checker alone is inert).
+
+### rule-file budget gate — git pre-commit
+- current: `tools/git-hooks/pre-commit` → `tools/git-hooks/check_budgets.py`
+  (2026-10-06). For every STAGED `CLAUDE.md` and top-level `ops/*.md` it reads
+  the staged blob's size against the caps the nudge already declares
+  (`CLAUDE_MD_CAP`, `SIZE_CAP`, `SIZE_CAP_EXEMPT`, parsed from
+  `hooks/ops_health_nudge.py` so there is one declaration) and refuses the
+  commit only when the blob is OVER its cap AND LARGER than HEAD's. A shrink,
+  an unchanged over-cap file, an exempt file, an unreadable cap or any failure
+  of its own passes with a notice. Refusal text repeats the nudge's remedy
+  (merge/relocate for CLAUDE.md, extract-to-references for ops/). Deliberate
+  over-cap checkpoint: `git commit --no-verify` (the user's call).
+- why: the budgets fire at SessionStart, which is one or more sessions AFTER
+  the edit — three breaches (2026-09-23 Codex-tier bullet, 2026-10-03 fetchsrc
+  paragraph, 2026-10-06 vault ruling) each sat as a standing HMI alarm until a
+  later session extracted; feedback pool `rule:ops/20-dispatch.md` proposal
+  "edit-time size check". The commit is the edit-time event this repo always
+  has. Growth-only so the gate can never block its own remedy.
+- evidence: throwaway-repo calibration 2026-10-06, 7/7 — R1 CLAUDE.md grown
+  over cap, R2 ops file grown over cap → refused; P1 over-cap shrunk, P2
+  over-cap untouched, P3 exempt grown, P4 under-cap growth, P5 caps unreadable
+  (notice) → passed. Live: the commit that added it ran over itself.
+- review-when: the nudge renames its cap constants or judges `ops/`
+  recursively; `core.hooksPath` changes; the gate refuses a commit the user
+  meant as a checkpoint more than ~3 times (then add a commit-message escape
+  like `[budget-ok]`, mirroring `[branch-ok]`).
+- rollback: delete `tools/git-hooks/check_budgets.py` (the wrapper skips a
+  missing checker).
+
 ### stale uncommitted work — ops-health check 14
 - current: at session start with cwd == `~/.claude` ONLY, `git status
   --porcelain -uall`; any dirty path whose mtime exceeds **3 days**
@@ -2138,8 +2328,9 @@ option B's trigger). Tier-B compliance meter:
 
 ### tracking refs — integrity-sweep check 34 + ops-health check 18
 - current: `tools/tracking-refs/refs.py` reads PATH and NAME references out of
-  every committed/uncommitted instruction surface (CLAUDE.md, settings.json,
-  skill-trigger-dict, skills/ hooks/ rules/ ops/ agents/ commands/,
+  every committed/uncommitted instruction surface (every top-level *.md —
+  CLAUDE.md, the dict, OPERATOR-GUIDE, PHILOSOPHY, LABEL-REGISTRY… — plus
+  settings.json, skills/ hooks/ rules/ ops/ agents/ commands/,
   references/*.md, tools/*/README.md) and classes each target: **dangling**
   (tracked source → existing untracked target) = FAIL, exit 1; `pending` /
   `ignored` = REPORT; `undetermined` (target found nowhere) counted apart;
@@ -2160,6 +2351,16 @@ option B's trigger). Tier-B compliance meter:
   live tree after the sweep 0 dangling / 0 pending / 18 ignored / 106
   undetermined; live hook run 0.31 s, silent. The first replay MISSED the
   CLAUDE.md case (bare-name reference) — the NAME form was added because of it.
+- history: 2026-10-03 SURFACE widened from three named top-level files to every
+  top-level *.md (this entry's own review-when: "a new surface kind starts
+  naming capabilities"). User ruling the same day replaced the hand-kept
+  hook/skill/agent/ops counts in OPERATOR-GUIDE and PHILOSOPHY with pointers to
+  live sources, and asked that those pointers get the same path checks as a
+  share/migration defence: the guide's steps run on a NEW machine, where an
+  untracked target is exactly what the clone does not bring. Control 13 (24/24;
+  `{}` under the old SURFACE); live tree unchanged at 0 dangling. Existence of
+  the same pointers is the sibling ES-5 top-level pass in
+  `tools/entry-schema-lint/`.
 - severity basis: a dangling pointer is a determinable closure (both ends are
   read from git), so FAIL, not WARN (`gate-severity-by-consumer` ruling
   2026-08-26). `undetermined` never moves the exit code: most of its 106 rows
@@ -2349,7 +2550,10 @@ option B's trigger). Tier-B compliance meter:
 - current: file CONTENT goes through Write (create/replace) or Edit
   (modify/append), search through Grep/Glob; the shell keeps git, running
   programs and POSIX pipelines. Global CLAUDE.md Environment bullet 1.
-  (2026-08-18)
+  (2026-08-18) Heredoc detail moved here from the bullet 2026-10-06 (CLAUDE.md
+  budget): a Windows path inside a Python heredoc is a raw string or forward
+  slashes, never `\\`; a raw string cannot END in a backslash — use `pathlib`
+  (or a forward-slash form) for a trailing directory separator.
 - why: the Bash tool's three defects (backslash `ceil(n/2)` collapse, ~7.7 KB
   truncation, Windows-path forms) exist only inside the shell, and the first
   two fail SILENTLY — the command reports success with corrupt output. A rule
@@ -2602,7 +2806,8 @@ option B's trigger). Tier-B compliance meter:
 ### `past_work_recall_inject` — a past-work phrase in the prompt triggers a machine lookup
 - current: UserPromptSubmit (no matcher). When the prompt carries 之前 / 上次 /
   先前 / 以前 / 做過 / 用過 / "like before" / "last time" / "previously", the hook
-  runs `tools/recall/recall.py` on the prompt's topic words (legs `mem,proj,les`,
+  runs `tools/recall/recall.py` on the prompt's topic words (the fast legs in the
+  hook's `LEGS` tuple — the leg list has ONE copy, `tools/recall/README.md`;
   3 per leg, 4 s timeout) and prints the candidates to stdout, which the harness
   injects beside the prompt. **Never blocks.** Harness-authored prompts
   (compaction banner, task notification, slash-command echo), "在 X 之前" and
@@ -2627,6 +2832,12 @@ option B's trigger). Tier-B compliance meter:
 - history: born 2026-09-20 as order 2 of the retrieval-linkage audit. Named
   gaps: a callback phrased without any listed word; subagents (UserPromptSubmit
   does not fire for them — the dispatcher must pass findings in the brief).
+  2026-09-21 `deliv` joined (`DELIVERABLE_FUNCTION_NAME`). 2026-10-06 `cand`
+  joined (AssetVault candidate shelf, D-39, user ruling: "like the shell we used
+  last time" must land on the CURRENT candidate of its class, L-142); the same
+  day the leg was found ranking a superseded candidate above its replacement
+  when the old title carried the query words — `order_cand_results` now emits
+  the replacement first (recall controls 20, two-sided).
 - rollback: remove the entry from `settings.json` UserPromptSubmit FIRST
   (`backups/2026-09-20/settings.json.pre-order2.bak`), then the hook file.
 - review-when: recall.py's `--json` block shape changes; a leg's latency moves
@@ -3496,6 +3707,26 @@ option B's trigger). Tier-B compliance meter:
   `tools/telemetry-framing/suite-sessions.json`, rows untouched. `--selftest`
   32/32 leaves the production file's row count unchanged.
 
+
+### `stash_worktree_notice` — a stash that writes refs/stash in a repository with linked worktrees
+- current: `hooks/stash_worktree_notice.py`, PreToolUse `Bash(*stash*)` / `PowerShell(*stash*)`.
+  **NOTICE, never deny** (user ruling 2026-10-06 「走建議用提醒的」), when a
+  `git [-C dir] stash` with no subcommand or push|save|pop|apply|drop|clear|branch
+  targets a repository whose `git worktree list` has more than one entry. The text
+  names the shared ref and the read-out route `git show <rev>:<path>` redirected into a scratch folder.
+  `list`/`show`, repositories without worktrees and malformed input stay silent.
+  Asset property: `ops/references/shared-tree-git.md` §0 refs/stash row (L-130).
+- why: refs/stash is one ref across every worktree; probe W3 showed a peer's pop
+  in the canonical tree exits 0 and writes a worktree's edit there. The rule row
+  alone is recall-only; the hook can determine the worktree count, not whether a
+  peer is active, so it forwards rather than vetoes. Outside feedback 2026-10-06
+  proposed a deny; the house ladder (L-061) is notice first.
+- evidence: suite `hooks/tests/test_stash_worktree_notice.py` 17/17 two-sided on
+  real temp repositories (7 notice-side, 10 silent-side incl. 3 undetermined
+  inputs); an inverted build that ignores the worktree count fails F1.
+- promotion trigger: DENY on the first incident where a stash entry crossed trees
+  (a `git stash list` entry `On <branch>:` popped in another tree).
+- rollback: remove the two settings.json entries and the hook file; the §0 row stays.
 ### `BOUNDARY_CONTRACT_NOTICE` — the first code write of an L1/L2 main loop meets a recorded contract or waiver
 - current: `hooks/boundary_contract_notice.py` (PreToolUse `Write|Edit|NotebookEdit`,
   once per session: a main-loop opus/fable session writing its first code file
@@ -3528,6 +3759,46 @@ option B's trigger). Tier-B compliance meter:
   (a) is its promotion trigger; kept and closed by user ruling 2026-09-23.
 - rollback: remove the settings.json entry and the hook file; keep this entry
   with `status: retired` and the §4 Trigger clause.
+
+### `CANDIDATE_SHELF_NOTICE` — writing a file of a shelved class names the class's current candidate
+- current: `hooks/candidate_shelf_notice.py` (PreToolUse `Write|Edit|NotebookEdit`,
+  NOTICE, never deny). When the target path matches a class's `triggers` globs in
+  AssetVault's derived `candidates/index.json` (D-39) and that class has a
+  `current` candidate, it names the candidate, its superseded predecessors and
+  the `candidates.py` commands — once per class per session
+  (`cache/candidate-shelf-notice/<session>.json`). Silent inside AssetVault's
+  own `candidates/`, under memory/cache/telemetry/plans, and when no class
+  matches. Fail-open, one telemetry row per notice or error
+  (`telemetry/candidate-shelf-notice.jsonl`). The reading twin is recall's
+  `cand` leg (joined to `past_work_recall_inject` the same day). (2026-10-06)
+- why: L-142 — the accepted se-history reading shell (2026-10-04) sat in a project
+  folder no index covered while the rule's only pointer named the older SSLD
+  shell, so the R07 intro page copied the old one. A prose "check for newer
+  shells first" is the ~22% follow-through carrier measured 2026-09-20; the edge
+  into the shelf had to be a hook. NOTICE not DENY: whether the write starts a
+  new thing of that class or edits one already derived from the current
+  candidate is not determinable from the path.
+- evidence: `--selftest` 13/13 two-sided incl. two undetermined inputs
+  (`hooks/tests/test_candidate_shelf_notice.py`), hook-deny-lint conforms,
+  deliverable probe pass, past-work suite 28/28; e2e row in telemetry
+  2026-10-06. The index it reads is DERIVED by `candidates.py sync` and checked
+  by AssetVault's C8 at its pre-commit, and here by HMI point
+  `assetvault.candidates-shelf` (`candidates.py check`, exit-code).
+- history: born 2026-10-06 (user rulings the same day: shelf inside AssetVault,
+  always a copy, proven/speculative grades, notice once per class per session).
+  The vault principle those rulings rest on ("every vault is a shared,
+  self-contained library") lives in the global CLAUDE.md prior-art bullet,
+  AssetVault `docs/DESIGN.md` D-39, obsidian_Nathan `AGENTS.md` INV-14 and
+  `interop/portable-core.md`; LexiconVault (dormant) and the knowledge packs
+  (`skills/render-perf/INTAKE.md` §6a) carry it by pointer only.
+- rollback: remove the settings.json PreToolUse entry FIRST, then the hook file;
+  the recall `cand` leg is independent (drop `"cand"` from the injection hook's
+  `LEGS`).
+- review-when: (a) ≥30 notices and most name a candidate the write was already
+  copied from → add an origin/uses check (the hook's own narrowing trigger);
+  (b) `candidates/index.json` changes shape or moves; (c) a second class is
+  added to `classes.json` (re-run the selftest: trigger globs are per class);
+  (d) LexiconVault is revived → its INV list gets the principle, not a pointer.
 
 ### `AGENT_FACING_TEXT` — two surfaces, and which requirement binds which
 - current: `rules/hook-deny-message.md` governs every string a hook sends into a
@@ -3654,7 +3925,12 @@ option B's trigger). Tier-B compliance meter:
   2026-09-11: the seven hosts `ops/environment.md` measured on 2026-09-10 (IEEE Xplore,
   ScienceDirect, Wiley, MDPI, Southampton eprints = `agent_banned`; Optica, IOP =
   `landing_page`, one document per run, webfetch only), the public APIs, the OA hosts,
-  Scopus / Web of Science / airiti / SLIM = `institutional_only`. An UNLISTED host gets
+  Scopus / Web of Science / airiti / SLIM = `institutional_only`. 59 rows on 2026-10-04
+  (user ruling on the claude-se-history literature run): 21 open / catalogue rows for
+  the grey literature that run cited (SEBoK, NASA, NIST, SRE book, Wikipedia, vendor
+  posts — `claude.com` / `openai.com` deliberately unlisted because a row matches every
+  subdomain), and 7 measured challenges to `agent_banned`, `link.springer.com` among
+  them (was `landing_page`). An UNLISTED host gets
   one plain fetch of a named URL and no browser surface (user ruling R2); the skill caps
   a run at three distinct unlisted hosts; the hook rules only on listed hosts and on
   browser surfaces to the `unmeasured_publisher_hosts` list. The hook fails OPEN on an
@@ -3933,11 +4209,17 @@ option B's trigger). Tier-B compliance meter:
   (`ledger.py feedback --target <prefix:name> --symptom --action
   fixed-inline|left|worked-around|planned-work [--proposal]`), written by the
   session that saw it; `hooks/feedback_notice.py` (PreToolUse, notice, once per
-  session×target) asks for it at the first edit of that subsystem's files.
-  `tools/feedback-pool/feedback.py collect` groups those rows with six
+  session×target) asks for it at the first edit of that subsystem's files,
+  and since 2026-10-05 also at the first shell call passing a registered
+  override flag of that subsystem (`tools/feedback-pool/gate-overrides.json`;
+  backtest 25 fires / 74,753 shell calls over 86 days, ≈9 after once-per-pair,
+  incl. all 4 forced lab-skill-sync marks of 2026-10-04/05 that left no row).
+  `tools/feedback-pool/feedback.py collect` groups those rows with seven
   read-only sensors (hook false positives, HMI standing fail, lesson
   `held=no` recurrence — folded ones charged to the fold target rule —, open
-  skill-gap rounds, LSE reflux corrections, go-live fails) per target; a target
+  skill-gap rounds, LSE reflux corrections, go-live fails, and since
+  2026-10-02 S-8 feedback-observer findings, shadow until key
+  `FEEDBACK_OBSERVER` flips) per target; a target
   with ≥ `DRAIN_THRESHOLD` events since its last `feedback-fold` row is `due`
   and the ONE surface is system-hmi point `feedback-pool.due` (warn). A review
   starts only when the user says 「檢視回授」 and closes with a `feedback-fold`
@@ -3971,6 +4253,36 @@ option B's trigger). Tier-B compliance meter:
 - rollback: remove the `feedback_notice.py` entry from `settings.json`; delete
   the `feedback-pool` subsystem/source/points from `tools/system-hmi/registry/`;
   the ledger rows stay (records are never washed).
+
+### `FEEDBACK_OBSERVER` — a side model's findings about this machine are listed before they are counted
+- current: **shadow** (since 2026-10-02). `mods/feedback-observer` is a Claude
+  Code mod (install: `settings.json` env `CLAUDE_CODE_PLUGIN_DIRS`) that, after
+  a substantial main turn or at the user's 收工, sends the transcript window
+  since its last check to sonnet/medium and records JSON findings beside the
+  transcript (`projects/<proj>/<session>.observer.jsonl`). feedback-pool
+  sensor S-8 reads them; while this key reads `shadow`, `collect()` keeps every
+  S-8 event out of count/oldest/newest/state/due and `report` lists them under
+  "observer (shadow)". Flip = replace the word `shadow` on the current line
+  with `counted-from:<YYYY-MM-DD>` (digits); only findings on or after that
+  date count — `feedback.py observer_mode()` reads this section and takes the
+  first such date. Flip condition FO-R-4: ≥10 findings judged with
+  `mods/feedback-observer/judge.py <id> right|wrong`, precision ≥60 %
+  (`judge.py --stats` says when it is met; the flip itself stays manual).
+- why: a new mechanism's first real output never feeds downstream in the same
+  step (gate-design rule); the user's verdicts ARE the calibration, and a flip
+  that counted the findings judged during calibration would count them twice.
+- evidence: `tools/feedback-pool/controls.py` S-8 block (3 shadow findings not
+  due · `counted-from` before them → count 3, due · after them → shadow ·
+  folded target + new shadow-only finding → state `shadow`, never `deferred` ·
+  undetermined target → no event, no error); `claude plugin test
+  mods/feedback-observer`; design `references/feedback-observer-design.md`
+  FO-INV-6/7, build log under the source's `reports/` tree (not shipped).
+- review-when: `judge.py --stats` reports FO-R-4 met (flip); the observer
+  leaves `CLAUDE_CODE_PLUGIN_DIRS` (retire this key; S-8 then simply finds no
+  new files); the Desktop engine changes `$.session.messages()` or
+  `$.model.complete` (the mod's design R-1 table names the fields it reads).
+- rollback: write `shadow` back on the current line; the next `collect` stops
+  counting. Removing the mod: delete its path from `CLAUDE_CODE_PLUGIN_DIRS`.
 
 ### `MOC_CLOSEOUT` — the session that made the MOC lag regenerates it at close-out, prompted at the moment it writes its digest
 > **Share note.** `tools/graph-snapshot/` (`moc_regen.py` and its tests) is
@@ -4074,3 +4386,85 @@ option B's trigger). Tier-B compliance meter:
   trigger → give it an `if` at birth.
 - rollback: copy the backup over `settings.json`, or delete the `if` keys and the
   extra per-pattern handlers (keep one handler per hook).
+
+### `DISPATCH_REPORT_WEAKEST_POINT` — a worker's report names its least-trusted delivered item and the brief's gaps
+- current: since 2026-10-03 (user ruling the same day, R05 B4). `20-dispatch.md` §7
+  adds two free-text fields beside the honesty clause: **weakest point** (the ONE
+  delivered item most likely to be wrong, located) and **brief gaps** (where the brief
+  forced a guess, and the reading taken). Consumers: `10-command-loop.md` Step 6
+  spot-check starts at the weakest point (unlocated = fake limitation);
+  `references/dispatch-templates.md` rules of thumb close the gaps in the next brief.
+  Not a schema (§2 class C); anchored verdict reports (`external-dispatch.md`) exempt.
+- why: the honesty clause asks what was NOT done; nothing asked what the worker trusts
+  least in what it DID, or where it filled a brief gap by guessing — a worker cannot
+  see the main conversation (§2 part 5). Source: the 阿普 LifeOS page, APU-31
+  (§B4 of an evaluation note in the operator's own vault, not shipped).
+  Same idea one level up already existed: boundary contract item 1 "interpretation
+  forks" (`05-authority.md` §4, main loop) and 「最弱的一環」 (`60-record-templates.md`
+  §4, artifacts); work-card-executor reports unsettled forks. This extends them to
+  every worker report rather than coining a third vocabulary.
+- evidence: a local session (2026-10-03): the vault intake spec asks reader agents
+  for 「遇到的問題／建議」; seven Sonnet agents returned ten spec proposals (P1–P10,
+  in the same vault evaluation folder) and one self-reported six misplaced page citations plus its
+  un-rechecked post-compaction range — none of it requested by the generic §7.
+  Bytes: `20-dispatch.md` 26,607 → 26,597 (cap 26,624) after removing the §6
+  rules-of-thumb duplicate of the templates file and three other repeats.
+  config-self-audit 2026-10-03: one finding fixed in the same change — a worker
+  sees only its brief, so §2 part 3 and the templates header now carry §7's
+  fields into every brief; all references resolve; entry-schema-lint 0 FAIL.
+- history: 2026-10-03 born. Proposal: `drafts/2026-10-03-dispatch-report-weakest-point/APPLY.md`.
+  Backups: `backups/2026-10-03/` (three ops files, pre-change).
+- review-when: after the next 5 dispatches that return a report — retire if in ≥3 both
+  fields are empty-with-reason or restate the honesty clause; or the harness gives
+  subagents the parent conversation (the gap premise goes).
+- rollback: `git revert` the commit, or copy the three backups back.
+
+### `SECRET_PRINT_GUARD` — a credential value may not be printed into a transcript by an environment dump or a credential-key grep over a config file
+- current: since 2026-10-03 (user ruling the same day, R05 B1 follow-up:
+  「規則加完」). Property 2 of `hooks/secret_file_guard.py` (already registered on
+  `Read|Grep|Bash|PowerShell`; no `settings.json` change). DENY on two determinable
+  forms: (a) a whole-environment dump — psutil `.environ()`, `/proc/*/environ`,
+  `print(os.environ)`, `console.log(process.env)`, `GetEnvironmentVariables()`, bare
+  `printenv` / `env` / `export -p` as a command (filtered `env | grep` included), `gci
+  env:` without a variable name — unless the same command projects names only or masks
+  values; (b) a content search (grep/rg/findstr/Select-String, or the Grep tool in
+  content mode) whose text names a compound credential key (password, api_key,
+  client_secret, access/auth/bot/refresh_token) over a config-extension file, unless
+  `-l`/`-c`/`-q`. The denial names the rewrite (names only, one variable, length, -l/-c,
+  sed masking). Same override marker as property 1.
+- why: the R05 B1 sweep (§B1 of an evaluation note in the operator's own vault, not shipped)
+  found 4 real or possible credentials in 4,719 transcript files; the two live ones were
+  printed by the AGENT (a psutil environment dump 2026-10-02 carrying the Claude Code
+  OAuth token; a password grep over an application preferences file 2026-09-17).
+  Transcripts are kept 3650 days and mirrored twice, so printed = leaked. Property 1
+  gates reading a file named as a credential store and could not see either shape.
+  Layer by trigger shape (`40-maintenance.md` §2a): a tool call with inspectable input,
+  damage during the call, a cost-free rewrite exists → PreToolUse DENY.
+- evidence: `tools/secret-guard-test/test_secret_file_guard.py` 26 must-deny / 41
+  must-pass / 0 failures (both recorded shapes are must-deny cases). Backtest over every
+  recorded Bash/PowerShell/Grep call (78,637 unique): first draft fired 95 times, mostly
+  on code greps naming secret-handling tools and on `(env)` in commit subjects; narrowed
+  before birth (compound keys, config extensions, no `(` boundary, masking/name
+  projections pass) → 22 fires (~0.3/day), including both recorded leaks, a third
+  printing of the same OAuth token (2026-08-14 `env | grep -iE "^(anthropic|claude…"`),
+  and a 2026-08-18 extraction of values from an env backup; the rest are filtered env
+  dumps of non-secret variables (cost: one rewrite to `printenv NAME`).
+- history: 2026-10-03 born. Backups: `backups/2026-10-03/secret_file_guard.py`,
+  `test_secret_file_guard.py`. Proposal: `drafts/2026-10-03-secret-print-guard/APPLY.md`.
+  2026-10-10 (user ruling, CC 2.1.295): `settings.json` sets `onFailure: "block"` on
+  this hook — a crash or timeout now blocks the Read/Grep/Bash call instead of passing it.
+  2026-10-04 property-2 misfire P2-1 (1 of 3): a value-masking grep (`grep … | sed`
+  replacing every value after `=` with a mask, a real backtest row) was denied although the deny text names
+  that very rewrite — a defect in the RETRY TEXT (hook-deny-message R2: the message's
+  route led back to the same deny), not an over-broad object. Fixed in the gate, not the
+  text: `cred_grep_command` now clears a credential-key grep whose every searching
+  statement pipes through one value-masking sed (`MASK_SED`) with only stream filters
+  around it; `env_dump`'s NAMES_ONLY projection unchanged. Suite 50 must-deny / 53
+  must-pass / 0 failures (before: the 3 new must-pass denied, all 10 twins denied);
+  mutation run flips a twin for each restriction removed; pass-only change, nothing newly
+  denied. Log: the hook's PROPERTY-2 MISFIRES block.
+- review-when: misfires recorded with `report_fp.py --hook secret_file_guard` reach 3 for
+  property 2 (count 1 since 2026-10-04, P2-1) → narrow with each FP added to must-pass first; a new language/runtime
+  prints environments another way (add its form); Claude Code starts redacting
+  credentials in transcripts (the premise weakens).
+- rollback: copy the two backups over the hook and its test, or `git revert` the commit.
