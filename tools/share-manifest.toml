@@ -981,10 +981,11 @@ rules file, with and without a `paths:` key" — recording which of them the
 loader charges to session start. Declared rather than renamed because renaming
 it to something that resolves would invent an artifact to satisfy a check, which
 is the failure mode COLLECTION-RULES.md rule 3 names."""
-fallback = """None needed. The two real files of that class DO ship, as
-`global-claude-md/rules/frontend-layering.md` and
-`global-claude-md/rules/shader-failure-modes.md`; the table is about the loading
-mechanism, not about either of them."""
+fallback = """None needed. Real files of that class DO ship under
+`global-claude-md/rules/` (e.g. `frontend-layering.md`); the table is about the
+loading mechanism, not about any of them. (Until 2026-10-10 this named
+`shader-failure-modes.md` as the second example; the source retired that rule on
+2026-10-09 — see its `[[not_shipped]]` entry.)"""
 # RE-CHECK 2026-10-02 (lane W2-global, source 183c129): the reason above is NO
 # LONGER TRUE of the source. The source environment's own `ops/environment.md`
 # stopped using `rules/x.md` as a table row label in its 2026-08-26 link-repair
@@ -2508,21 +2509,6 @@ edits = [
   "NEW 2026-10-02: Intake paragraph, the options-listing command: the vault root, an absolute path on a non-system drive, -> `<vault>` (the tail `tools/consumers.py options` resolves in the adopter's own vault and is kept; `<vault>` is already declared). The paragraph's other `consumers.py take` / `consumers.py sync` mentions are bare subcommand names, kept.",
   "NEW 2026-10-02: 'Shared layout code lives in one place' bullet, the vault-pointer to the shared deck builder (AssetVault by name plus an item name) -> \"the source environment's asset-library deck builder, not shipped here\" — same class as the opening-paragraph edit above.",
   "NEW 2026-10-02: CJK-run-language bullet, two pointers: the vault deck-builder helper reference -> \"the source environment's asset-library deck builder, `_set_font`; not shipped here\"; and the line-start gate's invocation under the source's `tools/` tree (home-prefixed) -> \"a source-only line-start gate (does not ship here), run as `<deck>`\" — contract kept (COM `TextRange.Lines`, exit 3 = uncalibrated), literal path dropped. PARTLY RETIRED 2026-10-02 (merge step): the line-start half — pptx-line-start ships under instruments/pptx-line-start/ (lane W5b), so the source's home-prefixed invocation is restored; the `_set_font` deck-builder pointer stays generalized (the asset library does not ship).",
-]
-
-[[collected]]
-path = "global-claude-md/rules/shader-failure-modes.md"
-source = "~/.claude/rules/shader-failure-modes.md"
-status = "edited"
-# 2026-09-12 refresh (lane W2, align to source 7c9867b): the repo copy had
-# fallen behind source by one expansion — the bare "review 2026-11" review-when
-# line was replaced at source (2026-09-08, ES-3) with a fuller clause
-# explaining WHY the ES 1.00-vs-ES-3/WGSL trigger matters and stating "a date
-# is not a trigger", but the repo still carried the old bare line. Restored to
-# match fresh source verbatim (no scrub target in the new clause — it names no
-# path, account, or credential).
-edits = [
-  "2026-08-27 refresh (procedure B): the re-glob measurement sentence arrived naming the source's second-drive work root as the corpus location -> 'the local work root'. The corpus size (1,361 files) and every recall number stay — they are the evidence; the path is not.",
 ]
 
 [[collected]]
@@ -9780,3 +9766,33 @@ reason = """NEW 2026-10-10 (lane W5, source 148e021e), re-checked per file. The 
 fallback = """Create `registry/telemetry.json` as `{"rows": [...], "unowned": [...]}` with one row per telemetry file your own hooks write when you adopt the trend emitter; `hmi/registry.py` `telemetry_check()` documents the validation rules at the top of its telemetry section."""
 
 # === lane W5 2026-10-10 END ===
+
+# === main 2026-10-10 BEGIN ===
+
+[[not_shipped]]
+path = "rules/shader-failure-modes.md"
+disposition = "upstream-absent"
+reason = """RETIRED 2026-10-10. Shipped from 2026-08-11 as `global-claude-md/rules/shader-failure-modes.md`
+(a `[[collected]]` entry until this round). The source deleted the rule on 2026-10-09 by owner ruling: it
+loaded once in more than a thousand sessions and the project it was extracted from is finished; the same
+source commit dropped it from CLAUDE.md's path-scoped index. The repo copy moved to the local, unpublished
+`archive/`. Mentions that remain in shipped files are history (`claude-ops/ops/rule-registry.md` records the
+retirement itself; `instruments/context-budget/` and `instruments/glob-fitness.py` use it as a measured
+example) and read correctly without the file."""
+fallback = """None needed for a reader: the retirement is recorded in `claude-ops/ops/rule-registry.md`. An
+adopter with a GLSL/WGSL project who wants the content can recover it from this repo's git history before
+2026-10-10."""
+
+[[not_shipped]]
+path = ".gitignore"
+disposition = "excluded-by-decision"
+reason = """NEW 2026-10-10 (first sorted this round as a candidate; it had never carried an entry). The source
+environment's root ignore list is a record of one machine's config home: which of its private stores,
+caches, app-state files and harness residue stay untracked. Shipped files mention `.gitignore` as a concept
+(rollback steps, a sweep check, an env-cleanup tier list), and those mentions resolve to this repo's own
+`.gitignore`, which is authored here for this repo."""
+fallback = """Write your own config-home `.gitignore`; the shipped rules say which classes must stay untracked
+(session records, caches, telemetry, raw dispatch output) and `claude-ops/ops/40-maintenance.md` has the
+detection command for a tracked-but-ignored file."""
+
+# === main 2026-10-10 END ===
