@@ -130,53 +130,7 @@ source commits it rests on (short shas) and what closes it. Close-out moves
 each item's outcome into the round's `CHANGELOG.md` entry and deletes it here:
 this section is a queue, not a record.
 
-### Q-1 (queued 2026-10-03, source `1ec6e86`) — three pointer shapes R cannot see
-
-The source replaced the hand-kept hook/skill/agent/ops counts in
-`OPERATOR-GUIDE.md` and `PHILOSOPHY.md` (shipped under `environment-guide/`)
-with pointers to live sources (`177f1c8`, `975cfc0`, `6584fc0`), and put those
-pointers under its own path checks: the entry-schema-lint ES-5 pass over every
-top-level `*.md` (`07fbd62`) and tracking-refs reading every top-level `*.md`
-(`e64f63f`). Both guides and both instruments are `refresh` items for this
-round.
-
-A read-only preview before collection (the gate's own R predicates, imported,
-run over the two source guides) sorted their pointers like this:
-
-| pointer shape, example from the guides | R today |
-|---|---|
-| `tools/hook-proof-of-life/pol.py`, `settings.json` | declared `[[not_shipped]]`: fine |
-| `ops/references/integrity-sweep.md` | resolves in this repo: fine |
-| a derived page, `tools/system-hmi/out/structure.html` | **not read**: `.html` is outside `INTERESTING_SUFFIX` |
-| a glob, `skills/*/SKILL.md` or `agents/*.md` | **not read**: `ASSET_RE` rejects `*` |
-| a command, `python tools/system-hmi/hmi.py collect` | **not read**: a token containing a space is skipped |
-
-Owner ruling 2026-10-03: fix these inside this round, not between rounds.
-Suggested order. Each fix needs a positive and a negative case in
-`tools/test_share_gate.py`, and a calibration run over the whole repo BEFORE
-it is kept: count the new findings, and treat a shape that floods with false
-findings as a missing class, not as a reason to widen the net.
-
-1. Add `.html` to `INTERESTING_SUFFIX` (the direct fix).
-2. Globs: a glob resolves when it matches at least one tracked file (after
-   `[source_map]`) or a `[[not_shipped]]` entry covers its fixed prefix.
-3. Commands: take the path argument after `python`/`py` and test it like any
-   other token.
-
-Closes when all three shapes read "fine" or carry a recorded disposition, and
-the gate exits 0 with `--source`.
-
-### Q-2 (queued 2026-10-03) — the gate's own test suite leaves two files line-ending dirty
-
-`tools/test_share_gate.py` saves three fixtures with `read_text` (lines 157,
-175, 246), which folds CRLF to LF, and restores them with `newline=""`. Every
-run therefore leaves `tools/share-manifest.toml` and
-`hooks/settings.example.json` modified on disk with no content change
-(`git diff --numstat` empty), and they sit in `git status` until checked out
-again. Measured 2026-10-03 on a clean tree; the files were restored with
-`git checkout --`. Fix: save and restore those three with
-`read_bytes`/`write_bytes`, as lines 131 and 375 already do; then a full run
-must leave `git status` clean (add that as a case).
+(Empty. Q-1 and Q-2 closed in the 2026-10-10 round; see `CHANGELOG.md`.)
 
 ## Appendix A — the lane brief template
 

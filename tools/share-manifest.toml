@@ -22,7 +22,7 @@
 # CHANGELOG.md entry, so it changes in the SAME commit as that entry and never
 # on its own — a baseline edited separately is a second copy that rots.
 # ---------------------------------------------------------------------------
-source_aligned = "b6ccd3e"
+source_aligned = "46cad1f"
 
 # ---------------------------------------------------------------------------
 # source_env_roots — bare prefixes that mean "an asset of the SOURCE
@@ -1745,6 +1745,7 @@ edits = [
   "2026-09-12 NEW (coordinator ruling, tools/ citations): §4a's routing checklist cites `tools/extdispatch/allowlist.txt` as a criterion to consult -> a share note added just above the checklist stating the whole external-dispatch path (`tools/extdispatch/`) is source-only except its red-team/ scripts, so every task in this copy goes to a subagent regardless of the checklist's other four criteria.",
   "2026-10-10 (lane W1, refresh to the 2026-10-10 source; 93/111 numstat; 3-way merge, two conflicting hunks resolved by hand): the three standing edits re-applied on re-read anchors: the section 4a share note above the 'Send it externally' checklist; the section 4b redline sentence naming the operator's own share and publication trees (the source's two-path wording re-anchored); the section 7a share note, re-worded because the registration steps moved to `ops/references/ticket-supervision.md`, which the note now names. DROPPED as moot: the section 2 class-closure-drain report pointer (that paragraph moved out of this file into `dispatch-templates.md`, where the same generalisation is declared) and the section 7 session-board sweep-script pointer (section 7a was extracted into `ticket-supervision.md`, which carries it).",
   "2026-10-10 NEW scrubs in new text: the section 4 'a guard that did not answer is not an approval' paragraph names an 8-hex local session id -> 'a local session'; the same paragraph names a dated CC-version reconciliation report by its path under the source's `reports/` tree -> 'a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship' (class wording used for that report in environment.md). Cross-lane: new text cites `agents/cheap-worker.md` (agents lane) and `ops/references/ticket-supervision.md` (ships in this lane's 2026-10-10 block).",
+  "2026-10-10 (main, re-align to 46cad1f): the source rewrote that clause (onFailure block is now set on two guards, citing a short commit id) and dropped the reconciliation-report pointer, so the second scrub of the edit above is RETIRED — the source's new wording carries verbatim. The session-id scrub stays. The rounds 4–5 write-back into the section 4 table, its 'Last summarised' line and the shortened per-call effort line carry verbatim.",
 ]
 # NOT edited (verified, ships as pure content growth, no scrub needed):
 # - New §0 paragraph on agents/*.md dispatch-snapshot lag (cites `lessons.md`

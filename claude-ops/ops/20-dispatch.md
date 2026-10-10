@@ -147,8 +147,8 @@ explicit per-instance user approval (mechanically enforced where the
 environment supports it — see `environment.md`). **A guard that did not answer
 is not an approval**: a command hook that times out is a PASS to the engine
 (default `onFailure: "continue"`; since 2.1.295 a hook may set
-`onFailure: "block"` to turn timeout/crash/exit≠0,2 into a block — not yet
-set on any local guard, see a dated CC-version reconciliation report under the source's `reports/` tree, which this repo does not ship), so
+`onFailure: "block"` to turn timeout/crash/exit≠0,2 into a block — set on
+model_cap_guard + secret_file_guard only, `78511853`), so
 a dispatch that went out with no `model` (or an over-cap one) runs on the
 parent's model — stop it (TaskStop) and re-dispatch with `model` set; record
 the escape as a `feedback` row (`hook:model_cap_guard`). Never "left"
@@ -159,7 +159,7 @@ the escape as a `feedback` row (`hook:model_cap_guard`). Never "left"
 | Summarize / reformat / dictionary-style lookups | cheap | medium |
 | Translation / extraction / to-spec outputs — anything with a hard machine-checkable gate | cheap + explicit output-format contract (a hard gate substitutes for tier quality on internal work; outward-facing "always top-tier" project rules still win) | medium |
 | Multi-constraint format contract | cheap — not mid (mid adds punctuation and length by habit) | medium |
-| Search / inventory / read-many-files | cheap, dispatcher POST-SORTS the output mechanically (cheap keeps the set exact and orders by natural line number); mid only when order is contractual and no post-processor exists | medium |
+| Search / inventory / read-many-files | cheap, dispatcher POST-SORTS the output mechanically (cheap keeps the set exact and orders by natural line number); mid only when order is contractual and no post-processor exists; `high` does not fix the order | medium |
 | Write a script/module; agentic repair against an immutable test gate | cheap when the verification regime is explicit (hidden tests, hashed tests + suite run by the gate); mid otherwise; always review | high |
 | Red-team / review | a different model family/tool than the author if one exists; else fresh-context mid — cheap is clean when the acceptance layer is ANCHORED (`red-team/` layers 2–4). **Reviewer ≠ author, always** | high |
 | Research / multi-source verification | mid; cheap when the sources are LOCAL and every citation is machine-checked verbatim | high |
@@ -169,7 +169,7 @@ the escape as a `feedback` row (`hook:model_cap_guard`). Never "left"
 
 The table SUMMARISES the latest `tools/model-bench` round (cheapest arm that
 passes every repetition, per row) and changes when that register does, never
-by hand. Cheap effort floor is medium (user ruling 2026-10-08): no `low`;
+by hand. Last summarised: rounds 4–5, 2026-10-10 (`round5-report.md`). Cheap effort floor is medium (user ruling 2026-10-08): no `low`;
 `high` only for code rows with an explicit verification regime; `xhigh` buys
 thinking time, not passes. **A cheap dispatch carries no user instruction
 layer** — CLAUDE.md, rules and session injections are noise to mechanical
@@ -367,8 +367,7 @@ Incidents, routing by coupling class, recovery: `ops/references/shared-tree-git.
 Dispatch mechanisms）：下表「強度」欄是各定義檔 frontmatter **已經釘住**的值；
 per-call `effort` 依工具說明只在使用者或指令明確要求時才填，且上限仍是 `high`
 （`xhigh`／`max` 屬超出上限）。`model` 仍可 per-call 覆寫。
-per-call effort 實測見 tools/model-bench/results/round4-report.md §2 與 round5-report.md
-§2（haiku t04 的失誤是排序，high 不會修好）；表格數字待使用者裁決後再回寫。
+per-call effort 實測：tools/model-bench/results/round4-report.md §2、round5-report.md §2。
 
 | 任務形狀 (task shape) | agentType | model × effort（定義檔已釘） | 能力邊界 |
 |---|---|---|---|

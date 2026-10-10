@@ -188,4 +188,4 @@ Agent 列多一個 `gold_seen` 欄）；執行 log `round4-local-full.log`、`ro
 
 結論（都是 n=3，目前看來）：`claude -p` 路徑修正前後差距在雜訊範圍內，外洩沒有明顯灌水；Agent 路徑 t04 兩種 effort 都升到 2/3，
 六次都沒讀到答案，失誤仍只有「排序錯」一種，high 依然沒修好；t11 長上下文計數仍是 haiku 的弱點（haiku@high 0/3）；t02 不受影響。
-`ops/20-dispatch.md` §4 表格數字是否回寫，仍待擁有者裁決。
+第四、五輪的結果已在同日寫回 `claude-ops/ops/20-dispatch.md` §4 的表格（搜尋盤點列加註「high 不會修好排序」）。
